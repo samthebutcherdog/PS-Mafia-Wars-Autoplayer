@@ -26,7 +26,7 @@
 */
 
 // ==UserScript==
-// @name        Facebook Mafia Wars Player
+// @name        Facebook Mafia Wars AutoPlayer
 // @namespace   mafiawars
 // @description Autoplayer for the facebook application - Mafia Wars
 // @include     http://mwfb.zynga.com/mwfb/*
@@ -39,7 +39,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.0',
-  build: '3',
+  build: '4',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
