@@ -38,8 +38,8 @@
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.1',
-  build: '7',
+  version: '1.0.2',
+  build: '8',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3283,6 +3283,22 @@ function autoHitman() {
   return true;
 }
 
+function getStaminaMode() {
+  var how = GM_getValue('staminaSpendHow');
+
+  // If fighting randomly, assign randomly chosen mode
+  if (how == STAMINA_HOW_RANDOM) {
+    if (newStaminaMode == undefined)
+      newStaminaMode = Math.floor(Math.random()*(staminaSpendChoices.length - 1));
+    how = newStaminaMode;
+  }
+  else {
+    newStaminaMode = undefined;
+  }
+
+  return how;
+}
+
 function autoStaminaSpend() {
   if (!isChecked('staminaSpend')) return false;
 
@@ -3297,18 +3313,7 @@ function autoStaminaSpend() {
     }
   }
 
-  var how = GM_getValue('staminaSpendHow');
-
-  // If fighting randomly, assign randomly chosen mode
-  if (how == STAMINA_HOW_RANDOM) {
-    if (newStaminaMode == undefined)
-      newStaminaMode = Math.floor(Math.random()*(staminaSpendChoices.length - 1));
-    how = newStaminaMode;
-  }
-  else {
-    newStaminaMode = undefined;
-  }
-
+  var how = getStaminaMode();
   switch (how) {
     case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:
@@ -4582,8 +4587,8 @@ function updateLogStats() {
   var fightLossPct = (GM_getValue('fightLossCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1)
     document.getElementById('fightLossPct').firstChild.nodeValue =  (isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%';
 
-  var how = GM_getValue('staminaSpendHow');
-  switch (GM_getValue('staminaSpendHow')) {
+  var how = getStaminaMode();
+  switch (how) {
     case STAMINA_HOW_HITMAN:
       //Update new hitman stats
       var hitmanCount = document.getElementById('hitmanCount');
@@ -4883,8 +4888,8 @@ function createLogBox() {
   var fightLossPct = (GM_getValue('fightLossCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1);
     makeElement('div', mafiaLogBox, {'id':'fightLossPct', 'style':'position: absolute; right: 280px; bottom: 3px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%'));
 
-  var how = GM_getValue('staminaSpendHow');
-  switch (GM_getValue('staminaSpendHow')) {
+  var how = getStaminaMode();
+  switch (how) {
     case STAMINA_HOW_HITMAN:
       makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 165px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Hits:'));
       makeElement('div', mafiaLogBox, {'id':'hitmanCount', 'style':'position: absolute; right: 185px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue((GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)))));
@@ -10166,16 +10171,7 @@ function saveRecipientInfo() {
 }
 
 function takeFightStatistics(experience, cashStr, resultType) {
-  var loc = NY;
-  if (cashStr.search(/(C\$)/)) {
-    loc = CUBA;
-  } else if (cashStr.search(/(R\$)/)) {
-    loc = MOSCOW;
-  }
-  // If $0 cash is won/loss, then fallback to known fight location
-  if (cashStr.search(/(\$0)/)) {
-    loc = GM_getValue('fightLocation');
-  }
+  var loc = city;
   var xp = parseInt(experience);
   var cashInt = parseCash(cashStr);
 
@@ -10262,7 +10258,7 @@ function takeFightStatistics(experience, cashStr, resultType) {
 }
 
 function logFightResponse(rootElt, resultElt, context) {
-  var how = GM_getValue('staminaSpendHow');
+  var how = getStaminaMode();
   lastOpponent = context;
   var inner = resultElt? resultElt.innerHTML : '';
   var innerNoTags = inner.untag();
@@ -10463,7 +10459,7 @@ function logResponse(rootElt, action, context) {
     // If fighting from a user-specified list, cycle it.
     // Otherwise, the problem might repeat indefinitely.
     if (action == 'fight' &&
-        GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_LIST) {
+        GM_getValue('staminaSpendHow') == getStaminaMode()) {
       addToLog('warning Icon', 'Opponent ' + context.id +
                ' in your fight list may be invalid.');
       cycleSavedList('fightList');
