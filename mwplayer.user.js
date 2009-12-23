@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.1
+* @version 1.0.2
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.1
+// @version     1.0.2
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.2',
-  build: '8',
+  build: '9',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
