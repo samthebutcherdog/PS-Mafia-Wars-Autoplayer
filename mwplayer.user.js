@@ -38,8 +38,8 @@
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.0',
-  build: '4',
+  version: '1.0.1',
+  build: '5',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1584,6 +1584,7 @@ var idle = true;                // Is the script currently idle?
 var shakeDownFlag = false;      // Flag so shake down again doesnt get interrupted
 var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
+var newStaminaMode;             // New stamina mode for random fighting
 
 if (!initialized) {
   var settingsOpen = false;
@@ -1604,11 +1605,14 @@ if (!initialized) {
   // Define how stamina can be used.
   const STAMINA_HOW_FIGHT_RANDOM = 0;  // Random fighting.
   const STAMINA_HOW_FIGHT_LIST   = 1;  // List fighting.
-  const STAMINA_HOW_HITMAN       = 2  // Hitman.
+  const STAMINA_HOW_HITMAN       = 2;  // Hitman.
+  const STAMINA_HOW_RANDOM       = 3;  // Random spending of stamina in random cities.
+
   var staminaSpendChoices = [];
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
   staminaSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific opponents';
   staminaSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect hitlist bounties';
+  staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Whack \'em y\'all mafia!';
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
@@ -2338,6 +2342,11 @@ function doAutoPlay () {
   // Auto-send energy pack
   if (running && isChecked('sendEnergyPack')) {
     if (autoSendEnergyPack()) return;
+  }
+
+  // Check top mafia bonus
+  if (running && (!timeLeftGM('topMafiaTimer') || isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
+    if (getTopMafiaInfo()) return;
   }
 
   // If we reach this point, the script is considered to be idle. Anything the
@@ -3089,6 +3098,13 @@ function autoFight(how) {
     return true;
   }
 
+  // Make sure we're on the fight tab.
+  if (!onFightTab() && !autoFight.profileSearch) {
+    Autoplay.fx = goFightTab;
+    Autoplay.start();
+    return true;
+  }
+
   // Get an opponent.
   var opponent;
   if (autoFight.profileSearch && onProfileNav()) {
@@ -3282,7 +3298,18 @@ function autoStaminaSpend() {
   }
 
   var how = GM_getValue('staminaSpendHow');
-  switch (GM_getValue('staminaSpendHow')) {
+
+  // If fighting randomly, assign randomly chosen mode
+  if (how == STAMINA_HOW_RANDOM) {
+    if (newStaminaMode == undefined)
+      newStaminaMode = Math.floor(Math.random()*(staminaSpendChoices.length - 1));
+    how = newStaminaMode;
+  }
+  else {
+    newStaminaMode = undefined;
+  }
+
+  switch (how) {
     case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:
       return autoFight(how);
@@ -4074,7 +4101,7 @@ function helpSettings() {
 
   // Get the active tab and open corresponding wiki page
   if (tabs) {
-    for (var i = 0, iLength=tabs.childNodes.length; i < iLength; ++i) {
+    for (var i = 0, iLength=tabs.childNodes.length - 1; i < iLength; ++i) {
       if (tabs.childNodes[i].className == 'selected')
         helpName = tabs.childNodes[i].id;
     }
@@ -6352,12 +6379,14 @@ function createStaminaTab() {
   // Handler for switching sub-areas.
   var handleSpendChanged = function() {
     // Hide all but the selected sub-area.
-    for (var i = 0, iLength=staminaSpendHow.length; i < iLength; ++i) {
+    for (var i = 0, iLength=staminaSpendHow.length - 1; i < iLength; ++i) {
       if (i != staminaSpendHow.selectedIndex) {
         staminaTabSub.childNodes[i].style.display = 'none';
       }
     }
-    staminaTabSub.childNodes[staminaSpendHow.selectedIndex].style.display = 'block';
+
+    if (staminaSpendHow.selectedIndex < staminaSpendHow.length - 1)
+      staminaTabSub.childNodes[staminaSpendHow.selectedIndex].style.display = 'block';
   }
   staminaSpendHow.selectedIndex = GM_getValue('staminaSpendHow', 0);
   handleSpendChanged();
@@ -6615,6 +6644,9 @@ function validateStaminaTab() {
         alert('Please enter a minimum bounty amount.');
         return;
       }
+      break;
+
+    case STAMINA_HOW_RANDOM: // Random stamina spending
       break;
 
     default:
@@ -7453,30 +7485,8 @@ function customizeNames() {
 function customizeHome() {
   if (!onHome()) return false;
 
-  // Get the wheelman bonus.
-  var elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
-  if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
-    var bonus = parseInt(RegExp.$1);
-    if (bonus && bonus !== GM_getValue('selectEnergyBonus')) {
-      GM_setValue('selectEnergyBonus', bonus);
-      DEBUG('Set Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
-      didJobCalculations = false;
-    }
-  }
-
-  // Get the mastermind bonus.
-  var elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
-  if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
-    var bonus = parseInt(RegExp.$1);
-    if (bonus && bonus !== GM_getValue('selectExpBonus')) {
-      GM_setValue('selectExpBonus', bonus);
-      DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
-      didJobCalculations = false;
-    }
-  }
-
   // Is an energy pack waiting to be used?
-  energyPackElt = xpathFirst('.//span[@class="sexy_pack_use" and contains(text(), "Use energy pack")]', innerPageElt);
+  energyPackElt = xpathFirst('.//a/span[@class="sexy_pack_use" and contains(text(), "Use energy pack")]', innerPageElt);
   energyPack = energyPackElt? true : false;
 
   // Display a message next to the energy pack button.
@@ -9070,6 +9080,49 @@ function autoGiftWaiting() {
   return false;
 }
 
+// This function will retrieve the top mafia info
+// FIXME: Create a TopMafia object should we need the TopMafia info to persist
+function getTopMafiaInfo() {
+  // Load My Mafia
+  if (!onMyMafiaNav()) {
+    Autoplay.fx = goMyMafiaNav;
+    Autoplay.start();
+    return true;
+  }
+
+  // Load My Mafia Tab
+  if (!onMyMafiaTab()) {
+    Autoplay.fx = goMyMafiaTab;
+    Autoplay.start();
+    return true;
+  }
+
+  // Get the wheelman bonus.
+  var elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
+  if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
+    var bonus = parseInt(RegExp.$1);
+    if (bonus && bonus !== GM_getValue('selectEnergyBonus')) {
+      GM_setValue('selectEnergyBonus', bonus);
+      DEBUG('Set Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
+      didJobCalculations = false;
+    }
+  }
+
+  // Get the mastermind bonus.
+  var elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
+  if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
+    var bonus = parseInt(RegExp.$1);
+    if (bonus && bonus !== GM_getValue('selectExpBonus')) {
+      GM_setValue('selectExpBonus', bonus);
+      DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
+      didJobCalculations = false;
+    }
+  }
+
+  setGMTime('topMafiaTimer','1 hour');
+  return true;
+}
+
 // This function returns false if nothing was done, true otherwise.
 function propertyBuy() {
   var buyCost = parseInt(GM_getValue('buyCost', 0));
@@ -9166,7 +9219,7 @@ function onProfileNav() {
 
 function onMyMafiaNav() {
   // Return true if we're on My Mafia nav, false otherwise.
-  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Recruit")]', innerPageElt)) {
+  if (xpathFirst('.//li[contains(@class, "tab_first")]//a[contains(., "Recruit")]', innerPageElt)) {
     return true;
   }
 
@@ -9576,6 +9629,25 @@ function goMyMafiaNav() {
   DEBUG('Clicked to load My Mafia nav.');
 }
 
+function goMyMafiaTab() {
+  var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "My Mafia")]', innerPageElt);
+  if (!elt) {
+    goMyMafiaNav();
+    return;
+  }
+  clickElement(elt);
+  DEBUG('Clicked to go to My Mafia tab.');
+}
+
+function onMyMafiaTab() {
+  // Return true if we're on the My Mafia tab, false otherwise.
+  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "My Mafia")]', innerPageElt)) {
+    return true;
+  }
+
+  return false;
+}
+
 function goWarNav() {
   var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Declare War")]', innerPageElt);
   if (!elt) {
@@ -9703,6 +9775,16 @@ function goFightNav() {
   }
   clickElement(elt);
   DEBUG('Clicked to go to fights.');
+}
+
+function goFightTab() {
+  var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Fight")]', innerPageElt);
+  if (!elt) {
+    goFightNav();
+    return;
+  }
+  clickElement(elt);
+  DEBUG('Clicked to go to fight tab.');
 }
 
 function goHitlistTab() {
@@ -10321,7 +10403,35 @@ function logFightResponse(rootElt, resultElt, context) {
     DEBUG(inner);
   }
 
+  randomizeStamina();
   return false;
+}
+
+// Spend Stamina successful, change fight location and spend mode
+function randomizeStamina() {
+  if (isSame('staminaSpendHow', STAMINA_HOW_RANDOM)) {
+    var spendMode = Math.floor(Math.random()*(staminaSpendChoices.length - 1));
+    var fightLoc = Math.floor(Math.random()*cities.length);
+    var hitmanLoc = Math.floor(Math.random()*cities.length);
+
+    // Randomize stamina spend mode
+    if (spendMode != newStaminaMode) {
+      newStaminaMode = spendMode;
+      DEBUG('Stamina spending set to : ' + staminaSpendChoices[spendMode]);
+    }
+
+    // Randomize fight location
+    if (!isSame('fightLocation', fightLoc)) {
+      GM_setValue('fightLocation', fightLoc);
+      DEBUG('Fight location set to : ' + cities[GM_getValue('fightLocation')][CITY_NAME]);
+    }
+
+    // Randomize hitman location
+    if (!isSame('hitmanLocation', hitmanLoc)) {
+      GM_setValue('hitmanLocation', hitmanLoc);
+      DEBUG('Fight location set to : ' + cities[GM_getValue('hitmanLocation')][CITY_NAME]);
+    }
+  }
 }
 
 // Interprets the response to an action that was taken.
@@ -10531,7 +10641,9 @@ function logResponse(rootElt, action, context) {
         GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseCash(context.bounty)));
       }
       updateLogStats();
+
       Autoplay.start();
+      randomizeStamina();
       return true;
       break;
 
@@ -11033,9 +11145,14 @@ function isSame (gmName, gmValue) {
   return GM_getValue(gmName) == gmValue;
 }
 
-// Check if a GM value is checked or not
+// Check if a GM value is checked
 function isChecked (gmName) {
   return isSame (gmName, 'checked');
+}
+
+// Check if a GM value is undefined
+function isUndefined (gmName) {
+  return isSame (gmName, undefined);
 }
 
 function makeElement(type, appendto, attributes, checked, chkdefault) {
