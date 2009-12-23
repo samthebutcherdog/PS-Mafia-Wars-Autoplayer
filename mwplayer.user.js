@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.3
+* @version 1.0.4
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.3
+// @version     1.0.4
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.3',
-  build: '10',
+  version: '1.0.4',
+  build: '11',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -10425,7 +10425,7 @@ function randomizeStamina() {
     // Randomize hitman location
     if (!isSame('hitmanLocation', hitmanLoc)) {
       GM_setValue('hitmanLocation', hitmanLoc);
-      DEBUG('Fight location set to : ' + cities[GM_getValue('hitmanLocation')][CITY_NAME]);
+      DEBUG('Hitman location set to : ' + cities[GM_getValue('hitmanLocation')][CITY_NAME]);
     }
   }
 }
@@ -10593,7 +10593,7 @@ function logResponse(rootElt, action, context) {
               DEBUG('Clicked to repeat the hit on ' + clickContext.name +
                     ' (' + clickContext.id + ').');
             }
-            updateLogStats(STAMINA_HOW_FIGHT_HITMAN);
+            updateLogStats(STAMINA_HOW_HITMAN);
             Autoplay.delay = 0;
             Autoplay.start();
             return true;
@@ -10639,7 +10639,7 @@ function logResponse(rootElt, action, context) {
         GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
         GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseCash(context.bounty)));
       }
-      updateLogStats(STAMINA_HOW_FIGHT_HITMAN);
+      updateLogStats(STAMINA_HOW_HITMAN);
       randomizeStamina();
       break;
 
