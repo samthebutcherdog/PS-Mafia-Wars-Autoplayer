@@ -39,7 +39,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.1',
-  build: '6',
+  build: '7',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3981,7 +3981,7 @@ function handleVersionChange() {
 
   // In an old version, there was robbing
   val = GM_getValue('staminaSpendHow');
-  if (val > 2) {
+  if (val > 3) {
     GM_setValue('staminaSpendHow', Math.min(val, 2));
   }
 
