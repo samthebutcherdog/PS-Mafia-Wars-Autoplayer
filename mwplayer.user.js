@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.2
+* @version 1.0.3
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.2
+// @version     1.0.3
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.2',
-  build: '9',
+  version: '1.0.3',
+  build: '10',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -4576,7 +4576,7 @@ function addToLog(icon, line) {
   GM_setValue('itemLog', logBox.innerHTML);
 }
 
-function updateLogStats() {
+function updateLogStats(newHow) {
   var fightCount = document.getElementById('fightCount');
   if (!fightCount) return;
     fightCount.firstChild.nodeValue = makeCommaValue(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0));
@@ -4587,7 +4587,7 @@ function updateLogStats() {
   var fightLossPct = (GM_getValue('fightLossCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1)
     document.getElementById('fightLossPct').firstChild.nodeValue =  (isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%';
 
-  var how = getStaminaMode();
+  var how = !newHow ? getStaminaMode() : newHow;
   switch (how) {
     case STAMINA_HOW_HITMAN:
       //Update new hitman stats
@@ -10565,9 +10565,9 @@ function logResponse(rootElt, action, context) {
       }
 
       // Default action is to reload the hitlist.
-      if (stamina) {
+      /*if (stamina) {
         Autoplay.fx = goHitlistTab;
-      }
+      }*/
 
       var targetKilled = (innerNoTags.indexOf('You knocked out') != -1);
       if (innerNoTags.indexOf('You WON') != -1) {
@@ -10593,7 +10593,10 @@ function logResponse(rootElt, action, context) {
               DEBUG('Clicked to repeat the hit on ' + clickContext.name +
                     ' (' + clickContext.id + ').');
             }
+            updateLogStats(STAMINA_HOW_FIGHT_HITMAN);
             Autoplay.delay = 0;
+            Autoplay.start();
+            return true;
           }
         }
       } else if (innerNoTags.indexOf('You LOST') != -1) {
@@ -10636,11 +10639,8 @@ function logResponse(rootElt, action, context) {
         GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
         GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseCash(context.bounty)));
       }
-      updateLogStats();
-
-      Autoplay.start();
+      updateLogStats(STAMINA_HOW_FIGHT_HITMAN);
       randomizeStamina();
-      return true;
       break;
 
     case 'war':
