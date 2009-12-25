@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.5
+* @version 1.0.6
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.5
+// @version     1.0.6
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.5',
-  build: '12',
+  version: '1.0.6',
+  build: '13',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1269,13 +1269,11 @@ if (!initialized) {
     return a;
   };
 
-  // Set the initial run state.
-  if (typeof GM_getValue('isRunning') != 'boolean') {
-    // FIXME: Perhaps it should be false, and instead pop up an alert
-    //        asking the user to check the settings?
-    GM_setValue('isRunning', true);
+  // Check for missing settings.
+  if (GM_getValue('autoClick') == undefined) {
+    saveDefaultSettings();
+    addToLog('info Icon', 'If you want to perform jobs, fighting, and other actions automatically, please adjust your settings.');
   }
-  running = GM_getValue('isRunning');
 
   // Check for a version change.
   if (GM_getValue('version') != SCRIPT.version ||
@@ -1283,11 +1281,13 @@ if (!initialized) {
     handleVersionChange();
   }
 
-  // Check for missing settings.
-  if (GM_getValue('autoClick') == undefined) {
-    saveDefaultSettings();
-    addToLog('info Icon', 'If you want to perform jobs, fighting, and other actions automatically, please adjust your settings.');
+  // Set the initial run state.
+  if (typeof GM_getValue('isRunning') != 'boolean') {
+    // FIXME: Perhaps it should be false, and instead pop up an alert
+    //        asking the user to check the settings?
+    GM_setValue('isRunning', true);
   }
+  running = GM_getValue('isRunning');
 
   var Reload = new Animate();
   Reload.desc = 'reload';
