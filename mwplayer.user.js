@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.6
+* @version 1.0.7
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.6
+// @version     1.0.7
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.6',
-  build: '15',
+  version: '1.0.7',
+  build: '16',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1507,9 +1507,9 @@ function doAutoPlay () {
         clickAction = 'energypack';
         clickElement(energyPackElt);
         DEBUG('Clicked to use energy pack');
-        Autoplay.start();
-        return;
       }
+      Autoplay.start();
+      return;
     }
   }
 
@@ -2217,7 +2217,14 @@ function autoMission() {
     return;
   }
 
-  // Do the job.
+  // Buy requirements first, if any
+  if (buyJobRowItems(innerPageElt)) {
+    Autoplay.delay = 0;
+    Autoplay.start();
+    return;
+  }
+
+  // Do the job
   Autoplay.fx = function() { goJob(jobno); };
   Autoplay.start();
 }
@@ -6807,15 +6814,9 @@ function customizeJobs() {
           if (masteryLevel == 3) masteredJobsCount++
         }
 
-        // Ignore jobs with item requirements/locked jobs
+        // Ignore locked jobs
         if (jobButton.snapshotItem(i).innerHTML.indexOf('sexy_button_locked') == -1) {
-          if(requiredItems.snapshotItem(i).innerHTML.indexOf('need_item') == -1) {
-            DEBUG('Available Job: ' + missions[jobMatch][0] + '(' + jobMatch + ')');
-            availableJobs[city][currentTab].push(jobMatch);
-          } else {
-            DEBUG('Items needed in Job: ' + missions[jobMatch][0] + '(' + jobMatch + ')');
-            // FIXME: Buy code here
-          }
+          availableJobs[city][currentTab].push(jobMatch);
         } else {
           DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
         }
@@ -7136,41 +7137,23 @@ function getJobRow(jobName, contextNode) {
   return rowElt;
 }
 
-function buyJobRowItems(currentJobRow){
-  if (!currentJobRow) {
-    return;
-  }
-  addToLog('search Icon', 'Checking for purchase required items.');
-  var amountNeeded=0;
-  var buyItemElts = xpath('.//a[contains(@onclick, "create_buy_item_lbox")]',currentJobRow);
-  if (buyItemElts.snapshotLength>0){
-    for (var currentItem = 0, numItems=buyItemElts.snapshotLength; currentItem < numItems; ++currentItem) {
-      var itemClick = buyItemElts.snapshotItem(currentItem).getAttribute('onClick')
-      itemClick.match( /(.*?)create_buy_item_lbox\(\"(.*?)\", \"(.*?)\", (\d+), (\d+), (\d+)/i);;
-      var itemCost=RegExp.$4;
-      var itemQty=RegExp.$6;
-      amountNeeded +=itemCost*itemQty;
-    }
-    amountNeeded-=cities[city][CITY_CASH];
-  } else {
-    return false;
-  }
+function buyJobRowItems(element){
+  var currentJob = missions[GM_getValue('selectMission', 1)][0];
+  var currentJobRow = getJobRow(currentJob, element);
+  if (!currentJobRow) return false;
 
-  if (amountNeeded > 0) {
-    suspendBank = true;
-    autoBankWithdraw(amountNeeded);
-    Autoplay.start()
-    return true;
-  } else {
+  buyItemElts = xpath('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
+  if (buyItemElts.snapshotLength>0){
     addToLog('search Icon', 'Attempting to purchase required items.');
-    suspendBank = false;
-    buyItemElts = xpath('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
-    if (buyItemElts.snapshotLength>0){
-      for (var currentItem = 0, numItems=buyItemElts.snapshotLength; currentItem < numItems; ++currentItem) {
-        clickContext = 'buyJobItem';
+    for (var currentItem = 0, numItems=buyItemElts.snapshotLength; currentItem < numItems; ++currentItem) {
+      Autoplay.fx = function() {
+        clickAction = 'buy item';
         clickElement(buyItemElts.snapshotItem(currentItem));
+        DEBUG('Clicked to buy item.');
       }
+      break;
     }
+    return true;
   }
   return false;
 }
@@ -7182,9 +7165,8 @@ function jobReqs (element) {
   // Find the job row.
   var currentJob = missions[GM_getValue('selectMission', 1)][0];
   var currentJobRow = getJobRow(currentJob, element);
-  if (!currentJobRow) return;
-  if (buyJobRowItems(currentJobRow)) return;
-  DEBUG('Nothing to buy; moving to prerequisite job.');
+  if (!currentJobRow) return false;
+
   var items = getSavedList('itemList');
   var jobs = getSavedList('jobsToDo', '');
   var necessaryItems = $x('.//div[@class="req_item need_item"]//img', currentJobRow);
@@ -7214,10 +7196,10 @@ function jobReqs (element) {
         );
       }
     );
+    setSavedList('itemList', items.unique());
+    setSavedList('jobsToDo', jobs);
+    return true;
   } else { addToLog('warning Icon', 'BUG DETECTED: Broken item detection.'); }
-  setSavedList('itemList', items.unique());
-  setSavedList('jobsToDo', jobs);
-  popJob();
   return;
 }
 
@@ -8876,29 +8858,12 @@ function goJob(jobno, context) {
   var items = getSavedList('itemList');
   var jobs = getSavedList('jobsToDo', '');
   if (!elt) {
-    //see if we can do an alternate job for the top item in item list
-    //sometimes we push many jobs on the list for a single item
-    //if we are on a "vory job" maybe the mafiya job is next on the list
-    //since we cant ding this job link, we can safely get rid of the job
-    var nextJobYieldsThisItem;
-    var item;
-    if (items.length>0) item=items[items.length-1]
-    if (jobs.length>0 && item) {
-      job=jobs[jobs.length-1];
-      var i=0;
-      requirementJob.forEach(
-        function(j){
-          if (j[1] == job) {
-            if (requirementJob[i][0]==item) {
-              nextJobYieldsThisItem=i;
-            } else {
-            }
-          }
-          i++;
-        }
-      );
-    }
-    if (nextJobYieldsThisItem){
+    if (jobReqs(innerPageElt)){
+      while (!elt) {
+        popJob();
+        reqJob = missions[GM_getValue('selectMission', 1)][2];
+        elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + reqJob + '&")]', innerPageElt);
+      }
       popJob();
     } else {
       addToLog('warning Icon', 'Can\'t find job ' + jobno + ' link to click.');
@@ -8906,10 +8871,15 @@ function goJob(jobno, context) {
       return;
     }
   }
-  clickAction = 'job';
-  clickContext = context;
-  clickElement(elt);
-  DEBUG('Clicked job ' + jobno + '.');
+
+  if (elt) {
+    clickAction = 'job';
+    clickContext = context;
+    clickElement(elt);
+    DEBUG('Clicked job ' + jobno + '.');
+  } else {
+    addToLog('warning Icon', 'Link for job ' + jobno + ' missing.');
+  }
 }
 
 function goFightNav() {
@@ -9968,6 +9938,10 @@ function logResponse(rootElt, action, context) {
       } else {
         DEBUG(inner);
       }
+      break;
+
+    // FIXME: Add parsing here
+    case 'buy item':
       break;
 
     default:
