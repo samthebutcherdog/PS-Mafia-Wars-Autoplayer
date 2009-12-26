@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.8
+* @version 1.0.9
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.8
+// @version     1.0.9
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.8',
-  build: '18',
+  version: '1.0.9',
+  build: '19',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1398,6 +1398,11 @@ function doAutoPlay () {
     return;
   }
 
+  // Check top mafia bonus
+  if (running && (!timeLeftGM('topMafiaTimer') || isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
+    if (getTopMafiaInfo()) return;
+  }
+
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && canMission();
   var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina();
@@ -1538,11 +1543,6 @@ function doAutoPlay () {
   // Auto-send energy pack
   if (running && isChecked('sendEnergyPack')) {
     if (autoSendEnergyPack()) return;
-  }
-
-  // Check top mafia bonus
-  if (running && (!timeLeftGM('topMafiaTimer') || isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
-    if (getTopMafiaInfo()) return;
   }
 
   // If we reach this point, the script is considered to be idle. Anything the
