@@ -8242,6 +8242,16 @@ function getTopMafiaInfo() {
       didJobCalculations = false;
     }
   }
+  else {
+    if (isUndefined('selectEnergyBonus')) {
+      GM_setValue('selectEnergyBonus', 0);
+	  addToLog('warning Icon', 'Can\'t find Wheelman bonus, setting Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
+      didJobCalculations = false;
+	}
+	else {
+	  addToLog('warning Icon', 'Can\'t find Wheelman bonus');
+	}
+  }
 
   // Get the mastermind bonus.
   var elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
@@ -8252,6 +8262,16 @@ function getTopMafiaInfo() {
       DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
       didJobCalculations = false;
     }
+  }
+  else {
+    if (isUndefined('selectExpBonus')) {
+      GM_setValue('selectExpBonus', 0);
+	  addToLog('warning Icon', 'Can\'t find Mastermind bonus, setting Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
+      didJobCalculations = false;
+	}
+	else {
+	  addToLog('warning Icon', 'Can\'t find Mastermind bonus');
+	}	  
   }
 
   setGMTime('topMafiaTimer','1 hour');
