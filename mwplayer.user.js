@@ -16,7 +16,6 @@
 /**
 * @version 1.0.8
 * @package Facebook Mafia Wars Autoplayer
-* Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe
@@ -39,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.8',
-  build: '22',
+  build: '23',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
