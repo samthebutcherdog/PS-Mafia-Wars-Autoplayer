@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.9
+* @version 1.0.8
 * @package Facebook Mafia Wars Autoplayer
 * Copyright MafiaWarsPlayer.org 2008-09. All right reserved
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N
@@ -32,14 +32,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.9
+// @version     1.0.8
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.9',
-  build: '19',
+  version: '1.0.8',
+  build: '20',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -791,6 +791,7 @@ if (!initialized) {
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  var xJob = ''; // Keep track of previously failed job
 
   var debug = isChecked('enableDebug');
   var filter = isChecked('filterLog');
@@ -6645,6 +6646,9 @@ function customizeNames() {
 function customizeHome() {
   if (!onHome()) return false;
 
+  // Set xJob
+  xJob = '';
+
   // Is an energy pack waiting to be used?
   energyPackElt = xpathFirst('.//a/span[@class="sexy_pack_use" and contains(text(), "Use energy pack")]', innerPageElt);
   energyPack = energyPackElt? true : false;
@@ -7158,14 +7162,14 @@ function buyJobRowItems(element){
   return false;
 }
 
-function jobReqs (element) {
+function setJobReqs (element) {
   // If we are here then we have already failed the job.
   addToLog('process Icon', 'Getting job requirements.');
 
   // Find the job row.
   var currentJob = missions[GM_getValue('selectMission', 1)][0];
   var currentJobRow = getJobRow(currentJob, element);
-  if (!currentJobRow) return false;
+  if (!currentJobRow) return;
 
   var items = getSavedList('itemList');
   var jobs = getSavedList('jobsToDo', '');
@@ -7189,7 +7193,8 @@ function jobReqs (element) {
         requirementJob.forEach(
           function(j){
             if (j[0] == i.alt) {
-              jobs.push(j[1]);
+              if (j[1] != xJob)
+                jobs.push(j[1]);
               items.push(i.alt);
             }
           }
@@ -7198,9 +7203,7 @@ function jobReqs (element) {
     );
     setSavedList('itemList', items.unique());
     setSavedList('jobsToDo', jobs);
-    return true;
   } else { addToLog('warning Icon', 'BUG DETECTED: Broken item detection.'); }
-  return;
 }
 
 function popJob(){
@@ -8271,7 +8274,7 @@ function getTopMafiaInfo() {
 	}
 	else {
 	  addToLog('warning Icon', 'Can\'t find Mastermind bonus');
-	}	  
+	}
   }
 
   setGMTime('topMafiaTimer','1 hour');
@@ -8875,22 +8878,6 @@ function goJobTab(tabno) {
 
 function goJob(jobno, context) {
   var elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
-  var items = getSavedList('itemList');
-  var jobs = getSavedList('jobsToDo', '');
-  if (!elt) {
-    if (jobReqs(innerPageElt)){
-      while (!elt) {
-        popJob();
-        reqJob = missions[GM_getValue('selectMission', 1)][2];
-        elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + reqJob + '&")]', innerPageElt);
-      }
-      popJob();
-    } else {
-      addToLog('warning Icon', 'Can\'t find job ' + jobno + ' link to click.');
-      jobProgress(innerPageElt);
-      return;
-    }
-  }
 
   if (elt) {
     clickAction = 'job';
@@ -8898,7 +8885,10 @@ function goJob(jobno, context) {
     clickElement(elt);
     DEBUG('Clicked job ' + jobno + '.');
   } else {
-    addToLog('warning Icon', 'Link for job ' + jobno + ' missing.');
+    xJob = missions[GM_getValue('selectMission')][0];
+    setJobReqs (innerPageElt);
+    popJob();
+    goJobsNav();
   }
 }
 
@@ -9676,9 +9666,6 @@ function logResponse(rootElt, action, context) {
         }
 
         return false;
-      } else if (innerNoTags.indexOf('You don\'t have the necessary items to perform this job') != -1) {
-        addToLog('info Icon', 'You don\'t have the items necessary to do ' + missions[GM_getValue('selectMission', 1)][0] + '.');
-        jobReqs(rootElt);
       } else if (innerNoTags.indexOf('You are not high enough level to do this job') != -1) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][0] + '.');
         addToLog('warning Icon', 'Job processing will stop');
