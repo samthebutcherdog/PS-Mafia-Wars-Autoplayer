@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.8',
-  build: '24',
+  build: '25',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6476,10 +6476,8 @@ function getEnergyGainRate() {
 }
 
 function checkLanguage() {
-  if (document.documentElement.lang == 'en') return;
-
-  DEBUG('Language is "' + document.documentElement.lang + '".');
-  addToLog('warning Icon', 'Unfortunately, only the English version of the game is fully supported. If you experience problems, set your Facebook language to English and try again.');
+  GM_setValue('language', document.documentElement.lang);
+  return;
 }
 
 function customizeLayout() {
