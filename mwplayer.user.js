@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.8',
-  build: '23',
+  build: '24',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -57,6 +57,7 @@ if (window.location.href.match(/facebook/))  {
   if (fbName && fbName.firstChild)
     GM_setValue('FBName', fbName.firstChild.innerHTML);
 
+  GM_deleteValue('language');
   checkLanguage();
 
   var iFrameCanvas = xpathFirst('//iframe[contains(@src,"mwfb.zynga.com")]');
@@ -1315,6 +1316,12 @@ if (!initialized) {
 
   var initialized = true;
   DEBUG('Completed initialize.');
+  
+  // Check language.
+  if (GM_getValue('language') != 'en') {
+    DEBUG('Language is "' + GM_getValue('language') + '".');
+    addToLog('warning Icon', 'Unfortunately, only the English version of the game is fully supported. If you experience problems, set your Facebook language to English and try again.');
+  }
 }
 
 function Animate() {
@@ -7476,7 +7483,7 @@ function debugDumpSettings() {
 
   DEBUG('[code]>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
         'Script Version: <strong>' + SCRIPT.version + ' build ' + SCRIPT.build + '</strong><br>' +
-        'Language: <strong>' + document.documentElement.lang + '</strong><br>' +
+        'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
         'Player current level: <strong>' + level + '</strong><br>' +
         'Player points to next level: <strong>' + ptsToNextLevel + '</strong><br>' +
         'Player mafia size: <strong>' + mafia + '</strong><br>' +
