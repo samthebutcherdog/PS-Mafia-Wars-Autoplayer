@@ -39,7 +39,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.8',
-  build: '20',
+  build: '21',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3443,7 +3443,7 @@ function saveSettings() {
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
-                            'autoWarBetray']);
+                            'autoWarBetray', 'hideGifts']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -4532,6 +4532,16 @@ function createDisplayTab() {
   title = 'Hide advertisements';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide ads'));
+
+  // Safe house gifts
+  var item = makeElement('div', list);
+  var lhs = makeElement('div', item, {'class':'lhs'});
+  var rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'hideGifts';
+  title = 'Hide Safe House Gifts';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide safe house gift links'));
 
   // Email bar
   var item = makeElement('div', list);
@@ -6492,6 +6502,21 @@ function customizeLayout() {
     }
   }
 
+  if (isChecked('hideGifts')) {
+    // Deal with safe houses
+    var safeHouse = xpathFirst('.//a/img[@alt="Gift Safe House"]');
+    if (safeHouse) safeHouse.setAttribute("style", "margin:0; height:0; display:none", 0);
+
+    // Deal with free gifts
+    var msgs = $x('.//td[@class="message_body"]');
+    for (var i = 0, iLength=msgs.length; i < iLength; ++i) {
+      if (msgs[i].innerHTML.match(/You have gifts available to send./)) {
+        msgs[i].setAttribute("style", "margin:0; height:0; display:none", 0);
+        break;
+      }
+    }
+  }
+
   // Deal with the email bar.
   if (isChecked('moveEmailBar')) {
     var emailBar = xpathFirst('//table[@class="fb_email_prof_header"]');
@@ -7502,6 +7527,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
         '&nbsp;&nbsp;Filter fail: <strong>' + GM_getValue('filterFail') + '</strong><br>' +
         'Hide ads: <strong>'+ showIfUnchecked(GM_getValue('hideAds')) + '</strong><br>' +
+        'Hide safe house gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Move email options: <strong>'+ showIfUnchecked(GM_getValue('moveEmailBar')) + '</strong><br>' +
         'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
