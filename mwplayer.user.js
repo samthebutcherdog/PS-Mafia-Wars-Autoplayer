@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.8
+* @version 1.0.9
 * @package Facebook Mafia Wars Autoplayer
 * @authors: StevenD, CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -31,14 +31,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.8
+// @version     1.0.9
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.8',
-  build: '25',
+  version: '1.0.9',
+  build: '26',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
