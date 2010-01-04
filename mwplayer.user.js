@@ -5677,7 +5677,7 @@ function createAboutTab () {
   devs.appendChild(document.createTextNode('Contributors:'));
   devList = makeElement('span', devs, {'style':'position: relative; left: 15px;'});
 
-  var devNames = ['StevenD', 'CharlesD', 'Eric Ortego', 'Jeremy', 'Liquidor', 'AK17710N', 'Fragger',
+  var devNames = ['CharlesD', 'Eric Ortego', 'Jeremy', 'Liquidor', 'AK17710N', 'Fragger',
                  '<x51>', 'CyB', 'int1', 'Janos112', 'int2str', 'Doonce', 'Eric Layne', 'Tanlis',
                  'Cam', 'csanbuenaventura', 'vmzildjian', 'Scrotal', 'Bushdaka', 'rdmcgraw', 'moe', 'KCMCL'];
 
