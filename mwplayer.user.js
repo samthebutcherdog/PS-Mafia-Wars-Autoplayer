@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.9',
-  build: '29',
+  build: '30',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1316,7 +1316,7 @@ if (!initialized) {
 
   var initialized = true;
   DEBUG('Completed initialize.');
-  
+
   // Check language.
   if (GM_getValue('language') != 'en') {
     DEBUG('Language is "' + GM_getValue('language') + '".');
@@ -4062,26 +4062,26 @@ function createLogBox() {
   //Change Stats Displayed based on current stamina burner
   //fight Stats are currently default for leftmost portion of Stats
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fights:'));
-  makeElement('div', mafiaLogBox, {'id':'fightCount', 'style':'position: absolute; right: 335px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'id':'fightCount', 'style':'position: absolute; right: 340px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0))));
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Won:'));
-  makeElement('div', mafiaLogBox, {'id':'fightWinCount', 'style':'position: absolute; right: 335px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'id':'fightWinCount', 'style':'position: absolute; right: 340px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0))));
   var fightWinPct = (GM_getValue('fightWinCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'fightWinPct', 'style':'position: absolute; right: 280px; bottom: 18px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(fightWinPct)) ? '0.0%' : fightWinPct + '%'));
+    makeElement('div', mafiaLogBox, {'id':'fightWinPct', 'style':'position: absolute; right: 295px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(fightWinPct)) ? '0.0%' : fightWinPct + '%'));
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Lost:'));
-  makeElement('div', mafiaLogBox, {'id':'fightLossCount', 'style':'position: absolute; right: 335px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightLossCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'id':'fightLossCount', 'style':'position: absolute; right: 340px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightLossCountInt', 0))));
   var fightLossPct = (GM_getValue('fightLossCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'fightLossPct', 'style':'position: absolute; right: 280px; bottom: 3px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%'));
+    makeElement('div', mafiaLogBox, {'id':'fightLossPct', 'style':'position: absolute; right: 295px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%'));
 
-  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 165px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Hits:'));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Hits:'));
   makeElement('div', mafiaLogBox, {'id':'hitmanCount', 'style':'position: absolute; right: 185px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue((GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)))));
-  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 165px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Succ:'));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Succ:'));
   makeElement('div', mafiaLogBox, {'id':'hitmanWinCount', 'style':'position: absolute; right: 185px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanWinCountInt', 0))));
   var hitmanWinPct = (GM_getValue('hitmanWinCountInt', 0)/(GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'hitmanWinPct', 'style':'position: absolute; right: 130px; bottom: 18px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(hitmanWinPct)) ? '0.0%' : hitmanWinPct + '%'));
-  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 165px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fail:'));
+    makeElement('div', mafiaLogBox, {'id':'hitmanWinPct', 'style':'position: absolute; right: 140px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(hitmanWinPct)) ? '0.0%' : hitmanWinPct + '%'));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fail:'));
   makeElement('div', mafiaLogBox, {'id':'hitmanLossCount', 'style':'position: absolute; right: 185px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanLossCountInt', 0))));
   var hitmanLossPct = (GM_getValue('hitmanLossCountInt', 0)/(GM_getValue('hitmanWinCountInt', 1) + GM_getValue('hitmanLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'hitmanLossPct', 'style':'position: absolute; right: 130px; bottom: 3px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(hitmanLossPct)) ? '0.0%' : hitmanLossPct + '%'));
+    makeElement('div', mafiaLogBox, {'id':'hitmanLossPct', 'style':'position: absolute; right: 140px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(hitmanLossPct)) ? '0.0%' : hitmanLossPct + '%'));
 
   makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode('$' + makeCommaValue(parseInt(GM_getValue('totalWinDollarsInt', 0)))));  //Accomodates up to $999,999,999,999
   makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode('$' + makeCommaValue(parseInt(GM_getValue('totalLossDollarsInt', 0)))));
@@ -8274,16 +8274,14 @@ function getTopMafiaInfo() {
       DEBUG('Set Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
       didJobCalculations = false;
     }
-  }
-  else {
+  } else {
     if (isUndefined('selectEnergyBonus')) {
       GM_setValue('selectEnergyBonus', 0);
-	  addToLog('warning Icon', 'Can\'t find Wheelman bonus, setting Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
+      addToLog('warning Icon', 'Can\'t find Wheelman bonus, setting Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
       didJobCalculations = false;
-	}
-	else {
-	  addToLog('warning Icon', 'Can\'t find Wheelman bonus');
-	}
+    } else {
+      addToLog('warning Icon', 'Can\'t find Wheelman bonus');
+    }
   }
 
   // Get the mastermind bonus.
@@ -8295,16 +8293,14 @@ function getTopMafiaInfo() {
       DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
       didJobCalculations = false;
     }
-  }
-  else {
+  } else {
     if (isUndefined('selectExpBonus')) {
       GM_setValue('selectExpBonus', 0);
-	  addToLog('warning Icon', 'Can\'t find Mastermind bonus, setting Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
+      addToLog('warning Icon', 'Can\'t find Mastermind bonus, setting Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
       didJobCalculations = false;
-	}
-	else {
-	  addToLog('warning Icon', 'Can\'t find Mastermind bonus');
-	}
+    } else {
+      addToLog('warning Icon', 'Can\'t find Mastermind bonus');
+    }
   }
 
   setGMTime('topMafiaTimer','1 hour');
