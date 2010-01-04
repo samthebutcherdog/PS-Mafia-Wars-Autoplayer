@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.10',
-  build: '31',
+  build: '32',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7221,9 +7221,8 @@ function setJobReqs (element) {
         DEBUG('Missing : ' +i.alt);
         requirementJob.forEach(
           function(j){
-            if (j[0] == i.alt) {
-              if (j[1] != xJob)
-                jobs.push(j[1]);
+            if (j[0] == i.alt && j[1] != xJob) {
+              jobs.push(j[1]);
               items.push(i.alt);
             }
           }
