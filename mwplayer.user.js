@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.10',
-  build: '32',
+  build: '33',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -57,7 +57,6 @@ if (window.location.href.match(/facebook/))  {
   if (fbName && fbName.firstChild)
     GM_setValue('FBName', fbName.firstChild.innerHTML);
 
-  GM_deleteValue('language');
   checkLanguage();
 
   var iFrameCanvas = xpathFirst('//iframe[contains(@src,"mwfb.zynga.com")]');
@@ -1405,9 +1404,9 @@ function doAutoPlay () {
     return;
   }
 
-  // Check top mafia bonus
+// Check top mafia bonus
   if (running && (!timeLeftGM('topMafiaTimer') || isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
-    if (getTopMafiaInfo()) return;
+    getTopMafiaInfo();
   }
 
   // Determine whether a job and/or fight/hit could be attempted.
@@ -7998,14 +7997,14 @@ function autoLotto() {
           ticket = ticket + '-';
       }
       Autoplay.fx = function() {
+    }
+    // FIXME: It is a bug to reach this point?
+    Autoplay.fx = goHome;
         clickElement(submitTicket);
         addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: Played ticket' + ticket + '.');
       };
       Autoplay.start();
       return true;
-    }
-    // FIXME: It is a bug to reach this point?
-    Autoplay.fx = goHome;
     Autoplay.start();
     return true;
   }
@@ -8268,7 +8267,7 @@ function getTopMafiaInfo() {
   var elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
   if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
     var bonus = parseInt(RegExp.$1);
-    if (bonus && bonus !== GM_getValue('selectEnergyBonus')) {
+    if (bonus && (bonus !== GM_getValue('selectEnergyBonus')) || (isUndefined('selectEnergyBonus'))) {
       GM_setValue('selectEnergyBonus', bonus);
       DEBUG('Set Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
       didJobCalculations = false;
@@ -8287,7 +8286,7 @@ function getTopMafiaInfo() {
   var elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
   if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
     var bonus = parseInt(RegExp.$1);
-    if (bonus && bonus !== GM_getValue('selectExpBonus')) {
+    if (bonus && (bonus !== GM_getValue('selectExpBonus')) || (isUndefined('selectExpBonus'))) {
       GM_setValue('selectExpBonus', bonus);
       DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
       didJobCalculations = false;
