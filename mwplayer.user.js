@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.10',
-  build: '33',
+  build: '34',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1972,6 +1972,10 @@ function autoStat() {
     Autoplay.fx = goMyProfile;
     Autoplay.start();
     return true;
+  }
+
+  if (!onProfileNav()) {
+    addToLog('warning Icon', 'BUG DETECTED: Not on Profile Page.');
   }
 
   // Add stats to the attribute farthest from the goal
