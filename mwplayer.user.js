@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.10',
-  build: '34',
+  build: '35',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1911,62 +1911,6 @@ function autoPlayerUpdates() {
 
 function autoStat() {
 
-  // Array containers for status settings
-  var curStats = [curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
-  var modeStats = [level,curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
-  var statFallbacks = new Array(curStats.length);
-
-  var maxPtDiff = 0;
-  var statIndex = 0;
-  var statPrio = autoStatPrios.length;
-  for (var i = 0, iLength = curStats.length; i < iLength; ++i) {
-    // Calculate the Points needed to reach target stat
-    var ratio = new Number(GM_getValue(autoStatRatios[i]));
-    var base = new Number(GM_getValue(autoStatBases[i]));
-    var curStatPrio = new Number(GM_getValue(autoStatPrios[i]));
-    var curStatDiff = Math.max (0, ratio * modeStats[GM_getValue(autoStatModes[i])] + base - curStats[i]);
-
-    // Account for priority
-    if ((curStatDiff > 0 && curStatPrio < statPrio) || (curStatDiff > maxPtDiff && curStatPrio <= statPrio)) {
-      maxPtDiff = curStatDiff;
-      statIndex = i;
-      statPrio = curStatPrio;
-    }
-
-    // Fallback method
-    statFallbacks[i] = isChecked(autoStatFallbacks[i]) ? i : '';
-  }
-
-  // Disable auto-stat when status goals are reached and autoStatDisable is checked
-  if (maxPtDiff <= 0 && isChecked('autoStatDisable')) {
-    addToLog('info Icon', 'All status goals met, please update your goals.');
-    GM_setValue('autoStat', 0);
-    return false;
-  }
-
-  // Increment the status corresponding to the nextStat variable (fallback)
-  if (maxPtDiff <= 0) {
-    if (statFallbacks.join('') != '') {
-      DEBUG('Status GOALS reached, using fallback method.');
-      var nextStat = parseInt(GM_getValue('nextStat', ATTACK_STAT));
-
-      // Search for next Stat to increment
-      while (statFallbacks.indexOf(nextStat) == -1)
-        nextStat = (nextStat + 1) % curStats.length;
-
-      DEBUG('Next stat in fallback mode: ' + autoStatDescrips[nextStat + 1]);
-      statIndex = nextStat;
-    } else {
-      // Do not call autoStat until next level Up
-      DEBUG('Status GOALS reached, waiting till next level up.');
-      GM_setValue('restAutoStat', 1);
-      return false;
-    }
-  } else {
-    DEBUG('Next stat to increment : ' + autoStatDescrips[statIndex + 1] + ' (' + maxPtDiff + ' points to goal) ');
-    GM_setValue('restAutoStat', 0);
-  }
-
   // Load profile
   if (!onProfileNav()) {
     Autoplay.fx = goMyProfile;
@@ -1974,41 +1918,99 @@ function autoStat() {
     return true;
   }
 
-  if (!onProfileNav()) {
+  if (onProfileNav()) {
+
+  // Array containers for status settings
+    var curStats = [curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
+    var modeStats = [level,curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
+    var statFallbacks = new Array(curStats.length);
+  
+    var maxPtDiff = 0;
+    var statIndex = 0;
+    var statPrio = autoStatPrios.length;
+    for (var i = 0, iLength = curStats.length; i < iLength; ++i) {
+  	// Calculate the Points needed to reach target stat
+      var ratio = new Number(GM_getValue(autoStatRatios[i]));
+      var base = new Number(GM_getValue(autoStatBases[i]));
+      var curStatPrio = new Number(GM_getValue(autoStatPrios[i]));
+      var curStatDiff = Math.max (0, ratio * modeStats[GM_getValue(autoStatModes[i])] + base - curStats[i]);
+
+  	// Account for priority
+      if ((curStatDiff > 0 && curStatPrio < statPrio) || (curStatDiff > maxPtDiff && curStatPrio <= statPrio)) {
+        maxPtDiff = curStatDiff;
+	    statIndex = i;
+	    statPrio = curStatPrio;
+	  }
+
+	  // Fallback method
+	  statFallbacks[i] = isChecked(autoStatFallbacks[i]) ? i : '';
+    }
+
+    // Disable auto-stat when status goals are reached and autoStatDisable is checked
+    if (maxPtDiff <= 0 && isChecked('autoStatDisable')) {
+	  addToLog('info Icon', 'All status goals met, please update your goals.');
+	  GM_setValue('autoStat', 0);
+	  return false;
+    }
+
+    // Increment the status corresponding to the nextStat variable (fallback)
+    if (maxPtDiff <= 0) {
+	  if (statFallbacks.join('') != '') {
+	    DEBUG('Status GOALS reached, using fallback method.');
+	    var nextStat = parseInt(GM_getValue('nextStat', ATTACK_STAT));
+
+	    // Search for next Stat to increment
+	    while (statFallbacks.indexOf(nextStat) == -1)
+		  nextStat = (nextStat + 1) % curStats.length;
+
+	    DEBUG('Next stat in fallback mode: ' + autoStatDescrips[nextStat + 1]);
+	    statIndex = nextStat;
+	  } else {
+	    // Do not call autoStat until next level Up
+	    DEBUG('Status GOALS reached, waiting till next level up.');
+	    GM_setValue('restAutoStat', 1);
+	    return false;
+	  }
+    } else {
+	  DEBUG('Next stat to increment : ' + autoStatDescrips[statIndex + 1] + ' (' + maxPtDiff + ' points to goal) ');
+	  GM_setValue('restAutoStat', 0);
+    }
+
+    // Add stats to the attribute farthest from the goal
+    // (or the nextStat if fallback kicked in)
+    var upgradeElt;
+    switch (statIndex) {
+	  case ATTACK_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=attack")]', innerPageElt);         break;
+	  case DEFENSE_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=defense")]', innerPageElt);        break;
+	  case HEALTH_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_health")]', innerPageElt);     break;
+	  case ENERGY_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_energy")]', innerPageElt);     break;
+	  case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence"])', innerPageElt);  break;
+	  case STAMINA_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_stamina")]', innerPageElt);    break;
+
+	  default             :
+	    // Disable auto-stats when maxPts calculated is NaN
+	    GM_setValue('autoStat', 0);
+	    addToLog('warning Icon', 'BUG DETECTED: Invalid calculated maxPts value "' + maxPts + '". Auto-stat disabled.');
+	    return false;
+    }
+
+    if (!upgradeElt){
+	  DEBUG('Couldnt find link to upgrade stat.');
+	  return false;
+    }
+
+    // Use click simulation
+    Autoplay.fx = function() {
+	  clickAction = 'stats';
+      clickElement(upgradeElt);
+	  DEBUG('Clicked to upgrade: ' + autoStatDescrips[statIndex + 1]);
+    }
+    Autoplay.start();
+    return true;
+  }
+  else {
     addToLog('warning Icon', 'BUG DETECTED: Not on Profile Page.');
   }
-
-  // Add stats to the attribute farthest from the goal
-  // (or the nextStat if fallback kicked in)
-  var upgradeElt;
-  switch (statIndex) {
-    case ATTACK_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=attack")]', innerPageElt);         break;
-    case DEFENSE_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=defense")]', innerPageElt);        break;
-    case HEALTH_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_health")]', innerPageElt);     break;
-    case ENERGY_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_energy")]', innerPageElt);     break;
-    case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence"])', innerPageElt);  break;
-    case STAMINA_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_stamina")]', innerPageElt);    break;
-
-    default             :
-      // Disable auto-stats when maxPts calculated is NaN
-      GM_setValue('autoStat', 0);
-      addToLog('warning Icon', 'BUG DETECTED: Invalid calculated maxPts value "' + maxPts + '". Auto-stat disabled.');
-      return false;
-  }
-
-  if (!upgradeElt){
-    DEBUG('Couldnt find link to upgrade stat.');
-    return false;
-  }
-
-  // Use click simulation
-  Autoplay.fx = function() {
-    clickAction = 'stats';
-    clickElement(upgradeElt);
-    DEBUG('Clicked to upgrade: ' + autoStatDescrips[statIndex + 1]);
-  }
-  Autoplay.start();
-  return true;
 }
 
 // Calculate job cost and reward
