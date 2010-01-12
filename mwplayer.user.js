@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.10',
-  build: '35',
+  build: '37',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
