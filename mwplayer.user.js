@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.10',
-  build: '37',
+  build: '38',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6684,7 +6684,8 @@ function customizeHome() {
   xJob = '';
 
   // Is an energy pack waiting to be used?
-energyPackElt = xpathFirst('.//a/span[(@class="sexy_pack_use" or @class="sexy_energy2_use") and contains(text(), "Use energy pack")]', innerPageElt);  energyPack = energyPackElt? true : false;
+  energyPackElt = xpathFirst('.//a/span[(@class="sexy_pack_use" or @class="sexy_energy2_use") and contains(text(), "Use energy pack")]', innerPageElt); 
+  energyPack = energyPackElt? true : false;
 
   // Display a message next to the energy pack button.
   if (energyPackElt) {
