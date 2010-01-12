@@ -6684,8 +6684,7 @@ function customizeHome() {
   xJob = '';
 
   // Is an energy pack waiting to be used?
-  energyPackElt = xpathFirst('.//a/span[@class="sexy_pack_use" and contains(text(), "Use energy pack")]', innerPageElt);
-  energyPack = energyPackElt? true : false;
+energyPackElt = xpathFirst('.//a/span[(@class="sexy_pack_use" or @class="sexy_energy2_use") and contains(text(), "Use energy pack")]', innerPageElt);  energyPack = energyPackElt? true : false;
 
   // Display a message next to the energy pack button.
   if (energyPackElt) {
