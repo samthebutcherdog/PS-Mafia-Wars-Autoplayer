@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.12',
-  build: '47',
+  build: '48',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7400,7 +7400,16 @@ function jobProgress(element) {
           var findMastery = function(v, i, a) { return (a[i].innerHTML.indexOf('Mastery') > 0)? 1:0; };
           var nonMasteredJobs = tierJobs.filter(findMastery);
           var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].trim();
-          var matches = missions.searchArray(jobName, 0);
+
+          // Handle pre-Bangkok job names
+          if (nonMasteredJobs[0].innerHTML.match(/Asian Museum Break-in/)) 
+            jobName = 'Asian Museum Break-in';
+          if (nonMasteredJobs[0].innerHTML.match(/Smuggle Thai Gems/)) 
+            jobName = 'Smuggle Thai Gems';
+          if (nonMasteredJobs[0].innerHTML.match(/Repel the Yakuza/)) 
+            jobName = 'Repel the Yakuza';
+
+			var matches = missions.searchArray(jobName, 0);
           if (!matches) {
             addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
                      ' not found in mission array.');
