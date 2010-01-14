@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.12',
-  build: '46',
+  build: '47',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6581,7 +6581,6 @@ function customizeMasthead() {
   // Make the SMS Mobile link go away
   var smsElt = xpathFirst('//div[@class="mw_sms"]', innerPageElt);
   if (smsElt) {
-  alert('Success');
   smsElt.setAttribute("style", "margin:0; height:0; display:none", 0);
   }
 
