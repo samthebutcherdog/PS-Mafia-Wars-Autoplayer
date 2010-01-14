@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.11
+* @version 1.0.12
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -31,14 +31,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.11
+// @version     1.0.12
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.11',
-  build: '40',
+  version: '1.0.12',
+  build: '41',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1376,10 +1376,10 @@ if (GM_getValue('logOpen') == 'open') {
   showMafiaLogBox();
 }
 return;
+
 ///////////////////////////////////////////////////////////////////////////////
 //   End of top-level code. Automatic play is kicked off by doAutoPlay().    //
 ///////////////////////////////////////////////////////////////////////////////
-
 
 function doAutoPlay () {
   // Set the default auto-play timer function and delay.
@@ -1404,7 +1404,7 @@ function doAutoPlay () {
     return;
   }
 
-// Check top mafia bonus
+  // Check top mafia bonus
   if (running && (!timeLeftGM('topMafiaTimer') || isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
     getTopMafiaInfo();
   }
@@ -8811,12 +8811,16 @@ function goMyProfile() {
 }
 
 function goMyMafiaNav() {
-  var elt = xpathFirst('.//div[@class="mafia_link"]//a[contains(.,"My  Mafia")]');
+  var elt = xpathFirst('.//div[@class="mafia_link"]//a[contains(.,"My Mafia")]');
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find My Mafia nav link to click.');
     return;
+  } else {
+    var eltProfile = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
+    if (eltProfile) {
+      elt.setAttribute('onclick',eltProfile.getAttribute('onclick').replace(/xw_controller=stats/i,'xw_controller=recruit'));
+    }
   }
-
   clickElement(elt);
   DEBUG('Clicked to load My Mafia nav.');
 }
