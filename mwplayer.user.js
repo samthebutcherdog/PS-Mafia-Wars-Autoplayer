@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.11',
-  build: '39',
+  build: '40',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1285,7 +1285,7 @@ if (!initialized) {
   if (typeof GM_getValue('isRunning') != 'boolean') {
     // FIXME: Perhaps it should be false, and instead pop up an alert
     //        asking the user to check the settings?
-    GM_setValue('isRunning', true);
+    GM_setValue('isRunning', false);
   }
   running = GM_getValue('isRunning');
 
@@ -1573,7 +1573,15 @@ function doAutoPlay () {
   // Idle in preferred city
   if (running && idle && isChecked('idleInCity') && city != GM_getValue('idleLocation', NY)) {
     DEBUG('Idling. Moving to ' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '. ');
-    goLocation(GM_getValue('idleLocation',NY));
+	if ((level < 35) && (GM_getValue('idleLocation', NY) == CUBA)) {
+	  addToLog('warning Icon', 'WARNING: Current level does not allow travel to Cuba.');
+      DEBUG('Idling. Staying in NY.');
+	} else if ((level < 70) && (GM_getValue('idleLocation', NY) == MOSCOW)) {
+      addToLog('warning Icon', 'WARNING: Current level does not allow travel to Moscow.');
+      DEBUG('Idling. Staying in NY.');
+	} else {
+	  goLocation(GM_getValue('idleLocation',NY));
+	}
     return;
   }
 }
