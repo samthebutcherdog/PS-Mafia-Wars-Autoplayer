@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.12',
-  build: '43',
+  build: '44',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -5762,9 +5762,8 @@ function validateStaminaTab() {
         alert('Please enter a maximum relative level of zero or more.');
         return;
       } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level) {
-        alert('Please enter a fight level of ' + level +
-              ' (your current level) or more for fighting.');
-        return;
+        addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
+        s.fightLevelMax = level;
       } else if (!s.fightLevelMaxRelative && level >= 180 &&
                  s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a maximum fight level of 200 at the very least. If necessary, lower the maximum mafia size to compensate.');
