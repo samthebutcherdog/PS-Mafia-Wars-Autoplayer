@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.10
+* @version 1.0.11
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -31,14 +31,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.10
+// @version     1.0.11
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.10',
-  build: '38',
+  version: '1.0.11',
+  build: '39',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1910,7 +1910,6 @@ function autoPlayerUpdates() {
 }
 
 function autoStat() {
-
   // Load profile
   if (!onProfileNav()) {
     Autoplay.fx = goMyProfile;
@@ -1919,97 +1918,97 @@ function autoStat() {
   }
 
   if (onProfileNav()) {
-
-  // Array containers for status settings
+    // Array containers for status settings
     var curStats = [curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
     var modeStats = [level,curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
     var statFallbacks = new Array(curStats.length);
-  
+
     var maxPtDiff = 0;
     var statIndex = 0;
     var statPrio = autoStatPrios.length;
     for (var i = 0, iLength = curStats.length; i < iLength; ++i) {
-  	// Calculate the Points needed to reach target stat
+      // Calculate the Points needed to reach target stat
       var ratio = new Number(GM_getValue(autoStatRatios[i]));
       var base = new Number(GM_getValue(autoStatBases[i]));
       var curStatPrio = new Number(GM_getValue(autoStatPrios[i]));
       var curStatDiff = Math.max (0, ratio * modeStats[GM_getValue(autoStatModes[i])] + base - curStats[i]);
 
-  	// Account for priority
+      // Account for priority
       if ((curStatDiff > 0 && curStatPrio < statPrio) || (curStatDiff > maxPtDiff && curStatPrio <= statPrio)) {
         maxPtDiff = curStatDiff;
-	    statIndex = i;
-	    statPrio = curStatPrio;
-	  }
+        statIndex = i;
+        statPrio = curStatPrio;
+      }
 
-	  // Fallback method
-	  statFallbacks[i] = isChecked(autoStatFallbacks[i]) ? i : '';
+      // Fallback method
+      statFallbacks[i] = isChecked(autoStatFallbacks[i]) ? i : '';
     }
 
     // Disable auto-stat when status goals are reached and autoStatDisable is checked
     if (maxPtDiff <= 0 && isChecked('autoStatDisable')) {
-	  addToLog('info Icon', 'All status goals met, please update your goals.');
-	  GM_setValue('autoStat', 0);
-	  return false;
+      addToLog('info Icon', 'All status goals met, please update your goals.');
+      GM_setValue('autoStat', 0);
+      return false;
     }
 
     // Increment the status corresponding to the nextStat variable (fallback)
     if (maxPtDiff <= 0) {
-	  if (statFallbacks.join('') != '') {
-	    DEBUG('Status GOALS reached, using fallback method.');
-	    var nextStat = parseInt(GM_getValue('nextStat', ATTACK_STAT));
+      if (statFallbacks.join('') != '') {
+        DEBUG('Status GOALS reached, using fallback method.');
+        var nextStat = parseInt(GM_getValue('nextStat', ATTACK_STAT));
 
-	    // Search for next Stat to increment
-	    while (statFallbacks.indexOf(nextStat) == -1)
-		  nextStat = (nextStat + 1) % curStats.length;
+        // Search for next Stat to increment
+        while (statFallbacks.indexOf(nextStat) == -1)
+          nextStat = (nextStat + 1) % curStats.length;
 
-	    DEBUG('Next stat in fallback mode: ' + autoStatDescrips[nextStat + 1]);
-	    statIndex = nextStat;
-	  } else {
-	    // Do not call autoStat until next level Up
-	    DEBUG('Status GOALS reached, waiting till next level up.');
-	    GM_setValue('restAutoStat', 1);
-	    return false;
-	  }
+        DEBUG('Next stat in fallback mode: ' + autoStatDescrips[nextStat + 1]);
+        statIndex = nextStat;
+      } else {
+        // Do not call autoStat until next level Up
+        DEBUG('Status GOALS reached, waiting till next level up.');
+        GM_setValue('restAutoStat', 1);
+        return false;
+      }
     } else {
-	  DEBUG('Next stat to increment : ' + autoStatDescrips[statIndex + 1] + ' (' + maxPtDiff + ' points to goal) ');
-	  GM_setValue('restAutoStat', 0);
+      DEBUG('Next stat to increment : ' + autoStatDescrips[statIndex + 1] + ' (' + maxPtDiff + ' points to goal) ');
+      GM_setValue('restAutoStat', 0);
     }
 
     // Add stats to the attribute farthest from the goal
     // (or the nextStat if fallback kicked in)
     var upgradeElt;
     switch (statIndex) {
-	  case ATTACK_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=attack")]', innerPageElt);         break;
-	  case DEFENSE_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=defense")]', innerPageElt);        break;
-	  case HEALTH_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_health")]', innerPageElt);     break;
-	  case ENERGY_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_energy")]', innerPageElt);     break;
-	  case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence"])', innerPageElt);  break;
-	  case STAMINA_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_stamina")]', innerPageElt);    break;
+      case ATTACK_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=attack")]', innerPageElt);         break;
+      case DEFENSE_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=defense")]', innerPageElt);        break;
+      case HEALTH_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_health")]', innerPageElt);     break;
+      case ENERGY_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_energy")]', innerPageElt);     break;
+      case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence"])', innerPageElt);  break;
+      case STAMINA_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_stamina")]', innerPageElt);    break;
 
-	  default             :
-	    // Disable auto-stats when maxPts calculated is NaN
-	    GM_setValue('autoStat', 0);
-	    addToLog('warning Icon', 'BUG DETECTED: Invalid calculated maxPts value "' + maxPts + '". Auto-stat disabled.');
-	    return false;
+      default             :
+        // Disable auto-stats when maxPts calculated is NaN
+        GM_setValue('autoStat', 0);
+        addToLog('warning Icon', 'BUG DETECTED: Invalid calculated maxPts value "' + maxPts + '". Auto-stat disabled.');
+        return false;
     }
 
     if (!upgradeElt){
-	  DEBUG('Couldnt find link to upgrade stat.');
-	  return false;
+      DEBUG('Couldnt find link to upgrade stat.');
+      return false;
     }
 
     // Use click simulation
     Autoplay.fx = function() {
-	  clickAction = 'stats';
+      clickAction = 'stats';
       clickElement(upgradeElt);
-	  DEBUG('Clicked to upgrade: ' + autoStatDescrips[statIndex + 1]);
+      DEBUG('Clicked to upgrade: ' + autoStatDescrips[statIndex + 1]);
     }
     Autoplay.start();
     return true;
-  }
-  else {
-    addToLog('warning Icon', 'BUG DETECTED: Not on Profile Page.');
+  } else {
+    // Disable auto-stats when profile page cannot be loaded
+    GM_setValue('autoStat', 0);
+    addToLog('warning Icon', 'BUG DETECTED: Unable to load Profile page, autostat disabled.');
   }
 }
 
@@ -4172,8 +4171,8 @@ function createSettingsBox() {
       makeElement('a', displayTabLink, {'href':'#', 'rel':'displayTab'}).appendChild(document.createTextNode('Display'));
     var socialTabLink = makeElement('div', tabNav, {'id':'Social_Tab'});
       makeElement('a', socialTabLink, {'href':'#', 'rel':'socialTab'}).appendChild(document.createTextNode('Social'));
-    var skillsTabLink = makeElement('div', tabNav, {'id':'Skills_Tab'});
-      makeElement('a', skillsTabLink, {'href':'#', 'rel':'skillsTab'}).appendChild(document.createTextNode('Skills'));
+    var autostatTabLink = makeElement('div', tabNav, {'id':'Autostat_Tab'});
+      makeElement('a', autostatTabLink, {'href':'#', 'rel':'autostatTab'}).appendChild(document.createTextNode('Autostat'));
     var energyTabLink = makeElement('div', tabNav, {'id':'Energy_Tab'});
       makeElement('a', energyTabLink, {'href':'#', 'rel':'energyTab'}).appendChild(document.createTextNode('Energy'));
     var staminaTabLink = makeElement('div', tabNav, {'id':'Stamina_Tab'});
@@ -4195,9 +4194,9 @@ function createSettingsBox() {
   var socialTab = createSocialTab();
   settingsBox.appendChild(socialTab);
 
-  // Create Skills tab.
-  var skillsTab = createSkillsTab();
-  settingsBox.appendChild(skillsTab);
+  // Create Autostat tab.
+  var autostatTab = createAutostatTab();
+  settingsBox.appendChild(autostatTab);
 
   // Create energy tab.
   var energyTab = createEnergyTab();
@@ -4779,12 +4778,12 @@ function createSocialTab() {
   return socialTab;
 }
 
-// Create Skills Tab
-function createSkillsTab() {
+// Create Autostat Tab
+function createAutostatTab() {
   var elt, title, id, label;
-  var skillsTab = makeElement('div', null, {'id':'skillsTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  var statDiv = makeElement('div', skillsTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
+  var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
 
   id = 'autoStat';;
   var autoStats = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; left: 20px;'});
@@ -4895,7 +4894,7 @@ function createSkillsTab() {
     sel.selectedIndex = GM_getValue(autoStatPrios[i], 0);
   }
 
-  return skillsTab;
+  return autostatTab;
 }
 
 // Create Energy Tab
@@ -6684,7 +6683,7 @@ function customizeHome() {
   xJob = '';
 
   // Is an energy pack waiting to be used?
-  energyPackElt = xpathFirst('.//a/span[(@class="sexy_pack_use" or @class="sexy_energy2_use") and contains(text(), "Use energy pack")]', innerPageElt); 
+  energyPackElt = xpathFirst('.//a/span[(@class="sexy_pack_use" or @class="sexy_energy2_use") and contains(text(), "Use energy pack")]', innerPageElt);
   energyPack = energyPackElt? true : false;
 
   // Display a message next to the energy pack button.
@@ -6859,7 +6858,7 @@ function customizeJobs() {
           DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
         }
       }
-        }
+    }
 
     var elt = energies.snapshotItem(i);
     var cost = parseInt(elt.firstChild.nodeValue);
@@ -7555,7 +7554,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Publish war declaration: <strong>' + showIfUnchecked(GM_getValue('autoWarPublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Publish call for backup: <strong>' + showIfUnchecked(GM_getValue('autoWarResponsePublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Publish reward: <strong>' + showIfUnchecked(GM_getValue('autoWarRewardPublish')) + '</strong><br>' +
-        '-------------------Skills Tab--------------------<br>' +
+        '-------------------Autostat Tab--------------------<br>' +
         'Enable auto-stat: <strong>' + showIfUnchecked(GM_getValue('autoStat')) + '</strong><br>' +
         'Disable auto-stat: <strong>' + showIfUnchecked(GM_getValue('autoStatDisable')) + '</strong><br>' +
         '&nbsp;&nbsp;-Attack Base: <strong>' + GM_getValue('autoStatAttackBase') + '</strong><br>' +
@@ -7800,7 +7799,7 @@ function parsePlayerUpdates(messagebox) {
   } else if (messageTextNoTags.indexOf('needs your help') != -1) {
     if (isChecked('autoHelp')) {
       // Help requested by a fellow mafia member.
-      var userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+      var userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
       var elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
       if (elt) {
         // Help immediately.
@@ -8804,11 +8803,8 @@ function goMyProfile() {
 }
 
 function goMyMafiaNav() {
-  // Mimic ajax onclick event from profile nav
-  var elt = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
-  if (elt) {
-    elt.setAttribute('onclick',elt.getAttribute('onclick').replace(/xw_controller=stats/i,'xw_controller=recruit'));
-  } else {
+  var elt = xpathFirst('.//div[@class="mafia_link"]//a[contains(.,"My  Mafia")]');
+  if (!elt) {
     addToLog('warning Icon', 'Can\'t find My Mafia nav link to click.');
     return;
   }
