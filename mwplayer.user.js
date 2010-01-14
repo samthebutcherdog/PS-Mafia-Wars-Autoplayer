@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.12',
-  build: '44',
+  build: '45',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6400,6 +6400,12 @@ function refreshGlobalStats() {
     }
   } else {
     stats = 0;
+  }
+
+  // Update current level so the next if will work
+  if (isUndefined('currentLevel')) {
+    GM_setValue('currentLevel', level);
+    GM_setValue('restAutoStat', 0);
   }
 
   // Show congratulations if level has increased.
