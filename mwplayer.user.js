@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.12',
-  build: '42',
+  build: '43',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1558,6 +1558,7 @@ function doAutoPlay () {
   // If not previously idle, check the home page.
   if (running && !previouslyIdle) {
     DEBUG('Now idle. Checking the home page.');
+    Autoplay.fx = goHome;
     Autoplay.start();
     return;
   }
@@ -6397,8 +6398,6 @@ function refreshGlobalStats() {
     stats = parseInt(skillElt.innerHTML);
     if (isNaN(stats)) {
       stats = 0;
-    } else if (stats > 1) {
-      GM_setValue('restAutoStat', 0);
     }
   } else {
     stats = 0;
