@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.12
+* @version 1.0.13
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -31,14 +31,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.12
+// @version     1.0.13
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.12',
-  build: '48',
+  version: '1.0.13',
+  build: '49',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1667,7 +1667,7 @@ function autoHeal() {
   // Make sure we're in the preferred city.
   var healLocation = parseInt(GM_getValue('healLocation', NY));
 
-  if (city != healLocation) {
+  if (healLocation != cities.length && city != healLocation) {
     Autoplay.fx = function() { goLocation(healLocation); }
     Autoplay.start();
     return;
@@ -4342,6 +4342,11 @@ function createGeneralTab() {
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
     healLocation.appendChild(choice);
   }
+  var choice = document.createElement('option');
+  choice.value = i;
+  choice.appendChild(document.createTextNode('Active City'));
+  healLocation.appendChild(choice);
+
   healLocation.selectedIndex = GM_getValue('healLocation', NY);
   makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' when health falls below '));
   makeElement('input', rhs, {'style':'vertical-align: middle; text-align: center','type':'text', 'value':GM_getValue('healthLevel', '50'), 'id':'healthLevel', 'size':'1'});
@@ -7402,14 +7407,14 @@ function jobProgress(element) {
           var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].trim();
 
           // Handle pre-Bangkok job names
-          if (nonMasteredJobs[0].innerHTML.match(/Asian Museum Break-in/)) 
+          if (nonMasteredJobs[0].innerHTML.match(/Asian Museum Break-in/))
             jobName = 'Asian Museum Break-in';
-          if (nonMasteredJobs[0].innerHTML.match(/Smuggle Thai Gems/)) 
+          if (nonMasteredJobs[0].innerHTML.match(/Smuggle Thai Gems/))
             jobName = 'Smuggle Thai Gems';
-          if (nonMasteredJobs[0].innerHTML.match(/Repel the Yakuza/)) 
+          if (nonMasteredJobs[0].innerHTML.match(/Repel the Yakuza/))
             jobName = 'Repel the Yakuza';
 
-			var matches = missions.searchArray(jobName, 0);
+          var matches = missions.searchArray(jobName, 0);
           if (!matches) {
             addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
                      ' not found in mission array.');
