@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.13',
-  build: '49',
+  build: '50',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -635,6 +635,8 @@ var hideIcon =    '<img src="' +
 var blackBgImage =    '<img src="' +
                     'data:image/gif;base64,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' +
                     '" />';
+
+var generalTabImage =     '<img src="http://playerscripts.com/images/mwap_graphics/generaltabimage.png" />';
 
 var bgTabImage =    '<img src="' +
                     'data:image/png;base64,' +
@@ -4259,7 +4261,7 @@ function createSettingsBox() {
 // Create General Tab
 function createGeneralTab() {
   var elt, title, id, label;
-  var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -4475,7 +4477,7 @@ function createGeneralTab() {
 // Create Display Tab
 function createDisplayTab() {
   var elt, title, id, label;
-  var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -4613,7 +4615,7 @@ function createDisplayTab() {
 // Create Social Tab
 function createSocialTab() {
   var elt, title, id, label;
-  var socialTab = makeElement('div', null, {'id':'socialTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var socialTab = makeElement('div', null, {'id':'socialTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', socialTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -4795,7 +4797,7 @@ function createSocialTab() {
 // Create Autostat Tab
 function createAutostatTab() {
   var elt, title, id, label;
-  var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
 
@@ -4914,7 +4916,7 @@ function createAutostatTab() {
 // Create Energy Tab
 function createEnergyTab() {
   var elt, title, id, label;
-  var energyTab = makeElement('div', null, {'id':'energyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var energyTab = makeElement('div', null, {'id':'energyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', energyTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -5250,7 +5252,7 @@ function createEnergyTab() {
 // Create Stamina Tab
 function createStaminaTab() {
   var elt, title, id, label;
-  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -5595,7 +5597,7 @@ function createStaminaTab() {
 // Create Money tab
 function createMoneyTab () {
   var elt, title, id, label;
-  var moneyTab = makeElement('div', null, {'id':'moneyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var moneyTab = makeElement('div', null, {'id':'moneyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   var autoBuy = makeElement('div', moneyTab, {'style':'top: 25px;'});
   makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, 'autoBuy');
@@ -5684,7 +5686,7 @@ function createMoneyTab () {
 // Create About tab
 function createAboutTab () {
   var elt, title, id, label;
-  var aboutTab = makeElement('div', null, {'id':'aboutTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var aboutTab = makeElement('div', null, {'id':'aboutTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
 
   var versionInfo = makeElement('div', aboutTab, {'style':'top: 25px;font-size: 18px; font-weight: bold;'});
   versionInfo.appendChild(document.createTextNode('Version '+ SCRIPT.version));
