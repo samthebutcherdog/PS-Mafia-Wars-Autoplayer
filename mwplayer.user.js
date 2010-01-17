@@ -38,7 +38,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.13',
-  build: '50',
+  build: '51',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -299,7 +299,6 @@ function PlayerList(name) {
   this.get();
 }
 
-
 //create data uris for mini icon usage
 var searchIcon = '<img src="' +
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACLElEQVR42mNkgIJ12/cacLCzlTIwMtkwMzNx/Pnz58qfP3/n+Ls5LGfAAxhBxMZdBxKFBflnqirKs4oKCTAwMjIyfP' +
@@ -314,29 +313,6 @@ var lootbagIcon = '<img src="' +
                     'data:image/gif;base64,R0lGODlhEAAQAIQfALq3nMG8k8TAmbSvfMnFoTg3LYmEWhMSDaumeM7Lqrm0hNXStXl2Vnp4ab65jaeha4+Nery2irexgmhnW9HNrsvIpdjVurGrd9fUuktKQcK9otPQsrOwkiAfHG' +
                     'poSv///yH5BAEAAB8ALAAAAAAQABAAAAWB4CeOk1Y0UHeMrHgAUZU4Wds2gcKo9thxl0ePNUlUKoPVEGLZYDaBZK9gsTwJgcig11h4KQSHQiJscSjoRFgi2bIOsoRxPXCPDoQ4QSAeXFp4BIICAQ5tfywFAouEDh' +
                     'FtBm8Bk4xZCgoPSh8ZARcKk4UKjgiaHyoFDAaqBh4MpCIhADs=' +
-                    '" />';
-
-var tabSelectedImage =    '<img src="' +
-                    'data:image/gif;base64,' +
-                    'R0lGODlhZAAyALMAACIODyUQESYTFCkWGCwZHTMgJDckKDAdIDooLT4sMUw6QEY0OkEvNVJBSFlIUGFQWSH5BAAAAAAALAAAAABkADIAQAT/sC3EWBNFJYDcOoiiEMbSFIWjHJaGII9RxgwrURamcR4okiaUyuYK' +
-                    'jUqn1KqVeMVmNYbJ0FQMDonEwKBgFBAJxRexMGQUBikDYTaREI2BoEsILxbX7Lb7DY/LZ2kLCRlgYi+AIoJrBiEFd2ZkCAECBgcEcgQFVwgFJCgElwmYLwcFZgaahAShCAICCQYCpjKvmpyeZp6ipAi0p5+7db0H' +
-                    'ja0yB7SYBwIAAQMDAACsAAKYr9YBlATbBALQ4M6Y1dfglNDS1NaZ39De3wTOB+AFzNzb3fDO6OuvA97OnDWrNlBAAGmUEBqsdlDbQYHSXgWk9DAhwYgPJw60+CqjRYoM/52B5PjQYMWSKKVVU1nwpEKWCDOKxEgz' +
-                    'IsyQDp8dHLgSp0M5DYNqQ8iy4cKZF0dKPBgt6VGVRQW6dGq02c6SVhdSstpzqUMpGBoQKjHilANoHgiEKJOAgYJOCRw0aqAhwR25BNwyCFBA7KkFZQ2cHZB2LRW3cOVqKayALeICcefWvYOAhKVTNcZUNsXgm4Yt' +
-                    'TU6lQcGlHpjKjxIUS2MKsqUXmwt0HvCZSicZXk4doq3FtujcXGSUOvBWLZ5vBQyy4vavACVP1i6xGrDpyqblxTDVu2Runjvmmp7Ho27vlvVvpryFWk5dDvT1clIFWI9wQNWITeXss/pMGrqt+p3jX/80OglUUFML' +
-                    '6feNSd80BI1VAfYHwH8KQuPgTUiRJNVQBfHUElQZ8TQURDiZtNNLUm14IolamURUTy+O2GJDPYE0Y0Ai8hQQUjeuOBRFRtG4UZAYNmMcA/8MkYAEjYRRhwIN1KGCIGKs8UA9DsglBZQLHJnkCkuWYciTUcaFxpay' +
-                    'wTBCGGVOiaaVWGrJZTENvJCFGJApYI1YT04wQZRpLCECG2GIEWgAcMgFhh957jmKHZIA6hYLCzjwaGORkjCpW2+98FYbnbwVCwHFhdDJF3gccMcjfNi1AGQZaAHZAp5VRgYDMhSi1lsokHHFqoB54Wqadv36arCz' +
-                    'vkrIEm21ooX/KQl8w0Zl1CXwzKiNyGAJcKOk+RquyTRiTRZYRKKdtQNgywYy3GriRSrZskvaKFRcQsZrbLBiSSjJzFePHNS9YoY1qWByi71bbALCN5ZckQw0lvg7D3ICJ0fCdAerJUclFhfcXDUyBGBKMZnMo4kt' +
-                    'rGwTzSyZYByKcvZ4go47r3jyzCXwcLNONfOIFx3GzmlyDXusMDOfN//YckA6/+j0jTgGLRh1fvbNB/CDBvVMjkHmPEOgN+d0ZPXTXpNzdTYDalMOUGz/Y98sHemHokRO8YdgVnS7WCBILLZkIjYi3b2UV3enqI3d' +
-                    'KoU4VVcfznQ4iiMmXlPkBb0EZED2RdQ4/+Wa17SjQzHZJFJQG5VO0+OQjyhjTKRbrvePH+GN+kc8BgVi6CUSWXuGp8s0lVac4w58iJrndFXqk4vY+eEOKY8U8iGRuKNXHjlP/U0WAaBFB7G41SULDsyS1pJoZOEA' +
-                    'nWXStYAUDXhBglgDcB/o9wyEf8D4dFERF/p1NIB/+fszQAPS1xj2MeB9FqgBFeJAALpcQQKoQsMLGmCKAUKGLmgQjGke4IDKJLAYS/qHAw8AQTJIEA4VPAH5DgGYRqCwLyrEoAwcYBo+qUY2KyChFQSIK9kAKi6E' +
-                    '6AGnYHMCUg3BAA+gYCoAkwwH8tAMFiABEFPwgSGyIYpUsBQVWTCoCf+iQAF44RRr+oKkELgvA6EQgQ+aQAW2CEYGUCqLBIrhlly0L3580MQIiLOCELDRLraxVBr76II2UuGNAhTVq8yABeJ0wk5StAJxVEOGLMQi' +
-                    'g4CJ4BHaZ4ZifeEtIABDJK+gARAMIgvBIQudSllJVGKShYPoS2WC4yssUCAUayAlvnDFALtcwi1P0kNqPPGIf6zPXc1iAQJ0GUpe+jIva8pgM9PwTGCGgVxiCGW3rPEqFKTLFbKxBLS0Q7/bZEsDE9CErwiQzkNW' +
-                    'JgBNwAC4xkmdcoqGDXWCDDlxaU42GAo2BywXIS4BAu34YhfL3MIy61APbdUjL5jI1j/chwoQyGb/E19IDwggttCBOvSXmFDoPzyKDNOcAgzfiOdDTyYyA0DDFCBjRjGISQJrnOIKjNxMJwjq0lm4NBTVgWklZGoG' +
-                    'oclCEy6dKVFpetSbngIUDKXOZZwhs24841+suE4ooOHNZEjHZMnQlxxMcTTnWIM5WL1FVrmqsLD+Q61bpc51TMHVoplnGdcQmX2ucLWlzUKm73kYUHrWnre+AxPaIOzE/uHXl1nnZiYjD88Aq55QaCNpDrOqRPrh' +
-                    'tnPEAwCXmNDaypEcro12HysrB2L1cdbLIk1mL31aaN3WDvVEg7aJbcY/zHaOzFmDaV4DhzX8AZ5wLEhte+1ZO3YSj/nYIrVA/xnuM0Ia3Ae940EWgsdBrnFcfygkbFKjCDcmdLbMbWU/wQXQdxcEFPXqY2x77Yhy' +
-                    'mHK1y0qNQimaEN5cR6AAEa4i5iXbiPx7lI0V7hkmQrBA+rvfyy5PQVGRHoJSMru7Ne8oMqoITxD0YAwTKHrA8xBTdLcTHf2OSD66z/NgZGLhnc5FjgPdSGo0pNHBpHrC07Dk6pY8qGC4xtFLCOWEouMXLQUisYtR' +
-                    'VPgmo6yo+McigbHi8ttkwx05c1QxUH1Cx7clB294NznK9aDiZeL5xMzZA7PohOzkHWPYzMPjEO5gt7rELe5DxqPxhkYnZyQnWHU+sZ5QwvwhGNfII9mj8FOX+UNnQvNZRfwx8p07F+Q65+12EV705ITEks1xOimR' +
-                    'E12G8GwiPU8oSD/ysZ3nhmofla7Vps4J74b0O9ZF2XU5+duqbcwjW8/OyYP+9Z5BLI0IAAA7' +
                     '" />';
 
 var playIcon = '<img src="' +
@@ -632,94 +608,7 @@ var hideIcon =    '<img src="' +
                     'aYwJ9wSCwaA8ikkRhoeTyYwFKoQNkoFpiUqFCNCoJwgbCTIhDCDOAhAAAMgwQhREgwSD+FyO2G1wYCEwYQDEIPfAIDEoAAMm8JQhp8BTk0A3wAAgVCDm4CBAQml3wHmz8BNwApAT08BAUHsS4EQw0ADQEdOjgRLG' +
                     'dFFwAxATwVID5bRSclAA4cGx8zyUULAC9JSFMrAAtTQkEAOw==" />';
 
-var blackBgImage =    '<img src="' +
-                    'data:image/gif;base64,R0lGODlhZACQANUAADMtIiciGgwLCTQtIh4aFgkIBxAPDFNIMwYGBRkWEkM6Kl5SPEI5KmJUPVBFMjQuIlBGMiYgGSciGQEBAWFSPB0ZFRgVEVJGM0U6KjYvIwABACYhGSgjGkM7LFJFMx4aFQICAgAAADYtIiUgGRgWEUU7LBoXEg0LCRgVEgEBAAIBARURDgMCAgICAQQDAwABAQQEAxUSDhQSDh0aFhMRDgMDAx0aFRUSDxUTDxUTDh4ZFUA4KhYUDx0ZFh4ZFlJGNCH5BAAAAAAALAAAAABkAJAAAAb/wERngDAEFIITZVDgMAYElGlhMC4CBclhE9twDiDDYJZaNTgFFANQDDAEAgogq4AmSFTDhtJtXrgcEg5hABUaMlcFCRhEBhwKJwILTCMKADMWZwg2TzIVBD8nBg4MBQQXAxsfjwRFHRUuMhQmBgQAGwhNECwFCxwIBE84NgQQAgYQpRUQAxwzTgQnRQwELjENCbXNuRyDBQ24NgoPMcQQog4dph5EtgcIJg4DKwQcD45TcBQOegAMDwgSOHNR4IKIApw20IhRgY0OABAQWDgwwFOEAY4SLNDHj0MGf0RIcLBB0MOcDwwCxLhhC9gDBwEPiLhhg4MIIxYWnEgwYB4J/xIXCghQgOEEgTr3RhkoYAFCAgQbSnwoUIuBCwQKrBZgkGHngAwxLEwUuqPojH8AqvArQGPfUyczqH5QcBUD3QKWdgIYgINEgqBD38ywBMDFBYAJAASgR+ABCQEEDhgwsePBhwoDAKBAIMPGABUGPNg4EYPDHAM4ILhwQRHeAw6ebCUQUIGfhRIiCBAIEACCDAQcUk0wcICAgBwSmBiIcWA1BIAmAHCgh9kCbduPiszwQMDAHwEBAADAcSMBg0gDJCM4Eu3EEQFbAcAwUGLDDT0KitiAYIN4gBOmARADDRYwsBQAC2RQQAwLYEBVARs8AN8TLhigABcGSJBfLRB05/+ABAKY9sANKxFgingoSGCBOhk+AKElCdBAAgAkyCCABDgUIAMGMuCgm4QGzDDABAh0ENcHGQxgQgAFUhUAExJwRcsHGCRlywQ0YABBDDHMQMAAonypAlZxeTYACUwqQJVpBWDWQC4iMBEDAxXIQAMBEgQZAz83/GOBLQLQYMA9aAjAwAwwWJABiFSxUYB4C2JQZzkc1ELDBVUAUAcCQ6EhwwZpFXDDATq4YEIq8BngKKQ0KFABDTLMEIABFZhQHA0NCRBDDhsYIEBmOGwQwAYoyJCYEWkZkEMAj9RiwQAE6VaDGBzoCqgMn/o6ADm8BUCCtjtQJYNVIKQEjGIBwND/ZqlibCCADF++K8OsJ/R0A2/RaBqXBQ8QoAMBMgwQQ4Zd3cABBxWMQkIRD8hglAAA2CiDCa0Y4BlBCkxlgmW6xVARsrqCykQO1BhgVGEC4KBAAjomUPEMhRVQQgUFzFhBBTPEMGKGc9CQkgv1igAeAMY9k2cPvwK4WwGKVPNrAjoYgACNEg2AwjEJpFsvmOHZIIANXtRiaDVGbdACAg+YgIBIH1QBsQUBZWCBKAlsALR47hVyQgUc9GqfcRYkkKcEqzD95IkzkHBCUQL41Urj0JoiUC4E0EDQeCeIlWcAFUjA9AYK2mLDBxVuYJxQuACHC3j1UB4DQXw1jkKlG8j6/zkTR1XhAtHzVZBNFRGYTENSJJjA9ANwdxFDASessIFQJviFgCgjgOBCvxXO8LsjJnu8FAkEqJ1hBcfkEIFQJ8xgcgKBT++I9VBUSMD2s+o6wLuQIQD06hvMVkUCfcIaCmZHORm0AEK+EoAL5jcBAdgHDgKYAQJqAB5OceAxVTBBwDAjvrpdZTFFAJgFCjABApBgAifgAgQ/oD/3WDABopiMDBRgAamtIAcDWwqIjlExEyGABxKwUQwSEINcQKYFppJBEWGwtwkkSmq7us9SOHACUUiwFjEqwAo4sDysgQAYU+mPAeAGNAJMwAXZQEAMlFiFJkSCVkXwgQFWY4AbRP9rKQaQgcmWokcDQM16DPzaUnKxMBfoCg5Ms1yFcnBHqggqCcDR3xgNoK4ZSKMKy7NRAARAwRsgUkd0jIG6+kOVgcEBKpw5ZQEQwEI0Ls8ANMgFEXNEFRwggIkJmAAIaHCCVYJAKASZzYJUiQAJ1oAEOapC85hnHCMmAAQgsIEMQPDGGLTglwosgAngw0tprLIC+iMiVXxFy1/6SigIuMEXRTGfPSIAGAo8BtPeaQAQTIAqq6GKBrBUgAOeUwCcOZsogDYwHclyKUyj5C9/k9B8GiAF/DQnfACqTvdRUFC6rAILirBKI2ogDAa4p69et1EFqnGV8CEhR2FgvZCC9Iv/gzQiQdZWoWwmgAUVOgFBeumCGqxApUtxQUszaoCNxhSYq0zAVYqwVAXCIAlXAeZ83sk0nRJEABCVmgsmcDYSVqgAS53jO08AA0MClGmrROo8i8BSoRBpelzNhQq+CgN6NnU1kcjFPA2JgHV2FGhClVpJ9ceCpYwJPixloj3fiYAzcmoCLJDGF+HzTqCVlXlLTagk0bmarSpwNe+cK1xbAJ8QGFKnTPusUGqgLhL+EqzMQ0BXSejEvnJKALp85xl52oIGbpVTLI0qV5l2Vdnq9Sr21OkZP0vVFmwUBhNAIXQ55QKc5iIE2MQpVXYLVv0J4IuVpepi+4rcLxYgBCFg/6xjcbvRXOTWBRogrQvOFt5cLFalANXfGeuqgsg2Vl2yFe4Xa6CByG6Vmsb9K1w5pT8NAFQDV3FBWa8yJvjOlAXRJWEKcuHcj4IVBHWFQX+vogENSMO0EyyrumCA0++yYK4fvuwLHBuCA1b3KtBtQV0/6t7aWg+xEv6uUBGgAl26dpXWhehqUvBLoVoPASywp2NL/E4ezxeajYXskckr4bLuU39M1p/1VqPLHWvgndglbF9rAFpo1gAB+yzAhOHjgrl2tq0sQOKN62w9Eobgwy0I81ZZUNboflED6d3qamBQ1l/mua6O7Wx8qxtd/apr0GSGLAJCQCQQ2JjHLNU0hv8jnAIIb5VIQl3NYkEw17oS+ZfXnIAKQFADTvdVl06GrAtSkIJCoxqnq4nyPbfKY3tOOLpL7jSuoVnpIe+zrCHY6J5/OYEaeFqXRJqAaYNbg+gmFpokfqs9Pb3rfdpzo+Bmdm8bq4FGq3qrEM3zPoV6xp7q0novMDeucSplcNf4KiGoMK3nCoJ5Yzi6tTatC2zdAuyWtchnDAFEoWtoEKAXxIhmqQZUwOLonrHUXu4vEqWs44zD14keBwELQvDRk9sTwiBIwchlbT0VKLngXF34GVmtglgjm+XQnLfF99kCm4cABg2/d8rNffL5RveanK72BHh9xgkQHQYzji6ihQr/UZVHNwVO1jk0OU1pj7vc4sgutaf1HXWLFxm+EA40oiH7AuwW/KMs6Draz1jisUNW5SU++D67bW4VSByyFx+6PXtLc6gjG9GevqbMtc1Vq9McvdiGsOGx3Xb0Rlvb5i4xhIFu9cnvE7JzXziTWf303s7d8B+dQL45n4JayxzyDZ8r4wff9lJzvrcBn7Xse076vlM+9B8tOJNVMPeYc/rlrvf44Yfegtx33ermTkGNA/2ClyPa5rqcPnpZgGGW75PTjNf23nsLUYhrXeKuD3rUsa/1zEM2usy3eMApL/+vI/qj2ldgc6d1p4doKxd7RKd1EGV1EIdo16QBy/cCKVBk//uUAit3b883dSxndRk4f+ZnT9HWcN1Hf5SnSxowYy1weipAgdqnbTXGfB7HazWmdhBogtgmfcQWfr4ncVEGUebGaSxQg3dHgNG1clGnbyU2a/+ndX4XdLFXdzZ4cSVocQtYauUXehA3fpbncbGHftIXcxsXc7oEcVJWYgR4dwXYdSyHYft0cOoHdM6HXZAHe2ZoeSnoe/R3gPY0gVL2hl1nhioggUEnfEWIcx9XgPcHUZyGaExmeS9Wh2oHAjP2crMmht4XhRs3dcsnhQHHagMIdAcHfH+3T+22f1NnaGaYd7p0cHe3giy3eTAYXRsoe7HncVvYcKGHirG3gFx4cf+8RoH7BHsvh3+nN3Sod4PYdYqyaGilNmt/iG285oNWN4IbR4EsF2g1toVbGIRPuH2nF4O7GHW8yHJymI2ZGIv6x1VmKIkXB3kl6G3DaIvSN4FTF45sCHkQ+FFzmIQuqIQQiHM1KHcgWIsFBnoFxmk15oDaiHLaVmQQZ4GOeH3yaIYl1ojoVWRUx40gKI+NCI5fN5H9RYJ12Hb/KHsTKWVKeH+2WGLRZ4vYVWrO5XHAKIubiH+UB3uy5o6Fh4SnFwIvkILvt4eZ536YB4U2F18l2IBiSID6aHfu15BumHSch4qWR3rzJ3qKp3x7KGUsN3kFl28LV2P6R4rJyGlFhl7/+ph8E2l59kSBrciW2LeLB6l2ryiLmah9w4iSH3V43FhkdTeQeWeBzNd1K8h8+yeIdsiF3LiMbLh6agd69YeADyhrsgiFxUeZAXh3D5iM3zeREreUnwiNouh/cvh38FePOWl1KYh8CJl888d/zVdqnImKVSiXOliByfeNeKmJE8lr+pd3ZomYG1hwG3iCa2eLjahvKYd5xviUOAl7jUmEd8eGN1iENVh6upQCI0iPU3eJgOh7dzeMB5d/60h12Od31Ol3TVl930h/aBl9A0mAUZaAz+d28cmA2qaGBcZ81Ml+Cwh5aCeUQadtbjiFZpiChKiFePl/8XiUOTmbFFhk/4spd0HpnpnXk+9nl/aUdcpojG73YlYHgsmJip1odVsFhJanhGsImSyQb6YlhcZXjC14dy8ab1H3lynqe8AJdn3XdzjndJu3cEU2hC+3kfeHfj7piV1oh5+pfGzYiS3IhhvZXwaYh/T4fymYkKv3mRyIkOH3g2qJlqfYlhJ6eKtJmQ3Ig5E4gBxIgOnXh3t5hGZ5jbJomCKajLJ4hEx2mekXjLwIeRqJnfV4kDV2geWHeWhZftLXo92nmW2qjbJ5gbL3hwg4jA/5kuVog22piIRnghRpgTgXb6H3jHZpaLNYkuu4hCy5d5roet/4kBsHeS0YiB81mLrEoTBKmQRqeP89F4NUqI5j6IWQyWu7uIASR3wIWHmuSH3YqXjumazMd3rgaXyGppjruIV9F4SVZ25B+HZ4WK3nJ3uX+XL714YBOqZoh2EteIrNWI8DmZeo6YKAt633toDw9ZCm2olEF4oDaIZHOI92+YhcaKqhd4QFua55+pIYqnXU2IBlaqPIKJTL6Knhd6sq2YJkSZ12GV+7qYLFCIkwyaYauIdzuqhMZnwv4JDBSJye2pRpqageF2oFWJilin0Hx5n4CHTFV4CfR46nmHVDV36N+JieN3Qcm4y8WHVJSZkbKYbpx4Xn547rWoN5d7Ac2ZY5SamNGYY4SYLTF6M2mX9j2obxepn/LtlwoDqRPQmRr5mEA6h96bmQNfiadjqmDRmDixh1VqmrU6eKUEuczCaTYehxUgmCZUqRSGmKRXuN3KiIiWt5bzt5NWZ+oGepLpiW16ar0ginX7mMIipz0Wq0bymSZXmD/FmMdal+2NeAOauy5TqifWqM/Pd1D9iF4hiiawiUWXh4gaeNWBmigAuZtmh4QNeeqHp9wRiUn7lyk+d7MHh72Td3cPiaEJWl2amFH1uACIh+pDiyhjiyRgewzhpz7feZxBt+h2d15MeLhteHBfqr6WiTNauz6XugQAh+fSiH2jtrXHqtnVmRGEmp8Kp1ixmYZ4hz6jprK5d/2ld9SVuD/4g2m/cZeEA5jOwpfHUYrrLIeuqbciLpmvY3r6V5ljSnfc6okqgqgFx6lTzbh3WKekRXvzhLme/pgBgpp5YbdQeIeCpJeYxncxaHgje5gtFVd5g7hPOLlMqJu2a5rqTne7v5gYv6ftwYfeknjg0ocy1aq3g4Y3v5k+cawZcbj6AXbfk2n5VXgt/4gXrqqSDoiVCbkJiqqe4HYY4oeqBHfl56gUN4puJKsAq4hxvHjRXYqFeZnO1JkxyIxDCZnyaYhdD6dS+WgUy4gYxXdJR8eNp3sk6snwPcncWntTiZge03dRjZhuPKhR4KsuTHdvd2enD3kcMYcOj1AorqfSyYZ/9eCIQFh8H7t4h3ibOUyGqY573Vi6779AL3+pEmCITm1m94uIG3m6GL7LtPx5xvy5mviZbke5ZpSManF4SieoO7OLDNTHzAurXH94RE3JWu15Ip+r2gh43Iqc0Ti33663oqm6/qGG91V45kTHDK+KrCm8L3mKlBiF22OrIGCbnVW3iqeZ4GiYvxpZDteWp0W5CTKJFEDJlFG6GOHJ4LWa1Q68b+J3yziIdUa7aUWZBEp29/mqxnC4fyaJKlx4Z17LgrKLXQ6JKK+JQ6yXlP6cXGuqSau5T1iF1J6sIM2Id7Z6RgGLXA187tuHr5OLvSOI9KLcdRO6WXu5rVV9M+jJn/SJyBogd8e6l2CHuqyYphK8hkEuip1jjBiEzExLvTyQqni2mSguyET1p/bgyUXDh7u2mT5Ei+m/nX8njYK6mG2GakGqi/0MRrLRmL1qt8nPaXrMp/URqp2wiy5Ip4FGl3uom0iHiPbum8xod5O2yzgi1rpgdZWVjAG9jRRCiMS0h/SffJcvifsraaL2ess/mLhjeJMRqSS5d9fxvGCtx78fXa9MeI+nyP8olzonic95myecqxsbeR/hmDelydIozUQIvNKvnE5Wi1A+uWKVqCW0yxdVuHIXp8ZdiTs1l//NuGg1t6HVasX0eXGBisx/p/L5Z1sBdteEmFrqe3i5qN/9LZd0C8kAvalDZYdFXZqVFduWj3g84YhhmMuv9Z1/HZd1I5qffZ2JV7qrYMmWJ4lhBKwJvXW2cJhlyVssScxtIKdMSqgMjqhvkriQV5rLg44jIt32FIp8qZf9gcjIGHc3lpiDCQwWPYvRK3pOR6yk3oiB/6wsBcofNdop9YYNbNlly5zB3afPuqi7ImzYBNutFHgU+H5vZ9iTTMpf/ppxD5jZm4wwjM3uMooc2YdBVceqRodJT4frdnjvL7pUw5ugx9gmsOtfpof4BthBc6ls5342YXj+1pePTIa+pKjTTYdx07Y9GK1gFHisiH1t43ye3ogL5Z0xTX6VYukS55fv/FZ7AmyLbD28O8CYYbareQiOeeKrA2mdfxJqhJunm6mpBirrY0qekK2I+GGbevyruw3dLw2rbUrIWvGaIxzWSRKL8oSpVCnZ1m6JvMzoFNGXQ72NOxWs7LGde56uInq5YrCZdMOJIXioDdl4/izLoV+nxK2XngCILa3bGp+7/298N7eXqTyN/T6YIf+bK6+34IWbrbjdjOd6gyufHjKIU+aLhpOp3MK8gYqZrr6KIazu1N69kLyMim3bKLjNS7iYePaZJDOrV5XrDdG940HLeyuJoqWtPrHnhiSn/OusTRBulKb3xUB9xfSo+WrLr7De7ObLAD+uSLCLi9XNL/LKD/tFjdEY9+CCy8E0jd+JysrlrdyFuv7avntMlVmZx5+uvSJe2u2rh/yqeOTD7DHKiuvovD7S2jP5jG70jAsFmdxIjr2rzTyS7TvmqTVKeVmlh49ZuJQti/H4/3QCl4bnq3qgyBeeaZ0a6MinyR8U3pNMnsfy/25/jHI2nUtqit1qjUaglxvNqHSTdrzH6APrikLp7PaCjR4RrNSkycqg6zcVmkTN29nHudHbja+gjq6bu6Ek3JuHvkV4rIXKjWZimSsGuLv9qQ3ld9+cZqJmx5JzuKMul5wriFno607GmR317GS8mCghysmAkEmhAolWKBNBqQKqSZqF4TZXLCSjqb/yDihDsJTVqaKLEI6lY1KW5KKf2CQuwJW+tcD+d2qTrcbkmfpMyaquK+UkKOUlQCNVjmJpa4hgjhvhjPXuyyCLmo+szUzCaR7NIi48yEIt0Ym5xUitBSVFk9a1lk11rgqgBZWEJU2pTCAqWckvCcBu3oRv+46liLGF+YJh0BaSH/qLyUth7Vjr4S1TyfrJxahEdT3YiyID1hEUMDv1jZ457ukbuEaNKnBSNEnrjp0Vcq0piAYLgwYTjozB0jSY58y/OEWZdRggRyFAYu2qFlXj6GjDdvUbRveoTworOnnhFELYJBFDhypj5wU8Kxm/BCn88mIdohRKNNybAuQobco/8CwiEgDS4AlVKTqteXXJHkMJyjRgVVfWlqld0Jblq9UHqeqkEUjKzAQaIWTTICCNMQbNG8rAMjyostQoguyimMqg3hNXC0oQMFMMSLP5d8ymmnwZstQatYaEqn5U3hjFxgrMoKyFwSiuM0uApXOjbpKsPO4mYkpNkgFSxiOUsEzcvvLSFcxDbIJcwbdqOQXEqDDVA2TyfTQWRGBbcquDtDuYo4T09eyGhuz/k4Sd2nL2F+K/0iRpWK3WX+wXwiVgjnJIwMImaTgHhzrTqnGGMljmAEoquWLlx4xJmK2NiNmGV4Y2OvZaJwQ0IxABFtM4reesuRo1qYCS6sFouImzf/HMMEoGSauc+XveBS74xTSpGwwrfqES8SA3N8YYntqNmEsxYnSUqLilRbkDrrBMIksrKqW0MNU56wCxN8+nLioLEoOgMpWMAZIg0WCjpjkY+SUlCaU5C5LJ8Cg6JiIKt2RKkyyDahSLYpIlmvC8fUU6y0+S47UZQmwtwNj9I4Og+y+1TpsAwprrFvjwDHgahSSH8ZJgVeiDxrjjBoQcJTZISxq0WBCG2huQ8rgnWL7Ix55ME8aMGolz9S6DAZVof8z7VeDgXjlFyI5AJaLVURJhhTErEikPwmrNagackEBxU5FtyVlNW6jA4Vn7pgYhMjjsoOsvrW448dNiS8REXd/9ytIj9fbpmKTvV6qWUaWm4y5qlk9oztEZXQKnioKoxpJh1X2AAlIe2Es83gYGJBoosOGWonPpI8XGWJzGAx0Mw52eFuLjdEenimjeI5cCFCHsFyDqTWUQWdK0rBaVFZaH14YTWHgIxYVdfQhFke0UKJrz2YRgKvsnaDAity4tjy1K7Qm0g11awYmptqosNCCZA5SigvGQlpQrBh2ghJW1cSYdIvSgP7hB2nShITozTQ6WczCQFGiUg+5iHEwLOEY6yzRx7jWbQ9FImPGWaT47K++eChbaRlO/r8vU8L++9cjAq7qx5U5dRiKxgWWW5I58CADk2NsoR4SYWYU/nsvv9VqkcJssRlgpYpY5ulEFYkmrV4Zt5jxtR0YH+Cb2eXZB4WIqJnYwp2iYTlksKCHb7ZhmJ27Yqgs5wgQr6iD+h0baxWJjpaZPUNojRDTKOZ3KnqhDegRIUYZ4ABe3ZEIkQFZEsB3F+ylOamj2zvK8C5gi8qUw8RwgFHFekbkoCEN2/IyAuLw1xEvlEExlHQC5jpmzTmQLetZCeACpLRQRSVNyiNwkJMY5MJG8esMq0DCwj0if8GUgq3EYs14TtDOwhBlAz+BAlGAkw6HLKbB6Vuco5SwvrEhQwSwfBaYMGWjyRFwEMppDPRGMZ5pIClNKAqIfrYUilA0IIoWCkkC7q4Wn/IgKpJsaseURmPXYrQk23hKSMIVIxkQEMzuzBrEmU5iDzcNyR0CIJmgPKQIOc4CoV4xyMhicWLnGCFkAhrJK/zWeCcg0YYRg8tldEHyTKWFSuRjyPbIQbk2tCLxIlCCKF64RQm6JqkMA4Yf4yJwjwRhZ10xmJ7sN0+IpEiLHWiNmk8ysYKQifeiMxgcGCCFViYrCHZIj9Ma6A1WtYUNAlDBZtx1lOWQRbe8ElS2fgVOgQjsmgEAQA7' +
-                    '" />';
-
-var generalTabImage =     '<img src="http://playerscripts.com/images/mwap_graphics/generaltabimage.png" />';
-
-var bgTabImage =    '<img src="' +
-                    'data:image/png;base64,' +
-                    '/9j/4AAQSkZJRgABAQEAYABgAAD/4QA2RXhpZgAASUkqAAgAAAACAAEDBQABAAAAJgAAAAMDAQABAAAAAAAAAAAAAACghgEAj7EAAP/bAEMACAYGBwYFCAcHBwkJCAoM' +
-                    'FA0MCwsMGRITDxQdGh8eHRocHCAkLicgIiwjHBwoNyksMDE0NDQfJzk9ODI8LjM0Mv/bAEMBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy' +
-                    'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAfQCWAMBIgACEQEDEQH/xAAfAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgv/xAC1EAACAQMDAgQDBQUEBAAAAX0B' +
-                    'AgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImK' +
-                    'kpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJ' +
-                    'Cgv/xAC1EQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZ' +
-                    'WmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEA' +
-                    'AhEDEQA/APn+iiigAooooAKKKKACiiigAooopgFFFFABRRRSAKKKKYBRRRSABSmkpapbWAQUtFFOwhKKWkpNWGFFFFIAooopAFFFFMBaSiloASilxQBVKLYBSU40lDVt' +
-                    'ADFFFFOwhKKDRUWGFFFFABRRRQAUUUUAFFFLTSuAYooopgJRS0lSAUUUuKaVwEopaM07JbgJRiijNToAuKSjNLkelUkmAlFKRSUmmgCiiikAUUUUgCiiigAooooAKKKK' +
-                    'ACiiigAooooAKKKKACiiimAUUUUAFFFFIAooooAKKKKACiiigAooooAKKKKYBS0maWmgCiiiqEFFFFDASilxmkxipaYwoooqQCiilxVJNgJS0YxRT5bCFBozSUnWq9o9' +
-                    'gsFLRilxUpNsBKM0UlJsYUUUUgCilxRiq5WAlLilFIafLpcQYoxRRStcYlFLSUtgDNLSUUrgLxRSUU+bS1gFzSZNFFK7AKKKKQBRS0hp2AKKKKQCg0vBptFWpdGICKKX' +
-                    'rRihx6oYlFLRU2ASilxSYoswCiiikAUUUUAFFFFABRRRQAUUUUAFFFFABRRRTAKKKKACiiikAUUUUAFFFFAC0lFFMAooopAFFFFABRRRRcApaSimgFzRn1pKKfMwF4o+' +
-                    'lJS4p3v0AM0ZpKKVwFpQKbS5NVGSW4h3A9zSU2jNN1L9AsOFIaTNFS5K1hi4pKKKnQBRRSUtNAFFFJTTAWlpKM00xBRRmkpPyGGc0UtFK1wEopaSk1YAooopAFFFFMBa' +
-                    'SlpKYBRRRSAKKKKLAFFFFAC0UgpapMAoxRmiq0EFFFFIApKWik7MBKKWkqWhhRRRSAKKKKACiiigAooooAKKKKYBRRRQAUUUUWAKKKKACiiigAopaKdgEopaSlYAoooo' +
-                    'AKKKKLAFFLSUAFAoooQC0UUVa1EFJTuKSk0gEopcUYqeVsYlFFFIAooooAKKKKYBSigClxVKL3EJSUtJSYwooopAFFFFAC0ZpKKfMAZoooo3AKKKMUrAFFL0pKbVgAUU' +
-                    'UtACUUtJSsAUZoopAFFFFMApaSii4BRRRRcBaKSincApaSloATNFLRQAlFFFSAUUUUAFFFFABRRRTAKKKKQBRRRTAWikoouAUUZooAXFLSCjNWrJaiA0lFFS3cYUUUUg' +
-                    'ClxRRT0AKM0lFF+wBRRRSAKKXFBp20AKKSjNFwAUtKB70vFaRixCUmaDSUpS7AKeaSlFFS9dRhRiiihWEJSgUUU0knqA7gUmabRTdR9AsLSUUVm3cYUUUYoAKKKKACig' +
-                    'UtNIBKWjNGM1SXYQDmlpOlJQpJAKTSUUVF7jCiiihALRSUU7oBaSijFG4BRRRUgFFFFABRRRQAUUUUwCiiikAUZoopgLSUUUXAKKKKQBRRRQAUUooqrAJRRilpWASiil' +
-                    'osAlGKWiq5QEpaKKEAGkpaMUPVgJRS4FGKXIwEopcUmKVmAUUtFO1wEoxS0U+UBKWjFFPlYgJpKKKhu4wooopAFFFFABRRRQAUUUUAFLSUuaaYBRRRVXEJRRRUjCilpK' +
-                    'LALSUUUXAKKKKACiiigBaSiii4BRRRQAUtJRRsAuKSlFGKq11dAJRRRUgFFFFABRRRQAYopc0dadk9gEoooqQCiiigAooooAKKKKYBRRRQAUUUUgCiiigApc0lFO7AXN' +
-                    'JRRRcBaKSinzALS4ptLmqjJdRC4pKN1BOacnG10AUUlFRzDFpRSZpMmqUkhDqSjJpd3tVc0ZbgJijNG6jNS3HoAtGabRRzsLC5pCc0UVLk2MKKKKQBRRRSAKKKKACiii' +
-                    'nYApcUlLTSAKTiiihsBaSiik3cAooopAFLSUU7gLn1pKKKbbYBRRRikrgFFLSU2rAFFFFIAooooAKKKKQBS5pKKadgFxSUuaODVWT2ASiiipYBRRRSAKKKKACiiincAo' +
-                    'oooQC0lLRTASiiikAUUUUAFFFFABRRRQAUtJRQgFxSUtFOwCUUUVIBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFO4BRS0lFgCjNHWijUAooooAKKWiiwCUuKKKdkAdaXb6m' +
-                    'm5op3XYBcgdKTNFFJtsAooopAFLSUoFNXYCUU7GKOKrk7iuNopcUlQ1YYUUUUAFFFFABRRRSAKKKKYBRRRSAKKKKACiiigAooooAKKKKYBRRRSAKKKKACiiigAooooAK' +
-                    'KKKAFpKKKdwCiiigAooooAKKKKACiiigAoooouAUUuKMU1FsBKKXFFFmgCiikptiCilzRSa7DEpc0lFK4C9aSilp6MBKKXFJScWgCiiigApaSlHNOPYAxSU7bSYqnTYr' +
-                    'iUtGKMVNmMSilxSUNNbgFFFFIBaSilpgJRRRSAM0UUUXAKM0UUALmjNJRT5mAUUUVIBRRRTAKKKXFFgEooooAKKKKLAFFLikxRYAooooAKKWkosAUtGKKpIApKWinyiE' +
-                    'ooIoqLWGFFFFABRRRQAUUUUgCiiigAooooAKKKKdwCiiigAooopAFFFFMAzS5pKKLsBcijNJRT5mwFFFJRRcApaKKaQgpKWihoBKKKKgYuaMg0lFUpMAopc0lL0AKKUA' +
-                    'GjinZgAbFOzmmUA4q41GtGKw4ikpc5pDVSs9UAUUUVmAUYoozRoMSiilxUgFJilxRVW7gJRS0YpWASiiloSTASinZ9qaaGkgCiilxQotgJRRRSAKXNJRQgCilFFVytgJ' +
-                    'S0UUJWEFFFFMAoopKkYUtJTgacVfcBKWikqr2EFFFFK4C02nUYqnG4DaKUijFRysYlFBoqWAUUUUgCiiigAooooAKKKKACiiimAUUUUAFFLRRYBKKKKQBRS0lOwBRRRQ' +
-                    'AUZooouAuaXNNopqbQDsA9KbiilzTvF7gJiil4o4osgEpcUUnSlawBRRRSYBRRRSAKXrSUVSdgFPBoozSU7pCFopKKTdxhS0lFCfYBc0vBptFUpiFoNFFJu4CUUuKKOU' +
-                    'YUYozzS5qkovdiEpKcT7U2pkknoMKMUUtSAmKXpRRTAM0CkpaakAUUUVTEFFFFTcYUUlLRcApKKKTYBRRRSAKWkooAXNGaSinzMBcmlzTRRT5mAtJSig02rq6EJRRiio' +
-                    'sMKKKKQBRRRQAUUUUAFFFFMAooopAFFFFMAxS0lGaegBRRRSAKKKKACiiigAooopAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFLjPekoqk7bgLikpc0daGk9gEopaTND' +
-                    '0AKKKKVwClBxSUUJ21AXOaM0lFPmYBRRRUgLmjNJS1SYADRx6UlFNSsA7IpOtJRQ5sBcUlFFS2mAZooooAKM0UUbALRSUUXAKKKKQBRRRQAUUUUwCiigUALSUUUAKKWm' +
-                    '0oNXBrqJi0hFFLVPUBtLiikrMYuKTFGaXNACUUuaKQCUUUuM00m9gEopdp70UOLW4CUUtJSAKKKKQBRRRTAKWiko2AKKKKACilop2ASilopWASiiigAxRRS0wEoxS0U0' +
-                    'kAYoxRSUnYBaKSijQAopaSlYAozS0lGwBRRRQAUUUUgCiilqkAlFFFIApaSii4BQKKKEAUUGihoAooooAKKKKQBRRRQAUUUYpgFFFFIAooooAKKKKACiiimAUtJRQAUU' +
-                    'UUgCiiigBaKQUtWmIKSlooaASiiipGFFFFABRRRQAUUUUgCiiimAUUUUAFFFFIAoooFMAooooAKWkooTAXFJRS07XASjNLijFPlYCUU6kocbAJRRRUgFFFFABRRRQAUU' +
-                    'UtABSUvWkptAFFLRQkAmKKKWiyAKOtFJQ2AUUUVIBRRRQAUUUUwCilFJQ11AKKKKACiiigAooopAFLSUUIANFLSU2uoBRRRSAKKKKdgCiiigAooopAFFFFABRRRTQBS0' +
-                    'lLTQBRRRVCCkpaKTQCUUUVIwooopAFGKKUGqVuoCYopaKfKAlFBoqbAFFFFABRRRSQAaKKKbAKKKMUWAKKXFLiqUGwEzS0lFVdoQUUUVO4CUUtFLlGJRS0UrAJRRRQwC' +
-                    'iiigApaSlprsAlFFLijUAoxRRTYCGig0VLAKKKWiwCUUtIaLAFFFFIApaSlzVJgGKSlzRTaXQBKKXFJipAKKMUUAFFFFFgClpKKEAUU8ISKay4q3SmldoVxKKKKi4woo' +
-                    'opAFFFFMAooopAFLRSVQBRRRSQC0UlLVJgFFFFFxBRRRRYBKKKKkYUUUUgCiilxTV2AlFOxSYqnFgJRS4pKloAooooAKWilq4xuITFFKaSh2WiAM0ZNFGKTbYxKKKKm4' +
-                    'BmlpKWmmAUUUUwCkpaSkwFpKKKW4BRRRSAWikop3AWiiiq2AKKQUtIBKKKWhK4BRRRTsIKKKKAEopaMUrDEooopAFLSUU0AuKKM0Zp3QgopM0ZpXQwxRRRSuAUo460lF' +
-                    'NO2oC5pKKKTbAKKKKQBRRRQAUUUUwFxR0pKKaaQCmkoopN3AKKKKQC0UlFUpALRSUU7oBaKSilcAoopcUkrgJRS7aMU+VgJS5NGKSlqgFzS7qbRmrjUkhWFOTSUuaKTS' +
-                    'eoCU7rSUU46ALik6UZpKHJdADNFFLU6jEooopXAKKKKQBRRRQAUtJS1SAKKKKPUAxRmikxRfsAUUtJRYApelFFC0ADSUUUN3AKXNJRSTAKXNJRQpNbALuozSUVXPJgLm' +
-                    'kzRRU3YBk0UUUrgFFFFABRRRQAUUUUAFFFFABRRRQAUUGimwCiiikAUUUtMBKKKBQAUUUtACUUppKACilpKGAUUUUgCiiigAooooAKKKKYBRRRQA4Gim0oNaRnfRisLS' +
-                    'GiiiWoCUUGis9hhS0lFCYC5pM0UUOTAKKKKQC0lFFO9wFpKKXNG4CUUUUMAooopAFKDSUU07AOppozS1fxbCEpaCR6UvHahR8wEooopNAFJS0UhiUUtFFgEoooqQCiii' +
-                    'gAooooAX60hGKKUHsapWejASilIxSUmmtwCiiigBaSiii4BRRRSAKKKKAClpKWqXcBKKKKkAooopgFFFFABRRS0wEpaKKAEooopAFFFBoAKKKKACiiikAUUUUwCiiikA' +
-                    'UUUUAFFFFMApc0lFNSaAWkoopN3AKKKKACiiikAUUUYpgFFFFIAooooAKWkpaaASiiigAooopAFGaKKdwCiiikAUtJQDVJ9wFpKKKGAUtFFFgEopaSk0AUUUUAFFFFIA' +
-                    'ooooAUHjFJRS9RVXbQCUUUuKFFsBKKdwKMj0p8i7gNoxS7vYUmc0mkgCiiikAtJS0lNgFFFFSAUUUUwCiiimAUUUUgFoNJRmmAUUUUgClpKWmgEooopAFFFFABRRS0WA' +
-                    'SiiikAUUUUwCiiikAUUUuKdgEopcUU7AJiilop2uAlGKeAKcEHc1rHDylsK5Hg0u04zipCyr0FMLk1cqdOmtZXYrtiUlFFYN3GFJRRUDClFJRQgCilozTAMUlFFIAooo' +
-                    'pAFGKKWmkAlFLSUWAKKWkoYBS0lKKaYBRSGihMBaMUUvSqSuIbRTutJik4MdxKKMUVNgClFJRQnZgFFFGKLAFFFL0osAlFFFABS0UU0u4BSUUUgCiiigAooooAUUUlLT' +
-                    'ASiiikAUUUUAFFFFABS0lLTQCGiloxRYBKWiihAFJS0lD0AKKKKkAooopgGKXFJRTTS3QDtpoxTc0uTWilDsLUdijFN3Gl3ValBhqGKMUu4UEjrRaO6EJ0oLGkJzSVnK' +
-                    'o9kOwUUUVkMKXikopp2AdmkpKKfM2AUUuKSkAUUUUALSYooouAUUUtOwBSUUUNgLRSUtC10ASlopKQBRRRQAtJRRTuAZopaSgBc0ZpKKFJoBaSlpKGAUUuKSlYAoopeB' +
-                    'TAOlJR1oobvoAuDRjFGaXqKpRi1oIbmiiioYwooopAFFFFNAFLikpaYBRRRQAUUUUAJijFLRmmkgExRS9aDSaASl60lAoiwCiloosAUUUlMBaSiipuAUUUUgCiiimAUU' +
-                    'UYosAUUUUAFFFFFwCiiikAUUUUwCiiigAooooAKKKKAFoooqrCEopaKVhiUUuKMUrAJRS0U7AJRRRSAKKKM0aAFGaKKACiilxRa4CUYpcUVSj3AKSlpME0NdgFozRtPo' +
-                    'aTB9KLNdAFpQO5oHHakJzVK0VdiAmkopahtyGJRRiikwCiiikAUUUtNAJRS0lDVgCiiikAUtJS00AlFFFAC0UmaWmAUlFFAC0UUdKpCCkooqG7jCgUUUIBaM0Uu2rSb2' +
-                    'EJSYp2B60Yp8jC42ilpKhxsMKKKKkAooooAKKKKACiiigAooooAKKKKYBRRRQAtFJRRcApaSigBaSjNFGgC0UCiqQhKWikpDClpKKACiiikwCiiikAUUUUAFLijFL0q1' +
-                    'HuISnDigAGg1vGPKrsQmaSlxSGs5X6jCjNFFRqAbj607zG9abSU1VnHaTCyFJJ6mkopam7lqxiUtFFNaALSYooyad11EGKKSip0GLSUUUgFooFGKpJsBKKWkqWrAFLSU' +
-                    'tNAJRilxRRZgFFFFVYQUUnelpbsBegpp5pSaSiUugwoooxUgFLSUUALRmiiqvbYQUtNzS5pqdgsKabRRUylcYUUUVIBRRRQAUUUUwCiiiiwBRRRSAKKKKACiiigAoooo' +
-                    'AKKKKACiiigAoopapAFFFJRcAooopAFFFFIAooopgFOAxSCjNVGy1AKM0lFLmfQBSxNJRRScm9wFBozSUU1NoAozRRSuwCiiikAUZoooAKKKKYBRRRQAtJRRRcAooopA' +
-                    'FLmkopptAO60YptFXzJ7iFxRSUVN12GLmjNJRRzMBc0maKUDNGrAAM0uMdaOnNIWJGCeK0tGK13EJRRRWIwpaSimgClFJS00AUlFFJsAoopcUWYCUUUUgCiiigAooooA' +
-                    'KKKWmAUUUU7gGKSlooaASijFFKwBRRRSAKKKKACiiigAooopgFKKSihMBaM0lFO4C0lFFK9wCilxRimosBMU4L60lGatKK3EKQKbRmiolK+wxaSiildAFFFLRYBMUuKS' +
-                    'jNNWAWkoopMAooooAKKKMUWAKKXFGKfIwuJRS0U+UQYpcUZpCaq0UAhoopagYhoooqWAUYopaaASilpKYC0UoXNLs960VOT2QriDFO3ADpSFSByKYavmdLSwtxScnNGK' +
-                    'M0ZrG6erGHFLgGm0oNOMl1QBx3FKNtBGRmm078j2AkwtNIHrTaWqdRSVrBYTFLilxSdKnltuA7ikNFA5q276IBtFKVxSVi4tPUYUUUVIBRRRQAUUUUwCiiigBRRSUUwF' +
-                    'ozSUUXAKKKKQBRRiiiwBRRRQAUUUUAFFFFABRS0U1EBKWiinyiDNLTaKOYBc0lFFS3cYUUUUAFFFFIAooooAKKKWmAYB6UYpKM1V12AKUCijNCS6gFLSUtWhAKWm0uap' +
-                    'SVrMA60lLmg0mr6oBKSiismMKKWjFCVwExRS0U3EBKKKKmwBTgtAwKQmtFyx1YhSaTcaSipc5DsKST1NJRRUtt7gFFFFIAooooAUHFB5pKWrT6MBKUUGkpbMB1BFNpcm' +
-                    'rU09GKwlFFFZ31GOzSGkoqnK6AKKKKgAooooAKKKKACiiigAooopgFFFLQkAYoooqrCCiiiqQC4pMUtG70p+71ATpSUUVm3fYYUtLimmm4uIC0UlLmlcAooop3AMUlLR' +
-                    'RZAJRS4pKmzAKKKKACiloxTsAlFLikpWAKMUUUwCiilxSAKO9GKKpoAzRmkopczAXNJRRSuAUuaSihMApaKKpIQuKM0lJTcrbALS8DrTaKSlboA7K+lJx2NJRT579AsF' +
-                    'FLRU2GJRS0lIAxRSiinYBKKKKQBRRRQAUUUUALSUtJTAKKKKQBRRRRYAooopAFFFFDAKKKKAClpKKpAFFLSUNAFFLRQkAUZpKKLsBaKSlppiCiikobAM0UUtTa+4xKKX' +
-                    'NJR6AKDQaSlFXF30YhKKDRUMYUUUUAFFFFIAzS5pKKabQC4pKKKLgLRRRVIQUlLRRuMQUuKSlpAJS5pKKV7bALmkzRRRdgFFFGKLAFGKXpSZp2S3AKUNj6UlFClZ3QDu' +
-                    'KSkopudxWCiiipGFLSUopoAoooq9EIKKKKlgBpKKKkYtFJmincBaMUcmlwapJy2QhMUlLg0uPWjlYDaKWipsMSloopgFJS0lJgLSdqWlxmmot7ANopSpFJScWtwCiiip' +
-                    'AKKKKACiiigBQaKSiqUgFopKWncQUlLRQ0AlFFFSMKKKKAFpKKKLgFFFFIAoFFFPYBTSUo9KKpq+ohKKKKkYUUUUgCiiimAUtJRQAuaSiii9wClpKWmgCkpaSgAopaSk' +
-                    'AUUUYoAKXNFJTAKKKKVgCiiikAUUUtNAGKSlBpSBjir5U1dCG0UUVAwooopXAKKAKdgCqUbgNpadRurWNOPViuNwfSnBD1NO3DFMJzVunTjre4rsDwaNxo4NNxUOTjts' +
-                    'MfvppOaSis5VJS3YWFFFAooWoxKKdSUOLASlFJilApJAKBQaKStXtZCCjmiiosrAJRRRWYwooooAKKKKYBRRRQAUUUUAGaXNJRTUmgFzSYooobuAUUUVIBRRRQAUUtFO' +
-                    'wCUUUUgCndabRVRlYBTSUtFNoBKUUlFTsAtFFFP1AKSiik9QCiiiiwBSikxRigBaKKKYBSUUUnqAUUtJigAooooAKKBRQAUUUUAFFFFIAoBxRRT2AdwfY00jmilB9aq6' +
-                    'luISjFLmihpIYUtNooUgHUlJRT5xC59KTNFFS5NjFopKUUJgJS4opOlFrAOApabmjNaKcUKwpoFANL1qkk9QAUtJS5ArWLXUQ2kxQzZpyjdWSSnLliMbSU8oRTcEVnOE' +
-                    'ov3kCYlFFFZjCiiigAooooAKKKKACiiigAooooAKKKKADFFLiiqsAmKWiko0QBRRRSAKKKKACiiikAUZooppsAoooo1AKKKKQBQKKKaAWkpc0lNgLRQKKpaiEpaKKVhi' +
-                    'UopQKO9NR6sQlFFFJoAxSUtFKwxKU0lKOlCXQBKKXFGKFFsBKKWiiwCUUuKMUcrASiiipAKKKKYBRS0lDAKKKKQBRRRQAUCiihMB1IaSl61pfm0EJRS4NGKnlYxKUHFI' +
-                    'RiihNxYCk0lFFJyb3AKKKKQChiO9KWzTaKv2krWuFgoooqACiiigAooooAKKKKACiiigApaKKqIBRRRVMQUUUUuoCd6KKKkYUCiigBaSiimwCiiikwCiiihALR2ooqmA' +
-                    'lFFFQAvakoopsAFBooo6AFFFFAC0UUVaELSUUVT6AFFFFSAUtFFNAFITRRTlsA4cikNFFXPZCEooorIYd6WiiriAhpKKKyluMKKKKSAKKKKGAUUUUgCiiigAooooAKKK' +
-                    'KAJB0ppNFFdc/hJ6jaKKK5SgooooAKKKKQBRRRTAKKKKQH//2Q==" />';
+var bgTabImage =  '<img src="http://playerscripts.com/images/mwap_graphics/generaltabimage.png" />';
 
 var checkedIcon = '<img src="data:image/gif;base64,' +
                   'R0lGODlhEAAQAOYAAAAAAP///1pdWVlcWF5hXV1gXFteWi0xKz5CPCcpJmNnYVPwAFLuAFHsAFHq' +
@@ -3312,8 +3201,12 @@ function saveDefaultSettings() {
   GM_setValue('clanName', defaultClans.join('\n'));
   GM_setValue('selectStaminaKeep', 0);
   GM_setValue('selectStaminaUse', 0);
+  GM_setValue('selectStaminaKeepMode', 0);
+  GM_setValue('selectStaminaUseMode', 0);
   GM_setValue('selectEnergyKeep', 0);
   GM_setValue('selectEnergyUse', 0);
+  GM_setValue('selectEnergyKeepMode', 0);
+  GM_setValue('selectEnergyUseMode', 0);
 
   // Property tab.
   GM_setValue('buyMinAmount', '0');
@@ -4119,35 +4012,35 @@ function createSettingsBox() {
   if (!document.getElementById('ap_settings_css')) {
     makeElement('style', document.getElementsByTagName('head')[0], {'id':'ap_settings_css', 'type':'text/css'}).appendChild(document.createTextNode(
       '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-      '#settingsBox #tabNav div.selected{background-image:url(' + stripURI(tabSelectedImage) + ')}' +
+      '#settingsBox #tabNav div.selected{background : rgb(20,20,40);}' +
       '#settingsBox #tabNav div a{color:#fff;font-weight:700}' +
-      '#settingsBox .sexy_button{position:absolute;background-image:url(' + stripURI(blackBgImage) + ');border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
+      '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
       '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
       '#settingsBox .sexy_button button:hover{color:#D0D0D0;font-weight:700;text-decoration:none}' +
       '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
       '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
       '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
-      '#settingsBox #generalTab div, #socialTab div, #displayTab div, ' +
+      '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
       '#settingsBox #energyTab div {position: static;}' +
-      '#settingsBox #generalTab span, #socialTab span, #displayTab span, ' +
+      '#settingsBox #generalTab span, #mafiaTab span, #displayTab span, ' +
       '#settingsBox #energyTab span {position: static; vertical-align: middle}' +
-      '#settingsBox #generalTab select, #socialTab select, #displayTab select, ' +
+      '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
       '#settingsBox #energyTab select {position: static;}' +
-      '#settingsBox #generalTab textarea, #socialTab textarea, #displayTab textarea, ' +
+      '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
       '#settingsBox #energyTab textarea {position: static;}' +
-      '#settingsBox #generalTab input[type=radio], #socialTab input[type=radio], #displayTab input[type=radio], ' +
+      '#settingsBox #generalTab input[type=radio], #mafiaTab input[type=radio], #displayTab input[type=radio], ' +
       '#settingsBox #energyTab input[type=radio] {vertical-align: middle}' +
-      '#settingsBox #generalTab input[type=checkbox], #socialTab input[type=checkbox], #displayTab input[type=checkbox], ' +
+      '#settingsBox #generalTab input[type=checkbox], #mafiaTab input[type=checkbox], #displayTab input[type=checkbox], ' +
       '#settingsBox #energyTab input[type=checkbox] {vertical-align: middle}' +
-      '#settingsBox #generalTab input, #socialTab input, #displayTab input, ' +
+      '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
       '#settingsBox #energyTab input {position: static; margin: 0;}' +
-      '#settingsBox #generalTab .lhs, #socialTab .lhs, #displayTab .lhs, ' +
+      '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
       '#settingsBox #energyTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
-      '#settingsBox #generalTab .rhs, #socialTab .rhs, #displayTab .rhs, ' +
+      '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, ' +
       '#settingsBox #energyTab .rhs {position: static; float: left; padding: 3px;}' +
-      '#settingsBox #generalTab .single, #socialTab .single, #displayTab .single, ' +
+      '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, ' +
       '#settingsBox #energyTab .single {position: static; text-align: center}' +
-      '#settingsBox #generalTab .hide, #socialTab .hide, #displayTab .hide, ' +
+      '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
       '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
       '#settingsBox #staminaTab div {position: static;}' +
       '#settingsBox #staminaTab span {position: static; vertical-align: middle}' +
@@ -4175,21 +4068,21 @@ function createSettingsBox() {
   //elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; text-align: center'});
   elt = makeElement('div', settingsBox, {'style':'position: static; width: 100%; text-align: left'});
 
-  var tabNav = makeElement('div', elt, {'id':'tabNav', 'style':'position: static; display: inline-block; background: transparent url(' + stripURI(blackBgImage) + ') repeat-x scroll 0 0; border: 1px solid #AAAAAA; fontsize: 13px; line-height: 28px; height: 32px;'});
+  var tabNav = makeElement('div', elt, {'id':'tabNav', 'style':'position: static; display: inline-block; background: transparent repeat-x scroll 0 0; border: 1px solid #AAAAAA; fontsize: 13px; line-height: 28px; '});
     var generalTabLink = makeElement('div', tabNav, {'class':'selected', 'id':'General_Tab'});
       makeElement('a', generalTabLink, {'href':'#', 'rel':'generalTab'}).appendChild(document.createTextNode('General'));
     var displayTabLink = makeElement('div', tabNav, {'id':'Display_Tab'});
       makeElement('a', displayTabLink, {'href':'#', 'rel':'displayTab'}).appendChild(document.createTextNode('Display'));
-    var socialTabLink = makeElement('div', tabNav, {'id':'Social_Tab'});
-      makeElement('a', socialTabLink, {'href':'#', 'rel':'socialTab'}).appendChild(document.createTextNode('Social'));
+    var mafiaTabLink = makeElement('div', tabNav, {'id':'Mafia_Tab'});
+      makeElement('a', mafiaTabLink, {'href':'#', 'rel':'mafiaTab'}).appendChild(document.createTextNode('Mafia'));
     var autostatTabLink = makeElement('div', tabNav, {'id':'Autostat_Tab'});
       makeElement('a', autostatTabLink, {'href':'#', 'rel':'autostatTab'}).appendChild(document.createTextNode('Autostat'));
     var energyTabLink = makeElement('div', tabNav, {'id':'Energy_Tab'});
       makeElement('a', energyTabLink, {'href':'#', 'rel':'energyTab'}).appendChild(document.createTextNode('Energy'));
     var staminaTabLink = makeElement('div', tabNav, {'id':'Stamina_Tab'});
       makeElement('a', staminaTabLink, {'href':'#', 'rel':'staminaTab'}).appendChild(document.createTextNode('Stamina'));
-    var moneyTabLink = makeElement('div', tabNav, {'id':'Money_Tab'});
-      makeElement('a', moneyTabLink, {'href':'#', 'rel':'moneyTab'}).appendChild(document.createTextNode('Money'));
+    var cashTabLink = makeElement('div', tabNav, {'id':'Cash_Tab'});
+      makeElement('a', cashTabLink, {'href':'#', 'rel':'cashTab'}).appendChild(document.createTextNode('Cash'));
     var aboutTabLink = makeElement('div', tabNav, {'id':'About_Tab'});
       makeElement('a', aboutTabLink, {'href':'#', 'rel':'aboutTab'}).appendChild(document.createTextNode('About'));
 
@@ -4201,9 +4094,9 @@ function createSettingsBox() {
   var displayTab = createDisplayTab();
   settingsBox.appendChild(displayTab);
 
-  // Create Social tab.
-  var socialTab = createSocialTab();
-  settingsBox.appendChild(socialTab);
+  // Create Mafia tab.
+  var mafiaTab = createMafiaTab();
+  settingsBox.appendChild(mafiaTab);
 
   // Create Autostat tab.
   var autostatTab = createAutostatTab();
@@ -4217,9 +4110,9 @@ function createSettingsBox() {
   var staminaTab = createStaminaTab();
   settingsBox.appendChild(staminaTab);
 
-  // Create money tab.
-  var moneyTab = createMoneyTab();
-  settingsBox.appendChild(moneyTab);
+  // Create cash tab.
+  var cashTab = createCashTab();
+  settingsBox.appendChild(cashTab);
 
   // Create about tab.
   var aboutTab = createAboutTab();
@@ -4261,7 +4154,7 @@ function createSettingsBox() {
 // Create General Tab
 function createGeneralTab() {
   var elt, title, id, label;
-  var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -4477,7 +4370,7 @@ function createGeneralTab() {
 // Create Display Tab
 function createDisplayTab() {
   var elt, title, id, label;
-  var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -4612,13 +4505,13 @@ function createDisplayTab() {
   return displayTab;
 }
 
-// Create Social Tab
-function createSocialTab() {
+// Create Mafia Tab
+function createMafiaTab() {
   var elt, title, id, label;
-  var socialTab = makeElement('div', null, {'id':'socialTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var mafiaTab = makeElement('div', null, {'id':'mafiaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', socialTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
 
   // Auto-ask for job help
   var item = makeElement('div', list);
@@ -4791,13 +4684,13 @@ function createSocialTab() {
   warModeHandler();
   warModes.addEventListener('change', warModeHandler, false);
 
-  return socialTab;
+  return mafiaTab;
 }
 
 // Create Autostat Tab
 function createAutostatTab() {
   var elt, title, id, label;
-  var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
 
@@ -4916,7 +4809,7 @@ function createAutostatTab() {
 // Create Energy Tab
 function createEnergyTab() {
   var elt, title, id, label;
-  var energyTab = makeElement('div', null, {'id':'energyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var energyTab = makeElement('div', null, {'id':'energyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', energyTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -5252,7 +5145,7 @@ function createEnergyTab() {
 // Create Stamina Tab
 function createStaminaTab() {
   var elt, title, id, label;
-  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -5594,16 +5487,16 @@ function createStaminaTab() {
   return staminaTab;
 }
 
-// Create Money tab
-function createMoneyTab () {
+// Create Cash tab
+function createCashTab () {
   var elt, title, id, label;
-  var moneyTab = makeElement('div', null, {'id':'moneyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var cashTab = makeElement('div', null, {'id':'cashTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  var autoBuy = makeElement('div', moneyTab, {'style':'top: 25px;'});
+  var autoBuy = makeElement('div', cashTab, {'style':'top: 25px;'});
   makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, 'autoBuy');
   autoBuy.appendChild(document.createTextNode('Enable Auto-buy'));
 
-  var selectProperties = makeElement('div', moneyTab, {'style':'top: 50px;'});
+  var selectProperties = makeElement('div', cashTab, {'style':'top: 50px;'});
   selectPropertiesTitle = makeElement('span', selectProperties, {'style':'margin-left:6px;'});
   selectPropertiesTitle.appendChild(document.createTextNode('Select the properties you want to buy:'));
   makeElement('br', selectProperties);
@@ -5636,33 +5529,33 @@ function createMoneyTab () {
   selectPropertiesNote.appendChild(document.createTextNode('* Properties that cannot be robbed'));
 
   title = 'Never spend below this amount of cash';
-  var buyMinAmount = makeElement('div', moneyTab, {'style':'top: 50px; right: 10px;'});
+  var buyMinAmount = makeElement('div', cashTab, {'style':'top: 50px; right: 10px;'});
   buyMinAmount.appendChild(document.createTextNode('Minimum cash: '));
   makeElement('input', buyMinAmount, {'type':'text', 'style':'width: 80px;', 'title':title, 'value':GM_getValue('buyMinAmount', '0'), 'id':'buyMinAmount', 'size':'5'});
 
-  var autoSellCrates = makeElement('div', moneyTab, {'style':'top: 150px; right: 10px;'});
+  var autoSellCrates = makeElement('div', cashTab, {'style':'top: 150px; right: 10px;'});
   autoSellCrates.appendChild(document.createTextNode('Sell Cuban business output'));
   makeElement('input', autoSellCrates, {'type':'checkbox', 'id':'autoSellCrates', 'value':'checked'}, 'autoSellCrates');
 
-  var autoSellCratesMoscow = makeElement('div', moneyTab, {'style':'top: 175px; right: 10px;'});
+  var autoSellCratesMoscow = makeElement('div', cashTab, {'style':'top: 175px; right: 10px;'});
   autoSellCratesMoscow.appendChild(document.createTextNode('Sell Moscow business output'));
   makeElement('input', autoSellCratesMoscow, {'type':'checkbox', 'id':'autoSellCratesMoscow', 'value':'checked'}, 'autoSellCratesMoscow');
 
-  var collectNYTake = makeElement('div', moneyTab, {'style':'top: 200px; right: 10px;'});
+  var collectNYTake = makeElement('div', cashTab, {'style':'top: 200px; right: 10px;'});
   collectNYTake.appendChild(document.createTextNode('Automatically collect NY 3 hour take'));
   makeElement('input', collectNYTake, {'type':'checkbox', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
 
   // Racketing
 
-  var racketCollect = makeElement('div', moneyTab, {'style':'top: 225px; right: 10px;'});
+  var racketCollect = makeElement('div', cashTab, {'style':'top: 225px; right: 10px;'});
   racketCollect.appendChild(document.createTextNode('Automatically collect racket'));
   makeElement('input', racketCollect, {'type':'checkbox', 'id':'racketCollect', 'value':'checked'}, 'racketCollect');
 
-  var racketReshakedown = makeElement('div', moneyTab, {'style':'top: 250px; right: 10px;'});
+  var racketReshakedown = makeElement('div', cashTab, {'style':'top: 250px; right: 10px;'});
   racketReshakedown.appendChild(document.createTextNode('Shake down again'));
   makeElement('input', racketReshakedown, {'type':'checkbox', 'id':'racketReshakedown', 'value':'checked'}, 'racketReshakedown');
 
-  var racketPermanentShakedown = makeElement('div', moneyTab, {'style':'top: 275px; right: 10px;'});
+  var racketPermanentShakedown = makeElement('div', cashTab, {'style':'top: 275px; right: 10px;'});
   racketPermanentShakedown.appendChild(document.createTextNode('Shake down again permanently'));
   makeElement('input', racketPermanentShakedown, {'type':'checkbox', 'id':'racketPermanentShakedown', 'value':'checked'}, 'racketPermanentShakedown');
 
@@ -5670,7 +5563,7 @@ function createMoneyTab () {
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
     id = cities[i][CITY_AUTOBANK];
     title = 'Enable ' + cities[i][CITY_NAME] + ' banking ';
-    var curBank = makeElement('div', moneyTab, {'style':'top: '+(i*25 + xTop)+'px; right: 10px;'});
+    var curBank = makeElement('div', cashTab, {'style':'top: '+(i*25 + xTop)+'px; right: 10px;'});
     makeElement('input', curBank, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id);
     makeElement('label', curBank, {'for':id}).appendChild(document.createTextNode(title));
     makeElement('img', curBank, {'style':'vertical-align: middle;','src':stripURI(cities[i][CITY_CASH_ICON])});
@@ -5680,13 +5573,13 @@ function createMoneyTab () {
     curBank.addEventListener('change', minBankCheck, false);
   }
 
-  return moneyTab;
+  return cashTab;
 }
 
 // Create About tab
 function createAboutTab () {
   var elt, title, id, label;
-  var aboutTab = makeElement('div', null, {'id':'aboutTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(generalTabImage) + ')'});
+  var aboutTab = makeElement('div', null, {'id':'aboutTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   var versionInfo = makeElement('div', aboutTab, {'style':'top: 25px;font-size: 18px; font-weight: bold;'});
   versionInfo.appendChild(document.createTextNode('Version '+ SCRIPT.version));
@@ -5862,9 +5755,9 @@ function createStatWindow() {
 
   makeElement('style', document.getElementsByTagName('head')[0], {'type':'text/css'}).appendChild(document.createTextNode(
     '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-    '#statsWindow #sWindowTabNav div.selected{background-image:url(' + stripURI(tabSelectedImage) + ')}' +
+    '#statsWindow #sWindowTabNav div.selected{background : rgb(60,60,100);}' +
     '#statsWindow #sWindowTabNav div a{color:#fff;font-weight:700}' +
-    '#statsWindow .sexy_button{position:absolute;background-image:url(' + stripURI(blackBgImage) + ');border:1px solid #FFD927;color:#FFD927;cursor:pointer;display:block;float:left;font-size:14px;font-weight:700;padding:5px;text-decoration:none;width:auto}' +
+    '#statsWindow .sexy_button{position:absolute;background:black;border:1px solid #FFD927;color:#FFD927;cursor:pointer;display:block;float:left;font-size:14px;font-weight:700;padding:5px;text-decoration:none;width:auto}' +
     '#statsWindow .sexy_button button{background:transparent;border:medium none #FFF;color:#FFD927;cursor:pointer;font-size:14px;font-weight:700;margin:0}' +
     '#statsWindow .sexy_button button:hover{color:#BCD2EA;font-weight:700;text-decoration:none}' +
     '#statsWindow .tabcontent{display:none;}' +
@@ -5889,7 +5782,7 @@ function createStatWindow() {
   // NOTE: This container is for placing the buttons horizontally.
   elt = makeElement('div', statsWindow, {'style':'text-align: left'});
   // Make the button bar.
-  var sWindowTabNav = makeElement('div', elt, {'id':'sWindowTabNav', 'style':'position: static; display: inline-block; background: transparent url(' + stripURI(blackBgImage) + ') repeat-x scroll 0 0; border: 1px solid #FFFFFF; fontsize: 13px; line-height: 28px; height: 30px;'});
+  var sWindowTabNav = makeElement('div', elt, {'id':'sWindowTabNav', 'style':'position: static; display: inline-block; background: transparent repeat-x scroll 0 0; border: 1px solid #FFFFFF; fontsize: 13px; line-height: 28px; height: 30px;'});
     var graphTabLink = makeElement('div', sWindowTabNav, {'class':'selected'} );
       makeElement('a', graphTabLink, {'href':'#', 'rel':'graphTab'}).appendChild(document.createTextNode('Graphs'));
     var statTabLink = makeElement('div', sWindowTabNav );
@@ -6588,7 +6481,7 @@ function customizeMasthead() {
   // Make the SMS Mobile link go away
   var smsElt = xpathFirst('//div[@class="mw_sms"]', innerPageElt);
   if (smsElt) {
-  smsElt.setAttribute("style", "margin:0; height:0; display:none", 0);
+    smsElt.setAttribute("style", "margin:0; height:0; display:none", 0);
   }
 
   // Make a container for the autoplayer menu.
@@ -7572,7 +7465,7 @@ function debugDumpSettings() {
         'Move email options: <strong>'+ showIfUnchecked(GM_getValue('moveEmailBar')) + '</strong><br>' +
         'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
-        '---------------------Social Tab--------------------<br>' +
+        '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
         'Message to post on wall for job help: <strong>' + GM_getValue('autoAskJobHelpMessage') + '</strong><br>' +
@@ -7666,7 +7559,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Stamina use started: <strong>' + GM_getValue('useStaminaStarted') + '</strong><br>' +
         'Stamina reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
         'Ignore reserve to level-up: <strong>' + showIfUnchecked(GM_getValue('allowStaminaToLevelUp')) + '</strong><br>' +
-        '------------------Money Tab-------------------<br>' +
+        '------------------Cash Tab-------------------<br>' +
         'Enable auto-buy <strong>' + showIfUnchecked(GM_getValue('autoBuy')) + '</strong><br>' +
         '&nbsp;&nbsp;-Min cash: <strong>' + GM_getValue('buyMinAmount') + '</strong><br>' +
         'Sell Cuban business output: <strong>' + showIfUnchecked(GM_getValue('autoSellCrates')) + '</strong><br>' +
