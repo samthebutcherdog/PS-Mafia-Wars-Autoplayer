@@ -39,7 +39,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.14',
-  build: '52',
+  build: '53',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3359,14 +3359,14 @@ function saveSettings() {
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
-                            'hasHelicopter', 'hasPrivateIsland', 'hasGoldenThrone','isManiac',
-                            'sendEnergyPack', 'autoAskJobHelp','autoPause','hideAds', 'idleInCity',
+                            'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
+                            'sendEnergyPack','autoAskJobHelp','autoPause','hideAds', 'idleInCity',
                             'moveEmailBar','acceptMafiaInvitations','autoLottoOpt', 'multipleJobs',
                             'leftAlign','filterLog','autoHelp','autoSellCratesMoscow','collectNYTake',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
-                            'autoWarBetray', 'hideGifts']);
+                            'autoWarBetray','hideGifts','autoSecretStash']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -3429,7 +3429,6 @@ function saveSettings() {
   GM_setValue('logPlayerUpdatesMax', logPlayerUpdatesMax);
   GM_setValue('buyMinAmount', document.getElementById('buyMinAmount').value);
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
-  GM_setValue('autoAskJobHelpMessage', document.getElementById('autoAskJobHelpMessage').value);
   GM_setValue('autoLottoBonusItem', document.getElementById('autoLottoList').selectedIndex);
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   GM_setValue('warMode', document.getElementById('warMode').selectedIndex);
@@ -4537,14 +4536,16 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'size':'2'});
   rhs.appendChild(document.createTextNode(' minimum experience'));
 
+  // Auto-publish Secret Stash
   var item = makeElement('div', list);
   var lhs = makeElement('div', item, {'class':'lhs'});
   var rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = 'Enter a message to publish to your wall when asking for help with a job. If you don\'t want to publish to your wall, leave this blank.';
-  id = 'autoAskJobHelpMessage';
-  lhs.appendChild(document.createTextNode('Message to publish:'));
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':id, 'title':title}).appendChild(document.createTextNode(GM_getValue(id, 'Help!')));;;
+  title = 'Automatically post Secret Stash found while fighting.';
+  id = 'autoSecretStash';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Publish secret stash found while fighting'));
 
   // Auto-accept mafia invitations
   var item = makeElement('div', list);
@@ -5960,83 +5961,47 @@ function handleContentModified(e) {
 function handlePublishing() {
   // Publishing/skipping posts
   var skipPost = xpathFirst('.//input[@value="Skip"]');
-  if (!skipPost) {
+  var pubPost = xpathFirst('.//input[@value="Publish"]');
+  if (!skipPost && !pubPost) {
     // Publish/Skip buttons not yet loaded, try again in 2 seconds
     window.setTimeout(handlePublishing, 2000);
     return;
 
   } else {
+
+    // Generic publishing function
+    var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
+      var eltDiv = xpathFirst(xpathString);
+      if (eltDiv) {
+        if (isChecked(gmFlag))
+          clickElement(pubElt);
+        else
+          clickElement(skipElt);
+        return true;
+      }
+      return false;
+    };
+
     // Gift post
-    var giftCheck = xpathFirst('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]');
-    if (giftCheck && isChecked('autoGiftSkipOpt')) {
-      clickElement(skipPost);
-      return;
-    }
+    if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipPost, pubPost)) return;
 
     // Daily chance
-    var lottoCheck = xpathFirst('.//div[contains(., "prizes are given away each week")]');
-    if (lottoCheck && isChecked('autoLottoOpt')) {
-      clickElement(skipPost);
-      return;
-    }
+    if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipPost, pubPost)) return;
+
+    // Secret Stash
+    if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubPost, skipPost)) return;
 
     // Job Help
-    var jobHelpCheck = xpathFirst('.//div[contains(.,"requested help")]');
-    if (jobHelpCheck && isChecked('autoAskJobHelp')) {
-      var msg = GM_getValue('autoAskJobHelpMessage');
-      var msgElt = document.getElementById("feedform_user_message");
-      var publishPost = xpathFirst('.//input[@value="Publish"]');
-      if (msg && msgElt && publishPost) {
-        msgElt.value = msg;
-        clickElement(publishPost);
-        return;
-      } else {
-        clickElement(skipPost);
-        return;
-      }
-    }
+    if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubPost, skipPost)) return;
 
     // War Reward
-    var warRewardCheck = xpathFirst('.//div[contains(.,"rewarded their friends with")]');
-    if (warRewardCheck && isChecked('autoWar')) {
-      var publishPost = xpathFirst('.//input[@value="Publish"]');
-      if (publishPost && isChecked('autoWarRewardPublish')) {
-        clickElement(publishPost);
-        return;
-      } else {
-        // Dont publish the post
-        clickElement(skipPost);
-        return;
-      }
-    }
+    if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubPost, skipPost)) return;
 
     // War back up request
-    var warHelpCheck = xpathFirst('.//div[contains(.,"needs help to win their War")]');
-    if (warHelpCheck && isChecked('autoWar')) {
-      var publishPost = xpathFirst('.//input[@value="Publish"]');
-      if (publishPost && isChecked('autoWarResponsePublish')) {
-        clickElement(publishPost);
-        return;
-      } else {
-        // Dont publish the post
-        clickElement(skipPost);
-        return;
-      }
-    }
+    if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubPost, skipPost)) return;
 
     // War Declaration
-    var warDeclareCheck = xpathFirst('.//div[contains(.,"and has Declared War")]');
-    if (warDeclareCheck && isChecked('autoWar')) {
-      var publishPost = xpathFirst('.//input[@value="Publish"]');
-      if (publishPost && isChecked('autoWarPublish')) {
-        clickElement(publishPost);
-        return;
-      } else {
-        // Dont publish the post
-        clickElement(skipPost);
-        return;
-      }
-    }
+    if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubPost, skipPost)) return;
   }
 }
 
@@ -7443,7 +7408,7 @@ function debugDumpSettings() {
         'Delay rate low: <strong>'+ GM_getValue('d1') + '</strong><br>' +
         'Delay rate high: <strong>' + GM_getValue('d2') + '</strong><br>' +
         'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Heal in : <strong>' + cities[GM_getValue('healLocation')][CITY_NAME] + '</strong><br>' +
+        '&nbsp;&nbsp;-Heal in : <strong>' + (GM_getValue('healLocation') == cities.length ? 'Active City' : cities[GM_getValue('healLocation')][CITY_NAME]) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
@@ -7473,7 +7438,7 @@ function debugDumpSettings() {
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
-        'Message to post on wall for job help: <strong>' + GM_getValue('autoAskJobHelpMessage') + '</strong><br>' +
+        'Publish secret stash found while fighting: <strong>' + GM_getValue('autoSecretStash') + '</strong><br>' +
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
@@ -9357,9 +9322,15 @@ function logFightResponse(rootElt, resultElt, context) {
 
   if (resultElt.className == "fight_results") {
     // A fight took place. Results are in the "VS" format.
-
     var attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
     lastOpponent.attackAgain = attackAgainElt ? attackAgainElt : undefined;
+
+    // Click the secret stash immediately
+    var eltStash = xpathFirst('.//span[contains(.,"Send Them Now")]', resultElt);
+    if (eltStash && isChecked('autoSecretStash')) {
+      clickElement(eltStash);
+      DEBUG('Clicked to publish the secret stash');
+    }
 
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
       // Look for any new opponents in the displayed list.
