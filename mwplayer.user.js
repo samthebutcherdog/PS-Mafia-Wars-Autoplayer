@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.13
+* @version 1.0.14
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -31,14 +31,15 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @version     1.0.13
+// @include     http://www.facebook.com/connect/*
+// @version     1.0.14
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.13',
-  build: '51',
+  version: '1.0.14',
+  build: '52',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -49,6 +50,14 @@ var SCRIPT = {
   opponent: '&opponent_id=',
   user: '&user_id='
 };
+
+// Handle Publishing
+if (window.location.href.match(/prompt_feed/))  {
+  if (GM_getValue('isRunning')) {
+    window.setTimeout(handlePublishing, 2000);
+  }
+  return;
+}
 
 // Load the iframe
 if (window.location.href.match(/facebook/))  {
@@ -5948,6 +5957,89 @@ function handleContentModified(e) {
   setModificationTimer();
 }
 
+function handlePublishing() {
+  // Publishing/skipping posts
+  var skipPost = xpathFirst('.//input[@value="Skip"]');
+  if (!skipPost) {
+    // Publish/Skip buttons not yet loaded, try again in 2 seconds
+    window.setTimeout(handlePublishing, 2000);
+    return;
+
+  } else {
+    // Gift post
+    var giftCheck = xpathFirst('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]');
+    if (giftCheck && isChecked('autoGiftSkipOpt')) {
+      clickElement(skipPost);
+      return;
+    }
+
+    // Daily chance
+    var lottoCheck = xpathFirst('.//div[contains(., "prizes are given away each week")]');
+    if (lottoCheck && isChecked('autoLottoOpt')) {
+      clickElement(skipPost);
+      return;
+    }
+
+    // Job Help
+    var jobHelpCheck = xpathFirst('.//div[contains(.,"requested help")]');
+    if (jobHelpCheck && isChecked('autoAskJobHelp')) {
+      var msg = GM_getValue('autoAskJobHelpMessage');
+      var msgElt = document.getElementById("feedform_user_message");
+      var publishPost = xpathFirst('.//input[@value="Publish"]');
+      if (msg && msgElt && publishPost) {
+        msgElt.value = msg;
+        clickElement(publishPost);
+        return;
+      } else {
+        clickElement(skipPost);
+        return;
+      }
+    }
+
+    // War Reward
+    var warRewardCheck = xpathFirst('.//div[contains(.,"rewarded their friends with")]');
+    if (warRewardCheck && isChecked('autoWar')) {
+      var publishPost = xpathFirst('.//input[@value="Publish"]');
+      if (publishPost && isChecked('autoWarRewardPublish')) {
+        clickElement(publishPost);
+        return;
+      } else {
+        // Dont publish the post
+        clickElement(skipPost);
+        return;
+      }
+    }
+
+    // War back up request
+    var warHelpCheck = xpathFirst('.//div[contains(.,"needs help to win their War")]');
+    if (warHelpCheck && isChecked('autoWar')) {
+      var publishPost = xpathFirst('.//input[@value="Publish"]');
+      if (publishPost && isChecked('autoWarResponsePublish')) {
+        clickElement(publishPost);
+        return;
+      } else {
+        // Dont publish the post
+        clickElement(skipPost);
+        return;
+      }
+    }
+
+    // War Declaration
+    var warDeclareCheck = xpathFirst('.//div[contains(.,"and has Declared War")]');
+    if (warDeclareCheck && isChecked('autoWar')) {
+      var publishPost = xpathFirst('.//input[@value="Publish"]');
+      if (publishPost && isChecked('autoWarPublish')) {
+        clickElement(publishPost);
+        return;
+      } else {
+        // Dont publish the post
+        clickElement(skipPost);
+        return;
+      }
+    }
+  }
+}
+
 function handlePublishNotificationsInternal(e) {
   //if (!ignoreElement(e.target)) logElement(e.target, 'handlePublishNotifications');
 
@@ -5973,93 +6065,6 @@ function handlePublishNotificationsInternal(e) {
       if (elt) {
         clickElement(elt);
         DEBUG('Clicked to skip "minor issue" popup.');
-      }
-    }
-
-    // Publishing/skipping posts
-    var skipPost = xpathFirst('.//input[@value="Skip"]', popup);
-    if (skipPost) {
-
-      // Gift post
-      var giftCheck = xpathFirst('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]', popup);
-      if (giftCheck && isChecked('autoGiftSkipOpt')) {
-        clickElement(skipPost);
-        DEBUG('Clicked to skip gift publishing.');
-        return;
-      }
-
-      // Daily chance
-      var lottoCheck = xpathFirst('.//div[contains(., "prizes are given away each week")]', popup);
-      if (lottoCheck && isChecked('autoLottoOpt')) {
-        clickElement(skipPost);
-        DEBUG('Clicked to skip lotto publishing.');
-        return;
-      }
-
-      // Job Help
-      var jobHelpCheck = xpathFirst('.//div[contains(.,"requested help")]', popup);
-      if (jobHelpCheck && isChecked('autoAskJobHelp')) {
-        var msg = GM_getValue('autoAskJobHelpMessage');
-        var msgElt = document.getElementById("feedform_user_message");
-        var publishPost = xpathFirst('.//input[@value="Publish"]', popup);
-        if (msg && msgElt && publishPost) {
-          msgElt.value = msg;
-          clickElement(publishPost);
-          DEBUG('Clicked to publish job help request.');
-          return;
-        } else {
-          clickElement(skipPost);
-          DEBUG('Clicked to skip job help request publishing.');
-          return;
-        }
-      }
-
-      // War Reward
-      var warRewardCheck = xpathFirst('.//div[contains(.,"rewarded their friends with")]', popup);
-      if (warRewardCheck && isChecked('autoWar')) {
-        var publishPost = xpathFirst('.//input[@value="Publish"]', popup);
-        if (publishPost && isChecked('autoWarRewardPublish')) {
-          clickElement(publishPost);
-          DEBUG('Clicked to publish war reward notice.');
-          return;
-        } else {
-          // Dont publish the post
-          clickElement(skipPost);
-          DEBUG('Clicked to skip war reward notice publishing.');
-          return;
-        }
-      }
-
-      // War back up request
-      var warHelpCheck = xpathFirst('.//div[contains(.,"needs help to win their War")]', popup);
-      if (warHelpCheck && isChecked('autoWar')) {
-        var publishPost = xpathFirst('.//input[@value="Publish"]', popup);
-        if (publishPost && isChecked('autoWarResponsePublish')) {
-          clickElement(publishPost);
-          DEBUG('Clicked to publish war backup request.');
-          return;
-        } else {
-          // Dont publish the post
-          clickElement(skipPost);
-          DEBUG('Clicked to skip war backup request publishing.');
-          return;
-        }
-      }
-
-      // War Declaration
-      var warDeclareCheck = xpathFirst('.//div[contains(.,"and has Declared War")]', popup);
-      if (warDeclareCheck && isChecked('autoWar')) {
-        var publishPost = xpathFirst('.//input[@value="Publish"]', popup);
-        if (publishPost && isChecked('autoWarPublish')) {
-          clickElement(publishPost);
-          DEBUG('Clicked to publish war declaration.');
-          return;
-        } else {
-          // Dont publish the post
-          clickElement(skipPost);
-          DEBUG('Clicked to skip war declaration publishing.');
-          return;
-        }
       }
     }
   }
