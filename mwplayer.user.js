@@ -39,7 +39,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.14',
-  build: '54',
+  build: '55',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6874,20 +6874,10 @@ function customizeJobs() {
     var timePerEnergy = isChecked('isManiac') ? 3 : 5;
     timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
     timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
-    if (cost > energy) {
-      jobTimeLeft = (cost - energy) * timePerEnergy;
-      if (jobTimeLeft < 60)
-        jobTimeLeftText = 'Time: < ' + (Math.round((jobTimeLeft) * 10) / 10) + ' min';
-      else {
-        jobTimeLeft = Math.round((jobTimeLeft/60) * 100) / 100;
-        if (jobTimeLeft < 24)
-          jobTimeLeftText = 'Time: < ' + jobTimeLeft + ' hr';
-        else
-          jobTimeLeftText = 'Time: < ' + Math.round(jobTimeLeft/24) + ' days';
-      }
-    } else {
-      jobTimeLeftText = 'Time: 0 min';
-    }
+
+    if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
+    else               jobTimeLeftText = 'Time: 0 min';
+
     makeElement('br', jobButton.snapshotItem(i));
     makeElement('span', jobButton.snapshotItem(i), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
   }
@@ -10402,6 +10392,23 @@ function timeLeft(timeToConvert) {
     }
   }
   return(returnVal);
+}
+
+// Convert decimal time to ?h ?m ?s format
+function getDecimalTime(decimalTime) {
+  DEBUG('decimal: ' + decimalTime);
+  var num = parseFloat(decimalTime);
+  var strTime = '';
+  if (num) {
+    if (num >= 60) {
+      strTime = parseInt(num/60) + 'h ';
+      num -= parseInt(num); num *= 60;
+    }
+    strTime += parseInt(num) + 'm ';
+    num -= parseInt(num); num *= 60;
+    strTime += parseInt(num) + 's';
+  }
+  return strTime.replace('00','0');
 }
 
 /******************************** Base64 DECODING ********************************/
