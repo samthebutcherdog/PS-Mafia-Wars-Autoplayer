@@ -39,7 +39,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.14',
-  build: '53',
+  build: '54',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -68,7 +68,7 @@ if (window.location.href.match(/facebook/))  {
 
   checkLanguage();
 
-  var iFrameCanvas = xpathFirst('//iframe[contains(@src,"mwfb.zynga.com")]');
+  var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
   if (iFrameCanvas)
     window.location.href = iFrameCanvas.src;
   return;
@@ -3366,7 +3366,7 @@ function saveSettings() {
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
-                            'autoWarBetray','hideGifts','autoSecretStash']);
+                            'autoWarBetray','hideGifts','autoSecretStash','iceCheck']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -5183,6 +5183,13 @@ function createStaminaTab() {
     staminaSpendHow.appendChild(choice);
   }
 
+  // IceCheck
+  title = 'Check if the target is iced or alive on profile page';
+  id = 'iceCheck';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: right;margin-left: 0.5em;', 'value':'checked'}, 'iceCheck');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Enable IceCheck'));
+
   // Bordered container for varying settings content.
   var staminaTabSub = makeElement('div', list, {'id':'staminaTabSub', 'style':'position: static; border: 1px inset #FFD927; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px;'});
 
@@ -6655,6 +6662,83 @@ function customizeProfile() {
         makeElement('a', statsDiv, {'href':'http://apps.facebook.com/' + SCRIPT.name + SCRIPT.controller + 'war' + SCRIPT.action + 'add' + SCRIPT.city + (city + 1) + '&friend_id=' + id}).appendChild(document.createTextNode('Add to Mafia'));
       }
 
+      // Not currently in mafia. Show if alive or dead
+      if (!removeElt && isChecked('iceCheck')) {
+        javascript: ( function() {
+          function getMWURL() {
+            str = document.location;
+            str = str.toString();
+            beg = str.substring(0, str.indexOf('?') + 1);
+            str = str.substring(str.indexOf('?') + 1);
+            str = str.split('&');
+            mid = '';
+            for (var i = 0; i < str.length; i++) {
+              if (str[i].indexOf('sf_xw_') == 0)
+                mid = mid + str[i] + '&';
+            }
+            return beg + mid;
+          }
+
+          var xmlHTTP;
+          var as = document.getElementsByTagName('a');
+
+          for (var i = 0; i < as.length; i++) {
+            if (as[i].innerHTML == 'Add to Hitlist')
+               attackstring = as[i].href;
+          }
+
+          if (hit = /xw_city=(\d+).*?tmp=([a-f0-9]+).*?target_id=(\d+)/.exec(attackstring))
+            var hitlist_url = getMWURL() + 'xw_controller=hitlist&xw_action=set&xw_city=' + hit[1] + '&tmp=' + hit[2] + '&target_id=' + hit[3] + '&skip_req_frame=1&ajax=1';
+
+          var last_url = null;
+
+          function get_xmlHTTP() {
+            if (window.XMLHttpRequest) return new XMLHttpRequest();
+            if (window.ActiveXObject) return new ActiveXObject('Microsoft.XMLHTTP');
+            return null;
+          }
+
+          function request(url) {
+            xmlHTTP.onreadystatechange = state_change;
+            xmlHTTP.open('GET', url, true);
+            xmlHTTP.send(null);
+            last_url = url;
+          }
+
+          function state_change() {
+            if (xmlHTTP.readyState == 4) {
+              if (xmlHTTP.status == 200) {
+                s = xmlHTTP.responseText;
+                if (/You can't add/.test(s)) {
+                  statsDiv.appendChild(document.createTextNode(' | '));
+                  makeElement('a', statsDiv,  {'text': ''}).appendChild(document.createTextNode('Target already dead or too weak!'));
+                } else if (/Bounty Amount/.test(s)) {
+                  statsDiv.appendChild(document.createTextNode(' | '));
+                  var el = makeElement('a', statsDiv, {'id':id});
+                  el.appendChild(document.createTextNode('Target is alive! AttackX?'));
+                  el.addEventListener('click', attackXfromProfile, false);
+                } else {
+                  debug('Unknown response');
+                  return;
+                }
+              } else {
+                debug('Problem retrieving XML data');
+                return;
+              }
+            }
+            retries = 0;
+          }
+
+          xmlHTTP = get_xmlHTTP();
+          if (!xmlHTTP) {
+            debug('Your browser does not support XMLHTTP.');
+            return;
+          }
+          request(hitlist_url);
+
+        }());
+      }
+
       // Promote
       statsDiv.appendChild(document.createTextNode(' | '));
       makeElement('a', statsDiv, {'href':'http://apps.facebook.com/' + SCRIPT.name + SCRIPT.controller + 'group' + SCRIPT.action + 'view' + SCRIPT.city + (city + 1) + '&promote=yes&uid=' + id}).appendChild(document.createTextNode('Promote'));
@@ -6693,6 +6777,14 @@ function customizeProfile() {
   }
 
   return true;
+}
+
+// Load AttackX script by Spockholm
+function attackXfromProfile() {
+  var a = document.createElement("script");
+  a.type = "text/javascript";
+  a.src = "http://www.spockholm.com/mafia/attackX-beta.js?" + Math.random();
+  document.getElementsByTagName("head")[0].appendChild(a)
 }
 
 function customizeJobs() {
