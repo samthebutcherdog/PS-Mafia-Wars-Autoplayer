@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.14
+* @version 1.0.15
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -32,14 +32,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.14
+// @version     1.0.15
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.14',
-  build: '55',
+  version: '1.0.15',
+  build: '56',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -53,14 +53,13 @@ var SCRIPT = {
 
 // Handle Publishing
 if (window.location.href.match(/prompt_feed/))  {
-  if (GM_getValue('isRunning')) {
+  if (GM_getValue('isRunning'))
     window.setTimeout(handlePublishing, 2000);
-  }
   return;
 }
 
 // Load the iframe
-if (window.location.href.match(/facebook/))  {
+if (document.domain.match(/facebook.com/))  {
   // Get FB name
   var fbName = document.getElementById("fb_menu_account");
   if (fbName && fbName.firstChild)
@@ -70,13 +69,14 @@ if (window.location.href.match(/facebook/))  {
 
   var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
   if (iFrameCanvas)
-    window.location.href = iFrameCanvas.src;
+    window.location.replace(iFrameCanvas.src);
   return;
 }
 
-// Handle Blank pages (click back if encountered)
+// Handle Blank pages (load facebook mafia wars app)
 if (!document.body) {
-  return back();
+  loadHome();
+  return;
 }
 
 // Register debugOnOff with Greasemonkey
@@ -4020,11 +4020,11 @@ function createSettingsBox() {
   if (!document.getElementById('ap_settings_css')) {
     makeElement('style', document.getElementsByTagName('head')[0], {'id':'ap_settings_css', 'type':'text/css'}).appendChild(document.createTextNode(
       '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-      '#settingsBox #tabNav div.selected{background : rgb(20,20,40);}' +
+      '#settingsBox #tabNav div.selected{background : #666666;}' +
       '#settingsBox #tabNav div a{color:#fff;font-weight:700}' +
       '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
       '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
-      '#settingsBox .sexy_button button:hover{color:#D0D0D0;font-weight:700;text-decoration:none}' +
+      '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
       '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
       '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
       '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
