@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.15
+* @version 1.0.16
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.15
+// @version     1.0.16
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.15',
-  build: '60',
+  version: '1.0.16',
+  build: '61',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -55,7 +55,7 @@ var SCRIPT = {
 // Handle Publishing
 if (window.location.href.match(/prompt_feed/))  {
   if (GM_getValue('isRunning'))
-    window.setTimeout(handlePublishing, 2000);
+    window.setTimeout(handlePublishing, 1000);
   return;
 }
 
@@ -5967,15 +5967,16 @@ function handleContentModified(e) {
 
 function handlePublishing() {
   // Publishing/skipping posts
-  var skipPost = xpathFirst('.//input[@value="Skip"]');
-  var pubPost = xpathFirst('.//input[@value="Publish"]');
-  if (!skipPost && !pubPost) {
-    // Publish/Skip buttons not yet loaded, try again in 2 seconds
-    window.setTimeout(handlePublishing, 2000);
-    return;
+  var skipElt = xpathFirst('.//input[@id="cancel"]');
+  var pubElt = xpathFirst('.//input[@id="publish"]');
+  var okElt = xpathFirst('.//input[@id="okay"]');
 
-  } else {
+  // Click "Ok" if it's there, to close window
+  if (okElt) {
+    clickElement(okElt);
 
+  // Perform publishing logic once Publish / Skip buttons has loaded
+  } else if (skipElt && pubElt) {
     // Generic publishing function
     var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
       var eltDiv = xpathFirst(xpathString);
@@ -5990,26 +5991,30 @@ function handlePublishing() {
     };
 
     // Gift post
-    if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipPost, pubPost)) return;
+    if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipElt, pubElt)) return;
 
     // Daily chance
-    if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipPost, pubPost)) return;
+    if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipElt, pubElt)) return;
 
     // Secret Stash
-    if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubPost, skipPost)) return;
+    if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubElt, skipElt)) return;
 
     // Job Help
-    if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubPost, skipPost)) return;
+    if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
     // War Reward
-    if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubPost, skipPost)) return;
+    if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
     // War back up request
-    if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubPost, skipPost)) return;
+    if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
     // War Declaration
-    if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubPost, skipPost)) return;
+    if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
   }
+
+  // Retry until window is closed
+  window.setTimeout(handlePublishing, 1000);
+  return;
 }
 
 function handlePublishNotificationsInternal(e) {
@@ -6397,10 +6402,10 @@ function customizeLayout() {
     // Deal with free gifts
     var msgs = xpathFirst('//table[@class="messages"]');
     if (msgs) {
-      for (var i = 0, iLength=msgs.childNodes.length; i < iLength; ++i) {
-        if (msgs.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
+      for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
+        if (msgs.firstChild.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
           if (iLength == 1) hideElement(msgs);
-          else hideElement(msgs.childNodes[i]);
+          else hideElement(msgs.firstChild.childNodes[i]);
           break;
         }
       }
