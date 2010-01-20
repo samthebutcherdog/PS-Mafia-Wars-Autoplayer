@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.15',
-  build: '59',
+  build: '60',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6389,34 +6389,29 @@ function customizeLayout() {
 
   if (isChecked('hideGifts')) {
     // Deal with Holiday Free Gifts
-    var freeGifts = xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]');;
-    if (freeGifts) {
-      freeGifts.setAttribute("style", "margin:0; height:0; display:none", 0);
-    }
+    hideElement(xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]'));
 
     // Deal with gift safe houses
-    var safeHouse = xpathFirst('.//a/img[@alt="Gift Safe House"]');
-    if (safeHouse) safeHouse.setAttribute("style", "margin:0; height:0; display:none", 0);
+    hideElement(xpathFirst('.//a/img[@alt="Gift Safe House"]'));
 
     // Deal with free gifts
-    var msgs = $x('.//td[@class="message_body"]');
-    for (var i = 0, iLength=msgs.length; i < iLength; ++i) {
-      if (msgs[i].innerHTML.match(/You have gifts available to send./)) {
-        msgs[i].setAttribute("style", "margin:0; height:0; display:none", 0);
-        break;
+    var msgs = xpathFirst('//table[@class="messages"]');
+    if (msgs) {
+      for (var i = 0, iLength=msgs.childNodes.length; i < iLength; ++i) {
+        if (msgs.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
+          if (iLength == 1) hideElement(msgs);
+          else hideElement(msgs.childNodes[i]);
+          break;
+        }
       }
     }
   }
 
   // Deal with the Zynga bar
-  var zbarDiv = xpathFirst('//div[@id="mw_zbar"]');
-  if (zbarDiv)
-    zbarDiv.setAttribute("style", "margin:0; height:0; display:none", 0);
+  hideElement(xpathFirst('//div[@id="mw_zbar"]'));
 
   // Deal with the email bar.
-  var emailBar = xpathFirst('//table[@class="fb_email_prof_header"]');
-  if (emailBar)
-    emailBar.setAttribute("style", "margin:0; height:0; display:none", 0);
+  hideElement(xpathFirst('//table[@class="fb_email_prof_header"]'));
 
   // Handle Unknown error
   var unkError = xpathFirst('//div[@id="error_dialog" and contains(.,"Unknown Error")]');
@@ -6453,10 +6448,7 @@ function customizeMasthead() {
   }
 
   // Make the SMS Mobile link go away
-  var smsElt = xpathFirst('//div[@class="mw_sms"]', innerPageElt);
-  if (smsElt) {
-    smsElt.setAttribute("style", "margin:0; height:0; display:none", 0);
-  }
+  hideElement(xpathFirst('//div[@class="mw_sms"]', innerPageElt));
 
   // Make a container for the autoplayer menu.
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
@@ -6815,9 +6807,6 @@ function customizeJobs() {
       var jobMatch = missions.searchArray(jobName, 0)[0];
 
       if (jobMatch != undefined) {
-        // FIXME: Try to buy the required items if the item is store bought.
-        //        If job loot, should we add the job that drops it on selectMissionMultiple?
-
         // Ignore mastered jobs
         if (jobInfo.snapshotItem(i).innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
           if (missions[jobMatch][9] == true) {
@@ -10176,6 +10165,12 @@ function decodeHTMLEntities(str) {
 
   scratchpad.innerHTML = str;
   return scratchpad.value;
+}
+
+// Hide the element
+function hideElement(elt) {
+  if (!elt) return;
+  elt.setAttribute("style", "margin:0; height:0; display:none", 0);
 }
 
 function clickElement(elt) {
