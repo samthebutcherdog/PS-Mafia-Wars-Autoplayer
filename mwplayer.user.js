@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.15',
-  build: '57',
+  build: '58',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1447,6 +1447,11 @@ function doAutoPlay () {
     return;
   }
 
+  // Mini-pack check
+  if (running && isChecked('checkMiniPack')) {
+    if (miniPack()) return;
+  }
+
   // Auto-send energy pack
   if (running && isChecked('sendEnergyPack')) {
     if (autoSendEnergyPack()) return;
@@ -1819,6 +1824,38 @@ function autoPlayerUpdates() {
   return false;
 }
 
+function miniPack() {
+  var last = GM_getValue("lastMiniPackCheck", 0);
+  var now = new Date().getTime();
+  if (last == 0 || now - last > 1000 * 60 * 60) {
+    var tries = GM_getValue("lastMiniPackTry", 0);
+    //GM_log("tries=" + tries);
+    if (tries >= 10) {
+      DEBUG("Failed miniPack after 10 tries");
+      GM_setValue("lastMiniPackCheck", "" + now);
+      GM_setValue("lastMiniPackTry", "0");
+      return;
+    }
+    GM_setValue("lastMiniPackTry", tries + 1);
+    if (xpathFirst('.//div[@class="title" and contains(., "Gifting")]', innerPageElt)) {
+      DEBUG("Getting secret key");
+      var giftInput = document.getElementById("gift_key");
+      if (!giftInput) {
+        DEBUG("Secret key not found!");
+        return;
+      }
+      var secretKey = giftInput.value;
+      now += 60 * 1000;  //set now to a minute later
+      GM_setValue("lastMiniPackCheck", "" + now);
+      DEBUG("Redirecting to do mini Energy");
+      window.location.href = "http://apps.facebook.com/inthemafia/track.php?zy_track=toolbar&next_controller=index&next_action=toolbarlootreward&next_params=%7B%22gift_key%22%3A%22" + secretKey + "%22%7D";
+    } else {
+        DEBUG("Redirecting to Gifting page to get secret key");
+        window.location.href = 'http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=gift&xw_action=view&xw_city=2';
+      }  
+  }
+}
+    
 function autoStat() {
   // Load profile
   if (!onProfileNav()) {
@@ -3361,7 +3398,7 @@ function saveSettings() {
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
                             'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
-                            'sendEnergyPack','autoAskJobHelp','autoPause','idleInCity',
+                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
                             'filterLog','autoHelp','autoSellCratesMoscow','collectNYTake',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
@@ -5046,6 +5083,17 @@ function createEnergyTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'sendEnergyPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
+
+  // Periodically check for mini energy packs?
+  var item = makeElement('div', list);
+  var lhs = makeElement('div', item, {'class':'lhs'});
+  var rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Periodically check for mini energy Packs.';
+  id = 'checkMiniPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'checkMiniPack');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Check for mini Energy Packs'));
 
   // Horizontal line
   //var item = makeElement('div', list);
@@ -7562,6 +7610,7 @@ function debugDumpSettings() {
         'Has golden throne: <strong>' + showIfUnchecked(GM_getValue('hasGoldenThrone')) + '</strong><br>' +
         'Is Maniac: <strong>' + showIfUnchecked(GM_getValue('isManiac')) + '</strong><br>' +
         'Auto send energy pack: <strong>' + showIfUnchecked(GM_getValue('sendEnergyPack')) + '</strong><br>' +
+        'Check for mini Energy Packs: <strong>' + showIfUnchecked(GM_getValue('checkMiniPack')) + '</strong><br>' +
         'Energy threshold: <strong>' + GM_getValue('selectEnergyUse') + ' ' + numberSchemes[GM_getValue('selectEnergyUseMode', 0)] + ' (refill to ' + SpendEnergy.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
         'Energy reserve: <strong>' + + GM_getValue('selectEnergyKeep') + ' ' + numberSchemes[GM_getValue('selectEnergyKeepMode', 0)] + ' (keep above ' + SpendEnergy.floor + ')</strong><br>' +
