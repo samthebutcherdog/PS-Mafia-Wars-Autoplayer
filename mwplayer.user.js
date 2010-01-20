@@ -18,7 +18,8 @@
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
-            Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe
+            Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
+            scooy78
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -39,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.15',
-  build: '56',
+  build: '57',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3360,9 +3361,9 @@ function saveSettings() {
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
                             'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
-                            'sendEnergyPack','autoAskJobHelp','autoPause','hideAds', 'idleInCity',
-                            'moveEmailBar','acceptMafiaInvitations','autoLottoOpt', 'multipleJobs',
-                            'leftAlign','filterLog','autoHelp','autoSellCratesMoscow','collectNYTake',
+                            'sendEnergyPack','autoAskJobHelp','autoPause','idleInCity',
+                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
+                            'filterLog','autoHelp','autoSellCratesMoscow','collectNYTake',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
@@ -4450,35 +4451,15 @@ function createDisplayTab() {
   filterHandler();
   filterOpt.addEventListener('change', filterHandler, false);
 
-  // Ads
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'hideAds';
-  title = 'Hide advertisements';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide ads'));
-
   // Safe house gifts
   var item = makeElement('div', list);
   var lhs = makeElement('div', item, {'class':'lhs'});
   var rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hideGifts';
-  title = 'Hide Safe House Gifts';
+  title = 'Hide gifting items';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide safe house gift links'));
-
-  // Email bar
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'moveEmailBar';
-  title = 'Move email options to the bottom';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Move email options to the bottom'));
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide gifting'));
 
   // Alignment
   var item = makeElement('div', list);
@@ -5609,7 +5590,8 @@ function createAboutTab () {
 
   var devNames = ['CharlesD', 'Eric Ortego', 'Jeremy', 'Liquidor', 'AK17710N', 'Fragger',
                  '<x51>', 'CyB', 'int1', 'Janos112', 'int2str', 'Doonce', 'Eric Layne', 'Tanlis',
-                 'Cam', 'csanbuenaventura', 'vmzildjian', 'Scrotal', 'Bushdaka', 'rdmcgraw', 'moe', 'KCMCL'];
+                 'Cam', 'csanbuenaventura', 'vmzildjian', 'Scrotal', 'Bushdaka', 'rdmcgraw', 'moe',
+                 'KCMCL', 'scooy78'];
 
   // Append developer names
   devNames.forEach(function(devName) {
@@ -6387,20 +6369,14 @@ function customizeLayout() {
     }
   }
 
-  // Deal with ads.
-  if (isChecked('hideAds')) {
-    var adsTop = xpathFirst('//iframe[contains(@src, "zbar")]');
-    if (adsTop) {
-      adsTop.setAttribute("style", "margin:0; height:0; display:none", 0);
-    }
+  if (isChecked('hideGifts')) {
+    // Deal with Holiday Free Gifts
     var freeGifts = xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]');;
     if (freeGifts) {
       freeGifts.setAttribute("style", "margin:0; height:0; display:none", 0);
     }
-  }
 
-  if (isChecked('hideGifts')) {
-    // Deal with safe houses
+    // Deal with gift safe houses
     var safeHouse = xpathFirst('.//a/img[@alt="Gift Safe House"]');
     if (safeHouse) safeHouse.setAttribute("style", "margin:0; height:0; display:none", 0);
 
@@ -6414,12 +6390,15 @@ function customizeLayout() {
     }
   }
 
+  // Deal with the Zynga bar
+  var zbarDiv = xpathFirst('//div[@id="mw_zbar"]');
+  if (zbarDiv)
+    zbarDiv.setAttribute("style", "margin:0; height:0; display:none", 0);
+
   // Deal with the email bar.
-  if (isChecked('moveEmailBar')) {
-    var emailBar = xpathFirst('//table[@class="fb_email_prof_header"]');
-    if (emailBar && mainCont)
-      mainCont.appendChild(emailBar);
-  }
+  var emailBar = xpathFirst('//table[@class="fb_email_prof_header"]');
+  if (emailBar)
+    emailBar.setAttribute("style", "margin:0; height:0; display:none", 0);
 
   // Handle Unknown error
   var unkError = xpathFirst('//div[@id="error_dialog" and contains(.,"Unknown Error")]');
@@ -7512,9 +7491,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Filter mode: <strong>' + GM_getValue('filterOpt') + '</strong><br>' +
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
         '&nbsp;&nbsp;Filter fail: <strong>' + GM_getValue('filterFail') + '</strong><br>' +
-        'Hide ads: <strong>'+ showIfUnchecked(GM_getValue('hideAds')) + '</strong><br>' +
-        'Hide safe house gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
-        'Move email options: <strong>'+ showIfUnchecked(GM_getValue('moveEmailBar')) + '</strong><br>' +
+        'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
