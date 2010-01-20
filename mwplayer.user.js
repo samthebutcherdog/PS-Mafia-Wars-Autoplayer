@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.15',
-  build: '58',
+  build: '59',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -71,12 +71,6 @@ if (document.domain.match(/facebook.com/))  {
   var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
   if (iFrameCanvas)
     window.location.replace(iFrameCanvas.src);
-  return;
-}
-
-// Handle Blank pages (load facebook mafia wars app)
-if (!document.body) {
-  loadHome();
   return;
 }
 
@@ -1448,7 +1442,7 @@ function doAutoPlay () {
   }
 
   // Mini-pack check
-  if (running && isChecked('checkMiniPack')) {
+  if (running && isChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
     if (miniPack()) return;
   }
 
@@ -1824,38 +1818,14 @@ function autoPlayerUpdates() {
   return false;
 }
 
+// MiniPack!
+// FIXME: As the energy pack, needs AI to control when to use this
 function miniPack() {
-  var last = GM_getValue("lastMiniPackCheck", 0);
-  var now = new Date().getTime();
-  if (last == 0 || now - last > 1000 * 60 * 60) {
-    var tries = GM_getValue("lastMiniPackTry", 0);
-    //GM_log("tries=" + tries);
-    if (tries >= 10) {
-      DEBUG("Failed miniPack after 10 tries");
-      GM_setValue("lastMiniPackCheck", "" + now);
-      GM_setValue("lastMiniPackTry", "0");
-      return;
-    }
-    GM_setValue("lastMiniPackTry", tries + 1);
-    if (xpathFirst('.//div[@class="title" and contains(., "Gifting")]', innerPageElt)) {
-      DEBUG("Getting secret key");
-      var giftInput = document.getElementById("gift_key");
-      if (!giftInput) {
-        DEBUG("Secret key not found!");
-        return;
-      }
-      var secretKey = giftInput.value;
-      now += 60 * 1000;  //set now to a minute later
-      GM_setValue("lastMiniPackCheck", "" + now);
-      DEBUG("Redirecting to do mini Energy");
-      window.location.href = "http://apps.facebook.com/inthemafia/track.php?zy_track=toolbar&next_controller=index&next_action=toolbarlootreward&next_params=%7B%22gift_key%22%3A%22" + secretKey + "%22%7D";
-    } else {
-        DEBUG("Redirecting to Gifting page to get secret key");
-        window.location.href = 'http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=gift&xw_action=view&xw_city=2';
-      }  
-  }
+  setGMTime('miniPackTimer', '8 hours');
+  DEBUG('Redirecting to use mini Energy');
+  window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
 }
-    
+
 function autoStat() {
   // Load profile
   if (!onProfileNav()) {
