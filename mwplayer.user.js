@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.17
+* @version 1.0.18
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.17
+// @version     1.0.18
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.17',
-  build: '64',
+  version: '1.0.18',
+  build: '65',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1568,8 +1568,8 @@ function doQuickClicks() {
   // Click the level up bonus
   var eltLevel = xpathFirst('.//a[contains(.,"Continue")]');
   if (eltLevel && isChecked('autoLevelPublish')) {
-    clickElement(eltLevel);
-    DEBUG('Clicked to publish Level Up');
+    //clickElement(eltLevel);
+    //DEBUG('Clicked to publish Level Up');
   }
 }
 
@@ -6367,6 +6367,8 @@ function customizeLayout() {
             ' #mw_zbar iframe {margin:0; height:0; display:none}' +
             // Hide the email bar.
             ' .fb_email_prof_header {margin:0; height:0; display:none}' +
+            // Hide SMS Mobile link
+            ' .mw_sms {margin:0; height:0; display:none}' +
             // Left align.
             (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '' );
 
@@ -6426,9 +6428,6 @@ function customizeMasthead() {
       '.ap_option:hover {background-color:#660000;}'
     ));
   }
-
-  // Make the SMS Mobile link go away
-  hideElement(xpathFirst('//div[@class="mw_sms"]', innerPageElt));
 
   // Make a container for the autoplayer menu.
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
