@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.17',
-  build: '62',
+  build: '63',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6350,18 +6350,28 @@ function checkLanguage() {
 }
 
 function customizeLayout() {
-  var mainFrame = xpathFirst('//div[@id="mainDiv"]');
-  if (!mainFrame) return;
+  var mainDiv = xpathFirst('//div[@id="mainDiv"]');
+  if (!mainDiv) return;
 
-  mainFrame.setAttribute('style', 'overflow: auto; width: 100%; height: 100%; position: absolute;', 0);
-  var mainCont = xpathFirst('//div[@id="mw_city_wrapper"]');
+  var cssElt = document.getElementById('mwapCSS');
+  var mwapCSS, newCSS = '';
 
-  // Left align.
-  if (isChecked('leftAlign')) {
-    if (mainCont) {
-      mainCont.setAttribute("style", "margin:0; float: left", 0);
-    }
-  }
+  // MWAP CSS
+  if (!cssElt)
+    cssElt = makeElement('style', document.getElementsByTagName('head')[0], {'id':'mwapCSS', 'type':'text/css'});
+  else
+    mwapCSS = cssElt.innerHTML;
+
+  newCSS =  ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}' +
+            // Hide the Zynga bar
+            ' #mw_zbar iframe {margin:0; height:0; display:none}' +
+            // Hide the email bar.
+            ' .fb_email_prof_header {margin:0; height:0; display:none}' +
+            // Left align.
+            (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '' );
+
+  // If CSS has changed, update it
+  if (newCSS != mwapCSS) cssElt.innerHTML = newCSS;
 
   if (isChecked('hideGifts')) {
     // Deal with Holiday Free Gifts
@@ -6382,12 +6392,6 @@ function customizeLayout() {
       }
     }
   }
-
-  // Deal with the Zynga bar
-  hideElement(xpathFirst('//div[@id="mw_zbar"]'));
-
-  // Deal with the email bar.
-  hideElement(xpathFirst('//table[@class="fb_email_prof_header"]'));
 
   // Handle Unknown error
   var unkError = xpathFirst('//div[@id="error_dialog" and contains(.,"Unknown Error")]');
