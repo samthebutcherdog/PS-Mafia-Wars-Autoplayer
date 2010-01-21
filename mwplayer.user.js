@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.16
+* @version 1.0.17
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.16
+// @version     1.0.17
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.16',
-  build: '61',
+  version: '1.0.17',
+  build: '62',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -54,8 +54,11 @@ var SCRIPT = {
 
 // Handle Publishing
 if (window.location.href.match(/prompt_feed/))  {
-  if (GM_getValue('isRunning'))
+  if (GM_getValue('isRunning')) {
+    GM_setValue('postClicked', false);
+    setGMTime('postTimer', '1 minute');
     window.setTimeout(handlePublishing, 1000);
+  }
   return;
 }
 
@@ -1202,8 +1205,6 @@ if (!initialized) {
 
   // Add event listeners.
   setListenContent(true);
-  setListenFBNotifications(true);
-  setListenAutoSkip(true);
 
   // Make sure the modification timer goes off at least once.
   setModificationTimer();
@@ -1284,7 +1285,10 @@ function doAutoPlay () {
   var previouslyIdle = idle;
   idle = false;
 
-  //Dont let healing interrupt shake down again
+  // Perform clicking of publish items here, excluding fighting items
+  doQuickClicks();
+
+  // Don't let healing interrupt shake down again
   if (running && shakeDownFlag) {
     if (collectRacket()) return;
   }
@@ -1295,8 +1299,7 @@ function doAutoPlay () {
       health < GM_getValue('healthLevel', 0) &&
       health < maxHealth &&
       (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
-    autoHeal();
-    return;
+    if (autoHeal()) return;
   }
 
   // Check top mafia bonus
@@ -1560,6 +1563,16 @@ function autoSendEnergyPack() {
   return false;
 }
 
+// Perform actions that does not require response logging here
+function doQuickClicks() {
+  // Click the level up bonus
+  var eltLevel = xpathFirst('.//a[contains(.,"Continue")]');
+  if (eltLevel && isChecked('autoLevelPublish')) {
+    clickElement(eltLevel);
+    DEBUG('Clicked to publish Level Up');
+  }
+}
+
 function autoHeal() {
   // NOTE: In the interest of time, delays are waived.
   Autoplay.delay = 0;
@@ -1570,27 +1583,30 @@ function autoHeal() {
   if (healLocation != cities.length && city != healLocation) {
     Autoplay.fx = function() { goLocation(healLocation); }
     Autoplay.start();
-    return;
+    return true;
   }
 
   // Use our custom instant-heal element (if present).
-  healElt = xpathFirst('.//a[contains(., "Heal your character")]', innerPageElt);
-  if (!healElt) {
-    var healElt = document.getElementById('ap_heal');
-    if (!healElt) {
-      DEBUG('WARNING: Can\'t find instant-heal link.');
-      // Go to the hospital.
-      var hospitalElt = xpathFirst('//a[@class="heal_link"]');
-      if (hospitalElt) {
-        Autoplay.fx = function() {
-          clickElement(hospitalElt);
-          DEBUG('Clicked to go to hospital.');
-        };
-        Autoplay.start();
-      } else {
-        addToLog('warning Icon', 'WARNING: Can\'t find hospital link.');
-      }
-      return;
+  var healElt = document.getElementById('ap_heal');
+  if (healElt) {
+    clickElement(healElt);
+    DEBUG('Clicked to heal immediately.');
+    return false;
+  // If not, go to hospital manually
+  } else  {
+    DEBUG('WARNING: Can\'t find instant-heal link.');
+    // Go to the hospital.
+    var hospitalElt = xpathFirst('//a[@class="heal_link"]');
+    if (hospitalElt) {
+      Autoplay.fx = function() {
+        clickElement(hospitalElt);
+        DEBUG('Clicked to go to hospital.');
+      };
+      Autoplay.start();
+      return true;
+    } else {
+      addToLog('warning Icon', 'WARNING: Can\'t find hospital link.');
+      return false;
     }
   }
 
@@ -1601,8 +1617,7 @@ function autoHeal() {
     DEBUG('Clicked to heal.');
   };
   Autoplay.start();
-
-  return;
+  return true;
 }
 
 function autoSellCrates(sellCity) {
@@ -3374,7 +3389,8 @@ function saveSettings() {
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
-                            'autoWarBetray','hideGifts','autoSecretStash','iceCheck']);
+                            'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
+                            'autoLevelPublish']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -4524,17 +4540,6 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'size':'2'});
   rhs.appendChild(document.createTextNode(' minimum experience'));
 
-  // Auto-publish Secret Stash
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Automatically post Secret Stash found while fighting.';
-  id = 'autoSecretStash';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Publish secret stash found while fighting'));
-
   // Auto-accept mafia invitations
   var item = makeElement('div', list);
   var lhs = makeElement('div', item, {'class':'lhs'});
@@ -4545,6 +4550,35 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Accept mafia invitations'));
+
+  // Auto-publish Miscellaneous Stuff
+  var item = makeElement('div', list);
+  var lhs = makeElement('div', item, {'class':'lhs'});
+  var rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  label = makeElement('label', lhs);
+  label.appendChild(document.createTextNode('Automatically publish:'));
+
+  // Secret Stash
+  title = 'Automatically post Secret Stash found while fighting.';
+  id = 'autoSecretStash';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Secret stash '));
+
+  // Iced opponent bonus
+  title = 'Automatically post iced opponent bonus.';
+  id = 'autoIcePublish';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Ice bonus '));
+
+  // Level up bonus
+  title = 'Automatically post level up bonus.';
+  id = 'autoLevelPublish';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Level-up bonus'));
 
   // Auto-help on jobs/wars
   var item = makeElement('div', list);
@@ -5030,17 +5064,24 @@ function createEnergyTab() {
   var lhs = makeElement('div', item, {'class':'lhs'});
   var rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = 'Spend energy packs if it will not waste any energy, as determined by the estimated job ratio setting and your stamina statistics.';
-  id = 'autoEnergyPack';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'autoEnergyPack');
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Spend energy packs:'));
 
-  // Estimated xp-to-energy ratio for jobs.
+  // Mini packs
+  title = 'Periodically check for mini energy Packs.';
+  id = 'checkMiniPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'checkMiniPack');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Mini packs '));
+
+  // Full packs
+  title = 'Spend energy packs if it will not waste any energy, as determined by the estimated job ratio setting and your stamina statistics.';
+  id = 'autoEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'autoEnergyPack');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
   title = 'Estimate the average experience-to-energy ratio of the jobs you will be performing. For example, a job that paid 10 experience points and required 5 energy would have a ratio of 2. Enter 0 if you prefer to have energy packs fire regardless of waste.';
   id = 'estimateJobRatio';
-  label = makeElement('label', rhs, {'for':id, 'title':title, 'style':'vertical-align:middle'});
-  label.appendChild(document.createTextNode('Estimated job ratio '));
+  label.appendChild(document.createTextNode(' Full packs @ ratio '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
 
   // Periodically send energy packs?
@@ -5053,17 +5094,6 @@ function createEnergyTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'sendEnergyPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
-
-  // Periodically check for mini energy packs?
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Periodically check for mini energy Packs.';
-  id = 'checkMiniPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'checkMiniPack');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Check for mini Energy Packs'));
 
   // Horizontal line
   //var item = makeElement('div', list);
@@ -5609,7 +5639,7 @@ function createAboutTab () {
   var devNames = ['CharlesD', 'Eric Ortego', 'Jeremy', 'Liquidor', 'AK17710N', 'Fragger',
                  '<x51>', 'CyB', 'int1', 'Janos112', 'int2str', 'Doonce', 'Eric Layne', 'Tanlis',
                  'Cam', 'csanbuenaventura', 'vmzildjian', 'Scrotal', 'Bushdaka', 'rdmcgraw', 'moe',
-                 'KCMCL', 'scooy78'];
+                 'KCMCL', 'scooy78', 'crazydude'];
 
   // Append developer names
   devNames.forEach(function(devName) {
@@ -5970,12 +6000,17 @@ function handlePublishing() {
   var skipElt = xpathFirst('.//input[@id="cancel"]');
   var pubElt = xpathFirst('.//input[@id="publish"]');
   var okElt = xpathFirst('.//input[@id="okay"]');
+  var closeElt = xpathFirst('.//input[@id="fb_dialog_cancel_button"]');
 
-  // Click "Ok" if it's there, to close window
-  if (okElt) {
+  // If (1) "Ok" is there or
+  //    (2) Pub/Skip already clicked or
+  //    (3) It's been 1 minute since the post window loaded
+  // Then close the post window manually
+  if (okElt || GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
+    clickElement(closeElt);
     clickElement(okElt);
 
-  // Perform publishing logic once Publish / Skip buttons has loaded
+  // Perform publishing logic once posting buttons have loaded
   } else if (skipElt && pubElt) {
     // Generic publishing function
     var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
@@ -5985,6 +6020,11 @@ function handlePublishing() {
           clickElement(pubElt);
         else
           clickElement(skipElt);
+
+        // Wait for 5 seconds to ensure post is successful
+        // before trying to close window manually
+        GM_setValue('postClicked', true);
+        window.setTimeout(handlePublishing, 5000);
         return true;
       }
       return false;
@@ -5998,6 +6038,12 @@ function handlePublishing() {
 
     // Secret Stash
     if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubElt, skipElt)) return;
+
+    // Iced Opponent
+    if (checkPublish('.//div[contains(.,"just iced")]','autoIcePublish', pubElt, skipElt)) return;
+
+    // Level up bonus
+    if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
 
     // Job Help
     if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
@@ -6017,60 +6063,6 @@ function handlePublishing() {
   return;
 }
 
-function handlePublishNotificationsInternal(e) {
-  //if (!ignoreElement(e.target)) logElement(e.target, 'handlePublishNotifications');
-
-  var popup = e.target;
-
-  if (running && popup && popup.innerHTML &&
-      (popup.id == 'pop_content' ||
-       popup.innerHTML.indexOf('pop_content') != -1 ||
-       popup.innerHTML.indexOf('feedform_user_message') != -1) ) {
-
-    // Close "No Network" popups.
-    if (popup.innerHTML.match(/no network/i)) {
-      var elt = xpathFirst('.//input[@value="Okay"]', popup);
-      if (elt) {
-        clickElement(elt);
-        DEBUG('Clicked to skip "no network" popup.');
-      }
-    }
-
-    // Close "minor issue" popups.
-    if (popup.innerHTML.match(/minor issue/i)) {
-      var elt = xpathFirst('.//input[@value="Okay"]', popup);
-      if (elt) {
-        clickElement(elt);
-        DEBUG('Clicked to skip "minor issue" popup.');
-      }
-    }
-  }
-}
-
-function handlePublishNotifications(e) {
-  // Wrapping the call with setTimeout is necessary to make Greasemonkey
-  // API calls available (such as GM_getValue).
-  setTimeout(function() { handlePublishNotificationsInternal(e) }, 0);
-}
-
-function handleFBNotificationsInternal(e) {
-  //logElement(e.target, 'handleFBNotifications');
-
-  var parentElt = e.target.parentNode;
-  if (!parentElt) return;
-
-  // Watch for sent notifications and get rid of some of them.
-  if (parentElt.className == 'Beeps') {
-    filterNotifications(e.target);
-  }
-}
-
-function handleFBNotifications(e) {
-  // Wrapping the call with setTimeout is necessary to make Greasemonkey
-  // API calls available (such as GM_getValue).
-  setTimeout(function() { handleFBNotificationsInternal(e) }, 0);
-}
-
 // Turns on/off the high-level event listener for the game.
 function setListenContent(on) {
   var elt = document.getElementById('mainDiv');
@@ -6079,27 +6071,6 @@ function setListenContent(on) {
     elt.addEventListener('DOMSubtreeModified', handleContentModified, false);
   } else {
     elt.removeEventListener('DOMSubtreeModified', handleContentModified, false);
-  }
-}
-
-// Turns on/off the event listener for publish pop-ups.
-function setListenAutoSkip(on) {
-  if (!document.body) return;
-  if (on) {
-    document.body.addEventListener('DOMNodeInserted', handlePublishNotifications, false);
-  } else {
-    document.body.removeEventListener('DOMNodeInserted', handlePublishNotifications, false);
-  }
-}
-
-// Turns on/off the event listener for Facebook notifications.
-function setListenFBNotifications(on) {
-  var elt = document.getElementById('presence_bar_right');
-  if (!elt) return;
-  if (on) {
-    elt.addEventListener('DOMNodeInserted', handleFBNotifications, false);
-  } else {
-    elt.removeEventListener('DOMNodeInserted', handleFBNotifications, false);
   }
 }
 
@@ -6512,11 +6483,9 @@ function customizeStats() {
     // Substitute AJAX navigation if code is available.
     var hospitalElt = xpathFirst('//a[@class="heal_link"]');
     if (hospitalElt) {
+      // Make instant heal work without switching pages.
       healLinkElt.setAttribute("onclick", hospitalElt.getAttribute("onclick").replace(/view/, 'heal'));
-      if (!running) {
-        // Make instant heal work without switching pages.
-        healLinkElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace(/'inner_page'/, "'" + SCRIPT.ajaxPage + "'"));
-      }
+      healLinkElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace(/'inner_page'/, "'" + SCRIPT.ajaxPage + "'"));
     }
   }
 
@@ -7509,7 +7478,10 @@ function debugDumpSettings() {
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
-        'Publish secret stash found while fighting: <strong>' + GM_getValue('autoSecretStash') + '</strong><br>' +
+        'Miscellaneous publishing: <br>' +
+        '&nbsp;&nbsp;Secret stash: <strong>' + GM_getValue('autoSecretStash') + '</strong><br>' +
+        '&nbsp;&nbsp;Ice bonus: <strong>' + GM_getValue('autoIcePublish') + '</strong><br>' +
+        '&nbsp;&nbsp;Level-up bonus: <strong>' + GM_getValue('autoLevelPublish') + '</strong><br>' +
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
@@ -9401,7 +9373,14 @@ function logFightResponse(rootElt, resultElt, context) {
     var eltStash = xpathFirst('.//span[contains(.,"Send Them Now")]', resultElt);
     if (eltStash && isChecked('autoSecretStash')) {
       clickElement(eltStash);
-      DEBUG('Clicked to publish the secret stash');
+      DEBUG('Clicked to publish the secret stash.');
+    }
+
+    // Click the iced opponent bonus immediately
+    var eltIce = xpathFirst('.//a[contains(.,"Help Your Friends")]');
+    if (eltIce && isChecked('autoIcePublish')) {
+      clickElement(eltIce);
+      DEBUG('Clicked to publish iced opponent bonus.');
     }
 
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
@@ -10392,7 +10371,6 @@ function timeLeft(timeToConvert) {
 
 // Convert decimal time to ?h ?m ?s format
 function getDecimalTime(decimalTime) {
-  DEBUG('decimal: ' + decimalTime);
   var num = parseFloat(decimalTime);
   var strTime = '';
   if (num) {
