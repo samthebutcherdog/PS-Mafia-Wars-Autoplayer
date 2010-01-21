@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.17',
-  build: '63',
+  build: '64',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -9755,7 +9755,7 @@ function logResponse(rootElt, action, context) {
       // Remove invalid war targets
       if (innerNoTags.indexOf('Target user is not a friend') != -1 ||
         innerNoTags.indexOf('Target user does not exist') != -1) {
-        removeSavedListItem('autoWarTargetList', context.id);
+        removeSavedListItem('autoWarTargetList', context.target_id);
         addToLog('warning Icon', 'Invalid war target (id='+context.target_id+'). Removing from list.');
       }
       // Friend is already at war with somebody else
