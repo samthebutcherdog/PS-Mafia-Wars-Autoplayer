@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.18
+* @version 1.0.19
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.18
+// @version     1.0.19
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.18',
-  build: '67',
+  version: '1.0.19',
+  build: '68',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -770,9 +770,10 @@ if (!initialized) {
   const INFLUENCE_STAT = 5;
 
   // Define city variables.
-  const NY     = 0;
-  const CUBA   = 1;
-  const MOSCOW = 2;
+  const NY      = 0;
+  const CUBA    = 1;
+  const MOSCOW  = 2;
+  const BANGKOK = 3;
 
   // Constants to access city attributes
   const CITY_NAME        = 0;
@@ -792,7 +793,8 @@ if (!initialized) {
   var cities = new Array(
     ['New York', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', '$'],
     ['Cuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'C$'],
-    ['Moscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$']
+    ['Moscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$'],
+    ['Bangkok', undefined, 70, cashCubaIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'B$']
   );
 
   // Spend objects
@@ -1978,8 +1980,8 @@ function canMission() {
   if (isChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
 
-    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{}})"));
-    var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{}})"));
+    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
+    var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{},3:{}})"));
     var expLeft = lvlExp - curExp;
     var ratio = Math.round(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
@@ -2559,7 +2561,7 @@ function getHitlist(element, forceRefresh) {
     if (!opponent.profile || !opponent.attack) continue;
 
     // Get the target's id, name, title, and bounty.
-    opponent.id = decodeID(opponent.profile.getAttribute('onclick').split('user=')[1].split('\'')[0]);
+    opponent.id = decodeID(opponent.profile.getAttribute('onclick').split('user=')[1].split('\'')[0].split('&')[0]);
     if (!opponent.id) continue;
     opponent.name = opponent.profile.innerHTML;
     if (opponent.profile.previousSibling &&
@@ -2612,7 +2614,7 @@ function getDisplayedOpponents(element, forceRefresh) {
     // Get the opponent's details.
     opponent.profile = nameAndLevel.getElementsByTagName('a')[0];
     if (!opponent.profile) continue;
-    opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split('user=')[1].split('\'')[0]);
+    opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split('user=')[1].split('\'')[0].split('&')[0]);
     if (!opponent.id) continue;
     opponent.attack  = linkElt;
     opponent.mafia   = rowData[1] ? parseInt(rowData[1].innerHTML) : 0;
@@ -2675,7 +2677,7 @@ function getDisplayedOpponents(element, forceRefresh) {
       // Get the opponent's details.
       opponent.profile = nameAndLevel.getElementsByTagName('a')[0];
       if (!opponent.profile) continue;
-      opponent.id      = decodeID(opponent.profile.href.split('user=')[1].split('\'')[0]);
+      opponent.id      = decodeID(opponent.profile.href.split('user=')[1].split('\'')[0].split('&')[0]);
       if (!opponent.id) continue;
       opponent.attack  = linkElt;
       opponent.mafia   = rowData[1] ? parseInt(rowData[1].innerHTML) : 0;
@@ -3163,6 +3165,7 @@ function saveDefaultSettings() {
   GM_setValue('bankConfig', '50000');
   GM_setValue('bankConfigCuba', '50000');
   GM_setValue('bankConfigMoscow', '50000');
+  GM_setValue('bankConfigBangkok', '50000');
   GM_setValue('autoPauseBefore', 'checked');
   GM_setValue('autoPauseAfter', 0);
   GM_setValue('autoPauseExp', '50');
@@ -3264,27 +3267,36 @@ function saveSettings() {
   var autoBankOn      = (document.getElementById('autoBank').checked === true);
   var autoBankCubaOn  = (document.getElementById('autoBankCuba').checked === true);
   var autoBankMoscowOn  = (document.getElementById('autoBankMoscow').checked === true);
+  var autoBankBangkokOn  = (document.getElementById('autoBankBangkok').checked === true);
   var bankConfig      = document.getElementById('bankConfig').value;
   var bankConfigCuba      = document.getElementById('bankConfigCuba').value;
   var bankConfigMoscow      = document.getElementById('bankConfigMoscow').value;
+  var bankConfigBangkok      = document.getElementById('bankConfigBangkok').value;
   var bankConfigInt   = parseInt(bankConfig);
   var bankConfigCubaInt   = parseInt(bankConfigCuba);
   var bankConfigMoscowInt   = parseInt(bankConfigMoscow);
+  var bankConfigBangkokInt   = parseInt(bankConfigBangkok);
+
   if (autoBankOn && (isNaN(bankConfigInt) || bankConfigInt < 10)) {
     alert('Minimum auto-bank amount must be 10 or higher.');
     return;
   }
 
-  GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
-
   if (autoBankCubaOn && (isNaN(bankConfigCubaInt) || bankConfigCubaInt < 10)) {
     alert('Minimum Cuba auto-bank amount must be 10 or higher.');
     return;
   }
+
   if (autoBankMoscowOn && (isNaN(bankConfigMoscowInt) || bankConfigMoscowInt < 10)) {
     alert('Minimum Moscow auto-bank amount must be 10 or higher.');
     return;
   }
+
+  if (autoBankBangkokOn && (isNaN(bankConfigBangkokInt) || bankConfigBangkokInt < 10)) {
+    alert('Minimum Bangkok auto-bank amount must be 10 or higher.');
+    return;
+  }
+
   var estimateJobRatio = parseFloat(document.getElementById('estimateJobRatio').value);
   var autoEnergyPackOn = (document.getElementById('autoEnergyPack').checked === true );
 
@@ -3354,8 +3366,10 @@ function saveSettings() {
   GM_setValue(filterOpt == 0 ? 'filterPass' : 'filterFail', document.getElementById('filterPatterns').value);
   GM_setValue('filterOpt', filterOpt);
 
+  GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
   GM_setValue('healLocation', document.getElementById('healLocation').value);
   GM_setValue('burnOption', document.getElementById('burnOption').value);
+
 
   if (document.getElementById('hasPrivateIsland').checked !== isChecked('hasPrivateIsland')) {
     didJobCalculations = false;
@@ -3372,12 +3386,12 @@ function saveSettings() {
                             'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
-                            'filterLog','autoHelp','autoSellCratesMoscow','collectNYTake',
+                            'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok', 'collectNYTake',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
-                            'autoLevelPublish']);
+                            'autoLevelPublish','autoBankBangkok']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -3429,6 +3443,7 @@ function saveSettings() {
   GM_setValue('bankConfig', bankConfig);
   GM_setValue('bankConfigCuba', bankConfigCuba);
   GM_setValue('bankConfigMoscow', bankConfigMoscow);
+  GM_setValue('bankConfigBangkok', bankConfigBangkok);
   GM_setValue('r1', document.getElementById('r1').value);
   GM_setValue('r2', document.getElementById('r2').value);
   GM_setValue('d1', document.getElementById('d1').value);
@@ -3474,8 +3489,8 @@ function saveSettings() {
   setSavedList('itemList', []);
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', "({0:{},1:{},2:{}})");
-  GM_setValue('availableJobs', "({0:{},1:{},2:{}})");
+  GM_setValue('masteredJobs', "({0:{},1:{},2:{},3:{}})");
+  GM_setValue('availableJobs', "({0:{},1:{},2:{},3:{}})");
 
   // Clear the fight/hit state.
   fightListNew.set([]);
@@ -3550,8 +3565,8 @@ function unPause() {
   }
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', "({0:{},1:{},2:{}})");
-  GM_setValue('availableJobs', "({0:{},1:{},2:{}})");
+  GM_setValue('masteredJobs', "({0:{},1:{},2:{},3:{}})");
+  GM_setValue('availableJobs', "({0:{},1:{},2:{},3:{}})");
 
   // Update the running state.
   GM_setValue('isRunning', true);
@@ -5525,11 +5540,11 @@ function createCashTab () {
   var elt, title, id, label;
   var cashTab = makeElement('div', null, {'id':'cashTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  var autoBuy = makeElement('div', cashTab, {'style':'top: 25px;'});
+  var autoBuy = makeElement('div', cashTab, {'style':'top: 10px;'});
   makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, 'autoBuy');
   autoBuy.appendChild(document.createTextNode('Enable Auto-buy'));
 
-  var selectProperties = makeElement('div', cashTab, {'style':'top: 50px;'});
+  var selectProperties = makeElement('div', cashTab, {'style':'top: 35px;'});
   selectPropertiesTitle = makeElement('span', selectProperties, {'style':'margin-left:6px;'});
   selectPropertiesTitle.appendChild(document.createTextNode('Select the properties you want to buy:'));
   makeElement('br', selectProperties);
@@ -5558,41 +5573,48 @@ function createCashTab () {
 
   makeElement('br', selectProperties);
   makeElement('br', selectProperties);
-  selectPropertiesNote = makeElement('span', selectProperties, {'style':'margin-left:21px'});
+  selectPropertiesNote = makeElement('span', selectProperties, {'style':'font-size: 10px;'});
   selectPropertiesNote.appendChild(document.createTextNode('* Properties that cannot be robbed'));
 
   title = 'Never spend below this amount of cash';
-  var buyMinAmount = makeElement('div', cashTab, {'style':'top: 50px; right: 10px;'});
+  var buyMinAmount = makeElement('div', cashTab, {'style':'top: 10px; right: 10px;'});
   buyMinAmount.appendChild(document.createTextNode('Minimum cash: '));
   makeElement('input', buyMinAmount, {'type':'text', 'style':'width: 80px;', 'title':title, 'value':GM_getValue('buyMinAmount', '0'), 'id':'buyMinAmount', 'size':'5'});
 
-  var autoSellCrates = makeElement('div', cashTab, {'style':'top: 150px; right: 10px;'});
+  id = 'autoSellCrates';
+  var autoSellCrates = makeElement('div', cashTab, {'style':'top: 50px; right: 10px;'});
   autoSellCrates.appendChild(document.createTextNode('Sell Cuban business output'));
-  makeElement('input', autoSellCrates, {'type':'checkbox', 'id':'autoSellCrates', 'value':'checked'}, 'autoSellCrates');
+  makeElement('input', autoSellCrates, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
-  var autoSellCratesMoscow = makeElement('div', cashTab, {'style':'top: 175px; right: 10px;'});
+  id = 'autoSellCratesMoscow';
+  var autoSellCratesMoscow = makeElement('div', cashTab, {'style':'top: 70px; right: 10px;'});
   autoSellCratesMoscow.appendChild(document.createTextNode('Sell Moscow business output'));
-  makeElement('input', autoSellCratesMoscow, {'type':'checkbox', 'id':'autoSellCratesMoscow', 'value':'checked'}, 'autoSellCratesMoscow');
+  makeElement('input', autoSellCratesMoscow, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
-  var collectNYTake = makeElement('div', cashTab, {'style':'top: 200px; right: 10px;'});
+  id = 'autoSellCratesBangkok';
+  var autoSellCratesBangkok = makeElement('div', cashTab, {'style':'top: 90px; right: 10px;'});
+  autoSellCratesBangkok.appendChild(document.createTextNode('Sell Bangkok business output'));
+  makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+
+  var collectNYTake = makeElement('div', cashTab, {'style':'top: 120px; right: 10px;'});
   collectNYTake.appendChild(document.createTextNode('Automatically collect NY 3 hour take'));
   makeElement('input', collectNYTake, {'type':'checkbox', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
 
   // Racketing
 
-  var racketCollect = makeElement('div', cashTab, {'style':'top: 225px; right: 10px;'});
+  var racketCollect = makeElement('div', cashTab, {'style':'top: 140px; right: 10px;'});
   racketCollect.appendChild(document.createTextNode('Automatically collect racket'));
   makeElement('input', racketCollect, {'type':'checkbox', 'id':'racketCollect', 'value':'checked'}, 'racketCollect');
 
-  var racketReshakedown = makeElement('div', cashTab, {'style':'top: 250px; right: 10px;'});
+  var racketReshakedown = makeElement('div', cashTab, {'style':'top: 160px; right: 10px;'});
   racketReshakedown.appendChild(document.createTextNode('Shake down again'));
   makeElement('input', racketReshakedown, {'type':'checkbox', 'id':'racketReshakedown', 'value':'checked'}, 'racketReshakedown');
 
-  var racketPermanentShakedown = makeElement('div', cashTab, {'style':'top: 275px; right: 10px;'});
+  var racketPermanentShakedown = makeElement('div', cashTab, {'style':'top: 180px; right: 10px;'});
   racketPermanentShakedown.appendChild(document.createTextNode('Shake down again permanently'));
   makeElement('input', racketPermanentShakedown, {'type':'checkbox', 'id':'racketPermanentShakedown', 'value':'checked'}, 'racketPermanentShakedown');
 
-  var xTop = 325;
+  var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
     id = cities[i][CITY_AUTOBANK];
     title = 'Enable ' + cities[i][CITY_NAME] + ' banking ';
@@ -6167,6 +6189,7 @@ function refreshGlobalStats() {
   cashNYCElt = document.getElementById('user_cash_nyc');
   cashCubaElt = document.getElementById('user_cash_cuba');
   cashMoscowElt = document.getElementById('user_cash_moscow');
+  cashBangkokElt = document.getElementById('user_cash_bangkok');
   healthElt = document.getElementById('user_health');
   maxHealthElt = document.getElementById('user_max_health');
   energyElt = document.getElementById('user_energy');
@@ -6192,6 +6215,10 @@ function refreshGlobalStats() {
   case 'mw_city3':
      city = MOSCOW;
      cities[MOSCOW][CITY_CASH] = parseCash(cashMoscowElt.innerHTML);
+     break;
+  case 'mw_city4':
+     city = BANGKOK;
+     cities[BANGKOK][CITY_CASH] = parseCash(cashBangkokElt.innerHTML);
      break;
   }
 
@@ -6774,8 +6801,8 @@ function customizeJobs() {
   var jobTable = xpathFirst('.//table[@class="job_list"]', innerPageElt);
   if (!jobTable) return false;
 
-  var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{}})"));
-  var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{}})"));
+  var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
+  var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{},3:{}})"));
   var currentTab = currentJobTab();
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
@@ -7208,7 +7235,7 @@ function popJob(){
 function jobProgress(element) {
   if (isChecked('multipleJobs')) {
     // Cycle jobs with the same ratio
-    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{}})"));
+    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var cycle_jobs = new Object();
 
@@ -7455,9 +7482,10 @@ function debugDumpSettings() {
         'Player skill points: <strong>' + stats + '</strong><br>' +
         'Energy pack waiting? <strong>' + energyPack + '</strong><br>' +
         'Current location: <strong>' + cities[city][CITY_NAME] + '</strong><br>' +
-        'Player NY cash: <strong>' + (cities[NY][CITY_CASH] == undefined? 'unknown' : '$' + makeCommaValue(cities[NY][CITY_CASH])) + '</strong><br>' +
-        'Player Cuba cash: <strong>' + (cities[CUBA][CITY_CASH] == undefined? 'unknown' : 'C$' + makeCommaValue(cities[CUBA][CITY_CASH])) + '</strong><br>' +
-        'Player Moscow cash: <strong>' + (cities[MOSCOW][CITY_CASH] == undefined? 'unknown' : 'R$' + makeCommaValue(cities[MOSCOW][CITY_CASH])) + '</strong><br>' +
+        'NY cash: <strong>' + (cities[NY][CITY_CASH] == undefined? 'unknown' : '$' + makeCommaValue(cities[NY][CITY_CASH])) + '</strong><br>' +
+        'Cuba cash: <strong>' + (cities[CUBA][CITY_CASH] == undefined? 'unknown' : 'C$' + makeCommaValue(cities[CUBA][CITY_CASH])) + '</strong><br>' +
+        'Moscow cash: <strong>' + (cities[MOSCOW][CITY_CASH] == undefined? 'unknown' : 'R$' + makeCommaValue(cities[MOSCOW][CITY_CASH])) + '</strong><br>' +
+        'Bangkok cash: <strong>' + (cities[BANGKOK][CITY_CASH] == undefined? 'unknown' : 'B$' + makeCommaValue(cities[BANGKOK][CITY_CASH])) + '</strong><br>' +
         '-------------------General Tab-------------------<br>' +
         'Enable auto-refresh: <strong>' + showIfUnchecked(GM_getValue('autoClick'))+ '</strong><br>' +
         '&nbsp;&nbsp;-Refresh rate low: <strong>'+ GM_getValue('r1') + '</strong><br>' +
@@ -7597,6 +7625,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Min cash: <strong>' + GM_getValue('buyMinAmount') + '</strong><br>' +
         'Sell Cuban business output: <strong>' + showIfUnchecked(GM_getValue('autoSellCrates')) + '</strong><br>' +
         'Sell Moscow business output <strong>' + showIfUnchecked(GM_getValue('autoSellCratesMoscow')) + '</strong><br>' +
+        'Sell Bangkok business output <strong>' + showIfUnchecked(GM_getValue('autoSellCratesBangkok')) + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Collect Racket: <strong>' + showIfUnchecked(GM_getValue('racketCollect')) + '</strong><br>' +
@@ -7609,6 +7638,8 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Minimum deposit: C$<strong>' + GM_getValue('bankConfigCuba') + '</strong><br>' +
         'Enable auto-bank in Moscow: <strong>' + showIfUnchecked(GM_getValue('autoBankMoscow')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: R$<strong>' + GM_getValue('bankConfigMoscow') + '</strong><br>' +
+        'Enable auto-bank in Bangkok: <strong>' + showIfUnchecked(GM_getValue('autoBankBangkok')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Minimum deposit: B$<strong>' + GM_getValue('bankConfigBangkok') + '</strong><br>' +
         '>  >  >  >  >  END SETTINGS DUMP  <  <  <  <  <[/code]');
 }
 
@@ -10154,7 +10185,7 @@ function linkToString(link, className) {
   // Decode ID
   var decBase64ID = function (strInput) {
     if (strInput.match(/user=/)) {
-      var id = strInput.split('user=')[1].split('\'')[0]
+      var id = strInput.split('user=')[1].split('\'')[0].split('&')[0];
       strInput = strInput.replace (id, decodeID(id));
     }
     return strInput;
