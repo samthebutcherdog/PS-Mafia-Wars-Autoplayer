@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.18',
-  build: '66',
+  build: '67',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -9576,14 +9576,14 @@ function logResponse(rootElt, action, context) {
   // Fight message
   var messagebox = xpathFirst('.//div[@class="fight_results"]', rootElt);
 
-  // Normal message
-  if (!messagebox) {
-    messagebox = xpathFirst('.//table[@class="messages"]', rootElt);
-  }
-
   // Crate selling pop-up message
   if (!messagebox) {
     messagebox = xpathFirst('.//div[@id="default_id_box"]', rootElt);
+  }
+
+  // Normal message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//table[@class="messages"]', rootElt);
   }
 
   if (action=='withdraw' && context) {
