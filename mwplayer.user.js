@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.18',
-  build: '65',
+  build: '66',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -57,7 +57,7 @@ if (window.location.href.match(/prompt_feed/))  {
   if (GM_getValue('isRunning')) {
     GM_setValue('postClicked', false);
     setGMTime('postTimer', '1 minute');
-    window.setTimeout(handlePublishing, 1000);
+    window.setTimeout(handlePublishing, 3000);
   }
   return;
 }
@@ -1285,9 +1285,6 @@ function doAutoPlay () {
   var previouslyIdle = idle;
   idle = false;
 
-  // Perform clicking of publish items here, excluding fighting items
-  doQuickClicks();
-
   // Don't let healing interrupt shake down again
   if (running && shakeDownFlag) {
     if (collectRacket()) return;
@@ -1561,16 +1558,6 @@ function autoSendEnergyPack() {
   }
 
   return false;
-}
-
-// Perform actions that does not require response logging here
-function doQuickClicks() {
-  // Click the level up bonus
-  var eltLevel = xpathFirst('.//a[contains(.,"Continue")]');
-  if (eltLevel && isChecked('autoLevelPublish')) {
-    //clickElement(eltLevel);
-    //DEBUG('Clicked to publish Level Up');
-  }
 }
 
 function autoHeal() {
@@ -6122,6 +6109,10 @@ function innerPageChanged() {
   // Reset auto-reload (if enabled).
   autoReload();
 
+  // Perform actions here not requiring response logging
+  doParseMessages();
+  doQuickClicks();
+
   // Customize the display.
   setListenContent(false);
   customizeMasthead();
@@ -6400,6 +6391,31 @@ function customizeLayout() {
   if (unkError) {
     DEBUG('Unknown error encountered, reloading...');
     window.location.reload();
+  }
+}
+
+// Perform click actions here
+function doQuickClicks() {
+  // Click the level up bonus
+  var eltLevel = xpathFirst('.//a[contains(@onclick,"levelUpBoost")]');
+  if (eltLevel && isChecked('autoLevelPublish')) {
+    clickElement(eltLevel);
+    DEBUG('Clicked to publish Level Up');
+  }
+}
+
+// Parse certain messages appearing on the message window
+function doParseMessages() {
+  var msgs = xpathFirst('//table[@class="messages"]');
+  if (msgs) {
+    for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
+      var currNode = msgs.firstChild.childNodes[i];
+
+      // Log Minipack kick-off
+      if (currNode.innerHTML.match(/Mini Energy Buff/)) {
+        addToLog('good Icon', currNode.innerHTML);
+      }
+    }
   }
 }
 
@@ -9557,9 +9573,17 @@ function logResponse(rootElt, action, context) {
   Autoplay.fx = goHome;
   Autoplay.delay = getAutoPlayDelay();
 
+  // Fight message
   var messagebox = xpathFirst('.//div[@class="fight_results"]', rootElt);
+
+  // Normal message
   if (!messagebox) {
     messagebox = xpathFirst('.//table[@class="messages"]', rootElt);
+  }
+
+  // Crate selling pop-up message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@id="default_id_box"]', rootElt);
   }
 
   if (action=='withdraw' && context) {
@@ -9901,9 +9925,10 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'sell output':
-      // Log any message from a sale of Cuban business output.
-      if (inner.match(/sold|collected/i)) {
-        addToLog(cities[city][CITY_CASH_CSS], inner);
+      // Log any message from a sale of business output.
+      var sellElt = xpathFirst('.//div[contains(.,"sold") or contains(.,"collected")]', messagebox);
+      if (sellElt) {
+        addToLog(cities[city][CITY_CASH_CSS], sellElt.innerHTML);
       } else {
         DEBUG(inner);
       }
