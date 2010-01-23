@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.19',
-  build: '69',
+  build: '70',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6507,7 +6507,7 @@ function customizeStats() {
   }
 
   if (healLinkElt) {
-    healLinkElt.href = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+    healLinkElt.href = 'http://mwfb.zynga.com/mwfb/' + 
                        SCRIPT.controller + 'hospital' +
                        SCRIPT.action + 'heal' +
                        SCRIPT.city + (city + 1);
@@ -6668,7 +6668,7 @@ function customizeProfile() {
       if (!removeElt) {
         // Not currently in mafia. Show option to add.
         statsDiv.appendChild(document.createTextNode(' | '));
-        makeElement('a', statsDiv, {'href':'http://mwfb.zynga.com/mwfb/' + SCRIPT.name + SCRIPT.controller + 'war' + SCRIPT.action + 'add' + SCRIPT.city + (city + 1) + '&friend_id=' + id}).appendChild(document.createTextNode('Add to Mafia'));
+        makeElement('a', statsDiv, {'href':'http://mwfb.zynga.com/mwfb/' + SCRIPT.controller + 'war' + SCRIPT.action + 'add' + SCRIPT.city + (city + 1) + '&friend_id=' + id}).appendChild(document.createTextNode('Add to Mafia'));
       }
 
       // Not currently in mafia. Show if alive or dead
@@ -6750,7 +6750,7 @@ function customizeProfile() {
 
       // Promote
       statsDiv.appendChild(document.createTextNode(' | '));
-      makeElement('a', statsDiv, {'href':'http://mwfb.zynga.com/mwfb/' + SCRIPT.name + SCRIPT.controller + 'group' + SCRIPT.action + 'view' + SCRIPT.city + (city + 1) + '&promote=yes&uid=' + id}).appendChild(document.createTextNode('Promote'));
+      makeElement('a', statsDiv, {'href':'http://mwfb.zynga.com/mwfb/' + SCRIPT.controller + 'group' + SCRIPT.action + 'view' + SCRIPT.city + (city + 1) + '&promote=yes&uid=' + id}).appendChild(document.createTextNode('Promote'));
 
       if (removeElt) {
         // In my mafia. Show options to add/remove from war list.
@@ -8658,7 +8658,7 @@ function loadHome() {
 }
 
 function loadBank() {
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' +
                       SCRIPT.controller + 'bank' +
                       SCRIPT.action + 'view' +
                       SCRIPT.city + (city + 1);
@@ -8666,7 +8666,7 @@ function loadBank() {
 
 function loadJobTab(tabno) {
   DEBUG('Switching to job tab ' + tabno + '.');
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' +
                       SCRIPT.controller + 'job' +
                       SCRIPT.action + 'view' +
                       SCRIPT.city + (city + 1) +
@@ -8675,28 +8675,28 @@ function loadJobTab(tabno) {
 }
 
 function loadFightNav() {
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' +
                       SCRIPT.controller + 'fight' +
                       SCRIPT.action + 'view' +
                       SCRIPT.city + (city + 1);
 }
 
 function loadPropertyNav() {
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' +
                       SCRIPT.controller + 'property' +
                       SCRIPT.action + 'view' +
                       SCRIPT.city + (city + 1);
 }
 
 function loadBusinessesNav() {
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' +
                       SCRIPT.controller + 'business' +
                       SCRIPT.action + 'view' +
                       SCRIPT.city + (city + 1);
 }
 
 function loadAccept() {
-  var link = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  var link = 'http://mwfb.zynga.com/mwfb/' + 
              SCRIPT.controller + 'recruit' +
              SCRIPT.action + 'accept' +
              SCRIPT.user + 'all';
@@ -8716,7 +8716,7 @@ function loadAccept() {
 }
 
 function loadDeleteNews() {
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' +
                       SCRIPT.controller + 'index' +
                       SCRIPT.action + 'deletenews' +
                       SCRIPT.city + (city + 1);
@@ -8730,7 +8730,7 @@ function loadLocation(toCity) {
       return;
   }
 
-  document.location = 'http://mwfb.zynga.com/mwfb/' + SCRIPT.name +
+  document.location = 'http://mwfb.zynga.com/mwfb/' + 
                       SCRIPT.controller + 'travel' +
                       SCRIPT.action + 'travel' +
                       SCRIPT.city + (city + 1) +
