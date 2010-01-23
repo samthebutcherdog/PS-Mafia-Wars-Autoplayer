@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.20',
-  build: '72',
+  build: '73',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -56,8 +56,8 @@ var SCRIPT = {
 if (window.location.href.match(/prompt_feed/))  {
   if (GM_getValue('isRunning')) {
     GM_setValue('postClicked', false);
-    setGMTime('postTimer', '1 minute');
-    window.setTimeout(handlePublishing, 3000);
+    setGMTime('postTimer', '00:10');
+    window.setTimeout(handlePublishing, 500);
   }
   return;
 }
@@ -1013,7 +1013,31 @@ if (!initialized) {
     ['Break Into An Architect\'s Office',134,82,6,MOSCOW,185],
     ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
     ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
-    ['Assault The Mansion Walls',148,85,6,MOSCOW,211]
+    ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
+    // BANGKOK EPISODE 1
+    ['Move Stolen Art Through Suvarnabhumi Airport',72,1,1,BANGKOK,100],
+    ['Show A Cocky Biker Who\'s In Charge',64,2,1,BANGKOK,91],
+    ['Take On Local Motorcycle Thugs',192,3,1,BANGKOK,228],
+    ['Meet A Gang\'s Rep In A Go-Go Bar',80,5,1,BANGKOK,109],
+    ['Raid One Of Suchart\'s Gambling Dens',112,9,1,BANGKOK,155],
+    ['Trash The Low-Rent Casino',88,10,1,BANGKOK,118],
+    ['Intercept An Ammo Shipment',80,11,1,BANGKOK,109],
+    ['Sneak It On To A Chinese Cargo Ship',88,15,1,BANGKOK,118],
+    ['Bribe A Dock Guard',64,16,1,BANGKOK,91],
+    ['Blow Up Suchart\'s Warehouse',136,17,1,BANGKOK,191],
+    ['Take Down Boss Suchart',100,18,1,BANGKOK,100],
+    // BANGKOK EPISODE 2
+    ['Force A Local Landowner To Sell',52,20,2,BANGKOK,64],
+    ['Receive A Kickback From The Buyer',56,21,2,BANGKOK,68],
+    ['Attack A Paramilitary Police Post',104,22,2,BANGKOK,112],
+    ['Set Up A Phony Business',48,24,2,BANGKOK,60],
+    ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64],
+    ['Resell The Stolen Supplies',52,26,2,BANGKOK,64],
+    ['Pay Off The Guards At Bangkwang Prison',36,30,2,BANGKOK,44],
+    ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48],
+    ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44],
+    ['Expose A Crooked Royal Thai Police Officer',72,36,2,BANGKOK,88],
+    ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100]
   );
 
   var missionTabs = [];
@@ -1043,6 +1067,10 @@ if (!initialized) {
     'Avtoritet',
     'Vor',
     'Pakhan'
+  );
+  missionTabs[BANGKOK] = new Array(
+    'Brawler',
+    'Criminal'
   );
 
   var requirementJob = new Array(
@@ -1937,6 +1965,7 @@ function calcJobinfo() {
   var energyBonus = 1 - (GM_getValue('selectEnergyBonus', 0) / 100);
   var expBonusMultiplier = 1 + (GM_getValue('selectExpBonus', 0) / 100);
   missions.forEach(function(mission) {
+
     var cost = mission[1];
     if (cost > 5) {
       // Adjust for energy bonus.
@@ -1949,9 +1978,7 @@ function calcJobinfo() {
     }
     // Adjust for mastermind.
     reward = Math.floor(reward * expBonusMultiplier);
-    //var job_ratio = Math.round(reward / cost * 100) / 100;
     mission[6] = reward;
-    //mission[7] = job_ratio;
     mission[8] = cost;
   });
   didJobCalculations = true;
@@ -3049,12 +3076,12 @@ function handleVersionChange() {
   addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' build ' + SCRIPT.build);
 
   // Check for invalid settings and upgrade them.
-  
+
   // Change heal location to New York to be on the safe-side
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 72) {
     if (GM_getValue('healLocation') > 2)
       GM_setValue('healLocation', 0);
-  }  
+  }
 
   // In an old version, the bonus had been up to 15%.
   var val = GM_getValue('selectEnergyBonus');
@@ -6018,13 +6045,15 @@ function handlePublishing() {
   var okElt = xpathFirst('.//input[@id="okay"]');
   var closeElt = xpathFirst('.//input[@id="fb_dialog_cancel_button"]');
 
-  // If (1) "Ok" is there or
-  //    (2) Pub/Skip already clicked or
-  //    (3) It's been 1 minute since the post window loaded
-  // Then close the post window manually
-  if (okElt || GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
-    clickElement(closeElt);
+  // If OK button is found, close the window by pressing it
+  if (okElt) {
     clickElement(okElt);
+
+  // If (1) Pub/Skip already clicked or
+  //    (2) It's been 10 seconds since the post window loaded
+  // Then close the window
+  } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
+    clickElement(closeElt);
 
   // Perform publishing logic once posting buttons have loaded
   } else if (skipElt && pubElt) {
@@ -6037,10 +6066,9 @@ function handlePublishing() {
         else
           clickElement(skipElt);
 
-        // Wait for 5 seconds to ensure post is successful
-        // before trying to close window manually
+        // Wait for half a second before trying to close window manually
         GM_setValue('postClicked', true);
-        window.setTimeout(handlePublishing, 5000);
+        window.setTimeout(handlePublishing, 500);
         return true;
       }
       return false;
@@ -6075,7 +6103,7 @@ function handlePublishing() {
   }
 
   // Retry until window is closed
-  window.setTimeout(handlePublishing, 1000);
+  window.setTimeout(handlePublishing, 500);
   return;
 }
 
@@ -6818,20 +6846,21 @@ function customizeJobs() {
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
   var reselectJob = false;
-  var jobInfo = xpath('.//td[@class="job_name"]', innerPageElt);
-  var energies = xpath('.//td[@class="job_energy"]/span[@class="bold_number"]', innerPageElt);
-  var rewards = xpath('.//td[@class="job_reward"]/span[@class="bold_number"]', innerPageElt);
-  var monies = xpath('.//td[@class="job_reward"]/span[@class="money"]/strong', innerPageElt);
-  var requiredItems = xpath('.//td[@class="job_required_items"]', innerPageElt);
-  var jobButton = xpath('.//td[@class="job_action"]', innerPageElt);
+  var jobInfo = xpath('.//td[contains(@class,"job_name")]', innerPageElt);
+  var energies = xpath('.//td[contains(@class,"job_energy")]/span[@class="bold_number"]', innerPageElt);
+  var rewards = xpath('.//td[contains(@class,"job_reward")]/span[@class="bold_number"]', innerPageElt);
+  var monies = xpath('.//td[contains(@class,"job_reward")]/span[@class="money"]/strong', innerPageElt);
+  var requiredItems = xpath('.//td[contains(@class,"job_required_items")]', innerPageElt);
+  var jobButton = xpath('.//td[contains(@class,"job_action")]', innerPageElt);
   var masteryLevel;
   var masteredJobsCount = 0;
   for (var i = 0, iLength = energies.snapshotLength; i < iLength; ++i) {
+    var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
+    var jobMatch = missions.searchArray(jobName, 0)[0];
+
     // Determine available jobs
     if (isChecked('multipleJobs') &&
         GM_getValue('isRunning') === true) {
-      var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim().replace(/<[/]*fb:intl>/gi, '');
-      var jobMatch = missions.searchArray(jobName, 0)[0];
 
       if (jobMatch != undefined) {
         // Ignore mastered jobs
@@ -6862,6 +6891,12 @@ function customizeJobs() {
     makeElement('span', elt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
 
     if (monies.snapshotItem(i)) {
+      if (jobMatch) {
+        missions[jobMatch][6] = reward;
+        missions[jobMatch][7] = ratio;
+        missions[jobMatch][8] = cost;
+      }
+
       var currency = cities[city][CITY_CASH_SYMBOL];
       var money = parseCash(monies.snapshotItem(i).firstChild.nodeValue);
       var mratio = makeCommaValue(Math.round(money / cost));
@@ -7799,7 +7834,8 @@ function parsePlayerUpdates(messagebox) {
       // Help requested by a fellow mafia member.
       var userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
       var elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
-      if (elt) {
+      // FIXME: Remove exclusion code for Bangkok later
+      if (elt && !elt.getAttribute('onclick').match(/xw_city=4/)) {
         // Help immediately.
         Autoplay.fx = function() {
           clickAction = 'help';
