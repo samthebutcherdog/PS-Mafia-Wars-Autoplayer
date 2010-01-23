@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.19
+* @version 1.0.20
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.19
+// @version     1.0.20
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.19',
-  build: '71',
+  version: '1.0.20',
+  build: '72',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1520,8 +1520,7 @@ function autoAccept() {
   // Get the "accept all" link.
   elt = xpathFirst('.//a[contains(., "accept all")]', innerPageElt);
   if (!elt) {
-    DEBUG('Can\'t find accept link to click. Using fallback method.');
-    loadAccept();
+    DEBUG('Can\'t find accept link to click. ');
     return true;
   }
 
@@ -3048,10 +3047,14 @@ function upgradeFightRobTab() {
 
 function handleVersionChange() {
   addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' build ' + SCRIPT.build);
-  GM_setValue('version', SCRIPT.version);
-  GM_setValue('build', SCRIPT.build);
 
   // Check for invalid settings and upgrade them.
+  
+  // Change heal location to New York to be on the safe-side
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 72) {
+    if (GM_getValue('healLocation') > 2)
+      GM_setValue('healLocation', 0);
+  }  
 
   // In an old version, the bonus had been up to 15%.
   var val = GM_getValue('selectEnergyBonus');
@@ -3134,6 +3137,10 @@ function handleVersionChange() {
 
   // Upgrade Misc Tab settings
   clearOldCheckBoxStatuValues()
+
+  // Update saved script version
+  GM_setValue('version', SCRIPT.version);
+  GM_setValue('build', SCRIPT.build);
 }
 
 function clearOldCheckBoxStatuValues() {
@@ -6507,7 +6514,7 @@ function customizeStats() {
   }
 
   if (healLinkElt) {
-    healLinkElt.href = 'http://mwfb.zynga.com/mwfb' + 
+    healLinkElt.href = 'http://mwfb.zynga.com/mwfb' +
                        SCRIPT.controller + 'hospital' +
                        SCRIPT.action + 'heal' +
                        SCRIPT.city + (city + 1);
@@ -8131,6 +8138,14 @@ function autoWar() {
   // Check the timer, do we even need to go further?
   if (timeLeftGM('warTimer') > 0) return false;
 
+  // Bangkok doesn't have fighting/warring yet
+  if (city == BANGKOK) {
+    Autoplay.fx = function() { goLocation(MOSCOW); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+
   // We need to be on the war page to go any further
   if (!onWarNav()) {
     Autoplay.fx = goWarNav;
@@ -8657,87 +8672,6 @@ function loadHome() {
   document.location = 'http://apps.facebook.com/inthemafia/index.php';
 }
 
-function loadBank() {
-  document.location = 'http://mwfb.zynga.com/mwfb' +
-                      SCRIPT.controller + 'bank' +
-                      SCRIPT.action + 'view' +
-                      SCRIPT.city + (city + 1);
-}
-
-function loadJobTab(tabno) {
-  DEBUG('Switching to job tab ' + tabno + '.');
-  document.location = 'http://mwfb.zynga.com/mwfb' +
-                      SCRIPT.controller + 'job' +
-                      SCRIPT.action + 'view' +
-                      SCRIPT.city + (city + 1) +
-                      '&tab=' + tabno +
-                      '&bar=' + (tabno < 6? '0' : '1');
-}
-
-function loadFightNav() {
-  document.location = 'http://mwfb.zynga.com/mwfb' +
-                      SCRIPT.controller + 'fight' +
-                      SCRIPT.action + 'view' +
-                      SCRIPT.city + (city + 1);
-}
-
-function loadPropertyNav() {
-  document.location = 'http://mwfb.zynga.com/mwfb' +
-                      SCRIPT.controller + 'property' +
-                      SCRIPT.action + 'view' +
-                      SCRIPT.city + (city + 1);
-}
-
-function loadBusinessesNav() {
-  document.location = 'http://mwfb.zynga.com/mwfb' +
-                      SCRIPT.controller + 'business' +
-                      SCRIPT.action + 'view' +
-                      SCRIPT.city + (city + 1);
-}
-
-function loadAccept() {
-  var link = 'http://mwfb.zynga.com/mwfb' + 
-             SCRIPT.controller + 'recruit' +
-             SCRIPT.action + 'accept' +
-             SCRIPT.user + 'all';
-
-  if (document.location == link) {
-    // Sometimes the "+XX" still displays after accepting by URL.
-    DEBUG('Already invited; reloading to clear masthead.');
-    loadHome();
-    return;
-  }
-
-  // Accept all invitations.
-  addToLog('process Icon', 'Accepting ' + invites + ' mafia ' +
-           (invites > 1 ? ' invites.' : ' invite.'));
-  window.location = link;
-  return;
-}
-
-function loadDeleteNews() {
-  document.location = 'http://mwfb.zynga.com/mwfb' +
-                      SCRIPT.controller + 'index' +
-                      SCRIPT.action + 'deletenews' +
-                      SCRIPT.city + (city + 1);
-}
-
-function loadLocation(toCity) {
-  var cityDest = parseInt(toCity);
-
-  if (cityDest < 0 || cityDest >= cities.length) {
-      addToLog('warning Icon', 'BUG DETECTED: Unrecognized destination "' + cityDest + '".');
-      return;
-  }
-
-  document.location = 'http://mwfb.zynga.com/mwfb' + 
-                      SCRIPT.controller + 'travel' +
-                      SCRIPT.action + 'travel' +
-                      SCRIPT.city + (city + 1) +
-                      '&destination=' + (cityDest + 1) +
-                      '&from=index';
-}
-
 function goLinkElement(elt) {
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Null element passed to goLinkElement().');
@@ -8840,8 +8774,7 @@ function goWarNav() {
 function goBank() {
   var elt = xpathFirst('//a[@class="bank_deposit"]');
   if (!elt) {
-    addToLog('warning Icon', 'Can\'t find bank link to click. Using fallback method.');
-    loadBank();
+    addToLog('warning Icon', 'Can\'t find bank link to click.');
     return;
   }
   clickElement(elt);
@@ -8922,11 +8855,6 @@ function goFightNav() {
       break;
     }
   }
-  if (!elt) {
-    addToLog('warning Icon', 'Can\'t find fight nav link to click. Using fallback method.');
-    loadFightNav();
-    return;
-  }
   clickElement(elt);
   DEBUG('Clicked to go to fights.');
 }
@@ -8960,11 +8888,6 @@ function goPropertyNav() {
       break;
     }
   }
-  if (!elt) {
-    addToLog('warning Icon', 'Can\'t find properties nav link to click. Using fallback method.');
-    loadPropertyNav();
-    return;
-  }
   clickElement(elt);
   DEBUG('Clicked to go to properties.');
 }
@@ -8972,8 +8895,7 @@ function goPropertyNav() {
 function goBusinessesNav() {
   var elt = xpathFirst('//*[@id="nav_link_businesses"]//a');
   if (!elt) {
-    addToLog('warning Icon', 'Can\'t find businesses nav link to click. Using fallback method.');
-    loadBusinessesNav();
+    addToLog('warning Icon', 'Can\'t find businesses nav link to click.');
     return;
   }
   clickElement(elt);
@@ -8983,8 +8905,7 @@ function goBusinessesNav() {
 function goDeleteNews() {
   var elt = xpathFirst('//a[contains(text(), "Clear Updates")]');
   if (!elt) {
-    DEBUG('Can\'t find delete news link to click. Using fallback method.');
-    loadDeleteNews();
+    DEBUG('Can\'t find delete news link to click. ');
     return;
   }
   clickElement(elt);
@@ -9019,8 +8940,7 @@ function goLocation(toCity) {
   }
 
   addToLog('warning Icon', 'Unable to find ' + cities[toCity][CITY_NAME] +
-           ' travel link. Using fallback method.');
-  loadLocation(toCity);
+           ' travel link. ');
 }
 
 function handleResponse(responseDetails, action, context) {
