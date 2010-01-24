@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.20',
-  build: '73',
+  build: '74',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -439,7 +439,7 @@ var experienceIcon = '<img src="' +
                     'QHUzI2Bh8GazkvTRMeXRUFgiNMajcOK05IG2UgKogFSywXVTAlJwg4jnBtNB1EWFyObElpcVcYFGE8jVJoHAEMPkZfGo0hMQECcgILQCYAiGRiEvQY9ONNCwiIJGxxkehMBH+DFAxwRGBiIAA7Cg==' +
                     '" />';
 
-var badIcon = '<img src="' +
+var omgIcon = '<img src="' +
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADW0lEQVR42l2TW2gUVxzGv7Nz2yS7m2xMNpusuWxq3EKLfSsJjVDEtlgLIuQiWJGKF4qlVFpL2bRpDN2l1FYRxZcGBL' +
                     'VaDaIkD5XapIJIQl+KNj4ktFm7ZrOX7H1mNzszOzM9O9G09j8cGGbO9zvn+18I/hfhUMjLctxBXhC2EV33GoYBg5BQaXV1WlXksc7NvtB/95NnL08eP2ZYhhnlCtLxJ1cucisz9yGnk+Y/oX4DGnt64dmzVy1yws' +
                     'myrg9v8vm0dcBSOMzwPD8u3bm9e+HcaVid9WAF6zrdoKssl1DKpNF19CNwW1+/qShKfwVi7kksLweKUz/7F8+fQbWrCbzNDr0g/QugBIvNBkUSUUjE0fn+hyA9vcGOrq4hEo1EvNaCNP9g3yBnc7vhenMH3O/ux9' +
@@ -542,7 +542,7 @@ var killedMobsterIcon = '<img src="' +
                     'YxW9vHErEZwTtUFsZPUnrVaiiuTEYqWIacklbsezleU0ctjKFFt82utv0SP/9kK' +
                     '" />';
 
-var goodIcon = '<img src="' +
+var yeahIcon = '<img src="' +
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADA0lEQVR42o2TWWgTURSG/8nMnUlsNTFNTNN0IVpbu6i0GFD0xQ2xD4pCq2JBpa2CBVFwI2KqYgISX3wRtSrqq2ARBL' +
                     'F1AZG2UrTigxIJxEbSNm3aLE06yUwm42TEuDyIBwYu95zz3bPMT+EvC4x9tROG6eQ4blNOztnVSxkBPs2/FAThdk11TeD3eOrnYSw4Rmto+lJCw5+6/vEReREcQTgVU32WBQZsrnLgSMNOUScw3pwkuWqX10oFQP' +
                     'BbkGZZ9mHf+OtdF4buoKTIAC1hf+FlIC0ImFGAPes6sL3E0adU05qHqCHjkxPux5NvnBdH7sKmN0FLA1XFZnjXn1XzDz7vQSqbREZ5MxSPwOU4hK2GZs9ye/U5KjQesicY3rfpSTdZYTBjMQF0tIzKhVZ4NnhVwN' +
@@ -3996,14 +3996,15 @@ function createLogBox() {
     '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
     '#mafiaLogBox .logEvent.pause.Icon{background-image:url(' + stripURI(pauseIcon) + ')}' +
     '#mafiaLogBox .logEvent.play.Icon{background-image:url(' + stripURI(playIcon) + ')}' +
-    '#mafiaLogBox .logEvent.good.Icon{background-image:url(' + stripURI(goodIcon) + ')}' +
-    '#mafiaLogBox .logEvent.bad.Icon{background-image:url(' + stripURI(badIcon) + ')}' +
+    '#mafiaLogBox .logEvent.yeah.Icon{background-image:url(' + stripURI(yeahIcon) + ')}' +
+    '#mafiaLogBox .logEvent.omg.Icon{background-image:url(' + stripURI(omgIcon) + ')}' +
     '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
     '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
     '#mafiaLogBox .logEvent.health.Icon{background-image:url(' + stripURI(healthIcon) + ')}' +
     '#mafiaLogBox .logEvent.cash.Icon{background-image:url(' + stripURI(cashIcon) + ')}' +
     '#mafiaLogBox .logEvent.cashCuba.Icon{background-image:url(' + stripURI(cashCubaIcon) + ')}' +
     '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
+    '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashCubaIcon) + ')}' +
     '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}'
   ));
 
@@ -6475,7 +6476,7 @@ function doParseMessages() {
 
       // Log Minipack kick-off
       if (currNode.innerHTML.match(/Mini Energy Buff/)) {
-        addToLog('good Icon', currNode.innerHTML);
+        addToLog('yeah Icon', currNode.innerHTML);
       }
     }
   }
@@ -6936,14 +6937,14 @@ function customizeJobs() {
       elt = bestJobs.pop().parentNode;
       makeElement('br', elt);
       elt = makeElement('span', elt, {'style':'color:#52E259; font-size: 10px'});
-      makeElement('img', elt, {'src':stripURI(goodIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      makeElement('img', elt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
       elt.appendChild(document.createTextNode(' BEST'));
     }
     while (worstJobs.length) {
       elt = worstJobs.pop().parentNode;
       makeElement('br', elt);
       elt = makeElement('span', elt, {'style':'color:#EC2D2D; font-size: 10px'});
-      makeElement('img', elt, {'src':stripURI(badIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      makeElement('img', elt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
       elt.appendChild(document.createTextNode(' WORST'));
     }
   }
@@ -7016,7 +7017,7 @@ function customizeFight() {
     // Mark targets that should be avoided.
     if (blacklist.indexOf(opponent.id) != -1) {
       var parentElt = opponent.profile.parentNode;
-      var elt = makeElement('img', null, {'src':stripURI(badIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already lost to this opponent during automatic play.'});
+      var elt = makeElement('img', null, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already lost to this opponent during automatic play.'});
       parentElt.insertBefore(elt, parentElt.firstChild);
     }
   }
@@ -7040,7 +7041,7 @@ function customizeHitlist() {
     // Mark targets that should be avoided.
     if (blacklist.indexOf(opponent.id) != -1) {
       var parentElt = opponent.profile.parentNode;
-      var elt = makeElement('img', null, {'src':stripURI(badIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already lost to this opponent during automatic play.'});
+      var elt = makeElement('img', null, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already lost to this opponent during automatic play.'});
       parentElt.insertBefore(elt, parentElt.firstChild);
     }
 
@@ -8097,7 +8098,7 @@ function autoLotto() {
       for (var i = 0, numPrizes=prizes.length; i < numPrizes; ++i) {
         var description = prizes[i].innerHTML.untag().trim();
         if (description) {
-          addToLog('good Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Prize</span>: ' + description);
+          addToLog('yeah Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Prize</span>: ' + description);
         }
       }
     }
@@ -8654,7 +8655,7 @@ function propertyGet() {
     if (bestProperty.row > 0) {
       allPropertyRows.snapshotItem(bestProperty.row).style.backgroundColor="#020";
       best = makeElement('div', bestProperty.path, {'style':'color:#52E259; font-size: 10px; margin-top:10px'});
-      makeElement('img', best, {'src':stripURI(goodIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      makeElement('img', best, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
       best.appendChild(document.createTextNode(' BEST'));
     }
 
@@ -9434,7 +9435,7 @@ function logFightResponse(rootElt, resultElt, context) {
     if (experience) {
       result += ' <span class="good">' + 'WON ' + cost + '</span>' + ' and ' +
                 '<span class="good">' + experience + ' experience</span>.';
-      addToLog('good Icon', result);
+      addToLog('yeah Icon', result);
     } else {
       result += ' <span class="bad">' +
                 'LOST ' + cost + '</span>.';
@@ -9466,7 +9467,7 @@ function logFightResponse(rootElt, resultElt, context) {
           setFightOpponentAvoid(context);
         }
       }
-      addToLog('bad Icon', result);
+      addToLog('omg Icon', result);
     }
 
     // Check for any fatalities.
@@ -9474,7 +9475,7 @@ function logFightResponse(rootElt, resultElt, context) {
       addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
     }
     if (innerNoTags.indexOf('You were snuffed') != -1) {
-      addToLog('bad Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
+      addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
     }
 
     // Look for any loot.
@@ -9692,7 +9693,7 @@ function logResponse(rootElt, action, context) {
         var cashGain = innerNoTags.match(/gained.*?([A-Z]?\$[\d,]*\d)/i);
         var cashWon = RegExp.$1
         var experience = innerNoTags.match(/\d+\s+experience\s+points?/i);
-        addToLog('good Icon', 'Hit ' + linkToString(context.profile, 'user') +
+        addToLog('yeah Icon', 'Hit ' + linkToString(context.profile, 'user') +
                  ', <span class="good">WON ' + cashWon + '</span> and ' +
                  '<span class="good">' + experience + '</span>.');
         GM_setValue('hitmanWinCountInt',GM_getValue('hitmanWinCountInt',0)+1);
@@ -9730,7 +9731,7 @@ function logResponse(rootElt, action, context) {
           setHitmanOpponentAvoid(context.id);
           result += ' Avoiding.';
         }
-        addToLog('bad Icon', result);
+        addToLog('omg Icon', result);
       } else if (innerNoTags.indexOf('This player is currently part of your mafia') != -1) {
         if (context.id) {
           setHitmanOpponentAvoid(context.id);
@@ -9782,12 +9783,12 @@ function logResponse(rootElt, action, context) {
       // Cycle war list after successful war declaration
       else if (innerNoTags.indexOf('You successfully declared war') != -1) {
         cycleSavedList('autoWarTargetList');
-        addToLog('good Icon', inner);
+        addToLog('yeah Icon', inner);
       }
       // War attack result
       else if (innerNoTags.indexOf('WON') != -1 ||
                innerNoTags.indexOf('LOST') != -1) {
-        var logIcon = innerNoTags.indexOf('LOST') != -1 ? 'bad Icon' : 'good Icon';
+        var logIcon = innerNoTags.indexOf('LOST') != -1 ? 'omg Icon' : 'yeah Icon';
         addToLog(logIcon, inner.split('points.')[0] + 'points.</div>');
       }
       else {
