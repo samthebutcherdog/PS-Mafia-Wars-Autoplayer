@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.20
+* @version 1.0.21
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.20
+// @version     1.0.21
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.20',
-  build: '74',
+  version: '1.0.21',
+  build: '75',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -706,7 +706,7 @@ if (!initialized) {
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
   staminaSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific opponents';
   staminaSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect hitlist bounties';
-  staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Whack \'em y\'all mafia!';
+  staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
@@ -1015,28 +1015,36 @@ if (!initialized) {
     ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
     ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
     // BANGKOK EPISODE 1
-    ['Move Stolen Art Through Suvarnabhumi Airport',72,1,1,BANGKOK,100],
-    ['Show A Cocky Biker Who\'s In Charge',64,2,1,BANGKOK,91],
-    ['Take On Local Motorcycle Thugs',192,3,1,BANGKOK,228],
-    ['Meet A Gang\'s Rep In A Go-Go Bar',80,5,1,BANGKOK,109],
-    ['Raid One Of Suchart\'s Gambling Dens',112,9,1,BANGKOK,155],
-    ['Trash The Low-Rent Casino',88,10,1,BANGKOK,118],
-    ['Intercept An Ammo Shipment',80,11,1,BANGKOK,109],
-    ['Sneak It On To A Chinese Cargo Ship',88,15,1,BANGKOK,118],
-    ['Bribe A Dock Guard',64,16,1,BANGKOK,91],
-    ['Blow Up Suchart\'s Warehouse',136,17,1,BANGKOK,191],
+    ['Move Stolen Art Through Suvarnabhumi Airport',71,1,1,BANGKOK,111],
+    ['Show A Cocky Biker Who\'s In Charge',63,2,1,BANGKOK,101],
+    ['Take On Local Motorcycle Thugs',189,3,1,BANGKOK,253],
+    ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120], // Choice Point
+    ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133], // TRIAD
+    ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102], // TRIAD
+    ['Torch A Building For Insurance',110,9,1,BANGKOK,172], // YAKUZA
+    ['Arrange An "Accident" For A Witness',71,9,1,BANGKOK,111], // YAKUZA
+    ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94], // Choice Point
+    ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102], // TRIAD
+    ['Bribe A Dock Guard',52,16,1,BANGKOK,78], // TRIAD
+    ['Deliver It To A Japanese Front Company',94,15,1,BANGKOK,130], // YAKUZA
+    ['Pay Off A Corrupt Police Officer',64,16,1,BANGKOK,91], // YAKUZA
+    ['Blow Up Suchart\'s Warehouse',111,17,1,BANGKOK,164],
     ['Take Down Boss Suchart',100,18,1,BANGKOK,100],
     // BANGKOK EPISODE 2
-    ['Force A Local Landowner To Sell',52,20,2,BANGKOK,64],
-    ['Receive A Kickback From The Buyer',56,21,2,BANGKOK,68],
-    ['Attack A Paramilitary Police Post',104,22,2,BANGKOK,112],
-    ['Set Up A Phony Business',48,24,2,BANGKOK,60],
-    ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64],
-    ['Resell The Stolen Supplies',52,26,2,BANGKOK,64],
-    ['Pay Off The Guards At Bangkwang Prison',36,30,2,BANGKOK,44],
-    ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48],
-    ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44],
-    ['Expose A Crooked Royal Thai Police Officer',72,36,2,BANGKOK,88],
+    ['Force A Local Landowner To Sell',67,20,2,BANGKOK,95],
+    ['Receive A Kickback From The Buyer',73,21,2,BANGKOK,102],
+    ['Attack A Paramilitary Police Post',136,22,2,BANGKOK,167],
+    ['Set Up A Phony Business',62,24,2,BANGKOK,89], // Choice Point
+    ['Set Up A Bogus Chess Tournament',57,25,2,BANGKOK,77], // TRIAD
+    ['Rob The Chess Masters',51,26,2,BANGKOK,72], // TRIAD
+    ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64], // YAKUZA
+    ['Resell The Stolen Supplies',52,26,2,BANGKOK,64], // YAKUZA
+    ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65], // Choice Point
+    ['Break A Triad Hitman Out',57,31,2,BANGKOK,77], // TRIAD
+    ['Help Rub Out A Bosozoku Leader',62,32,2,BANGKOK,89], // TRIAD
+    ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48], // YAKUZA
+    ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44], // YAKUZA
+    ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
     ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100]
   );
 
@@ -1463,8 +1471,15 @@ function doAutoPlay () {
   if (autoStaminaSpendif) {
     if (autoStaminaSpend()) return;
 
+    // Attempt failed. Randomize stamina setting (if set)
+    if (isSame('staminaSpendHow', STAMINA_HOW_RANDOM)) {
+      randomizeStamina();
+      return;
+
     // Attempt failed. Let some other action happen before trying again
-    skipStaminaSpend = true;
+    } else {
+      skipStaminaSpend = true;
+    }
   }
   if (autoMissionif) {
     autoMission();
@@ -2277,6 +2292,9 @@ function autoFight(how) {
   } else if (how == STAMINA_HOW_FIGHT_LIST) {
     var id = parseInt(GM_getValue('fightList', ''));
     if (!id) {
+      // If nothing is here, and fighting is "random", fight someone else
+      if (isSame('staminaSpendHow', STAMINA_HOW_RANDOM)) return false;
+
       // The user-specified list is empty or invalid.
       addToLog('warning Icon', 'Can\'t fight because the list of opponents is empty or invalid. Turning automatic fighting off.');
       GM_setValue('staminaSpend', 0);
@@ -6055,6 +6073,7 @@ function handlePublishing() {
   // Then close the window
   } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
     clickElement(closeElt);
+    clickElement(skipElt);
 
   // Perform publishing logic once posting buttons have loaded
   } else if (skipElt && pubElt) {
@@ -9526,8 +9545,6 @@ function logFightResponse(rootElt, resultElt, context) {
 function randomizeStamina() {
   if (isSame('staminaSpendHow', STAMINA_HOW_RANDOM)) {
     var spendMode = Math.floor(Math.random()*(staminaSpendChoices.length - 1));
-    var fightLoc = Math.floor(Math.random()*cities.length);
-    var hitmanLoc = Math.floor(Math.random()*cities.length);
 
     // Randomize stamina spend mode
     if (spendMode != newStaminaMode) {
@@ -9536,13 +9553,16 @@ function randomizeStamina() {
     }
 
     // Randomize fight location
-    if (!isSame('fightLocation', fightLoc)) {
+    if ((spendMode == STAMINA_HOW_FIGHT_RANDOM || spendMode == STAMINA_HOW_FIGHT_LIST) &&
+        !isSame('fightLocation', fightLoc)) {
+      var fightLoc = Math.floor(Math.random()*cities.length);
       GM_setValue('fightLocation', fightLoc);
       DEBUG('Fight location set to : ' + cities[GM_getValue('fightLocation')][CITY_NAME]);
     }
 
     // Randomize hitman location
-    if (!isSame('hitmanLocation', hitmanLoc)) {
+    if ((spendMode == STAMINA_HOW_HITMAN) && !isSame('hitmanLocation', hitmanLoc)) {
+      var hitmanLoc = Math.floor(Math.random()*cities.length);
       GM_setValue('hitmanLocation', hitmanLoc);
       DEBUG('Hitman location set to : ' + cities[GM_getValue('hitmanLocation')][CITY_NAME]);
     }
