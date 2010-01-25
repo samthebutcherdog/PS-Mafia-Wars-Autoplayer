@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.21
+* @version 1.0.22
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.21
+// @version     1.0.22
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.21',
-  build: '75',
+  version: '1.0.22',
+  build: '76',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1021,13 +1021,13 @@ if (!initialized) {
     ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120], // Choice Point
     ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133], // TRIAD
     ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102], // TRIAD
-    ['Torch A Building For Insurance',110,9,1,BANGKOK,172], // YAKUZA
-    ['Arrange An "Accident" For A Witness',71,9,1,BANGKOK,111], // YAKUZA
+    ['Torch A Building For Insurance',110,6,1,BANGKOK,172], // YAKUZA
+    ['Arrange An "Accident" For A Witness',71,7,1,BANGKOK,111], // YAKUZA
     ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94], // Choice Point
     ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102], // TRIAD
     ['Bribe A Dock Guard',52,16,1,BANGKOK,78], // TRIAD
-    ['Deliver It To A Japanese Front Company',94,15,1,BANGKOK,130], // YAKUZA
-    ['Pay Off A Corrupt Police Officer',64,16,1,BANGKOK,91], // YAKUZA
+    ['Deliver It To A Japanese Front Company',94,12,1,BANGKOK,130], // YAKUZA
+    ['Pay Off A Corrupt Police Officer',64,13,1,BANGKOK,91], // YAKUZA
     ['Blow Up Suchart\'s Warehouse',111,17,1,BANGKOK,164],
     ['Take Down Boss Suchart',100,18,1,BANGKOK,100],
     // BANGKOK EPISODE 2
@@ -1035,13 +1035,13 @@ if (!initialized) {
     ['Receive A Kickback From The Buyer',73,21,2,BANGKOK,102],
     ['Attack A Paramilitary Police Post',136,22,2,BANGKOK,167],
     ['Set Up A Phony Business',62,24,2,BANGKOK,89], // Choice Point
-    ['Set Up A Bogus Chess Tournament',57,25,2,BANGKOK,77], // TRIAD
-    ['Rob The Chess Masters',51,26,2,BANGKOK,72], // TRIAD
+    ['Set Up A Bogus Chess Tournament',57,28,2,BANGKOK,77], // TRIAD
+    ['Rob The Chess Masters',51,29,2,BANGKOK,72], // TRIAD
     ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64], // YAKUZA
     ['Resell The Stolen Supplies',52,26,2,BANGKOK,64], // YAKUZA
     ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65], // Choice Point
-    ['Break A Triad Hitman Out',57,31,2,BANGKOK,77], // TRIAD
-    ['Help Rub Out A Bosozoku Leader',62,32,2,BANGKOK,89], // TRIAD
+    ['Break A Triad Hitman Out',57,34,2,BANGKOK,77], // TRIAD
+    ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89], // TRIAD
     ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48], // YAKUZA
     ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44], // YAKUZA
     ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
