@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.22
+* @version 1.0.23
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.22
+// @version     1.0.23
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.22',
-  build: '76',
+  version: '1.0.23',
+  build: '77',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1018,67 +1018,48 @@ if (!initialized) {
     ['Move Stolen Art Through Suvarnabhumi Airport',71,1,1,BANGKOK,111],
     ['Show A Cocky Biker Who\'s In Charge',63,2,1,BANGKOK,101],
     ['Take On Local Motorcycle Thugs',189,3,1,BANGKOK,253],
-    ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120], // Choice Point
-    ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133], // TRIAD
-    ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102], // TRIAD
-    ['Torch A Building For Insurance',110,6,1,BANGKOK,172], // YAKUZA
-    ['Arrange An "Accident" For A Witness',71,7,1,BANGKOK,111], // YAKUZA
-    ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94], // Choice Point
-    ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102], // TRIAD
-    ['Bribe A Dock Guard',52,16,1,BANGKOK,78], // TRIAD
-    ['Deliver It To A Japanese Front Company',94,12,1,BANGKOK,130], // YAKUZA
-    ['Pay Off A Corrupt Police Officer',64,13,1,BANGKOK,91], // YAKUZA
+    ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120],           // CHOICE POINT
+    ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133],        // Triad
+    ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102],                  // Triad
+    ['Torch A Building For Insurance',110,6,1,BANGKOK,172],             // Yakuza
+    ['Arrange An "Accident" For A Witness',71,7,1,BANGKOK,111],         // Yakuza
+    ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94],                  // CHOICE POINT
+    ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102],        // Triad
+    ['Bribe A Dock Guard',52,16,1,BANGKOK,78],                          // Triad
+    ['Deliver It To A Japanese Front Company',94,12,1,BANGKOK,130],     // Yakuza
+    ['Pay Off A Corrupt Police Officer',64,13,1,BANGKOK,91],            // Yakuza
     ['Blow Up Suchart\'s Warehouse',111,17,1,BANGKOK,164],
     ['Take Down Boss Suchart',100,18,1,BANGKOK,100],
     // BANGKOK EPISODE 2
     ['Force A Local Landowner To Sell',67,20,2,BANGKOK,95],
     ['Receive A Kickback From The Buyer',73,21,2,BANGKOK,102],
     ['Attack A Paramilitary Police Post',136,22,2,BANGKOK,167],
-    ['Set Up A Phony Business',62,24,2,BANGKOK,89], // Choice Point
-    ['Set Up A Bogus Chess Tournament',57,28,2,BANGKOK,77], // TRIAD
-    ['Rob The Chess Masters',51,29,2,BANGKOK,72], // TRIAD
-    ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64], // YAKUZA
-    ['Resell The Stolen Supplies',52,26,2,BANGKOK,64], // YAKUZA
-    ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65], // Choice Point
-    ['Break A Triad Hitman Out',57,34,2,BANGKOK,77], // TRIAD
-    ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89], // TRIAD
-    ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48], // YAKUZA
-    ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44], // YAKUZA
+    ['Set Up A Phony Business',62,24,2,BANGKOK,89],                     // CHOICE POINT
+    ['Set Up A Bogus Chess Tournament',57,28,2,BANGKOK,77],             // Triad
+    ['Rob The Chess Masters',51,29,2,BANGKOK,72],                       // Triad
+    ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64],     // Yakuza
+    ['Resell The Stolen Supplies',52,26,2,BANGKOK,64],                  // Yakuza
+    ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65],      // CHOICE POINT
+    ['Break A Triad Hitman Out',57,34,2,BANGKOK,77],                    // Triad
+    ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
+    ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48],                  // Yakuza
+    ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44],    // Yakuza
     ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
     ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100]
   );
 
-  var missionTabs = [];
-  missionTabs[NY] = new Array(
-    'Street Thug (Levels 1-4)',
-    'Associate (Levels 5-8)',
-    'Soldier (Levels 9-12)',
-    'Enforcer (Levels 13-17)',
-    'Hitman (Levels 18-24)',
-    'Capo (Levels 25-34)',
-    'Consigliere (Levels 35-59)',
-    'Underboss (Levels 60-99)',
-    'Boss (Levels 100+)'
-  );
-  missionTabs[CUBA] = new Array(
-    'El Soldado (Levels 35-59)',
-    'El Capitan (Levels 60-84)',
-    'El Jefe (Levels 85-109)',
-    'El Patron (Levels 110-129)',
-    'El Padrino (Levels 130-150)',
-    'El Cacique (Levels 151+)'
-  );
-  missionTabs[MOSCOW] = new Array(
-    'Baklany',
-    'Boets',
-    'Brigadir',
-    'Avtoritet',
-    'Vor',
-    'Pakhan'
-  );
-  missionTabs[BANGKOK] = new Array(
-    'Brawler',
-    'Criminal'
+  var missionTabs = new Array(
+    // NEW YORK
+    ['Street Thug (Levels 1-4)','Associate (Levels 5-8)','Soldier (Levels 9-12)',
+     'Enforcer (Levels 13-17)','Hitman (Levels 18-24)', 'Capo (Levels 25-34)',
+     'Consigliere (Levels 35-59)','Underboss (Levels 60-99)','Boss (Levels 100+)'],
+    // CUBA
+    ['El Soldado (Levels 35-59)','El Capitan (Levels 60-84)','El Jefe (Levels 85-109)',
+     'El Patron (Levels 110-129)','El Padrino (Levels 130-150)','El Cacique (Levels 151+)'],
+    // MOSCOW
+    ['Baklany','Boets','Brigadir','Avtoritet','Vor','Pakhan'],
+    // BANGKOK
+    ['Brawler','Criminal']
   );
 
   var requirementJob = new Array(
@@ -6870,58 +6851,55 @@ function customizeJobs() {
   var energies = xpath('.//td[contains(@class,"job_energy")]/span[@class="bold_number"]', innerPageElt);
   var rewards = xpath('.//td[contains(@class,"job_reward")]/span[@class="bold_number"]', innerPageElt);
   var monies = xpath('.//td[contains(@class,"job_reward")]/span[@class="money"]/strong', innerPageElt);
-  var requiredItems = xpath('.//td[contains(@class,"job_required_items")]', innerPageElt);
   var jobButton = xpath('.//td[contains(@class,"job_action")]', innerPageElt);
   var masteryLevel;
   var masteredJobsCount = 0;
-  for (var i = 0, iLength = energies.snapshotLength; i < iLength; ++i) {
+  for (var i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
     var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
     var jobMatch = missions.searchArray(jobName, 0)[0];
+
+    if (!jobMatch) { i++; continue; }
 
     // Determine available jobs
     if (isChecked('multipleJobs') &&
         GM_getValue('isRunning') === true) {
 
-      if (jobMatch != undefined) {
-        // Ignore mastered jobs
-        if (jobInfo.snapshotItem(i).innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
-          if (missions[jobMatch][9] == true) {
-            masteredJobs[city][currentTab].push(jobMatch);
-            DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered (Level ' + masteryLevel + '). Adding to ignore list.');
-          }
-          masteryLevel = parseInt(RegExp.$1);
-          if (masteryLevel == 3) masteredJobsCount++
+      // Ignore mastered jobs
+      if (jobInfo.snapshotItem(i).innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
+        if (missions[jobMatch][9] == true) {
+          masteredJobs[city][currentTab].push(jobMatch);
+          DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered (Level ' + masteryLevel + '). Adding to ignore list.');
         }
+        masteryLevel = parseInt(RegExp.$1);
+        if (masteryLevel == 3) masteredJobsCount++
+      }
 
-        // Ignore locked jobs
-        if (jobButton.snapshotItem(i).innerHTML.indexOf('sexy_button_locked') == -1) {
-          availableJobs[city][currentTab].push(jobMatch);
-        } else {
-          DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
-        }
+      // Ignore locked jobs
+      if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_button_locked') == -1) {
+        availableJobs[city][currentTab].push(jobMatch);
+      } else {
+        DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
       }
     }
 
-    var elt = energies.snapshotItem(i);
+    var elt = energies.snapshotItem(j);
     var cost = parseInt(elt.firstChild.nodeValue);
-    var reward = parseInt(rewards.snapshotItem(i).firstChild.nodeValue);
+    var reward = parseInt(rewards.snapshotItem(j).firstChild.nodeValue);
     var ratio = Math.round(reward / cost * 100) / 100;
 
     makeElement('br', elt.parentNode);
     makeElement('span', elt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
 
-    if (monies.snapshotItem(i)) {
-      if (jobMatch) {
-        missions[jobMatch][6] = reward;
-        missions[jobMatch][7] = ratio;
-        missions[jobMatch][8] = cost;
-      }
+    if (monies.snapshotItem(j)) {
+      missions[jobMatch][6] = reward;
+      missions[jobMatch][7] = ratio;
+      missions[jobMatch][8] = cost;
 
       var currency = cities[city][CITY_CASH_SYMBOL];
-      var money = parseCash(monies.snapshotItem(i).firstChild.nodeValue);
+      var money = parseCash(monies.snapshotItem(j).firstChild.nodeValue);
       var mratio = makeCommaValue(Math.round(money / cost));
 
-      makeElement('span', monies.snapshotItem(i).parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
+      makeElement('span', monies.snapshotItem(j).parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
     }
 
     // Keep track of the best & worst payoffs.
@@ -6946,8 +6924,9 @@ function customizeJobs() {
     if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
     else               jobTimeLeftText = 'Time: 0 min';
 
-    makeElement('br', jobButton.snapshotItem(i));
-    makeElement('span', jobButton.snapshotItem(i), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
+    makeElement('br', jobButton.snapshotItem(j));
+    makeElement('span', jobButton.snapshotItem(j), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
+    i++; j++;
   }
 
   // Highlight the best and worst jobs.
