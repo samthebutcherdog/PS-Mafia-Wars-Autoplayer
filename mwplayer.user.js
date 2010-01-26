@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.24
+* @version 1.0.25
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.24
+// @version     1.0.25
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.24',
-  build: '79',
+  version: '1.0.25',
+  build: '80',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7144,9 +7144,15 @@ function clickWarListRemove() {
 function getJobRow(jobName, contextNode) {
   var rowElt;
   try {
-    var jobMatch = missions.searchArray(jobName, 0)[0];
-    var jobArr = missions[jobMatch];
-    rowElt = xpathFirst('.//table[@class="job_list"]//tr//a[contains(@onclick, "job='+jobArr[2]+'")]', contextNode);
+    var jobNameTokens = jobName.replace (/"/g,' ').replace(/'/g, ' ').split(' ');
+    var conTxt = '';
+    for (var i = 0; i < jobNameTokens.length; ++i) {
+      if (jobNameTokens[i].length > 1) {
+        if (i > 0) conTxt += ' and ';
+        conTxt += 'contains(., "'+jobNameTokens[i]+'")';
+      }
+    }
+    rowElt = xpathFirst('.//table[@class="job_list"]//tr//td['+conTxt+']', contextNode);
     while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
     DEBUG(rowElt.innerHTML);
   } catch(ex) {
@@ -9499,14 +9505,14 @@ function randomizeStamina() {
     // Randomize fight location
     if ((spendMode == STAMINA_HOW_FIGHT_RANDOM || spendMode == STAMINA_HOW_FIGHT_LIST) &&
         !isSame('fightLocation', fightLoc)) {
-      var fightLoc = Math.floor(Math.random()*cities.length);
+      var fightLoc = Math.floor(Math.random()*(cities.length-1));
       GM_setValue('fightLocation', fightLoc);
       DEBUG('Fight location set to : ' + cities[GM_getValue('fightLocation')][CITY_NAME]);
     }
 
     // Randomize hitman location
     if ((spendMode == STAMINA_HOW_HITMAN) && !isSame('hitmanLocation', hitmanLoc)) {
-      var hitmanLoc = Math.floor(Math.random()*cities.length);
+      var hitmanLoc = Math.floor(Math.random()*(cities.length-1));
       GM_setValue('hitmanLocation', hitmanLoc);
       DEBUG('Hitman location set to : ' + cities[GM_getValue('hitmanLocation')][CITY_NAME]);
     }
