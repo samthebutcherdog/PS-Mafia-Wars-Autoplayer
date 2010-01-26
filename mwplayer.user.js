@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.23
+* @version 1.0.24
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.23
+// @version     1.0.24
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.23',
-  build: '78',
+  version: '1.0.24',
+  build: '79',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6847,11 +6847,11 @@ function customizeJobs() {
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
   var reselectJob = false;
-  var jobInfo = xpath('.//td[contains(@class,"job_name")]', innerPageElt);
-  var energies = xpath('.//td[contains(@class,"job_energy")]/span[@class="bold_number"]', innerPageElt);
-  var rewards = xpath('.//td[contains(@class,"job_reward")]/span[@class="bold_number"]', innerPageElt);
-  var monies = xpath('.//td[contains(@class,"job_reward")]/span[@class="money"]/strong', innerPageElt);
-  var jobButton = xpath('.//td[contains(@class,"job_action")]', innerPageElt);
+  var jobInfo = xpath('.//td[contains(@class,"job_name")]', jobTable);
+  var energies = xpath('.//td[contains(@class,"job_energy")]/span[@class="bold_number"]', jobTable);
+  var rewards = xpath('.//td[contains(@class,"job_reward")]/span[@class="bold_number"]', jobTable);
+  var monies = xpath('.//td[contains(@class,"job_reward")]/span[@class="money"]/strong', jobTable);
+  var jobButton = xpath('.//td[contains(@class,"job_action")]', jobTable);
   var masteryLevel;
   var masteredJobsCount = 0;
   for (var i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
@@ -7142,49 +7142,13 @@ function clickWarListRemove() {
 }
 
 function getJobRow(jobName, contextNode) {
-  //FIXME: look up job in job table, and get the jobnumber, then search for the row  by job number
   var rowElt;
   try {
-    if (jobName.indexOf('"') != -1 && jobName.indexOf("'") != -1){
-      var quoteString= jobName;
-      var longQuote='';
-      while (quoteString.indexOf('"') != -1) {
-        quoteString.match(/(.*?)\"(.*)/);
-        if (RegExp.$1.length > longQuote.length){
-          longQuote=RegExp.$1;
-        }
-        if (quoteString.indexOf('"') != -1 && RegExp.$2.length > longQuote.Length) {
-          longQuote=RegExp.$2;
-        }
-        quoteString=RegExp.$2
-      }
-
-      quoteString= jobName;
-      while (quoteString.indexOf("'") != -1) {
-        quoteString.match(/(.*?)\'(.*)/);
-        if (RegExp.$1.length > longQuote.length){
-          longQuote=RegExp.$1;
-        }
-        if (quoteString.indexOf("'") != -1 && RegExp.$2.length > longQuote.Length) {
-          longQuote=RegExp.$2;
-        }
-        quoteString=RegExp.$2
-      }
-      jobName=longQuote;
-      DEBUG('Finding Job Row for String:'+jobName+'.');
-    }
-
-    var xQuote = (jobName.indexOf('"') != -1) ?  '\'' : '"';
-    rowElt = xpathFirst('.//tr[contains(., ' + xQuote + jobName + xQuote + ') and contains(., "Do Job")]', contextNode);
-    if (!rowElt) {
-        rowElt = xpathFirst('.//tr[contains(., ' + xQuote + jobName + xQuote + ') and contains(., "Pick Vory")]', contextNode);
-      }
-    if (!rowElt) {
-        rowElt = xpathFirst('.//tr[contains(., ' + xQuote + jobName + xQuote + ') and contains(., "Pick Mafiya")]', contextNode);
-      }
-    if (!rowElt) {
-      addToLog('warning Icon', 'Unable to find job row for ' + jobName + '.');
-    }
+    var jobMatch = missions.searchArray(jobName, 0)[0];
+    var jobArr = missions[jobMatch];
+    rowElt = xpathFirst('.//table[@class="job_list"]//tr//a[contains(@onclick, "job='+jobArr[2]+'")]', contextNode);
+    while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
+    DEBUG(rowElt.innerHTML);
   } catch(ex) {
       addToLog('warning Icon', ex);
   }
@@ -7337,7 +7301,7 @@ function jobProgress(element) {
   if (currentJobRow && currentJobRow.innerHTML.match(/level (\d+)/i)) {
     tierLevel = RegExp.$1
   }
-  var tierJobs = $x('.//tr/td[@class="job_name"]', element);
+  var tierJobs = $x('.//table[@class="job_list"]//tr/td[contains(@class,"job_name")]', element);
   var tierPercent = 0;
   var jobCount = 0;
   tierJobs.forEach(
