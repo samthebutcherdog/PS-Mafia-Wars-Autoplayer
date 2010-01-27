@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.25
+* @version 1.0.26
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.25
+// @version     1.0.26
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.25',
-  build: '80',
+  version: '1.0.26',
+  build: '81',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1350,6 +1350,8 @@ function doAutoPlay () {
 
   // Player updates
   if (running && !maxed && isChecked('logPlayerUpdates')) {
+    // FIXME: Removed this once Bangkok warring is enabled
+    if (leaveBangkok()) return;
     if (autoPlayerUpdates()) return;
   }
 
@@ -6039,72 +6041,74 @@ function handleContentModified(e) {
 }
 
 function handlePublishing() {
-  // Publishing/skipping posts
-  var skipElt = xpathFirst('.//input[@id="cancel"]');
-  var pubElt = xpathFirst('.//input[@id="publish"]');
-  var okElt = xpathFirst('.//input[@id="okay"]');
-  var closeElt = xpathFirst('.//input[@id="fb_dialog_cancel_button"]');
+  try {
+    // Publishing/skipping posts
+    var skipElt = xpathFirst('.//input[@id="cancel"]');
+    var pubElt = xpathFirst('.//input[@id="publish"]');
+    var okElt = xpathFirst('.//input[@id="okay"]');
+    var closeElt = xpathFirst('.//input[@id="fb_dialog_cancel_button"]');
 
-  // If OK button is found, close the window by pressing it
-  if (okElt) {
-    clickElement(okElt);
+    // If OK button is found, close the window by pressing it
+    if (okElt) {
+      clickElement(okElt);
 
-  // If (1) Pub/Skip already clicked or
-  //    (2) It's been 10 seconds since the post window loaded
-  // Then close the window
-  } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
-    clickElement(closeElt);
-    clickElement(skipElt);
+    // If (1) Pub/Skip already clicked or
+    //    (2) It's been 10 seconds since the post window loaded
+    // Then close the window
+    } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
+      clickElement(closeElt);
+      clickElement(skipElt);
 
-  // Perform publishing logic once posting buttons have loaded
-  } else if (skipElt && pubElt) {
-    // Generic publishing function
-    var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
-      var eltDiv = xpathFirst(xpathString);
-      if (eltDiv) {
-        if (isChecked(gmFlag))
-          clickElement(pubElt);
-        else
-          clickElement(skipElt);
+    // Perform publishing logic once posting buttons have loaded
+    } else if (skipElt && pubElt) {
+      // Generic publishing function
+      var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
+        var eltDiv = xpathFirst(xpathString);
+        if (eltDiv) {
+          if (isChecked(gmFlag))
+            clickElement(pubElt);
+          else
+            clickElement(skipElt);
 
-        // Wait for half a second before trying to close window manually
-        GM_setValue('postClicked', true);
-        window.setTimeout(handlePublishing, 500);
-        return true;
-      }
-      return false;
-    };
+          // Wait for half a second before trying to close window manually
+          GM_setValue('postClicked', true);
+          window.setTimeout(handlePublishing, 500);
+          return true;
+        }
+        return false;
+      };
 
-    // Gift post
-    if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipElt, pubElt)) return;
+      // Gift post
+      if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipElt, pubElt)) return;
 
-    // Daily chance
-    if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipElt, pubElt)) return;
+      // Daily chance
+      if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipElt, pubElt)) return;
 
-    // Secret Stash
-    if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubElt, skipElt)) return;
+      // Secret Stash
+      if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubElt, skipElt)) return;
 
-    // Iced Opponent
-    if (checkPublish('.//div[contains(.,"just iced")]','autoIcePublish', pubElt, skipElt)) return;
+      // Iced Opponent
+      if (checkPublish('.//div[contains(.,"just iced")]','autoIcePublish', pubElt, skipElt)) return;
 
-    // Level up bonus
-    if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
+      // Level up bonus
+      if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
 
-    // Job Help
-    if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
+      // Job Help
+      if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
-    // War Reward
-    if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
+      // War Reward
+      if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
-    // War back up request
-    if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
+      // War back up request
+      if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
-    // War Declaration
-    if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
+      // War Declaration
+      if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
+    }
+  } finally {
+    // Retry until window is closed
+    window.setTimeout(handlePublishing, 500);
   }
-
-  // Retry until window is closed
-  window.setTimeout(handlePublishing, 500);
   return;
 }
 
@@ -6848,9 +6852,8 @@ function customizeJobs() {
   var bestRatio = 0, worstRatio = 10;
   var reselectJob = false;
   var jobInfo = xpath('.//td[contains(@class,"job_name")]', jobTable);
-  var energies = xpath('.//td[contains(@class,"job_energy")]/span[@class="bold_number"]', jobTable);
-  var rewards = xpath('.//td[contains(@class,"job_reward")]/span[@class="bold_number"]', jobTable);
-  var monies = xpath('.//td[contains(@class,"job_reward")]/span[@class="money"]/strong', jobTable);
+  var energies = xpath('.//td[contains(@class,"job_energy")]', jobTable);
+  var rewards = xpath('.//td[contains(@class,"job_reward")]', jobTable);
   var jobButton = xpath('.//td[contains(@class,"job_action")]', jobTable);
   var masteryLevel;
   var masteredJobsCount = 0;
@@ -6858,7 +6861,16 @@ function customizeJobs() {
     var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
     var jobMatch = missions.searchArray(jobName, 0)[0];
 
-    if (!jobMatch) { i++; continue; }
+    // Skip wrong job names fetched from Choice Point jobs in Bangkok (Mastery strings)
+    if (!jobMatch) {
+      // But compensate for BOSS jobs not in missions array
+      if (jobName == jobName.untag()) j++;
+      i++;
+      continue;
+    }
+
+    // Don't do all these if job isn't in missions array
+    if (!jobMatch) { i++; j++; continue }
 
     // Determine available jobs
     if (isChecked('multipleJobs') &&
@@ -6871,7 +6883,7 @@ function customizeJobs() {
           DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered (Level ' + masteryLevel + '). Adding to ignore list.');
         }
         masteryLevel = parseInt(RegExp.$1);
-        if (masteryLevel == 3) masteredJobsCount++
+        if (masteryLevel == 3) masteredJobsCount++;
       }
 
       // Ignore locked jobs
@@ -6882,54 +6894,70 @@ function customizeJobs() {
       }
     }
 
-    var elt = energies.snapshotItem(j);
-    var cost = parseInt(elt.firstChild.nodeValue);
-    var reward = parseInt(rewards.snapshotItem(j).firstChild.nodeValue);
-    var ratio = Math.round(reward / cost * 100) / 100;
+    var costElt = xpathFirst('.//span[@class="bold_number"]', energies.snapshotItem(j));
+    var cost;
+    if (costElt)
+      cost = parseInt(costElt.innerHTML);
 
-    makeElement('br', elt.parentNode);
-    makeElement('span', elt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
+    var expElt = xpathFirst('.//span[@class="bold_number"]', rewards.snapshotItem(j));
+    var reward;
+    if (expElt)
+      reward = parseInt(expElt.innerHTML);
 
-    if (monies.snapshotItem(j)) {
+    var moneyElt = xpathFirst('.//span[@class="money"]/strong', rewards.snapshotItem(j));
+    var money;
+    if (moneyElt)
+      money = parseCash(moneyElt.innerHTML);
+
+    // Display ratio and timer
+    if (costElt && expElt && moneyElt) {
+      var ratio = Math.round(reward / cost * 100) / 100;
+
+      makeElement('br', costElt.parentNode);
+      makeElement('span', costElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
+
       missions[jobMatch][6] = reward;
       missions[jobMatch][7] = ratio;
       missions[jobMatch][8] = cost;
 
-      var currency = cities[city][CITY_CASH_SYMBOL];
-      var money = parseCash(monies.snapshotItem(j).firstChild.nodeValue);
-      var mratio = makeCommaValue(Math.round(money / cost));
+      if (moneyElt) {
+        var currency = cities[city][CITY_CASH_SYMBOL];
+        var mratio = makeCommaValue(Math.round(money / cost));
 
-      makeElement('span', monies.snapshotItem(j).parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
+        makeElement('span', moneyElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
+      }
+
+      // Keep track of the best & worst payoffs.
+      if (ratio > bestRatio) {
+        bestRatio = ratio;
+        bestJobs = [costElt];
+      } else if (ratio == bestRatio) {
+        bestJobs.push(costElt);
+      }
+      if (ratio < worstRatio) {
+        worstRatio = ratio;
+        worstJobs = [costElt];
+      } else if (ratio == worstRatio) {
+        worstJobs.push(costElt);
+      }
+
+      // Calculate time left for each job and display under the do job button
+      var timePerEnergy = isChecked('isManiac') ? 3 : 5;
+      timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
+      timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
+
+      if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
+      else               jobTimeLeftText = 'Time: 0 min';
+
+      makeElement('br', jobButton.snapshotItem(j));
+      makeElement('span', jobButton.snapshotItem(j), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
     }
 
-    // Keep track of the best & worst payoffs.
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestJobs = [elt];
-    } else if (ratio == bestRatio) {
-      bestJobs.push(elt);
-    }
-    if (ratio < worstRatio) {
-      worstRatio = ratio;
-      worstJobs = [elt];
-    } else if (ratio == worstRatio) {
-      worstJobs.push(elt);
-    }
-
-    // Calculate time left for each job and display under the do job button
-    var timePerEnergy = isChecked('isManiac') ? 3 : 5;
-    timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
-    timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
-
-    if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
-    else               jobTimeLeftText = 'Time: 0 min';
-
-    makeElement('br', jobButton.snapshotItem(j));
-    makeElement('span', jobButton.snapshotItem(j), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
     i++; j++;
   }
 
   // Highlight the best and worst jobs.
+  var elt;
   if (worstRatio != bestRatio) {
     while (bestJobs.length) {
       elt = bestJobs.pop().parentNode;
@@ -8124,6 +8152,17 @@ function autoWarAttack() {
   return false;
 }
 
+// Bangkok doesn't have fighting/warring yet
+function leaveBangkok() {
+  if (city == BANGKOK) {
+    Autoplay.fx = function() { goLocation(MOSCOW); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+  return false;
+}
+
 function autoWar() {
   var action = 'war';
   Autoplay.delay = getAutoPlayDelay();
@@ -8141,16 +8180,11 @@ function autoWar() {
     return true;
   }
 
+  // FIXME: Removed this once Bangkok warring is enabled
+  if (leaveBangkok()) return true;
+
   // Check the timer, do we even need to go further?
   if (timeLeftGM('warTimer') > 0) return false;
-
-  // Bangkok doesn't have fighting/warring yet
-  if (city == BANGKOK) {
-    Autoplay.fx = function() { goLocation(MOSCOW); };
-    Autoplay.delay = getAutoPlayDelay();
-    Autoplay.start();
-    return true;
-  }
 
   // We need to be on the war page to go any further
   if (!onWarNav()) {
