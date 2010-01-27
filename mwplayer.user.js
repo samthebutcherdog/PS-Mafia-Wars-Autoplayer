@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.26
+* @version 1.0.27
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.26
+// @version     1.0.27
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.26',
-  build: '81',
+  version: '1.0.27',
+  build: '82',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1350,8 +1350,6 @@ function doAutoPlay () {
 
   // Player updates
   if (running && !maxed && isChecked('logPlayerUpdates')) {
-    // FIXME: Removed this once Bangkok warring is enabled
-    if (leaveBangkok()) return;
     if (autoPlayerUpdates()) return;
   }
 
@@ -1829,6 +1827,8 @@ function autoPlayerUpdates() {
 
   // Process new updates.
   if (logPlayerUpdatesCount < pUpdatesLen) {
+    // FIXME: Removed this once Bangkok warring is enabled
+    if (leaveBangkok()) return;
     DEBUG('Parsing new player updates.');
     for (var i = pUpdatesLen - logPlayerUpdatesCount - 1; i >= 0; i--) {
       if (!parsePlayerUpdates(pUpdates.snapshotItem(i))) return true;
