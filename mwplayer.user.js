@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.27
+* @version 1.0.28
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.27
+// @version     1.0.28
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.27',
-  build: '82',
+  version: '1.0.28',
+  build: '83',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1372,7 +1372,7 @@ function doAutoPlay () {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isChecked(cities[i][CITY_SELLCRATES]) &&
-          GM_getValue('sellHour' + cities[i][CITY_NAME], -1) != new Date().getHours()) {
+          !timeLeftGM('sellHour' + cities[i][CITY_NAME])) {
 
         // Deposit first if selling output on another city
         if (city != i && canBank) if (autoBankDeposit()) return;
@@ -1507,7 +1507,8 @@ function doAutoPlay () {
       addToLog('warning Icon', 'WARNING: Current level does not allow travel to Moscow.');
       DEBUG('Idling. Staying in NY.');
     } else {
-      goLocation(GM_getValue('idleLocation',NY));
+      Autoplay.fx = goLocation(GM_getValue('idleLocation',NY));
+      Autoplay.start();
     }
     return;
   }
@@ -1660,8 +1661,8 @@ function autoSellCrates(sellCity) {
   }
 
   // Nothing to sell.
-  GM_setValue('sellHour' + cities[sellCity][CITY_NAME], new Date().getHours());
-  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in an hour.');
+  setGMTime('sellHour' + cities[sellCity][CITY_NAME], '3 hours');
+  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in 3 hours.');
 
   // Visit home after selling all output
   Autoplay.fx = goHome;
@@ -3077,6 +3078,12 @@ function handleVersionChange() {
   addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' build ' + SCRIPT.build);
 
   // Check for invalid settings and upgrade them.
+
+  // Delete sellHour values
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 83) {
+    for  (var i = 0, iLength = cities.length; i < iLength; ++i)
+      GM_deleteValue('sellHour' + cities[i][CITY_NAME]);
+  }
 
   // Change heal location to New York to be on the safe-side
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 72) {
@@ -7833,7 +7840,7 @@ function parsePlayerUpdates(messagebox) {
       var userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
       var elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
       // FIXME: Remove exclusion code for Bangkok later
-      if (elt && !elt.getAttribute('onclick').match(/xw_city=4/)) {
+      if (elt && !elt.getAttribute('onclick').match(/job_city=4/)) {
         // Help immediately.
         Autoplay.fx = function() {
           clickAction = 'help';
@@ -7998,7 +8005,7 @@ function autoLotto() {
       // Is the current item the correct one?
       if (lottoPrize == (GM_getValue('autoLottoBonusItem', 0) + 1)) {
         // Grab the mastery button
-        var bonusClaim = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Claim Ticket Mastery Bonus")]', innerPageElt);
+        var bonusClaim = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Claim Prize")]', innerPageElt);
         if (bonusClaim) {
           Autoplay.fx = function() {
             clickElement(bonusClaim);
@@ -8033,15 +8040,11 @@ function autoLotto() {
         if (i<5)
           ticket = ticket + '-';
       }
-      Autoplay.fx = function() {
-    }
-    // FIXME: It is a bug to reach this point?
-    Autoplay.fx = goHome;
-        clickElement(submitTicket);
-        addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: Played ticket' + ticket + '.');
-      };
-      Autoplay.start();
-      return true;
+
+      Autoplay.fx = goHome;
+      clickElement(submitTicket);
+      addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: Played ticket' + ticket + '.');
+    };
     Autoplay.start();
     return true;
   }
@@ -8180,11 +8183,11 @@ function autoWar() {
     return true;
   }
 
-  // FIXME: Removed this once Bangkok warring is enabled
-  if (leaveBangkok()) return true;
-
   // Check the timer, do we even need to go further?
   if (timeLeftGM('warTimer') > 0) return false;
+
+  // FIXME: Removed this once Bangkok warring is enabled
+  if (leaveBangkok()) return true;
 
   // We need to be on the war page to go any further
   if (!onWarNav()) {
@@ -8352,8 +8355,8 @@ function getTopMafiaInfo() {
     }
   }
 
-  setGMTime('topMafiaTimer','1 hour');
-  return true;
+  // Check again after 3 hours
+  setGMTime('topMafiaTimer','3 hours');
 }
 
 // This function returns false if nothing was done, true otherwise.
