@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.29',
-  build: '86',
+  build: '87',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -54,7 +54,8 @@ var SCRIPT = {
 
 // Handle Publishing
 if (window.location.href.match(/prompt_feed/))  {
-  if (GM_getValue('isRunning')) {
+  if (GM_getValue('isRunning') &&
+      window.document.referrer.match(/mwfb.zynga.com/)) {
     GM_setValue('postClicked', false);
     setGMTime('postTimer', '00:10');
     window.setTimeout(handlePublishing, 500);
@@ -3087,7 +3088,10 @@ function handleVersionChange() {
   // Delete sellHour values
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 83) {
     for  (var i = 0, iLength = cities.length; i < iLength; ++i)
-      GM_deleteValue('sellHour' + cities[i][CITY_NAME]);
+      if (typeof GM_deleteValue == 'function')
+        GM_deleteValue('sellHour' + cities[i][CITY_NAME]);
+      else
+        GM_setValue('sellHour' + cities[i][CITY_NAME], undefined);
   }
 
   // Change heal location to New York to be on the safe-side
@@ -7293,7 +7297,7 @@ function setJobReqs (element) {
 
   var items = getSavedList('itemList');
   var jobs = getSavedList('jobsToDo', '');
-  var necessaryItems = $x('.//div[@class="req_item need_item"]//img', currentJobRow);
+  var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
   // Save the current job for later. The current job should not already
   // exist in the list, so check first.
   if (jobs.indexOf(currentJob) == -1) {
@@ -10090,7 +10094,10 @@ function clearSettings() {
       typeof GM_deleteValue == 'function') {
     var values = GM_listValues();
     for (var i in values) {
-      GM_deleteValue(values[i]);
+      if (typeof GM_deleteValue == 'function')
+        GM_deleteValue(values[i]);
+      else
+        GM_setValue(values[i], undefined);
     }
   } else {
     alert('In order to do this you need at least GreaseMonkey version: 0.8.20090123.1. Please upgrade and try again.');
