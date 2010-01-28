@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.31',
-  build: '90',
+  build: '91',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1461,7 +1461,7 @@ function doAutoPlay () {
     // Attempt failed. Randomize stamina setting (if set)
     if (isSame('staminaSpendHow', STAMINA_HOW_RANDOM)) {
       randomizeStamina();
-      return;
+      if (autoStaminaSpend()) return;
 
     // Attempt failed. Let some other action happen before trying again
     } else {
