@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.29',
-  build: '84',
+  build: '85',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6906,8 +6906,8 @@ function attackXfromProfile() {
 
 function customizeJobs() {
   // Extras for jobs pages.
-  var jobTable = xpathFirst('.//table[@class="job_list"]', innerPageElt);
-  if (!jobTable) return false;
+  var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
+  if (!jobTables) return false;
 
   var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
   var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{},3:{}})"));
@@ -6919,109 +6919,113 @@ function customizeJobs() {
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
   var reselectJob = false;
-  var jobInfo = xpath('.//td[contains(@class,"job_name")]', jobTable);
-  var energies = xpath('.//td[contains(@class,"job_energy")]', jobTable);
-  var rewards = xpath('.//td[contains(@class,"job_reward")]', jobTable);
-  var jobButton = xpath('.//td[contains(@class,"job_action")]', jobTable);
-  var masteryLevel;
-  var masteredJobsCount = 0;
-  for (var i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
-    var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
-    var jobMatch = missions.searchArray(jobName, 0)[0];
 
-    // Skip wrong job names fetched from Choice Point jobs in Bangkok (Mastery strings)
-    if (!jobMatch) {
-      // But compensate for BOSS jobs not in missions array
-      if (jobName == jobName.untag()) j++;
-      i++;
-      continue;
-    }
+  for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
+    var jobInfo = xpath('.//td[contains(@class,"job_name")]', jobTables[x]);
+    var energies = xpath('.//td[contains(@class,"job_energy")]', jobTables[x]);
+    var rewards = xpath('.//td[contains(@class,"job_reward")]', jobTables[x]);
+    var jobButton = xpath('.//td[contains(@class,"job_action")]', jobTables[x]);
+    var masteryLevel;
+    var masteredJobsCount = 0;
+    for (var i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
+      var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
+      var jobMatch = missions.searchArray(jobName, 0)[0];
 
-    // Don't do all these if job isn't in missions array
-    if (!jobMatch) { i++; j++; continue }
+      // Skip wrong job names fetched from Choice Point jobs in Bangkok (Mastery strings)
+      if (!jobMatch) {
+        // But compensate for BOSS jobs not in missions array
+        if (jobName == jobName.untag()) j++;
+        i++;
+        continue;
+      }
 
-    // Determine available jobs
-    if (isChecked('multipleJobs') &&
-        GM_getValue('isRunning') === true) {
+      // Don't do all these if job isn't in missions array
+      if (!jobMatch) { i++; j++; continue }
 
-      // Ignore mastered jobs
-      if (jobInfo.snapshotItem(i).innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
-        if (missions[jobMatch][9] == true) {
-          masteredJobs[city][currentTab].push(jobMatch);
-          DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered (Level ' + masteryLevel + '). Adding to ignore list.');
+      // Determine available jobs
+      if (isChecked('multipleJobs') &&
+          GM_getValue('isRunning') === true) {
+
+        // Ignore mastered jobs
+        if (jobInfo.snapshotItem(i).innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
+          if (missions[jobMatch][9] == true) {
+            masteredJobs[city][currentTab].push(jobMatch);
+            DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered (Level ' + masteryLevel + '). Adding to ignore list.');
+          }
+          masteryLevel = parseInt(RegExp.$1);
+          if (masteryLevel == 3) masteredJobsCount++;
         }
-        masteryLevel = parseInt(RegExp.$1);
-        if (masteryLevel == 3) masteredJobsCount++;
+
+        // Ignore locked jobs
+        if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_button_locked') == -1) {
+          availableJobs[city][currentTab].push(jobMatch);
+        } else {
+          DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
+        }
       }
 
-      // Ignore locked jobs
-      if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_button_locked') == -1) {
-        availableJobs[city][currentTab].push(jobMatch);
-      } else {
-        DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
+      var costElt = xpathFirst('.//span[@class="bold_number"]', energies.snapshotItem(j));
+      var cost;
+      if (costElt)
+        cost = parseInt(costElt.innerHTML);
+
+      var expElt = xpathFirst('.//span[@class="bold_number"]', rewards.snapshotItem(j));
+      var reward;
+      if (expElt)
+        reward = parseInt(expElt.innerHTML);
+
+      var moneyElt = xpathFirst('.//span[@class="money"]/strong', rewards.snapshotItem(j));
+      var money;
+      if (moneyElt)
+        money = parseCash(moneyElt.innerHTML);
+
+      // Display ratio and timer
+      // FIXME: Do we need to check other elements within this IF block?
+      if (costElt /* && expElt && moneyElt*/) {
+        var ratio = Math.round(reward / cost * 100) / 100;
+
+        makeElement('br', costElt.parentNode);
+        makeElement('span', costElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
+
+        missions[jobMatch][6] = reward;
+        missions[jobMatch][7] = ratio;
+        missions[jobMatch][8] = cost;
+
+        if (moneyElt) {
+          var currency = cities[city][CITY_CASH_SYMBOL];
+          var mratio = makeCommaValue(Math.round(money / cost));
+
+          makeElement('span', moneyElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
+        }
+
+        // Keep track of the best & worst payoffs.
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          bestJobs = [costElt];
+        } else if (ratio == bestRatio) {
+          bestJobs.push(costElt);
+        }
+        if (ratio < worstRatio) {
+          worstRatio = ratio;
+          worstJobs = [costElt];
+        } else if (ratio == worstRatio) {
+          worstJobs.push(costElt);
+        }
+
+        // Calculate time left for each job and display under the do job button
+        var timePerEnergy = isChecked('isManiac') ? 3 : 5;
+        timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
+        timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
+
+        if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
+        else               jobTimeLeftText = 'Time: 0 min';
+
+        makeElement('br', jobButton.snapshotItem(j));
+        makeElement('span', jobButton.snapshotItem(j), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
       }
+
+      i++; j++;
     }
-
-    var costElt = xpathFirst('.//span[@class="bold_number"]', energies.snapshotItem(j));
-    var cost;
-    if (costElt)
-      cost = parseInt(costElt.innerHTML);
-
-    var expElt = xpathFirst('.//span[@class="bold_number"]', rewards.snapshotItem(j));
-    var reward;
-    if (expElt)
-      reward = parseInt(expElt.innerHTML);
-
-    var moneyElt = xpathFirst('.//span[@class="money"]/strong', rewards.snapshotItem(j));
-    var money;
-    if (moneyElt)
-      money = parseCash(moneyElt.innerHTML);
-
-    // Display ratio and timer
-    if (costElt && expElt && moneyElt) {
-      var ratio = Math.round(reward / cost * 100) / 100;
-
-      makeElement('br', costElt.parentNode);
-      makeElement('span', costElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
-
-      missions[jobMatch][6] = reward;
-      missions[jobMatch][7] = ratio;
-      missions[jobMatch][8] = cost;
-
-      if (moneyElt) {
-        var currency = cities[city][CITY_CASH_SYMBOL];
-        var mratio = makeCommaValue(Math.round(money / cost));
-
-        makeElement('span', moneyElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
-      }
-
-      // Keep track of the best & worst payoffs.
-      if (ratio > bestRatio) {
-        bestRatio = ratio;
-        bestJobs = [costElt];
-      } else if (ratio == bestRatio) {
-        bestJobs.push(costElt);
-      }
-      if (ratio < worstRatio) {
-        worstRatio = ratio;
-        worstJobs = [costElt];
-      } else if (ratio == worstRatio) {
-        worstJobs.push(costElt);
-      }
-
-      // Calculate time left for each job and display under the do job button
-      var timePerEnergy = isChecked('isManiac') ? 3 : 5;
-      timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
-      timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
-
-      if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
-      else               jobTimeLeftText = 'Time: 0 min';
-
-      makeElement('br', jobButton.snapshotItem(j));
-      makeElement('span', jobButton.snapshotItem(j), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
-    }
-
-    i++; j++;
   }
 
   // Highlight the best and worst jobs.
@@ -7047,7 +7051,7 @@ function customizeJobs() {
   elt = makeElement('div', null, {'id':'level_up_ratio', 'style':'text-align:center; display:none'});
   makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
   elt.appendChild(document.createTextNode(''));
-  jobTable.parentNode.insertBefore(elt, jobTable);
+  jobTables[0].parentNode.insertBefore(elt, jobTables[0]);
 
   setLevelUpRatio();
   if(reselectJob) canMission();
