@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.29',
-  build: '85',
+  build: '86',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6907,7 +6907,7 @@ function attackXfromProfile() {
 function customizeJobs() {
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
-  if (!jobTables) return false;
+  if (!jobTables || !jobTables[0]) return false;
 
   var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
   var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{},3:{}})"));
