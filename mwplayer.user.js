@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.30',
-  build: '88',
+  build: '89,
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -8816,8 +8816,10 @@ function goProfileNav(player) {
   var elt = player.profile;
   if (!elt) {
     elt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@href, "xw_controller=stats")]', innerPageElt);
-    if (elt && elt.getAttribute('onclick').match(/sf_xw_user_id=(\w+)/)) {
-      var newClick = elt.getAttribute('onclick').replace(RegExp.$1, player.id);
+    if (elt && elt.getAttribute('onclick').match(/user=(\w+)/)) {
+      var newClick = elt.getAttribute('onclick');
+      var oldID = newClick.split('&user=')[1].split('\'')[0].split('&')[0];
+      newClick = newClick.replace(oldID, player.id);
       // Try to fix the profile link
       if (newClick.match(/this.href/))
         newClick = newClick.replace('this.href=\'http://mwfb.zynga.com/mwfb/','return do_ajax(\'inner_page\', \'') + ', 1, 1, 0, 0); return false;';
