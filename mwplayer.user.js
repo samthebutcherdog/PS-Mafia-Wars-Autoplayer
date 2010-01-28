@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.29
+* @version 1.0.30
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.29
+// @version     1.0.30
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.29',
-  build: '87',
+  version: '1.0.30',
+  build: '88',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -52,19 +52,21 @@ var SCRIPT = {
   user: '&user_id='
 };
 
+var runMWAP = true;
+
 // Handle Publishing
-if (window.location.href.match(/prompt_feed/))  {
-  if (GM_getValue('isRunning') &&
-      window.document.referrer.match(/mwfb.zynga.com/)) {
-    GM_setValue('postClicked', false);
-    setGMTime('postTimer', '00:10');
-    window.setTimeout(handlePublishing, 500);
-  }
-  return;
+if (GM_getValue('isRunning') &&
+    window.document.referrer.match(/mwfb.zynga.com/) &&
+    window.location.href.match(/prompt_feed/))  {
+  GM_setValue('postClicked', false);
+  setGMTime('postTimer', '00:10');
+  window.setTimeout(handlePublishing, 500);
+  runMWAP = false;
 }
 
 // Load the iframe
-if (document.domain.match(/facebook.com/))  {
+var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
+if (document.domain.match(/facebook.com/) && iFrameCanvas)  {
   // Get FB name
   var fbName = document.getElementById("fb_menu_account");
   if (fbName && fbName.firstChild)
@@ -72,10 +74,8 @@ if (document.domain.match(/facebook.com/))  {
 
   checkLanguage();
 
-  var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
-  if (iFrameCanvas)
-    window.location.replace(iFrameCanvas.src);
-  return;
+  window.location.replace(iFrameCanvas.src);
+  runMWAP = false;
 }
 
 // Register debugOnOff with Greasemonkey
@@ -680,7 +680,7 @@ var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var newStaminaMode;             // New stamina mode for random fighting
 
-if (!initialized) {
+if (!initialized && runMWAP) {
   var settingsOpen = false;
   var statsOpen = false;
   var didJobCalculations = false;
@@ -1272,7 +1272,7 @@ Animate.prototype.setTimeout = function(fx, delay) {
 }
 
 Animate.prototype.start = function() {
-  if (running && settingsOpen === false) {
+  if (running && settingsOpen === false && this.fx) {
     this.setTimeout(this.fx, this.delay);
   } else if (settingsOpen === true) {
     DEBUG('Settings box open. Not starting ' + this.desc + ' timer.');
@@ -1282,21 +1282,21 @@ Animate.prototype.start = function() {
 }
 
 // Set up auto-reload (if enabled).
-autoReload();
+if (runMWAP) {
+  autoReload();
 
-if (!refreshGlobalStats()) {
-  handleUnexpectedPage();
+  if (!refreshGlobalStats()) {
+    // Stop the script. (The timer will still go off and reload.)
+    handleUnexpectedPage();
+  } else {
 
-  // Stop the script. (The timer will still go off and reload.)
-  return;
+    refreshSettings();
+
+    if (GM_getValue('logOpen') == 'open') {
+      showMafiaLogBox();
+    }
+  }
 }
-
-refreshSettings();
-
-if (GM_getValue('logOpen') == 'open') {
-  showMafiaLogBox();
-}
-return;
 
 ///////////////////////////////////////////////////////////////////////////////
 //   End of top-level code. Automatic play is kicked off by doAutoPlay().    //
@@ -1513,7 +1513,7 @@ function doAutoPlay () {
       addToLog('warning Icon', 'WARNING: Current level does not allow travel to Moscow.');
       DEBUG('Idling. Staying in NY.');
     } else {
-      Autoplay.fx = goLocation(GM_getValue('idleLocation',NY));
+      Autoplay.fx = function(){goLocation(GM_getValue('idleLocation',NY))};
     }
     Autoplay.start();
     return;
@@ -1642,7 +1642,7 @@ function autoHeal() {
 function autoSellCrates(sellCity) {
   // Go to the correct city.
   if (city != sellCity) {
-    Autoplay.fx = goLocation(sellCity);
+    Autoplay.fx = function(){goLocation(sellCity)};
     Autoplay.start();
     return true;
   }
@@ -2340,7 +2340,7 @@ function autoFight(how) {
     if (opponent.id && !onProfileNav()) {
       // Go to the opponent's profile.
       autoFight.profileSearch = opponent;
-      Autoplay.fx = goProfileNav(opponent);
+      Autoplay.fx = function(){goProfileNav(opponent)};
       Autoplay.start();
       return true;
     }
@@ -3088,10 +3088,7 @@ function handleVersionChange() {
   // Delete sellHour values
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 83) {
     for  (var i = 0, iLength = cities.length; i < iLength; ++i)
-      if (typeof GM_deleteValue == 'function')
-        GM_deleteValue('sellHour' + cities[i][CITY_NAME]);
-      else
-        GM_setValue('sellHour' + cities[i][CITY_NAME], undefined);
+      GM_setValue('sellHour' + cities[i][CITY_NAME], 0);
   }
 
   // Change heal location to New York to be on the safe-side
@@ -8819,7 +8816,7 @@ function goProfileNav(player) {
   var elt = player.profile;
   if (!elt) {
     elt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@href, "xw_controller=stats")]', innerPageElt);
-    if (elt && elt.getAttribute('onclick').match(/user=(\w+)/)) {
+    if (elt && elt.getAttribute('onclick').match(/sf_xw_user_id=(\w+)/)) {
       var newClick = elt.getAttribute('onclick').replace(RegExp.$1, player.id);
       // Try to fix the profile link
       if (newClick.match(/this.href/))
@@ -8832,7 +8829,7 @@ function goProfileNav(player) {
     }
   }
   clickElement(elt);
-  DEBUG('Clicked to load profile (id=' + player.id + ').');
+  DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + newClick + '). ');
 }
 
 function goMyProfile() {
@@ -10096,8 +10093,6 @@ function clearSettings() {
     for (var i in values) {
       if (typeof GM_deleteValue == 'function')
         GM_deleteValue(values[i]);
-      else
-        GM_setValue(values[i], undefined);
     }
   } else {
     alert('In order to do this you need at least GreaseMonkey version: 0.8.20090123.1. Please upgrade and try again.');
