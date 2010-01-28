@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.28
+* @version 1.0.29
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.28
+// @version     1.0.29
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.28',
-  build: '83',
+  version: '1.0.29',
+  build: '84',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -777,24 +777,26 @@ if (!initialized) {
 
   // Constants to access city attributes
   const CITY_NAME        = 0;
-  const CITY_CASH        = 1;
-  const CITY_LEVEL       = 2;
-  const CITY_CASH_ICON   = 3;
-  const CITY_CASH_CSS    = 4;
-  const CITY_AUTOBANK    = 5;
-  const CITY_BANKCONFG   = 6;
-  const CITY_SELLCRATES  = 7;
-  const CITY_CASH_SYMBOL = 8;
+  const CITY_SIDES       = 1;
+  const CITY_CASH        = 2;
+  const CITY_LEVEL       = 3;
+  const CITY_CASH_ICON   = 4;
+  const CITY_CASH_CSS    = 5;
+  const CITY_AUTOBANK    = 6;
+  const CITY_BANKCONFG   = 7;
+  const CITY_SELLCRATES  = 8;
+  const CITY_CASH_SYMBOL = 9;
 
   // Add city variables in this format
-  // Name, Icon, Icon CSS, Auto bank config, Min cash config, Sell Crates config
+  // Name, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', '$'],
-    ['Cuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'C$'],
-    ['Moscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$'],
-    ['Bangkok', undefined, 70, cashCubaIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'B$']
+    ['New York', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', '$'],
+    ['Cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'C$'],
+    // Add support for choosing sides in Moscow later on
+    ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$'],
+    ['Bangkok', ['Yakuza','Triad'], undefined, 0, cashCubaIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'B$']
   );
 
   // Spend objects
@@ -1018,32 +1020,32 @@ if (!initialized) {
     ['Move Stolen Art Through Suvarnabhumi Airport',71,1,1,BANGKOK,111],
     ['Show A Cocky Biker Who\'s In Charge',63,2,1,BANGKOK,101],
     ['Take On Local Motorcycle Thugs',189,3,1,BANGKOK,253],
-    ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120],           // CHOICE POINT
-    ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133],        // Triad
-    ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102],                  // Triad
+    ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120],           // CHOICE POINT (Yakuza = 5, Triad = 8)
     ['Torch A Building For Insurance',110,6,1,BANGKOK,172],             // Yakuza
     ['Arrange An "Accident" For A Witness',71,7,1,BANGKOK,111],         // Yakuza
-    ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94],                  // CHOICE POINT
-    ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102],        // Triad
-    ['Bribe A Dock Guard',52,16,1,BANGKOK,78],                          // Triad
+    ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133],        // Triad
+    ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102],                  // Triad
+    ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94],                  // CHOICE POINT (Yakuza = 11, Triad = 14)
     ['Deliver It To A Japanese Front Company',94,12,1,BANGKOK,130],     // Yakuza
     ['Pay Off A Corrupt Police Officer',64,13,1,BANGKOK,91],            // Yakuza
+    ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102],        // Triad
+    ['Bribe A Dock Guard',52,16,1,BANGKOK,78],                          // Triad
     ['Blow Up Suchart\'s Warehouse',111,17,1,BANGKOK,164],
     ['Take Down Boss Suchart',100,18,1,BANGKOK,100],
     // BANGKOK EPISODE 2
     ['Force A Local Landowner To Sell',67,20,2,BANGKOK,95],
     ['Receive A Kickback From The Buyer',73,21,2,BANGKOK,102],
     ['Attack A Paramilitary Police Post',136,22,2,BANGKOK,167],
-    ['Set Up A Phony Business',62,24,2,BANGKOK,89],                     // CHOICE POINT
-    ['Set Up A Bogus Chess Tournament',57,28,2,BANGKOK,77],             // Triad
-    ['Rob The Chess Masters',51,29,2,BANGKOK,72],                       // Triad
+    ['Set Up A Phony Business',62,24,2,BANGKOK,89],                     // CHOICE POINT (Yakuza = 24, Triad = 27)
     ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64],     // Yakuza
     ['Resell The Stolen Supplies',52,26,2,BANGKOK,64],                  // Yakuza
-    ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65],      // CHOICE POINT
-    ['Break A Triad Hitman Out',57,34,2,BANGKOK,77],                    // Triad
-    ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
+    ['Set Up A Bogus Chess Tournament',57,28,2,BANGKOK,77],             // Triad
+    ['Rob The Chess Masters',51,29,2,BANGKOK,72],                       // Triad
+    ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65],      // CHOICE POINT (Yakuza = 30, Triad = 33)
     ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48],                  // Yakuza
     ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44],    // Yakuza
+    ['Break A Triad Hitman Out',57,34,2,BANGKOK,77],                    // Triad
+    ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
     ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
     ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100]
   );
@@ -1217,6 +1219,9 @@ if (!initialized) {
   var fightListActive   = new PlayerList('fightListActive');
   var fightListNew      = new PlayerList('fightListNew');
   var fightListAvoid    = new PlayerList('fightListAvoid');
+
+  // Choose sides (handling)
+  chooseSides();
 
   // This line is optional, but it makes the menu display faster.
   customizeMasthead();
@@ -1508,8 +1513,8 @@ function doAutoPlay () {
       DEBUG('Idling. Staying in NY.');
     } else {
       Autoplay.fx = goLocation(GM_getValue('idleLocation',NY));
-      Autoplay.start();
     }
+    Autoplay.start();
     return;
   }
 }
@@ -3441,6 +3446,18 @@ function saveSettings() {
     GM_setValue('repeatJob', 'checked');
   }
 
+  // Save "Choose Sides settings
+  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
+    if (cities[i][CITY_SIDES].length > 0) {
+      var id = 'side' + cities[i][CITY_NAME];
+      for (var j = 0, jLength = cities[i][CITY_SIDES].length; j < jLength; ++j) {
+        GM_setValue(id, document.getElementById(id).selectedIndex);
+      }
+    }
+  }
+  // Invoke choose sides
+  chooseSides();
+
   var selectProperties = '';
   if (saveCheckBoxElement('abandoned'))
     selectProperties += 'Abandoned Lot';
@@ -4440,6 +4457,31 @@ function createGeneralTab() {
   }
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' first if both are not maxed'));
   burnOpt.selectedIndex = GM_getValue('burnOption', BURN_ENERGY);
+
+  // Choose Sides
+  var item = makeElement('div', list);
+  var lhs = makeElement('div', item, {'class':'lhs'});
+  var rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Choose sides:'));
+
+  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
+    var sideOpt, choice;
+    if (cities[i][CITY_SIDES].length > 0) {
+      id = 'side' + cities[i][CITY_NAME];
+      makeElement('label', rhs).appendChild(document.createTextNode(' ' + cities[i][CITY_NAME] + ' '));
+      sideOpt = makeElement('select', rhs, {'id':id});
+
+      for (var j = 0, jLength = cities[i][CITY_SIDES].length; j < jLength; ++j) {
+        choice = document.createElement('option');
+        choice.value = j;
+        choice.appendChild(document.createTextNode(cities[i][CITY_SIDES][j]));
+        sideOpt.appendChild(choice);
+      }
+
+      sideOpt.selectedIndex = GM_getValue(id, 0);
+    }
+  }
 
   return generalTab;
 }
@@ -6223,6 +6265,25 @@ function innerPageChanged() {
   }
 }
 
+function chooseSides() {
+  // Bangkok Side-Handling
+  var choiceJobs = new Array (
+                    // Yakuza job no, Triad job no, Job name
+                    [5, 8, 'Meet A Gang\'s Rep In A Go-Go Bar'],
+                    [11, 14, 'Intercept An Ammo Shipment'],
+                    [24, 27, 'Set Up A Phony Business'],
+                    [30, 33, 'Pay Off The Guards At Bangkwang Prison']
+                   );
+    choiceJobs.forEach( function(job) {
+    var jobMatch = missions.searchArray(job[2], 0)[0];
+    // For Bangkok, simply change the jobNo of the jobs above to support sides
+    if (jobMatch)
+      missions[jobMatch][2] = job[GM_getValue('sideBangkok', 0)];
+  });
+
+  // FIXME: Moscow Side-Handling
+}
+
 function refreshGlobalStats() {
   // NOTE: In this function, only elements displayed in and above the
   //       navigation bar should be examined. Everything in the inner page
@@ -7556,6 +7617,8 @@ function debugDumpSettings() {
         'Enable collect lotto bonus: <strong>' + showIfUnchecked(GM_getValue('autoLottoBonus'))  + ' == ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)] + '</strong><br>' +
         'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
         'Spend all: <strong>' + showIfUnchecked(GM_getValue('burnFirst')) + ' == ' + burnOptions[GM_getValue('burnOption')] + '</strong><br>' +
+        'Choose Sides: <br>' +
+        '&nbsp;&nbsp;Bangkok: <strong>' + cities[BANGKOK][CITY_SIDES][GM_getValue('sideBangkok', 0)] + '</strong><br>' +
         '---------------------Display Tab--------------------<br>' +
         'Enable logging: <strong>' + showIfUnchecked(GM_getValue('autoLog')) + '</strong><br>' +
         '&nbsp;&nbsp;-Logging length: <strong>' + GM_getValue('autoLogLength') + '</strong><br>' +
@@ -8749,7 +8812,11 @@ function goProfileNav(player) {
   if (!elt) {
     elt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@href, "xw_controller=stats")]', innerPageElt);
     if (elt && elt.getAttribute('onclick').match(/user=(\w+)/)) {
-      elt.setAttribute('onclick', elt.getAttribute('onclick').replace(RegExp.$1, player.id));
+      var newClick = elt.getAttribute('onclick').replace(RegExp.$1, player.id);
+      // Try to fix the profile link
+      if (newClick.match(/this.href/))
+        newClick = newClick.replace('this.href=\'http://mwfb.zynga.com/mwfb/','return do_ajax(\'inner_page\', \'') + ', 1, 1, 0, 0); return false;';
+      elt.setAttribute('onclick', newClick);
     } else {
       DEBUG("Couldnt find profile link");
       goFightNav();
