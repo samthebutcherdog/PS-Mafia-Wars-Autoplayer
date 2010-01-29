@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.31
+* @version 1.0.32
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.31
+// @version     1.0.32
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.31',
-  build: '91',
+  version: '1.0.32',
+  build: '92',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1265,8 +1265,9 @@ Animate.prototype.setTimeout = function(fx, delay) {
   this.delay = delay;
   // Make the handler clear TOUT. This prevents attempts
   // to clear timers that have already gone off.
+
   var obj = this;
-  this.TOUT = window.setTimeout(function () { obj.TOUT = null; fx(); }, delay);
+  this.TOUT = window.setTimeout(function () { if (obj) obj.TOUT = null; fx(); }, delay);
   DEBUG('Started ' + this.desc + ' timer ' + this.TOUT +
         ', delay=' + delay/1000 + ' sec.');
 }
@@ -1518,14 +1519,19 @@ function doAutoPlay () {
     Autoplay.start();
     return;
   }
+
+  // Use the reload animate obj to kick off autoplay again
+  autoReload(true);
 }
 
 function getAutoPlayDelay() {
-  return Math.floor(parseFloat(GM_getValue('d1', '3')) + parseFloat((GM_getValue('d2', '5'))-parseFloat(GM_getValue('d1', '3')))*Math.random())*1000;
+  return Math.floor(parseFloat(GM_getValue('d1', '3')) +
+         parseFloat((GM_getValue('d2', '5')) -
+         parseFloat(GM_getValue('d1', '3')))*Math.random())*1000;
 }
 
-function autoReload() {
-  if (isChecked('autoClick')) {
+function autoReload(forceReload) {
+  if (forceReload || isChecked('autoClick')) {
     Reload.fx    = function() {
       // Try the "nice" way first, but reload completely if that doesn't work.
       goHome();
@@ -2267,6 +2273,7 @@ function autoFight(how) {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoFight.profileSearch) {
     Autoplay.fx = goFightTab;
+    Autoplay.delay = 0;
     Autoplay.start();
     return true;
   }
@@ -3976,21 +3983,6 @@ function minBankCheck() {
     alert('Minimum Moscow auto-bank amount must be 1 or higher');
     document.getElementById('bankConfigMoscow').focus();
   }
-}
-
-function takeAction(link, action, context) {
-  if (!link) {
-    addToLog('warning Icon', 'BUG DETECTED: No link passed to takeAction().');
-    return;
-  }
-
-  DEBUG('Action set to: ' + action);
-  GM_xmlhttpRequest({ method: 'GET',
-    url: link,
-    headers:{'Content-type':'application/x-www-form-urlencoded'},
-    onload: function(responseDetails) { handleResponse(responseDetails, action, context); },
-    onerror: function(responseDetails) { addToLog('warning Icon', 'error status '+ responseDetails.status); }
-  });
 }
 
 function createLogBox() {
@@ -6068,7 +6060,7 @@ function handleModificationTimer() {
     try {
       innerPageChanged();
     } catch(ex) {
-      addToLog('warning Icon', ex);
+      addToLog('warning Icon', 'BUG DETECTED (pageChanged): ' + ex);
     }
   }
 }
@@ -6250,19 +6242,24 @@ function innerPageChanged() {
     GM_setValue('logPlayerUpdatesCount', 0);
   }
 
-  // If a click action was taken, check the response.
-  if (clickAction) {
-    var action = clickAction;
-    var context = clickContext;
-    clickAction = undefined;
-    clickContext = undefined;
-    if (!logResponse(innerPageElt, action, context)) {
-      // No further action was taken. Kick off auto-play.
+  try {
+    // If a click action was taken, check the response.
+    if (clickAction) {
+      var action = clickAction;
+      var context = clickContext;
+      clickAction = undefined;
+      clickContext = undefined;
+      if (!logResponse(innerPageElt, action, context)) {
+        // No further action was taken. Kick off auto-play.
+        doAutoPlay();
+      }
+    } else {
+      // Kick off auto-play.
       doAutoPlay();
     }
-  } else {
-    // Kick off auto-play.
-    doAutoPlay();
+  } catch (ex) {
+    addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
+    autoReload(true);
   }
 }
 
@@ -7257,7 +7254,7 @@ function getJobRow(jobName, contextNode) {
     while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
     DEBUG(rowElt.innerHTML);
   } catch(ex) {
-      addToLog('warning Icon', ex);
+      addToLog('warning Icon', 'BUG DETECTED (getJobRow): ' + ex);
   }
   return rowElt;
 }
@@ -8226,7 +8223,7 @@ function autoWarAttack() {
 // Bangkok doesn't have fighting/warring yet
 function leaveBangkok() {
   if (city == BANGKOK) {
-    Autoplay.fx = function() { goLocation(MOSCOW); };
+    Autoplay.fx = function() { goLocation(NY); };
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
     return true;
@@ -8814,24 +8811,31 @@ function goHome() {
 
 function goProfileNav(player) {
   var elt = player.profile;
-  if (!elt) {
+
+  // Get the profile click element
+  if (!elt || !elt.getAttribute('onclick')) {
     elt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@href, "xw_controller=stats")]', innerPageElt);
-    if (elt && elt.getAttribute('onclick').match(/user=(\w+)/)) {
-      var newClick = elt.getAttribute('onclick');
-      var oldID = newClick.split('&user=')[1].split('\'')[0].split('&')[0];
-      newClick = newClick.replace(oldID, player.id);
-      // Try to fix the profile link
-      if (newClick.match(/this.href/))
-        newClick = newClick.replace('this.href=\'http://mwfb.zynga.com/mwfb/','return do_ajax(\'inner_page\', \'') + ', 1, 1, 0, 0); return false;';
-      elt.setAttribute('onclick', newClick);
-    } else {
-      DEBUG("Couldnt find profile link");
-      goFightNav();
-      return;
-    }
   }
+
+  // Try to "fix" the onclick event
+  if (elt && elt.getAttribute('onclick').match(/user=(\w+)/)) {
+    var newClick = elt.getAttribute('onclick');
+    var oldID = newClick.split('&user=')[1].split('\'')[0].split('&')[0];
+    newClick = newClick.replace(oldID, player.id);
+
+    // Fix AJAX loading of profile link
+    if (newClick.match(/this.href/))
+      newClick = newClick.replace('this.href=\'http://mwfb.zynga.com/mwfb/','return do_ajax(\'inner_page\', \'') + ', 1, 1, 0, 0); return false;';
+
+    elt.setAttribute('onclick', newClick);
+  } else {
+    DEBUG("Couldnt find profile link");
+    goFightNav();
+    return;
+  }
+
   clickElement(elt);
-  DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + newClick + '). ');
+  DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + elt.getAttribute('onclick') + '). ');
 }
 
 function goMyProfile() {
@@ -10077,7 +10081,7 @@ function updateScript() {
       }
     });
   } catch (ex) {
-    addToLog('warning Icon', ex);
+    addToLog('warning Icon', 'BUG DETECTED (updateScript): ' + ex);
   }
 }
 
