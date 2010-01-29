@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.32
+* @version 1.0.33
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.32
+// @version     1.0.33
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.32',
-  build: '93',
+  version: '1.0.33',
+  build: '94',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -5723,18 +5723,15 @@ function createAboutTab () {
 
   var devs = makeElement('div', aboutTab, {'style':'top: 75px; left: 10px; font-size: 12px; font-weight: bold;'});
   devs.appendChild(document.createTextNode('Contributors:'));
-  devList = makeElement('span', devs, {'style':'position: relative; left: 15px;'});
+  makeElement('br', devs);
 
-  var devNames = ['CharlesD', 'Eric Ortego', 'Jeremy', 'Liquidor', 'AK17710N', 'Fragger',
-                 '<x51>', 'CyB', 'int1', 'Janos112', 'int2str', 'Doonce', 'Eric Layne', 'Tanlis',
-                 'Cam', 'csanbuenaventura', 'vmzildjian', 'Scrotal', 'Bushdaka', 'rdmcgraw', 'moe',
-                 'KCMCL', 'scooy78', 'crazydude'];
+  var devNames = 'CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, Fragger, <x51>, ' +
+                 'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, '     +
+                 'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, '    +
+                 'KCMCL, scooy78, caesar2k, crazydude';
 
-  // Append developer names
-  devNames.forEach(function(devName) {
-    makeElement('br', devList);
-    devList.appendChild(document.createTextNode(devName));
-  });
+  devList = makeElement('p', devs, {'style':'position: relative; left: 15px;'});
+  devList.appendChild(document.createTextNode(devNames));
 
   return aboutTab;
 }
