@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.32',
-  build: '92',
+  build: '93',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1326,8 +1326,10 @@ function doAutoPlay () {
   }
 
   // Check top mafia bonus
-  if (running && (!timeLeftGM('topMafiaTimer') || isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
+  if (running && (isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
     getTopMafiaInfo();
+    Autoplay.start();
+    return;
   }
 
   // Determine whether a job and/or fight/hit could be attempted.
@@ -6216,6 +6218,7 @@ function innerPageChanged() {
   // Perform actions here not requiring response logging
   doParseMessages();
   doQuickClicks();
+  getTopMafiaInfo(true);
 
   // Customize the display.
   setListenContent(false);
@@ -8367,20 +8370,26 @@ function autoGiftWaiting() {
 
 // This function will retrieve the top mafia info
 // FIXME: Create a TopMafia object should we need the TopMafia info to persist
-function getTopMafiaInfo() {
-  // Load My Mafia
-  if (!onMyMafiaNav()) {
-    Autoplay.fx = goMyMafiaNav;
-    Autoplay.start();
-    return true;
+function getTopMafiaInfo(skipAutoplay) {
+
+  // Skip these steps if NOT invoked from doAutoPlay
+  if (!skipAutoplay) {
+    // Load My Mafia
+    if (!onMyMafiaNav()) {
+      Autoplay.fx = goMyMafiaNav;
+      Autoplay.start();
+      return true;
+    }
+
+    // Load My Mafia Tab
+    if (!onMyMafiaTab()) {
+      Autoplay.fx = goMyMafiaTab;
+      Autoplay.start();
+      return true;
+    }
   }
 
-  // Load My Mafia Tab
-  if (!onMyMafiaTab()) {
-    Autoplay.fx = goMyMafiaTab;
-    Autoplay.start();
-    return true;
-  }
+  if (!onMyMafiaTab()) return;
 
   // Get the wheelman bonus.
   var elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
@@ -8419,9 +8428,6 @@ function getTopMafiaInfo() {
       addToLog('warning Icon', 'Can\'t find Mastermind bonus');
     }
   }
-
-  // Check again after 3 hours
-  setGMTime('topMafiaTimer','3 hours');
 }
 
 // This function returns false if nothing was done, true otherwise.
