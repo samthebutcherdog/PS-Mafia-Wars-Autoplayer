@@ -32,7 +32,7 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @include     http://www.facebook.com/connect/*
+// @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.33
 // ==/UserScript==
 
@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.33',
-  build: '94',
+  build: '95',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6272,7 +6272,8 @@ function chooseSides() {
                     [24, 27, 'Set Up A Phony Business'],
                     [30, 33, 'Pay Off The Guards At Bangkwang Prison']
                    );
-    choiceJobs.forEach( function(job) {
+
+  choiceJobs.forEach( function(job) {
     var jobMatch = missions.searchArray(job[2], 0)[0];
     // For Bangkok, simply change the jobNo of the jobs above to support sides
     if (jobMatch)
