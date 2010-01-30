@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.33',
-  build: '95',
+  build: '96',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -253,8 +253,8 @@ PlayerList.prototype.add = function(player, max) {
   // Shorten the array if it has become too large.
   if (max > 0) {
     while (max < this.list.length) {
-      var player = this.list.shift();
-      DEBUG('Removed player ' + player.id + ' from ' + this.name + '.');
+      var playerItem = this.list.shift();
+      DEBUG('Removed player ' + playerItem.id + ' from ' + this.name + '.');
     }
   }
 
@@ -685,7 +685,7 @@ if (!initialized && runMWAP) {
   var statsOpen = false;
   var didJobCalculations = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '◄', '«', '™', 'Ψ', 'Ξ'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -1747,6 +1747,7 @@ function collectRacket() {
    GM_setValue("racketPermanentShakedown", 0);
    GM_setValue("racketCollect", 0);
    DEBUG("Turning off racket options. We're on properties page.");
+   return false;
   }
 }
 
@@ -1763,7 +1764,7 @@ function collectNYTake() {
     if (onPropertyNav()) {
       var takeTimer = xpathFirst('.//span[@id="prop_eng_timer_span"]', innerPageElt);
       if (takeTimer) {
-        var prodReadyIn = timeLeft(takeTimer.innerHTML);
+        var d, prodReadyIn = timeLeft(takeTimer.innerHTML);
         if (prodReadyIn == 0 || prodReadyIn >= 10500) { //If the timer says between 0 or 2:55:00
           var elt = xpathFirst('.//a[contains(., "Collect take")]', innerPageElt);
           if (elt) {
@@ -1783,7 +1784,7 @@ function collectNYTake() {
           } else {
             // Nothing to collect.
             setGMTime("nextNYTake", takeTimer.innerHTML);
-            var d = new Date();
+            d = new Date();
             d.setMilliseconds(0);
             d.setTime(d.getTime()+(timeLeft(takeTimer.innerHTML)*1000));
             DEBUG('The take has been collected. Coming back at: ' + d);
@@ -1792,7 +1793,7 @@ function collectNYTake() {
         } else {
           //It's more than 5 minutes after a take being ready, so we'll come back when the next take is ready.
           setGMTime("nextNYTake", takeTimer.innerHTML);
-          var d = new Date();
+          d = new Date();
           d.setMilliseconds(0);
           d.setTime(d.getTime()+(timeLeft(takeTimer.innerHTML)*1000));
           DEBUG('Take will be available at: ' + d);
@@ -1817,6 +1818,7 @@ function collectNYTake() {
     GM_setValue("collectNYTake", 0);
     DEBUG('Turning off collect NY Take. Player does not have take timer.')
   }
+  return false;
 }
 
 function autoPlayerUpdates() {
@@ -1843,7 +1845,7 @@ function autoPlayerUpdates() {
   // Process new updates.
   if (logPlayerUpdatesCount < pUpdatesLen) {
     // FIXME: Removed this once Bangkok warring is enabled
-    if (leaveBangkok()) return;
+    if (leaveBangkok()) return true;
     DEBUG('Parsing new player updates.');
     for (var i = pUpdatesLen - logPlayerUpdatesCount - 1; i >= 0; i--) {
       if (!parsePlayerUpdates(pUpdates.snapshotItem(i))) return true;
@@ -1970,6 +1972,7 @@ function autoStat() {
     // Disable auto-stats when profile page cannot be loaded
     GM_setValue('autoStat', 0);
     addToLog('warning Icon', 'BUG DETECTED: Unable to load Profile page, autostat disabled.');
+    return false;
   }
 }
 
@@ -2016,6 +2019,7 @@ function canMission() {
   if (!isChecked('autoMission')) return false;
 
   if (!didJobCalculations) calcJobinfo();
+  var i, job;
   if (isChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
 
@@ -2032,9 +2036,9 @@ function canMission() {
 
     // mission mastery code
     var mastery_jobs_list = getSavedList('masteryJobsList');
-    for (var i=0, iLength=mastery_jobs_list.length; i < iLength; ++i) {
+    for (i = 0, iLength=mastery_jobs_list.length; i < iLength; ++i) {
       // Filters jobs on the ignorelist
-      var job = mastery_jobs_list[i];
+      job = mastery_jobs_list[i];
 
       // Only push jobs that does not exist on the main list
       if (multiple_jobs_list.indexOf(job) == -1) {
@@ -2044,8 +2048,8 @@ function canMission() {
       }
     }
 
-    for (var i=0, iLength= multiple_jobs_list.length; i < iLength; ++i) {
-      var job = multiple_jobs_list[i];
+    for (i = 0, iLength= multiple_jobs_list.length; i < iLength; ++i) {
+      job = multiple_jobs_list[i];
       var mission = missions[job];
       // This should enable us to use mastery jobs for single job level ups
       var singleJobLevelUpPossible = false;
@@ -2091,7 +2095,7 @@ function canMission() {
 
       if (isChecked('endLevelOptimize')) {
         // Burn up exp before leveling up to maximize energy
-        for (var i=0, iLength=expBurners.length; i < iLength; ++i) {
+        for (i = 0, iLength=expBurners.length; i < iLength; ++i) {
           var expBurner = expBurners[i];
           if ( (energy - missions[singleJobLevelUp[0]][8]) > missions[expBurner][8] &&
              expLeft > Math.floor(missions[expBurner][6] * 1.5) ) {
@@ -2102,7 +2106,7 @@ function canMission() {
       }
     } else {
       // Can't level up. Pick a job we can do whose ratio is high enough.
-      for (var i=0; i < multiple_jobs_ratio_sorted.length; i++) {
+      for (i = 0; i < multiple_jobs_ratio_sorted.length; i++) {
         if (energy >= missions[multiple_jobs_ratio_sorted[i]][8] &&
             ratio <= missions[multiple_jobs_ratio_sorted[i]][7]) {
           jobs_selection.push(multiple_jobs_ratio_sorted[i]);
@@ -2374,7 +2378,7 @@ function autoFight(how) {
 
 function autoHitman() {
   // Go to the correct city.
-  var loc = GM_getValue('hitmanLocation', NY);
+  var i, loc = GM_getValue('hitmanLocation', NY);
   if (city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.start();
@@ -2401,7 +2405,7 @@ function autoHitman() {
   var bountyCount = 0;
   var namesCount = 0;
   var opponentsQualified = [];
-  for (var i = 0, iLength=opponents.length; i < iLength; i++) {
+  for (i = 0, iLength=opponents.length; i < iLength; i++) {
     var opponent = opponents[i];
     if (blacklist.indexOf(opponent.id) != -1) {
       blacklistCount++;
@@ -2433,7 +2437,7 @@ function autoHitman() {
 
     case BOUNTY_HIGHEST_BOUNTY:
       var bigBounty = 0;
-      for (var i = 0, iLength=opponentsQualified.length; i < iLength; i++) {
+      for (i = 0, iLength=opponentsQualified.length; i < iLength; i++) {
         if (parseCash(opponentsQualified[i].bounty) > bigBounty) {
           bountyIndex = i;
           bigBounty = parseCash(opponentsQualified[i].bounty)
@@ -2582,7 +2586,7 @@ function autoBankWithdraw(amount) {
 function getHitlist(element, forceRefresh) {
   // If the list was already seen, don't read it again.
   if (!forceRefresh && getHitlist.opponents) {
-    if (!getHitlist.opponents.length) return;
+    if (!getHitlist.opponents.length) return [];
     return getHitlist.opponents;
   }
   getHitlist.opponents = [];
@@ -2619,7 +2623,7 @@ function getHitlist(element, forceRefresh) {
   }
   DEBUG(getHitlist.opponents.length + ' hitlist target(s) found.');
 
-  if (!getHitlist.opponents.length) return;
+  if (!getHitlist.opponents.length) return [];
 
   //for (var i = 0; i < getHitlist.opponents.length; i++) {
   //  var opponent = getHitlist.opponents[i];
@@ -2637,21 +2641,21 @@ function getHitlist(element, forceRefresh) {
 function getDisplayedOpponents(element, forceRefresh) {
   // If the list was already seen, don't read it again.
   if (!forceRefresh && getDisplayedOpponents.opponents) {
-    if (!getDisplayedOpponents.opponents.length) return;
+    if (!getDisplayedOpponents.opponents.length) return [];
     return getDisplayedOpponents.opponents;
   }
   getDisplayedOpponents.opponents = [];
-  var fight = true;
+  var i, linkElt, row, rowData, opponent, fight = true;
 
   // First, look for a traditional fight table (one with real links).
   var links = $x('.//table[@class="main_table fight_table"]//a[contains(@onclick, "opponent_id")]', element);
 
   // Get each potential opponent in the displayed list.
-  for (var i = 0, iLength=links.length; i < iLength; i++) {
-    var linkElt = links[i];
-    var opponent = new Player();
-    var row     = linkElt.parentNode.parentNode;
-    var rowData = row.getElementsByTagName('td');
+  for (i = 0, iLength=links.length; i < iLength; i++) {
+    linkElt = links[i];
+    opponent = new Player();
+    row     = linkElt.parentNode.parentNode;
+    rowData = row.getElementsByTagName('td');
     nameAndLevel = row;
 
     // Get the opponent's details.
@@ -2686,15 +2690,15 @@ function getDisplayedOpponents(element, forceRefresh) {
 
     // Find level elements.
     var levelElts = $x('.//table[@class="main_table fight_table"]//td/span[contains(@id, "fight_view_level_")]', element);
-    for (var i = 0, iLength=levelElts.length; i < iLength; ++i) {
+    for (i = 0, iLength=levelElts.length; i < iLength; ++i) {
       var levelElt = levelElts[i];
       if (!levelElt.innerHTML.match(/evel (\d+)/i)) continue;
 
       // Found an opponent.
-      var opponent = new Player();
+      opponent = new Player();
       opponent.level = parseInt(RegExp.$1);
-      var row = levelElt.id.match(/\d+$/);
-      var rowElt = levelElt.parentNode.parentNode;
+      row = levelElt.id.match(/\d+$/);
+      rowElt = levelElt.parentNode.parentNode;
       opponent.profile = xpathFirst('.//*[@id="fight_view_namelink_' + row + '"]/a', rowElt);
       if (!opponent.profile) continue;
       opponent.name = opponent.profile.firstChild.innerHTML;
@@ -2707,14 +2711,14 @@ function getDisplayedOpponents(element, forceRefresh) {
 
   if (fight && !getDisplayedOpponents.opponents.length) {
     // Look for a hybrid fight table (mix of links & non-links).
-    var links = $x('.//table[@class="main_table fight_table"]//a[contains(@onclick, "reg_fight_view_attack")]', element);
+    links = $x('.//table[@class="main_table fight_table"]//a[contains(@onclick, "reg_fight_view_attack")]', element);
 
     // Get each potential opponent in the displayed list.
-    for (var i = 0, iLength=links.length; i < iLength; ++i) {
-      var linkElt = links[i];
-      var opponent = new Player();
-      var row     = linkElt.parentNode.parentNode;
-      var rowData = row.getElementsByTagName('td');
+    for (i = 0, iLength=links.length; i < iLength; ++i) {
+      linkElt = links[i];
+      opponent = new Player();
+      row     = linkElt.parentNode.parentNode;
+      rowData = row.getElementsByTagName('td');
       nameAndLevel = row;
 
       // Get the opponent's details.
@@ -2742,7 +2746,7 @@ function getDisplayedOpponents(element, forceRefresh) {
     }
   }
 
-  if (!getDisplayedOpponents.opponents.length) return;
+  if (!getDisplayedOpponents.opponents.length) return [];
 
   DEBUG(getDisplayedOpponents.opponents.length + ' opponents listed.');
   //for (var i = 0; i < getDisplayedOpponents.opponents.length; ++i) {
@@ -3115,7 +3119,7 @@ function handleVersionChange() {
 
   // In an old version, there was no cap. But it definitely must be under 100,
   // and it probably wouldn't work properly with more than 75.
-  var val = parseInt(GM_getValue('logPlayerUpdatesMax', '100'));
+  val = parseInt(GM_getValue('logPlayerUpdatesMax', '100'));
   if (isNaN(val) || val > 75) {
     GM_setValue('logPlayerUpdatesMax', '75');
   }
@@ -3195,12 +3199,12 @@ function handleVersionChange() {
 
 function clearOldCheckBoxStatuValues() {
   // Clear old checkbox values
-
-  for (var i = 0, iLength=autoStatBases.length; i < iLength; i++)
+  var i;
+  for (i = 0, iLength=autoStatBases.length; i < iLength; i++)
     if (isNaN (parseInt (GM_getValue(autoStatBases[i]))))
       GM_setValue(autoStatBases[i], 0);
 
-  for (var i = 0, iLength=autoStatRatios.length; i < iLength; i++)
+  for (i = 0, iLength=autoStatRatios.length; i < iLength; i++)
     if (isNaN (parseInt (GM_getValue(autoStatRatios[i]))))
       GM_setValue(autoStatRatios[i], 0);
 
@@ -3210,6 +3214,7 @@ function saveDefaultSettings() {
   // Assume all settings have been cleared and set defaults.
   // For groups of radio buttons, one must be checked and all others cleared.
   // For checkboxes, no need to default if the option should be off.
+  var i;
 
   // General tab.
   GM_setValue('autoClick', 'checked');
@@ -3242,19 +3247,19 @@ function saveDefaultSettings() {
   GM_setValue('autoStat', 0);
   GM_setValue('autoStatDisable', 0);
 
-  for (var i = 0, iLength=autoStatModes.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatModes.length; i < iLength; ++i)
     GM_setValue(autoStatModes[i], 0);
 
-  for (var i = 0, iLength=autoStatPrios.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatPrios.length; i < iLength; ++i)
     GM_setValue(autoStatPrios[i], 0);
 
-  for (var i = 0, iLength=autoStatBases.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatBases.length; i < iLength; ++i)
     GM_setValue(autoStatBases[i], 0);
 
-  for (var i = 0, iLength=autoStatRatios.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatRatios.length; i < iLength; ++i)
     GM_setValue(autoStatRatios[i], 0);
 
-  for (var i = 0, iLength=autoStatFallbacks.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatFallbacks.length; i < iLength; ++i)
     GM_setValue(autoStatFallbacks[i], 0);
 
   GM_setValue('filterLog', 0);
@@ -3306,7 +3311,7 @@ function saveSettings() {
     GM_deleteValue('statLog');
   }
 */
-
+  var i;
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
   var healthLevel = parseInt(document.getElementById('healthLevel').value);
   if (autoHealOn && (!healthLevel || healthLevel < 1)) {
@@ -3380,14 +3385,14 @@ function saveSettings() {
 
   // Validate the auto-stat setting.
   var autoStatOn = (document.getElementById('autoStat').checked === true);
-  for (var i = 0, iLength=autoStatBases.length; i < iLength; ++i) {
+  for (i = 0, iLength=autoStatBases.length; i < iLength; ++i) {
     if (autoStatOn && isNaN(document.getElementById(autoStatBases[i]).value)) {
       alert('Please enter valid numbers for auto-stat ' + autoStatDescrips[i+1] + ' (Misc tab). : ' + document.getElementById(autoStatBases[i]).value);
       return;
     }
   }
 
-  for (var i = 0, iLength=autoStatRatios.length; i < iLength; ++i) {
+  for (i = 0, iLength=autoStatRatios.length; i < iLength; ++i) {
     if (autoStatOn && isNaN(document.getElementById(autoStatRatios[i]).value)) {
       alert('Please enter valid numbers for auto-stat ' + autoStatDescrips[i+1] + ' (Misc tab).');
       return;
@@ -3410,13 +3415,13 @@ function saveSettings() {
   // All settings are valid. Save them.
   //
   GM_setValue('restAutoStat', 0);
-  for (var i = 0, iLength=autoStatBases.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatBases.length; i < iLength; ++i)
     GM_setValue(autoStatBases[i], document.getElementById(autoStatBases[i]).value);
-  for (var i = 0, iLength=autoStatRatios.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatRatios.length; i < iLength; ++i)
     GM_setValue(autoStatRatios[i], document.getElementById(autoStatRatios[i]).value);
-  for (var i = 0, iLength=autoStatModes.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatModes.length; i < iLength; ++i)
     GM_setValue(autoStatModes[i], document.getElementById(autoStatModes[i]).value);
-  for (var i = 0, iLength=autoStatPrios.length; i < iLength; ++i)
+  for (i = 0, iLength=autoStatPrios.length; i < iLength; ++i)
     GM_setValue(autoStatPrios[i], document.getElementById(autoStatPrios[i]).value);
 
   var filterOpt = document.getElementById('filterOpt').value;
@@ -3457,7 +3462,7 @@ function saveSettings() {
   }
 
   // Save "Choose Sides settings
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
     if (cities[i][CITY_SIDES].length > 0) {
       var id = 'side' + cities[i][CITY_NAME];
       for (var j = 0, jLength = cities[i][CITY_SIDES].length; j < jLength; ++j) {
@@ -3533,7 +3538,7 @@ function saveSettings() {
   selectedTierValue = document.getElementById('selectTier').value.split('.');
   masteryCity = parseInt(selectedTierValue[0]);
   masteryTier = parseInt(selectedTierValue[1]);
-  for (var i = 0, iLength = missions.length; i < iLength; i++) {
+  for (i = 0, iLength = missions.length; i < iLength; i++) {
     if (document.getElementById(missions[i][0]).checked) {
       multiple_jobs_list.push(i);
     }
@@ -3711,12 +3716,12 @@ function addToLog(icon, line) {
   var timestampdate = m_names[currentTime.getMonth()] + ' ' + currentTime.getDate();
 
   // Create a timestamp, formatted for the log.
-  var hours = currentTime.getHours();
+  var ampm, hours = currentTime.getHours();
   if (hours >= 12) {
     hours = hours - 12;
-    var ampm = ' PM';
+    ampm = ' PM';
   } else {
-    var ampm = ' AM';
+    ampm = ' AM';
   }
   if (hours == 0) {
     hours = 12;
@@ -3864,7 +3869,7 @@ function debugOnOff() {
 }
 
 function DEBUG(line, level) {
-  var level = (level == null) ? 0 : level;
+  level = (level == null) ? 0 : level;
   if (debug) {
     addToLog('info Icon', line);
     GM_log(line, level);
@@ -3872,12 +3877,13 @@ function DEBUG(line, level) {
 }
 
 function CyclePropertyList() {
+  var i;
   DEBUG('CyclePropertyList(): '+ GM_getValue('propertyId', ''));
   if (GM_getValue('propertyId') <= 6) {
     CyclePropertyList();
-    var i = 12; //back to casinos
+    i = 12; //back to casinos
   } else {
-    var i = GM_getValue('propertyId') - 1;
+    i = GM_getValue('propertyId') - 1;
   }
   GM_setValue('propertyId', i);
 }
@@ -3988,6 +3994,7 @@ function minBankCheck() {
 }
 
 function createLogBox() {
+  var title;
   // Define CSS styles.
   makeElement('style', document.getElementsByTagName('head')[0], {'type':'text/css'}).appendChild(document.createTextNode(
     '#mafiaLogBox div.mouseunderline:hover{text-decoration:underline}' +
@@ -4043,12 +4050,12 @@ function createLogBox() {
     closeLogButton.appendChild(document.createTextNode('close'));
     closeLogButton.addEventListener('click', hideMafiaLogBox, false);
 
-  var title = 'Click to toggle log filtering';
+  title = 'Click to toggle log filtering';
   var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 160px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
     filterElt.appendChild(document.createTextNode('filter'));
     filterElt.addEventListener('click', logFilterOnOff, false);
 
-  var title = 'Click to toggle debug log';
+  title = 'Click to toggle debug log';
   var debugElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_debug_log', 'style':'position: absolute; right: 80px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (debug ? '255' : '100') + ', 0, 0);'});
     debugElt.appendChild(document.createTextNode('debug'));
     debugElt.addEventListener('click', debugOnOff, false);
@@ -4224,7 +4231,7 @@ function createSettingsBox() {
     "data:application/x-javascript;base64,Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUgbGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3dGgsIDA3IHRvIHZlcnNpb24gMi4wLiBDb250YWlucyBudW1lcm91cyBpbXByb3ZlbWVudHM6DQovLyAgIC1BZGRlZCBBdXRvIE1vZGU6IFNjcmlwdCBhdXRvIHJvdGF0ZXMgdGhlIHRhYnMgYmFzZWQgb24gYW4gaW50ZXJ2YWwsIHVudGlsIGEgdGFiIGlzIGV4cGxpY2l0bHkgc2VsZWN0ZWQNCi8vICAgLUFiaWxpdHkgdG8gZXhwYW5kL2NvbnRyYWN0IGFyYml0cmFyeSBESVZzIG9uIHRoZSBwYWdlIGFzIHRoZSB0YWJiZWQgY29udGVudCBpcyBleHBhbmRlZC8gY29udHJhY3RlZA0KLy8gICAtQWJpbGl0eSB0byBkeW5hbWljYWxseSBzZWxlY3QgYSB0YWIgZWl0aGVyIGJhc2VkIG9uIGl0cyBwb3NpdGlvbiB3aXRoaW4gaXRzIHBlZXJzLCBvciBpdHMgSUQgYXR0cmlidXRlIChnaXZlIHRoZSB0YXJnZXQgdGFiIG9uZSAxc3QpDQovLyAgIC1BYmlsaXR5IHRvIHNldCB3aGVyZSB0aGUgQ1NTIGNsYXNzbmFtZSAic2VsZWN0ZWQiIGdldCBhc3NpZ25lZC0gZWl0aGVyIHRvIHRoZSB0YXJnZXQgdGFiJ3MgbGluayAoIkEiKSwgb3IgaXRzIHBhcmVudCBjb250YWluZXINCi8vKiogVXBkYXRlZCBGZWIgMTh0aCwgMDggdG8gdmVyc2lvbiAyLjE6IEFkZHMgYSAidGFiaW5zdGFuY2UuY3ljbGVpdChkaXIpIiBtZXRob2QgdG8gY3ljbGUgZm9yd2FyZCBvciBiYWNrd2FyZCBiZXR3ZWVuIHRhYnMgZHluYW1pY2FsbHkNCi8vKiogVXBkYXRlZCBBcHJpbCA4dGgsIDA4IHRvIHZlcnNpb24gMi4yOiBBZGRzIHN1cHBvcnQgZm9yIGV4cGFuZGluZyBhIHRhYiB1c2luZyBhIFVSTCBwYXJhbWV0ZXIgKGllOiBodHRwOi8vbXlzaXRlLmNvbS90YWJjb250ZW50Lmh0bT90YWJpbnRlcmZhY2VpZD0wKSANCg0KLy8vL05PIE5FRUQgVE8gRURJVCBCRUxPVy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLw0KDQpmdW5jdGlvbiBkZHRhYmNvbnRlbnQodGFiaW50ZXJmYWNlaWQpew0KCXRoaXMudGFiaW50ZXJmYWNlaWQ9dGFiaW50ZXJmYWNlaWQgLy9JRCBvZiBUYWIgTWVudSBtYWluIGNvbnRhaW5lcg0KCXRoaXMudGFicz1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0YWJpbnRlcmZhY2VpZCkuZ2V0RWxlbWVudHNCeVRhZ05hbWUoImEiKSAvL0dldCBhbGwgdGFiIGxpbmtzIHdpdGhpbiBjb250YWluZXINCgl0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlPXRydWUNCgl0aGlzLmhvdHRhYnNwb3NpdGlvbnM9W10gLy9BcnJheSB0byBzdG9yZSBwb3NpdGlvbiBvZiB0YWJzIHRoYXQgaGF2ZSBhICJyZWwiIGF0dHIgZGVmaW5lZCwgcmVsYXRpdmUgdG8gYWxsIHRhYiBsaW5rcywgd2l0aGluIGNvbnRhaW5lcg0KCXRoaXMuY3VycmVudFRhYkluZGV4PTAgLy9JbmRleCBvZiBjdXJyZW50bHkgc2VsZWN0ZWQgaG90IHRhYiAodGFiIHdpdGggc3ViIGNvbnRlbnQpIHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkNCgl0aGlzLnN1YmNvbnRlbnRpZHM9W10gLy9BcnJheSB0byBzdG9yZSBpZHMgb2YgdGhlIHN1YiBjb250ZW50cyAoInJlbCIgYXR0ciB2YWx1ZXMpDQoJdGhpcy5yZXZjb250ZW50aWRzPVtdIC8vQXJyYXkgdG8gc3RvcmUgaWRzIG9mIGFyYml0cmFyeSBjb250ZW50cyB0byBleHBhbmQvY29udGFjdCBhcyB3ZWxsICgicmV2IiBhdHRyIHZhbHVlcykNCgl0aGlzLnNlbGVjdGVkQ2xhc3NUYXJnZXQ9ImxpbmsiIC8va2V5d29yZCB0byBpbmRpY2F0ZSB3aGljaCB0YXJnZXQgZWxlbWVudCB0byBhc3NpZ24gInNlbGVjdGVkIiBDU1MgY2xhc3MgKCJsaW5rcGFyZW50IiBvciAibGluayIpDQp9DQoNCmRkdGFiY29udGVudC5nZXRDb29raWU9ZnVuY3Rpb24oTmFtZSl7IA0KCXZhciByZT1uZXcgUmVnRXhwKE5hbWUrIj1bXjtdKyIsICJpIik7IC8vY29uc3RydWN0IFJFIHRvIHNlYXJjaCBmb3IgdGFyZ2V0IG5hbWUvdmFsdWUgcGFpcg0KCWlmIChkb2N1bWVudC5jb29raWUubWF0Y2gocmUpKSAvL2lmIGNvb2tpZSBmb3VuZA0KCQlyZXR1cm4gZG9jdW1lbnQuY29va2llLm1hdGNoKHJlKVswXS5zcGxpdCgiPSIpWzFdIC8vcmV0dXJuIGl0cyB2YWx1ZQ0KCXJldHVybiAiIg0KfQ0KDQpkZHRhYmNvbnRlbnQuc2V0Q29va2llPWZ1bmN0aW9uKG5hbWUsIHZhbHVlKXsNCglkb2N1bWVudC5jb29raWUgPSBuYW1lKyI9Iit2YWx1ZSsiO3BhdGg9LyIgLy9jb29raWUgdmFsdWUgaXMgZG9tYWluIHdpZGUgKHBhdGg9LykNCn0NCg0KZGR0YWJjb250ZW50LnByb3RvdHlwZT17DQoNCglleHBhbmRpdDpmdW5jdGlvbih0YWJpZF9vcl9wb3NpdGlvbil7IC8vUFVCTElDIGZ1bmN0aW9uIHRvIHNlbGVjdCBhIHRhYiBlaXRoZXIgYnkgaXRzIElEIG9yIHBvc2l0aW9uKGludCkgd2l0aGluIGl0cyBwZWVycw0KCQl0aGlzLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCXZhciB0YWJyZWY9IiINCgkJdHJ5ew0KCQkJaWYgKHR5cGVvZiB0YWJpZF9vcl9wb3NpdGlvbj09InN0cmluZyIgJiYgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQodGFiaWRfb3JfcG9zaXRpb24pLmdldEF0dHJpYnV0ZSgicmVsIikpIC8vaWYgc3BlY2lmaWVkIHRhYiBjb250YWlucyAicmVsIiBhdHRyDQoJCQkJdGFicmVmPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKHRhYmlkX29yX3Bvc2l0aW9uKQ0KCQkJZWxzZSBpZiAocGFyc2VJbnQodGFiaWRfb3JfcG9zaXRpb24pIT1OYU4gJiYgdGhpcy50YWJzW3RhYmlkX29yX3Bvc2l0aW9uXS5nZXRBdHRyaWJ1dGUoInJlbCIpKSAvL2lmIHNwZWNpZmllZCB0YWIgY29udGFpbnMgInJlbCIgYXR0cg0KCQkJCXRhYnJlZj10aGlzLnRhYnNbdGFiaWRfb3JfcG9zaXRpb25dDQoJCX0NCgkJY2F0Y2goZXJyKXthbGVydCgiSW52YWxpZCBUYWIgSUQgb3IgcG9zaXRpb24gZW50ZXJlZCEiKX0NCgkJaWYgKHRhYnJlZiE9IiIpIC8vaWYgYSB2YWxpZCB0YWIgaXMgZm91bmQgYmFzZWQgb24gZnVuY3Rpb24gcGFyYW1ldGVyDQoJCQl0aGlzLmV4cGFuZHRhYih0YWJyZWYpIC8vZXhwYW5kIHRoaXMgdGFiDQoJfSwNCg0KCWN5Y2xlaXQ6ZnVuY3Rpb24oZGlyLCBhdXRvcnVuKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gbW92ZSBmb3dhcmQgb3IgYmFja3dhcmRzIHRocm91Z2ggZWFjaCBob3QgdGFiICh0YWJpbnN0YW5jZS5jeWNsZWl0KCdmb3dhcmQvYmFjaycpICkNCgkJaWYgKGRpcj09Im5leHQiKXsNCgkJCXZhciBjdXJyZW50VGFiSW5kZXg9KHRoaXMuY3VycmVudFRhYkluZGV4PHRoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGgtMSk%2FIHRoaXMuY3VycmVudFRhYkluZGV4KzEgOiAwDQoJCX0NCgkJZWxzZSBpZiAoZGlyPT0icHJldiIpew0KCQkJdmFyIGN1cnJlbnRUYWJJbmRleD0odGhpcy5jdXJyZW50VGFiSW5kZXg%2BMCk%2FIHRoaXMuY3VycmVudFRhYkluZGV4LTEgOiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoLTENCgkJfQ0KCQlpZiAodHlwZW9mIGF1dG9ydW49PSJ1bmRlZmluZWQiKSAvL2lmIGN5Y2xlaXQoKSBpcyBiZWluZyBjYWxsZWQgYnkgdXNlciwgdmVyc3VzIGF1dG9ydW4oKSBmdW5jdGlvbg0KCQkJdGhpcy5jYW5jZWxhdXRvcnVuKCkgLy9zdG9wIGF1dG8gY3ljbGluZyBvZiB0YWJzIChpZiBydW5uaW5nKQ0KCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zW2N1cnJlbnRUYWJJbmRleF1dKQ0KCX0sDQoNCglzZXRwZXJzaXN0OmZ1bmN0aW9uKGJvb2wpeyAvL1BVQkxJQyBmdW5jdGlvbiB0byB0b2dnbGUgcGVyc2lzdGVuY2UgZmVhdHVyZQ0KCQkJdGhpcy5lbmFibGV0YWJwZXJzaXN0ZW5jZT1ib29sDQoJfSwNCg0KCXNldHNlbGVjdGVkQ2xhc3NUYXJnZXQ6ZnVuY3Rpb24ob2Jqc3RyKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gc2V0IHdoaWNoIHRhcmdldCBlbGVtZW50IHRvIGFzc2lnbiAic2VsZWN0ZWQiIENTUyBjbGFzcyAoImxpbmtwYXJlbnQiIG9yICJsaW5rIikNCgkJdGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PW9ianN0ciB8fCAibGluayINCgl9LA0KDQoJZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldDpmdW5jdGlvbih0YWJyZWYpeyAvL1JldHVybnMgdGFyZ2V0IGVsZW1lbnQgdG8gYXNzaWduICJzZWxlY3RlZCIgQ1NTIGNsYXNzIHRvDQoJCXJldHVybiAodGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PT0oImxpbmtwYXJlbnQiLnRvTG93ZXJDYXNlKCkpKT8gdGFicmVmLnBhcmVudE5vZGUgOiB0YWJyZWYNCgl9LA0KDQoJdXJscGFyYW1zZWxlY3Q6ZnVuY3Rpb24odGFiaW50ZXJmYWNlaWQpew0KCQl2YXIgcmVzdWx0PXdpbmRvdy5sb2NhdGlvbi5zZWFyY2gubWF0Y2gobmV3IFJlZ0V4cCh0YWJpbnRlcmZhY2VpZCsiPShcXGQrKSIsICJpIikpIC8vY2hlY2sgZm9yICI%2FdGFiaW50ZXJmYWNlaWQ9MiIgaW4gVVJMDQoJCXJldHVybiAocmVzdWx0PT1udWxsKT8gbnVsbCA6IHBhcnNlSW50KFJlZ0V4cC4kMSkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXgsIHdoZXJlIGluZGV4IChpbnQpIGlzIHRoZSBzZWxlY3RlZCB0YWIncyBpbmRleA0KCX0sDQoNCglleHBhbmR0YWI6ZnVuY3Rpb24odGFicmVmKXsNCgkJdmFyIHN1YmNvbnRlbnRpZD10YWJyZWYuZ2V0QXR0cmlidXRlKCJyZWwiKSAvL0dldCBpZCBvZiBzdWJjb250ZW50IHRvIGV4cGFuZA0KCQkvL0dldCAicmV2IiBhdHRyIGFzIGEgc3RyaW5nIG9mIElEcyBpbiB0aGUgZm9ybWF0ICIsam9obixnZW9yZ2UsdHJleSxldGMsIiB0byBlYXNpbHkgc2VhcmNoIHRocm91Z2gNCgkJdmFyIGFzc29jaWF0ZWRyZXZpZHM9KHRhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpKT8gIiwiK3RhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpLnJlcGxhY2UoL1xzKy8sICIiKSsiLCIgOiAiIg0KCQl0aGlzLmV4cGFuZHN1YmNvbnRlbnQoc3ViY29udGVudGlkKQ0KCQl0aGlzLmV4cGFuZHJldmNvbnRlbnQoYXNzb2NpYXRlZHJldmlkcykNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMudGFicy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIGFsbCB0YWJzLCBhbmQgYXNzaWduIG9ubHkgdGhlIHNlbGVjdGVkIHRhYiB0aGUgQ1NTIGNsYXNzICJzZWxlY3RlZCINCgkJCXRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT0odGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIik9PXN1YmNvbnRlbnRpZCk%2FICJzZWxlY3RlZCIgOiAiIg0KCQl9DQoJCWlmICh0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlKSAvL2lmIHBlcnNpc3RlbmNlIGVuYWJsZWQsIHNhdmUgc2VsZWN0ZWQgdGFiIHBvc2l0aW9uKGludCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlkZHRhYmNvbnRlbnQuc2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQsIHRhYnJlZi50YWJwb3NpdGlvbikNCgkJdGhpcy5zZXRjdXJyZW50dGFiaW5kZXgodGFicmVmLnRhYnBvc2l0aW9uKSAvL3JlbWVtYmVyIHBvc2l0aW9uIG9mIHNlbGVjdGVkIHRhYiB3aXRoaW4gaG90dGFic3Bvc2l0aW9uc1tdIGFycmF5DQoJfSwNCg0KCWV4cGFuZHN1YmNvbnRlbnQ6ZnVuY3Rpb24oc3ViY29udGVudGlkKXsNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMuc3ViY29udGVudGlkcy5sZW5ndGg7IGkrKyl7DQoJCQl2YXIgc3ViY29udGVudD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0aGlzLnN1YmNvbnRlbnRpZHNbaV0pIC8vY2FjaGUgY3VycmVudCBzdWJjb250ZW50IG9iaiAoaW4gZm9yIGxvb3ApDQoJCQlzdWJjb250ZW50LnN0eWxlLmRpc3BsYXk9KHN1YmNvbnRlbnQuaWQ9PXN1YmNvbnRlbnRpZCk%2FICJibG9jayIgOiAibm9uZSIgLy8ic2hvdyIgb3IgaGlkZSBzdWIgY29udGVudCBiYXNlZCBvbiBtYXRjaGluZyBpZCBhdHRyIHZhbHVlDQoJCX0NCgl9LA0KDQoJZXhwYW5kcmV2Y29udGVudDpmdW5jdGlvbihhc3NvY2lhdGVkcmV2aWRzKXsNCgkJdmFyIGFsbHJldmlkcz10aGlzLnJldmNvbnRlbnRpZHMNCgkJZm9yICh2YXIgaT0wOyBpPGFsbHJldmlkcy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIHJldiBhdHRyaWJ1dGVzIGZvciBhbGwgdGFicyBpbiB0aGlzIHRhYiBpbnRlcmZhY2UNCgkJCS8vaWYgYW55IHZhbHVlcyBzdG9yZWQgd2l0aGluIGFzc29jaWF0ZWRyZXZpZHMgbWF0Y2hlcyBvbmUgd2l0aGluIGFsbHJldmlkcywgZXhwYW5kIHRoYXQgRElWLCBvdGhlcndpc2UsIGNvbnRyYWN0IGl0DQoJCQlkb2N1bWVudC5nZXRFbGVtZW50QnlJZChhbGxyZXZpZHNbaV0pLnN0eWxlLmRpc3BsYXk9KGFzc29jaWF0ZWRyZXZpZHMuaW5kZXhPZigiLCIrYWxscmV2aWRzW2ldKyIsIikhPS0xKT8gImJsb2NrIiA6ICJub25lIg0KCQl9DQoJfSwNCg0KCXNldGN1cnJlbnR0YWJpbmRleDpmdW5jdGlvbih0YWJwb3NpdGlvbil7IC8vc3RvcmUgY3VycmVudCBwb3NpdGlvbiBvZiB0YWIgKHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkpDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoOyBpKyspew0KCQkJaWYgKHRhYnBvc2l0aW9uPT10aGlzLmhvdHRhYnNwb3NpdGlvbnNbaV0pew0KCQkJCXRoaXMuY3VycmVudFRhYkluZGV4PWkNCgkJCQlicmVhaw0KCQkJfQ0KCQl9DQoJfSwNCg0KCWF1dG9ydW46ZnVuY3Rpb24oKXsgLy9mdW5jdGlvbiB0byBhdXRvIGN5Y2xlIHRocm91Z2ggYW5kIHNlbGVjdCB0YWJzIGJhc2VkIG9uIGEgc2V0IGludGVydmFsDQoJCXRoaXMuY3ljbGVpdCgnbmV4dCcsIHRydWUpDQoJfSwNCg0KCWNhbmNlbGF1dG9ydW46ZnVuY3Rpb24oKXsNCgkJaWYgKHR5cGVvZiB0aGlzLmF1dG9ydW50aW1lciE9InVuZGVmaW5lZCIpDQoJCQljbGVhckludGVydmFsKHRoaXMuYXV0b3J1bnRpbWVyKQ0KCX0sDQoNCglpbml0OmZ1bmN0aW9uKGF1dG9tb2RlcGVyaW9kKXsNCgkJdmFyIHBlcnNpc3RlZHRhYj1kZHRhYmNvbnRlbnQuZ2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQpIC8vZ2V0IHBvc2l0aW9uIG9mIHBlcnNpc3RlZCB0YWIgKGFwcGxpY2FibGUgaWYgcGVyc2lzdGVuY2UgaXMgZW5hYmxlZCkNCgkJdmFyIHNlbGVjdGVkdGFiPS0xIC8vQ3VycmVudGx5IHNlbGVjdGVkIHRhYiBpbmRleCAoLTEgbWVhbmluZyBub25lKQ0KCQl2YXIgc2VsZWN0ZWR0YWJmcm9tdXJsPXRoaXMudXJscGFyYW1zZWxlY3QodGhpcy50YWJpbnRlcmZhY2VpZCkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXggZnJvbTogdGFiY29udGVudC5odG0%2FdGFiaW50ZXJmYWNlaWQ9aW5kZXgNCgkJdGhpcy5hdXRvbW9kZXBlcmlvZD1hdXRvbW9kZXBlcmlvZCB8fCAwDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLnRhYnMubGVuZ3RoOyBpKyspew0KCQkJdGhpcy50YWJzW2ldLnRhYnBvc2l0aW9uPWkgLy9yZW1lbWJlciBwb3NpdGlvbiBvZiB0YWIgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIikpew0KCQkJCXZhciB0YWJpbnN0YW5jZT10aGlzDQoJCQkJdGhpcy5ob3R0YWJzcG9zaXRpb25zW3RoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGhdPWkgLy9zdG9yZSBwb3NpdGlvbiBvZiAiaG90IiB0YWIgKCJyZWwiIGF0dHIgZGVmaW5lZCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQkJdGhpcy5zdWJjb250ZW50aWRzW3RoaXMuc3ViY29udGVudGlkcy5sZW5ndGhdPXRoaXMudGFic1tpXS5nZXRBdHRyaWJ1dGUoInJlbCIpIC8vc3RvcmUgaWQgb2Ygc3ViIGNvbnRlbnQgKCJyZWwiIGF0dHIgdmFsdWUpDQoJCQkJdGhpcy50YWJzW2ldLm9uY2xpY2s9ZnVuY3Rpb24oKXsNCgkJCQkJdGFiaW5zdGFuY2UuZXhwYW5kdGFiKHRoaXMpDQoJCQkJCXRhYmluc3RhbmNlLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCQkJCXJldHVybiBmYWxzZQ0KCQkJCX0NCgkJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmV2IikpeyAvL2lmICJyZXYiIGF0dHIgZGVmaW5lZCwgc3RvcmUgZWFjaCB2YWx1ZSB3aXRoaW4gInJldiIgYXMgYW4gYXJyYXkgZWxlbWVudA0KCQkJCQl0aGlzLnJldmNvbnRlbnRpZHM9dGhpcy5yZXZjb250ZW50aWRzLmNvbmNhdCh0aGlzLnRhYnNbaV0uZ2V0QXR0cmlidXRlKCJyZXYiKS5zcGxpdCgvXHMqLFxzKi8pKQ0KCQkJCX0NCgkJCQlpZiAoc2VsZWN0ZWR0YWJmcm9tdXJsPT1pIHx8IHRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHBhcnNlSW50KHBlcnNpc3RlZHRhYik9PWkgfHwgIXRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT09InNlbGVjdGVkIil7DQoJCQkJCXNlbGVjdGVkdGFiPWkgLy9TZWxlY3RlZCB0YWIgaW5kZXgsIGlmIGZvdW5kDQoJCQkJfQ0KCQkJfQ0KCQl9IC8vRU5EIGZvciBsb29wDQoJCWlmIChzZWxlY3RlZHRhYiE9LTEpIC8vaWYgYSB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIHRhYiBpbmRleCBpcyBmb3VuZA0KCQkJdGhpcy5leHBhbmR0YWIodGhpcy50YWJzW3NlbGVjdGVkdGFiXSkgLy9leHBhbmQgc2VsZWN0ZWQgdGFiIChlaXRoZXIgZnJvbSBVUkwgcGFyYW1ldGVyLCBwZXJzaXN0ZW50IGZlYXR1cmUsIG9yIGNsYXNzPSJzZWxlY3RlZCIgY2xhc3MpDQoJCWVsc2UgLy9pZiBubyB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIGluZGV4IGZvdW5kDQoJCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zWzBdXSkgLy9KdXN0IHNlbGVjdCBmaXJzdCB0YWIgdGhhdCBjb250YWlucyBhICJyZWwiIGF0dHINCgkJaWYgKHBhcnNlSW50KHRoaXMuYXV0b21vZGVwZXJpb2QpPjUwMCAmJiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoPjEpew0KCQkJdGhpcy5hdXRvcnVudGltZXI9c2V0SW50ZXJ2YWwoZnVuY3Rpb24oKXt0YWJpbnN0YW5jZS5hdXRvcnVuKCl9LCB0aGlzLmF1dG9tb2RlcGVyaW9kKQ0KCQl9DQoJfSAvL0VORCBpbnQoKSBmdW5jdGlvbg0KDQp9IC8vRU5EIFByb3RvdHlwZSBhc3NpZ25tZW50"
   }).appendChild(document.createTextNode(
     '/***********************************************\n' +
-    '* Tab Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    '* Tab Content script v2.2- � Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     '* This notice MUST stay intact for legal use\n' +
     '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
     '***********************************************/\n'
@@ -4242,16 +4249,16 @@ function createSettingsBox() {
 
 // Create General Tab
 function createGeneralTab() {
-  var elt, title, id, label;
+  var elt, title, id, label, item, i, lhs, rhs, choice;
   var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
 
   // Refresh option
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check this to refresh MWAP between the indicated time interval.';
   id = 'autoClick';
@@ -4266,9 +4273,9 @@ function createGeneralTab() {
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' seconds '));
 
   // Delay option
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Set the delay interval between actions.';
   label = makeElement('label', lhs, {'title':title});
@@ -4280,9 +4287,9 @@ function createGeneralTab() {
   rhs.appendChild(document.createTextNode(' seconds'));
 
   // Auto-pause
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check this to enable auto-pause before or after level up.';
   id = 'autoPause';
@@ -4300,18 +4307,18 @@ function createGeneralTab() {
   makeElement('input', rhs, {'type':'radio', 'style':'vertical-align: middle;', 'name':'r3', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
 
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'autoPauseExp';
   lhs.appendChild(document.createTextNode('Experience left to pause at:'));
   makeElement('input', rhs, {'style':'vertical-align: middle; text-align: right;','type':'text', 'value':GM_getValue(id, '50'), 'id':id, 'size':'2'});
 
   // Healing options
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Heal when health lands below indicated health.';
   id = 'autoHeal';
@@ -4320,13 +4327,13 @@ function createGeneralTab() {
   makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Heal in:'));
   id = 'healLocation';
   var healLocation = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
     healLocation.appendChild(choice);
   }
-  var choice = document.createElement('option');
+  choice = document.createElement('option');
   choice.value = i;
   choice.appendChild(document.createTextNode('Active City'));
   healLocation.appendChild(choice);
@@ -4337,9 +4344,9 @@ function createGeneralTab() {
   makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' points'));
 
   // Hide in hospital
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Hide in hospital while health is below 20';
   id = 'hideInHospital';
@@ -4349,7 +4356,7 @@ function createGeneralTab() {
   makeElement('label', rhs, {'id':'hideLabel', 'for':id, 'title':title}).appendChild(document.createTextNode(title));
 
   elt = makeElement('div', rhs, {'style':'position: relative; line-height: 150%; left: 17px;','id':'hideOpts'});
-  for (var i = 0, iLength=healOptions.length; i < iLength; i++) {
+  for (i = 0, iLength=healOptions.length; i < iLength; i++) {
     id = healOptions[i][0];
     title = healOptions[i][1];
     var optElt = makeElement('div', elt);
@@ -4370,21 +4377,21 @@ function createGeneralTab() {
       hideOpts.style.display = 'none';
       hideLabel.firstChild.nodeValue = ' Hide in hospital';
     }
+    return true;
   }
   hideInHosp.addEventListener('click', hideHandler, false);
 
   // Idle-in location
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check to idle in preferred city';
   id = 'idleInCity';
   makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' When idle, fly to:'));
   var idleLocation = makeElement('select', rhs, {'id':'idleLocation'});
-  var choice;
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
@@ -4393,9 +4400,9 @@ function createGeneralTab() {
   idleLocation.selectedIndex = GM_getValue('idleLocation', NY);
 
   // Auto-lotto
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'autoLottoOpt';
   title = ' Play the Daily Chance';
@@ -4404,9 +4411,9 @@ function createGeneralTab() {
   makeElement('label', rhs, {'for':id, 'title':lottoTitle}).appendChild(document.createTextNode(title));
 
   // Lotto selector
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = ' Collect lotto bonus at: '
   id = 'autoLottoBonus';
@@ -4415,7 +4422,7 @@ function createGeneralTab() {
 
   id = 'autoLottoList';
   var lottoBonusSelect = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength = autoLottoBonusList.length; i < iLength; ++i) {
+  for (i = 0, iLength = autoLottoBonusList.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(autoLottoBonusList[i]));
@@ -4424,9 +4431,9 @@ function createGeneralTab() {
   lottoBonusSelect.selectedIndex = GM_getValue('autoLottoBonusItem', 0);
 
   // Hourly-stat
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hourlyStatsOpt';
   title = ' Enable hourly stats updates [Beta] ';
@@ -4434,17 +4441,16 @@ function createGeneralTab() {
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
 
   // Burn option
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check to prioritize burning of either energy or stamina';
   id = 'burnFirst';
   makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Spend all:'));
   var burnOpt = makeElement('select', rhs, {'id':'burnOption'});
-  var choice;
-  for (var i = 0, iLength=burnOptions.length; i < iLength; ++i) {
+  for (i = 0, iLength=burnOptions.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(burnOptions[i]));
@@ -4454,14 +4460,14 @@ function createGeneralTab() {
   burnOpt.selectedIndex = GM_getValue('burnOption', BURN_ENERGY);
 
   // Choose Sides
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Choose sides:'));
 
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
-    var sideOpt, choice;
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+    var sideOpt;
     if (cities[i][CITY_SIDES].length > 0) {
       id = 'side' + cities[i][CITY_NAME];
       makeElement('label', rhs).appendChild(document.createTextNode(' ' + cities[i][CITY_NAME] + ' '));
@@ -4483,16 +4489,16 @@ function createGeneralTab() {
 
 // Create Display Tab
 function createDisplayTab() {
-  var elt, title, id, label;
+  var title, id, i, item, choice, lhs, rhs;
   var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
 
   // Logging option
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'autoLog';
   title = 'Check this to enable logging.';
@@ -4503,9 +4509,9 @@ function createDisplayTab() {
   rhs.appendChild(document.createTextNode(' max # of messages in log'));
 
   // Player updates
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'logPlayerUpdates';
   title = 'Send Player Updates to Mafia Log.';
@@ -4516,9 +4522,9 @@ function createDisplayTab() {
   rhs.appendChild(document.createTextNode(' max # of updates'));
 
   // Log filtering
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check this to enable log-filtering';
   id = 'filterLog';
@@ -4528,8 +4534,7 @@ function createDisplayTab() {
   id = 'filterOpt';
   var filterOpt = makeElement('select', rhs, {'id':id});
   var filterOptions = ['Accept patterns','Reject patterns'];
-  var choice;
-  for (var i = 0, iLength=filterOptions.length; i < iLength; ++i) {
+  for (i = 0, iLength=filterOptions.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(filterOptions[i]));
@@ -4537,9 +4542,9 @@ function createDisplayTab() {
   }
   filterOpt.selectedIndex = GM_getValue(id, 0);
 
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'filterPatterns';
   var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
@@ -4557,9 +4562,9 @@ function createDisplayTab() {
   filterOpt.addEventListener('change', filterHandler, false);
 
   // Safe house gifts
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hideGifts';
   title = 'Hide gifting items';
@@ -4567,9 +4572,9 @@ function createDisplayTab() {
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide gifting'));
 
   // Alignment
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'leftAlign';
   title = 'Align game to the left';
@@ -4577,9 +4582,9 @@ function createDisplayTab() {
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Align game to the left'));
 
   // Summarize Attacks
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hideAttacks';
   title = 'Only Show Summary of Attacks';
@@ -4587,9 +4592,9 @@ function createDisplayTab() {
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Summarize attacks from Player Updates'));
 
   // Set Facebook account to window title
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'fbwindowtitle';
   title = 'Set window title to name on Facebook account';
@@ -4601,16 +4606,16 @@ function createDisplayTab() {
 
 // Create Mafia Tab
 function createMafiaTab() {
-  var elt, title, id, label;
+  var elt, title, id, label, item, lhs, rhs, i, choice;
   var mafiaTab = makeElement('div', null, {'id':'mafiaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
 
   // Auto-ask for job help
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check if you want to ask for help automatically with jobs.';
   id = 'autoAskJobHelp';
@@ -4623,9 +4628,9 @@ function createMafiaTab() {
   rhs.appendChild(document.createTextNode(' minimum experience'));
 
   // Auto-accept mafia invitations
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Automatically accept mafia invitations.';
   id = 'acceptMafiaInvitations';
@@ -4634,9 +4639,9 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Accept mafia invitations'));
 
   // Auto-publish Miscellaneous Stuff
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   label = makeElement('label', lhs);
   label.appendChild(document.createTextNode('Automatically publish:'));
@@ -4663,9 +4668,9 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Level-up bonus'));
 
   // Auto-help on jobs/wars
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   label = makeElement('label', lhs);
   label.appendChild(document.createTextNode(' Automatically help: '));
@@ -4682,9 +4687,9 @@ function createMafiaTab() {
 
 
   // Betray friends in wars
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Betray a random friend?';
   id = 'autoWarBetray';
@@ -4693,9 +4698,9 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Betray friends in wars'));
 
   // Skip gift wall posts
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'autoGiftSkipOpt';
   title = 'Check this to skip publishing of wall posts.';
@@ -4703,25 +4708,25 @@ function createMafiaTab() {
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' Skip gift wall posts'));
 
   // Option for clicking the gift waiting
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   title = 'Click the gift waiting option';
   id = 'autoGiftWaiting';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically click the gift waiting option'));
 
   // Undo notifications
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   notificationStopTitle = 'Handles undoing notification pop-ups alerting other users.';
   notificationID = 'notificationHandle';
   var notificationLabel = makeElement('label', lhs);
   notificationLabel.appendChild(document.createTextNode('Undo which notifications:'));
   var notificationHandle = makeElement('select', rhs, {'id':notificationID, 'title':notificationStopTitle}, 'notificationLabel');
-  var choice = document.createElement('option');
+  choice = document.createElement('option');
   choice.value = 0;
   choice.appendChild(document.createTextNode('None'));
   notificationHandle.appendChild(choice);
@@ -4739,9 +4744,9 @@ function createMafiaTab() {
   notificationHandle.selectedIndex = GM_getValue('notificationHandle', 1);
 
   // War - Automatically declare a war
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Declare war against this opponent';
   id = 'autoWar';
@@ -4772,8 +4777,8 @@ function createMafiaTab() {
   // War mode
   id = 'warMode';
   var warModes = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=warModeChoices.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=warModeChoices.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(warModeChoices[i]));
     warModes.appendChild(choice);
@@ -4803,12 +4808,12 @@ function createMafiaTab() {
 
 // Create Autostat Tab
 function createAutostatTab() {
-  var elt, title, id, label;
+  var title, id, label, i, j, choice, div;
   var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
 
-  id = 'autoStat';;
+  id = 'autoStat';
   var autoStats = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; left: 20px;'});
   makeElement('input', autoStats, {'type':'checkbox','style':'vertical-align: middle', 'id':id, 'value':'checked'}, id);
   makeElement('img', autoStats, {'style':'vertical-align: middle;','src':stripURI(plussignIcon)});
@@ -4825,29 +4830,26 @@ function createAutostatTab() {
   var xTop = 30;
   var yLeft = 10;
 
-  var yLeftCur = yLeft + 10;
-  var xTopCur = xTop;
-
   // Status Labels
-  var yLeftCur = yLeft + 10;
-  var xTopCur = xTop + 2;
+  var yLeftCur = yLeft + 20;
+  var xTopCur = xTop +2;
 
   // Stat labels
-  for (var i = 0, iLength=autoStatRatios.length; i < iLength; ++i ) {
-    var div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
+  for (i = 0, iLength=autoStatRatios.length; i < iLength; ++i ) {
+    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
     div.appendChild(document.createTextNode(autoStatDescrips[i + 1]));
 
     xTopCur += 25;
   }
 
   // Status ratio
-  var yLeftCur = yLeft + 75;
-  var xTopCur = xTop;
+  yLeftCur = yLeft + 75;
+  xTopCur = xTop;
 
-  for (var i = 0, iLength=autoStatRatios.length; i < iLength; ++i ) {
-    var title = 'Please set ratio of' + autoStatDescrips[i + 1] + ' stat';
-    var id = autoStatRatios[i];
-    var div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
+  for (i = 0, iLength=autoStatRatios.length; i < iLength; ++i ) {
+    title = 'Please set ratio of' + autoStatDescrips[i + 1] + ' stat';
+    id = autoStatRatios[i];
+    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
     div.appendChild(document.createTextNode(' = '));
     makeElement('input', div, {'type':'text', 'style':'width: 40px;', 'value':GM_getValue(id, 0), 'id':id, 'size':'1'});
     div.appendChild(document.createTextNode(' x '));
@@ -4856,16 +4858,16 @@ function createAutostatTab() {
   }
 
   // Status Allocation Mode Settings
-  var yLeftCur = yLeft + 150;
-  var xTopCur = xTop;
+  yLeftCur = yLeft + 150;
+  xTopCur = xTop;
 
-  for (var i = 0, iLength=autoStatModes.length; i < iLength; ++i ) {
-    var title = 'Please select where to base ' + autoStatDescrips[i + 1] + ' stat';
-    var id = autoStatModes[i];
+  for (i = 0, iLength=autoStatModes.length; i < iLength; ++i ) {
+    title = 'Please select where to base ' + autoStatDescrips[i + 1] + ' stat';
+    id = autoStatModes[i];
     var sel = makeElement('select', statDiv, {'id':id, 'title':title, 'style':'position: absolute; width:60px; top: ' + xTopCur + 'px; left: ' + yLeftCur + 'px;'});
     xTopCur += 25;
-    for (var j = 0, jLength=autoStatDescrips.length; j < jLength; ++j) {
-      var choice = document.createElement('option');
+    for (j = 0, jLength=autoStatDescrips.length; j < jLength; ++j) {
+      choice = document.createElement('option');
       choice.value = j;
       choice.appendChild(document.createTextNode(autoStatDescrips[j]));
       sel.appendChild(choice);
@@ -4874,42 +4876,42 @@ function createAutostatTab() {
   }
 
   // Status base
-  var yLeftCur = yLeft + 215;
-  var xTopCur = xTop;
+  yLeftCur = yLeft + 215;
+  xTopCur = xTop;
 
-  for (var i = 0, iLength=autoStatBases.length; i < iLength; ++i ) {
-    var id = autoStatBases[i];
-    var div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
+  for (i = 0, iLength=autoStatBases.length; i < iLength; ++i ) {
+    id = autoStatBases[i];
+    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
     div.appendChild(document.createTextNode(' + '));
     makeElement('input', div, {'type':'text', 'style':'width: 40px;', 'value':GM_getValue(id, 0), 'id':id, 'size':'1'});
     xTopCur += 25;
   }
 
   // Left-over points
-  var yLeftCur = yLeft + 280;
-  var xTopCur = xTop;
+  yLeftCur = yLeft + 280;
+  xTopCur = xTop;
 
-  for (var i = 0, iLength=autoStatFallbacks.length; i < iLength; ++i ) {
-    var title = 'Check this to distribute points to ' + autoStatDescrips[i + 1] + ' when goals are reached';
-    var id = autoStatFallbacks[i];
-    var div = makeElement('div', statDiv, {'style':'position: absolute; top: ' + xTopCur + 'px; left:' + yLeftCur + 'px; '});
+  for (i = 0, iLength=autoStatFallbacks.length; i < iLength; ++i ) {
+    title = 'Check this to distribute points to ' + autoStatDescrips[i + 1] + ' when goals are reached';
+    id = autoStatFallbacks[i];
+    div = makeElement('div', statDiv, {'style':'position: absolute; top: ' + xTopCur + 'px; left:' + yLeftCur + 'px; '});
     makeElement('input', div, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, autoStatFallbacks[i]);
-    var label = makeElement('label', div, {'for':id, 'title':title});
+    label = makeElement('label', div, {'for':id, 'title':title});
     label.appendChild(document.createTextNode(' ' + autoStatDescrips[i+1] + ' as fallback'));
     xTopCur += 25;
   }
 
   // Priority Settings
   title = 'Please select priority level for stat distribution';
-  var yLeftCur = yLeft + 460;
-  var xTopCur = xTop;
+  yLeftCur = yLeft + 460;
+  xTopCur = xTop;
 
-  for (var i = 0, iLength=autoStatPrios.length; i < iLength; ++i ) {
-    var id = autoStatPrios[i];
-    var sel = makeElement('select', statDiv, {'id':id, 'title':title,'style':'position: absolute; top: ' + xTopCur + 'px; left: ' + yLeftCur + 'px;'});
+  for (i = 0, iLength=autoStatPrios.length; i < iLength; ++i ) {
+    id = autoStatPrios[i];
+    sel = makeElement('select', statDiv, {'id':id, 'title':title,'style':'position: absolute; top: ' + xTopCur + 'px; left: ' + yLeftCur + 'px;'});
     xTopCur += 25;
-    for (var j = 0, jLength=autoStatRatios.length; j < jLength; ++j) {
-      var choice = document.createElement('option');
+    for (j = 0, jLength=autoStatRatios.length; j < jLength; ++j) {
+      choice = document.createElement('option');
       choice.value = j;
       choice.appendChild(document.createTextNode('Priority ' + (j + 1)));
       sel.appendChild(choice);
@@ -4922,16 +4924,16 @@ function createAutostatTab() {
 
 // Create Energy Tab
 function createEnergyTab() {
-  var elt, title, id, label;
+  var elt, title, id, label, item, rhs, lhs, choice;
   var energyTab = makeElement('div', null, {'id':'energyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', energyTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
 
   // How to spend energy
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Spend energy automatically.';
   id = 'autoMission';
@@ -4955,9 +4957,9 @@ function createEnergyTab() {
   //
   // Job selector.
   //
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = '...set by handler...';
   id = 'selectMission';
@@ -4979,8 +4981,8 @@ function createEnergyTab() {
 
   // Master tier selection pull down.
   var selectTierDiv = makeElement('div', list);
-  var lhs = makeElement('div', selectTierDiv, {'class':'lhs'});
-  var rhs = makeElement('div', selectTierDiv, {'class':'rhs'});
+  lhs = makeElement('div', selectTierDiv, {'class':'lhs'});
+  rhs = makeElement('div', selectTierDiv, {'class':'rhs'});
   makeElement('br', selectTierDiv, {'class':'hide'});
   title = 'Master Tier';
   id = 'selectTier';
@@ -4995,11 +4997,7 @@ function createEnergyTab() {
   // Create the rows of the list.
   var cityno = -1;
   var tabno = -1;
-  var divChoice;
-  var chkImg;
-  var choiceM;
-  var choiceS;
-  var label;
+  var divChoice, choiceM, choiceS;
   //var energyBonus = 1 - (GM_getValue('selectEnergyBonus', 0) / 100);
   //var expBonusMultiplier = 1 + (GM_getValue('selectExpBonus', 0) / 100);
 
@@ -5087,7 +5085,7 @@ function createEnergyTab() {
     selectMissionM.appendChild(divChoice);
 
     // Single job choices
-    var choiceS = document.createElement('option');
+    choiceS = document.createElement('option');
     choiceS.text = mission[0] + ' (' + parseFloat(ratio) + ')';
     choiceS.className = 'ap_option';
     selectMissionS.appendChild(choiceS);
@@ -5111,9 +5109,10 @@ function createEnergyTab() {
 
   // Handler to change selection style (multiple vs. single)
   var handler = function() {
+    var title, labelText;
     if (multipleJobs.checked) {
-      var labelText = 'Job selection:';
-      var title = 'Select one or more jobs to perform. Jobs will be performed in an automatically optimized order.';
+      labelText = 'Job selection:';
+      title = 'Select one or more jobs to perform. Jobs will be performed in an automatically optimized order.';
       selectMissionLabel.firstChild.nodeValue = labelText;
       selectMissionLabel.title = title;
       selectMissionM.title = title;
@@ -5122,8 +5121,8 @@ function createEnergyTab() {
       jobOptions.style.display = '';
       selectTierDiv.style.display = '';
     } else {
-      var labelText = 'Next job to master:';
-      var title = 'Select the next job to master. Once mastered, another job will be picked automatically.';
+      labelText = 'Next job to master:';
+      title = 'Select the next job to master. Once mastered, another job will be picked automatically.';
       selectMissionLabel.firstChild.nodeValue = labelText;
       selectMissionLabel.title = title;
       selectMissionS.title = title;
@@ -5142,9 +5141,9 @@ function createEnergyTab() {
   multipleJobs.addEventListener('change', handler, false);
 
   // Spend energy packs?
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Spend energy packs:'));
@@ -5167,9 +5166,9 @@ function createEnergyTab() {
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
 
   // Periodically send energy packs?
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Periodically send energy packs to your fellow mafia members.';
   id = 'sendEnergyPack';
@@ -5182,9 +5181,9 @@ function createEnergyTab() {
   //makeElement('hr', item, {'style':'width: 100%'});
 
   // Maniac character type?
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check this box if your character type is Maniac (as opposed to Fearless or Mogul).';
   id = 'isManiac';
@@ -5193,9 +5192,9 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(' Character type is Maniac'));
 
   // Mastery items owned.
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Check the mastery items you already own.',
   label = makeElement('label', lhs, {'title':title});
@@ -5217,16 +5216,16 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(' Golden Throne'));
 
   // Spend energy option
-  var item = makeElement('div', list, {'class':'single'});
+  item = makeElement('div', list, {'class':'single'});
   title = 'Start spending energy when energy level is reached';
   id = 'selectEnergyUse';
   item.appendChild(document.createTextNode('Start spending energy when '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
   id = 'selectEnergyUseMode';
   item.appendChild(document.createTextNode(' '));
-  var elt = makeElement('select', item, {'id':id, 'title':title});
+  elt = makeElement('select', item, {'id':id, 'title':title});
   for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(numberSchemes[i]));
     elt.appendChild(choice);
@@ -5235,16 +5234,16 @@ function createEnergyTab() {
   item.appendChild(document.createTextNode(' of energy has accumulated.'));
 
   // Stamina to reserve for manual play
-  var item = makeElement('div', list, {'class':'single'});
+  item = makeElement('div', list, {'class':'single'});
   title = 'Suspend automatic play below this level of energy.';
   id = 'selectEnergyKeep';
   item.appendChild(document.createTextNode('Reserve '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
   id = 'selectEnergyKeepMode';
   item.appendChild(document.createTextNode(' '));
-  var elt = makeElement('select', item, {'id':id, 'title':title});
-    for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  elt = makeElement('select', item, {'id':id, 'title':title});
+  for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(numberSchemes[i]));
     elt.appendChild(choice);
@@ -5253,7 +5252,7 @@ function createEnergyTab() {
   item.appendChild(document.createTextNode(' of energy for manual play.'));
 
   // Level up
-  var item = makeElement('div', list, {'class':'single'});
+  item = makeElement('div', list, {'class':'single'});
   title = 'Ignore minimum energy settings if a level up is within reach.';
   id = 'allowEnergyToLevelUp';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
@@ -5265,8 +5264,8 @@ function createEnergyTab() {
 
 // Create Stamina Tab
 function createStaminaTab() {
-  var elt, title, id, label;
-  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var i, elt, title, id, label, lhs, item, choice;
+  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'rhsclass':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -5274,9 +5273,9 @@ function createStaminaTab() {
   //
   // How to spend stamina (fight/hitlist).
   //
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
 
   title = 'Spend stamina automatically.';
@@ -5287,8 +5286,8 @@ function createStaminaTab() {
 
   id = 'staminaSpendHow';
   var staminaSpendHow = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=staminaSpendChoices.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=staminaSpendChoices.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(staminaSpendChoices[i]));
     staminaSpendHow.appendChild(choice);
@@ -5305,16 +5304,16 @@ function createStaminaTab() {
   var staminaTabSub = makeElement('div', list, {'id':'staminaTabSub', 'style':'position: static; border: 1px inset #FFD927; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px;'});
 
   // Spend stamina option
-  var item = makeElement('div', list, {'class':'single'});
+   item = makeElement('div', list, {'class':'single'});
   title = 'Start spending stamina when stamina level is reached';
   id = 'selectStaminaUse';
   item.appendChild(document.createTextNode('Start spending stamina when '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
   id = 'selectStaminaUseMode';
   item.appendChild(document.createTextNode(' '));
-  var elt = makeElement('select', item, {'id':id, 'title':title});
+  elt = makeElement('select', item, {'id':id, 'title':title});
   for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(numberSchemes[i]));
     elt.appendChild(choice);
@@ -5323,16 +5322,16 @@ function createStaminaTab() {
   item.appendChild(document.createTextNode(' of stamina has accumulated.'));
 
   // Stamina to reserve for manual play
-  var item = makeElement('div', list, {'class':'single'});
+  item = makeElement('div', list, {'class':'single'});
   title = 'Suspend automatic play below this level of stamina.';
   id = 'selectStaminaKeep';
   item.appendChild(document.createTextNode('Reserve '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
   id = 'selectStaminaKeepMode';
   item.appendChild(document.createTextNode(' '));
-  var elt = makeElement('select', item, {'id':id, 'title':title});
-    for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  elt = makeElement('select', item, {'id':id, 'title':title});
+  for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(numberSchemes[i]));
     elt.appendChild(choice);
@@ -5341,7 +5340,7 @@ function createStaminaTab() {
   item.appendChild(document.createTextNode(' of stamina for manual play.'));
 
   // Level up
-  var item = makeElement('div', list, {'class':'single'});
+  item = makeElement('div', list, {'class':'single'});
   title = 'Ignore minimum stamina settings if a level up is within reach.';
   id = 'allowStaminaToLevelUp';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'allowStaminaToLevelUp');
@@ -5353,18 +5352,18 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  var list = makeElement('div', staminaTabSub, {'id':'fightRandomSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none;'});
+  list = makeElement('div', staminaTabSub, {'id':'fightRandomSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none;'});
 
   // Location setting
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   lhs.appendChild(document.createTextNode('Fight in:'));
   id = 'fightRandomLoc';
   var fightRandomLoc = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
     fightRandomLoc.appendChild(choice);
@@ -5384,9 +5383,9 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode('bucks'));
 
   // Maximum level.
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Avoid opponents higher than this level.';
   id = 'fightLevelMax';
@@ -5402,9 +5401,9 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode(' Add my level'));
 
   // Maximum mafia size.
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'fightMafiaMax';
   title = 'Avoid opponents with mafia sizes larger than this.',
@@ -5420,9 +5419,9 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode(' Add my mafia size'));
 
   // Minimum mafia size.
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'fightMafiaMin';
   title = 'Avoid opponents with mafia sizes smaller than this.',
@@ -5438,9 +5437,9 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
 
   // Use stealth fighting?
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Prefer opponents who won\'t be notified of your attacks.';
   id = 'fightStealth';
@@ -5457,9 +5456,9 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
 
   // Family names
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Avoid random opponents whose names contain specific patterns.';
   id = 'fightAvoidNames';
@@ -5477,18 +5476,18 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  var list = makeElement('div', staminaTabSub, {'id':'fightListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+  list = makeElement('div', staminaTabSub, {'id':'fightListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
 
   // Location setting
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   lhs.appendChild(document.createTextNode('Fight in:'));
   id = 'fightListLoc';
   var fightListLoc = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
     fightListLoc.appendChild(choice);
@@ -5508,9 +5507,9 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode('bucks'));
 
   // Opponent list
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   lhs.appendChild(document.createTextNode('Fight these opponents:'));
   makeElement('textarea', rhs, {'style':'position: static; width: 180px; height: 105px;', 'id':'fightList', 'title':'Enter each opponent\'s ID (not their name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightList', '')));
@@ -5518,9 +5517,9 @@ function createStaminaTab() {
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each Facebook ID on a separate line.'));
 
   // Remove stronger opponents?
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Remove stronger opponents from the list automatically.';
   id = 'fightRemoveStronger';
@@ -5535,18 +5534,18 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  var list = makeElement('div', staminaTabSub, {'id':'hitmanSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+  list = makeElement('div', staminaTabSub, {'id':'hitmanSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
 
   // Location setting
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   lhs.appendChild(document.createTextNode('Collect bounties in:'));
   id = 'hitmanLoc';
   var hitmanLoc = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=cities.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
     hitmanLoc.appendChild(choice);
@@ -5554,9 +5553,9 @@ function createStaminaTab() {
   hitmanLoc.selectedIndex = GM_getValue('hitmanLocation', NY);
 
   // Minimum bounty
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hitmanBountyMin';
   title = 'Ignore targets with bounties below this measly amount.',
@@ -5565,15 +5564,15 @@ function createStaminaTab() {
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351', 'value':GM_getValue('hitmanBountyMin', '0')});
 
   // Bounty selection
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   lhs.appendChild(document.createTextNode('Prefer targets with:'));
   id = 'bountySelection';
   var bountySelection = makeElement('select', rhs, {'id':id});
-  for (var i = 0, iLength=bountySelectionChoices.length; i < iLength; ++i) {
-    var choice = document.createElement('option');
+  for (i = 0, iLength=bountySelectionChoices.length; i < iLength; ++i) {
+    choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(bountySelectionChoices[i]));
     bountySelection.appendChild(choice);
@@ -5581,16 +5580,16 @@ function createStaminaTab() {
   bountySelection.selectedIndex = GM_getValue('bountySelection', BOUNTY_HIGHEST_BOUNTY);
 
   // Family names
-  var item = makeElement('div', list);
-  var lhs = makeElement('div', item, {'class':'lhs'});
-  var rhs = makeElement('div', item, {'class':'rhs'});
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   title = 'Avoid random opponents whose names contain specific patterns.';
   id = 'hitmanAvoidNames';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'hitmanAvoidNames', 0);
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Avoid mafia families:'));
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));;
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
   // End of options specific to hitman
@@ -5742,7 +5741,7 @@ function validateStaminaTab() {
   var elt, id;
 
   var checked = function(id) {
-    return document.getElementById(id).checked === true? 'checked' : 0;
+    return document.getElementById(id).checked === true ? 'checked' : 0;
   }
 
   // Create an empty object to hold the settings.
@@ -5790,45 +5789,45 @@ function validateStaminaTab() {
       // Validate the maximum level settings.
       if (isNaN(s.fightLevelMax)) {
         alert('Please enter a maximum level for fighting.');
-        return;
+        return {};
       } else if (s.fightLevelMaxRelative && s.fightLevelMax < 0) {
         alert('Please enter a maximum relative level of zero or more.');
-        return;
+        return {};
       } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level) {
         addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
         s.fightLevelMax = level;
       } else if (!s.fightLevelMaxRelative && level >= 180 &&
                  s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a maximum fight level of 200 at the very least. If necessary, lower the maximum mafia size to compensate.');
-        return;
+        return {};
       } else if (s.fightLevelMaxRelative && level >= 180 &&
                 level + s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a relative fight level of at least ' + (200 - s.fightLevelMax) + '. If necessary, lower the maximum mafia size to compensate.');
-        return;
+        return {};
       }
 
       // Validate the maximum mafia size settings.
       if (isNaN(s.fightMafiaMax)) {
         alert('Please enter a maximum mafia size for fighting.');
-        return;
+        return {};
       } else if (!s.fightMafiaMaxRelative && (s.fightMafiaMax < 1)) {
         alert('Please enter a maximum mafia size of one or more for fighting.');
-        return;
+        return {};
       } else if (s.fightMafiaMaxRelative && (s.fightMafiaMax + mafia < 1)) {
         alert('Please enter a larger relative mafia size for fighting.');
-        return;
+        return {};
       }
 
       // Validate the minimum mafia size settings.
       if (isNaN(s.fightMafiaMin)) {
         alert('Please enter a minimum mafia size for fighting.');
-        return;
+        return {};
       } else if (!s.fightMafiaMinRelative && (s.fightMafiaMin < 1)) {
         alert('Please enter a minimum mafia size of one or more for fighting.');
-        return;
+        return {};
       } else if (s.fightMafiaMinRelative && (mafia - s.fightMafiaMin < 1)) {
         alert('Please enter a smaller relative mafia size for fighting.');
-        return;
+        return {};
       }
       break;
 
@@ -5850,7 +5849,7 @@ function validateStaminaTab() {
       var list = s.fightList.split('\n');
       if (!list[0]) {
         alert('Enter the Facebook ID of at least one opponent to fight.');
-        return;
+        return {};
       }
       break;
 
@@ -5866,7 +5865,7 @@ function validateStaminaTab() {
       var min = parseCash(s.hitmanBountyMin);
       if (isNaN(min) || min < 0) {
         alert('Please enter a minimum bounty amount.');
-        return;
+        return {};
       }
       break;
 
@@ -5884,7 +5883,7 @@ function validateStaminaTab() {
 function createStatWindow() {
   if (settingsOpen === true) {
     toggleSettings()
-  };
+  }
 
   makeElement('style', document.getElementsByTagName('head')[0], {'type':'text/css'}).appendChild(document.createTextNode(
     '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
@@ -5936,7 +5935,7 @@ function createStatWindow() {
     "data:application/x-javascript;base64,Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUgbGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3dGgsIDA3IHRvIHZlcnNpb24gMi4wLiBDb250YWlucyBudW1lcm91cyBpbXByb3ZlbWVudHM6DQovLyAgIC1BZGRlZCBBdXRvIE1vZGU6IFNjcmlwdCBhdXRvIHJvdGF0ZXMgdGhlIHRhYnMgYmFzZWQgb24gYW4gaW50ZXJ2YWwsIHVudGlsIGEgdGFiIGlzIGV4cGxpY2l0bHkgc2VsZWN0ZWQNCi8vICAgLUFiaWxpdHkgdG8gZXhwYW5kL2NvbnRyYWN0IGFyYml0cmFyeSBESVZzIG9uIHRoZSBwYWdlIGFzIHRoZSB0YWJiZWQgY29udGVudCBpcyBleHBhbmRlZC8gY29udHJhY3RlZA0KLy8gICAtQWJpbGl0eSB0byBkeW5hbWljYWxseSBzZWxlY3QgYSB0YWIgZWl0aGVyIGJhc2VkIG9uIGl0cyBwb3NpdGlvbiB3aXRoaW4gaXRzIHBlZXJzLCBvciBpdHMgSUQgYXR0cmlidXRlIChnaXZlIHRoZSB0YXJnZXQgdGFiIG9uZSAxc3QpDQovLyAgIC1BYmlsaXR5IHRvIHNldCB3aGVyZSB0aGUgQ1NTIGNsYXNzbmFtZSAic2VsZWN0ZWQiIGdldCBhc3NpZ25lZC0gZWl0aGVyIHRvIHRoZSB0YXJnZXQgdGFiJ3MgbGluayAoIkEiKSwgb3IgaXRzIHBhcmVudCBjb250YWluZXINCi8vKiogVXBkYXRlZCBGZWIgMTh0aCwgMDggdG8gdmVyc2lvbiAyLjE6IEFkZHMgYSAidGFiaW5zdGFuY2UuY3ljbGVpdChkaXIpIiBtZXRob2QgdG8gY3ljbGUgZm9yd2FyZCBvciBiYWNrd2FyZCBiZXR3ZWVuIHRhYnMgZHluYW1pY2FsbHkNCi8vKiogVXBkYXRlZCBBcHJpbCA4dGgsIDA4IHRvIHZlcnNpb24gMi4yOiBBZGRzIHN1cHBvcnQgZm9yIGV4cGFuZGluZyBhIHRhYiB1c2luZyBhIFVSTCBwYXJhbWV0ZXIgKGllOiBodHRwOi8vbXlzaXRlLmNvbS90YWJjb250ZW50Lmh0bT90YWJpbnRlcmZhY2VpZD0wKSANCg0KLy8vL05PIE5FRUQgVE8gRURJVCBCRUxPVy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLw0KDQpmdW5jdGlvbiBkZHRhYmNvbnRlbnQodGFiaW50ZXJmYWNlaWQpew0KCXRoaXMudGFiaW50ZXJmYWNlaWQ9dGFiaW50ZXJmYWNlaWQgLy9JRCBvZiBUYWIgTWVudSBtYWluIGNvbnRhaW5lcg0KCXRoaXMudGFicz1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0YWJpbnRlcmZhY2VpZCkuZ2V0RWxlbWVudHNCeVRhZ05hbWUoImEiKSAvL0dldCBhbGwgdGFiIGxpbmtzIHdpdGhpbiBjb250YWluZXINCgl0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlPXRydWUNCgl0aGlzLmhvdHRhYnNwb3NpdGlvbnM9W10gLy9BcnJheSB0byBzdG9yZSBwb3NpdGlvbiBvZiB0YWJzIHRoYXQgaGF2ZSBhICJyZWwiIGF0dHIgZGVmaW5lZCwgcmVsYXRpdmUgdG8gYWxsIHRhYiBsaW5rcywgd2l0aGluIGNvbnRhaW5lcg0KCXRoaXMuY3VycmVudFRhYkluZGV4PTAgLy9JbmRleCBvZiBjdXJyZW50bHkgc2VsZWN0ZWQgaG90IHRhYiAodGFiIHdpdGggc3ViIGNvbnRlbnQpIHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkNCgl0aGlzLnN1YmNvbnRlbnRpZHM9W10gLy9BcnJheSB0byBzdG9yZSBpZHMgb2YgdGhlIHN1YiBjb250ZW50cyAoInJlbCIgYXR0ciB2YWx1ZXMpDQoJdGhpcy5yZXZjb250ZW50aWRzPVtdIC8vQXJyYXkgdG8gc3RvcmUgaWRzIG9mIGFyYml0cmFyeSBjb250ZW50cyB0byBleHBhbmQvY29udGFjdCBhcyB3ZWxsICgicmV2IiBhdHRyIHZhbHVlcykNCgl0aGlzLnNlbGVjdGVkQ2xhc3NUYXJnZXQ9ImxpbmsiIC8va2V5d29yZCB0byBpbmRpY2F0ZSB3aGljaCB0YXJnZXQgZWxlbWVudCB0byBhc3NpZ24gInNlbGVjdGVkIiBDU1MgY2xhc3MgKCJsaW5rcGFyZW50IiBvciAibGluayIpDQp9DQoNCmRkdGFiY29udGVudC5nZXRDb29raWU9ZnVuY3Rpb24oTmFtZSl7IA0KCXZhciByZT1uZXcgUmVnRXhwKE5hbWUrIj1bXjtdKyIsICJpIik7IC8vY29uc3RydWN0IFJFIHRvIHNlYXJjaCBmb3IgdGFyZ2V0IG5hbWUvdmFsdWUgcGFpcg0KCWlmIChkb2N1bWVudC5jb29raWUubWF0Y2gocmUpKSAvL2lmIGNvb2tpZSBmb3VuZA0KCQlyZXR1cm4gZG9jdW1lbnQuY29va2llLm1hdGNoKHJlKVswXS5zcGxpdCgiPSIpWzFdIC8vcmV0dXJuIGl0cyB2YWx1ZQ0KCXJldHVybiAiIg0KfQ0KDQpkZHRhYmNvbnRlbnQuc2V0Q29va2llPWZ1bmN0aW9uKG5hbWUsIHZhbHVlKXsNCglkb2N1bWVudC5jb29raWUgPSBuYW1lKyI9Iit2YWx1ZSsiO3BhdGg9LyIgLy9jb29raWUgdmFsdWUgaXMgZG9tYWluIHdpZGUgKHBhdGg9LykNCn0NCg0KZGR0YWJjb250ZW50LnByb3RvdHlwZT17DQoNCglleHBhbmRpdDpmdW5jdGlvbih0YWJpZF9vcl9wb3NpdGlvbil7IC8vUFVCTElDIGZ1bmN0aW9uIHRvIHNlbGVjdCBhIHRhYiBlaXRoZXIgYnkgaXRzIElEIG9yIHBvc2l0aW9uKGludCkgd2l0aGluIGl0cyBwZWVycw0KCQl0aGlzLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCXZhciB0YWJyZWY9IiINCgkJdHJ5ew0KCQkJaWYgKHR5cGVvZiB0YWJpZF9vcl9wb3NpdGlvbj09InN0cmluZyIgJiYgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQodGFiaWRfb3JfcG9zaXRpb24pLmdldEF0dHJpYnV0ZSgicmVsIikpIC8vaWYgc3BlY2lmaWVkIHRhYiBjb250YWlucyAicmVsIiBhdHRyDQoJCQkJdGFicmVmPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKHRhYmlkX29yX3Bvc2l0aW9uKQ0KCQkJZWxzZSBpZiAocGFyc2VJbnQodGFiaWRfb3JfcG9zaXRpb24pIT1OYU4gJiYgdGhpcy50YWJzW3RhYmlkX29yX3Bvc2l0aW9uXS5nZXRBdHRyaWJ1dGUoInJlbCIpKSAvL2lmIHNwZWNpZmllZCB0YWIgY29udGFpbnMgInJlbCIgYXR0cg0KCQkJCXRhYnJlZj10aGlzLnRhYnNbdGFiaWRfb3JfcG9zaXRpb25dDQoJCX0NCgkJY2F0Y2goZXJyKXthbGVydCgiSW52YWxpZCBUYWIgSUQgb3IgcG9zaXRpb24gZW50ZXJlZCEiKX0NCgkJaWYgKHRhYnJlZiE9IiIpIC8vaWYgYSB2YWxpZCB0YWIgaXMgZm91bmQgYmFzZWQgb24gZnVuY3Rpb24gcGFyYW1ldGVyDQoJCQl0aGlzLmV4cGFuZHRhYih0YWJyZWYpIC8vZXhwYW5kIHRoaXMgdGFiDQoJfSwNCg0KCWN5Y2xlaXQ6ZnVuY3Rpb24oZGlyLCBhdXRvcnVuKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gbW92ZSBmb3dhcmQgb3IgYmFja3dhcmRzIHRocm91Z2ggZWFjaCBob3QgdGFiICh0YWJpbnN0YW5jZS5jeWNsZWl0KCdmb3dhcmQvYmFjaycpICkNCgkJaWYgKGRpcj09Im5leHQiKXsNCgkJCXZhciBjdXJyZW50VGFiSW5kZXg9KHRoaXMuY3VycmVudFRhYkluZGV4PHRoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGgtMSk%2FIHRoaXMuY3VycmVudFRhYkluZGV4KzEgOiAwDQoJCX0NCgkJZWxzZSBpZiAoZGlyPT0icHJldiIpew0KCQkJdmFyIGN1cnJlbnRUYWJJbmRleD0odGhpcy5jdXJyZW50VGFiSW5kZXg%2BMCk%2FIHRoaXMuY3VycmVudFRhYkluZGV4LTEgOiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoLTENCgkJfQ0KCQlpZiAodHlwZW9mIGF1dG9ydW49PSJ1bmRlZmluZWQiKSAvL2lmIGN5Y2xlaXQoKSBpcyBiZWluZyBjYWxsZWQgYnkgdXNlciwgdmVyc3VzIGF1dG9ydW4oKSBmdW5jdGlvbg0KCQkJdGhpcy5jYW5jZWxhdXRvcnVuKCkgLy9zdG9wIGF1dG8gY3ljbGluZyBvZiB0YWJzIChpZiBydW5uaW5nKQ0KCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zW2N1cnJlbnRUYWJJbmRleF1dKQ0KCX0sDQoNCglzZXRwZXJzaXN0OmZ1bmN0aW9uKGJvb2wpeyAvL1BVQkxJQyBmdW5jdGlvbiB0byB0b2dnbGUgcGVyc2lzdGVuY2UgZmVhdHVyZQ0KCQkJdGhpcy5lbmFibGV0YWJwZXJzaXN0ZW5jZT1ib29sDQoJfSwNCg0KCXNldHNlbGVjdGVkQ2xhc3NUYXJnZXQ6ZnVuY3Rpb24ob2Jqc3RyKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gc2V0IHdoaWNoIHRhcmdldCBlbGVtZW50IHRvIGFzc2lnbiAic2VsZWN0ZWQiIENTUyBjbGFzcyAoImxpbmtwYXJlbnQiIG9yICJsaW5rIikNCgkJdGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PW9ianN0ciB8fCAibGluayINCgl9LA0KDQoJZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldDpmdW5jdGlvbih0YWJyZWYpeyAvL1JldHVybnMgdGFyZ2V0IGVsZW1lbnQgdG8gYXNzaWduICJzZWxlY3RlZCIgQ1NTIGNsYXNzIHRvDQoJCXJldHVybiAodGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PT0oImxpbmtwYXJlbnQiLnRvTG93ZXJDYXNlKCkpKT8gdGFicmVmLnBhcmVudE5vZGUgOiB0YWJyZWYNCgl9LA0KDQoJdXJscGFyYW1zZWxlY3Q6ZnVuY3Rpb24odGFiaW50ZXJmYWNlaWQpew0KCQl2YXIgcmVzdWx0PXdpbmRvdy5sb2NhdGlvbi5zZWFyY2gubWF0Y2gobmV3IFJlZ0V4cCh0YWJpbnRlcmZhY2VpZCsiPShcXGQrKSIsICJpIikpIC8vY2hlY2sgZm9yICI%2FdGFiaW50ZXJmYWNlaWQ9MiIgaW4gVVJMDQoJCXJldHVybiAocmVzdWx0PT1udWxsKT8gbnVsbCA6IHBhcnNlSW50KFJlZ0V4cC4kMSkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXgsIHdoZXJlIGluZGV4IChpbnQpIGlzIHRoZSBzZWxlY3RlZCB0YWIncyBpbmRleA0KCX0sDQoNCglleHBhbmR0YWI6ZnVuY3Rpb24odGFicmVmKXsNCgkJdmFyIHN1YmNvbnRlbnRpZD10YWJyZWYuZ2V0QXR0cmlidXRlKCJyZWwiKSAvL0dldCBpZCBvZiBzdWJjb250ZW50IHRvIGV4cGFuZA0KCQkvL0dldCAicmV2IiBhdHRyIGFzIGEgc3RyaW5nIG9mIElEcyBpbiB0aGUgZm9ybWF0ICIsam9obixnZW9yZ2UsdHJleSxldGMsIiB0byBlYXNpbHkgc2VhcmNoIHRocm91Z2gNCgkJdmFyIGFzc29jaWF0ZWRyZXZpZHM9KHRhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpKT8gIiwiK3RhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpLnJlcGxhY2UoL1xzKy8sICIiKSsiLCIgOiAiIg0KCQl0aGlzLmV4cGFuZHN1YmNvbnRlbnQoc3ViY29udGVudGlkKQ0KCQl0aGlzLmV4cGFuZHJldmNvbnRlbnQoYXNzb2NpYXRlZHJldmlkcykNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMudGFicy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIGFsbCB0YWJzLCBhbmQgYXNzaWduIG9ubHkgdGhlIHNlbGVjdGVkIHRhYiB0aGUgQ1NTIGNsYXNzICJzZWxlY3RlZCINCgkJCXRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT0odGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIik9PXN1YmNvbnRlbnRpZCk%2FICJzZWxlY3RlZCIgOiAiIg0KCQl9DQoJCWlmICh0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlKSAvL2lmIHBlcnNpc3RlbmNlIGVuYWJsZWQsIHNhdmUgc2VsZWN0ZWQgdGFiIHBvc2l0aW9uKGludCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlkZHRhYmNvbnRlbnQuc2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQsIHRhYnJlZi50YWJwb3NpdGlvbikNCgkJdGhpcy5zZXRjdXJyZW50dGFiaW5kZXgodGFicmVmLnRhYnBvc2l0aW9uKSAvL3JlbWVtYmVyIHBvc2l0aW9uIG9mIHNlbGVjdGVkIHRhYiB3aXRoaW4gaG90dGFic3Bvc2l0aW9uc1tdIGFycmF5DQoJfSwNCg0KCWV4cGFuZHN1YmNvbnRlbnQ6ZnVuY3Rpb24oc3ViY29udGVudGlkKXsNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMuc3ViY29udGVudGlkcy5sZW5ndGg7IGkrKyl7DQoJCQl2YXIgc3ViY29udGVudD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0aGlzLnN1YmNvbnRlbnRpZHNbaV0pIC8vY2FjaGUgY3VycmVudCBzdWJjb250ZW50IG9iaiAoaW4gZm9yIGxvb3ApDQoJCQlzdWJjb250ZW50LnN0eWxlLmRpc3BsYXk9KHN1YmNvbnRlbnQuaWQ9PXN1YmNvbnRlbnRpZCk%2FICJibG9jayIgOiAibm9uZSIgLy8ic2hvdyIgb3IgaGlkZSBzdWIgY29udGVudCBiYXNlZCBvbiBtYXRjaGluZyBpZCBhdHRyIHZhbHVlDQoJCX0NCgl9LA0KDQoJZXhwYW5kcmV2Y29udGVudDpmdW5jdGlvbihhc3NvY2lhdGVkcmV2aWRzKXsNCgkJdmFyIGFsbHJldmlkcz10aGlzLnJldmNvbnRlbnRpZHMNCgkJZm9yICh2YXIgaT0wOyBpPGFsbHJldmlkcy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIHJldiBhdHRyaWJ1dGVzIGZvciBhbGwgdGFicyBpbiB0aGlzIHRhYiBpbnRlcmZhY2UNCgkJCS8vaWYgYW55IHZhbHVlcyBzdG9yZWQgd2l0aGluIGFzc29jaWF0ZWRyZXZpZHMgbWF0Y2hlcyBvbmUgd2l0aGluIGFsbHJldmlkcywgZXhwYW5kIHRoYXQgRElWLCBvdGhlcndpc2UsIGNvbnRyYWN0IGl0DQoJCQlkb2N1bWVudC5nZXRFbGVtZW50QnlJZChhbGxyZXZpZHNbaV0pLnN0eWxlLmRpc3BsYXk9KGFzc29jaWF0ZWRyZXZpZHMuaW5kZXhPZigiLCIrYWxscmV2aWRzW2ldKyIsIikhPS0xKT8gImJsb2NrIiA6ICJub25lIg0KCQl9DQoJfSwNCg0KCXNldGN1cnJlbnR0YWJpbmRleDpmdW5jdGlvbih0YWJwb3NpdGlvbil7IC8vc3RvcmUgY3VycmVudCBwb3NpdGlvbiBvZiB0YWIgKHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkpDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoOyBpKyspew0KCQkJaWYgKHRhYnBvc2l0aW9uPT10aGlzLmhvdHRhYnNwb3NpdGlvbnNbaV0pew0KCQkJCXRoaXMuY3VycmVudFRhYkluZGV4PWkNCgkJCQlicmVhaw0KCQkJfQ0KCQl9DQoJfSwNCg0KCWF1dG9ydW46ZnVuY3Rpb24oKXsgLy9mdW5jdGlvbiB0byBhdXRvIGN5Y2xlIHRocm91Z2ggYW5kIHNlbGVjdCB0YWJzIGJhc2VkIG9uIGEgc2V0IGludGVydmFsDQoJCXRoaXMuY3ljbGVpdCgnbmV4dCcsIHRydWUpDQoJfSwNCg0KCWNhbmNlbGF1dG9ydW46ZnVuY3Rpb24oKXsNCgkJaWYgKHR5cGVvZiB0aGlzLmF1dG9ydW50aW1lciE9InVuZGVmaW5lZCIpDQoJCQljbGVhckludGVydmFsKHRoaXMuYXV0b3J1bnRpbWVyKQ0KCX0sDQoNCglpbml0OmZ1bmN0aW9uKGF1dG9tb2RlcGVyaW9kKXsNCgkJdmFyIHBlcnNpc3RlZHRhYj1kZHRhYmNvbnRlbnQuZ2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQpIC8vZ2V0IHBvc2l0aW9uIG9mIHBlcnNpc3RlZCB0YWIgKGFwcGxpY2FibGUgaWYgcGVyc2lzdGVuY2UgaXMgZW5hYmxlZCkNCgkJdmFyIHNlbGVjdGVkdGFiPS0xIC8vQ3VycmVudGx5IHNlbGVjdGVkIHRhYiBpbmRleCAoLTEgbWVhbmluZyBub25lKQ0KCQl2YXIgc2VsZWN0ZWR0YWJmcm9tdXJsPXRoaXMudXJscGFyYW1zZWxlY3QodGhpcy50YWJpbnRlcmZhY2VpZCkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXggZnJvbTogdGFiY29udGVudC5odG0%2FdGFiaW50ZXJmYWNlaWQ9aW5kZXgNCgkJdGhpcy5hdXRvbW9kZXBlcmlvZD1hdXRvbW9kZXBlcmlvZCB8fCAwDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLnRhYnMubGVuZ3RoOyBpKyspew0KCQkJdGhpcy50YWJzW2ldLnRhYnBvc2l0aW9uPWkgLy9yZW1lbWJlciBwb3NpdGlvbiBvZiB0YWIgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIikpew0KCQkJCXZhciB0YWJpbnN0YW5jZT10aGlzDQoJCQkJdGhpcy5ob3R0YWJzcG9zaXRpb25zW3RoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGhdPWkgLy9zdG9yZSBwb3NpdGlvbiBvZiAiaG90IiB0YWIgKCJyZWwiIGF0dHIgZGVmaW5lZCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQkJdGhpcy5zdWJjb250ZW50aWRzW3RoaXMuc3ViY29udGVudGlkcy5sZW5ndGhdPXRoaXMudGFic1tpXS5nZXRBdHRyaWJ1dGUoInJlbCIpIC8vc3RvcmUgaWQgb2Ygc3ViIGNvbnRlbnQgKCJyZWwiIGF0dHIgdmFsdWUpDQoJCQkJdGhpcy50YWJzW2ldLm9uY2xpY2s9ZnVuY3Rpb24oKXsNCgkJCQkJdGFiaW5zdGFuY2UuZXhwYW5kdGFiKHRoaXMpDQoJCQkJCXRhYmluc3RhbmNlLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCQkJCXJldHVybiBmYWxzZQ0KCQkJCX0NCgkJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmV2IikpeyAvL2lmICJyZXYiIGF0dHIgZGVmaW5lZCwgc3RvcmUgZWFjaCB2YWx1ZSB3aXRoaW4gInJldiIgYXMgYW4gYXJyYXkgZWxlbWVudA0KCQkJCQl0aGlzLnJldmNvbnRlbnRpZHM9dGhpcy5yZXZjb250ZW50aWRzLmNvbmNhdCh0aGlzLnRhYnNbaV0uZ2V0QXR0cmlidXRlKCJyZXYiKS5zcGxpdCgvXHMqLFxzKi8pKQ0KCQkJCX0NCgkJCQlpZiAoc2VsZWN0ZWR0YWJmcm9tdXJsPT1pIHx8IHRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHBhcnNlSW50KHBlcnNpc3RlZHRhYik9PWkgfHwgIXRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT09InNlbGVjdGVkIil7DQoJCQkJCXNlbGVjdGVkdGFiPWkgLy9TZWxlY3RlZCB0YWIgaW5kZXgsIGlmIGZvdW5kDQoJCQkJfQ0KCQkJfQ0KCQl9IC8vRU5EIGZvciBsb29wDQoJCWlmIChzZWxlY3RlZHRhYiE9LTEpIC8vaWYgYSB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIHRhYiBpbmRleCBpcyBmb3VuZA0KCQkJdGhpcy5leHBhbmR0YWIodGhpcy50YWJzW3NlbGVjdGVkdGFiXSkgLy9leHBhbmQgc2VsZWN0ZWQgdGFiIChlaXRoZXIgZnJvbSBVUkwgcGFyYW1ldGVyLCBwZXJzaXN0ZW50IGZlYXR1cmUsIG9yIGNsYXNzPSJzZWxlY3RlZCIgY2xhc3MpDQoJCWVsc2UgLy9pZiBubyB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIGluZGV4IGZvdW5kDQoJCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zWzBdXSkgLy9KdXN0IHNlbGVjdCBmaXJzdCB0YWIgdGhhdCBjb250YWlucyBhICJyZWwiIGF0dHINCgkJaWYgKHBhcnNlSW50KHRoaXMuYXV0b21vZGVwZXJpb2QpPjUwMCAmJiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoPjEpew0KCQkJdGhpcy5hdXRvcnVudGltZXI9c2V0SW50ZXJ2YWwoZnVuY3Rpb24oKXt0YWJpbnN0YW5jZS5hdXRvcnVuKCl9LCB0aGlzLmF1dG9tb2RlcGVyaW9kKQ0KCQl9DQoJfSAvL0VORCBpbnQoKSBmdW5jdGlvbg0KDQp9IC8vRU5EIFByb3RvdHlwZSBhc3NpZ25tZW50"
   }).appendChild(document.createTextNode(
     '/***********************************************\n' +
-    '* Tab Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    '* Tab Content script v2.2- � Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     '* This notice MUST stay intact for legal use\n' +
     '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
     '***********************************************/\n'
@@ -5974,6 +5973,7 @@ function handleUnexpectedPage() {
       p.innerHTML = 'You will automatically try again in ' +
                     delay-- + ' seconds.';
       window.setTimeout(wait, 1000);
+      return false;
     }
     DEBUG('Service interruption: "Try Again" button seen.');
     tryAgainElt.parentNode.appendChild(document.createElement('br'));
@@ -6013,7 +6013,7 @@ function handleModificationTimer() {
   //GM_log('Changes finished.');
   modificationTimer = undefined;
 
-  var mastheadElt = document.getElementById('mw_masthead');
+  var elt, mastheadElt = document.getElementById('mw_masthead');
   if (!mastheadElt || !mastheadElt.scrollWidth || !refreshGlobalStats()) {
     handleUnexpectedPage();
     return;
@@ -6026,7 +6026,7 @@ function handleModificationTimer() {
   var contentRowElt = document.getElementById('content_row');
   var result = xpath('./*[contains(@id, "inner_page")]', contentRowElt);
   for (var i = 0, iLength=result.snapshotLength; i < iLength; i++) {
-    var elt = result.snapshotItem(i);
+    elt = result.snapshotItem(i);
     if (elt.style.display != 'none') {
       innerPageElt = elt;
       break;
@@ -6036,7 +6036,7 @@ function handleModificationTimer() {
 
   // Make sure our private AJAX page exists and isn't visible.
   var ajaxID = SCRIPT.ajaxPage;
-  var elt = xpathFirst('//div[@id="' + ajaxID + '"]');
+  elt = xpathFirst('//div[@id="' + ajaxID + '"]');
   if (!elt) {
     elt = makeElement('div', innerPageElt.parentNode, {'id':ajaxID});
   }
@@ -6666,9 +6666,9 @@ function customizeStats() {
 }
 
 function customizeNames() {
-  var elts = $x('.//a[contains(@onclick, "user=")]', innerPageElt);
-  for (var i = 0, iLength=elts.length; i < iLength; ++i) {
-    var elt = elts[i];
+  var i, elt, elts = $x('.//a[contains(@onclick, "user=")]', innerPageElt);
+  for (i = 0, iLength=elts.length; i < iLength; ++i) {
+    elt = elts[i];
     if (!elt.innerHTML.replace(/\xAD/g, '').trim()) {
       if (elt.getAttribute('onclick').match(/user=(\d+)/)) {
         elt.innerHTML = chickenIcon + ' Chicken ' + RegExp.$1;
@@ -6678,9 +6678,9 @@ function customizeNames() {
     }
   }
 
-  var elts = $x('.//span[contains(@id, "_fight_view_name_")]', innerPageElt);
-  for (var i = 0, iLength=elts.length; i < iLength; ++i) {
-    var elt = elts[i];
+  elts = $x('.//span[contains(@id, "_fight_view_name_")]', innerPageElt);
+  for (i = 0, iLength=elts.length; i < iLength; ++i) {
+    elt = elts[i];
     if (!elt.innerHTML.untag().trim()) {
       elt.innerHTML = chickenIcon + ' Chicken';
     }
@@ -6803,7 +6803,7 @@ function customizeProfile() {
                attackstring = as[i].href;
           }
 
-          if (hit = /xw_city=(\d+).*?tmp=([a-f0-9]+).*?target_id=(\d+)/.exec(attackstring))
+          if ((hit = /xw_city=(\d+).*?tmp=([a-f0-9]+).*?target_id=(\d+)/.exec(attackstring)))
             var hitlist_url = getMWURL() + 'xw_controller=hitlist&xw_action=set&xw_city=' + hit[1] + '&tmp=' + hit[2] + '&target_id=' + hit[3] + '&skip_req_frame=1&ajax=1';
 
           var last_url = null;
@@ -6859,31 +6859,32 @@ function customizeProfile() {
       statsDiv.appendChild(document.createTextNode(' | '));
       makeElement('a', statsDiv, {'href':'http://mwfb.zynga.com/mwfb' + SCRIPT.controller + 'group' + SCRIPT.action + 'view' + SCRIPT.city + (city + 1) + '&promote=yes&uid=' + id}).appendChild(document.createTextNode('Promote'));
 
+      var elt;
       if (removeElt) {
         // In my mafia. Show options to add/remove from war list.
         statsDiv.appendChild(document.createTextNode(' | '));
-        var el = makeElement('a', statsDiv, {'id':id});
+        elt = makeElement('a', statsDiv, {'id':id});
         var warList = getSavedList('autoWarTargetList');
         if (warList.indexOf(id) != -1) {
-          el.appendChild(document.createTextNode('Remove from War List'));
-          el.addEventListener('click', clickWarListRemove, false);
+          elt.appendChild(document.createTextNode('Remove from War List'));
+          elt.addEventListener('click', clickWarListRemove, false);
         } else {
-          el.appendChild(document.createTextNode('Add to War List'));
-          el.addEventListener('click', clickWarListAdd, false);
+          elt.appendChild(document.createTextNode('Add to War List'));
+          elt.addEventListener('click', clickWarListAdd, false);
         }
       }
 
       if (!removeElt) {
         // Not in mafia. Show options to add/remove from fight lists.
         statsDiv.appendChild(document.createTextNode(' | '));
-        var el = makeElement('a', statsDiv, {'id':id});
+        elt = makeElement('a', statsDiv, {'id':id});
         var fightList = getSavedList('fightList');
         if (fightList.indexOf(id) != -1) {
-          el.appendChild(document.createTextNode('Remove from Fight List'));
-          el.addEventListener('click', clickFightListRemove, false);
+          elt.appendChild(document.createTextNode('Remove from Fight List'));
+          etl.addEventListener('click', clickFightListRemove, false);
         } else {
-          el.appendChild(document.createTextNode('Add to Fight List'));
-          el.addEventListener('click', clickFightListAdd, false);
+          elt.appendChild(document.createTextNode('Add to Fight List'));
+          elt.addEventListener('click', clickFightListAdd, false);
         }
       }
     }
@@ -6917,7 +6918,7 @@ function customizeJobs() {
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
-  var reselectJob = false;
+  var i, reselectJob = false;
 
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
     var jobInfo = xpath('.//td[contains(@class,"job_name")]', jobTables[x]);
@@ -6926,7 +6927,7 @@ function customizeJobs() {
     var jobButton = xpath('.//td[contains(@class,"job_action")]', jobTables[x]);
     var masteryLevel;
     var masteredJobsCount = 0;
-    for (var i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
+    for (i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
       var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
       var jobMatch = missions.searchArray(jobName, 0)[0];
 
@@ -7086,7 +7087,7 @@ function customizeJobs() {
 
       if (GM_getValue('selectTier') != '0.0') {
         var mastery_jobs_list = [];
-        for (var i = 0, iLength = missions.length; i < iLength; i++) {
+        for (i = 0, iLength = missions.length; i < iLength; i++) {
           if (masteryCity == missions[i][4] &&
               masteryTier == missions[i][3]) {
             mastery_jobs_list.push(i);
@@ -7118,6 +7119,7 @@ function customizeFight() {
       parentElt.insertBefore(elt, parentElt.firstChild);
     }
   }
+  return true;
 }
 
 function customizeHitlist() {
@@ -7136,16 +7138,17 @@ function customizeHitlist() {
     if (!opponent.profile) continue;
 
     // Mark targets that should be avoided.
+    var elt, parentElt;
     if (blacklist.indexOf(opponent.id) != -1) {
-      var parentElt = opponent.profile.parentNode;
-      var elt = makeElement('img', null, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already lost to this opponent during automatic play.'});
+      parentElt = opponent.profile.parentNode;
+      elt = makeElement('img', null, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already lost to this opponent during automatic play.'});
       parentElt.insertBefore(elt, parentElt.firstChild);
     }
 
     // Mark targets on which bounties have already been collected.
     if (kills.indexOf(opponent.id) != -1) {
-      var parentElt = opponent.profile.parentNode;
-      var elt = makeElement('img', null, {'src':stripURI(lootbagIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already collected a bounty on this target during automatic play.'});
+      parentElt = opponent.profile.parentNode;
+      elt = makeElement('img', null, {'src':stripURI(lootbagIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle', 'title':'You have already collected a bounty on this target during automatic play.'});
       parentElt.insertBefore(elt, parentElt.firstChild);
     }
   }
@@ -7206,7 +7209,7 @@ function clickFightListAdd() {
 
 // Callback for clicking 'Remove from Fight List' on profile page.
 function clickFightListRemove() {
-  while(removeSavedListItem('fightList', this.id));
+  while(removeSavedListItem('fightList', this.id))
   this.firstChild.nodeValue = 'Add to Fight List';
   this.removeEventListener('click', clickFightListRemove, false);
   this.addEventListener('click', clickFightListAdd, false);
@@ -7230,7 +7233,7 @@ function clickWarListAdd() {
 
 // Callback for clicking 'Remove from War List' on profile page.
 function clickWarListRemove() {
-  while(removeSavedListItem('autoWarTargetList', this.id));
+  while(removeSavedListItem('autoWarTargetList', this.id))
   this.firstChild.nodeValue = 'Add to War List';
   this.removeEventListener('click', clickWarListRemove, false);
   this.addEventListener('click', clickWarListAdd, false);
@@ -7343,6 +7346,7 @@ function popJob(){
 }
 
 function jobProgress(element) {
+  var i;
   if (isChecked('multipleJobs')) {
     // Cycle jobs with the same ratio
     var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
@@ -7350,7 +7354,7 @@ function jobProgress(element) {
     var cycle_jobs = new Object();
 
     // Group selected jobs by ratio
-    for (var i=0, iLength=multiple_jobs_list.length; i < iLength; ++i) {
+    for (i = 0, iLength=multiple_jobs_list.length; i < iLength; ++i) {
       var job = multiple_jobs_list[i];
       var mission = missions[job];
 
@@ -7368,7 +7372,7 @@ function jobProgress(element) {
 
     // Rebuild the job list array
     multiple_jobs_list = [];
-    for (var i in cycle_jobs) {
+    for (i in cycle_jobs) {
       if (cycle_jobs[i].length > 1) {
         // Only cycle the current job's ratio group
         if (missions[GM_getValue('selectMission', 1)][7] == i) {
@@ -7443,7 +7447,7 @@ function jobProgress(element) {
         // NOTE: This assumes that the missions array is sorted by city and
         //       then by tier.
         var nextTierJob;
-        for (var i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
+        for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
           if (missions[i][4] != cityno) {
             nextTierJob = i;
             addToLog('info Icon', 'You have mastered the final job tier in ' +
@@ -7501,12 +7505,12 @@ function jobProgress(element) {
 }
 
 function jobLoot(element) {
-  var lootbag = [];
+  var i, lootbag = [];
 
   // See what loot was gained.
   var messages = $x('.//td[@class="message_body"]', element);
   var numMessages = messages.length;
-  for (var i = 1; i < numMessages; i++) {
+  for (i = 1; i < numMessages; i++) {
     var innerNoTags = messages[i].innerHTML.untag();
     if (innerNoTags.match(/You\s+gained(?:\s+an?)?\s+(.+)\./) ||
         innerNoTags.match(/found(?:\s+an?)?\s+(.*?)\s+on\s+the/i) ||
@@ -7527,7 +7531,7 @@ function jobLoot(element) {
   var itemFound = false;
   var itemName;
   // NOTE: The single equal sign is intentional in this while() condition.
-  while (itemName = lootbag.pop()) {
+  while ((itemName = lootbag.pop())) {
     DEBUG('Looking for ' + itemName + ' in needed items list.');
     DEBUG('We need ' + items.length + ' item(s).');
     for (var j = 0, jLength=items.length; j < jLength; j++) {
@@ -7543,7 +7547,7 @@ function jobLoot(element) {
   }
   if (!itemFound) {
     var jobResult;
-    for (var i = 0, numItems=items.length; i < numItems; ++i) {
+    for (i = 0, numItems=items.length; i < numItems; ++i) {
       jobResult = requirementJob.searchArray(items[i], 0);
       if (jobResult === false) {
         addToLog('warning Icon', 'BUG DETECTED: ' + items[i] + ' not found in requirementJob array.');
@@ -7773,11 +7777,12 @@ function parsePlayerUpdates(messagebox) {
   var messageText = messageTextElt.innerHTML;
   var messageTextNoTags = messageText.untag();
   var links = messageTextElt.getElementsByTagName('a');
+  var cost, user, result, userElt, elt, hitman;
 
   if (messageTextNoTags.indexOf('attacked by') != -1) {
     // Attacked by some fool with a death wish.
-    var user = linkToString(links[0], 'user');
-    var result = 'Attacked';
+    user = linkToString(links[0], 'user');
+    result = 'Attacked';
     if (links[0] && links[0].nextSibling && links[0].nextSibling.nodeValue &&
         links[0].nextSibling.nodeValue.match(/\d+ times/i)) {
       result += ' ' + RegExp.lastMatch;
@@ -7785,7 +7790,7 @@ function parsePlayerUpdates(messagebox) {
     result += ' by ' + user;
     if (messageTextNoTags.match(/you won.*you gained .*?(\d+) experience points?.*?([A-Z]?\$[\d,]*\d)/i)) {
       // The fight was won.
-      var cost = RegExp.$2;
+      cost = RegExp.$2;
       var experience = RegExp.$1;
       result += '<span class="good">' + ' WON ' + cost + '</span>' + ' and ' +
                 '<span class="good">' + experience +' experience.</span>';
@@ -7816,7 +7821,7 @@ function parsePlayerUpdates(messagebox) {
 //      GM_setValue('totalWinDollarsInt', (parseInt(GM_getValue('totalWinDollarsInt', 1)) + cost));
     } else if (messageTextNoTags.match(/you lost.*and losing .*?([A-Z]?\$[\d,]*\d)/i)) {
       // The fight was lost.
-      var cost   = RegExp.$1;
+      cost   = RegExp.$1;
       result += '<span class="bad">' + ' LOST ' + cost + '.</span>';
       cost = parseCash(cost);
 
@@ -7846,12 +7851,12 @@ function parsePlayerUpdates(messagebox) {
 
   } else if (messageTextNoTags.indexOf('You were knocked out') != -1) {
     // Hitlist ride has ended.
-    var hitman = linkToString(links[0], 'user');
-    var user = linkToString(links[1], 'attacker');
+    hitman = linkToString(links[0], 'user');
+    user = linkToString(links[1], 'attacker');
     var bounty = parseCash(messageTextNoTags.split(' who claimed the ')[1]);
-    var result = 'Whacked by '+ hitman + ' who claimed the $' +
-                 makeCommaValue(parseInt(bounty)) + ' bounty set by ' +
-                 user + '.';
+    result = 'Whacked by '+ hitman + ' who claimed the $' +
+             makeCommaValue(parseInt(bounty)) + ' bounty set by ' +
+             user + '.';
 
     if (isChecked('hideAttacks')) {
       DEBUG('Whacked riding hitlist.');
@@ -7860,17 +7865,18 @@ function parsePlayerUpdates(messagebox) {
       GM_setValue('totalXp', parseInt(GM_getValue('totalXp', 0)) + parseInt(GM_getValue('currentHitXp', 0)));
       GM_setValue('lastHitXp', parseInt(GM_getValue('currentHitXp', 0)));
       GM_setValue('totalHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + parseInt(GM_getValue('totalHitDollars', 0))));
+      var currentHitXp, currentHitDollars;
       if (GM_getValue('currentHitXp', 0) < 0) {
-        var currentHitXp = '<span class="bad">LOST ' + GM_getValue('currentHitXp', 0) + '</span>';
+        currentHitXp = '<span class="bad">LOST ' + GM_getValue('currentHitXp', 0) + '</span>';
       } else {
-        var currentHitXp = '<span class="good">GAINED ' + GM_getValue('currentHitXp', 0) + '</span>';
+        currentHitXp = '<span class="good">GAINED ' + GM_getValue('currentHitXp', 0) + '</span>';
       }
       if (parseInt(GM_getValue('currentHitDollars', 0)) < 0) {
-        var currentHitDollars = '<span class="bad">' +
+        currentHitDollars = '<span class="bad">' +
                                 ' LOST $' + makeCommaValue(parseInt(GM_getValue('currentHitDollars', 0))) + '</span>';
         addToLog('updateBad Icon', minutesAgo + currentHitXp + ' experience and ' + currentHitDollars + ' on the hitlist.');
       } else {
-        var currentHitDollars = '<span class="good">' +
+        currentHitDollars = '<span class="good">' +
                                 ' WON $' + makeCommaValue(parseInt(GM_getValue('currentHitDollars', 0))) + '</span>';
         addToLog('updateGood Icon', minutesAgo + currentHitXp + ' experience and ' + currentHitDollars + ' on the hitlist.');
       }
@@ -7886,25 +7892,25 @@ function parsePlayerUpdates(messagebox) {
 
   } else if (messageTextNoTags.indexOf('You were punched') != -1) {
     // Punched by some wuss.
-    var user = linkToString(links[0], 'attacker');
-    var result = 'You were punched in the face by ' + user + '.';
+    user = linkToString(links[0], 'attacker');
+    result = 'You were punched in the face by ' + user + '.';
     addToLog('updateBad Icon', minutesAgo + result);
 
   } else if (messageTextNoTags.indexOf('You fought as') != -1) {
     // Helped a fellow mafia member in a fight.
     var capo = linkToString(links[0], 'user');
-    var user = linkToString(links[1], 'user');
-    var cost = messageTextNoTags.match(REGEX_CASH);
-    var result = 'You fought as ' + capo + "'s Capo and defeated " +
-                 user + ', receiving ' + '<span class="good">' +
-                 cost + '</span> for your efforts.';
+    user = linkToString(links[1], 'user');
+    cost = messageTextNoTags.match(REGEX_CASH);
+    result = 'You fought as ' + capo + "'s Capo and defeated " +
+             user + ', receiving ' + '<span class="good">' +
+             cost + '</span> for your efforts.';
     addToLog('updateGood Icon', minutesAgo + result);
 
   } else if (messageTextNoTags.indexOf('needs your help') != -1) {
     if (isChecked('autoHelp')) {
       // Help requested by a fellow mafia member.
-      var userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
-      var elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
+      userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
+      elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
       // FIXME: Remove exclusion code for Bangkok later
       if (elt && !elt.getAttribute('onclick').match(/job_city=4/)) {
         // Help immediately.
@@ -7928,8 +7934,8 @@ function parsePlayerUpdates(messagebox) {
   } else if (messageTextNoTags.indexOf('went to war with') != -1) {
     if (isChecked('autoWarHelp')) {
       // War assist requested by a fellow mafia member.
-      var userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-      var elt = xpathFirst('.//a[contains(text(), "Help out your friends")]', messagebox);
+      userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+      elt = xpathFirst('.//a[contains(text(), "Help out your friends")]', messagebox);
       if (elt) {
         // Help immediately.
         Autoplay.fx = function() {
@@ -7951,11 +7957,11 @@ function parsePlayerUpdates(messagebox) {
 
   } else if (messageTextNoTags.indexOf('claimed your $') != -1) {
     // Bounty claimed. Whoever was hitlisted is sleeping with the fishes.
-    var hitman = linkToString(links[0], 'user');
-    var user = linkToString(links[1], 'attacker');
-    var result = hitman + ' claimed your ' +
-                 messageTextNoTags.match(REGEX_CASH)[0] +
-                 ' bounty on ' + user + '.';
+    hitman = linkToString(links[0], 'user');
+    user = linkToString(links[1], 'attacker');
+    result = hitman + ' claimed your ' +
+             messageTextNoTags.match(REGEX_CASH)[0] +
+             ' bounty on ' + user + '.';
     addToLog('updateGood Icon', minutesAgo + result);
 
   } else if (messageTextNoTags.match(/you earned.*achievement/i)) {
@@ -8037,7 +8043,7 @@ function profileFix() {
 function autoLotto() {
   Autoplay.delay = getAutoPlayDelay();
 
-  var lottoButton = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Play Now and Win Big")]', innerPageElt);
+  var i, j, lottoButton = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Play Now and Win Big")]', innerPageElt);
   if (lottoButton) {
     Autoplay.fx = function() {
       clickElement(lottoButton);
@@ -8099,7 +8105,7 @@ function autoLotto() {
 
     if (submitTicket) {
       var ticket = ' ';
-      for (var i = 1; i < 6; i++) {
+      for (i = 1; i < 6; i++) {
         var searchstring = './/div[@id="ticket_1_selected_' + i + '"]';
         lottonum = xpathFirst(searchstring, innerPageElt);
         ticket = ticket + lottonum.innerHTML;
@@ -8110,7 +8116,7 @@ function autoLotto() {
       Autoplay.fx = goHome;
       clickElement(submitTicket);
       addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: Played ticket' + ticket + '.');
-    };
+    }
     Autoplay.start();
     return true;
   }
@@ -8129,7 +8135,7 @@ function autoLotto() {
       return false;
     }
     var winningtickets = [0, 0, 0, 0, 0, 0];
-    for (var j = 0, numTickets=lottotable.snapshotLength; j < numTickets; j++) {
+    for (j = 0, numTickets=lottotable.snapshotLength; j < numTickets; j++) {
       var eachticket = lottotable.snapshotItem(j).parentNode.innerHTML;
       var count = 0;
       for (var k = 0, ticketLength=eachticket.length; k < ticketLength; k++) {
@@ -8140,7 +8146,7 @@ function autoLotto() {
     }
     var lottoLog = '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto winners</span>: ';
     var atleastOneWinner = false;
-    for (var j = 1; j < 6; j++)
+    for (j = 1; j < 6; j++)
       if (winningtickets[j]>0) {
         atleastOneWinner = true;
         if (winningtickets[j] == 1)
@@ -8161,7 +8167,7 @@ function autoLotto() {
     // Log any displayed prizes.
     if (atleastOneWinner) {
       var prizes = $x('.//table[@class="messages"]//center', innerPageElt);
-      for (var i = 0, numPrizes=prizes.length; i < numPrizes; ++i) {
+      for (i = 0, numPrizes=prizes.length; i < numPrizes; ++i) {
         var description = prizes[i].innerHTML.untag().trim();
         if (description) {
           addToLog('yeah Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Prize</span>: ' + description);
@@ -8350,6 +8356,7 @@ function autoWar() {
     Autoplay.start();
     return true;
   }
+  return false;
 }
 
 function autoGiftWaiting() {
@@ -8387,12 +8394,12 @@ function getTopMafiaInfo(skipAutoplay) {
     }
   }
 
-  if (!onMyMafiaTab()) return;
+  if (!onMyMafiaTab()) return false;
 
   // Get the wheelman bonus.
-  var elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
+  var bonus, elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
   if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
-    var bonus = parseInt(RegExp.$1);
+    bonus = parseInt(RegExp.$1);
     if (bonus && (bonus !== GM_getValue('selectEnergyBonus')) || (isUndefined('selectEnergyBonus'))) {
       GM_setValue('selectEnergyBonus', bonus);
       DEBUG('Set Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
@@ -8409,9 +8416,9 @@ function getTopMafiaInfo(skipAutoplay) {
   }
 
   // Get the mastermind bonus.
-  var elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
+  elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
   if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
-    var bonus = parseInt(RegExp.$1);
+    bonus = parseInt(RegExp.$1);
     if (bonus && (bonus !== GM_getValue('selectExpBonus')) || (isUndefined('selectExpBonus'))) {
       GM_setValue('selectExpBonus', bonus);
       DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
@@ -8426,6 +8433,7 @@ function getTopMafiaInfo(skipAutoplay) {
       addToLog('warning Icon', 'Can\'t find Mastermind bonus');
     }
   }
+  return false;
 }
 
 // This function returns false if nothing was done, true otherwise.
@@ -8580,7 +8588,7 @@ function propertyGet() {
       reloadProperty = true;
 
     } else {
-      var messageCheck = xpathFirst('.//td[@class="message_body"]', innerPageElt);
+      messageCheck = xpathFirst('.//td[@class="message_body"]', innerPageElt);
       if (messageCheck) {
         messageCheck = messageCheck.innerHTML.untag();
         if (messageCheck.match(/successfully sold (.*) for ([A-Z]?\$[\d,]*\d)/i)) {
@@ -8600,11 +8608,11 @@ function propertyGet() {
   var allPropertyRows = xpath(allPropertyRowsPath, innerPageElt);
 
   // get number of payments per day
-  var tempObj = xpathFirst('.//div[contains(text(), "Cash Flow")]', innerPageElt);
+  var payments, tempObj = xpathFirst('.//div[contains(text(), "Cash Flow")]', innerPageElt);
   if (tempObj && tempObj.innerHTML.match(/every (.+) minutes/i)) {
-    var payments = 1440 / parseInt(RegExp.$1);
+    payments = 1440 / parseInt(RegExp.$1);
   } else {
-    var payments = 24;
+    payments = 24;
   }
 
   if (allPropertyRows.snapshotLength > 0) {
@@ -8624,7 +8632,7 @@ function propertyGet() {
         var currentRowXpath = allPropertyRowsPath + "[" + (currentRow+1) + "]/";
 
         // get id
-        var tempObj = xpathFirst(currentRowXpath + 'td[3]/table/tbody/tr/td[2]/form/table/tbody/tr/td/input[@name="property"]', innerPageElt);
+        tempObj = xpathFirst(currentRowXpath + 'td[3]/table/tbody/tr/td[2]/form/table/tbody/tr/td/input[@name="property"]', innerPageElt);
         if (tempObj) {
           currentProperty.id = tempObj.value;
         }
@@ -8710,14 +8718,15 @@ function propertyGet() {
           roiText.appendChild(document.createTextNode('ROI: '));
           makeElement('strong', roiText, { 'style':'color:#FFD927'}).appendChild(document.createTextNode(''+Math.round(currentProperty.roi*100000000)/100000));
           var roiTime = (1/currentProperty.roi) / payments; // days
+          var roiTimeText;
           if (roiTime > 3652.5) { // display years
             roiTime /= 365.25;
-            var roiTimeText = ' years)';
+            roiTimeText = ' years)';
           } else if (roiTime > 365.25) { // display months
             roiTime /= 30.4375;
-            var roiTimeText = ' months)';
+            roiTimeText = ' months)';
           } else {
-            var roiTimeText = ' days)';
+            roiTimeText = ' days)';
           }
           roiText.appendChild(document.createTextNode(' (' + (Math.round(roiTime * 100) / 100) + roiTimeText));
         }
@@ -8917,6 +8926,7 @@ function goJobsNav() {
 }
 
 function goJobTab(tabno) {
+  var elt;
   var currentTab = currentJobTab();
   if (currentTab == -1) {
     // We're not even on a jobs page yet. Go there.
@@ -8932,7 +8942,7 @@ function goJobTab(tabno) {
   var barno = city == NY? (tabno < 6? 0 : 1) : 0;
   var currentBar = city == NY? (currentTab < 6? 0 : 1) : 0;
   if (currentBar != barno) {
-    var elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&bar=' + barno + '")]', innerPageElt);
+    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&bar=' + barno + '")]', innerPageElt);
     if (!elt) {
       addToLog('warning Icon', 'BUG DETECTED: Can\'t find jobs bar ' + barno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
       return;
@@ -8943,9 +8953,9 @@ function goJobTab(tabno) {
   }
 
   if (city == MOSCOW) {
-    var elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&episode_tab=' + tabno + '")]', innerPageElt);
+    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&episode_tab=' + tabno + '")]', innerPageElt);
   } else {
-    var elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
+    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
   }
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + jobno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
@@ -9118,7 +9128,7 @@ function updateHourlyStats() {
 
 //  Max potential storage 41 * 24 = 984 elements
 
-  var currentTime = new Date();
+  var i, currentTime = new Date();
   var currentHour = currentTime.getHours();
 
   var hrDataPack = "";
@@ -9136,13 +9146,14 @@ function updateHourlyStats() {
     }else {
       if ((GM_getValue('hourOfDay')*1 == 23 && currentHour != 0 )|| currentHour -1 != GM_getValue('hourOfDay')*1 && GM_getValue('hourOfDay') != isNaN(GM_getValue('hourOfDay'))){
         //We missed some hours so we need to carry the last good values forward
+        var tempHour;
         if (GM_getValue('hourOfDay')*1 > currentHour){
-          var tempHour = currentHour + 24;
+          tempHour = currentHour + 24;
         }else{
-          var tempHour = currentHour;
+          tempHour = currentHour;
         }
 
-        for (var i = GM_getValue('hourOfDay')*1 + 1; i < GM_getValue('hourOfDay')*1 + (tempHour - GM_getValue('hourOfDay')*1); i++){
+        for (i = GM_getValue('hourOfDay')*1 + 1; i < GM_getValue('hourOfDay')*1 + (tempHour - GM_getValue('hourOfDay')*1); i++){
           var valString = splitValues[GM_getValue('hourOfDay')];
           valString = valString.substring(valString.indexOf('|'), valString.length);
           if (i > 23){
@@ -9164,7 +9175,7 @@ function updateHourlyStats() {
     var hourlyLossStrongNY = new Array(24);   //position [8]
 
     // Organize Hourly stat data into ordered sets
-    for (var i = 0; i < splitValues.length; i++){
+    for (i = 0; i < splitValues.length; i++){
       //check length of each datapack to ensure it is the right size and fills missing with zeroes
       //this addresses issues when adding new metrics to the datapackage
       if (splitValues[i].split('|').length < 9) {
@@ -9247,7 +9258,7 @@ function updateHourlyStats() {
 
     //Gain rate per hour
     gainRateNY = [];
-    for (var i = 0; i < fightWinsNY.length; i++) {
+    for (i = 0; i < fightWinsNY.length; i++) {
       gainRateNY[i] = fightExpNY[i]/(fightWinsNY[i] + fightLossesNY[i]);
       if (isNaN(gainRateNY[i])) { gainRateNY[i] = 0; }
       gainRateNY[i] = Math.round(gainRateNY[i] * Math.pow(10,2))/Math.pow(10,2);
@@ -9328,6 +9339,7 @@ function prepStatsArray(workingArray, currentHour){
 function getStatSpecs(workingArray, includeZeroVals){
   var tempArray = [];
   var runningSum = 0;
+  var dataLen, dataMin, dataMax;
   for (var i = 0; i < workingArray.length; i++) {
     if (workingArray[i] != 0 && includeZeroVals == 0) {
       tempArray.push(workingArray[i]);
@@ -9338,14 +9350,14 @@ function getStatSpecs(workingArray, includeZeroVals){
   }
   if (includeZeroVals == 0) {
     tempArray.sort( function (a, b) { return a-b});
-    var dataLen = tempArray.length;
-    var dataMin = tempArray[0];
-    var dataMax = tempArray[dataLen - 1];
+    dataLen = tempArray.length;
+    dataMin = tempArray[0];
+    dataMax = tempArray[dataLen - 1];
   } else {
     workingArray.sort( function (a, b) { return a-b});
-    var dataLen = workingArray.length;
-    var dataMin = workingArray[0];
-    var dataMax = workingArray[dataLen - 1];
+    dataLen = workingArray.length;
+    dataMin = workingArray[0];
+    dataMax = workingArray[dataLen - 1];
   }
   var dataAvg = runningSum/dataLen;
   dataAvg = Math.round(dataAvg*Math.pow(10, 2))/Math.pow(10, 2);
@@ -9458,6 +9470,7 @@ function logFightResponse(rootElt, resultElt, context) {
   var innerNoTags = inner.untag();
   var messages = $x('.//td[@class="message_body"]', resultElt);
   var elt = messages[0]? messages[0].firstChild : undefined;
+  var cost;
 
   if (resultElt.className == "fight_results") {
     // A fight took place. Results are in the "VS" format.
@@ -9499,7 +9512,7 @@ function logFightResponse(rootElt, resultElt, context) {
       return false;
     }
     var experience = parseInt(RegExp.$1);
-    var cost = innerNoTags.match(REGEX_CASH)? RegExp.lastMatch : undefined;
+    cost = innerNoTags.match(REGEX_CASH)? RegExp.lastMatch : undefined;
 
     // Get the opponent's details.
     var opponentElt = xpathFirst('.//div[@class="fightres_opponent"]', resultElt);
@@ -9689,8 +9702,7 @@ function logResponse(rootElt, action, context) {
 
   var inner = messagebox? messagebox.innerHTML : '';
   var innerNoTags = inner.untag();
-  //var xw_time = rootElt.innerHTML.match(/xw_time=[^&]*/i);
-  //var xw_exp_sig = rootElt.innerHTML.match(/xw_exp_sig=[^&]*/i);
+  var cost, experience, result;
 
   switch (action) {
     case 'fight':
@@ -9701,7 +9713,7 @@ function logResponse(rootElt, action, context) {
       if (innerNoTags.indexOf('doctor healed') != -1) {
         GM_setValue('healWaitStarted',false);
         var addHealth = inner.split('doctor healed <strong>')[1].split('health')[0];
-        var cost = innerNoTags.match(REGEX_CASH);
+        cost = innerNoTags.match(REGEX_CASH);
         addToLog('health Icon', '<span style="color:#FF9999;">' + ' Health +'+ addHealth + ' for <span class="expense">' + cost + '</span>.</span>');
       } else if (innerNoTags.indexOf('You cannot heal so fast') != -1) {
         addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
@@ -9717,10 +9729,10 @@ function logResponse(rootElt, action, context) {
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
       if (xpGainElt) {
         // Job completed successfully.
-        var result = 'You performed ' + '<span class="job">' +
-                     missions[GM_getValue('selectMission')][0] +
-                     '</span> earning <span class="good">' +
-                     xpGainElt.innerHTML.toLowerCase() + '</span>';
+        result = 'You performed ' + '<span class="job">' +
+                 missions[GM_getValue('selectMission')][0] +
+                 '</span> earning <span class="good">' +
+                 xpGainElt.innerHTML.toLowerCase() + '</span>';
         var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
         if (cashGainElt) {
           result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
@@ -9781,7 +9793,7 @@ function logResponse(rootElt, action, context) {
       if (innerNoTags.indexOf('You WON') != -1) {
         var cashGain = innerNoTags.match(/gained.*?([A-Z]?\$[\d,]*\d)/i);
         var cashWon = RegExp.$1
-        var experience = innerNoTags.match(/\d+\s+experience\s+points?/i);
+        experience = innerNoTags.match(/\d+\s+experience\s+points?/i);
         addToLog('yeah Icon', 'Hit ' + linkToString(context.profile, 'user') +
                  ', <span class="good">WON ' + cashWon + '</span> and ' +
                  '<span class="good">' + experience + '</span>.');
@@ -9791,13 +9803,13 @@ function logResponse(rootElt, action, context) {
         GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseCash(cashWon.split('$')[1])));
 
         if (!targetKilled && canSpendStamina() && ptsToNextLevel > 6) {
-          var elt = xpathFirst('.//a[contains(.,"Attack Again")]', messagebox);
-          if (elt) {
+          var eltAtk = xpathFirst('.//a[contains(.,"Attack Again")]', messagebox);
+          if (eltAtk) {
             // Attack again immediately.
             Autoplay.fx = function() {
               clickAction = action;
               clickContext = context;
-              clickElement(elt);
+              clickElement(eltAtk);
               DEBUG('Clicked to repeat the hit on ' + clickContext.name +
                     ' (' + clickContext.id + ').');
             }
@@ -9810,7 +9822,7 @@ function logResponse(rootElt, action, context) {
       } else if (innerNoTags.indexOf('You LOST') != -1) {
         var t = innerNoTags.match(/LOST.*?([A-Z]?\$[\d,]*\d)/i);
         var cashLoss = RegExp.$1;
-        var result = 'Hit ' + linkToString(context.profile, 'user') +
+        result = 'Hit ' + linkToString(context.profile, 'user') +
                      ' <span class="bad">LOST ' + cashLoss + '.</span>';
         GM_setValue('hitmanLossCountInt',GM_getValue('hitmanLossCountInt',0)+1);
         GM_setValue('hitmanLossDollarsInt', '' + (parseInt(GM_getValue('hitmanLossDollarsInt', 0)) + parseCash(cashLoss.split('$')[1])));
@@ -9975,8 +9987,8 @@ function logResponse(rootElt, action, context) {
           addToLog('info Icon', 'Already helped ' + user + ' with this job.');
       } else if (innerNoTags.indexOf('You received') != -1 ||
                  innerNoTags.indexOf('You helped') != -1) {
-          var cost = innerNoTags.match(REGEX_CASH);
-          var experience = 0;
+          cost = innerNoTags.match(REGEX_CASH);
+          experience = 0;
           if (innerNoTags.match(/(\d+)\s+experience\s+points?/i)) {
             experience = parseInt(RegExp.$1);
           }
@@ -9984,7 +9996,7 @@ function logResponse(rootElt, action, context) {
             var loot = innerNoTags.split('gained a ')[1];
             addToLog('lootbag Icon', '<span class="loot">'+' Found a '+ loot.split('.<span')[0] + ' while helping on a job.</span>');
           }
-          var result = 'You received ' + '<span class="good">' +
+          result = 'You received ' + '<span class="good">' +
                    cost + '</span>' + ' and ' +
                    '<span class="good">' + experience + ' experience</span>' +
                    ' for helping ' + user + ' complete the job.';
@@ -10149,8 +10161,8 @@ function addSavedListItem(listName, item, max) {
   savedList.push(item);
   if (max > 0) {
     while (max < savedList.length) {
-      var item = savedList.shift();
-      DEBUG('Removing ' + item + ' from ' + listName + '.');
+      var itm = savedList.shift();
+      DEBUG('Removing ' + itm + ' from ' + listName + '.');
     }
   }
   setSavedList(listName, savedList);
@@ -10227,7 +10239,7 @@ function showIfRelative(key) {
 
 // Converts a link element to an HTML string with an optional CSS class.
 function linkToString(link, className) {
-  if (!link) return;
+  if (!link) return link;
 
   // Decode ID
   var decBase64ID = function (strInput) {
@@ -10278,13 +10290,14 @@ function clickElement(elt) {
 
 function ignoreElement(element) {
   var parentElt = element.parentNode;
+  var id;
   if (parentElt) {
-    var id = parentElt.id;
+    id = parentElt.id;
     if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1))
       return true;
   }
 
-  var id = element.id;
+  id = element.id;
   if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1))
     return true;
 
@@ -10319,13 +10332,13 @@ function xpathFirst(p, c) {
 
 function $x(p, c) {
   var i, r = [], x = document.evaluate(p, c || document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
-  while (i = x.iterateNext()) r.push(i);
+  while ((i = x.iterateNext())) r.push(i);
   return r;
 }
 
 function xpath(query, element) {
-  var element = (element == null) ? document : element;
-  return document.evaluate(query, element, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+  var elt = (element == null) ? document : element;
+  return document.evaluate(query, elt, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 }
 
 // Toggle checkbox element and return true if it is checked
