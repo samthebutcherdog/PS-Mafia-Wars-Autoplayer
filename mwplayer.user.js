@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.33',
-  build: '96',
+  build: '97',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -794,10 +794,10 @@ if (!initialized && runMWAP) {
   // Array container for city variables
   var cities = new Array(
     ['New York', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', '$'],
+    ['Bangkok', ['Yakuza','Triad'], undefined, 18, cashCubaIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'B$'],
     ['Cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'C$'],
     // Add support for choosing sides in Moscow later on
-    ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$'],
-    ['Bangkok', ['Yakuza','Triad'], undefined, 0, cashCubaIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'B$']
+    ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$']
   );
 
   // Spend objects
@@ -6881,7 +6881,7 @@ function customizeProfile() {
         var fightList = getSavedList('fightList');
         if (fightList.indexOf(id) != -1) {
           elt.appendChild(document.createTextNode('Remove from Fight List'));
-          etl.addEventListener('click', clickFightListRemove, false);
+          elt.addEventListener('click', clickFightListRemove, false);
         } else {
           elt.appendChild(document.createTextNode('Add to Fight List'));
           elt.addEventListener('click', clickFightListAdd, false);
