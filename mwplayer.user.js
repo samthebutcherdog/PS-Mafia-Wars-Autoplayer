@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.33',
-  build: '98',
+  build: '99',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7912,7 +7912,7 @@ function parsePlayerUpdates(messagebox) {
       userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
       elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
       // FIXME: Remove exclusion code for Bangkok later
-      if (elt && !elt.getAttribute('onclick').match(/job_city=4/)) {
+      if (elt) {
         // Help immediately.
         Autoplay.fx = function() {
           clickAction = 'help';
