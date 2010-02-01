@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.36',
-  build: '107',
+  build: '108',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -59,7 +59,7 @@ function checkInPublishPopup() {
       window.location.href.match(/prompt_feed/))  {
     GM_setValue('postClicked', false);
     setGMTime('postTimer', '00:10');
-    window.setTimeout(handlePublishing, 500);
+    window.setTimeout(handlePublishing, 2000);
     return true;
   }
   return false;
@@ -6130,9 +6130,9 @@ function handlePublishing() {
           else
             clickElement(skipElt);
 
-          // Wait for half a second before trying to close window manually
+          // Wait for 2 seconds before trying to close window manually
           GM_setValue('postClicked', true);
-          window.setTimeout(handlePublishing, 500);
+          window.setTimeout(handlePublishing, 2000);
           return true;
         }
         return false;
