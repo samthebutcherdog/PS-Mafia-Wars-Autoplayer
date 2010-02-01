@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.35',
-  build: '104',
+  build: '105',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3443,9 +3443,9 @@ function saveSettings() {
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
-                            'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
+                            'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac','hideNotice',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
-                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
+                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','hideOffer',
                             'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok', 'collectNYTake',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
@@ -4578,6 +4578,26 @@ function createDisplayTab() {
   title = 'Align game to the left';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Align game to the left'));
+
+  // Hide Feature Notice
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'hideNotice';
+  title = 'Hide feature notice updates';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide feature notice updates'));
+
+  // Hide Limited Time Offers
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'hideOffer';
+  title = 'Hide limited time offers';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide limited time offers'));
 
   // Summarize Attacks
   item = makeElement('div', list);
@@ -6492,7 +6512,11 @@ function customizeLayout() {
             ' .fb_email_prof_header {margin:0; height:0; display:none}' +
             // Hide SMS Mobile link
             ' .mw_sms {margin:0; height:0; display:none}' +
-            // Left align.
+            // Hide feature notice updates
+            (isChecked('hideNotice') ? ' .feature_update_notice {margin:0; height:0; display:none}' : '' ) +
+            // Hide limited time offers
+            (isChecked('hideOffer') ? ' .tab_box {margin:0; height:0; display:none}' : '' ) +
+            // Left align
             (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '' );
 
   // If CSS has changed, update it
@@ -7631,6 +7655,8 @@ function debugDumpSettings() {
         'Log player updates: <strong>' + showIfUnchecked(GM_getValue('logPlayerUpdates')) + '</strong><br>' +
         '&nbsp;&nbsp;-Updates length: <strong>' + GM_getValue('logPlayerUpdatesMax') + '</strong><br>' +
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
+        'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
+        'Hide Feature Notice: <strong>'+ showIfUnchecked(GM_getValue('hideNotice')) + '</strong><br>' +
         'Enable log-filtering: <strong>' + showIfUnchecked(GM_getValue('filterLog')) + '</strong><br>' +
         '&nbsp;&nbsp;Filter mode: <strong>' + GM_getValue('filterOpt') + '</strong><br>' +
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
