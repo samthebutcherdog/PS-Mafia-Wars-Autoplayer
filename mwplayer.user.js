@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.35
+* @version 1.0.36
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.35
+// @version     1.0.36
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.35',
-  build: '105',
+  version: '1.0.36',
+  build: '106',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -686,7 +686,8 @@ var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var newStaminaMode;             // New stamina mode for random fighting
 
-if (!initialized && !checkInPublishPopup() && !checkLoadIframe() && document.referrer.match(/inthemafia/)) {
+if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
+    (document.referrer.match(/inthemafia/) || document.referrer.match(/mwfb.zynga.com/))) {
   var settingsOpen = false;
   var statsOpen = false;
   var didJobCalculations = false;
