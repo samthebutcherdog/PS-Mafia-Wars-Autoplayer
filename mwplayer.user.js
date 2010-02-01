@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.34',
-  build: '100',
+  build: '101',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -8060,12 +8060,12 @@ function autoLotto() {
   // Are we supposed to grab a mastery prize?
   if (isChecked('autoLottoBonus')) {
     // Grab the progress status
-    var lottoProgress = xpath('.//div/span[contains(text(), "Ticket Mastery progress")]', innerPageElt);
+    var lottoProgress = xpath('.//div/span[contains(@style, "font-size: 20px; font-weight: bold") and contains(text(), " of 6")]', innerPageElt);
     if (lottoProgress.snapshotLength != 0) {
       lottoProgress = lottoProgress.snapshotItem(0).parentNode.innerHTML;
 
       // This is the prize number
-      var lottoPrize = parseInt(lottoProgress.substr(lottoProgress.indexOf("progress:") + 15, 1));
+      var lottoPrize = parseInt(lottoProgress.substr(lottoProgress.indexOf(" of 6") - 1, 1));
       DEBUG('Lotto Prize = ' + autoLottoBonusList[lottoPrize - 1]);
 
       // Is the current item the correct one?
