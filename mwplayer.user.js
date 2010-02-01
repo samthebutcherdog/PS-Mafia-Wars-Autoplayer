@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.34',
-  build: '102',
+  build: '103',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7247,7 +7247,7 @@ function getJobRow(jobName, contextNode) {
     var jobNameTokens = jobName.replace (/"/g,' ').replace(/'/g, ' ').split(' ');
     for (var i = 0; i < jobNameTokens.length; ++i) {
       if (jobNameTokens[i].length > 1) {
-        if (i > 0) conTxt += ' and ';
+        if (conTxt.length > 0) conTxt += ' and ';
         conTxt += 'contains(., "'+jobNameTokens[i]+'")';
       }
     }
