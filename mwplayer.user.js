@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.34',
-  build: '101',
+  build: '102',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -52,30 +52,34 @@ var SCRIPT = {
   user: '&user_id='
 };
 
-var runMWAP = true;
-
 // Handle Publishing
-if (GM_getValue('isRunning') &&
-    window.document.referrer.match(/mwfb.zynga.com/) &&
-    window.location.href.match(/prompt_feed/))  {
-  GM_setValue('postClicked', false);
-  setGMTime('postTimer', '00:10');
-  window.setTimeout(handlePublishing, 500);
-  runMWAP = false;
+function checkInPublishPopup() {
+  if (GM_getValue('isRunning') &&
+      window.document.referrer.match(/mwfb.zynga.com/) &&
+      window.location.href.match(/prompt_feed/))  {
+    GM_setValue('postClicked', false);
+    setGMTime('postTimer', '00:10');
+    window.setTimeout(handlePublishing, 500);
+    return true;
+  }
+  return false;
 }
 
 // Load the iframe
-var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
-if (document.domain.match(/facebook.com/) && iFrameCanvas)  {
-  // Get FB name
-  var fbName = document.getElementById("fb_menu_account");
-  if (fbName && fbName.firstChild)
-    GM_setValue('FBName', fbName.firstChild.innerHTML);
+function checkLoadIframe() {
+  var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
+  if (top && top.document.domain.match(/facebook.com/) && iFrameCanvas) {
+    // Get FB name
+    var fbName = document.getElementById("fb_menu_account");
+    if (fbName && fbName.firstChild)
+      GM_setValue('FBName', fbName.firstChild.innerHTML);
 
-  checkLanguage();
+    checkLanguage();
 
-  window.location.replace(iFrameCanvas.src);
-  runMWAP = false;
+    window.location.replace(iFrameCanvas.src);
+    return true;
+  }
+  return false;
 }
 
 // Register debugOnOff with Greasemonkey
@@ -682,7 +686,7 @@ var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var newStaminaMode;             // New stamina mode for random fighting
 
-if (!initialized && runMWAP) {
+if (!initialized && !checkInPublishPopup() && !checkLoadIframe() && document.referrer.match(/inthemafia/)) {
   var settingsOpen = false;
   var statsOpen = false;
   var didJobCalculations = false;
@@ -1285,7 +1289,7 @@ Animate.prototype.start = function() {
 }
 
 // Set up auto-reload (if enabled).
-if (runMWAP) {
+if (initialized) {
   autoReload();
 
   if (!refreshGlobalStats()) {
