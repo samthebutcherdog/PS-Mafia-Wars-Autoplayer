@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.36',
-  build: '108',
+  build: '109',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -5284,7 +5284,7 @@ function createEnergyTab() {
 // Create Stamina Tab
 function createStaminaTab() {
   var i, elt, title, id, label, lhs, item, choice;
-  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'rhsclass':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
   var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
@@ -5323,7 +5323,7 @@ function createStaminaTab() {
   var staminaTabSub = makeElement('div', list, {'id':'staminaTabSub', 'style':'position: static; border: 1px inset #FFD927; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px;'});
 
   // Spend stamina option
-   item = makeElement('div', list, {'class':'single'});
+  item = makeElement('div', list, {'class':'single'});
   title = 'Start spending stamina when stamina level is reached';
   id = 'selectStaminaUse';
   item.appendChild(document.createTextNode('Start spending stamina when '));
@@ -6165,10 +6165,11 @@ function handlePublishing() {
       // War Declaration
       if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
     }
-  } finally {
-    // Retry until window is closed
-    window.setTimeout(handlePublishing, 500);
+  } catch (ex) {
+    // Ignore exceptions
   }
+  // Retry until window is closed
+  window.setTimeout(handlePublishing, 500);
   return;
 }
 
