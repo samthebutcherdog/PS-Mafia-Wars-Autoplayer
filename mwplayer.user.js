@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.36',
-  build: '106',
+  build: '107',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -8269,7 +8269,7 @@ function autoWar() {
 
   // Does the main page have a reward button?
   var warRewardButton = xpathFirst('.//a//span[contains(text(), "Reward your friends now")]', innerPageElt);
-  if (warRewardButton) {
+  if (warRewardButton && isChecked('autoWarRewardPublish')) {
     Autoplay.fx = function() {
       clickAction = action;
       clickContext = warRewardButton;
@@ -8307,8 +8307,8 @@ function autoWar() {
   }
 
   // We're on the page, does it have a reward button
-  /*var warRewardButton = xpathFirst('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends!")]', innerPageElt);
-  if (warRewardButton) {
+  warRewardButton = xpathFirst('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends!")]', innerPageElt);
+  if (warRewardButton && isChecked('autoWarRewardPublish')) {
     Autoplay.fx = function() {
       clickAction = action;
       clickContext = warRewardButton;
@@ -8317,11 +8317,11 @@ function autoWar() {
     };
     Autoplay.start();
     return true;
-  }*/
+  }
 
   // We're on the page, grab the 'Call for Help!' button if it exists
   var warHelpMeButton = xpathFirst('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', innerPageElt);
-  if (warHelpMeButton) {
+  if (warHelpMeButton && isChecked('autoWarResponsePublish')) {
     Autoplay.fx = function() {
       clickAction = action;
       clickContext = warHelpMeButton;
