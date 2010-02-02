@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.37',
-  build: '112',
+  build: '113',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3446,7 +3446,7 @@ function saveSettings() {
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
-                            'autoLevelPublish','autoBankBangkok']);
+                            'autoLevelPublish','autoAchievementPublish','autoBankBangkok']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -4678,7 +4678,18 @@ function createMafiaTab() {
   id = 'autoLevelPublish';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Level-up bonus'));
+  label.appendChild(document.createTextNode(' Level-up bonus '));
+
+  // Achievement bonus
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Automatically post achievement bonus.';
+  id = 'autoAchievementPublish';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Achievement bonus '));
 
   // Auto-help on jobs/wars
   item = makeElement('div', list);
@@ -6147,6 +6158,9 @@ function handlePublishing() {
       // Level up bonus
       if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
 
+      // Achievement bonus
+      if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
+
       // Job Help
       if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
@@ -6228,7 +6242,7 @@ function innerPageChanged() {
 
   // Perform actions here not requiring response logging
   doParseMessages();
-  doQuickClicks();
+  if(running){doQuickClicks();}
   getTopMafiaInfo(true);
 
   // Customize the display.
@@ -6553,6 +6567,13 @@ function doQuickClicks() {
   if (eltLevel && isChecked('autoLevelPublish')) {
     clickElement(eltLevel);
     DEBUG('Clicked to publish Level Up');
+  }
+
+  // Click the achievement bonus
+  var eltAchievementPublish = xpathFirst('.//a[contains(.,"Share the wealth!")]');
+  if (eltAchievementPublish && isChecked('autoAchievementPublish')) {
+    clickElement(eltAchievementPublish);
+    DEBUG('Clicked to publish acheivemente bonus');
   }
 }
 
@@ -7667,6 +7688,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Secret stash: <strong>' + GM_getValue('autoSecretStash') + '</strong><br>' +
         '&nbsp;&nbsp;Ice bonus: <strong>' + GM_getValue('autoIcePublish') + '</strong><br>' +
         '&nbsp;&nbsp;Level-up bonus: <strong>' + GM_getValue('autoLevelPublish') + '</strong><br>' +
+        '&nbsp;&nbsp;Achievement bonus: <strong>' + GM_getValue('autoAchievementPublish') + '</strong><br>' +
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
