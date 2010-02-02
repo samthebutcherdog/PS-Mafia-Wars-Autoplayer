@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.37',
-  build: '110',
+  build: '111',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3157,28 +3157,22 @@ function handleVersionChange() {
     }
 
     // Get old accept filter patterns
-    if (GM_getValue('logFilterPass').length > 0) {
+    if (GM_getValue('logFilterPass') && GM_getValue('logFilterPass').length > 0) {
       GM_setValue('filterPass',GM_getValue('logFilterPass'));
     }
 
     // Get old accept filter patterns
-    if (GM_getValue('logFilterFail').length > 0) {
+    if (GM_getValue('logFilterFail') && GM_getValue('logFilterFail').length > 0) {
       GM_setValue('filterFail',GM_getValue('logFilterFail'));
     }
 
     // Get patterns
-    if (GM_getValue('filterPatterns').length > 0) {
+    if (GM_getValue('filterPatterns') && GM_getValue('filterPatterns').length > 0) {
       if (GM_getValue('filterOpt') == 0)
         GM_setValue('filterPass',GM_getValue('filterPatterns'));
       else
         GM_setValue('filterFail',GM_getValue('filterPatterns'));
     }
-  }
-
-  // In an old version, there was robbing
-  val = GM_getValue('staminaSpendHow');
-  if (val > 3) {
-    GM_setValue('staminaSpendHow', Math.min(val, 2));
   }
 
   // Upgrade fight/rob tab (builds 522 and under) to stamina tab settings.
@@ -6981,10 +6975,10 @@ function customizeJobs() {
         }
 
         // Ignore locked jobs
-        if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_button_locked') == -1) {
-          availableJobs[city][currentTab].push(jobMatch);
-        } else {
+        if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_energy') == -1) {
           DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
+        } else {
+          availableJobs[city][currentTab].push(jobMatch);
         }
       }
 
