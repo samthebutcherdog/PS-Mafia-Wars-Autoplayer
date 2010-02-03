@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.37',
-  build: '113',
+  build: '115',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7710,15 +7710,17 @@ function debugDumpSettings() {
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
         'Miscellaneous publishing: <br>' +
-        '&nbsp;&nbsp;Secret stash: <strong>' + GM_getValue('autoSecretStash') + '</strong><br>' +
-        '&nbsp;&nbsp;Ice bonus: <strong>' + GM_getValue('autoIcePublish') + '</strong><br>' +
-        '&nbsp;&nbsp;Level-up bonus: <strong>' + GM_getValue('autoLevelPublish') + '</strong><br>' +
-        '&nbsp;&nbsp;Achievement bonus: <strong>' + GM_getValue('autoAchievementPublish') + '</strong><br>' +
+        '&nbsp;&nbsp;Secret stash: <strong>' + showIfUnchecked(GM_getValue('autoSecretStash')) + '</strong><br>' +
+        '&nbsp;&nbsp;Ice bonus: <strong>' + showIfUnchecked(GM_getValue('autoIcePublish')) + '</strong><br>' +
+        '&nbsp;&nbsp;Level-up bonus: <strong>' + showIfUnchecked(GM_getValue('autoLevelPublish')) + '</strong><br>' +
+        '&nbsp;&nbsp;Achievement bonus: <strong>' + showIfUnchecked(GM_getValue('autoAchievementPublish')) + '</strong><br>' +
+        '&nbsp;&nbsp;Automatically share wishlist: <strong>' + showIfUnchecked(GM_getValue('autoShareWishlist')) + '</strong><br>' +
+        '&nbsp;&nbsp;Hour interval for sharing wishlist: <strong>' + GM_getValue('autoShareWishlistTime') + '</strong><br>' +
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
         'Undo notifications: <strong>'+ GM_getValue('notificationHandle') + '</strong><br>' +
-        'Skip gift wall posts: <strong>' + GM_getValue('autoGiftSkipOpt') + '</strong><br>' +
+        'Skip gift wall posts: <strong>' + showIfUnchecked(GM_getValue('autoGiftSkipOpt')) + '</strong><br>' +
         'Auto Gift Waiting: <strong>' + showIfUnchecked(GM_getValue('autoGiftWaiting'))  + '</strong><br>' +
         'Auto War: <strong>' + showIfUnchecked(GM_getValue('autoWar'))  + '</strong><br>' +
         '&nbsp;&nbsp;War Mode: <strong>' + warModeChoices[GM_getValue('warMode', 0)]  + '</strong><br>' +
