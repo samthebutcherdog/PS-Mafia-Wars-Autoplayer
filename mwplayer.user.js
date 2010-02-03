@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '120',
+  build: '121',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7493,7 +7493,7 @@ function jobProgress(element) {
   if (currentJobRow && currentJobRow.innerHTML.match(/level (\d+)/i)) {
     tierLevel = RegExp.$1
   }
-  var tierJobs = $x('.//table[@class="job_list"]//tr/td[contains(@class,"job_name" and contains(.,"Master"))]', element);
+  var tierJobs = $x('.//table[@class="job_list"]//tr/td[contains(@class,"job_name")]', element);
   var tierPercent = 0;
   var jobCount = 0;
   tierJobs.forEach(
