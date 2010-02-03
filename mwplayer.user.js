@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.37',
-  build: '116',
+  build: '117',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3437,7 +3437,7 @@ function saveSettings() {
                             'hideInHospital','autoStat','autoStatDisable','autoStatAttackFallback',
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
-                            'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
+                            'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack','hideMailList',
                             'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac','hideNotice',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','hideOffer','hideNewHome',
@@ -3446,7 +3446,9 @@ function saveSettings() {
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
-                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime','autoBankBangkok']);
+                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
+			    'autoBankBangkok','hideActionBox']);
+
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -3566,6 +3568,7 @@ function saveSettings() {
 
   toggleSettings();
   updateLogStats();
+  refreshMWAPCSS();
 }
 
 function updateMastheadMenu() {
@@ -4555,16 +4558,6 @@ function createDisplayTab() {
   filterHandler();
   filterOpt.addEventListener('change', filterHandler, false);
 
-  // Safe house gifts
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'hideGifts';
-  title = 'Hide gifting items';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide gifting'));
-
   // Alignment
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -4574,26 +4567,6 @@ function createDisplayTab() {
   title = 'Align game to the left';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Align game to the left'));
-
-  // Hide Feature Notice
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'hideNotice';
-  title = 'Hide feature notice updates';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide feature notice updates'));
-
-  // Hide Limited Time Offers
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'hideOffer';
-  title = 'Hide limited time offers';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide limited time offers'));
 
   // Hide new home page featured jobs and menu
   item = makeElement('div', list);
@@ -4624,6 +4597,41 @@ function createDisplayTab() {
   title = 'Set window title to name on Facebook account';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Set window title to name on Facebook account'));
+
+  // Hiding
+  item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
+  makeElement('label', item).appendChild(document.createTextNode(' Hide game elements '));
+
+  // Hide safe house gifts
+  item = makeElement('div', list, {'class':'single'});
+  id = 'hideGifts';
+  title = 'Hide gifting items';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Gifting '));
+
+  // Hide Action Box
+  id = 'hideActionBox';
+  title = 'Hide action boxes on homepage';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Action Boxes '));
+
+  // Hide Feature Notice
+  id = 'hideNotice';
+  title = 'Hide feature notice updates';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Feature Notice '));
+
+  // Hide Limited Time Offers
+  id = 'hideOffer';
+  title = 'Hide limited time offers';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Offers '));
+
+  // Hide Mailing List
+  id = 'hideMailList';
+  title = 'Hide mailing list';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Mail List '));
 
   return displayTab;
 }
@@ -6541,6 +6549,17 @@ function customizeLayout() {
   var mainDiv = xpathFirst('//div[@id="mainDiv"]');
   if (!mainDiv) return;
 
+  refreshMWAPCSS();
+
+  // Handle Unknown error
+  var unkError = xpathFirst('//div[@id="error_dialog" and contains(.,"Error")]');
+  if (unkError) {
+    DEBUG('Error encountered, reloading...');
+    window.location.reload();
+  }
+}
+
+function refreshMWAPCSS() {
   var cssElt = document.getElementById('mwapCSS');
   var mwapCSS, newCSS = '';
 
@@ -6551,16 +6570,17 @@ function customizeLayout() {
     mwapCSS = cssElt.innerHTML;
 
   newCSS =  ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}' +
+            ' #mwapHide {margin:0; height:0; width: 0; display:none}' +
             // Hide the Zynga bar
-            ' #mw_zbar iframe {margin:0; height:0; display:none}' +
+            ' #mw_zbar iframe {margin:0; height:0; width: 0; display:none}' +
             // Hide the email bar.
-            ' .fb_email_prof_header {margin:0; height:0; display:none}' +
+            ' .fb_email_prof_header {margin:0; height:0; width: 0; display:none}' +
             // Hide SMS Mobile link
-            ' .mw_sms {margin:0; height:0; display:none}' +
+            ' .mw_sms {margin:0; height:0; width: 0; display:none}' +
+            // Hide action boxes
+            (isChecked('hideActionBox') ? ' .action_box_container {margin:0; height:0; width: 0; display:none}' : '' ) +
             // Hide feature notice updates
-            (isChecked('hideNotice') ? ' .feature_update_notice {margin:0; height:0; display:none}' : '' ) +
-            // Hide limited time offers
-            (isChecked('hideOffer') ? ' .tab_box {margin:0; height:0; display:none}' : '' ) +
+            (isChecked('hideNotice') ? ' .feature_update_notice {margin:0; height:0; width: 0; display:none}' : '' ) +
             // Hide new home page featured jobs and menu
             (isChecked('hideNewHome') ? ' .action_box_container {margin:0; height:0; display:none}' : '' ) +
             // Left align
@@ -6569,31 +6589,28 @@ function customizeLayout() {
   // If CSS has changed, update it
   if (newCSS != mwapCSS) cssElt.innerHTML = newCSS;
 
-  if (isChecked('hideGifts')) {
-    // Deal with Holiday Free Gifts
-    hideElement(xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]'));
+  // Deal with limited time offers
+  hideElement(xpathFirst('//div[@class="tab_box" and contains(.,"Limited Time Offers")]'), isChecked('hideOffer'));
 
-    // Deal with gift safe houses
-    hideElement(xpathFirst('.//a/img[@alt="Gift Safe House"]'));
+  // Deal the mailing list
+  hideElement(xpathFirst('//div[contains(@style,"mailing_list_bg")]'), isChecked('hideMailList'));
 
-    // Deal with free gifts
-    var msgs = xpathFirst('//table[@class="messages"]');
-    if (msgs) {
-      for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
-        if (msgs.firstChild.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
-          if (iLength == 1) hideElement(msgs);
-          else hideElement(msgs.firstChild.childNodes[i]);
-          break;
-        }
+  // Deal with Holiday Free Gifts
+  hideElement(xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]'), isChecked('hideGifts'));
+
+  // Deal with gift safe houses
+  hideElement(xpathFirst('.//a/img[@alt="Gift Safe House"]'), isChecked('hideGifts'));
+
+  // Deal with free gifts
+  var msgs = xpathFirst('//table[@class="messages"]');
+  if (msgs) {
+    for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
+      if (msgs.firstChild.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
+        if (iLength == 1) hideElement(msgs, isChecked('hideGifts'));
+        else hideElement(msgs.firstChild.childNodes[i], isChecked('hideGifts'));
+        break;
       }
     }
-  }
-
-  // Handle Unknown error
-  var unkError = xpathFirst('//div[@id="error_dialog" and contains(.,"Unknown Error")]');
-  if (unkError) {
-    DEBUG('Unknown error encountered, reloading...');
-    window.location.reload();
   }
 }
 
@@ -7709,9 +7726,11 @@ function debugDumpSettings() {
         'Log player updates: <strong>' + showIfUnchecked(GM_getValue('logPlayerUpdates')) + '</strong><br>' +
         '&nbsp;&nbsp;-Updates length: <strong>' + GM_getValue('logPlayerUpdatesMax') + '</strong><br>' +
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
+        'Hide Action Boxes: <strong>'+ showIfUnchecked(GM_getValue('hideActionBox')) + '</strong><br>' +
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
         'Hide Featured Jobs: <strong>'+ showIfUnchecked(GM_getValue('hideNewHome')) + '</strong><br>' +
         'Hide Feature Notice: <strong>'+ showIfUnchecked(GM_getValue('hideNotice')) + '</strong><br>' +
+        'Hide Mailing List: <strong>'+ showIfUnchecked(GM_getValue('hideMailList')) + '</strong><br>' +
         'Enable log-filtering: <strong>' + showIfUnchecked(GM_getValue('filterLog')) + '</strong><br>' +
         '&nbsp;&nbsp;Filter mode: <strong>' + GM_getValue('filterOpt') + '</strong><br>' +
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
@@ -10136,6 +10155,7 @@ function logResponse(rootElt, action, context) {
       // Log any message from a sale of business output.
       var sellElt = xpathFirst('.//div[contains(.,"sold") or contains(.,"collected")]', messagebox);
       if (sellElt) {
+        hideElement(xpathFirst('.//img', sellElt));
         addToLog(cities[city][CITY_CASH_CSS], sellElt.innerHTML);
       } else {
         DEBUG(inner);
@@ -10389,9 +10409,10 @@ function decodeHTMLEntities(str) {
 }
 
 // Hide the element
-function hideElement(elt) {
+function hideElement(elt, hideFlag) {
   if (!elt) return;
-  elt.setAttribute("style", "margin:0; height:0; display:none", 0);
+  if (hideFlag == null) hideFlag = true;
+  elt.setAttribute("id", hideFlag ? "mwapHide" : "", 0);
 }
 
 function clickElement(elt) {
