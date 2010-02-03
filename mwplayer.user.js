@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '122',
+  build: '123',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -793,8 +793,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_AUTOBANK    = 6;
   const CITY_BANKCONFG   = 7;
   const CITY_SELLCRATES  = 8;
-  const CITY_CASH_SYMBOL = 9;
-  const CITY_BUYCRATES   = 10;
+  const CITY_BUYCRATES   = 9;
+  const CITY_CASH_SYMBOL = 10;
 
   // Add city variables in this format
   // Name, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol
@@ -802,11 +802,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Array container for city variables
   var cities = new Array(
     ['New York', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', '$'],
-    ['Cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'C$', 'autoBuyCratesCuba'],
+    ['Cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$'],
     // Add support for choosing sides in Moscow later on
-    ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'R$', 'autoBuyCratesMoscow'],
-    ['Bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'B$', 'autoBuyCratesBangkok']
+    ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$'],
+    ['Bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$']
   );
+
+
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -1403,13 +1405,17 @@ function doAutoPlay () {
   // Auto-buy business
   if (running && !maxed) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
-      if (level >= cities[i][CITY_LEVEL] && isChecked(cities[i][CITY_BUYCRATES]) && GM_getValue('buyHour' + cities[i][CITY_NAME], -3) != new Date().getHours()) {
+      if (level >= cities[i][CITY_LEVEL] &&
+          isChecked(cities[i][CITY_BUYCRATES]) &&
+          !timeLeftGM('buyHour' + cities[i][CITY_NAME])) {
 
-        // Buy business
+        // Buy crates
         if (autoBuyCrates(i)) return;
       }
     }
   }
+
+
 
   // Auto-bank
   if (running && !maxed && canBank) {
@@ -1698,7 +1704,7 @@ function autoSellCrates(sellCity) {
   function autoBuyCrates(buyCity) {
   // Go to the correct city.
   if (city != buyCity) {
-    Autoplay.fx = goLocation(buyCity);
+    Autoplay.fx = function(){goLocation(buyCity)};
     Autoplay.start();
     return true;
   }
@@ -1748,7 +1754,7 @@ function autoSellCrates(sellCity) {
   }
 
   // Nothing to buy.
-  GM_setValue('buyHour' + cities[buyCity][CITY_NAME], new Date().getHours());
+  setGMTime('buyHour' + cities[buyCity][CITY_NAME], '3 hours');
   DEBUG('Cannot buy any business or upgrade in ' + cities[buyCity][CITY_NAME] + ' . Checking again in 3 hours.');
 
   // Visit home after selling all output
