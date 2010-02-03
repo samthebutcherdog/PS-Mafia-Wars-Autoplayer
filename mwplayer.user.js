@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.37',
-  build: '115',
+  build: '116',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3440,7 +3440,7 @@ function saveSettings() {
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
                             'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac','hideNotice',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
-                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','hideOffer',
+                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','hideOffer','hideNewHome',
                             'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok', 'collectNYTake',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
@@ -4594,6 +4594,16 @@ function createDisplayTab() {
   title = 'Hide limited time offers';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide limited time offers'));
+
+  // Hide new home page featured jobs and menu
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'hideNewHome';
+  title = 'Hide the new home page featured jobs and menu';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide featured jobs'));
 
   // Summarize Attacks
   item = makeElement('div', list);
@@ -6551,6 +6561,8 @@ function customizeLayout() {
             (isChecked('hideNotice') ? ' .feature_update_notice {margin:0; height:0; display:none}' : '' ) +
             // Hide limited time offers
             (isChecked('hideOffer') ? ' .tab_box {margin:0; height:0; display:none}' : '' ) +
+            // Hide new home page featured jobs and menu
+            (isChecked('hideNewHome') ? ' .action_box_container {margin:0; height:0; display:none}' : '' ) +
             // Left align
             (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '' );
 
@@ -7698,6 +7710,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Updates length: <strong>' + GM_getValue('logPlayerUpdatesMax') + '</strong><br>' +
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
+        'Hide Featured Jobs: <strong>'+ showIfUnchecked(GM_getValue('hideNewHome')) + '</strong><br>' +
         'Hide Feature Notice: <strong>'+ showIfUnchecked(GM_getValue('hideNotice')) + '</strong><br>' +
         'Enable log-filtering: <strong>' + showIfUnchecked(GM_getValue('filterLog')) + '</strong><br>' +
         '&nbsp;&nbsp;Filter mode: <strong>' + GM_getValue('filterOpt') + '</strong><br>' +
