@@ -3446,7 +3446,7 @@ function saveSettings() {
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
-                            'autoLevelPublish','autoAchievementPublish','autoBankBangkok']);
+                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime','autoBankBangkok']);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -3522,6 +3522,7 @@ function saveSettings() {
   GM_setValue('logPlayerUpdatesMax', logPlayerUpdatesMax);
   GM_setValue('buyMinAmount', document.getElementById('buyMinAmount').value);
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
+  GM_setValue('autoShareWishlistTime', document.getElementById('autoShareWishlistTime').value);
   GM_setValue('autoLottoBonusItem', document.getElementById('autoLottoList').selectedIndex);
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   GM_setValue('warMode', document.getElementById('warMode').selectedIndex);
@@ -4690,6 +4691,21 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Achievement bonus '));
+
+  // Auto-share wishlist
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Check if you want to share wishlist.';
+  id = 'autoShareWishlist';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Wishlist every: '));
+  title = 'Enter the number of hours to wait before sharing wishlist again.';
+  id = 'autoShareWishlistTime';
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '1'), 'title':title, 'id':id, 'size':'2'});
+  rhs.appendChild(document.createTextNode(' hour(s)'));
 
   // Auto-help on jobs/wars
   item = makeElement('div', list);
@@ -6164,6 +6180,9 @@ function handlePublishing() {
       // Job Help
       if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
+      // Share wishlist
+      if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
+
       // War Reward
       if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
@@ -6242,7 +6261,13 @@ function innerPageChanged() {
 
   // Perform actions here not requiring response logging
   doParseMessages();
-  if(running){doQuickClicks();}
+  if(running){
+    doQuickClicks();
+    if(isChecked('autoShareWishlist') && !timeLeftGM('wishListTimer')){
+      autoWishlist();
+    }
+  }
+
   getTopMafiaInfo(true);
 
   // Customize the display.
@@ -6573,7 +6598,7 @@ function doQuickClicks() {
   var eltAchievementPublish = xpathFirst('.//a[contains(.,"Share the wealth!")]');
   if (eltAchievementPublish && isChecked('autoAchievementPublish')) {
     clickElement(eltAchievementPublish);
-    DEBUG('Clicked to publish acheivemente bonus');
+    DEBUG('Clicked to publish achievement bonus');
   }
 }
 
@@ -8223,6 +8248,36 @@ function autoLotto() {
   }
 
   return false;
+}
+
+function autoWishlist() {
+  var shareWishlist = GM_getValue('autoShareWishlistTime');
+
+  // Go to the wishlist.
+  elt = xpathFirst('.//div[@class="nav_link profile_link"]//a');
+  eltWishlist = xpathFirst('.//a[contains(.,"Share Wishlist with Your Friends")]');
+  if (elt) {
+    clickElement(elt);
+    DEBUG('Redirecting to post wishlist');
+
+    if(eltWishlist){
+      if(shareWishlist > 0){
+        clickElement(eltWishlist);
+        DEBUG('Clicked to post wishlist.');
+        addToLog('info Icon','Clicked to share wishlist, sharing again in '+shareWishlist+' hour(s)');
+        if(shareWishlist == 1){
+          setGMTime('wishListTimer', '1 hour');
+        }
+        else{
+          setGMTime('wishListTimer', shareWishlist + ' hours');
+        }
+      }
+    else{
+      addToLog('warning Icon', 'Please increase wishlist sharing time.');
+      setGMTime('wishListTimer', '1 hour');
+    }
+	}
+  }
 }
 
 // Attack the first war opponent you can
