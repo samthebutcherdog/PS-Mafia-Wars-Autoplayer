@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.37
+* @version 1.0.38
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.37
+// @version     1.0.38
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.37',
-  build: '118',
+  version: '1.0.38',
+  build: '119',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3447,7 +3447,7 @@ function saveSettings() {
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
-			    'autoBankBangkok','hideActionBox']);
+                            'autoBankBangkok','hideActionBox']);
 
 
   if (document.getElementById('masterAllJobs').checked === true) {
@@ -7038,7 +7038,8 @@ function customizeJobs() {
         }
 
         // Ignore locked jobs
-        if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_energy') == -1) {
+        if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_button_locked') >= 0 &&
+            jobButton.snapshotItem(j).innerHTML.indexOf('Help') == -1) {
           DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
         } else {
           availableJobs[city][currentTab].push(jobMatch);
@@ -8281,23 +8282,20 @@ function autoWishlist() {
     clickElement(elt);
     DEBUG('Redirecting to post wishlist');
 
-    if(eltWishlist){
-      if(shareWishlist > 0){
+    if (eltWishlist) {
+      if (shareWishlist > 0) {
         clickElement(eltWishlist);
         DEBUG('Clicked to post wishlist.');
         addToLog('info Icon','Clicked to share wishlist, sharing again in '+shareWishlist+' hour(s)');
-        if(shareWishlist == 1){
+        if(shareWishlist == 1)
           setGMTime('wishListTimer', '1 hour');
-        }
-        else{
+        else
           setGMTime('wishListTimer', shareWishlist + ' hours');
-        }
+      } else {
+        addToLog('warning Icon', 'Please increase wishlist sharing time.');
+        setGMTime('wishListTimer', '1 hour');
       }
-    else{
-      addToLog('warning Icon', 'Please increase wishlist sharing time.');
-      setGMTime('wishListTimer', '1 hour');
     }
-	}
   }
 }
 
