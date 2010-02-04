@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '128',
+  build: '129',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -9228,7 +9228,7 @@ function goJobTab(tabno) {
     return;
   }
 
-  var tabParamName = city == MOSCOW ? 'episode_tab' : (city == BANGKOK ? 'story_tab' : '&tab');
+  var tabParamName = city == MOSCOW ? 'episode_tab' : (city == BANGKOK ? 'story_tab' : 'tab');
   elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&' + tabParamName + '=' + tabno + '")]', innerPageElt);
 
   if (!elt) {
