@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '129',
+  build: '130',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7141,6 +7141,15 @@ function customizeJobs() {
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
 
+  var isJobLocked = function (jobAction) {
+    return (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
+            jobAction.innerHTML.indexOf('Help') == -1);
+  }
+
+  var isJobMastered = function (jobInfo) {
+    return (jobInfo && jobInfo.innerHTML.match(/Level\s+(\d+)\s+Mastered/i));
+  }
+
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
@@ -7173,7 +7182,7 @@ function customizeJobs() {
           GM_getValue('isRunning') === true) {
 
         // Ignore mastered jobs
-        if (jobInfo && jobInfo.innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
+        if (isJobMastered(jobInfo)) {
           if (missions[jobMatch][9] == true) {
             masteredJobs[city][currentTab].push(jobMatch);
             DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered. Adding to ignore list.');
@@ -7182,8 +7191,7 @@ function customizeJobs() {
         }
 
         // Ignore locked jobs
-        if (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
-            jobAction.innerHTML.indexOf('Help') == -1) {
+        if (isJobLocked(jobAction)) {
           DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
         } else {
           availableJobs[city][currentTab].push(jobMatch);
@@ -7195,7 +7203,7 @@ function customizeJobs() {
       if (!jobInfo) continue;
 
       // Tag the jobNames with "Mastery" if not mastered
-      if (jobInfo.innerHTML.match(/Mastery/i)) {
+      if (!isJobMastered(jobInfo)) {
         var mastElt = hideElement(makeElement('span',null));
         mastElt.appendChild(document.createTextNode('Mastery'));
         jobNames.snapshotItem(i).appendChild(mastElt);
@@ -7589,7 +7597,6 @@ function jobMastery(element) {
   var tabno      = missions[selectMission][3];
   var cityno     = missions[selectMission][4];
 
-  DEBUG(city + ' ' + tabno);
   if (city != cityno || !onJobTab(tabno)) return;
 
   DEBUG('Calculating progress for ' + currentJob + '.');
@@ -7606,7 +7613,7 @@ function jobMastery(element) {
   var jobCount = 0;
   tierJobs.forEach(
     function(f) {
-      if (f.innerHTML.indexOf('Mastered') != -1) {
+      if (f.innerHTML.indexOf('Mastered') != -1 || f.innerHTML.indexOf('Mastery') == -1) {
         tierPercent += 100;
         jobCount++;
       } else if (f.innerHTML.match(/Mastery\s+(\d+)%/i)) {
