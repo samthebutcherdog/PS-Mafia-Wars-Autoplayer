@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '127',
+  build: '128',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7163,8 +7163,6 @@ function customizeJobs() {
       var jobMatch = missions.searchArray(jobName, 0)[0];
       if (!jobMatch) { masteredJobsCount; continue; }
 
-      DEBUG('Job found: ' + missions[jobMatch][0]);
-
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -9230,13 +9228,11 @@ function goJobTab(tabno) {
     return;
   }
 
-  if (city == MOSCOW) {
-    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&episode_tab=' + tabno + '")]', innerPageElt);
-  } else {
-    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
-  }
+  var tabParamName = city == MOSCOW ? 'episode_tab' : (city == BANGKOK ? 'story_tab' : '&tab');
+  elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&' + tabParamName + '=' + tabno + '")]', innerPageElt);
+
   if (!elt) {
-    addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + jobno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
+    addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
     return;
   }
   clickElement(elt);
