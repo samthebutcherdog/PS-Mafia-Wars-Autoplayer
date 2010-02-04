@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '123',
+  build: '124',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1723,34 +1723,67 @@ function autoSellCrates(sellCity) {
   eltUpgradeProduces = xpathFirst('.//a[contains(.,"Upgrade to")]', innerPageElt);
   eltUpgradeOutput = xpathFirst('.//a[contains(.,"Upgrade Output to")]', innerPageElt);
 
-  if (eltUpgradeProduces && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
-    Autoplay.fx = function() {
-      clickAction = 'upgrade produce';
-      clickElement(eltUpgradeProduces);
-      DEBUG('Clicked to upgrade produce.');
-    };
-    Autoplay.start();
-    return true;
-  }
-  else
-  if (eltUpgradeOutput && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
-    Autoplay.fx = function() {
-      clickAction = 'upgrade output';
-      clickElement(eltUpgradeOutput);
-      DEBUG('Clicked to upgrade output.');
-    };
-    Autoplay.start();
-    return true;
-  }
-  else
-  if (eltTakeOver && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
-    Autoplay.fx = function() {
-      clickAction = 'buy business';
-      clickElement(eltTakeOver);
-      DEBUG('Clicked to take over business.');
-    };
-    Autoplay.start();
-    return true;
+  if(isChecked('autoBuyCratesOutput')){
+    if (eltUpgradeOutput && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+      Autoplay.fx = function() {
+        clickAction = 'upgrade output';
+        clickElement(eltUpgradeOutput);
+        DEBUG('Clicked to upgrade output.');
+      };
+      Autoplay.start();
+      return true;
+    }
+    else
+    if (eltUpgradeProduces && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+      Autoplay.fx = function() {
+        clickAction = 'upgrade produce';
+        clickElement(eltUpgradeProduces);
+        DEBUG('Clicked to upgrade produce.');
+      };
+      Autoplay.start();
+      return true;
+    }
+    else
+    if (eltTakeOver && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+      Autoplay.fx = function() {
+        clickAction = 'buy business';
+        clickElement(eltTakeOver);
+        DEBUG('Clicked to take over business.');
+      };
+      Autoplay.start();
+      return true;
+    }
+    }
+  else{
+    if (eltUpgradeProduces && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+      Autoplay.fx = function() {
+        clickAction = 'upgrade produce';
+        clickElement(eltUpgradeProduces);
+        DEBUG('Clicked to upgrade produce.');
+      };
+      Autoplay.start();
+      return true;
+    }
+    else
+    if (eltUpgradeOutput && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+      Autoplay.fx = function() {
+        clickAction = 'upgrade output';
+        clickElement(eltUpgradeOutput);
+        DEBUG('Clicked to upgrade output.');
+      };
+      Autoplay.start();
+      return true;
+    }
+    else
+    if (eltTakeOver && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+      Autoplay.fx = function() {
+        clickAction = 'buy business';
+        clickElement(eltTakeOver);
+        DEBUG('Clicked to take over business.');
+      };
+      Autoplay.start();
+      return true;
+    }
   }
 
   // Nothing to buy.
@@ -3370,6 +3403,8 @@ function saveDefaultSettings() {
 
   // Other settings.
   GM_setValue('logOpen', 'open');
+  GM_setValue('autoBuyCratesUpgrade', 'checked');
+  GM_setValue('autoBuyCratesOutput', 0);
 
   addToLog('process Icon', 'Options reset to defaults.');
 }
@@ -3527,7 +3562,8 @@ function saveSettings() {
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
-                            'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow','autoBuyCratesBangkok']);
+                            'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow','autoBuyCratesBangkok',
+							'autoBuyCratesOutput','autoBuyCratesUpgrade']);
 
 
   if (document.getElementById('masterAllJobs').checked === true) {
@@ -5856,6 +5892,21 @@ function createCashTab () {
   label = makeElement('label', autoBuyCratesBangkok, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Buy Bangkok Business:'));
   makeElement('input', autoBuyCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+
+  title = 'Select this to Upgrade the Produce First';
+  id = 'autoBuyCratesUpgrade';
+  var autoBuyCratesUpgrade = makeElement('div', cashTab, {'style':'top: 390px; right: 100px;'});
+  label = makeElement('label', autoBuyCratesUpgrade, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Upgrade'));
+  makeElement('input', autoBuyCratesUpgrade, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
+
+  title = 'Select this to Upgrade the Output First';
+  id = 'autoBuyCratesOutput';
+  var autoBuyCratesOutput = makeElement('div', cashTab, {'style':'top: 390px; right: 10px;'});
+  label = makeElement('label', autoBuyCratesOutput, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Output'));
+  makeElement('input', autoBuyCratesOutput, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
+
   // end auto buy crates
 
   return cashTab;
@@ -7939,6 +7990,8 @@ function debugDumpSettings() {
 		'Buy Cuban business: <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesCuba')) + '</strong><br>' +
         'Buy Moscow business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesMoscow')) + '</strong><br>' +
         'Buy Bangkok business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesBangkok')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Upgrade First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesUpgrade')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Output First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesOutput')) + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Collect Racket: <strong>' + showIfUnchecked(GM_getValue('racketCollect')) + '</strong><br>' +
@@ -10255,7 +10308,7 @@ function logResponse(rootElt, action, context) {
 
     case 'upgrade produce':
       // Log any message from upgrading a business produce.
-      var buyUpgradeProduce = xpathFirst('.//td[contains(.,"Improvements in production efficiency")]', innerPageElt);
+      var buyUpgradeProduce = xpathFirst('.//td[contains(.,"Improvements in production efficiency") or contains(.,"You\'ve invested")]', innerPageElt);
       if (buyUpgradeProduce) {
         addToLog(cities[city][CITY_CASH_CSS], buyUpgradeProduce.innerHTML);
       } else {
