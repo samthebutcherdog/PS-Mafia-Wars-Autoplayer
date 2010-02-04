@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '126',
+  build: '127',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -692,7 +692,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var statsOpen = false;
   var didJobCalculations = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', 'Ã‚Â«', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '«', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -801,14 +801,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', '$'],
+    ['New York', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$'],
     ['Cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$'],
     // Add support for choosing sides in Moscow later on
     ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$'],
     ['Bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$']
   );
-
-
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -1415,8 +1413,6 @@ function doAutoPlay () {
     }
   }
 
-
-
   // Auto-bank
   if (running && !maxed && canBank) {
     if (autoBankDeposit()) return;
@@ -1701,7 +1697,7 @@ function autoSellCrates(sellCity) {
   return true;
 }
 
-  function autoBuyCrates(buyCity) {
+function autoBuyCrates(buyCity) {
   // Go to the correct city.
   if (city != buyCity) {
     Autoplay.fx = function(){goLocation(buyCity)};
@@ -3563,7 +3559,7 @@ function saveSettings() {
                             'autoWarBetray','hideGifts','autoSecretStash','iceCheck','autoIcePublish',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow','autoBuyCratesBangkok',
-							'autoBuyCratesOutput','autoBuyCratesUpgrade']);
+                            'autoBuyCratesOutput','autoBuyCratesUpgrade']);
 
 
   if (document.getElementById('masterAllJobs').checked === true) {
@@ -4344,7 +4340,7 @@ function createSettingsBox() {
     "data:application/x-javascript;base64,Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUgbGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3dGgsIDA3IHRvIHZlcnNpb24gMi4wLiBDb250YWlucyBudW1lcm91cyBpbXByb3ZlbWVudHM6DQovLyAgIC1BZGRlZCBBdXRvIE1vZGU6IFNjcmlwdCBhdXRvIHJvdGF0ZXMgdGhlIHRhYnMgYmFzZWQgb24gYW4gaW50ZXJ2YWwsIHVudGlsIGEgdGFiIGlzIGV4cGxpY2l0bHkgc2VsZWN0ZWQNCi8vICAgLUFiaWxpdHkgdG8gZXhwYW5kL2NvbnRyYWN0IGFyYml0cmFyeSBESVZzIG9uIHRoZSBwYWdlIGFzIHRoZSB0YWJiZWQgY29udGVudCBpcyBleHBhbmRlZC8gY29udHJhY3RlZA0KLy8gICAtQWJpbGl0eSB0byBkeW5hbWljYWxseSBzZWxlY3QgYSB0YWIgZWl0aGVyIGJhc2VkIG9uIGl0cyBwb3NpdGlvbiB3aXRoaW4gaXRzIHBlZXJzLCBvciBpdHMgSUQgYXR0cmlidXRlIChnaXZlIHRoZSB0YXJnZXQgdGFiIG9uZSAxc3QpDQovLyAgIC1BYmlsaXR5IHRvIHNldCB3aGVyZSB0aGUgQ1NTIGNsYXNzbmFtZSAic2VsZWN0ZWQiIGdldCBhc3NpZ25lZC0gZWl0aGVyIHRvIHRoZSB0YXJnZXQgdGFiJ3MgbGluayAoIkEiKSwgb3IgaXRzIHBhcmVudCBjb250YWluZXINCi8vKiogVXBkYXRlZCBGZWIgMTh0aCwgMDggdG8gdmVyc2lvbiAyLjE6IEFkZHMgYSAidGFiaW5zdGFuY2UuY3ljbGVpdChkaXIpIiBtZXRob2QgdG8gY3ljbGUgZm9yd2FyZCBvciBiYWNrd2FyZCBiZXR3ZWVuIHRhYnMgZHluYW1pY2FsbHkNCi8vKiogVXBkYXRlZCBBcHJpbCA4dGgsIDA4IHRvIHZlcnNpb24gMi4yOiBBZGRzIHN1cHBvcnQgZm9yIGV4cGFuZGluZyBhIHRhYiB1c2luZyBhIFVSTCBwYXJhbWV0ZXIgKGllOiBodHRwOi8vbXlzaXRlLmNvbS90YWJjb250ZW50Lmh0bT90YWJpbnRlcmZhY2VpZD0wKSANCg0KLy8vL05PIE5FRUQgVE8gRURJVCBCRUxPVy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLw0KDQpmdW5jdGlvbiBkZHRhYmNvbnRlbnQodGFiaW50ZXJmYWNlaWQpew0KCXRoaXMudGFiaW50ZXJmYWNlaWQ9dGFiaW50ZXJmYWNlaWQgLy9JRCBvZiBUYWIgTWVudSBtYWluIGNvbnRhaW5lcg0KCXRoaXMudGFicz1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0YWJpbnRlcmZhY2VpZCkuZ2V0RWxlbWVudHNCeVRhZ05hbWUoImEiKSAvL0dldCBhbGwgdGFiIGxpbmtzIHdpdGhpbiBjb250YWluZXINCgl0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlPXRydWUNCgl0aGlzLmhvdHRhYnNwb3NpdGlvbnM9W10gLy9BcnJheSB0byBzdG9yZSBwb3NpdGlvbiBvZiB0YWJzIHRoYXQgaGF2ZSBhICJyZWwiIGF0dHIgZGVmaW5lZCwgcmVsYXRpdmUgdG8gYWxsIHRhYiBsaW5rcywgd2l0aGluIGNvbnRhaW5lcg0KCXRoaXMuY3VycmVudFRhYkluZGV4PTAgLy9JbmRleCBvZiBjdXJyZW50bHkgc2VsZWN0ZWQgaG90IHRhYiAodGFiIHdpdGggc3ViIGNvbnRlbnQpIHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkNCgl0aGlzLnN1YmNvbnRlbnRpZHM9W10gLy9BcnJheSB0byBzdG9yZSBpZHMgb2YgdGhlIHN1YiBjb250ZW50cyAoInJlbCIgYXR0ciB2YWx1ZXMpDQoJdGhpcy5yZXZjb250ZW50aWRzPVtdIC8vQXJyYXkgdG8gc3RvcmUgaWRzIG9mIGFyYml0cmFyeSBjb250ZW50cyB0byBleHBhbmQvY29udGFjdCBhcyB3ZWxsICgicmV2IiBhdHRyIHZhbHVlcykNCgl0aGlzLnNlbGVjdGVkQ2xhc3NUYXJnZXQ9ImxpbmsiIC8va2V5d29yZCB0byBpbmRpY2F0ZSB3aGljaCB0YXJnZXQgZWxlbWVudCB0byBhc3NpZ24gInNlbGVjdGVkIiBDU1MgY2xhc3MgKCJsaW5rcGFyZW50IiBvciAibGluayIpDQp9DQoNCmRkdGFiY29udGVudC5nZXRDb29raWU9ZnVuY3Rpb24oTmFtZSl7IA0KCXZhciByZT1uZXcgUmVnRXhwKE5hbWUrIj1bXjtdKyIsICJpIik7IC8vY29uc3RydWN0IFJFIHRvIHNlYXJjaCBmb3IgdGFyZ2V0IG5hbWUvdmFsdWUgcGFpcg0KCWlmIChkb2N1bWVudC5jb29raWUubWF0Y2gocmUpKSAvL2lmIGNvb2tpZSBmb3VuZA0KCQlyZXR1cm4gZG9jdW1lbnQuY29va2llLm1hdGNoKHJlKVswXS5zcGxpdCgiPSIpWzFdIC8vcmV0dXJuIGl0cyB2YWx1ZQ0KCXJldHVybiAiIg0KfQ0KDQpkZHRhYmNvbnRlbnQuc2V0Q29va2llPWZ1bmN0aW9uKG5hbWUsIHZhbHVlKXsNCglkb2N1bWVudC5jb29raWUgPSBuYW1lKyI9Iit2YWx1ZSsiO3BhdGg9LyIgLy9jb29raWUgdmFsdWUgaXMgZG9tYWluIHdpZGUgKHBhdGg9LykNCn0NCg0KZGR0YWJjb250ZW50LnByb3RvdHlwZT17DQoNCglleHBhbmRpdDpmdW5jdGlvbih0YWJpZF9vcl9wb3NpdGlvbil7IC8vUFVCTElDIGZ1bmN0aW9uIHRvIHNlbGVjdCBhIHRhYiBlaXRoZXIgYnkgaXRzIElEIG9yIHBvc2l0aW9uKGludCkgd2l0aGluIGl0cyBwZWVycw0KCQl0aGlzLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCXZhciB0YWJyZWY9IiINCgkJdHJ5ew0KCQkJaWYgKHR5cGVvZiB0YWJpZF9vcl9wb3NpdGlvbj09InN0cmluZyIgJiYgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQodGFiaWRfb3JfcG9zaXRpb24pLmdldEF0dHJpYnV0ZSgicmVsIikpIC8vaWYgc3BlY2lmaWVkIHRhYiBjb250YWlucyAicmVsIiBhdHRyDQoJCQkJdGFicmVmPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKHRhYmlkX29yX3Bvc2l0aW9uKQ0KCQkJZWxzZSBpZiAocGFyc2VJbnQodGFiaWRfb3JfcG9zaXRpb24pIT1OYU4gJiYgdGhpcy50YWJzW3RhYmlkX29yX3Bvc2l0aW9uXS5nZXRBdHRyaWJ1dGUoInJlbCIpKSAvL2lmIHNwZWNpZmllZCB0YWIgY29udGFpbnMgInJlbCIgYXR0cg0KCQkJCXRhYnJlZj10aGlzLnRhYnNbdGFiaWRfb3JfcG9zaXRpb25dDQoJCX0NCgkJY2F0Y2goZXJyKXthbGVydCgiSW52YWxpZCBUYWIgSUQgb3IgcG9zaXRpb24gZW50ZXJlZCEiKX0NCgkJaWYgKHRhYnJlZiE9IiIpIC8vaWYgYSB2YWxpZCB0YWIgaXMgZm91bmQgYmFzZWQgb24gZnVuY3Rpb24gcGFyYW1ldGVyDQoJCQl0aGlzLmV4cGFuZHRhYih0YWJyZWYpIC8vZXhwYW5kIHRoaXMgdGFiDQoJfSwNCg0KCWN5Y2xlaXQ6ZnVuY3Rpb24oZGlyLCBhdXRvcnVuKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gbW92ZSBmb3dhcmQgb3IgYmFja3dhcmRzIHRocm91Z2ggZWFjaCBob3QgdGFiICh0YWJpbnN0YW5jZS5jeWNsZWl0KCdmb3dhcmQvYmFjaycpICkNCgkJaWYgKGRpcj09Im5leHQiKXsNCgkJCXZhciBjdXJyZW50VGFiSW5kZXg9KHRoaXMuY3VycmVudFRhYkluZGV4PHRoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGgtMSk%2FIHRoaXMuY3VycmVudFRhYkluZGV4KzEgOiAwDQoJCX0NCgkJZWxzZSBpZiAoZGlyPT0icHJldiIpew0KCQkJdmFyIGN1cnJlbnRUYWJJbmRleD0odGhpcy5jdXJyZW50VGFiSW5kZXg%2BMCk%2FIHRoaXMuY3VycmVudFRhYkluZGV4LTEgOiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoLTENCgkJfQ0KCQlpZiAodHlwZW9mIGF1dG9ydW49PSJ1bmRlZmluZWQiKSAvL2lmIGN5Y2xlaXQoKSBpcyBiZWluZyBjYWxsZWQgYnkgdXNlciwgdmVyc3VzIGF1dG9ydW4oKSBmdW5jdGlvbg0KCQkJdGhpcy5jYW5jZWxhdXRvcnVuKCkgLy9zdG9wIGF1dG8gY3ljbGluZyBvZiB0YWJzIChpZiBydW5uaW5nKQ0KCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zW2N1cnJlbnRUYWJJbmRleF1dKQ0KCX0sDQoNCglzZXRwZXJzaXN0OmZ1bmN0aW9uKGJvb2wpeyAvL1BVQkxJQyBmdW5jdGlvbiB0byB0b2dnbGUgcGVyc2lzdGVuY2UgZmVhdHVyZQ0KCQkJdGhpcy5lbmFibGV0YWJwZXJzaXN0ZW5jZT1ib29sDQoJfSwNCg0KCXNldHNlbGVjdGVkQ2xhc3NUYXJnZXQ6ZnVuY3Rpb24ob2Jqc3RyKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gc2V0IHdoaWNoIHRhcmdldCBlbGVtZW50IHRvIGFzc2lnbiAic2VsZWN0ZWQiIENTUyBjbGFzcyAoImxpbmtwYXJlbnQiIG9yICJsaW5rIikNCgkJdGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PW9ianN0ciB8fCAibGluayINCgl9LA0KDQoJZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldDpmdW5jdGlvbih0YWJyZWYpeyAvL1JldHVybnMgdGFyZ2V0IGVsZW1lbnQgdG8gYXNzaWduICJzZWxlY3RlZCIgQ1NTIGNsYXNzIHRvDQoJCXJldHVybiAodGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PT0oImxpbmtwYXJlbnQiLnRvTG93ZXJDYXNlKCkpKT8gdGFicmVmLnBhcmVudE5vZGUgOiB0YWJyZWYNCgl9LA0KDQoJdXJscGFyYW1zZWxlY3Q6ZnVuY3Rpb24odGFiaW50ZXJmYWNlaWQpew0KCQl2YXIgcmVzdWx0PXdpbmRvdy5sb2NhdGlvbi5zZWFyY2gubWF0Y2gobmV3IFJlZ0V4cCh0YWJpbnRlcmZhY2VpZCsiPShcXGQrKSIsICJpIikpIC8vY2hlY2sgZm9yICI%2FdGFiaW50ZXJmYWNlaWQ9MiIgaW4gVVJMDQoJCXJldHVybiAocmVzdWx0PT1udWxsKT8gbnVsbCA6IHBhcnNlSW50KFJlZ0V4cC4kMSkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXgsIHdoZXJlIGluZGV4IChpbnQpIGlzIHRoZSBzZWxlY3RlZCB0YWIncyBpbmRleA0KCX0sDQoNCglleHBhbmR0YWI6ZnVuY3Rpb24odGFicmVmKXsNCgkJdmFyIHN1YmNvbnRlbnRpZD10YWJyZWYuZ2V0QXR0cmlidXRlKCJyZWwiKSAvL0dldCBpZCBvZiBzdWJjb250ZW50IHRvIGV4cGFuZA0KCQkvL0dldCAicmV2IiBhdHRyIGFzIGEgc3RyaW5nIG9mIElEcyBpbiB0aGUgZm9ybWF0ICIsam9obixnZW9yZ2UsdHJleSxldGMsIiB0byBlYXNpbHkgc2VhcmNoIHRocm91Z2gNCgkJdmFyIGFzc29jaWF0ZWRyZXZpZHM9KHRhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpKT8gIiwiK3RhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpLnJlcGxhY2UoL1xzKy8sICIiKSsiLCIgOiAiIg0KCQl0aGlzLmV4cGFuZHN1YmNvbnRlbnQoc3ViY29udGVudGlkKQ0KCQl0aGlzLmV4cGFuZHJldmNvbnRlbnQoYXNzb2NpYXRlZHJldmlkcykNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMudGFicy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIGFsbCB0YWJzLCBhbmQgYXNzaWduIG9ubHkgdGhlIHNlbGVjdGVkIHRhYiB0aGUgQ1NTIGNsYXNzICJzZWxlY3RlZCINCgkJCXRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT0odGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIik9PXN1YmNvbnRlbnRpZCk%2FICJzZWxlY3RlZCIgOiAiIg0KCQl9DQoJCWlmICh0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlKSAvL2lmIHBlcnNpc3RlbmNlIGVuYWJsZWQsIHNhdmUgc2VsZWN0ZWQgdGFiIHBvc2l0aW9uKGludCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlkZHRhYmNvbnRlbnQuc2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQsIHRhYnJlZi50YWJwb3NpdGlvbikNCgkJdGhpcy5zZXRjdXJyZW50dGFiaW5kZXgodGFicmVmLnRhYnBvc2l0aW9uKSAvL3JlbWVtYmVyIHBvc2l0aW9uIG9mIHNlbGVjdGVkIHRhYiB3aXRoaW4gaG90dGFic3Bvc2l0aW9uc1tdIGFycmF5DQoJfSwNCg0KCWV4cGFuZHN1YmNvbnRlbnQ6ZnVuY3Rpb24oc3ViY29udGVudGlkKXsNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMuc3ViY29udGVudGlkcy5sZW5ndGg7IGkrKyl7DQoJCQl2YXIgc3ViY29udGVudD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0aGlzLnN1YmNvbnRlbnRpZHNbaV0pIC8vY2FjaGUgY3VycmVudCBzdWJjb250ZW50IG9iaiAoaW4gZm9yIGxvb3ApDQoJCQlzdWJjb250ZW50LnN0eWxlLmRpc3BsYXk9KHN1YmNvbnRlbnQuaWQ9PXN1YmNvbnRlbnRpZCk%2FICJibG9jayIgOiAibm9uZSIgLy8ic2hvdyIgb3IgaGlkZSBzdWIgY29udGVudCBiYXNlZCBvbiBtYXRjaGluZyBpZCBhdHRyIHZhbHVlDQoJCX0NCgl9LA0KDQoJZXhwYW5kcmV2Y29udGVudDpmdW5jdGlvbihhc3NvY2lhdGVkcmV2aWRzKXsNCgkJdmFyIGFsbHJldmlkcz10aGlzLnJldmNvbnRlbnRpZHMNCgkJZm9yICh2YXIgaT0wOyBpPGFsbHJldmlkcy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIHJldiBhdHRyaWJ1dGVzIGZvciBhbGwgdGFicyBpbiB0aGlzIHRhYiBpbnRlcmZhY2UNCgkJCS8vaWYgYW55IHZhbHVlcyBzdG9yZWQgd2l0aGluIGFzc29jaWF0ZWRyZXZpZHMgbWF0Y2hlcyBvbmUgd2l0aGluIGFsbHJldmlkcywgZXhwYW5kIHRoYXQgRElWLCBvdGhlcndpc2UsIGNvbnRyYWN0IGl0DQoJCQlkb2N1bWVudC5nZXRFbGVtZW50QnlJZChhbGxyZXZpZHNbaV0pLnN0eWxlLmRpc3BsYXk9KGFzc29jaWF0ZWRyZXZpZHMuaW5kZXhPZigiLCIrYWxscmV2aWRzW2ldKyIsIikhPS0xKT8gImJsb2NrIiA6ICJub25lIg0KCQl9DQoJfSwNCg0KCXNldGN1cnJlbnR0YWJpbmRleDpmdW5jdGlvbih0YWJwb3NpdGlvbil7IC8vc3RvcmUgY3VycmVudCBwb3NpdGlvbiBvZiB0YWIgKHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkpDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoOyBpKyspew0KCQkJaWYgKHRhYnBvc2l0aW9uPT10aGlzLmhvdHRhYnNwb3NpdGlvbnNbaV0pew0KCQkJCXRoaXMuY3VycmVudFRhYkluZGV4PWkNCgkJCQlicmVhaw0KCQkJfQ0KCQl9DQoJfSwNCg0KCWF1dG9ydW46ZnVuY3Rpb24oKXsgLy9mdW5jdGlvbiB0byBhdXRvIGN5Y2xlIHRocm91Z2ggYW5kIHNlbGVjdCB0YWJzIGJhc2VkIG9uIGEgc2V0IGludGVydmFsDQoJCXRoaXMuY3ljbGVpdCgnbmV4dCcsIHRydWUpDQoJfSwNCg0KCWNhbmNlbGF1dG9ydW46ZnVuY3Rpb24oKXsNCgkJaWYgKHR5cGVvZiB0aGlzLmF1dG9ydW50aW1lciE9InVuZGVmaW5lZCIpDQoJCQljbGVhckludGVydmFsKHRoaXMuYXV0b3J1bnRpbWVyKQ0KCX0sDQoNCglpbml0OmZ1bmN0aW9uKGF1dG9tb2RlcGVyaW9kKXsNCgkJdmFyIHBlcnNpc3RlZHRhYj1kZHRhYmNvbnRlbnQuZ2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQpIC8vZ2V0IHBvc2l0aW9uIG9mIHBlcnNpc3RlZCB0YWIgKGFwcGxpY2FibGUgaWYgcGVyc2lzdGVuY2UgaXMgZW5hYmxlZCkNCgkJdmFyIHNlbGVjdGVkdGFiPS0xIC8vQ3VycmVudGx5IHNlbGVjdGVkIHRhYiBpbmRleCAoLTEgbWVhbmluZyBub25lKQ0KCQl2YXIgc2VsZWN0ZWR0YWJmcm9tdXJsPXRoaXMudXJscGFyYW1zZWxlY3QodGhpcy50YWJpbnRlcmZhY2VpZCkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXggZnJvbTogdGFiY29udGVudC5odG0%2FdGFiaW50ZXJmYWNlaWQ9aW5kZXgNCgkJdGhpcy5hdXRvbW9kZXBlcmlvZD1hdXRvbW9kZXBlcmlvZCB8fCAwDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLnRhYnMubGVuZ3RoOyBpKyspew0KCQkJdGhpcy50YWJzW2ldLnRhYnBvc2l0aW9uPWkgLy9yZW1lbWJlciBwb3NpdGlvbiBvZiB0YWIgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIikpew0KCQkJCXZhciB0YWJpbnN0YW5jZT10aGlzDQoJCQkJdGhpcy5ob3R0YWJzcG9zaXRpb25zW3RoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGhdPWkgLy9zdG9yZSBwb3NpdGlvbiBvZiAiaG90IiB0YWIgKCJyZWwiIGF0dHIgZGVmaW5lZCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQkJdGhpcy5zdWJjb250ZW50aWRzW3RoaXMuc3ViY29udGVudGlkcy5sZW5ndGhdPXRoaXMudGFic1tpXS5nZXRBdHRyaWJ1dGUoInJlbCIpIC8vc3RvcmUgaWQgb2Ygc3ViIGNvbnRlbnQgKCJyZWwiIGF0dHIgdmFsdWUpDQoJCQkJdGhpcy50YWJzW2ldLm9uY2xpY2s9ZnVuY3Rpb24oKXsNCgkJCQkJdGFiaW5zdGFuY2UuZXhwYW5kdGFiKHRoaXMpDQoJCQkJCXRhYmluc3RhbmNlLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCQkJCXJldHVybiBmYWxzZQ0KCQkJCX0NCgkJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmV2IikpeyAvL2lmICJyZXYiIGF0dHIgZGVmaW5lZCwgc3RvcmUgZWFjaCB2YWx1ZSB3aXRoaW4gInJldiIgYXMgYW4gYXJyYXkgZWxlbWVudA0KCQkJCQl0aGlzLnJldmNvbnRlbnRpZHM9dGhpcy5yZXZjb250ZW50aWRzLmNvbmNhdCh0aGlzLnRhYnNbaV0uZ2V0QXR0cmlidXRlKCJyZXYiKS5zcGxpdCgvXHMqLFxzKi8pKQ0KCQkJCX0NCgkJCQlpZiAoc2VsZWN0ZWR0YWJmcm9tdXJsPT1pIHx8IHRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHBhcnNlSW50KHBlcnNpc3RlZHRhYik9PWkgfHwgIXRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT09InNlbGVjdGVkIil7DQoJCQkJCXNlbGVjdGVkdGFiPWkgLy9TZWxlY3RlZCB0YWIgaW5kZXgsIGlmIGZvdW5kDQoJCQkJfQ0KCQkJfQ0KCQl9IC8vRU5EIGZvciBsb29wDQoJCWlmIChzZWxlY3RlZHRhYiE9LTEpIC8vaWYgYSB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIHRhYiBpbmRleCBpcyBmb3VuZA0KCQkJdGhpcy5leHBhbmR0YWIodGhpcy50YWJzW3NlbGVjdGVkdGFiXSkgLy9leHBhbmQgc2VsZWN0ZWQgdGFiIChlaXRoZXIgZnJvbSBVUkwgcGFyYW1ldGVyLCBwZXJzaXN0ZW50IGZlYXR1cmUsIG9yIGNsYXNzPSJzZWxlY3RlZCIgY2xhc3MpDQoJCWVsc2UgLy9pZiBubyB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIGluZGV4IGZvdW5kDQoJCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zWzBdXSkgLy9KdXN0IHNlbGVjdCBmaXJzdCB0YWIgdGhhdCBjb250YWlucyBhICJyZWwiIGF0dHINCgkJaWYgKHBhcnNlSW50KHRoaXMuYXV0b21vZGVwZXJpb2QpPjUwMCAmJiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoPjEpew0KCQkJdGhpcy5hdXRvcnVudGltZXI9c2V0SW50ZXJ2YWwoZnVuY3Rpb24oKXt0YWJpbnN0YW5jZS5hdXRvcnVuKCl9LCB0aGlzLmF1dG9tb2RlcGVyaW9kKQ0KCQl9DQoJfSAvL0VORCBpbnQoKSBmdW5jdGlvbg0KDQp9IC8vRU5EIFByb3RvdHlwZSBhc3NpZ25tZW50"
   }).appendChild(document.createTextNode(
     '/***********************************************\n' +
-    '* Tab Content script v2.2- Ã‚Â© Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    '* Tab Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     '* This notice MUST stay intact for legal use\n' +
     '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
     '***********************************************/\n'
@@ -6137,7 +6133,7 @@ function createStatWindow() {
     "data:application/x-javascript;base64,Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUgbGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3dGgsIDA3IHRvIHZlcnNpb24gMi4wLiBDb250YWlucyBudW1lcm91cyBpbXByb3ZlbWVudHM6DQovLyAgIC1BZGRlZCBBdXRvIE1vZGU6IFNjcmlwdCBhdXRvIHJvdGF0ZXMgdGhlIHRhYnMgYmFzZWQgb24gYW4gaW50ZXJ2YWwsIHVudGlsIGEgdGFiIGlzIGV4cGxpY2l0bHkgc2VsZWN0ZWQNCi8vICAgLUFiaWxpdHkgdG8gZXhwYW5kL2NvbnRyYWN0IGFyYml0cmFyeSBESVZzIG9uIHRoZSBwYWdlIGFzIHRoZSB0YWJiZWQgY29udGVudCBpcyBleHBhbmRlZC8gY29udHJhY3RlZA0KLy8gICAtQWJpbGl0eSB0byBkeW5hbWljYWxseSBzZWxlY3QgYSB0YWIgZWl0aGVyIGJhc2VkIG9uIGl0cyBwb3NpdGlvbiB3aXRoaW4gaXRzIHBlZXJzLCBvciBpdHMgSUQgYXR0cmlidXRlIChnaXZlIHRoZSB0YXJnZXQgdGFiIG9uZSAxc3QpDQovLyAgIC1BYmlsaXR5IHRvIHNldCB3aGVyZSB0aGUgQ1NTIGNsYXNzbmFtZSAic2VsZWN0ZWQiIGdldCBhc3NpZ25lZC0gZWl0aGVyIHRvIHRoZSB0YXJnZXQgdGFiJ3MgbGluayAoIkEiKSwgb3IgaXRzIHBhcmVudCBjb250YWluZXINCi8vKiogVXBkYXRlZCBGZWIgMTh0aCwgMDggdG8gdmVyc2lvbiAyLjE6IEFkZHMgYSAidGFiaW5zdGFuY2UuY3ljbGVpdChkaXIpIiBtZXRob2QgdG8gY3ljbGUgZm9yd2FyZCBvciBiYWNrd2FyZCBiZXR3ZWVuIHRhYnMgZHluYW1pY2FsbHkNCi8vKiogVXBkYXRlZCBBcHJpbCA4dGgsIDA4IHRvIHZlcnNpb24gMi4yOiBBZGRzIHN1cHBvcnQgZm9yIGV4cGFuZGluZyBhIHRhYiB1c2luZyBhIFVSTCBwYXJhbWV0ZXIgKGllOiBodHRwOi8vbXlzaXRlLmNvbS90YWJjb250ZW50Lmh0bT90YWJpbnRlcmZhY2VpZD0wKSANCg0KLy8vL05PIE5FRUQgVE8gRURJVCBCRUxPVy8vLy8vLy8vLy8vLy8vLy8vLy8vLy8vLw0KDQpmdW5jdGlvbiBkZHRhYmNvbnRlbnQodGFiaW50ZXJmYWNlaWQpew0KCXRoaXMudGFiaW50ZXJmYWNlaWQ9dGFiaW50ZXJmYWNlaWQgLy9JRCBvZiBUYWIgTWVudSBtYWluIGNvbnRhaW5lcg0KCXRoaXMudGFicz1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0YWJpbnRlcmZhY2VpZCkuZ2V0RWxlbWVudHNCeVRhZ05hbWUoImEiKSAvL0dldCBhbGwgdGFiIGxpbmtzIHdpdGhpbiBjb250YWluZXINCgl0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlPXRydWUNCgl0aGlzLmhvdHRhYnNwb3NpdGlvbnM9W10gLy9BcnJheSB0byBzdG9yZSBwb3NpdGlvbiBvZiB0YWJzIHRoYXQgaGF2ZSBhICJyZWwiIGF0dHIgZGVmaW5lZCwgcmVsYXRpdmUgdG8gYWxsIHRhYiBsaW5rcywgd2l0aGluIGNvbnRhaW5lcg0KCXRoaXMuY3VycmVudFRhYkluZGV4PTAgLy9JbmRleCBvZiBjdXJyZW50bHkgc2VsZWN0ZWQgaG90IHRhYiAodGFiIHdpdGggc3ViIGNvbnRlbnQpIHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkNCgl0aGlzLnN1YmNvbnRlbnRpZHM9W10gLy9BcnJheSB0byBzdG9yZSBpZHMgb2YgdGhlIHN1YiBjb250ZW50cyAoInJlbCIgYXR0ciB2YWx1ZXMpDQoJdGhpcy5yZXZjb250ZW50aWRzPVtdIC8vQXJyYXkgdG8gc3RvcmUgaWRzIG9mIGFyYml0cmFyeSBjb250ZW50cyB0byBleHBhbmQvY29udGFjdCBhcyB3ZWxsICgicmV2IiBhdHRyIHZhbHVlcykNCgl0aGlzLnNlbGVjdGVkQ2xhc3NUYXJnZXQ9ImxpbmsiIC8va2V5d29yZCB0byBpbmRpY2F0ZSB3aGljaCB0YXJnZXQgZWxlbWVudCB0byBhc3NpZ24gInNlbGVjdGVkIiBDU1MgY2xhc3MgKCJsaW5rcGFyZW50IiBvciAibGluayIpDQp9DQoNCmRkdGFiY29udGVudC5nZXRDb29raWU9ZnVuY3Rpb24oTmFtZSl7IA0KCXZhciByZT1uZXcgUmVnRXhwKE5hbWUrIj1bXjtdKyIsICJpIik7IC8vY29uc3RydWN0IFJFIHRvIHNlYXJjaCBmb3IgdGFyZ2V0IG5hbWUvdmFsdWUgcGFpcg0KCWlmIChkb2N1bWVudC5jb29raWUubWF0Y2gocmUpKSAvL2lmIGNvb2tpZSBmb3VuZA0KCQlyZXR1cm4gZG9jdW1lbnQuY29va2llLm1hdGNoKHJlKVswXS5zcGxpdCgiPSIpWzFdIC8vcmV0dXJuIGl0cyB2YWx1ZQ0KCXJldHVybiAiIg0KfQ0KDQpkZHRhYmNvbnRlbnQuc2V0Q29va2llPWZ1bmN0aW9uKG5hbWUsIHZhbHVlKXsNCglkb2N1bWVudC5jb29raWUgPSBuYW1lKyI9Iit2YWx1ZSsiO3BhdGg9LyIgLy9jb29raWUgdmFsdWUgaXMgZG9tYWluIHdpZGUgKHBhdGg9LykNCn0NCg0KZGR0YWJjb250ZW50LnByb3RvdHlwZT17DQoNCglleHBhbmRpdDpmdW5jdGlvbih0YWJpZF9vcl9wb3NpdGlvbil7IC8vUFVCTElDIGZ1bmN0aW9uIHRvIHNlbGVjdCBhIHRhYiBlaXRoZXIgYnkgaXRzIElEIG9yIHBvc2l0aW9uKGludCkgd2l0aGluIGl0cyBwZWVycw0KCQl0aGlzLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCXZhciB0YWJyZWY9IiINCgkJdHJ5ew0KCQkJaWYgKHR5cGVvZiB0YWJpZF9vcl9wb3NpdGlvbj09InN0cmluZyIgJiYgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQodGFiaWRfb3JfcG9zaXRpb24pLmdldEF0dHJpYnV0ZSgicmVsIikpIC8vaWYgc3BlY2lmaWVkIHRhYiBjb250YWlucyAicmVsIiBhdHRyDQoJCQkJdGFicmVmPWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKHRhYmlkX29yX3Bvc2l0aW9uKQ0KCQkJZWxzZSBpZiAocGFyc2VJbnQodGFiaWRfb3JfcG9zaXRpb24pIT1OYU4gJiYgdGhpcy50YWJzW3RhYmlkX29yX3Bvc2l0aW9uXS5nZXRBdHRyaWJ1dGUoInJlbCIpKSAvL2lmIHNwZWNpZmllZCB0YWIgY29udGFpbnMgInJlbCIgYXR0cg0KCQkJCXRhYnJlZj10aGlzLnRhYnNbdGFiaWRfb3JfcG9zaXRpb25dDQoJCX0NCgkJY2F0Y2goZXJyKXthbGVydCgiSW52YWxpZCBUYWIgSUQgb3IgcG9zaXRpb24gZW50ZXJlZCEiKX0NCgkJaWYgKHRhYnJlZiE9IiIpIC8vaWYgYSB2YWxpZCB0YWIgaXMgZm91bmQgYmFzZWQgb24gZnVuY3Rpb24gcGFyYW1ldGVyDQoJCQl0aGlzLmV4cGFuZHRhYih0YWJyZWYpIC8vZXhwYW5kIHRoaXMgdGFiDQoJfSwNCg0KCWN5Y2xlaXQ6ZnVuY3Rpb24oZGlyLCBhdXRvcnVuKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gbW92ZSBmb3dhcmQgb3IgYmFja3dhcmRzIHRocm91Z2ggZWFjaCBob3QgdGFiICh0YWJpbnN0YW5jZS5jeWNsZWl0KCdmb3dhcmQvYmFjaycpICkNCgkJaWYgKGRpcj09Im5leHQiKXsNCgkJCXZhciBjdXJyZW50VGFiSW5kZXg9KHRoaXMuY3VycmVudFRhYkluZGV4PHRoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGgtMSk%2FIHRoaXMuY3VycmVudFRhYkluZGV4KzEgOiAwDQoJCX0NCgkJZWxzZSBpZiAoZGlyPT0icHJldiIpew0KCQkJdmFyIGN1cnJlbnRUYWJJbmRleD0odGhpcy5jdXJyZW50VGFiSW5kZXg%2BMCk%2FIHRoaXMuY3VycmVudFRhYkluZGV4LTEgOiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoLTENCgkJfQ0KCQlpZiAodHlwZW9mIGF1dG9ydW49PSJ1bmRlZmluZWQiKSAvL2lmIGN5Y2xlaXQoKSBpcyBiZWluZyBjYWxsZWQgYnkgdXNlciwgdmVyc3VzIGF1dG9ydW4oKSBmdW5jdGlvbg0KCQkJdGhpcy5jYW5jZWxhdXRvcnVuKCkgLy9zdG9wIGF1dG8gY3ljbGluZyBvZiB0YWJzIChpZiBydW5uaW5nKQ0KCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zW2N1cnJlbnRUYWJJbmRleF1dKQ0KCX0sDQoNCglzZXRwZXJzaXN0OmZ1bmN0aW9uKGJvb2wpeyAvL1BVQkxJQyBmdW5jdGlvbiB0byB0b2dnbGUgcGVyc2lzdGVuY2UgZmVhdHVyZQ0KCQkJdGhpcy5lbmFibGV0YWJwZXJzaXN0ZW5jZT1ib29sDQoJfSwNCg0KCXNldHNlbGVjdGVkQ2xhc3NUYXJnZXQ6ZnVuY3Rpb24ob2Jqc3RyKXsgLy9QVUJMSUMgZnVuY3Rpb24gdG8gc2V0IHdoaWNoIHRhcmdldCBlbGVtZW50IHRvIGFzc2lnbiAic2VsZWN0ZWQiIENTUyBjbGFzcyAoImxpbmtwYXJlbnQiIG9yICJsaW5rIikNCgkJdGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PW9ianN0ciB8fCAibGluayINCgl9LA0KDQoJZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldDpmdW5jdGlvbih0YWJyZWYpeyAvL1JldHVybnMgdGFyZ2V0IGVsZW1lbnQgdG8gYXNzaWduICJzZWxlY3RlZCIgQ1NTIGNsYXNzIHRvDQoJCXJldHVybiAodGhpcy5zZWxlY3RlZENsYXNzVGFyZ2V0PT0oImxpbmtwYXJlbnQiLnRvTG93ZXJDYXNlKCkpKT8gdGFicmVmLnBhcmVudE5vZGUgOiB0YWJyZWYNCgl9LA0KDQoJdXJscGFyYW1zZWxlY3Q6ZnVuY3Rpb24odGFiaW50ZXJmYWNlaWQpew0KCQl2YXIgcmVzdWx0PXdpbmRvdy5sb2NhdGlvbi5zZWFyY2gubWF0Y2gobmV3IFJlZ0V4cCh0YWJpbnRlcmZhY2VpZCsiPShcXGQrKSIsICJpIikpIC8vY2hlY2sgZm9yICI%2FdGFiaW50ZXJmYWNlaWQ9MiIgaW4gVVJMDQoJCXJldHVybiAocmVzdWx0PT1udWxsKT8gbnVsbCA6IHBhcnNlSW50KFJlZ0V4cC4kMSkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXgsIHdoZXJlIGluZGV4IChpbnQpIGlzIHRoZSBzZWxlY3RlZCB0YWIncyBpbmRleA0KCX0sDQoNCglleHBhbmR0YWI6ZnVuY3Rpb24odGFicmVmKXsNCgkJdmFyIHN1YmNvbnRlbnRpZD10YWJyZWYuZ2V0QXR0cmlidXRlKCJyZWwiKSAvL0dldCBpZCBvZiBzdWJjb250ZW50IHRvIGV4cGFuZA0KCQkvL0dldCAicmV2IiBhdHRyIGFzIGEgc3RyaW5nIG9mIElEcyBpbiB0aGUgZm9ybWF0ICIsam9obixnZW9yZ2UsdHJleSxldGMsIiB0byBlYXNpbHkgc2VhcmNoIHRocm91Z2gNCgkJdmFyIGFzc29jaWF0ZWRyZXZpZHM9KHRhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpKT8gIiwiK3RhYnJlZi5nZXRBdHRyaWJ1dGUoInJldiIpLnJlcGxhY2UoL1xzKy8sICIiKSsiLCIgOiAiIg0KCQl0aGlzLmV4cGFuZHN1YmNvbnRlbnQoc3ViY29udGVudGlkKQ0KCQl0aGlzLmV4cGFuZHJldmNvbnRlbnQoYXNzb2NpYXRlZHJldmlkcykNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMudGFicy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIGFsbCB0YWJzLCBhbmQgYXNzaWduIG9ubHkgdGhlIHNlbGVjdGVkIHRhYiB0aGUgQ1NTIGNsYXNzICJzZWxlY3RlZCINCgkJCXRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT0odGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIik9PXN1YmNvbnRlbnRpZCk%2FICJzZWxlY3RlZCIgOiAiIg0KCQl9DQoJCWlmICh0aGlzLmVuYWJsZXRhYnBlcnNpc3RlbmNlKSAvL2lmIHBlcnNpc3RlbmNlIGVuYWJsZWQsIHNhdmUgc2VsZWN0ZWQgdGFiIHBvc2l0aW9uKGludCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlkZHRhYmNvbnRlbnQuc2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQsIHRhYnJlZi50YWJwb3NpdGlvbikNCgkJdGhpcy5zZXRjdXJyZW50dGFiaW5kZXgodGFicmVmLnRhYnBvc2l0aW9uKSAvL3JlbWVtYmVyIHBvc2l0aW9uIG9mIHNlbGVjdGVkIHRhYiB3aXRoaW4gaG90dGFic3Bvc2l0aW9uc1tdIGFycmF5DQoJfSwNCg0KCWV4cGFuZHN1YmNvbnRlbnQ6ZnVuY3Rpb24oc3ViY29udGVudGlkKXsNCgkJZm9yICh2YXIgaT0wOyBpPHRoaXMuc3ViY29udGVudGlkcy5sZW5ndGg7IGkrKyl7DQoJCQl2YXIgc3ViY29udGVudD1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0aGlzLnN1YmNvbnRlbnRpZHNbaV0pIC8vY2FjaGUgY3VycmVudCBzdWJjb250ZW50IG9iaiAoaW4gZm9yIGxvb3ApDQoJCQlzdWJjb250ZW50LnN0eWxlLmRpc3BsYXk9KHN1YmNvbnRlbnQuaWQ9PXN1YmNvbnRlbnRpZCk%2FICJibG9jayIgOiAibm9uZSIgLy8ic2hvdyIgb3IgaGlkZSBzdWIgY29udGVudCBiYXNlZCBvbiBtYXRjaGluZyBpZCBhdHRyIHZhbHVlDQoJCX0NCgl9LA0KDQoJZXhwYW5kcmV2Y29udGVudDpmdW5jdGlvbihhc3NvY2lhdGVkcmV2aWRzKXsNCgkJdmFyIGFsbHJldmlkcz10aGlzLnJldmNvbnRlbnRpZHMNCgkJZm9yICh2YXIgaT0wOyBpPGFsbHJldmlkcy5sZW5ndGg7IGkrKyl7IC8vTG9vcCB0aHJvdWdoIHJldiBhdHRyaWJ1dGVzIGZvciBhbGwgdGFicyBpbiB0aGlzIHRhYiBpbnRlcmZhY2UNCgkJCS8vaWYgYW55IHZhbHVlcyBzdG9yZWQgd2l0aGluIGFzc29jaWF0ZWRyZXZpZHMgbWF0Y2hlcyBvbmUgd2l0aGluIGFsbHJldmlkcywgZXhwYW5kIHRoYXQgRElWLCBvdGhlcndpc2UsIGNvbnRyYWN0IGl0DQoJCQlkb2N1bWVudC5nZXRFbGVtZW50QnlJZChhbGxyZXZpZHNbaV0pLnN0eWxlLmRpc3BsYXk9KGFzc29jaWF0ZWRyZXZpZHMuaW5kZXhPZigiLCIrYWxscmV2aWRzW2ldKyIsIikhPS0xKT8gImJsb2NrIiA6ICJub25lIg0KCQl9DQoJfSwNCg0KCXNldGN1cnJlbnR0YWJpbmRleDpmdW5jdGlvbih0YWJwb3NpdGlvbil7IC8vc3RvcmUgY3VycmVudCBwb3NpdGlvbiBvZiB0YWIgKHdpdGhpbiBob3R0YWJzcG9zaXRpb25zW10gYXJyYXkpDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoOyBpKyspew0KCQkJaWYgKHRhYnBvc2l0aW9uPT10aGlzLmhvdHRhYnNwb3NpdGlvbnNbaV0pew0KCQkJCXRoaXMuY3VycmVudFRhYkluZGV4PWkNCgkJCQlicmVhaw0KCQkJfQ0KCQl9DQoJfSwNCg0KCWF1dG9ydW46ZnVuY3Rpb24oKXsgLy9mdW5jdGlvbiB0byBhdXRvIGN5Y2xlIHRocm91Z2ggYW5kIHNlbGVjdCB0YWJzIGJhc2VkIG9uIGEgc2V0IGludGVydmFsDQoJCXRoaXMuY3ljbGVpdCgnbmV4dCcsIHRydWUpDQoJfSwNCg0KCWNhbmNlbGF1dG9ydW46ZnVuY3Rpb24oKXsNCgkJaWYgKHR5cGVvZiB0aGlzLmF1dG9ydW50aW1lciE9InVuZGVmaW5lZCIpDQoJCQljbGVhckludGVydmFsKHRoaXMuYXV0b3J1bnRpbWVyKQ0KCX0sDQoNCglpbml0OmZ1bmN0aW9uKGF1dG9tb2RlcGVyaW9kKXsNCgkJdmFyIHBlcnNpc3RlZHRhYj1kZHRhYmNvbnRlbnQuZ2V0Q29va2llKHRoaXMudGFiaW50ZXJmYWNlaWQpIC8vZ2V0IHBvc2l0aW9uIG9mIHBlcnNpc3RlZCB0YWIgKGFwcGxpY2FibGUgaWYgcGVyc2lzdGVuY2UgaXMgZW5hYmxlZCkNCgkJdmFyIHNlbGVjdGVkdGFiPS0xIC8vQ3VycmVudGx5IHNlbGVjdGVkIHRhYiBpbmRleCAoLTEgbWVhbmluZyBub25lKQ0KCQl2YXIgc2VsZWN0ZWR0YWJmcm9tdXJsPXRoaXMudXJscGFyYW1zZWxlY3QodGhpcy50YWJpbnRlcmZhY2VpZCkgLy9yZXR1cm5zIG51bGwgb3IgaW5kZXggZnJvbTogdGFiY29udGVudC5odG0%2FdGFiaW50ZXJmYWNlaWQ9aW5kZXgNCgkJdGhpcy5hdXRvbW9kZXBlcmlvZD1hdXRvbW9kZXBlcmlvZCB8fCAwDQoJCWZvciAodmFyIGk9MDsgaTx0aGlzLnRhYnMubGVuZ3RoOyBpKyspew0KCQkJdGhpcy50YWJzW2ldLnRhYnBvc2l0aW9uPWkgLy9yZW1lbWJlciBwb3NpdGlvbiBvZiB0YWIgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmVsIikpew0KCQkJCXZhciB0YWJpbnN0YW5jZT10aGlzDQoJCQkJdGhpcy5ob3R0YWJzcG9zaXRpb25zW3RoaXMuaG90dGFic3Bvc2l0aW9ucy5sZW5ndGhdPWkgLy9zdG9yZSBwb3NpdGlvbiBvZiAiaG90IiB0YWIgKCJyZWwiIGF0dHIgZGVmaW5lZCkgcmVsYXRpdmUgdG8gaXRzIHBlZXJzDQoJCQkJdGhpcy5zdWJjb250ZW50aWRzW3RoaXMuc3ViY29udGVudGlkcy5sZW5ndGhdPXRoaXMudGFic1tpXS5nZXRBdHRyaWJ1dGUoInJlbCIpIC8vc3RvcmUgaWQgb2Ygc3ViIGNvbnRlbnQgKCJyZWwiIGF0dHIgdmFsdWUpDQoJCQkJdGhpcy50YWJzW2ldLm9uY2xpY2s9ZnVuY3Rpb24oKXsNCgkJCQkJdGFiaW5zdGFuY2UuZXhwYW5kdGFiKHRoaXMpDQoJCQkJCXRhYmluc3RhbmNlLmNhbmNlbGF1dG9ydW4oKSAvL3N0b3AgYXV0byBjeWNsaW5nIG9mIHRhYnMgKGlmIHJ1bm5pbmcpDQoJCQkJCXJldHVybiBmYWxzZQ0KCQkJCX0NCgkJCQlpZiAodGhpcy50YWJzW2ldLmdldEF0dHJpYnV0ZSgicmV2IikpeyAvL2lmICJyZXYiIGF0dHIgZGVmaW5lZCwgc3RvcmUgZWFjaCB2YWx1ZSB3aXRoaW4gInJldiIgYXMgYW4gYXJyYXkgZWxlbWVudA0KCQkJCQl0aGlzLnJldmNvbnRlbnRpZHM9dGhpcy5yZXZjb250ZW50aWRzLmNvbmNhdCh0aGlzLnRhYnNbaV0uZ2V0QXR0cmlidXRlKCJyZXYiKS5zcGxpdCgvXHMqLFxzKi8pKQ0KCQkJCX0NCgkJCQlpZiAoc2VsZWN0ZWR0YWJmcm9tdXJsPT1pIHx8IHRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHBhcnNlSW50KHBlcnNpc3RlZHRhYik9PWkgfHwgIXRoaXMuZW5hYmxldGFicGVyc2lzdGVuY2UgJiYgc2VsZWN0ZWR0YWI9PS0xICYmIHRoaXMuZ2V0c2VsZWN0ZWRDbGFzc1RhcmdldCh0aGlzLnRhYnNbaV0pLmNsYXNzTmFtZT09InNlbGVjdGVkIil7DQoJCQkJCXNlbGVjdGVkdGFiPWkgLy9TZWxlY3RlZCB0YWIgaW5kZXgsIGlmIGZvdW5kDQoJCQkJfQ0KCQkJfQ0KCQl9IC8vRU5EIGZvciBsb29wDQoJCWlmIChzZWxlY3RlZHRhYiE9LTEpIC8vaWYgYSB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIHRhYiBpbmRleCBpcyBmb3VuZA0KCQkJdGhpcy5leHBhbmR0YWIodGhpcy50YWJzW3NlbGVjdGVkdGFiXSkgLy9leHBhbmQgc2VsZWN0ZWQgdGFiIChlaXRoZXIgZnJvbSBVUkwgcGFyYW1ldGVyLCBwZXJzaXN0ZW50IGZlYXR1cmUsIG9yIGNsYXNzPSJzZWxlY3RlZCIgY2xhc3MpDQoJCWVsc2UgLy9pZiBubyB2YWxpZCBkZWZhdWx0IHNlbGVjdGVkIGluZGV4IGZvdW5kDQoJCQl0aGlzLmV4cGFuZHRhYih0aGlzLnRhYnNbdGhpcy5ob3R0YWJzcG9zaXRpb25zWzBdXSkgLy9KdXN0IHNlbGVjdCBmaXJzdCB0YWIgdGhhdCBjb250YWlucyBhICJyZWwiIGF0dHINCgkJaWYgKHBhcnNlSW50KHRoaXMuYXV0b21vZGVwZXJpb2QpPjUwMCAmJiB0aGlzLmhvdHRhYnNwb3NpdGlvbnMubGVuZ3RoPjEpew0KCQkJdGhpcy5hdXRvcnVudGltZXI9c2V0SW50ZXJ2YWwoZnVuY3Rpb24oKXt0YWJpbnN0YW5jZS5hdXRvcnVuKCl9LCB0aGlzLmF1dG9tb2RlcGVyaW9kKQ0KCQl9DQoJfSAvL0VORCBpbnQoKSBmdW5jdGlvbg0KDQp9IC8vRU5EIFByb3RvdHlwZSBhc3NpZ25tZW50"
   }).appendChild(document.createTextNode(
     '/***********************************************\n' +
-    '* Tab Content script v2.2- Ã‚Â© Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    '* Tab Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     '* This notice MUST stay intact for legal use\n' +
     '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
     '***********************************************/\n'
@@ -6696,7 +6692,7 @@ function customizeLayout() {
   refreshMWAPCSS();
 
   // Handle Unknown error
-  var unkError = xpathFirst('//div[@id="error_dialog" and contains(.,"Error")]');
+  var unkError = xpathFirst('//div[@class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable"]');
   if (unkError) {
     DEBUG('Error encountered, reloading...');
     window.location.reload();
@@ -6714,22 +6710,14 @@ function refreshMWAPCSS() {
     mwapCSS = cssElt.innerHTML;
 
   newCSS =  ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}' +
-            ' #mwapHide {margin:0; height:0; width: 0; display:none}' +
-            // Hide the Zynga bar
-            //' #mw_zbar iframe {margin:0; height:0; width: 0; display:none}' +
-            ' #mw_zbar {position:absolute; margin:0; height:0; width: 0; display:none}'  +
-			// Hide progress bar
-            ' #setup_progress_bar {margin:0; height:0; width: 0; display:none}'+
-            // Hide the email bar.
-            ' .fb_email_prof_header {margin:0; height:0; width: 0; display:none}' +
-            // Hide SMS Mobile link
-            ' .mw_sms {margin:0; height:0; width: 0; display:none}' +
+            (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '') +
+            // Hide the Zynga bar, progress bar, email bar, sms link
+            ' #mwapHide, #mw_zbar, #setup_progress_bar, .fb_email_prof_header, .mw_sms ' +
             // Hide action boxes
-            (isChecked('hideActionBox') ? ' .action_box_container {margin:0; height:0; width: 0; display:none}' : '' ) +
+            (isChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
             // Hide feature notice updates
-            (isChecked('hideNotice') ? ' .feature_update_notice {margin:0; height:0; width: 0; display:none}' : '' ) +
-            // Left align
-            (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '' );
+            (isChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
+            ' {position: absolute; margin:0; height:0; width: 0; display:none}';
 
   // If CSS has changed, update it
   if (newCSS != mwapCSS) cssElt.innerHTML = newCSS;
@@ -7156,116 +7144,120 @@ function customizeJobs() {
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
-  var i, reselectJob = false;
+  var reselectJob = false;
 
+  var masteredJobsCount = 0;
+  var jobsFound = 0;
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
-    var jobInfo = xpath('.//td[contains(@class,"job_name")]', jobTables[x]);
-    var energies = xpath('.//td[contains(@class,"job_energy")]', jobTables[x]);
-    var rewards = xpath('.//td[contains(@class,"job_reward")]', jobTables[x]);
-    var jobButton = xpath('.//td[contains(@class,"job_action")]', jobTables[x]);
-    var masteryLevel;
-    var masteredJobsCount = 0;
-    for (i = 0, j = 0, iLength = jobInfo.snapshotLength; i < iLength;) {
-      var jobName = jobInfo.snapshotItem(i).innerHTML.split('<br>')[0].trim();
+    var jobNames = xpath('.//td[@class="job_name" or @class="job_name_oneline job_no_border"]', jobTables[x]);
+    jobsFound +=  jobNames.snapshotLength;
+
+    for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
+      var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].trim();
+
+      // Skip this name if job row is not found
+      var jobRow = getJobRow (jobName);
+      if (!jobRow) continue;
+
+      // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
+      if (!jobMatch) { masteredJobsCount; continue; }
 
-      // Skip wrong job names fetched from Choice Point jobs in Bangkok (Mastery strings)
-      if (!jobMatch) {
-        // But compensate for BOSS jobs not in missions array
-        if (jobName == jobName.untag()) j++;
-        i++;
-        continue;
-      }
+      DEBUG('Job found: ' + missions[jobMatch][0]);
 
-      // Don't do all these if job isn't in missions array
-      if (!jobMatch) { i++; j++; continue }
+      var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
+      var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
+      var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
+      var jobAction = xpathFirst('.//td[contains(@class,"job_action")]', jobRow);
 
       // Determine available jobs
       if (isChecked('multipleJobs') &&
           GM_getValue('isRunning') === true) {
 
         // Ignore mastered jobs
-        if (jobInfo.snapshotItem(i).innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
+        if (jobInfo && jobInfo.innerHTML.match(/Level\s+(\d+)\s+Mastered/i)) {
           if (missions[jobMatch][9] == true) {
             masteredJobs[city][currentTab].push(jobMatch);
-            DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered (Level ' + masteryLevel + '). Adding to ignore list.');
+            DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered. Adding to ignore list.');
           }
-          masteryLevel = parseInt(RegExp.$1);
-          if (masteryLevel == 3) masteredJobsCount++;
+          masteredJobsCount++;
         }
 
         // Ignore locked jobs
-        if (jobButton.snapshotItem(j).innerHTML.indexOf('sexy_button_locked') >= 0 &&
-            jobButton.snapshotItem(j).innerHTML.indexOf('Help') == -1) {
+        if (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
+            jobAction.innerHTML.indexOf('Help') == -1) {
           DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
         } else {
           availableJobs[city][currentTab].push(jobMatch);
         }
       }
 
-      var costElt = xpathFirst('.//span[@class="bold_number"]', energies.snapshotItem(j));
-      var cost;
-      if (costElt)
-        cost = parseInt(costElt.innerHTML);
+      // Skip jobs with no mastery info
+      var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
+      if (!jobInfo) continue;
 
-      var expElt = xpathFirst('.//span[@class="bold_number"]', rewards.snapshotItem(j));
-      var reward;
-      if (expElt)
-        reward = parseInt(expElt.innerHTML);
-
-      var moneyElt = xpathFirst('.//span[@class="money"]/strong', rewards.snapshotItem(j));
-      var money;
-      if (moneyElt)
-        money = parseCash(moneyElt.innerHTML);
-
-      // Display ratio and timer
-      // FIXME: Do we need to check other elements within this IF block?
-      if (costElt /* && expElt && moneyElt*/) {
-        var ratio = Math.round(reward / cost * 100) / 100;
-
-        makeElement('br', costElt.parentNode);
-        makeElement('span', costElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
-
-        missions[jobMatch][6] = reward;
-        missions[jobMatch][7] = ratio;
-        missions[jobMatch][8] = cost;
-
-        if (moneyElt) {
-          var currency = cities[city][CITY_CASH_SYMBOL];
-          var mratio = makeCommaValue(Math.round(money / cost));
-
-          makeElement('span', moneyElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
-        }
-
-        // Keep track of the best & worst payoffs.
-        if (ratio > bestRatio) {
-          bestRatio = ratio;
-          bestJobs = [costElt];
-        } else if (ratio == bestRatio) {
-          bestJobs.push(costElt);
-        }
-        if (ratio < worstRatio) {
-          worstRatio = ratio;
-          worstJobs = [costElt];
-        } else if (ratio == worstRatio) {
-          worstJobs.push(costElt);
-        }
-
-        // Calculate time left for each job and display under the do job button
-        var timePerEnergy = isChecked('isManiac') ? 3 : 5;
-        timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
-        timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
-
-        if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
-        else               jobTimeLeftText = 'Time: 0 min';
-
-        makeElement('br', jobButton.snapshotItem(j));
-        makeElement('span', jobButton.snapshotItem(j), {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
+      // Tag the jobNames with "Mastery" if not mastered
+      if (jobInfo.innerHTML.match(/Mastery/i)) {
+        var mastElt = hideElement(makeElement('span',null));
+        mastElt.appendChild(document.createTextNode('Mastery'));
+        jobNames.snapshotItem(i).appendChild(mastElt);
       }
 
-      i++; j++;
+      var costElt = xpathFirst('.//span[@class="bold_number"]', jobCost);
+      var cost = parseInt(costElt.innerHTML);
+
+      var expElt = xpathFirst('.//span[@class="bold_number"]', jobReward);
+      var reward = parseInt(expElt.innerHTML);
+
+      var moneyElt = xpathFirst('.//span[@class="money"]/strong', jobReward);
+
+      // Display ratio and timer
+      var ratio = Math.round(reward / cost * 100) / 100;
+
+      makeElement('br', costElt.parentNode);
+      makeElement('span', costElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
+
+      missions[jobMatch][6] = reward;
+      missions[jobMatch][7] = ratio;
+      missions[jobMatch][8] = cost;
+
+      if (moneyElt) {
+        var money = parseCash(moneyElt.innerHTML);
+        var currency = cities[city][CITY_CASH_SYMBOL];
+        var mratio = makeCommaValue(Math.round(money / cost));
+
+        makeElement('span', moneyElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(' (' + currency + mratio + ')'));
+      }
+
+      // Keep track of the best & worst payoffs.
+      if (ratio > bestRatio) {
+        bestRatio = ratio;
+        bestJobs = [costElt];
+      } else if (ratio == bestRatio) {
+        bestJobs.push(costElt);
+      }
+      if (ratio < worstRatio) {
+        worstRatio = ratio;
+        worstJobs = [costElt];
+      } else if (ratio == worstRatio) {
+        worstJobs.push(costElt);
+      }
+
+      // Calculate time left for each job and display under the do job button
+      var timePerEnergy = isChecked('isManiac') ? 3 : 5;
+      timePerEnergy = isChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
+      timePerEnergy = isChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
+
+      if (cost > energy) jobTimeLeftText = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
+      else               jobTimeLeftText = 'Time: 0 min';
+
+      makeElement('br', jobAction);
+      makeElement('span', jobAction, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode(jobTimeLeftText));
     }
   }
+
+  // Set the job progress
+  jobMastery (innerPageElt);
 
   // Highlight the best and worst jobs.
   var elt;
@@ -7300,12 +7292,14 @@ function customizeJobs() {
   if (isChecked('multipleJobs') &&
       GM_getValue('isRunning') === true &&
       GM_getValue('selectTier') != '0.0') {
+
+    DEBUG('Jobs listed: ' + jobsFound + 'Jobs mastered: ' + masteredJobsCount);
     selectedTierValue = GM_getValue('selectTier').split('.');
     masteryCity = parseInt(selectedTierValue[0]);
     masteryTier = parseInt(selectedTierValue[1]);
     if (city == masteryCity &&
         masteryTier == currentTab &&
-        jobInfo.snapshotLength <= masteredJobsCount) {
+        jobsFound <= masteredJobsCount) {
       selectTier = cities[masteryCity][0] + ' - ' + missionTabs[masteryCity][masteryTier - 1];
       addToLog('info Icon', 'Tier ' + selectTier + ' is already mastered. Moving on to the next tier.');
 
@@ -7494,7 +7488,6 @@ function getJobRow(jobName, contextNode) {
     }
     rowElt = xpathFirst('.//table[@class="job_list"]//tr//td['+conTxt+']', contextNode);
     while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
-    DEBUG(rowElt.innerHTML);
   } catch(ex) {
       DEBUG (conTxt);
       addToLog('warning Icon', 'BUG DETECTED (getJobRow): ' + ex);
@@ -7585,54 +7578,10 @@ function popJob(){
   );
 }
 
-function jobProgress(element) {
-  var i;
-  if (isChecked('multipleJobs')) {
-    // Cycle jobs with the same ratio
-    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
-    var multiple_jobs_list = getSavedList('selectMissionMultiple');
-    var cycle_jobs = new Object();
-
-    // Group selected jobs by ratio
-    for (i = 0, iLength=multiple_jobs_list.length; i < iLength; ++i) {
-      var job = multiple_jobs_list[i];
-      var mission = missions[job];
-
-      // Put non-available jobs at the end of the queue
-      if (availableJobs[mission[4]][mission[3]] != null &&
-          availableJobs[mission[4]][mission[3]].indexOf(parseInt(job)) == -1) {
-        mission[7] = 0;
-      }
-
-      if (cycle_jobs[mission[7]] == null) {
-        cycle_jobs[mission[7]] = [];
-      }
-      cycle_jobs[mission[7]].push(multiple_jobs_list[i]);
-    }
-
-    // Rebuild the job list array
-    multiple_jobs_list = [];
-    for (i in cycle_jobs) {
-      if (cycle_jobs[i].length > 1) {
-        // Only cycle the current job's ratio group
-        if (missions[GM_getValue('selectMission', 1)][7] == i) {
-          cycle_jobs[i].push(cycle_jobs[i].shift());
-        }
-        for (var n = 0, nLength=cycle_jobs[i].length; n < nLength; ++n) {
-          multiple_jobs_list.push(cycle_jobs[i][n]);
-        }
-      } else {
-        multiple_jobs_list.push(cycle_jobs[i][0]);
-      }
-    }
-    setSavedList('selectMissionMultiple', multiple_jobs_list);
-
-    DEBUG('Exiting jobProgress function; multipleJobs is checked.');
-    return;
-  }
-
-  if (isChecked('repeatJob')) {
-    DEBUG('Exiting jobProgress function; repeatJob is checked.');
+// Set the next job to be mastered for mastery job options
+function jobMastery(element) {
+  if (isChecked('repeatJob') || isChecked('multipleJobs')) {
+    DEBUG('Exiting jobMastery function; multipleJobs / repeatJob is checked.');
     return;
   }
 
@@ -7641,6 +7590,10 @@ function jobProgress(element) {
   var jobno      = missions[selectMission][2];
   var tabno      = missions[selectMission][3];
   var cityno     = missions[selectMission][4];
+
+  DEBUG(city + ' ' + tabno);
+  if (city != cityno || !onJobTab(tabno)) return;
+
   DEBUG('Calculating progress for ' + currentJob + '.');
   var currentJobRow = getJobRow(currentJob, element);
 
@@ -7650,7 +7603,7 @@ function jobProgress(element) {
   if (currentJobRow && currentJobRow.innerHTML.match(/level (\d+)/i)) {
     tierLevel = RegExp.$1
   }
-  var tierJobs = $x('.//table[@class="job_list"]//tr/td[contains(@class,"job_name")]', element);
+  var tierJobs = $x('.//table[@class="job_list"]//tr/td[@class="job_name" or @class="job_name_oneline job_no_border"]', element);
   var tierPercent = 0;
   var jobCount = 0;
   tierJobs.forEach(
@@ -7659,7 +7612,10 @@ function jobProgress(element) {
         tierPercent += 100;
         jobCount++;
       } else if (f.innerHTML.match(/Mastery\s+(\d+)%/i)) {
+        DEBUG('Here!');
         tierPercent += parseInt(RegExp.$1);
+        jobCount++;
+      } else {
         jobCount++;
       }
     }
@@ -7711,7 +7667,7 @@ function jobProgress(element) {
           // Find the first unmastered job of this next tier.
           var findMastery = function(v, i, a) { return (a[i].innerHTML.indexOf('Mastery') > 0)? 1:0; };
           var nonMasteredJobs = tierJobs.filter(findMastery);
-          var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].trim();
+          var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].trim();
 
           // Handle pre-Bangkok job names
           if (nonMasteredJobs[0].innerHTML.match(/Asian Museum Break-in/))
@@ -7741,7 +7697,51 @@ function jobProgress(element) {
       addToLog('info Icon', '<span class="job">' + currentJob + '</span> is ' + jobPercentComplete + '% complete.');
     }
   }
-  return;
+}
+
+// Set the next job to be done for job combination options
+function jobCombo(element) {
+  var i;
+  if (isChecked('multipleJobs')) {
+    // Cycle jobs with the same ratio
+    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
+    var multiple_jobs_list = getSavedList('selectMissionMultiple');
+    var cycle_jobs = new Object();
+
+    // Group selected jobs by ratio
+    for (i = 0, iLength=multiple_jobs_list.length; i < iLength; ++i) {
+      var job = multiple_jobs_list[i];
+      var mission = missions[job];
+
+      // Put non-available jobs at the end of the queue
+      if (availableJobs[mission[4]][mission[3]] != null &&
+          availableJobs[mission[4]][mission[3]].indexOf(parseInt(job)) == -1) {
+        mission[7] = 0;
+      }
+
+      if (cycle_jobs[mission[7]] == null) {
+        cycle_jobs[mission[7]] = [];
+      }
+      cycle_jobs[mission[7]].push(multiple_jobs_list[i]);
+    }
+
+    // Rebuild the job list array
+    multiple_jobs_list = [];
+    for (i in cycle_jobs) {
+      if (cycle_jobs[i].length > 1) {
+        // Only cycle the current job's ratio group
+        if (missions[GM_getValue('selectMission', 1)][7] == i) {
+          cycle_jobs[i].push(cycle_jobs[i].shift());
+        }
+        for (var n = 0, nLength=cycle_jobs[i].length; n < nLength; ++n) {
+          multiple_jobs_list.push(cycle_jobs[i][n]);
+        }
+      } else {
+        multiple_jobs_list.push(cycle_jobs[i][0]);
+      }
+    }
+    setSavedList('selectMissionMultiple', multiple_jobs_list);
+  }
 }
 
 function jobLoot(element) {
@@ -7990,7 +7990,7 @@ function debugDumpSettings() {
         'Sell Cuban business output: <strong>' + showIfUnchecked(GM_getValue('autoSellCrates')) + '</strong><br>' +
         'Sell Moscow business output <strong>' + showIfUnchecked(GM_getValue('autoSellCratesMoscow')) + '</strong><br>' +
         'Sell Bangkok business output <strong>' + showIfUnchecked(GM_getValue('autoSellCratesBangkok')) + '</strong><br>' +
-		'Buy Cuban business: <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesCuba')) + '</strong><br>' +
+        'Buy Cuban business: <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesCuba')) + '</strong><br>' +
         'Buy Moscow business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesMoscow')) + '</strong><br>' +
         'Buy Bangkok business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesBangkok')) + '</strong><br>' +
         '&nbsp;&nbsp;-Upgrade First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesUpgrade')) + '</strong><br>' +
@@ -10027,7 +10027,7 @@ function logResponse(rootElt, action, context) {
           result += ' You spent 0 energy on this job.';
         }
         addToLog('process Icon', result);
-        jobProgress(rootElt);
+        jobCombo(rootElt);
         jobLoot(rootElt);
         // Add message if job tier prize found.
         if (innerNoTags.match(/.*(An* .+ was added to your inventory[^.]*.)/i)) {
@@ -10316,7 +10316,7 @@ function logResponse(rootElt, action, context) {
         addToLog(cities[city][CITY_CASH_CSS], buyUpgradeProduce.innerHTML);
       } else {
          DEBUG(inner);
-        }
+      }
       break;
 
     case 'upgrade output':
@@ -10326,7 +10326,7 @@ function logResponse(rootElt, action, context) {
         addToLog(cities[city][CITY_CASH_CSS], buyUpgradeOutput.innerHTML);
       } else {
          DEBUG(inner);
-        }
+      }
       break;
 
     case 'buy business':
@@ -10336,7 +10336,7 @@ function logResponse(rootElt, action, context) {
         addToLog(cities[city][CITY_CASH_CSS], buyBusiness.innerHTML);
       } else {
          DEBUG(inner);
-        }
+      }
       break;
 
     case 'deposit':
@@ -10590,6 +10590,7 @@ function hideElement(elt, hideFlag) {
   if (!elt) return;
   if (hideFlag == null) hideFlag = true;
   elt.setAttribute("id", hideFlag ? "mwapHide" : "", 0);
+  return elt;
 }
 
 function clickElement(elt) {
