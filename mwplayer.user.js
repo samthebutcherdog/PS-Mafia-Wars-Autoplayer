@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.38',
-  build: '124',
+  build: '125',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -5897,14 +5897,14 @@ function createCashTab () {
   id = 'autoBuyCratesUpgrade';
   var autoBuyCratesUpgrade = makeElement('div', cashTab, {'style':'top: 390px; right: 100px;'});
   label = makeElement('label', autoBuyCratesUpgrade, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Upgrade'));
+  label.appendChild(document.createTextNode('Upgrade'));  
   makeElement('input', autoBuyCratesUpgrade, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
-
+  
   title = 'Select this to Upgrade the Output First';
   id = 'autoBuyCratesOutput';
   var autoBuyCratesOutput = makeElement('div', cashTab, {'style':'top: 390px; right: 10px;'});
   label = makeElement('label', autoBuyCratesOutput, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Output'));
+  label.appendChild(document.createTextNode('Output'));  
   makeElement('input', autoBuyCratesOutput, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
 
   // end auto buy crates
@@ -6716,7 +6716,10 @@ function refreshMWAPCSS() {
   newCSS =  ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}' +
             ' #mwapHide {margin:0; height:0; width: 0; display:none}' +
             // Hide the Zynga bar
-            ' #mw_zbar iframe {margin:0; height:0; width: 0; display:none}' +
+            //' #mw_zbar iframe {margin:0; height:0; width: 0; display:none}' +
+            ' #mw_zbar {margin:0; height:0; width: 0; display:none}'  +
+			// Hide progress bar
+            ' #setup_progress_bar {margin:0; height:0; width: 0; display:none}'+
             // Hide the email bar.
             ' .fb_email_prof_header {margin:0; height:0; width: 0; display:none}' +
             // Hide SMS Mobile link
