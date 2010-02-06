@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.39',
-  build: '132',
+  build: '133',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6496,7 +6496,10 @@ function chooseSides() {
                     [5, 8, 'Meet A Gang\'s Rep In A Go-Go Bar'],
                     [11, 14, 'Intercept An Ammo Shipment'],
                     [24, 27, 'Set Up A Phony Business'],
-                    [30, 33, 'Pay Off The Guards At Bangkwang Prison']
+                    [30, 33, 'Pay Off The Guards At Bangkwang Prison'],
+					[43, 46, 'Hijack A Boat Load Of Electronics'],
+					[49, 52, 'Steal Shipping Manifests'],
+					[50, 55, 'Sink A Chinese Metals Freighter']
                    );
 
   choiceJobs.forEach( function(job) {
