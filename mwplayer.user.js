@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '140',
+  build: '141',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1448,7 +1448,7 @@ function doAutoPlay () {
   }
 
   // Auto-lotto
-  if (running && !maxed && isChecked('autoLottoOpt')) {
+  if (running && !maxed && isChecked('autoLottoOpt') && !timeLeftGM('dailyChance')) {
     if (autoLotto()) return;
   }
 
@@ -8247,11 +8247,23 @@ function profileFix() {
 function autoLotto() {
   Autoplay.delay = getAutoPlayDelay();
 
-  var i, j, lottoButton = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Play Now and Win Big")]', innerPageElt);
-  if (lottoButton) {
-    Autoplay.fx = function() {
-      clickElement(lottoButton);
-      DEBUG('Clicked to go to lotto.');
+  var elt = xpathFirst('//*[@id="nav_link_godfather_unlock"]//a');
+  var eltDailyChance = xpathFirst('.//a[contains(.,"Daily Chance")]');
+  var eltClickGfOnce = xpathFirst('.//div[@class="tab_middle" and contains(.,"Player Updates")]');
+  // Click the godfather nav only when in home page
+  if(eltClickGfOnce){
+    clickElement(elt);
+    DEBUG('Clicked to go to godfather.');
+  }
+
+  var i, j;
+  // Go to the daily chance menu
+  if (!xpathFirst('.//div[@class="minitab_content" and contains(.,"Play")]')) {
+    Autoplay.fx = function(){
+      if(eltDailyChance){
+        clickElement(eltDailyChance);
+        DEBUG('Clicked to go to daily chance.');
+      }
     };
     Autoplay.start();
     return true;
@@ -8383,6 +8395,7 @@ function autoLotto() {
     Autoplay.start();
     return true;
   }
+  setGMTime('dailyChance', '24 hours');
 
   return false;
 }
