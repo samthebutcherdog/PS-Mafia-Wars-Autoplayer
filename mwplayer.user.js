@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.40',
-  build: '135',
+  build: '136',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6739,7 +6739,8 @@ function refreshMWAPCSS() {
             (isChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
             // Hide feature notice updates
             (isChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
-            ' {position: absolute; margin:0; height:0; width: 0; display:none}';
+            ' {position: absolute !important; margin:0 !important; ' +
+            '  height:0 !important; width: 0 !important; display:none !important;}';
 
   // If CSS has changed, update it
   if (newCSS != mwapCSS) cssElt.innerHTML = newCSS;
