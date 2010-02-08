@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '142',
+  build: '143',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6525,10 +6525,10 @@ function chooseSides() {
                     [11, 14, 'Intercept An Ammo Shipment'],
                     [24, 27, 'Set Up A Phony Business'],
                     [30, 33, 'Pay Off The Guards At Bangkwang Prison'],
-					[43, 46, 'Hijack A Boat Load Of Electronics'],       // EPISODE 3 CHAPTER 1
-					[49, 52, 'Steal Shipping Manifests'],                // EPISODE 3 CHAPTER 2
-					[62, 65, 'Establish Contact With A CIA Agent'],      // EPISODE 4 CHAPTER 1
-					[68, 71, 'Betray Commander Chang and the UWSA']      // EPISODE 4 CHAPTER 2
+					[43, 46, 'Hijack A Boat Load Of Electronics'],        // EPISODE 3 CHAPTER 1
+					[49, 52, 'Steal Shipping Manifests'],                 // EPISODE 3 CHAPTER 2
+					[62, 65, 'Establish Contact With A CIA Agent'],       // EPISODE 4 CHAPTER 1
+					[68, 71, 'Betray Commander Chang and the UWSA']       // EPISODE 4 CHAPTER 2
                    );
 
   choiceJobs.forEach( function(job) {
