@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.40',
-  build: '136',
+  build: '137',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7435,7 +7435,7 @@ function getJobRow(jobName, contextNode) {
     while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
   } catch(ex) {
       DEBUG (conTxt);
-      addToLog('warning Icon', 'BUG DETECTED (getJobRow): ' + ex);
+      addToLog('warning Icon', 'BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + job + ']');
   }
   return rowElt;
 }
