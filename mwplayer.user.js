@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.40',
-  build: '137',
+  build: '138',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -4210,18 +4210,15 @@ function createSettingsBox() {
       '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
       '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
       '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
+      '#settingsBox img, label, span, input, select {vertical-align: middle;}' +
       '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
       '#settingsBox #energyTab div {position: static;}' +
-      '#settingsBox #generalTab span, #mafiaTab span, #displayTab span, ' +
-      '#settingsBox #energyTab span {position: static; vertical-align: middle}' +
+      '#settingsBox #generalTab img, span, label, #mafiaTab img, span, label, #displayTab img, span, label, ' +
+      '#settingsBox #energyTab img, span, label {position: static;}' +
       '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
       '#settingsBox #energyTab select {position: static;}' +
       '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
       '#settingsBox #energyTab textarea {position: static;}' +
-      '#settingsBox #generalTab input[type=radio], #mafiaTab input[type=radio], #displayTab input[type=radio], ' +
-      '#settingsBox #energyTab input[type=radio] {vertical-align: middle}' +
-      '#settingsBox #generalTab input[type=checkbox], #mafiaTab input[type=checkbox], #displayTab input[type=checkbox], ' +
-      '#settingsBox #energyTab input[type=checkbox] {vertical-align: middle}' +
       '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
       '#settingsBox #energyTab input {position: static; margin: 0;}' +
       '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
@@ -4233,7 +4230,7 @@ function createSettingsBox() {
       '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
       '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
       '#settingsBox #staminaTab div {position: static;}' +
-      '#settingsBox #staminaTab span {position: static; vertical-align: middle}' +
+      '#settingsBox #staminaTab img, span, label {position: static;}' +
       '#settingsBox #staminaTab select {position: static;}' +
       '#settingsBox #staminaTab textarea {position: static;}' +
       '#settingsBox #staminaTab input {position: static; margin: 0;}' +
@@ -4354,14 +4351,14 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check this to refresh MWAP between the indicated time interval.';
   id = 'autoClick';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
-  makeElement('img', lhs, {'style':'padding-left: 5px; vertical-align: middle;','src':stripURI(energyIcon)});
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('img', lhs, {'style':'padding-left: 5px;','src':stripURI(energyIcon)});
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Refresh every:'));
 
-  makeElement('input', rhs, {'type':'text','value':GM_getValue('r1', '30'), 'id':'r1', 'size':'1', 'style':'vertical-align: middle; text-align: center'});
+  makeElement('input', rhs, {'type':'text','value':GM_getValue('r1', '30'), 'id':'r1', 'size':'1', 'style':'text-align: center'});
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' to '));
-  makeElement('input', rhs, {'type':'text','value':GM_getValue('r2', '110'), 'id':'r2', 'size':'1', 'style':'vertical-align: middle; text-align: center'});
+  makeElement('input', rhs, {'type':'text','value':GM_getValue('r2', '110'), 'id':'r2', 'size':'1', 'style':'text-align: center'});
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' seconds '));
 
   // Delay option
@@ -4385,18 +4382,18 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check this to enable auto-pause before or after level up.';
   id = 'autoPause';
-  var autoPause = makeElement('input', lhs, {'type':'checkbox', 'style':'vertical-align: middle;', 'id':id, 'value':'checked'}, id);
+  var autoPause = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Enable auto-pause:'));
   autoPause.addEventListener('click', clickAutoPause, false);
 
   id = 'autoPauseBefore';
   title = ' Before level up ';
-  makeElement('input', rhs, {'type':'radio', 'style':'vertical-align: middle;', 'name':'r3', 'id':id, 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'radio', 'name':'r3', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
 
   id = 'autoPauseAfter';
   title = ' After level up ';
-  makeElement('input', rhs, {'type':'radio', 'style':'vertical-align: middle;', 'name':'r3', 'id':id, 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'radio', 'name':'r3', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
 
   item = makeElement('div', list);
@@ -4405,7 +4402,7 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   id = 'autoPauseExp';
   lhs.appendChild(document.createTextNode('Experience left to pause at:'));
-  makeElement('input', rhs, {'style':'vertical-align: middle; text-align: right;','type':'text', 'value':GM_getValue(id, '50'), 'id':id, 'size':'2'});
+  makeElement('input', rhs, {'style':'text-align: right;','type':'text', 'value':GM_getValue(id, '50'), 'id':id, 'size':'2'});
 
   // Healing options
   item = makeElement('div', list);
@@ -4414,8 +4411,8 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Heal when health lands below indicated health.';
   id = 'autoHeal';
-  makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
-  makeElement('img', lhs, {'style':'padding-left: 5px; vertical-align: middle;','src':stripURI(healthIcon)});
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
+  makeElement('img', lhs, {'style':'padding-left: 5px;','src':stripURI(healthIcon)});
   makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Heal in:'));
   id = 'healLocation';
   var healLocation = makeElement('select', rhs, {'id':id});
@@ -4432,7 +4429,7 @@ function createGeneralTab() {
 
   healLocation.selectedIndex = GM_getValue('healLocation', NY);
   makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' when health falls below '));
-  makeElement('input', rhs, {'style':'vertical-align: middle; text-align: center','type':'text', 'value':GM_getValue('healthLevel', '50'), 'id':'healthLevel', 'size':'1'});
+  makeElement('input', rhs, {'style':'text-align: center','type':'text', 'value':GM_getValue('healthLevel', '50'), 'id':'healthLevel', 'size':'1'});
   makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' points'));
 
   // Hide in hospital
@@ -4442,8 +4439,8 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Hide in hospital while health is below 20';
   id = 'hideInHospital';
-  var hideInHosp = makeElement('input', rhs, {'style':'vertical-align: middle;', 'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
-  makeElement('img', rhs, {'style':'padding-left: 5px; vertical-align: middle;','src':stripURI(hideIcon)});
+  var hideInHosp = makeElement('input', rhs, {'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
+  makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(hideIcon)});
   title = hideInHosp.checked ? ' Hide in hospital but...' : ' Hide in hospital';
   makeElement('label', rhs, {'id':'hideLabel', 'for':id, 'title':title}).appendChild(document.createTextNode(title));
 
@@ -4452,7 +4449,7 @@ function createGeneralTab() {
     id = healOptions[i][0];
     title = healOptions[i][1];
     var optElt = makeElement('div', elt);
-    makeElement('input', optElt, {'style':'vertical-align: middle;', 'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+    makeElement('input', optElt, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
     label = makeElement('label', optElt, {'for':id, 'title':title});
     label.appendChild(document.createTextNode(' ' + title));
   }
@@ -4480,7 +4477,7 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check to idle in preferred city';
   id = 'idleInCity';
-  makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' When idle, fly to:'));
   var idleLocation = makeElement('select', rhs, {'id':'idleLocation'});
   for (i = 0, iLength=cities.length; i < iLength; ++i) {
@@ -4499,7 +4496,7 @@ function createGeneralTab() {
   id = 'autoLottoOpt';
   title = ' Play the Daily Chance';
   lottoTitle = 'Play free auto-generated lottery ticket daily'
-  makeElement('input', rhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':lottoTitle}).appendChild(document.createTextNode(title));
 
   // Lotto selector
@@ -4509,7 +4506,7 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = ' Collect lotto bonus at: '
   id = 'autoLottoBonus';
-  makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
 
   id = 'autoLottoList';
@@ -4529,7 +4526,7 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   id = 'hourlyStatsOpt';
   title = ' Enable hourly stats updates [Beta] ';
-  makeElement('input', rhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
 
   // Burn option
@@ -4539,7 +4536,7 @@ function createGeneralTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check to prioritize burning of either energy or stamina';
   id = 'burnFirst';
-  makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Spend all:'));
   var burnOpt = makeElement('select', rhs, {'id':'burnOption'});
   for (i = 0, iLength=burnModes.length; i < iLength; ++i) {
@@ -4594,7 +4591,7 @@ function createDisplayTab() {
   makeElement('br', item, {'class':'hide'});
   id = 'autoLog';
   title = 'Check this to enable logging.';
-  makeElement('input', lhs, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable logging:'));
   id = 'autoLogLength';
   makeElement('input', rhs, {'type':'text', 'id':id, 'value':GM_getValue(id, '300'), 'size':'2', 'style':'text-align: left'});
@@ -4736,7 +4733,7 @@ function createMafiaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check if you want to ask for help automatically with jobs.';
   id = 'autoAskJobHelp';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Ask for job help at:'));
   title = 'Enter the minimum experience to ask for job help, or 0 for no minimum.';
@@ -4751,7 +4748,7 @@ function createMafiaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Automatically accept mafia invitations.';
   id = 'acceptMafiaInvitations';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Accept mafia invitations'));
 
@@ -4766,21 +4763,21 @@ function createMafiaTab() {
   // Secret Stash
   title = 'Automatically post Secret Stash found while fighting.';
   id = 'autoSecretStash';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Secret stash '));
 
   // Iced opponent bonus
   title = 'Automatically post iced opponent bonus.';
   id = 'autoIcePublish';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Ice bonus '));
 
   // Level up bonus
   title = 'Automatically post level up bonus.';
   id = 'autoLevelPublish';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Level-up bonus '));
 
@@ -4791,7 +4788,7 @@ function createMafiaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Automatically post achievement bonus.';
   id = 'autoAchievementPublish';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Achievement bonus '));
 
@@ -4802,7 +4799,7 @@ function createMafiaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check if you want to share wishlist.';
   id = 'autoShareWishlist';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Wishlist every: '));
   title = 'Enter the number of hours to wait before sharing wishlist again.';
@@ -4819,12 +4816,12 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Automatically help: '));
   title = 'Automatically help on jobs.';
   id = 'autoHelp';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' On Jobs '));
   title = 'Automatically help on wars.';
   id = 'autoWarHelp';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' On Wars '));
 
@@ -4836,7 +4833,7 @@ function createMafiaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Betray a random friend?';
   id = 'autoWarBetray';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Betray friends in wars'));
 
@@ -4847,7 +4844,7 @@ function createMafiaTab() {
   makeElement('br', item, {'class':'hide'});
   id = 'autoGiftSkipOpt';
   title = 'Check this to skip publishing of wall posts.';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' Skip gift wall posts'));
 
   // Option for clicking the gift waiting
@@ -4856,7 +4853,7 @@ function createMafiaTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   title = 'Click the gift waiting option';
   id = 'autoGiftWaiting';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically click the gift waiting option'));
 
   // Undo notifications
@@ -4958,14 +4955,14 @@ function createAutostatTab() {
 
   id = 'autoStat';
   var autoStats = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; left: 20px;'});
-  makeElement('input', autoStats, {'type':'checkbox','style':'vertical-align: middle', 'id':id, 'value':'checked'}, id);
-  makeElement('img', autoStats, {'style':'vertical-align: middle;','src':stripURI(plussignIcon)});
-  makeElement('label', autoStats, {'for':id, 'title':title, 'style':'vertical-align: middle;'}).appendChild(document.createTextNode(' Enable auto-stat'));
+  makeElement('input', autoStats, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('img', autoStats, {'src':stripURI(plussignIcon)});
+  makeElement('label', autoStats, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-stat'));
 
   title = ' Disable AutoStat when status goals are reached';
   id = 'autoStatDisable';
   var divStatDisable = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; left: 200px; '});
-  makeElement('input', divStatDisable, {'type':'checkbox', 'style':'vertical-align: middle;', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('input', divStatDisable, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', divStatDisable, {'for':id, 'title':title}).appendChild(document.createTextNode(title));
 
 
@@ -5038,7 +5035,7 @@ function createAutostatTab() {
     title = 'Check this to distribute points to ' + autoStatDescrips[i + 1] + ' when goals are reached';
     id = autoStatFallbacks[i];
     div = makeElement('div', statDiv, {'style':'position: absolute; top: ' + xTopCur + 'px; left:' + yLeftCur + 'px; '});
-    makeElement('input', div, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, autoStatFallbacks[i]);
+    makeElement('input', div, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, autoStatFallbacks[i]);
     label = makeElement('label', div, {'for':id, 'title':title});
     label.appendChild(document.createTextNode(' ' + autoStatDescrips[i+1] + ' as fallback'));
     xTopCur += 25;
@@ -5080,7 +5077,7 @@ function createEnergyTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Spend energy automatically.';
   id = 'autoMission';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'autoMission');
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'autoMission');
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Spend energy to:'));
   title = ' Master jobs one at a time';
@@ -5222,7 +5219,7 @@ function createEnergyTab() {
     divChoice = makeElement('div', null, {'class':'ap_option', 'chkid':id});
     divChoice.addEventListener('click', chkHandler, false);
     makeElement('img', divChoice, {'style':'width: 15px; height: 15px;', 'id':'img' + id, 'src': checkState ? stripURI(checkedIcon) : stripURI(unCheckedIcon)});
-    choiceM = makeElement('input', divChoice, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle; display: none', 'value':'checked'});
+    choiceM = makeElement('input', divChoice, {'type':'checkbox', 'id':id, 'title':title, 'style':'display: none', 'value':'checked'});
     choiceM.checked = checkState;
     divChoice.appendChild(document.createTextNode(' ' + title));
     selectMissionM.appendChild(divChoice);
@@ -5294,7 +5291,7 @@ function createEnergyTab() {
   // Mini packs
   title = 'Periodically check for mini energy Packs.';
   id = 'checkMiniPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'checkMiniPack');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'checkMiniPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Mini packs '));
 
@@ -5315,7 +5312,7 @@ function createEnergyTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Periodically send energy packs to your fellow mafia members.';
   id = 'sendEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'sendEnergyPack');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'sendEnergyPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
 
@@ -5398,7 +5395,7 @@ function createEnergyTab() {
   item = makeElement('div', list, {'class':'single'});
   title = 'Ignore minimum energy settings if a level up is within reach.';
   id = 'allowEnergyToLevelUp';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', item, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Don\'t reserve energy if within reach of the next level.'));
 
@@ -5423,7 +5420,7 @@ function createStaminaTab() {
 
   title = 'Spend stamina automatically.';
   id = 'staminaSpend';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'staminaSpend');
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'staminaSpend');
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Spend stamina to:'));
 
@@ -5437,11 +5434,11 @@ function createStaminaTab() {
   }
 
   // IceCheck
-  title = 'Check if the target is iced or alive on profile page';
+  title = 'Attack ONLY live targets';
   id = 'iceCheck';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: right;margin-left: 0.5em;', 'value':'checked'}, 'iceCheck');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'iceCheck');
   label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable IceCheck'));
+  label.appendChild(document.createTextNode(' Skip iced targets'));
 
   // Stamina bursts
   item = makeElement('div', list);
@@ -5450,7 +5447,7 @@ function createStaminaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Spend bursts of stamina.';
   id = 'burstStamina';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, id);
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Enable Stamina Bursts:'));
 
@@ -5515,7 +5512,7 @@ function createStaminaTab() {
   item = makeElement('div', list, {'class':'single'});
   title = 'Ignore minimum stamina settings if a level up is within reach.';
   id = 'allowStaminaToLevelUp';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle', 'value':'checked'}, 'allowStaminaToLevelUp');
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'allowStaminaToLevelUp');
   label = makeElement('label', item, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Don\'t reserve stamina if within reach of the next level.'));
 
@@ -5531,11 +5528,11 @@ function createStaminaTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  makeElement('label', lhs, {'style':'vertical-align: middle;'}).appendChild(document.createTextNode('Fight ('));
+  makeElement('label', lhs).appendChild(document.createTextNode('Fight ('));
   id = 'fightAllSides';
   title = 'Check this to enable fighting all sides randomly';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle;', 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title,'style':'vertical-align: middle;margin-left: 0.5em;'});
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', lhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('all sides?) in:'));
   id = 'fightRandomLoc';
   var fightRandomLoc = makeElement('select', rhs, {'id':id});
@@ -5550,13 +5547,13 @@ function createStaminaTab() {
   //rehit on money gain
   title = 'Reattack until iced if money gained';
   id = 'staminaReattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle;margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'vertical-align: middle;margin-left: 0.5em;'});
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('While gaining '));
   title = 'Reattack if this amount is gained';
   id = 'reattackThreshold';
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351', 'value':GM_getValue(id, '65000'), 'size':'1'});
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'vertical-align: middle;margin-left: 0.5em;'});
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('bucks'));
 
   // Maximum level.
@@ -5573,7 +5570,7 @@ function createStaminaTab() {
   // Maximum level relative?
   title = 'Make the maximum level be relative to your own. For example, if your level is 10, and maximum level is set to 5, opponents higher than level 15 will be avoided.';
   id = 'fightLevelMaxRelative';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle; margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxRelative');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Add my level'));
 
@@ -5591,7 +5588,7 @@ function createStaminaTab() {
   // Maximum mafia relative?
   title = 'Make the maximum mafia size be relative to your own. For example, if you have 300 mafia members, and maximum mafia is set to 50, opponents with more than 350 mafia members will be avoided.';
   id = 'fightMafiaMaxRelative';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle; margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMaxRelative');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMaxRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Add my mafia size'));
 
@@ -5609,7 +5606,7 @@ function createStaminaTab() {
   // Maximum mafia relative?
   title = 'Make the minimum mafia size be relative to your own. For example, if you have 300 mafia members, and minimum mafia is set to 50, opponents with less than 250 mafia members will be avoided.';
   id = 'fightMafiaMinRelative';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle; margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
 
@@ -5674,13 +5671,13 @@ function createStaminaTab() {
    //rehit on money gain
   title = 'Reattack until iced if money gained';
   id = 'staminaReattackList';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align: middle;margin-left: 0.5em;', 'value':'checked'}, 'staminaReattack');
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'vertical-align: middle;margin-left: 0.5em;'});
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'staminaReattack');
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('While gaining '));
   title = 'Reattack if this amount is gained';
   id = 'reattackThresholdList';
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351', 'value':GM_getValue('reattackThreshold', '65000'), 'size':'1'});
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'vertical-align: middle;margin-left: 0.5em;'});
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('bucks'));
 
   // Opponent list
@@ -5875,9 +5872,9 @@ function createCashTab () {
     id = cities[i][CITY_AUTOBANK];
     title = 'Enable ' + cities[i][CITY_NAME] + ' banking ';
     var curBank = makeElement('div', cashTab, {'style':'top: '+(i*25 + xTop)+'px; right: 10px;'});
-    makeElement('input', curBank, {'style':'vertical-align: middle;','type':'checkbox', 'id':id, 'value':'checked'}, id);
+    makeElement('input', curBank, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
     makeElement('label', curBank, {'for':id}).appendChild(document.createTextNode(title));
-    makeElement('img', curBank, {'style':'vertical-align: middle;','src':stripURI(cities[i][CITY_CASH_ICON])});
+    makeElement('img', curBank, {'src':stripURI(cities[i][CITY_CASH_ICON])});
     id = cities[i][CITY_BANKCONFG];
     title = 'Minimum deposit amount in ' + cities[i][CITY_NAME];
     makeElement('input', curBank, {'type':'text', 'style':'width: 80px;margin-left:5px; text-align: right', 'title':title, 'value':GM_getValue(id, '50000'), 'id':id, 'size':'5'});
