@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '141',
+  build: '142',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1061,21 +1061,38 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
     ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
     ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100],
-    // BANGKOK EPISODE 3
-    ['Secure A Pirate Vessel',43,39,3,BANGKOK,46],
-    ['Hire An Unsavory Crew',35,40,3,BANGKOK,53],
-    ['Take Down A Rival Pirate Outfit',106,41,3,BANGKOK,146],
-    ['Hijack A Boat Load Of Electronics',35,43,3,BANGKOK,53],                  // Yakuza = 43, Triad = 46
-    ['Truck The Cargo To Kuala Lumpur',60,44,3,BANGKOK,93],                    // Yakuza
-    ['Smuggle Cigarettes Back Into Thailand',60,45,3,BANGKOK,93],              // Yakuza
-    // ['Send Captain Mok Overboard' BOSS JOB]
-    ['Steal Japanese Auto Shipping Containers',56,53,3,BANGKOK,88],            // Triad
-    ['Offload The Cars Onto A Waiting Barge',60,54,3,BANGKOK,93],              // Triad
-    ['Steal Shipping Manifests',46,49,3,BANGKOK,71],                           // Yakuza = 49 Triad = 52
-    ['Sink A Chinese Metals Freighter',53,50,3,BANGKOK,84],                    // Yakuza = 50, Triad = 55
-    ['Hire Divers To Retrieve The Gold Bars',49,51,3,BANGKOK,75],              // Yakuza
-    ['Ship The Cargo To Jakarta',49,47,3,BANGKOK,75],                          // Triad
-    ['Return With A Shipment Of Weapons',49,48,3,BANGKOK,75]                    // Triad
+	// BANGKOK EPISODE 3
+	['Secure A Pirate Vessel',43,39,3,BANGKOK,46],                             // CHAPTER 1
+    ['Hire An Unsavory Crew',35,40,3,BANGKOK,53],                              // CHAPTER 1
+    ['Take Down A Rival Pirate Outfit',106,41,3,BANGKOK,146],                  // CHAPTER 1  HELP JOB
+	['Hijack A Boat Load Of Electronics',35,43,3,BANGKOK,53],                  // CHAPTER 2  CHOICE POINT (Yakuza = 43, Triad = 46)
+    ['Truck The Cargo To Kuala Lumpur',60,44,3,BANGKOK,93],                    // CHAPTER 2  Yakuza
+    ['Smuggle Cigarettes Back Into Thailand',60,45,3,BANGKOK,93],              // CHAPTER 2  Yakuza
+    ['Ship The Cargo To Jakarta',49,47,3,BANGKOK,75],                          // CHAPTER 2  Triad
+    ['Return With A Shipment Of Weapons',49,48,3,BANGKOK,75],                  // CHAPTER 2  Triad
+	['Steal Shipping Manifests',46,49,3,BANGKOK,71],                           // CHAPTER 3  CHOICE POINT (Yakuza = 49, Triad = 52)
+    ['Steal Japanese Auto Shipping Containers',56,53,3,BANGKOK,88],            // CHAPTER 3  Triad
+    ['Offload The Cars Onto A Waiting Barge',60,54,3,BANGKOK,93],              // CHAPTER 3  Triad
+    ['Hire Divers To Retrieve The Gold Bars',49,51,3,BANGKOK,75],              // CHAPTER 3  Yakuza
+	['Sink A Chinese Metals Freighter',53,50,3,BANGKOK,84],                    // CHAPTER 3  Yakuza
+	['Sink A Fleet Vessel',107,55,3,BANGKOK,135],                              // FINALE
+    ['Send Captain Mok Overboard',0,56,3,BANGKOK,0],                           // Boss job no energy or exp points known yet
+	// BANGKOK EPISODE 4
+	['Buy Some Chemicals On The Black Market',68,58,4,BANGKOK,84],             // CHAPTER 1
+	['Make Contact With The United Wa State Army',52,59,4,BANGKOK,64],         // CHAPTER 1
+	['Ambush A Burmese Army Convoy',144,60,4,BANGKOK,160],                     // CHAPTER 1  HELP JOB
+	['Establish Contact With A CIA Agent',48,62,4,BANGKOK,60],                 // CHAPTER 2  CHOICE POINT (Yakuza = 62, Triad = 65)
+	['Arrange To Process It In Bangkok',80,64,4,BANGKOK,100],                  // CHAPTER 2  Yakuza
+	['Set Up An Opium Shipment',76,63,4,BANGKOK,92],                           // CHAPTER 2  Yakuza
+	['Set Up The Import Of Illegal Chinese Arms',64,66,4,BANGKOK,80],          // CHAPTER 2  Triad
+	['Ship The Yaa Baa Payment To Phuket',60,67,4,BANGKOK,76],                 // CHAPTER 2  Triad
+    ['Betray Commander Chang and the UWSA',52,68,4,BANGKOK,64],                // CHAPTER 3  CHOICE POINT (Yakuza = 68, Triad = 71)
+	['Steal A Seized Drug Shipment',64,70,4,BANGKOK,80],                       // CHAPTER 3  Yakuza
+	['Pass On Information To The Thai Police',44,69,4,BANGKOK,56],             // CHAPTER 3  Yakuza
+	['Eliminate An Insurgent Escort',60,72,4,BANGKOK,72],                      // CHAPTER 3  Triad
+	['Make Off With Stolen Military Hardware',56,73,4,BANGKOK,68],             // CHAPTER 3  Triad
+	['Attack Chang\'s Heroin-Processing Facility',88,74,4,BANGKOK,112],        // FINALE
+	['Kill Commander Chang',0,75,4,BANGKOK,0]                                  // BOSS job no energy or exp points known yet
   );
 
   var missionTabs = new Array(
@@ -1089,7 +1106,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // MOSCOW
     ['Baklany','Boets','Brigadir','Avtoritet','Vor','Pakhan'],
     // BANGKOK
-    ['Brawler','Criminal','Pirate']
+    ['Brawler','Criminal','Pirate','Commandant']
   );
 
   var requirementJob = new Array(
@@ -6508,9 +6525,10 @@ function chooseSides() {
                     [11, 14, 'Intercept An Ammo Shipment'],
                     [24, 27, 'Set Up A Phony Business'],
                     [30, 33, 'Pay Off The Guards At Bangkwang Prison'],
-                    [43, 46, 'Hijack A Boat Load Of Electronics'],
-                    [49, 52, 'Steal Shipping Manifests'],
-                    [50, 55, 'Sink A Chinese Metals Freighter']
+					[43, 46, 'Hijack A Boat Load Of Electronics'],       // EPISODE 3 CHAPTER 1
+					[49, 52, 'Steal Shipping Manifests'],                // EPISODE 3 CHAPTER 2
+					[62, 65, 'Establish Contact With A CIA Agent'],      // EPISODE 4 CHAPTER 1
+					[68, 71, 'Betray Commander Chang and the UWSA']      // EPISODE 4 CHAPTER 2
                    );
 
   choiceJobs.forEach( function(job) {
