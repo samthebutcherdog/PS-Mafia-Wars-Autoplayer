@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.40
+* @version 1.0.41
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.40
+// @version     1.0.41
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.40',
-  build: '138',
+  version: '1.0.41',
+  build: '139',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3492,14 +3492,6 @@ function saveSettings() {
   // Validate the stamina tab.
   var staminaTabSettings = validateStaminaTab();
   if (!staminaTabSettings) return;
-  //var testStaminaTab = function() {
-  //  var s = validateStaminaTab();
-  //  GM_log('s='+s);
-  //  for (var setting in s) {
-  //    GM_log(setting + '=' + s[setting]);
-  //  }
-  //}
-  //testStaminaTab();
 
   //
   // All settings are valid. Save them.
@@ -3541,11 +3533,18 @@ function saveSettings() {
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
-                            'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish',
+                            'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
-                            'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow','autoBuyCratesBangkok',
-                            'autoBuyCratesOutput','autoBuyCratesUpgrade']);
+                            'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
+                            'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade']);
 
+  // Validate burstJobCount
+  var burstJobCount = document.getElementById('burstJobCount').value;
+  if (isNaN(burstJobCount)) {
+    alert('Please enter numeric values for burstJobCount.');
+    return;
+  }
+  GM_setValue('burstJobCount', burstJobCount);
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -5094,6 +5093,25 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(title + ' '));
   var unChkAll = makeElement('input', label, {'id':'unCheckAll','style':'font-size: 9px; display : ' + ((GM_getValue('multipleJobs') == 'checked') ? '':'none'),'type':'button', 'value':'Uncheck All'});
 
+  // Job bursts
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Performs bursts of jobs';
+  id = 'burstJob';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Enable job bursts:'));
+
+  title = 'How many times to do job bursts';
+  id = 'burstJobCount';
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Fire '));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '10')});
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' job attempts everytime'));
+
   //
   // Job selector.
   //
@@ -5305,21 +5323,6 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(' Full packs @ ratio '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
 
-  // Periodically send energy packs?
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Periodically send energy packs to your fellow mafia members.';
-  id = 'sendEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'sendEnergyPack');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
-
-  // Horizontal line
-  //var item = makeElement('div', list);
-  //makeElement('hr', item, {'style':'width: 100%'});
-
   // Maniac character type?
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -5327,9 +5330,16 @@ function createEnergyTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check this box if your character type is Maniac (as opposed to Fearless or Mogul).';
   id = 'isManiac';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'isManiac', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'isManiac', 'checked');
+  label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Character type is Maniac'));
+
+  // Periodically send energy packs?
+  title = 'Periodically send energy packs to your fellow mafia members.';
+  id = 'sendEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'sendEnergyPack');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
 
   // Mastery items owned.
   item = makeElement('div', list);
@@ -5449,12 +5459,12 @@ function createStaminaTab() {
   id = 'burstStamina';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable Stamina Bursts:'));
+  label.appendChild(document.createTextNode(' Enable stamina bursts:'));
 
   title = 'How many points to burst';
   id = 'burstPoints';
   label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Burst '));
+  label.appendChild(document.createTextNode('Burn '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '10')});
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' points '));
@@ -9169,13 +9179,21 @@ function goJobTab(tabno) {
   DEBUG('Clicked to go to job tab ' + tabno + '.');
 }
 
+function jobBurst (clickElt) {
+  var numClicks = 1;
+  if (isChecked('burstJob')) {
+    numClicks = GM_getValue('burstJobCount', 1);
+  }
+  clickBurst (clickElt, parseInt(numClicks));
+}
+
 function goJob(jobno, context) {
   var elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
 
   if (elt) {
     clickAction = 'job';
     clickContext = context;
-    clickElement(elt);
+    jobBurst(elt);
     DEBUG('Clicked job ' + jobno + '.');
   } else {
     xJob = missions[GM_getValue('selectMission')][0];
