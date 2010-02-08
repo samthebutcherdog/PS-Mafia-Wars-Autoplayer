@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '139',
+  build: '140',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7892,6 +7892,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +
         '-------------------Energy Tab--------------------<br>' +
         'Enable auto-mission: <strong>' + showIfUnchecked(GM_getValue('autoMission')) + '</strong><br>' +
+        'Enabled job bursts: <strong>' + showIfUnchecked(GM_getValue('burstJob')) + ' == Fire ' + GM_getValue('burstJobCount') + ' job attempts everytime</strong><br>' +
         '&nbsp;&nbsp;-Repeat Job: <strong>' + showIfUnchecked(GM_getValue('repeatJob')) + '</strong><br>' +
         '&nbsp;&nbsp;-Job selected: <strong>' + missions[GM_getValue('selectMission')][0] + '</strong><br>' +
         '&nbsp;&nbsp;-Multiple Jobs: <strong>' + showIfUnchecked(GM_getValue('multipleJobs')) + '</strong><br>' +
@@ -7914,7 +7915,7 @@ function debugDumpSettings() {
         '-------------------Stamina Tab-------------------<br>' +
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
-        'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burst ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
+        'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
         '&nbsp;&nbsp;-Fight all sides: <strong>' + showIfUnchecked(GM_getValue('fightAllSides')) + '</strong><br>' +
         '&nbsp;&nbsp;-Fight in: <strong>' + cities[GM_getValue('fightLocation', 0)][CITY_NAME] + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack <strong>' + showIfUnchecked(GM_getValue('staminaReattack')) + '</strong><br>' +
