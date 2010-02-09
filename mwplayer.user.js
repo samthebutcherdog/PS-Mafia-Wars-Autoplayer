@@ -19,7 +19,7 @@
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
-            scooy78
+            scooy78, crazydude
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '146',
+  build: '147',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3672,7 +3672,6 @@ function saveSettings() {
     GM_setValue('autoPauselvlExp', lvlExp);
   }
 
-  GM_setValue('notificationHandle', document.getElementById('notificationHandle').selectedIndex);
   GM_setValue('bankConfig', bankConfig);
   GM_setValue('bankConfigCuba', bankConfigCuba);
   GM_setValue('bankConfigMoscow', bankConfigMoscow);
@@ -4922,33 +4921,6 @@ function createMafiaTab() {
   id = 'autoGiftWaiting';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically click the gift waiting option'));
-
-  // Undo notifications
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  notificationStopTitle = 'Handles undoing notification pop-ups alerting other users.';
-  notificationID = 'notificationHandle';
-  var notificationLabel = makeElement('label', lhs);
-  notificationLabel.appendChild(document.createTextNode('Undo which notifications:'));
-  var notificationHandle = makeElement('select', rhs, {'id':notificationID, 'title':notificationStopTitle}, 'notificationLabel');
-  choice = document.createElement('option');
-  choice.value = 0;
-  choice.appendChild(document.createTextNode('None'));
-  notificationHandle.appendChild(choice);
-  choice = document.createElement('option');
-  choice.value = 1;
-  choice.appendChild(document.createTextNode('Fight'));
-  notificationHandle.appendChild(choice);
-  choice = document.createElement('option');
-  choice.value = 2;
-  choice.appendChild(document.createTextNode('All'));
-  notificationHandle.appendChild(choice);
-  if (GM_getValue('notificationHandle', 'unk') == 'unk') {
-    GM_setValue('notificationHandle', 1);
-  }
-  notificationHandle.selectedIndex = GM_getValue('notificationHandle', 1);
 
   // War - Automatically declare a war
   item = makeElement('div', list);
@@ -7331,8 +7303,6 @@ function customizeJobs() {
   if (isChecked('multipleJobs') &&
       GM_getValue('isRunning') === true &&
       GM_getValue('selectTier') != '0.0') {
-
-    DEBUG('Jobs listed: ' + jobsFound + 'Jobs mastered: ' + masteredJobsCount);
     selectedTierValue = GM_getValue('selectTier').split('.');
     masteryCity = parseInt(selectedTierValue[0]);
     masteryTier = parseInt(selectedTierValue[1]);
@@ -7426,32 +7396,6 @@ function customizeHitlist() {
   }
 
   return true;
-}
-
-function filterNotifications(elt) {
-  var handleCheck = GM_getValue('notificationHandle', 1);
-  if (!handleCheck) return;
-
-  // Get all beeps (pop-ups about notifications).
-  var beeps = xpath('.//div[@class="UIBeep_Title"]', elt);
-  for (var i = 0, iLength=beeps.snapshotLength; i < iLength; i++) {
-    var beepElt = beeps.snapshotItem(i);
-    if (beepElt && beepElt.innerHTML.indexOf('You sent a notification')) {
-      // A notification was sent.
-      var undoElt = xpathFirst('.//a[@class="undo_link"]', beepElt);
-      if (!undoElt) continue;
-
-      // Cancel certain types of notifications.
-      if (beepElt.innerHTML.match(/fought you/i)) {
-          clickElement(undoElt);
-          addToLog('info Icon', 'Canceled attack notification.');
-      } else if (handleCheck == 2) {
-          //FIXME: Should make sure it is a Mafia Wars notification.
-          clickElement(undoElt);
-          addToLog('info Icon', 'Canceled notification.');
-      }
-    }
-  }
 }
 
 function setLevelUpRatio() {
@@ -7933,7 +7877,6 @@ function debugDumpSettings() {
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
-        'Undo notifications: <strong>'+ GM_getValue('notificationHandle') + '</strong><br>' +
         'Skip gift wall posts: <strong>' + showIfUnchecked(GM_getValue('autoGiftSkipOpt')) + '</strong><br>' +
         'Auto Gift Waiting: <strong>' + showIfUnchecked(GM_getValue('autoGiftWaiting'))  + '</strong><br>' +
         'Auto War: <strong>' + showIfUnchecked(GM_getValue('autoWar'))  + '</strong><br>' +
@@ -8056,12 +7999,12 @@ function debugDumpSettings() {
 // caller should not make additional calls until that action has completed.
 function parsePlayerUpdates(messagebox) {
   // Get the timestamp (e.g. "3 minutes ago")
-  var minutesAgo = xpathFirst('div[@class="update_timestamp"]', messagebox);
+  var minutesAgo = xpathFirst('.//div[@class="update_timestamp"]', messagebox);
   minutesAgo = minutesAgo? minutesAgo.innerHTML + ' ' : '';
   minutesAgo = minutesAgo.indexOf('0') == 0? '' : minutesAgo;
 
   // Get the text and links.
-  var messageTextElt = xpathFirst('div[@class="update_txt"]', messagebox);
+  var messageTextElt = xpathFirst('.//div[@class="update_txt"]', messagebox);
   if (!messageTextElt) {
     addToLog('warning Icon', 'BUG DETECTED: Unable to read update text.');
     return true;
@@ -9305,13 +9248,11 @@ function goJob(jobno, context) {
 }
 
 function goFightNav() {
-  var elts = $x('//div[@class="nav_link fight_link"]//a');
-  var elt;
-  for (var i = 0, numElts=elts.length; i < numElts; ++i) {
-    if (elts[i].scrollWidth) {
-      elt = elts[i];
-      break;
-    }
+  var elt = xpathFirst('//div[@id="nav_link_fight_unlock"]//a');
+  if (!elt) {
+    addToLog('warning Icon', 'Can\'t find fight nav link to click. Using fallback method.');
+    loadFightNav();
+    return;
   }
   clickElement(elt);
   DEBUG('Clicked to go to fights.');
@@ -9338,13 +9279,12 @@ function goHitlistTab() {
 }
 
 function goPropertyNav() {
-  var elts = $x('//div[@class="nav_link properties_link"]//a');
-  var elt;
-  for (var i = 0, numElts=elts.length; i < numElts; ++i) {
-    if (elts[i].scrollWidth) {
-      elt = elts[i];
-      break;
-    }
+  var elt = xpathFirst('.//span[@id="nav_link_properties"]//a')
+  
+  if (!elt) {
+    addToLog('warning Icon', 'Can\'t find properties nav link to click. Using fallback method.');
+    loadPropertyNav();
+    return;
   }
   clickElement(elt);
   DEBUG('Clicked to go to properties.');
