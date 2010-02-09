@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '144',
+  build: '145',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -2536,14 +2536,13 @@ function autoFight(how) {
 
   // Check for pulse
   if (isChecked('iceCheck')) {
-    var hitURL = document.location.href;
-    hitURL = hitURL.replace(/xw_controller=\w+/,'xw_controller=hitlist');
-    hitURL = hitURL.replace(/xw_action=\w+/,'xw_action=set');
-    hitURL += hitURL.replace('#','');
-    hitURL += '&target_id=' + opponent.id;
-    if (/You can't add/.test(loadURL (hitURL))) {
+    var hitUrl = getHitUrl (opponent.id);
+    if (/You can't add/.test(loadUrl (hitUrl))) {
       DEBUG('Target is iced/dead, skipping opponent, id=' + opponent.id);
+      setFightOpponentInactive(opponent);
       return false;
+    } else {
+      setFightOpponentActive(opponent);
     }
   }
 
@@ -7074,6 +7073,20 @@ function customizeProfile() {
       // See if this player is in our mafia.
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
+      // Show if Alive/Dead
+      if (!running && !removeElt) {
+        var urlLoaded = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            var txt = '<span class="good">*ALIVE* </span>';
+            if (/You can't add/.test(this.responseText.untag()))
+              txt = '<span class="bad">*DEAD* </span>';
+            var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
+            if (titleElt) titleElt.innerHTML = txt + titleElt.innerHTML;
+          }
+        }
+        loadUrl (getHitUrl(id), urlLoaded);
+      }
+
       // Facebook profile
       makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + id}).appendChild(document.createTextNode('Facebook Profile'));
       statsDiv.appendChild(document.createTextNode(' | '));
@@ -10540,6 +10553,43 @@ function cycleSavedList(listName) {
 
 /******************************** HTML/DOM ********************************/
 
+// Load URL and return the untagged response text (synchronous)
+function loadUrl (url) {
+  try {
+    var xmlHTTP = new XMLHttpRequest();
+    DEBUG('Loading URL (synch): ' + url);
+    xmlHTTP.open('GET', url, false);
+    xmlHTTP.send(null);
+    return xmlHTTP.responseText.untag();
+  } catch (ex) {
+    DEBUG ('@loadUrl (synch): ' + ex);
+    return false;
+  }
+}
+
+// Load URL and hook the status_change to the function (asynchronous)
+function loadUrl (url, funcStateChange) {
+  try {
+    var xmlHTTP = new XMLHttpRequest();
+    DEBUG('Loading URL (asynch): ' + url);
+    xmlHTTP.onreadystatechange = funcStateChange;
+    xmlHTTP.open('GET', getHitUrl(id), true);
+    xmlHTTP.send(null);
+  } catch (ex) {
+    // Ignore exceptions for this
+    DEBUG ('@loadUrl (asynch): ' + ex);
+  }
+}
+
+function getHitUrl (targetId) {
+  var hitURL = document.location.href;
+  hitURL = hitURL.replace(/xw_controller=\w+/,'xw_controller=hitlist');
+  hitURL = hitURL.replace(/xw_action=\w+/,'xw_action=set');
+  hitURL += hitURL.replace('#','');
+  hitURL += '&target_id=' + targetId;
+  return hitURL;
+}
+
 function stripURI(img) {
   img = img.split('"')[1];
   return img.replace('" />', '');
@@ -10681,20 +10731,6 @@ function $x(p, c) {
 function xpath(query, element) {
   var elt = (element == null) ? document : element;
   return document.evaluate(query, elt, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-}
-
-// Load URL and return the untagged response text
-function loadURL (url) {
-  try {
-    var xmlHTTP = new XMLHttpRequest();
-    DEBUG('Loading URL: ' + url);
-    xmlHTTP.open('GET', url, false);
-    xmlHTTP.send(null);
-    return xmlHTTP.responseText.untag();
-  } catch (ex) {
-    DEBUG ('@loadURL: ' + ex);
-    return false;
-  }
 }
 
 // Toggle checkbox element and return true if it is checked
@@ -10860,7 +10896,7 @@ function getDecimalTime(decimalTime) {
   return strTime.replace('00','0');
 }
 
-/******************************** Base64 DECODING ********************************/
+/******************************** Base64 Logic ********************************/
 
 function decodeID (strID) {
   // Unescape and clean up the ID first (for %3D string, non-base 64 strings etc)
