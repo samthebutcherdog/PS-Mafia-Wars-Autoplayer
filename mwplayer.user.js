@@ -14,7 +14,7 @@
 */
 
 /**
-* @version 1.0.42
+* @version 1.0.43
 * @package Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -33,14 +33,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.42
+// @version     1.0.43
 // ==/UserScript==
 
 
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.42',
-  build: '148',
+  version: '1.0.43',
+  build: '149',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -9293,9 +9293,20 @@ function goHome() {
   // Find the visible home link.
   var elt = xpathFirst('//div[@id="nav_link_home_unlock"]//a');
   if (!elt) {
-    DEBUG('Can\'t find home link to click. Using fallback method.');
-    loadHome();
-    return;
+    // Find the visible home link.
+    var elts = $x('//div[@class="nav_link home_link"]//a');
+    for (var i = 0, numElts=elts.length; i < numElts; ++i) {
+      if (elts[i].scrollWidth) {
+        elt = elts[i];
+        break;
+      }
+    }
+
+    if (!elt) {
+      DEBUG('Can\'t find home link to click. Using fallback method.');
+      loadHome();
+      return;
+    }
   }
   clickElement(elt);
   DEBUG('Clicked to go home.');
@@ -9469,9 +9480,19 @@ function goJob(jobno, context) {
 function goFightNav() {
   var elt = xpathFirst('//div[@id="nav_link_fight_unlock"]//a');
   if (!elt) {
-    addToLog('warning Icon', 'Can\'t find fight nav link to click. Using fallback method.');
-    loadFightNav();
-    return;
+    // Find the visible fight link
+    var elts = $x('//div[@class="nav_link fight_link"]//a');
+    for (var i = 0, numElts=elts.length; i < numElts; ++i) {
+      if (elts[i].scrollWidth) {
+        elt = elts[i];
+        break;
+      }
+    }
+
+    if (!elt) {
+      addToLog('warning Icon', 'Can\'t find fight nav link to click.');
+      return;
+    }
   }
   clickElement(elt);
   DEBUG('Clicked to go to fights.');
