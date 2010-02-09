@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '143',
+  build: '144',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1061,38 +1061,70 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
     ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
     ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100],
-	// BANGKOK EPISODE 3
-	['Secure A Pirate Vessel',43,39,3,BANGKOK,46],                             // CHAPTER 1
+    // BANGKOK EPISODE 3
+    ['Secure A Pirate Vessel',43,39,3,BANGKOK,46],                             // CHAPTER 1
     ['Hire An Unsavory Crew',35,40,3,BANGKOK,53],                              // CHAPTER 1
     ['Take Down A Rival Pirate Outfit',106,41,3,BANGKOK,146],                  // CHAPTER 1  HELP JOB
-	['Hijack A Boat Load Of Electronics',35,43,3,BANGKOK,53],                  // CHAPTER 2  CHOICE POINT (Yakuza = 43, Triad = 46)
+    ['Hijack A Boat Load Of Electronics',35,43,3,BANGKOK,53],                  // CHAPTER 2  CHOICE POINT (Yakuza = 43, Triad = 46)
     ['Truck The Cargo To Kuala Lumpur',60,44,3,BANGKOK,93],                    // CHAPTER 2  Yakuza
     ['Smuggle Cigarettes Back Into Thailand',60,45,3,BANGKOK,93],              // CHAPTER 2  Yakuza
     ['Ship The Cargo To Jakarta',49,47,3,BANGKOK,75],                          // CHAPTER 2  Triad
     ['Return With A Shipment Of Weapons',49,48,3,BANGKOK,75],                  // CHAPTER 2  Triad
-	['Steal Shipping Manifests',46,49,3,BANGKOK,71],                           // CHAPTER 3  CHOICE POINT (Yakuza = 49, Triad = 52)
+    ['Steal Shipping Manifests',46,49,3,BANGKOK,71],                           // CHAPTER 3  CHOICE POINT (Yakuza = 49, Triad = 52)
     ['Steal Japanese Auto Shipping Containers',56,53,3,BANGKOK,88],            // CHAPTER 3  Triad
     ['Offload The Cars Onto A Waiting Barge',60,54,3,BANGKOK,93],              // CHAPTER 3  Triad
     ['Hire Divers To Retrieve The Gold Bars',49,51,3,BANGKOK,75],              // CHAPTER 3  Yakuza
-	['Sink A Chinese Metals Freighter',53,50,3,BANGKOK,84],                    // CHAPTER 3  Yakuza
-	['Sink A Fleet Vessel',107,55,3,BANGKOK,135],                              // FINALE
+    ['Sink A Chinese Metals Freighter',53,50,3,BANGKOK,84],                    // CHAPTER 3  Yakuza
+    ['Sink A Fleet Vessel',107,55,3,BANGKOK,135],                              // FINALE
     ['Send Captain Mok Overboard',0,56,3,BANGKOK,0],                           // Boss job no energy or exp points known yet
-	// BANGKOK EPISODE 4
-	['Buy Some Chemicals On The Black Market',68,58,4,BANGKOK,84],             // CHAPTER 1
-	['Make Contact With The United Wa State Army',52,59,4,BANGKOK,64],         // CHAPTER 1
-	['Ambush A Burmese Army Convoy',144,60,4,BANGKOK,160],                     // CHAPTER 1  HELP JOB
-	['Establish Contact With A CIA Agent',48,62,4,BANGKOK,60],                 // CHAPTER 2  CHOICE POINT (Yakuza = 62, Triad = 65)
-	['Arrange To Process It In Bangkok',80,64,4,BANGKOK,100],                  // CHAPTER 2  Yakuza
-	['Set Up An Opium Shipment',76,63,4,BANGKOK,92],                           // CHAPTER 2  Yakuza
-	['Set Up The Import Of Illegal Chinese Arms',64,66,4,BANGKOK,80],          // CHAPTER 2  Triad
-	['Ship The Yaa Baa Payment To Phuket',60,67,4,BANGKOK,76],                 // CHAPTER 2  Triad
+    // BANGKOK EPISODE 4
+    ['Buy Some Chemicals On The Black Market',68,58,4,BANGKOK,84],             // CHAPTER 1
+    ['Make Contact With The United Wa State Army',52,59,4,BANGKOK,64],         // CHAPTER 1
+    ['Ambush A Burmese Army Convoy',144,60,4,BANGKOK,160],                     // CHAPTER 1  HELP JOB
+    ['Establish Contact With A CIA Agent',48,62,4,BANGKOK,60],                 // CHAPTER 2  CHOICE POINT (Yakuza = 62, Triad = 65)
+    ['Arrange To Process It In Bangkok',80,64,4,BANGKOK,100],                  // CHAPTER 2  Yakuza
+    ['Set Up An Opium Shipment',76,63,4,BANGKOK,92],                           // CHAPTER 2  Yakuza
+    ['Set Up The Import Of Illegal Chinese Arms',64,66,4,BANGKOK,80],          // CHAPTER 2  Triad
+    ['Ship The Yaa Baa Payment To Phuket',60,67,4,BANGKOK,76],                 // CHAPTER 2  Triad
     ['Betray Commander Chang and the UWSA',52,68,4,BANGKOK,64],                // CHAPTER 3  CHOICE POINT (Yakuza = 68, Triad = 71)
-	['Steal A Seized Drug Shipment',64,70,4,BANGKOK,80],                       // CHAPTER 3  Yakuza
-	['Pass On Information To The Thai Police',44,69,4,BANGKOK,56],             // CHAPTER 3  Yakuza
-	['Eliminate An Insurgent Escort',60,72,4,BANGKOK,72],                      // CHAPTER 3  Triad
-	['Make Off With Stolen Military Hardware',56,73,4,BANGKOK,68],             // CHAPTER 3  Triad
-	['Attack Chang\'s Heroin-Processing Facility',88,74,4,BANGKOK,112],        // FINALE
-	['Kill Commander Chang',0,75,4,BANGKOK,0]                                  // BOSS job no energy or exp points known yet
+    ['Steal A Seized Drug Shipment',64,70,4,BANGKOK,80],                       // CHAPTER 3  Yakuza
+    ['Pass On Information To The Thai Police',44,69,4,BANGKOK,56],             // CHAPTER 3  Yakuza
+    ['Eliminate An Insurgent Escort',60,72,4,BANGKOK,72],                      // CHAPTER 3  Triad
+    ['Make Off With Stolen Military Hardware',56,73,4,BANGKOK,68],             // CHAPTER 3  Triad
+    ['Attack Chang\'s Heroin-Processing Facility',88,74,4,BANGKOK,112],        // FINALE
+    ['Kill Commander Chang',0,75,4,BANGKOK,0],                                 // BOSS job no energy or exp points known yet
+    // BANGKOK EPISODE 5A-Oyabun
+    ['Ship Burmese Sapphires Into Thailand',72,77,5,BANGKOK,92],               // CHAPTER 1
+    ['Smuggle The Sapphires Into Tokyo',52,78,5,BANGKOK,68],                   // CHAPTER 1
+    ['Fight Off A Minato-Kai Sponsored Hit',168,79,5,BANGKOK,188],             // CHAPTER 1  HELP JOB
+    ['Meet With Boss Matsumura\'s Advisor',56,81,5,BANGKOK,72],                // CHOICE POINT CHAPTER 2 (Yakuza = 81, Triad = 84)
+    ['Help Broker A Minato-Matsumura Peace',68,82,5,BANGKOK,88],               // CHAPTER 2  Yakuza
+    ['Take A Piece Of The Kabukicho Action',68,83,5,BANGKOK,88],               // CHAPTER 2  Yakuza
+    ['Assassinate The Minato-Kai Family Head',64,85,5,BANGKOK,102],            // CHAPTER 2  Triad
+    ['Frame An Enemy For The Murder',67,86,5,BANGKOK,106],                     // CHAPTER 2  Triad
+    ['Talk With A Police Insider About Matsumura',40,87,5,BANGKOK,52],         // CHOICE POINT CHAPTER 3 (Yakuza = 87, Triad = 90)
+    ['Gather More Evidence Of A Betrayal',80,88,5,BANGKOK,104],                // CHAPTER 3  Yakuza
+    ['Get The Support Of The Yakuza Families',84,89,5,BANGKOK,108],            // CHAPTER 3  Yakuza
+    ['Spread Distrust Among The Yakuza Families',78,91,5,BANGKOK,124],         // CHAPTER 3  Triad
+    ['Start A War Between Matsumura and Minato',78,92,5,BANGKOK,124],          // CHAPTER 3  Triad
+    ['Remove Matsumura\'s Loyal Lieutenants',104,93,5,BANGKOK,132],            // FINALE
+    ['Execute Oyabun Matsumura',0,94,5,BANGKOK,0],                             // BOSS JOB no energy or exp points known yet
+    // BANGKOK EPISODE 5B-Dragon Head
+    ['Set Up A Drug Shipment To China',49,86,6,BANGKOK,79],                    // CHAPTER 1
+    ['Dodge Customs At The Port of Hong Kong',64,87,6,BANGKOK,102],            // CHAPTER 1
+    ['Win A Shoot-Out With The Kowloon Police',149,88,6,BANGKOK,208],          // CHAPTER 1  HELP JOB
+    ['Intimidate Wealthy Expatriates',64,90,6,BANGKOK,102],                    // CHOICE POINT CHAPTER 2 (Yakuza = 90, Triad = 93)
+    ['Make An Example Of A Wealthy Industrialist',64,91,6,BANGKOK,102],        // CHAPTER 2  Yakuza
+    ['Fence The Goods Stolen From The Mansion',60,92,6,BANGKOK,97],            // CHAPTER 2  Yakuza
+    ['Extort The Head Of The Hong Kong Polo Club',67,94,6,BANGKOK,106],        // CHAPTER 2  Triad
+    ['Fix The Hong Kong Polo Invitational',64,95,6,BANGKOK,102],               // CHAPTER 2  Triad
+    ['Talk With Wei\'s Disloyal Enforcers',71,96,6,BANGKOK,115],                // CHOICE POINT CHAPTER 3 (Yakuza = 96, Triad = 99)
+    ['Sneak An Industrial Spy Into Hong Kong',64,97,6,BANGKOK,102],            // CHAPTER 3  Yakuza
+    ['Break In To Cheng-Wei Ballistics',67,98,6,BANGKOK,106],                  // CHAPTER 3  Yakuza
+    ['Kidnap One Of Wei\'s Trusted Advisors',56,100,6,BANGKOK,88],             // CHAPTER 3  Triad
+    ['Bury The Body Under A Construction Site',60,101,6,BANGKOK,97],           // Chapter 3  Triad
+    ['Attack Wei\'s Gambling Halls',96,102,6,BANGKOK,155],                     // FINALE
+    ['Dispose Of Mountain Master Wei',0,103,6,BANGKOK,0]                       // BOOS JOB
   );
 
   var missionTabs = new Array(
@@ -1106,7 +1138,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // MOSCOW
     ['Baklany','Boets','Brigadir','Avtoritet','Vor','Pakhan'],
     // BANGKOK
-    ['Brawler','Criminal','Pirate','Commandant']
+    ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head']
   );
 
   var requirementJob = new Array(
@@ -6525,10 +6557,14 @@ function chooseSides() {
                     [11, 14, 'Intercept An Ammo Shipment'],
                     [24, 27, 'Set Up A Phony Business'],
                     [30, 33, 'Pay Off The Guards At Bangkwang Prison'],
-					[43, 46, 'Hijack A Boat Load Of Electronics'],        // EPISODE 3 CHAPTER 1
-					[49, 52, 'Steal Shipping Manifests'],                 // EPISODE 3 CHAPTER 2
-					[62, 65, 'Establish Contact With A CIA Agent'],       // EPISODE 4 CHAPTER 1
-					[68, 71, 'Betray Commander Chang and the UWSA']       // EPISODE 4 CHAPTER 2
+                    [43, 46, 'Hijack A Boat Load Of Electronics'],           // EPISODE 3 CHAPTER 2
+                    [49, 52, 'Steal Shipping Manifests'],                    // EPISODE 3 CHAPTER 3
+                    [62, 65, 'Establish Contact With A CIA Agent'],          // EPISODE 4 CHAPTER 2
+                    [68, 71, 'Betray Commander Chang and the UWSA'],         // EPISODE 4 CHAPTER 3
+                    [81, 84, 'Meet With Boss Matsumura\'s Advisor'],         // EPISODE 5A CHAPTER 2
+                    [87, 90, 'Talk With A Police Insider About Matsumura'],  // EPISODE 5A CHAPTER 3
+                    [90, 93, 'Intimidate Wealthy Expatriates'],              // EPISODE 5B CHAPTER 2
+                    [96, 99, 'Talk With Wei\'s Disloyal Enforcers']          // EPISODE 5B CHAPTER 3
                    );
 
   choiceJobs.forEach( function(job) {
