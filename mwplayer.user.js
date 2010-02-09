@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.41',
-  build: '145',
+  build: '146',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -2856,6 +2856,26 @@ function getDisplayedOpponents(element, forceRefresh) {
     if (!opponent.profile) continue;
     opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split('user=')[1].split('\'')[0].split('&')[0]);
     if (!opponent.id) continue;
+
+    // Do icecheck from fightlist
+    if (!running) {
+      var urlLoaded = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          s = this.responseText;
+          var id = decodeID(s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0]);
+          var profElt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
+          if (profElt) {
+            if (/You can't add/.test(s.untag())) {
+              profElt.parentNode.innerHTML = '<span class="bad">*DEAD* </span>' + profElt.parentNode.innerHTML;
+            } else {
+              profElt.parentNode.innerHTML = '<span class="good">*ALIVE* </span>' + profElt.parentNode.innerHTML;
+            }
+          }
+        }
+      }
+      loadUrl (getHitUrl(opponent.id), urlLoaded);
+    }
+
     opponent.attack  = linkElt;
     opponent.mafia   = rowData[1] ? parseInt(rowData[1].innerHTML) : 0;
     opponent.level   = parseInt(nameAndLevel.innerHTML.split('Level ')[1]);
@@ -10573,7 +10593,7 @@ function loadUrl (url, funcStateChange) {
     var xmlHTTP = new XMLHttpRequest();
     DEBUG('Loading URL (asynch): ' + url);
     xmlHTTP.onreadystatechange = funcStateChange;
-    xmlHTTP.open('GET', getHitUrl(id), true);
+    xmlHTTP.open('GET', url, true);
     xmlHTTP.send(null);
   } catch (ex) {
     // Ignore exceptions for this
