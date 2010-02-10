@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.43',
-  build: '149',
+  build: '150',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1921,7 +1921,8 @@ function autoHeal() {
 
   // Use our custom instant-heal element (if present).
   var healElt = document.getElementById('ap_heal');
-  if (healElt) {
+  // FIXME: Should make quick healing optional
+  if (false && healElt) {
     clickElement(healElt);
     DEBUG('Clicked to heal immediately.');
     return false;
@@ -3092,9 +3093,9 @@ function getDisplayedOpponents(element, forceRefresh) {
           var profElt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
           if (profElt) {
             if (/You can't add/.test(s.untag())) {
-              profElt.parentNode.innerHTML = '<span class="bad">*DEAD* </span>' + profElt.parentNode.innerHTML;
+              profElt.parentNode.innerHTML = '<span class="bad">*ICED* </span>' + profElt.parentNode.innerHTML;
             } else {
-              profElt.parentNode.innerHTML = '<span class="good">*ALIVE* </span>' + profElt.parentNode.innerHTML;
+              profElt.parentNode.innerHTML = '<span class="good">*DICE!* </span>' + profElt.parentNode.innerHTML;
             }
           }
         }
@@ -7295,9 +7296,9 @@ function customizeProfile() {
       if (!running && !removeElt) {
         var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
-            var txt = '<span class="good">*ALIVE* </span>';
+            var txt = '<span class="good">*DICE!* </span>';
             if (/You can't add/.test(this.responseText.untag()))
-              txt = '<span class="bad">*DEAD* </span>';
+              txt = '<span class="bad">*ICED* </span>';
             var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
             if (titleElt) titleElt.innerHTML = txt + titleElt.innerHTML;
           }
