@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.45
-// @build       161
+// @version     1.0.46
+// @build       162
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.45',
-  build: '161',
+  version: '1.0.46',
+  build: '162',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -10675,7 +10675,7 @@ function updateScript() {
         if (result.status != 200) {
           return;
         }
-        if (!result.responseText.match(/@build\s+'(\d+)/)) return;
+        if (!result.responseText.match(/@build\s+(\d+)/)) return;
         var theOtherBuild = parseInt(RegExp.$1);
         var runningBuild = parseInt(SCRIPT.build);
         var theOtherVersion = result.responseText.match(/@version\s+([\d.]+)/)? RegExp.$1 : '';
