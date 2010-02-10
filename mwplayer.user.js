@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.43',
-  build: '150',
+  build: '151',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -2813,7 +2813,7 @@ function autoHitman() {
   }
 
   // Get the list of targets.
-  var opponents = getHitlist(innerPageElt);
+  var opponents = getHitlist(innerPageElt, true);
   if (!opponents) return false;
 
   // Get the targets that are acceptable.
@@ -3152,7 +3152,7 @@ function findFightOpponent(element) {
   }
 
   // Check the fight table.
-  var opponents = getDisplayedOpponents(element);
+  var opponents = getDisplayedOpponents(element, true);
   if (!opponents) {
     // No opponents displayed on this page.
     return newOpponents[Math.floor(Math.random() * len)];
@@ -6712,7 +6712,7 @@ function innerPageChanged() {
 
   // Perform actions here not requiring response logging
   doParseMessages();
-  if(running){
+  if (running) {
     doQuickClicks();
     if(isChecked('autoShareWishlist') && !timeLeftGM('wishListTimer')){
       autoWishlist();
@@ -7572,6 +7572,9 @@ function customizeJobs() {
 }
 
 function customizeFight() {
+  // No need to do this when AP is running
+  if (running) return true;
+
   var opponents = getDisplayedOpponents(innerPageElt, true);
   if (!opponents) return false;
 
@@ -7592,6 +7595,9 @@ function customizeFight() {
 }
 
 function customizeHitlist() {
+  // No need to do this when AP is running
+  if (running) return true;
+
   // Extras for hitlist.
   if (!onHitlistTab()) return false;
 
