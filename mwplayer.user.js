@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.43',
-  build: '154',
+  build: '155',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3836,7 +3836,7 @@ function saveSettings() {
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
-                            'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade']);
+                            'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade', 'showPulse']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
