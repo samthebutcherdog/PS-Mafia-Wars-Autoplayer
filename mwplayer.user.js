@@ -38,7 +38,7 @@
 
 var SCRIPT = {
   version: '1.0.46',
-  build: '164',
+  build: '165',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -918,7 +918,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var statsOpen = false;
   var didJobCalculations = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', '«', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', 'ï¿½', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -3865,7 +3865,7 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'showLevel']);
+                            'showLevel','hideFriendLadder']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4650,7 +4650,7 @@ function createSettingsBox() {
 
   makeElement('script', document.getElementsByTagName('head')[0], {'type':'text/javascript'}).appendChild(document.createTextNode(
     '/***********************************************\n' +
-    '* Tab Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    '* Tab Content script v2.2- ï¿½ Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     '* This notice MUST stay intact for legal use\n' +
     '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
     '***********************************************/\n'  +
@@ -5061,6 +5061,12 @@ function createDisplayTab() {
   title = 'Hide mailing list';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Mail List '));
+
+  // Hide Mailing List
+  id = 'hideFriendLadder';
+  title = 'Hide friend ladder';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Friend Ladder '));
 
   return displayTab;
 }
@@ -6485,7 +6491,7 @@ function createStatWindow() {
 
   makeElement('script', document.getElementsByTagName('head')[0], {'type':'text/javascript'}).appendChild(document.createTextNode(
     '/***********************************************\n' +
-    '* Tab Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    '* Tab Content script v2.2- ï¿½ Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     '* This notice MUST stay intact for legal use\n' +
     '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
     '***********************************************/\n'  +
@@ -7080,6 +7086,9 @@ function refreshMWAPCSS() {
 
   // Deal with limited time offers
   hideElement(xpathFirst('//div[@class="tab_box" and contains(.,"Limited Time Offers")]'), isChecked('hideOffer'));
+
+  // Deal with friends ladder
+  hideElement(xpathFirst('//div[@class="friendladder_box"]'), isChecked('hideFriendLadder'));
 
   // Deal the mailing list
   hideElement(xpathFirst('//div[contains(@style,"mailing_list_bg")]'), isChecked('hideMailList'));
@@ -8149,6 +8158,7 @@ function debugDumpSettings() {
         'Hide Feature Notice: <strong>'+ showIfUnchecked(GM_getValue('hideNotice')) + '</strong><br>' +
         'Hide Mailing List: <strong>'+ showIfUnchecked(GM_getValue('hideMailList')) + '</strong><br>' +
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
+        'Hide Friend Ladder: <strong>'+ showIfUnchecked(GM_getValue('hideFriendLadder')) + '</strong><br>' +
         'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
