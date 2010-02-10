@@ -14,8 +14,7 @@
 */
 
 /**
-* @version 1.0.43
-* @package Facebook Mafia Wars Autoplayer
+* @package: Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
@@ -33,18 +32,19 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.43
+// @version     1.0.44
+// @build       160
 // ==/UserScript==
 
-
 var SCRIPT = {
-  url: 'http://userscripts.org/scripts/source/64720.user.js',
-  version: '1.0.43',
-  build: '156',
+  version: '1.0.44',
+  build: '160',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
   presentationurl: 'http://userscripts.org/scripts/show/64720',
+  url: 'http://userscripts.org/scripts/source/64720.user.js',
+  metadata: 'http://userscripts.org/scripts/source/64720.meta.js',
   controller: '/remote/html_server.php?&xw_controller=',
   action: '&xw_action=',
   city: '&xw_city=',
@@ -3047,7 +3047,7 @@ function getHitlist(element, forceRefresh) {
     if (!running && isChecked('showLevel')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
-          s = this.responseText;
+          var s = this.responseText;
           var id = decodeID(s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0]);
           var profElt = xpathFirst('.//table[@class="hit_list"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
           if (profElt) {
@@ -3121,14 +3121,14 @@ function getDisplayedOpponents(element, forceRefresh) {
     if (!running && isChecked('showPulse')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
-          s = this.responseText;
+          var s = this.responseText;
           var id = decodeID(s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0]);
           var profElt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
           if (profElt) {
             if (/You can't add/.test(s.untag())) {
               profElt.parentNode.innerHTML = '<span class="bad">*ICED* </span>' + profElt.parentNode.innerHTML;
             } else {
-              profElt.parentNode.innerHTML = '<span class="good">*DICE!* </span>' + profElt.parentNode.innerHTML;
+              profElt.parentNode.innerHTML = '<span class="good">*LIVE* </span>' + profElt.parentNode.innerHTML;
             }
           }
         }
@@ -7350,7 +7350,7 @@ function customizeProfile() {
       if (!running && !removeElt) {
         var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
-            var txt = '<span class="good">*DICE!* </span>';
+            var txt = '<span class="good">*LIVE* </span>';
             if (/You can't add/.test(this.responseText.untag()))
               txt = '<span class="bad">*ICED* </span>';
             var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
@@ -10668,12 +10668,9 @@ function logResponse(rootElt, action, context) {
 //update the script (by Richard Gibson; changed by ms99 and blannie)
 function updateScript() {
   try {
-    if (!GM_getValue) {
-      return;
-    }
     GM_xmlhttpRequest({
       method: 'GET',
-      url: SCRIPT.url + '?source', // don't increase the 'installed' count; just for checking
+      url: SCRIPT.metadata,
       onload: function(result) {
         if (result.status != 200) {
           return;
@@ -10684,14 +10681,12 @@ function updateScript() {
         var theOtherVersion = result.responseText.match(/@version\s+([\d.]+)/)? RegExp.$1 : '';
         if (theOtherBuild < runningBuild) {
           if (window.confirm('You have a beta version (build ' + runningBuild + ') installed.\n\nDo you want to DOWNGRADE to the most recent official release (version ' + theOtherVersion + ')?\n')) {
-            //clearSettings();
             window.location.href = SCRIPT.url;
           }
           return;
         } else if (theOtherBuild > runningBuild ||
                    theOtherVersion != SCRIPT.version) {
           if (window.confirm('Version ' + theOtherVersion + ' is available!\n\n' + 'Do you want to upgrade?' + '\n')) {
-            //clearSettings();
             window.location.href = SCRIPT.url;
           }
         } else {
