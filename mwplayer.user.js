@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.43',
-  build: '153',
+  build: '154',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1924,11 +1924,11 @@ function autoHeal() {
   if (healElt) {
     // FIXME: Should make quick healing optional
     if (false) {
-      healElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace('inner_page', SCRIPT.ajaxPage));
+      healElt.setAttribute("onclick", healElt.getAttribute("onclick").replace('inner_page', SCRIPT.ajaxPage));
       DEBUG('Clicked to quick heal.');
       return false;
     } else {
-      healElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace(SCRIPT.ajaxPage,'inner_page'));
+      healElt.setAttribute("onclick", healElt.getAttribute("onclick").replace(SCRIPT.ajaxPage,'inner_page'));
     }
   // If not, go to hospital manually
   } else  {
