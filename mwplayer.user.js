@@ -38,7 +38,7 @@
 
 var SCRIPT = {
   version: '1.0.46',
-  build: '163',
+  build: '164',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -5025,7 +5025,7 @@ function createDisplayTab() {
   id = 'showLevel';
   title = 'Show player level on the hit list page';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show level on the hti list page'));
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show level on the hit list page'));
 
   // Hiding
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
@@ -10164,7 +10164,9 @@ function logFightResponse(rootElt, resultElt, context) {
 
     // Click Attack Again immediately to milk our cash-cow
     if (experience && canSpendStamina() && ptsToNextLevel > 6) {
-      var attackAgain = isChecked ('staminaReattack') && parseCash(cost) >= GM_getValue('reattackThreshold');
+      var attackAgain = isChecked ('staminaReattack') &&
+                        parseCash(cost) >= GM_getValue('reattackThreshold') &&
+                        (cost.indexOf(cities[city][CITY_CASH_SYMBOL]) != -1);
       if (attackAgain && attackAgainElt) {
         // Attack again immediately.
         Autoplay.fx = function() {
