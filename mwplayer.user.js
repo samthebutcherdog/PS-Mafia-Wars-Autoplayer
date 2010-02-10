@@ -38,7 +38,7 @@
 
 var SCRIPT = {
   version: '1.0.46',
-  build: '162',
+  build: '163',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -10670,7 +10670,7 @@ function updateScript() {
   try {
     GM_xmlhttpRequest({
       method: 'GET',
-      url: SCRIPT.metadata,
+      url: SCRIPT.metadata + '?' + new Date().getTime(),
       onload: function(result) {
         if (result.status != 200) {
           return;
