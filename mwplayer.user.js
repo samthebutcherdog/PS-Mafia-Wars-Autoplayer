@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.43',
-  build: '151',
+  build: '152',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1921,14 +1921,19 @@ function autoHeal() {
 
   // Use our custom instant-heal element (if present).
   var healElt = document.getElementById('ap_heal');
-  // FIXME: Should make quick healing optional
-  if (false && healElt) {
-    clickElement(healElt);
-    DEBUG('Clicked to heal immediately.');
-    return false;
+  if (healElt) {
+    // FIXME: Should make quick healing optional
+    if (quickHeal) {
+      healElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace('inner_page', SCRIPT.ajaxPage));
+      DEBUG('Clicked to quick heal.');
+      return false;
+    } else {
+      healElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace(SCRIPT.ajaxPage,'inner_page'));
+    }
   // If not, go to hospital manually
   } else  {
     DEBUG('WARNING: Can\'t find instant-heal link.');
+
     // Go to the hospital.
     var hospitalElt = xpathFirst('//a[@class="heal_link"]');
     if (hospitalElt) {
