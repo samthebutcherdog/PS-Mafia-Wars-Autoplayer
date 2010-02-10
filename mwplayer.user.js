@@ -40,7 +40,7 @@
 var SCRIPT = {
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   version: '1.0.43',
-  build: '155',
+  build: '156',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3044,6 +3044,34 @@ function getHitlist(element, forceRefresh) {
       opponent.bounty = RegExp.lastMatch;
     }
 
+    if (!running && isChecked('showLevel')) {
+      var urlLoaded = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          s = this.responseText;
+          var id = decodeID(s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0]);
+          var profElt = xpathFirst('.//table[@class="hit_list"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
+          if (profElt) {
+              var testManiac = /level\s([a-z,A-Z,0-9]+)\sManiac/.test(s.untag());
+              var resultManiac = RegExp.$1;
+              if (testManiac == true) {
+                  profElt.parentNode.innerHTML = '<span class="good">'+resultManiac+' </span>' + profElt.parentNode.innerHTML;
+              }
+              var testMogul = /level\s([a-z,A-Z,0-9]+)\sMogul/.test(s.untag());
+              var resultMogul = RegExp.$1;
+              if (testMogul == true) {
+                  profElt.parentNode.innerHTML = '<span class="good">'+resultMogul+' </span>' + profElt.parentNode.innerHTML;
+              }
+              var testFearless = /level\s([a-z,A-Z,0-9]+)\sFearless/.test(s.untag());
+              var resultFearless = RegExp.$1;
+              if (testFearless == true) {
+                  profElt.parentNode.innerHTML = '<span class="good">'+resultFearless+' </span>' + profElt.parentNode.innerHTML;
+              }
+          }
+        }
+      }
+      loadUrl (getProfileUrl(opponent.id), urlLoaded);
+    }
+
     getHitlist.opponents.push(opponent);
   }
   DEBUG(getHitlist.opponents.length + ' hitlist target(s) found.');
@@ -3836,7 +3864,8 @@ function saveSettings() {
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
-                            'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade', 'showPulse']);
+                            'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
+                            'showLevel']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4987,6 +5016,16 @@ function createDisplayTab() {
   title = 'Show ICED status on the fight list page';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show pulse on the fight list page'));
+
+  // Show Level on the hit list page
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'showLevel';
+  title = 'Show player level on the hit list page';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show level on the hti list page'));
 
   // Hiding
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
@@ -8112,6 +8151,7 @@ function debugDumpSettings() {
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
+        'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
@@ -10811,6 +10851,16 @@ function getHitUrl (targetId) {
   hitURL += hitURL.replace('#','');
   hitURL += '&target_id=' + targetId;
   return hitURL;
+}
+
+function getProfileUrl (useId) {
+  var profileURL = document.location.href;
+  DEBUG(profileURL);
+  profileURL = profileURL.replace(/xw_controller=\w+/,'xw_controller=stats');
+  profileURL = profileURL.replace(/xw_action=\w+/,'xw_action=view');
+  profileURL += profileURL.replace('#','');
+  profileURL += '&user=' + useId;
+  return profileURL;
 }
 
 function stripURI(img) {
