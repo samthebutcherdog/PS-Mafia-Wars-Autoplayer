@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.49
-// @build       167
+// @build       168
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.49',
-  build: '167',
+  build: '168',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -4416,46 +4416,6 @@ function minBankCheck() {
 
 function createLogBox() {
   var title;
-  // Define CSS styles.
-  makeElement('style', document.getElementsByTagName('head')[0], {'type':'text/css'}).appendChild(document.createTextNode(
-    '#mafiaLogBox div.mouseunderline:hover{text-decoration:underline}' +
-    '#mafiaLogBox .logEvent{border-bottom:1px solid #333; padding:4px 0px}' +
-    '#mafiaLogBox .eventTime{color:#888; font-size: 10px; width:75px;  float:left}' +
-    '#mafiaLogBox .eventBody{width:330px; float:right}' +
-    '#mafiaLogBox .eventTime,#mafiaLogBox .eventIcon,#mafiaLogBox .eventBody{}' +
-    '#mafiaLogBox .eventBody .good {color:#52E259;font-weight:bold;}' +
-    '#mafiaLogBox .eventBody .bad {color:#EC2D2D;font-weight:bold;}' +
-    '#mafiaLogBox .eventBody .warn {color:#EC2D2D;}' +
-    '#mafiaLogBox .eventBody .money {color:#00CC00;font-weight:bold;}' +
-    '#mafiaLogBox .eventBody .expense {color:#FFD927;}' +
-    '#mafiaLogBox .eventBody .loot {color:#FF6633;}' +
-    '#mafiaLogBox .eventBody .user {color:#FFD927;}' +
-    '#mafiaLogBox .eventBody .attacker {color:#EC2D2D;}' +
-    '#mafiaLogBox .eventBody .job {color:#52E259;font-weight:bold;}' +
-    '#mafiaLogBox .clear{clear:both}' +
-    '#mafiaLogBox .logEvent.Icon{background-repeat: no-repeat; background-position: 75px}' +
-    '#mafiaLogBox .logEvent.process.Icon{background-image:url(' + stripURI(processIcon) + ')}' +
-    '#mafiaLogBox .logEvent.search.Icon{background-image:url(' + stripURI(searchIcon) + ')}' +
-    '#mafiaLogBox .logEvent.warning.Icon{background-image:url(' + stripURI(warningIcon) + ')}' +
-    '#mafiaLogBox .logEvent.info.Icon{background-image:url(' + stripURI(infoIcon) + ')}' +
-    '#mafiaLogBox .logEvent.lootbag.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
-    '#mafiaLogBox .logEvent.found.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
-    '#mafiaLogBox .logEvent.updateGood.Icon{background-image:url(' + stripURI(updateGoodIcon) + ')}' +
-    '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
-    '#mafiaLogBox .logEvent.pause.Icon{background-image:url(' + stripURI(pauseIcon) + ')}' +
-    '#mafiaLogBox .logEvent.play.Icon{background-image:url(' + stripURI(playIcon) + ')}' +
-    '#mafiaLogBox .logEvent.yeah.Icon{background-image:url(' + stripURI(yeahIcon) + ')}' +
-    '#mafiaLogBox .logEvent.omg.Icon{background-image:url(' + stripURI(omgIcon) + ')}' +
-    '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
-    '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
-    '#mafiaLogBox .logEvent.health.Icon{background-image:url(' + stripURI(healthIcon) + ')}' +
-    '#mafiaLogBox .logEvent.cash.Icon{background-image:url(' + stripURI(cashIcon) + ')}' +
-    '#mafiaLogBox .logEvent.cashCuba.Icon{background-image:url(' + stripURI(cashCubaIcon) + ')}' +
-    '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
-    '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
-    '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}'
-  ));
-
 
   var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 30px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
 
@@ -4525,48 +4485,6 @@ function createLogBox() {
 
 function createSettingsBox() {
   if (document.getElementById('settingsBox')) return;
-
-  if (!document.getElementById('ap_settings_css')) {
-    makeElement('style', document.getElementsByTagName('head')[0], {'id':'ap_settings_css', 'type':'text/css'}).appendChild(document.createTextNode(
-      '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-      '#settingsBox #tabNav div.selected{background : #666666;}' +
-      '#settingsBox #tabNav div a{color:#fff;font-weight:700}' +
-      '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
-      '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
-      '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
-      '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
-      '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
-      '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
-      '#settingsBox img, label, span, input, select {vertical-align: middle;}' +
-      '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
-      '#settingsBox #energyTab div {position: static;}' +
-      '#settingsBox #generalTab img, span, label, #mafiaTab img, span, label, #displayTab img, span, label, ' +
-      '#settingsBox #energyTab img, span, label {position: static;}' +
-      '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
-      '#settingsBox #energyTab select {position: static;}' +
-      '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
-      '#settingsBox #energyTab textarea {position: static;}' +
-      '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
-      '#settingsBox #energyTab input {position: static; margin: 0;}' +
-      '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
-      '#settingsBox #energyTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
-      '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, ' +
-      '#settingsBox #energyTab .rhs {position: static; float: left; padding: 3px;}' +
-      '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, ' +
-      '#settingsBox #energyTab .single {position: static; text-align: center}' +
-      '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
-      '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
-      '#settingsBox #staminaTab div {position: static;}' +
-      '#settingsBox #staminaTab img, span, label {position: static;}' +
-      '#settingsBox #staminaTab select {position: static;}' +
-      '#settingsBox #staminaTab textarea {position: static;}' +
-      '#settingsBox #staminaTab input {position: static; margin: 0;}' +
-      '#settingsBox #staminaTab .lhs {position: static; width: 40%; float: left; text-align: right; padding: 5px;}' +
-      '#settingsBox #staminaTab .rhs {position: static; float: left; padding: 5px;}' +
-      '#settingsBox #staminaTab .single {position: static; text-align: center}' +
-      '#settingsBox #staminaTab .hide {clear: both; visibility: hidden;}'
-    ));
-  }
 
   // This creates the settings box just like a facebook popup
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
@@ -4642,25 +4560,29 @@ function createSettingsBox() {
   makeElement('button', updateButton).appendChild(document.createTextNode('Check for Updates'));
   updateButton.addEventListener('click', updateScript, false);
 
-  // FIXME: Is it necessary to recreate this stuff repeatedly? Or is it just
-  //        a memory leak?
-  // Tab code from:http://www.dynamicdrive.com/dynamicindex17/tabcontent.htm converted into a data URI
-  makeElement('script', document.getElementsByTagName('head')[0], {'type':'text/javascript'})
-    .appendChild(document.createTextNode(decode64(tabURI)));
-
-  makeElement('script', document.getElementsByTagName('head')[0], {'type':'text/javascript'}).appendChild(document.createTextNode(
-    '/***********************************************\n' +
-    '* Tab Content script v2.2- � Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
-    '* This notice MUST stay intact for legal use\n' +
-    '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
-    '***********************************************/\n'  +
-    'var tabs=new ddtabcontent("tabNav"); //enter ID of Tab Container\n' +
-    'tabs.setpersist(true); //toogle persistence of the tabs\' state\n' +
-    'tabs.setselectedClassTarget("linkparent"); //"link" or "linkparent"\n' +
-    'tabs.init();'
-  ));
+  createDynamicDrive();
 
   DEBUG('Menu created.');
+}
+
+// Create Dynamic Drive Script
+function createDynamicDrive() {
+  var ddriveElt = document.getElementById('ddriveCode');
+  if (ddriveElt) ddriveElt.parentNode.removeChild(ddriveElt);
+
+  // Tab code from: http://www.dynamicdrive.com/dynamicindex17/tabcontent.htm converted into a data URI
+  makeElement('script', document.getElementsByTagName('head')[0], {'id':'ddriveCode','type':'text/javascript'})
+    .appendChild(document.createTextNode(decode64(tabURI) + '\n';
+    ' /***********************************************\n' +
+    ' /*** Tab Content script v2.2- Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
+    ' /*** This notice MUST stay intact for legal use\n' +
+    ' /*** Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
+    ' ***********************************************/\n'  +
+    ' var tabs=new ddtabcontent("tabNav"); //enter ID of Tab Container\n' +
+    ' tabs.setpersist(true); //toogle persistence of the tabs\' state\n' +
+    ' tabs.setselectedClassTarget("linkparent"); //"link" or "linkparent"\n' +
+    ' tabs.init();'
+  ));
 }
 
 // Create General Tab
@@ -6440,19 +6362,8 @@ function validateStaminaTab() {
 
 function createStatWindow() {
   if (settingsOpen === true) {
-    toggleSettings()
+    toggleSettings();
   }
-
-  makeElement('style', document.getElementsByTagName('head')[0], {'type':'text/css'}).appendChild(document.createTextNode(
-    '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-    '#statsWindow #sWindowTabNav div.selected{background : rgb(60,60,100);}' +
-    '#statsWindow #sWindowTabNav div a{color:#fff;font-weight:700}' +
-    '#statsWindow .sexy_button{position:absolute;background:black;border:1px solid #FFD927;color:#FFD927;cursor:pointer;display:block;float:left;font-size:14px;font-weight:700;padding:5px;text-decoration:none;width:auto}' +
-    '#statsWindow .sexy_button button{background:transparent;border:medium none #FFF;color:#FFD927;cursor:pointer;font-size:14px;font-weight:700;margin:0}' +
-    '#statsWindow .sexy_button button:hover{color:#BCD2EA;font-weight:700;text-decoration:none}' +
-    '#statsWindow .tabcontent{display:none;}' +
-    '#statsWindow label {font-weight: normal; color: #BCD2EA}'
-  ));
 
   // This creates the stats box just like a facebook popup
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'sWindowGenDialogPopDialog'});
@@ -6485,21 +6396,7 @@ function createStatWindow() {
 
   var statTab = makeElement('div', statsWindow, {'id':'statTab', 'class':'tabcontent'});
 
-  //Tab code from:http://www.dynamicdrive.com/dynamicindex17/tabcontent.htm converted into a data URI
-  makeElement('script', document.getElementsByTagName('head')[0], {'type':'text/javascript'})
-    .appendChild(document.createTextNode(decode64(tabURI)));
-
-  makeElement('script', document.getElementsByTagName('head')[0], {'type':'text/javascript'}).appendChild(document.createTextNode(
-    '/***********************************************\n' +
-    '* Tab Content script v2.2- � Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
-    '* This notice MUST stay intact for legal use\n' +
-    '* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code\n' +
-    '***********************************************/\n'  +
-    'var statTabs=new ddtabcontent("sWindowTabNav"); //enter ID of Tab Container\n' +
-    'statTabs.setpersist(true); //toogle persistence of the tabs\' state\n' +
-    'statTabs.setselectedClassTarget("linkparent"); //"link" or "linkparent"\n' +
-    'statTabs.init();'
-  ));
+  createDynamicDrive();
 
   DEBUG('Stat Menu Created.');
 }
@@ -6711,7 +6608,7 @@ function handlePublishing() {
     // Ignore exceptions
   }
   // Retry until window is closed
-  window.setTimeout(handlePublishing, 500);
+  window.setTimeout(handlePublishing, 2000);
   return;
 }
 
@@ -7079,7 +6976,98 @@ function refreshMWAPCSS() {
             // Hide feature notice updates
             (isChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
             ' {position: absolute !important; margin:0 !important; ' +
-            '  height:0 !important; width: 0 !important; display:none !important;}';
+            '  height:0 !important; width: 0 !important; display:none !important;}' +
+            // ********************** Stats Tab CSS **********************
+            '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
+            '#statsWindow #sWindowTabNav div.selected{background : rgb(60,60,100);}' +
+            '#statsWindow #sWindowTabNav div a{color:#fff;font-weight:700}' +
+            '#statsWindow .sexy_button{position:absolute;background:black;border:1px solid #FFD927;color:#FFD927;cursor:pointer;display:block;float:left;font-size:14px;font-weight:700;padding:5px;text-decoration:none;width:auto}' +
+            '#statsWindow .sexy_button button{background:transparent;border:medium none #FFF;color:#FFD927;cursor:pointer;font-size:14px;font-weight:700;margin:0}' +
+            '#statsWindow .sexy_button button:hover{color:#BCD2EA;font-weight:700;text-decoration:none}' +
+            '#statsWindow .tabcontent{display:none;}' +
+            '#statsWindow label {font-weight: normal; color: #BCD2EA}' +
+            // ********************** Settings Tab CSS **********************
+            '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
+            '#settingsBox #tabNav div.selected{background : #666666;}' +
+            '#settingsBox #tabNav div a{color:#fff;font-weight:700}' +
+            '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
+            '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
+            '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
+            '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
+            '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
+            '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
+            '#settingsBox img, label, span, input, select {vertical-align: middle;}' +
+            '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
+            '#settingsBox #energyTab div {position: static;}' +
+            '#settingsBox #generalTab img, span, label, #mafiaTab img, span, label, #displayTab img, span, label, ' +
+            '#settingsBox #energyTab img, span, label {position: static;}' +
+            '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
+            '#settingsBox #energyTab select {position: static;}' +
+            '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
+            '#settingsBox #energyTab textarea {position: static;}' +
+            '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
+            '#settingsBox #energyTab input {position: static; margin: 0;}' +
+            '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
+            '#settingsBox #energyTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
+            '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, ' +
+            '#settingsBox #energyTab .rhs {position: static; float: left; padding: 3px;}' +
+            '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, ' +
+            '#settingsBox #energyTab .single {position: static; text-align: center}' +
+            '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
+            '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
+            '#settingsBox #staminaTab div {position: static;}' +
+            '#settingsBox #staminaTab img, span, label {position: static;}' +
+            '#settingsBox #staminaTab select {position: static;}' +
+            '#settingsBox #staminaTab textarea {position: static;}' +
+            '#settingsBox #staminaTab input {position: static; margin: 0;}' +
+            '#settingsBox #staminaTab .lhs {position: static; width: 40%; float: left; text-align: right; padding: 5px;}' +
+            '#settingsBox #staminaTab .rhs {position: static; float: left; padding: 5px;}' +
+            '#settingsBox #staminaTab .single {position: static; text-align: center}' +
+            '#settingsBox #staminaTab .hide {clear: both; visibility: hidden;}' +
+            // ********************** Log Box CSS **********************
+            '#mafiaLogBox div.mouseunderline:hover{text-decoration:underline}' +
+            '#mafiaLogBox .logEvent{border-bottom:1px solid #333; padding:4px 0px}' +
+            '#mafiaLogBox .eventTime{color:#888; font-size: 10px; width:75px;  float:left}' +
+            '#mafiaLogBox .eventBody{width:330px; float:right}' +
+            '#mafiaLogBox .eventTime,#mafiaLogBox .eventIcon,#mafiaLogBox .eventBody{}' +
+            '#mafiaLogBox .eventBody .good {color:#52E259;font-weight:bold;}' +
+            '#mafiaLogBox .eventBody .bad {color:#EC2D2D;font-weight:bold;}' +
+            '#mafiaLogBox .eventBody .warn {color:#EC2D2D;}' +
+            '#mafiaLogBox .eventBody .money {color:#00CC00;font-weight:bold;}' +
+            '#mafiaLogBox .eventBody .expense {color:#FFD927;}' +
+            '#mafiaLogBox .eventBody .loot {color:#FF6633;}' +
+            '#mafiaLogBox .eventBody .user {color:#FFD927;}' +
+            '#mafiaLogBox .eventBody .attacker {color:#EC2D2D;}' +
+            '#mafiaLogBox .eventBody .job {color:#52E259;font-weight:bold;}' +
+            '#mafiaLogBox .clear{clear:both}' +
+            '#mafiaLogBox .logEvent.Icon{background-repeat: no-repeat; background-position: 75px}' +
+            '#mafiaLogBox .logEvent.process.Icon{background-image:url(' + stripURI(processIcon) + ')}' +
+            '#mafiaLogBox .logEvent.search.Icon{background-image:url(' + stripURI(searchIcon) + ')}' +
+            '#mafiaLogBox .logEvent.warning.Icon{background-image:url(' + stripURI(warningIcon) + ')}' +
+            '#mafiaLogBox .logEvent.info.Icon{background-image:url(' + stripURI(infoIcon) + ')}' +
+            '#mafiaLogBox .logEvent.lootbag.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
+            '#mafiaLogBox .logEvent.found.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
+            '#mafiaLogBox .logEvent.updateGood.Icon{background-image:url(' + stripURI(updateGoodIcon) + ')}' +
+            '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
+            '#mafiaLogBox .logEvent.pause.Icon{background-image:url(' + stripURI(pauseIcon) + ')}' +
+            '#mafiaLogBox .logEvent.play.Icon{background-image:url(' + stripURI(playIcon) + ')}' +
+            '#mafiaLogBox .logEvent.yeah.Icon{background-image:url(' + stripURI(yeahIcon) + ')}' +
+            '#mafiaLogBox .logEvent.omg.Icon{background-image:url(' + stripURI(omgIcon) + ')}' +
+            '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
+            '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
+            '#mafiaLogBox .logEvent.health.Icon{background-image:url(' + stripURI(healthIcon) + ')}' +
+            '#mafiaLogBox .logEvent.cash.Icon{background-image:url(' + stripURI(cashIcon) + ')}' +
+            '#mafiaLogBox .logEvent.cashCuba.Icon{background-image:url(' + stripURI(cashCubaIcon) + ')}' +
+            '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
+            '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
+            '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}' +
+            // ********************** Energy Tab CSS **********************
+            '#ap_menu span:hover{text-decoration:underline}'+
+            '#ap_menu span{font-size: 12px; font-weight: bold; cursor: pointer; color: #FFD927}' +
+            '.ap_optgroup1 {background-color: #FFFF77; text-align: center; color: #000000; font-weight: bold; font-size: 11px}' +
+            '.ap_optgroup2 {background-color: #996633; text-align: center; color: #FFFFFF; font-size: 10px}' +
+            '.ap_option    {font-size: 10px; cursor: default;}' +
+            '.ap_option:hover {background-color:#660000;}';
 
   // If CSS has changed, update it
   if (newCSS != mwapCSS) cssElt.innerHTML = newCSS;
@@ -7157,18 +7145,6 @@ function customizeMasthead() {
   // Get the masthead.
   var mastheadElt = document.getElementById('mw_masthead');
   if (!mastheadElt) return;
-
-  // Set custom styles with CSS.
-  if (!document.getElementById('nodeInsertedCss')) {
-    makeElement('style', document.getElementsByTagName('head')[0], {'id':'nodeInsertedCss', 'type':'text/css'}).appendChild(document.createTextNode(
-      '#ap_menu span:hover{text-decoration:underline}'+
-      '#ap_menu span{font-size: 12px; font-weight: bold; cursor: pointer; color: #FFD927}' +
-      '.ap_optgroup1 {background-color: #FFFF77; text-align: center; color: #000000; font-weight: bold; font-size: 11px}' +
-      '.ap_optgroup2 {background-color: #996633; text-align: center; color: #FFFFFF; font-size: 10px}' +
-      '.ap_option    {font-size: 10px; cursor: default;}' +
-      '.ap_option:hover {background-color:#660000;}'
-    ));
-  }
 
   // Make a container for the autoplayer menu.
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
