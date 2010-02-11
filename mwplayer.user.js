@@ -31,14 +31,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.52
-// @build       170
+// @include     http://www.facebook.com/connect/*
+// @version     1.0.53
+// @build       171
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.52',
-  build: '170',
+  version: '1.0.53',
+  build: '171',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -59,7 +59,13 @@ if (window.location.href.match(/facebook.com/)) {
   if (profElt && profElt.getAttribute('href').match(/id=(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
   }
+
+  var profLink = xpathFirst('.//a[@class="UIIntentionalStory_Pic"]');
+  if (profLink && profLink.getAttribute('href').match(/id=(\w+)/)) {
+    GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
+  }
 }
+
 if (window.location.href.match(/mwfb.zynga.com/)) {
   var docUrl = document.location.href;
   if (docUrl.match(/sf_xw_user_id=(\w+)/)) {
@@ -7927,14 +7933,6 @@ function jobMastery(element) {
           var findMastery = function(v, i, a) { return (a[i].innerHTML.indexOf('Mastery') > 0)? 1:0; };
           var nonMasteredJobs = tierJobs.filter(findMastery);
           var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].trim();
-
-          // Handle pre-Bangkok job names
-          if (nonMasteredJobs[0].innerHTML.match(/Asian Museum Break-in/))
-            jobName = 'Asian Museum Break-in';
-          if (nonMasteredJobs[0].innerHTML.match(/Smuggle Thai Gems/))
-            jobName = 'Smuggle Thai Gems';
-          if (nonMasteredJobs[0].innerHTML.match(/Repel the Yakuza/))
-            jobName = 'Repel the Yakuza';
 
           var matches = missions.searchArray(jobName, 0);
           if (!matches) {
