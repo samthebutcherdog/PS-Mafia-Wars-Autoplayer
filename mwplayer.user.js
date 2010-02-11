@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.51
-// @build       169
+// @version     1.0.52
+// @build       170
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.51',
-  build: '169',
+  version: '1.0.52',
+  build: '170',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -9081,10 +9081,9 @@ function onMyMafiaNav() {
 }
 
 function onRacketNav() {
-  if (city == NY && xpathFirst('.//div[@class="racket_hood_name" and contains(.,"Little Italy")]', innerPageElt)) {
+  if (city == NY && xpathFirst('.//div[@class="racket_description" and contains(.,"Earn money")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
