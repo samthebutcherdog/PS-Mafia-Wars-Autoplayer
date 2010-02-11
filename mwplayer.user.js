@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.46
-// @build       162
+// @version     1.0.47
+// @build       166
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.46',
-  build: '165',
+  version: '1.0.47',
+  build: '166',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -2769,7 +2769,7 @@ function autoFight(how) {
   // Check for pulse
   if (isChecked('iceCheck')) {
     var hitUrl = getHitUrl (opponent.id);
-    if (/You can't add/.test(loadUrl (hitUrl))) {
+    if (/You can't add/.test(loadUrlWait (hitUrl))) {
       DEBUG('Target is iced/dead, skipping opponent, id=' + opponent.id);
       setFightOpponentInactive(opponent);
       return false;
@@ -6276,7 +6276,7 @@ function createAboutTab () {
   var devNames = 'CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, Fragger, <x51>, ' +
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, '     +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, '    +
-                 'KCMCL, scooy78, caesar2k, crazydude';
+                 'KCMCL, scooy78, caesar2k, crazydude, keli';
 
   devList = makeElement('p', devs, {'style':'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -10824,7 +10824,7 @@ function cycleSavedList(listName) {
 /******************************** HTML/DOM ********************************/
 
 // Load URL and return the untagged response text (synchronous)
-function loadUrl (url) {
+function loadUrlWait (url) {
   try {
     var xmlHTTP = new XMLHttpRequest();
     DEBUG('Loading URL (synch): ' + url);
