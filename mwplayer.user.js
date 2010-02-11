@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.47
-// @build       166
+// @version     1.0.49
+// @build       167
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.47',
-  build: '166',
+  version: '1.0.49',
+  build: '167',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1058,17 +1058,17 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Define all jobs. The array elements are:
   // job description, unadjusted energy cost, job number, tab number, city, unadjusted exp payout
   var missions = new Array(
-    ['Mugging',1,1,1,NY,1],
-    ['Corner Store Hold-up',3,2,1,NY,3],
-    ['Warehouse Robbery',5,3,1,NY,5],
-    ['Auto Theft',7,4,1,NY,8],
-    ['Beat Up Rival Gangster',2,5,1,NY,2],
-    ['Rob a Pimp',3,8,1,NY,3],
-    ['Collect on a Loan',2,37,1,NY,2],
-    ['Collect Protection Money',2,6,2,NY,2],
-    ['Rough Up Dealers',2,7,2,NY,2],
+    ['Chase Away Thugs',1,1,1,NY,1],
+    ['Rob a Pimp',3,2,1,NY,3],
+    ['Rough Up Dealers',5,3,1,NY,5],
+    ['Rob the Warehouse',7,4,1,NY,8],
+    ['Collect Protection Money',2,5,1,NY,2],
+    ['Grow Your Family',3,8,1,NY,3],
+    ['Perform a Hit',2,37,1,NY,2],
+    ['Mugging',2,6,2,NY,2],
+    ['Auto Theft',2,7,2,NY,2],
     ['Take Out a Rogue Cop',3,9,2,NY,3],
-    ['Perform a Hit',3,10,2,NY,3],
+    ['Collect on a Loan',3,10,2,NY,3],
     ['Bank Heist',10,11,2,NY,13],
     ['Jewelry Store Job',15,12,2,NY,20],
     ['Hijack a Semi',8,38,2,NY,9],
