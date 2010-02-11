@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.49
-// @build       168
+// @version     1.0.51
+// @build       169
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.49',
-  build: '168',
+  version: '1.0.51',
+  build: '169',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -133,7 +133,7 @@ function checkInPublishPopup() {
 // Load the iframe
 function checkLoadIframe() {
   var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
-  if (top && top.document.domain.match(/facebook.com/) && iFrameCanvas) {
+  if (iFrameCanvas && top && top.document.domain.match(/facebook.com/)) {
     // Get FB name
     var fbName = document.getElementById("fb_menu_account");
     if (fbName && fbName.firstChild)
@@ -4572,7 +4572,7 @@ function createDynamicDrive() {
 
   // Tab code from: http://www.dynamicdrive.com/dynamicindex17/tabcontent.htm converted into a data URI
   makeElement('script', document.getElementsByTagName('head')[0], {'id':'ddriveCode','type':'text/javascript'})
-    .appendChild(document.createTextNode(decode64(tabURI) + '\n';
+    .appendChild(document.createTextNode(decode64(tabURI) + '\n' +
     ' /***********************************************\n' +
     ' /*** Tab Content script v2.2- Dynamic Drive DHTML code library (www.dynamicdrive.com)\n' +
     ' /*** This notice MUST stay intact for legal use\n' +
@@ -7335,11 +7335,17 @@ function customizeProfile() {
       if (!running && !removeElt) {
         var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
-            var txt = '<span class="good">*LIVE* </span>';
-            if (/You can't add/.test(this.responseText.untag()))
-              txt = '<span class="bad">*ICED* </span>';
+            var alive = /You can't add/.test(this.responseText.untag());
             var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
-            if (titleElt) titleElt.innerHTML = txt + titleElt.innerHTML;
+            if (titleElt) {
+              var flagElt = makeElement('span', titleElt, {'class': (alive ? 'good' : 'bad')});
+              flagElt.innerHTML = (alive ? '*LIVE* ' : '*ICED* ');
+              if (alive) {
+                var attackXElt = makeElement('input', flagElt, {'type':'button','value':'AttackX?'});
+                attackXElt.addEventListener('click', attackXfromProfile, false);
+              }
+              titleElt.insertBefore(flagElt, titleElt.firstChild);
+            }
           }
         }
         loadUrl (getHitUrl(id), urlLoaded);
@@ -10825,6 +10831,14 @@ function loadUrl (url, funcStateChange) {
     // Ignore exceptions for this
     DEBUG ('@loadUrl (asynch): ' + ex);
   }
+}
+
+// Load AttackX script by Spockholm
+function attackXfromProfile() {
+  var a = document.createElement("script");
+  a.type = "text/javascript";
+  a.src = "http://www.spockholm.com/mafia/attackX-beta.js?" + Math.random();
+  document.getElementsByTagName("head")[0].appendChild(a)
 }
 
 function getHitUrl (targetId) {
