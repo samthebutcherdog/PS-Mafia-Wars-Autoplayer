@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.53
-// @build       171
+// @version     1.0.54
+// @build       172
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.53',
-  build: '171',
+  version: '1.0.54',
+  build: '172',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7341,7 +7341,7 @@ function customizeProfile() {
       if (!running && !removeElt) {
         var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
-            var alive = /You can't add/.test(this.responseText.untag());
+            var alive = !/You can't add/.test(this.responseText.untag());
             var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
             if (titleElt) {
               var flagElt = makeElement('span', titleElt, {'class': (alive ? 'good' : 'bad')});
