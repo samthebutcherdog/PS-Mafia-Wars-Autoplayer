@@ -18,7 +18,7 @@
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
-            scooy78, crazydude
+            scooy78, crazydude, SamTheButcher, dwightwilbanks
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.54
-// @build       172
+// @version     1.0.55
+// @build       173
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.54',
-  build: '172',
+  version: '1.0.55',
+  build: '173',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -74,19 +74,11 @@ if (window.location.href.match(/mwfb.zynga.com/)) {
 }
 
 var gvar=function() {} // Global variables
-var needApiUpgrade=false;
 function GM_ApiBrowserCheck() {
-
+  var needApiUpgrade=false;
   if(typeof(unsafeWindow)=='undefined') { unsafeWindow=window; }
   if(typeof(GM_log)=='undefined') { GM_log=function(msg) { try { unsafeWindow.console.log('GM_log: '+msg); } catch(e) {} }; }
-  GM_clog=function(msg) { if(arguments.callee.counter) { arguments.callee.counter++; } else { arguments.callee.counter=1; } GM_log('('+arguments.callee.counter+') '+msg); }
-  GM_addGlobalStyle=function(css) { // Redefine GM_addGlobalStyle with a better routine
-    var sel=document.createElement('style'); sel.setAttribute('type','text/css'); sel.appendChild(document.createTextNode(css)); var hel=document.documentElement.firstChild;
-    while(hel && hel.nodeName!='HEAD') { hel=hel.nextSibling; } if(hel && hel.nodeName=='HEAD') { hel.appendChild(sel); } else { document.body.insertBefore(sel,document.body.firstChild); }
-  }
-  if(window.navigator.appName.match(/^opera/i) && typeof(window.opera)!='undefined') {
-    needApiUpgrade=true; gvar.isOpera=true; GM_log=window.opera.postError; GM_log('Opera detected...');
-  }
+
   if(typeof(GM_setValue)!='undefined') {
     var gsv=GM_setValue.toString();
     if(gsv.indexOf('staticArgs')>0) { gvar.isGreaseMonkey=true; GM_log('GreaseMonkey Api detected...'); } // test GM_hitch
@@ -99,7 +91,7 @@ function GM_ApiBrowserCheck() {
     var ws=null; try { ws=typeof(unsafeWindow.localStorage); unsafeWindow.localStorage.length; } catch(e) { ws=null; } // Catch Security error
     if(ws=='object') {
       GM_log('Using localStorage for GM Api.');
-      GM_getValue=function(name,defValue) { var value=unsafeWindow.localStorage.getItem(GMSTORAGE_PATH+name); if(value==null) { if (defValue==null) { return ""; } else { return defValue; } } else { switch(value.substr(0,2)) { case 'S]': return value.substr(2); case 'N]': return parseInt(value.substr(2)); case 'B]': return value.substr(2)=='true'; } } return value; }
+      GM_getValue=function(name,defValue) { var value=unsafeWindow.localStorage.getItem(GMSTORAGE_PATH+name); if(value==null) { if (defValue==null) { return 'undefined'; } else { return defValue; } } else { switch(value.substr(0,2)) { case 'S]': return value.substr(2); case 'N]': return parseInt(value.substr(2)); case 'B]': return value.substr(2)=='true'; } } return value; }
       GM_setValue=function(name,value) { switch (typeof(value)) { case 'string': unsafeWindow.localStorage.setItem(GMSTORAGE_PATH+name,'S]'+value); break; case 'number': if(value.toString().indexOf('.')<0) { unsafeWindow.localStorage.setItem(GMSTORAGE_PATH+name,'N]'+value); } break; case 'boolean': unsafeWindow.localStorage.setItem(GMSTORAGE_PATH+name,'B]'+value); break; } }
       GM_deleteValue=function(name) { unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH+name); }
     } else if(!gvar.isOpera || typeof(GM_setValue)=='undefined') {
@@ -140,10 +132,6 @@ function checkInPublishPopup() {
 function checkLoadIframe() {
   var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
   if (iFrameCanvas && top && top.document.domain.match(/facebook.com/)) {
-    // Get FB name
-    var fbName = document.getElementById("fb_menu_account");
-    if (fbName && fbName.firstChild)
-      GM_setValue('FBName', fbName.firstChild.innerHTML);
 
     if (gvar.isGreaseMonkey) checkLanguage();
 
@@ -654,7 +642,7 @@ var cashBangkokIcon = '<img src="data:image/gif;base64,R0lGODlhEAAQANU/ACIGBdl/R
 
 var cashCubaIcon    = '<img src="data:image/gif;base64,R0lGODlhEAALANU/AMa6tcCbk7lpirKkmxRvU+Tc1ChYKlclM8zDuiu1J+LSzFmYYxX1AHQzUnBsbB0XF9PGu8Jcje3i3t/X0NrMxLt1puvh2Av1AfHP4eq508psmPPm49qKtdZ3qY1ebu3j2bQ7cBjVBWaHZ9RvpbNce7tTf9e/uuDOygLeCMm2q9C0rguNMDCLOlFKSmpTVJiYmKtids5soJtFXcaAoOWoyFWYV4x5egTKBRzsA9LCwdLKxtjGwpI0TuTV0ahEaAAAACH5BAEAAD8ALAAAAAAQAAsAAAaFwN/vwfN4HsKk8ncA0TAaQYNgWP5kIA6mM3sRCJfF4ZBMqWYlweKLqlU06YYLMaEMWKHVTVTRZkYwFBATEwgJFwwOPjEZGR0CPRMABQWGDBcAEAEkEREnGzo/DgAACQwMOZQTJgobEi1KBiE4Oxa2FhISNlZDAwUWHx8SALxKDggWCkg/QQA7" width="16" height="11" />';
 
-var cashMoscowIcon  = '<img src="data:image/gif;base64,R0lGODlhEAAQANU6ACkFBt4aIvFCSdoaIaITGV8LDvNhZq8VG/mtsPbbAChtEekbI8AXHfFITvvIyu8oL/JRV7kWHNwaIfXkAca/E/AwOOcbI8fFJvA4P5iiGfJNU/A0O/NZX/aBhX0PE/V2e9W8Be8tNPFGTL0WHcrDBPLPAPNbYeAaIt7bAoMPFIgQFeQbIveanUV5E/JYXmJbD7MVG+zMA22NC9XDD+8kLM0YH4EPE5IRFvA5QJ6rQQAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADoALAAAAAAQABAAAAaMQJ1wSCwaj8hkERAZDABKT4Dl0GwIKZsxEvg4DKaGQjFZeQpDQmBDw+RaCtSloQmJbgUGg0DIgGQkc14ILhEETgMMFBMJGRIQCAgGEg8nBwsLNRQJEwcjARIYAQEdBzoABTAzJQkWFRUDAQ8dBlBDLyAxDwK8AgYcaEYAKgsCEBAcFkqnBwI4tsvRSUEAOw==" width="16" height="11" />'
+var cashMoscowIcon  = '<img src="data:image/gif;base64,R0lGODlhEAAQANU6ACkFBt4aIvFCSdoaIaITGV8LDvNhZq8VG/mtsPbbAChtEekbI8AXHfFITvvIyu8oL/JRV7kWHNwaIfXkAca/E/AwOOcbI8fFJvA4P5iiGfJNU/A0O/NZX/aBhX0PE/V2e9W8Be8tNPFGTL0WHcrDBPLPAPNbYeAaIt7bAoMPFIgQFeQbIveanUV5E/JYXmJbD7MVG+zMA22NC9XDD+8kLM0YH4EPE5IRFvA5QJ6rQQAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADoALAAAAAAQABAAAAaMQJ1wSCwaj8hkERAZDABKT4Dl0GwIKZsxEvg4DKaGQjFZeQpDQmBDw+RaCtSloQmJbgUGg0DIgGQkc14ILhEETgMMFBMJGRIQCAgGEg8nBwsLNRQJEwcjARIYAQEdBzoABTAzJQkWFRUDAQ8dBlBDLyAxDwK8AgYcaEYAKgsCEBAcFkqnBwI4tsvRSUEAOw==" width="16" height="11" />';
 
 var healthIcon = '<img src="' +
                     'data:image/gif;base64,R0lGODlhEAAQAMQfAKkAE4oAELYAFawAFJEAEYYAD////7UAFZcAEZIAEaAAEp0AEo4AELIAFbAAFJsAErkAFZoAEpQAEbEAFJgAEq4AFKsAFIwAEKQAE7gAFaYAE6MAE7sAFbsAFr' +
@@ -757,6 +745,7 @@ var shakeDownFlag = false;      // Flag so shake down again doesnt get interrupt
 var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var newStaminaMode;             // New stamina mode for random fighting
+var nameChecked = false;
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     (document.referrer.match(/inthemafia/) || window.location.href.match(/mwfb.zynga.com/))) {
@@ -1533,6 +1522,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   chooseSides();
 
   // This line is optional, but it makes the menu display faster.
+  refreshMWAPCSS();
   customizeMasthead();
   customizeLayout();
 
@@ -1621,7 +1611,8 @@ function doAutoPlay () {
 
   // Don't let healing interrupt shake down again
   if (running && shakeDownFlag) {
-    if (collectRacket()) return;
+    if (isChecked('moneyRacketCheck') && collectMoneyRacket()) return;
+    if (isChecked('racketCollect') && collectRacket()) return;
   }
 
   // Auto-heal
@@ -1634,7 +1625,7 @@ function doAutoPlay () {
   }
 
   // Check top mafia bonus
-  if (running && (isUndefined('selectEnergyBonus') || isUndefined('selectExpBonus'))) {
+  if (running && (isUndefined('selectEnergyBonus'))) {
     getTopMafiaInfo();
     Autoplay.start();
     return;
@@ -1671,8 +1662,9 @@ function doAutoPlay () {
   }
 
   // Racketing
-  if (running && !maxed && isChecked('racketCollect') && !timeLeftGM('nextRacket')) {
-    if (collectRacket()) return;
+  if (running && !maxed  && !timeLeftGM('nextRacket')) {
+    if (isChecked('moneyRacketCheck') && collectMoneyRacket()) return;
+    if (isChecked('racketCollect') && collectRacket()) return;
   }
 
   // Auto-take for properties (NY)
@@ -2097,6 +2089,89 @@ function autoBuyCrates(buyCity) {
   return true;
 }
 
+// Collect Money Racket
+function collectMoneyRacket() {
+  // Go to NY first
+  DEBUG('Got to the rackets');
+  shakeDownFlag = true;
+  if (city != NY) {
+    Autoplay.fx = goNY;
+    Autoplay.start();
+    return true;
+  }
+
+  if (!onPropertyNav()) {
+    if (onRacketNav()) {
+      //clean up busted cash only rackets
+      elt = xpathFirst('.//a/img/div[@class="racket_imgbar" and contains(.,"Clean Up")]', innerPageElt);
+      if (elt && cities[NY][CITY_CASH] > 250) {
+        Autoplay.fx = function() {
+          clickElement(elt);
+          DEBUG('Clicked "Clean Up".');
+          //get the racket we want to do
+          elt = xpathFirst('.//a[contains(@onclick, "racket=1")]', innerPageElt);
+          if (elt) {
+            Autoplay.fx = function() {
+              clickElement(elt);
+              DEBUG('Clicked on new racket.');
+            };
+            Autoplay.start();
+            return true;
+          }
+        };
+        Autoplay.start();
+        return true;
+      }
+
+      //shake down the cash only rackets
+      elt = xpathFirst('.//a/div[@class="racket_empty_text"]', innerPageElt);
+      if (elt && cities[NY][CITY_CASH] > 250){
+        clickElement(elt);
+        DEBUG('Clicked "Shake Down".');
+
+        //get the racket we want to do
+        elt = xpathFirst('.//a[contains(@onclick, "racket=1")]', innerPageElt);
+        if (elt) {
+          Autoplay.fx = function() {
+            clickElement(elt);
+            DEBUG('Clicked on new racket.');
+          };
+          Autoplay.start();
+          return true;
+        }
+         //we should not hit this so if we do return false
+         return false;
+      }
+
+      elt = xpathFirst('.//img[contains(@title, "Ready to Collect")]', innerPageElt);
+      if (elt) {
+        Autoplay.fx = function() {
+          clickElement(elt);
+          DEBUG('Clicked "Ready to Collect".');
+        };
+        Autoplay.start();
+        return true;
+      }
+
+      // no racket comeback again 3.9 minutes
+      shakeDownFlag = false;
+      setGMTime("nextRacket", "03:50");
+      DEBUG('Setting racket timer for 4 minutes');
+    } else {
+      Autoplay.fx = goPropertyNav;
+      Autoplay.start();
+      return true;
+    }
+
+    return false;
+  } else {
+    //turning off rackets
+    GM_setValue("moneyRacketCheck", 0);
+    DEBUG("Turning off racket options. We're on properties page.");
+    return false;
+  }
+}
+
 // Collect Racket
 function collectRacket() {
   // Go to NY first
@@ -2108,12 +2183,10 @@ function collectRacket() {
 
   if (!onPropertyNav()) {
     if (onRacketNav()) {
-      //addToLog('info Icon', 'Check racket');
       if(isChecked('racketReshakedown')) {
         var elt = xpathFirst('.//a/span[@class="sexy_influence" and contains(.,"Shake Down Again")]', innerPageElt);
         if(elt) {
           shakeDownFlag= false;
-          //<div class="zy_progress_bar_outer" title=""><div class="zy_progress_bar_text">100% Mastered</div>
           var mastered=xpathFirst('.//div[@class="zy_progress_bar_text" and contains(.,"100% Mastered")]', innerPageElt);
           if(mastered && !isChecked('racketPermanentShakedown')) {
             addToLog('info Icon', 'Racket is 100% mastered');
@@ -2129,7 +2202,6 @@ function collectRacket() {
           return true;
         }
       }
-      //<a><div class="zy_progress_bar_outer" title=""><div class="zy_progress_bar_text">
 
       elt = xpathFirst('.//a/div[@class="zy_progress_bar_outer"]/div[@class="zy_progress_bar_text" and contains(.,"Ready to Collect")]', innerPageElt);
       if(elt) {
@@ -2462,6 +2534,7 @@ function canMission() {
     for (i = 0, iLength= multiple_jobs_list.length; i < iLength; ++i) {
       job = multiple_jobs_list[i];
       var mission = missions[job];
+      if(!mission) continue;
       // This should enable us to use mastery jobs for single job level ups
       var singleJobLevelUpPossible = false;
 
@@ -3385,8 +3458,7 @@ function toggleSettings() {
     showSettingsBox();
   } else {
     settingsOpen = false;
-    //hideSettingsBox();
-    destroySettingsBox();
+    destroyByID('GenDialogPopDialog');
 
     // Restart the timers.
     Autoplay.delay = 150;
@@ -3442,20 +3514,6 @@ function showStatsWindow() {
   var statsWindowContainer = document.getElementById('sWindowGenDialogPopDialog');
   if (statsWindowContainer) {
     statsWindowContainer.style.display = 'block';
-  }
-}
-
-function hideSettingsBox() {
-  var settingsBoxContainer = document.getElementById('GenDialogPopDialog');
-  if (settingsBoxContainer) {
-    settingsBoxContainer.style.display = 'none';
-  }
-}
-
-function destroySettingsBox() {
-  var settingsBoxContainer = document.getElementById('GenDialogPopDialog');
-  if (settingsBoxContainer) {
-    settingsBoxContainer.parentNode.removeChild(settingsBoxContainer);
   }
 }
 
@@ -3871,7 +3929,7 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'showLevel','hideFriendLadder']);
+                            'showLevel','hideFriendLadder','moneyRacketCheck']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4008,17 +4066,8 @@ function updateMastheadMenu() {
   var elt = document.getElementById('pauseButton');
   if (running) {
     if (elt) return;
-
-    // Remove the resume button and paused image.
-    elt = document.getElementById('resumeButton');
-    if (elt) {
-      elt.parentNode.removeChild(elt);
-    }
-    elt = document.getElementById('ap_pause_img');
-    if (elt) {
-      elt.parentNode.removeChild(elt);
-    }
-
+    destroyByID('resumeButton');
+    destroyByID('ap_pause_img');
     // Show a pause button.
     elt = makeElement('span', null, {'id':'pauseButton'});
     elt.appendChild(document.createTextNode('Pause'));
@@ -4562,9 +4611,11 @@ function createSettingsBox() {
   saveButton.addEventListener('click', saveSettings, false);
 
   // Create Update button
-  var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 10px; bottom: 10px;'});
-  makeElement('button', updateButton).appendChild(document.createTextNode('Check for Updates'));
-  updateButton.addEventListener('click', updateScript, false);
+  if (gvar.isGreaseMonkey) {
+    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 10px; bottom: 10px;'});
+    makeElement('button', updateButton).appendChild(document.createTextNode('Check for Updates'));
+    updateButton.addEventListener('click', updateScript, false);
+  }
 
   createDynamicDrive();
 
@@ -4990,7 +5041,7 @@ function createDisplayTab() {
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Mail List '));
 
-  // Hide Mailing List
+  // Hide Friend Ladder
   id = 'hideFriendLadder';
   title = 'Hide friend ladder';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
@@ -6132,6 +6183,10 @@ function createCashTab () {
   racketPermanentShakedown.appendChild(document.createTextNode('Shake down again permanently'));
   makeElement('input', racketPermanentShakedown, {'type':'checkbox', 'id':'racketPermanentShakedown', 'value':'checked'}, 'racketPermanentShakedown');
 
+  var moneyRacketCheck = makeElement('div', cashTab, {'style':'top: 200px; right: 10px;'});
+  moneyRacketCheck.appendChild(document.createTextNode('Money Rackets - Collect XP'));
+  makeElement('input', moneyRacketCheck, {'type':'checkbox', 'id':'moneyRacketCheck', 'value':'checked'}, 'moneyRacketCheck');
+
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
     id = cities[i][CITY_AUTOBANK];
@@ -6204,7 +6259,7 @@ function createAboutTab () {
   var devNames = 'CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, Fragger, <x51>, ' +
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, '     +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, '    +
-                 'KCMCL, scooy78, caesar2k, crazydude, keli';
+                 'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks';
 
   devList = makeElement('p', devs, {'style':'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -6953,8 +7008,6 @@ function customizeLayout() {
   var mainDiv = xpathFirst('//div[@id="mainDiv"]');
   if (!mainDiv) return;
 
-  refreshMWAPCSS();
-
   // Handle Unknown error
   var unkError = xpathFirst('//div[@class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable"]');
   if (unkError) {
@@ -6964,145 +7017,115 @@ function customizeLayout() {
 }
 
 function refreshMWAPCSS() {
-  var cssElt = document.getElementById('mwapCSS');
-  var mwapCSS, newCSS = '';
+  try {
+    var cssElt = document.getElementById('mwapCSS');
+    var mwapCSS = '';
+    if (cssElt) mwapCSS = cssElt.innerHTML;
+    var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
+                 (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +  // Hide the Zynga bar, progress bar, email bar, sms link
+                 ' #mwapHide, #mw_zbar, #mw_zbar iframe,#setup_progress_bar, .fb_email_prof_header, .mw_sms '  +// Hide action boxes
+                 (isChecked('hideActionBox') ? ' , .action_box_container' : '' ) +              // Hide feature notice updates
+                 (isChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
+                 ' {position: absolute !important; margin:0 !important; ' +
+                 '  height:0 !important; width: 0 !important; display:none !important;}' +
+                 // ********************** Stats Tab CSS **********************
+                 '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
+                 '#statsWindow #sWindowTabNav div.selected{background : rgb(60,60,100);}' +
+                 '#statsWindow #sWindowTabNav div a{color:#fff;font-weight:700}' +
+                 '#statsWindow .sexy_button{position:absolute;background:black;border:1px solid #FFD927;color:#FFD927;cursor:pointer;display:block;float:left;font-size:14px;font-weight:700;padding:5px;text-decoration:none;width:auto}' +
+                 '#statsWindow .sexy_button button{background:transparent;border:medium none #FFF;color:#FFD927;cursor:pointer;font-size:14px;font-weight:700;margin:0}' +
+                 '#statsWindow .sexy_button button:hover{color:#BCD2EA;font-weight:700;text-decoration:none}' +
+                 '#statsWindow .tabcontent{display:none;}' +
+                 '#statsWindow label {font-weight: normal; color: #BCD2EA}' +
+                 // ********************** Settings Tab CSS **********************
+                 '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
+                 '#settingsBox #tabNav div.selected{background : #666666;}' +
+                 '#settingsBox #tabNav div a{color:#fff;font-weight:700}' +
+                 '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
+                 '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
+                 '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
+                 '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
+                 '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
+                 '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
+                 '#settingsBox img, label, span, input, select {vertical-align: middle;}' +
+                 '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
+                 '#settingsBox #energyTab div {position: static;}' +
+                 '#settingsBox #generalTab img, span, label, #mafiaTab img, span, label, #displayTab img, span, label, ' +
+                 '#settingsBox #energyTab img, span, label {position: static;}' +
+                 '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
+                 '#settingsBox #energyTab select {position: static;}' +
+                 '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
+                 '#settingsBox #energyTab textarea {position: static;}' +
+                 '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
+                 '#settingsBox #energyTab input {position: static; margin: 0;}' +
+                 '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
+                 '#settingsBox #energyTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
+                 '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, ' +
+                 '#settingsBox #energyTab .rhs {position: static; float: left; padding: 3px;}' +
+                 '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, ' +
+                 '#settingsBox #energyTab .single {position: static; text-align: center}' +
+                 '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
+                 '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
+                 '#settingsBox #staminaTab div {position: static;}' +
+                 '#settingsBox #staminaTab img, span, label {position: static;}' +
+                 '#settingsBox #staminaTab select {position: static;}' +
+                 '#settingsBox #staminaTab textarea {position: static;}' +
+                 '#settingsBox #staminaTab input {position: static; margin: 0;}' +
+                 '#settingsBox #staminaTab .lhs {position: static; width: 40%; float: left; text-align: right; padding: 5px;}' +
+                 '#settingsBox #staminaTab .rhs {position: static; float: left; padding: 5px;}' +
+                 '#settingsBox #staminaTab .single {position: static; text-align: center}' +
+                 '#settingsBox #staminaTab .hide {clear: both; visibility: hidden;}' +
+                 // ********************** Log Box CSS **********************
+                 '#mafiaLogBox div.mouseunderline:hover{text-decoration:underline}' +
+                 '#mafiaLogBox .logEvent{border-bottom:1px solid #333; padding:4px 0px}' +
+                 '#mafiaLogBox .eventTime{color:#888; font-size: 10px; width:75px;  float:left}' +
+                 '#mafiaLogBox .eventBody{width:330px; float:right}' +
+                 '#mafiaLogBox .eventTime,#mafiaLogBox .eventIcon,#mafiaLogBox .eventBody{}' +
+                 '#mafiaLogBox .eventBody .good {color:#52E259;font-weight:bold;}' +
+                 '#mafiaLogBox .eventBody .bad {color:#EC2D2D;font-weight:bold;}' +
+                 '#mafiaLogBox .eventBody .warn {color:#EC2D2D;}' +
+                 '#mafiaLogBox .eventBody .money {color:#00CC00;font-weight:bold;}' +
+                 '#mafiaLogBox .eventBody .expense {color:#FFD927;}' +
+                 '#mafiaLogBox .eventBody .loot {color:#FF6633;}' +
+                 '#mafiaLogBox .eventBody .user {color:#FFD927;}' +
+                 '#mafiaLogBox .eventBody .attacker {color:#EC2D2D;}' +
+                 '#mafiaLogBox .eventBody .job {color:#52E259;font-weight:bold;}' +
+                 '#mafiaLogBox .clear{clear:both}' +
+                 '#mafiaLogBox .logEvent.Icon{background-repeat: no-repeat; background-position: 75px}' +
+                 '#mafiaLogBox .logEvent.process.Icon{background-image:url(' + stripURI(processIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.search.Icon{background-image:url(' + stripURI(searchIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.warning.Icon{background-image:url(' + stripURI(warningIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.info.Icon{background-image:url(' + stripURI(infoIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.lootbag.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.found.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.updateGood.Icon{background-image:url(' + stripURI(updateGoodIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.pause.Icon{background-image:url(' + stripURI(pauseIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.play.Icon{background-image:url(' + stripURI(playIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.yeah.Icon{background-image:url(' + stripURI(yeahIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.omg.Icon{background-image:url(' + stripURI(omgIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.health.Icon{background-image:url(' + stripURI(healthIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.cash.Icon{background-image:url(' + stripURI(cashIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.cashCuba.Icon{background-image:url(' + stripURI(cashCubaIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}' +
+                 // ********************** Energy Tab CSS **********************
+                 '#ap_menu span:hover{text-decoration:underline}'+
+                 '#ap_menu span{font-size: 12px; font-weight: bold; cursor: pointer; color: #FFD927}' +
+                 '.ap_optgroup1 {background-color: #FFFF77; text-align: center; color: #000000; font-weight: bold; font-size: 11px}' +
+                 '.ap_optgroup2 {background-color: #996633; text-align: center; color: #FFFFFF; font-size: 10px}' +
+                 '.ap_option    {font-size: 10px; cursor: default;}' +
+                 '.ap_option:hover {background-color:#660000;}';
 
-  // MWAP CSS
-  if (!cssElt)
-    cssElt = makeElement('style', document.getElementsByTagName('head')[0], {'id':'mwapCSS', 'type':'text/css'});
-  else
-    mwapCSS = cssElt.innerHTML;
-
-  newCSS =  ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}' +
-            (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '') +
-            // Hide the Zynga bar, progress bar, email bar, sms link
-            ' #mwapHide, #mw_zbar, #setup_progress_bar, .fb_email_prof_header, .mw_sms ' +
-            // Hide action boxes
-            (isChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
-            // Hide feature notice updates
-            (isChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
-            ' {position: absolute !important; margin:0 !important; ' +
-            '  height:0 !important; width: 0 !important; display:none !important;}' +
-            // ********************** Stats Tab CSS **********************
-            '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-            '#statsWindow #sWindowTabNav div.selected{background : rgb(60,60,100);}' +
-            '#statsWindow #sWindowTabNav div a{color:#fff;font-weight:700}' +
-            '#statsWindow .sexy_button{position:absolute;background:black;border:1px solid #FFD927;color:#FFD927;cursor:pointer;display:block;float:left;font-size:14px;font-weight:700;padding:5px;text-decoration:none;width:auto}' +
-            '#statsWindow .sexy_button button{background:transparent;border:medium none #FFF;color:#FFD927;cursor:pointer;font-size:14px;font-weight:700;margin:0}' +
-            '#statsWindow .sexy_button button:hover{color:#BCD2EA;font-weight:700;text-decoration:none}' +
-            '#statsWindow .tabcontent{display:none;}' +
-            '#statsWindow label {font-weight: normal; color: #BCD2EA}' +
-            // ********************** Settings Tab CSS **********************
-            '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
-            '#settingsBox #tabNav div.selected{background : #666666;}' +
-            '#settingsBox #tabNav div a{color:#fff;font-weight:700}' +
-            '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
-            '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
-            '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
-            '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
-            '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
-            '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
-            '#settingsBox img, label, span, input, select {vertical-align: middle;}' +
-            '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
-            '#settingsBox #energyTab div {position: static;}' +
-            '#settingsBox #generalTab img, span, label, #mafiaTab img, span, label, #displayTab img, span, label, ' +
-            '#settingsBox #energyTab img, span, label {position: static;}' +
-            '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
-            '#settingsBox #energyTab select {position: static;}' +
-            '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
-            '#settingsBox #energyTab textarea {position: static;}' +
-            '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
-            '#settingsBox #energyTab input {position: static; margin: 0;}' +
-            '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
-            '#settingsBox #energyTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
-            '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, ' +
-            '#settingsBox #energyTab .rhs {position: static; float: left; padding: 3px;}' +
-            '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, ' +
-            '#settingsBox #energyTab .single {position: static; text-align: center}' +
-            '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
-            '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
-            '#settingsBox #staminaTab div {position: static;}' +
-            '#settingsBox #staminaTab img, span, label {position: static;}' +
-            '#settingsBox #staminaTab select {position: static;}' +
-            '#settingsBox #staminaTab textarea {position: static;}' +
-            '#settingsBox #staminaTab input {position: static; margin: 0;}' +
-            '#settingsBox #staminaTab .lhs {position: static; width: 40%; float: left; text-align: right; padding: 5px;}' +
-            '#settingsBox #staminaTab .rhs {position: static; float: left; padding: 5px;}' +
-            '#settingsBox #staminaTab .single {position: static; text-align: center}' +
-            '#settingsBox #staminaTab .hide {clear: both; visibility: hidden;}' +
-            // ********************** Log Box CSS **********************
-            '#mafiaLogBox div.mouseunderline:hover{text-decoration:underline}' +
-            '#mafiaLogBox .logEvent{border-bottom:1px solid #333; padding:4px 0px}' +
-            '#mafiaLogBox .eventTime{color:#888; font-size: 10px; width:75px;  float:left}' +
-            '#mafiaLogBox .eventBody{width:330px; float:right}' +
-            '#mafiaLogBox .eventTime,#mafiaLogBox .eventIcon,#mafiaLogBox .eventBody{}' +
-            '#mafiaLogBox .eventBody .good {color:#52E259;font-weight:bold;}' +
-            '#mafiaLogBox .eventBody .bad {color:#EC2D2D;font-weight:bold;}' +
-            '#mafiaLogBox .eventBody .warn {color:#EC2D2D;}' +
-            '#mafiaLogBox .eventBody .money {color:#00CC00;font-weight:bold;}' +
-            '#mafiaLogBox .eventBody .expense {color:#FFD927;}' +
-            '#mafiaLogBox .eventBody .loot {color:#FF6633;}' +
-            '#mafiaLogBox .eventBody .user {color:#FFD927;}' +
-            '#mafiaLogBox .eventBody .attacker {color:#EC2D2D;}' +
-            '#mafiaLogBox .eventBody .job {color:#52E259;font-weight:bold;}' +
-            '#mafiaLogBox .clear{clear:both}' +
-            '#mafiaLogBox .logEvent.Icon{background-repeat: no-repeat; background-position: 75px}' +
-            '#mafiaLogBox .logEvent.process.Icon{background-image:url(' + stripURI(processIcon) + ')}' +
-            '#mafiaLogBox .logEvent.search.Icon{background-image:url(' + stripURI(searchIcon) + ')}' +
-            '#mafiaLogBox .logEvent.warning.Icon{background-image:url(' + stripURI(warningIcon) + ')}' +
-            '#mafiaLogBox .logEvent.info.Icon{background-image:url(' + stripURI(infoIcon) + ')}' +
-            '#mafiaLogBox .logEvent.lootbag.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
-            '#mafiaLogBox .logEvent.found.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
-            '#mafiaLogBox .logEvent.updateGood.Icon{background-image:url(' + stripURI(updateGoodIcon) + ')}' +
-            '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
-            '#mafiaLogBox .logEvent.pause.Icon{background-image:url(' + stripURI(pauseIcon) + ')}' +
-            '#mafiaLogBox .logEvent.play.Icon{background-image:url(' + stripURI(playIcon) + ')}' +
-            '#mafiaLogBox .logEvent.yeah.Icon{background-image:url(' + stripURI(yeahIcon) + ')}' +
-            '#mafiaLogBox .logEvent.omg.Icon{background-image:url(' + stripURI(omgIcon) + ')}' +
-            '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
-            '#mafiaLogBox .logEvent.experience.Icon{background-image:url(' + stripURI(experienceIcon) + ')}' +
-            '#mafiaLogBox .logEvent.health.Icon{background-image:url(' + stripURI(healthIcon) + ')}' +
-            '#mafiaLogBox .logEvent.cash.Icon{background-image:url(' + stripURI(cashIcon) + ')}' +
-            '#mafiaLogBox .logEvent.cashCuba.Icon{background-image:url(' + stripURI(cashCubaIcon) + ')}' +
-            '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
-            '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
-            '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}' +
-            // ********************** Energy Tab CSS **********************
-            '#ap_menu span:hover{text-decoration:underline}'+
-            '#ap_menu span{font-size: 12px; font-weight: bold; cursor: pointer; color: #FFD927}' +
-            '.ap_optgroup1 {background-color: #FFFF77; text-align: center; color: #000000; font-weight: bold; font-size: 11px}' +
-            '.ap_optgroup2 {background-color: #996633; text-align: center; color: #FFFFFF; font-size: 10px}' +
-            '.ap_option    {font-size: 10px; cursor: default;}' +
-            '.ap_option:hover {background-color:#660000;}';
-
-  // If CSS has changed, update it
-  if (newCSS != mwapCSS) cssElt.innerHTML = newCSS;
-
-  // Deal with limited time offers
-  hideElement(xpathFirst('//div[@class="tab_box" and contains(.,"Limited Time Offers")]'), isChecked('hideOffer'));
-
-  // Deal with friends ladder
-  hideElement(xpathFirst('//div[@class="friendladder_box"]'), isChecked('hideFriendLadder'));
-
-  // Deal the mailing list
-  hideElement(xpathFirst('//div[contains(@style,"mailing_list_bg")]'), isChecked('hideMailList'));
-
-  // Deal with Holiday Free Gifts
-  hideElement(xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]'), isChecked('hideGifts'));
-
-  // Deal with gift safe houses
-  hideElement(xpathFirst('.//a/img[@alt="Gift Safe House"]'), isChecked('hideGifts'));
-
-  // Deal with free gifts
-  var msgs = xpathFirst('//table[@class="messages"]');
-  if (msgs) {
-    for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
-      if (msgs.firstChild.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
-        if (iLength == 1) hideElement(msgs, isChecked('hideGifts'));
-        else hideElement(msgs.firstChild.childNodes[i], isChecked('hideGifts'));
-        break;
-      }
+    if (newCSS != mwapCSS){  // If CSS has changed, remove the old one and add a new one.
+      remakeElement('style', document.getElementsByTagName('head')[0], {'id':'mwapCSS','type':'text/css'}).appendChild(document.createTextNode(newCSS));
     }
+
+  } catch(ex) {
+    addToLog('warning Icon', 'BUG DETECTED (refreshMWAPCSS): ' + ex);
   }
 }
 
@@ -7266,9 +7289,39 @@ function customizeHome() {
   // Set xJob
   xJob = '';
 
+    // Deal with limited time offers
+  hideElement(xpathFirst('//div[@class="tab_box" and contains(.,"Limited Time Offers")]'), isChecked('hideOffer'));
+
+  // Deal with friends ladder
+  hideElement(xpathFirst('//div[@class="friendladder_box"]'), isChecked('hideFriendLadder'));
+
+  // Deal the mailing list
+  hideElement(xpathFirst('//div[contains(@style,"mailing_list_bg")]'), isChecked('hideMailList'));
+
+  // Deal with Holiday Free Gifts
+  hideElement(xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]'), isChecked('hideGifts'));
+
+  // Deal with gift safe houses
+  hideElement(xpathFirst('.//a/img[@alt="Gift Safe House"]'), isChecked('hideGifts'));
+
+  // Deal with free gifts
+  var msgs = xpathFirst('//table[@class="messages"]');
+  if (msgs) {
+    for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
+      if (msgs.firstChild.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
+        if (iLength == 1) hideElement(msgs, isChecked('hideGifts'));
+        else hideElement(msgs.firstChild.childNodes[i], isChecked('hideGifts'));
+        break;
+      }
+    }
+  }
+
   // Is an energy pack waiting to be used?
   energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
   energyPack = energyPackElt? true : false;
+
+  // Get the name from the stats box
+  getFBNameInfo();
 
   // Display a message next to the energy pack button.
   if (energyPackElt) {
@@ -7323,6 +7376,36 @@ function getPlayerStats() {
 }
 
 function customizeProfile() {
+  this.buildAnchor = function (Options) {
+    //Options.URLSegment = common portions if URL
+    //Options.href = allow for full control of href
+    //Options.clickEvent = function
+    //Options.title = flyout text
+    //Options.AnchorText = text inside Anchor
+    var buildAnchorOptions = {};
+    if(Options.URLSegment){
+      buildAnchorOptions.href='http://mwfb.zynga.com/mwfb/remote/html_server.php?'+Options.URLSegment;
+    } else if(Options.href){
+      buildAnchorOptions.href = Options.href;
+    } else {
+      buildAnchorOptions.href='#';
+    }
+    if( !Options.clickEvent && Options.URLSegment){
+      buildAnchorOptions.onclick ='return do_ajax(\'inner_page\', \'/remote/html_server.php?'+Options.URLSegment+'\', 1, 1, 0, 0); return false; ';
+    }
+    if(Options.title){
+      buildAnchorOptions.title=Options.title;
+    }
+
+    var anchorElt = makeElement('a', statsDiv, buildAnchorOptions);
+    if(Options.AnchorText){
+      anchorElt.appendChild(document.createTextNode(Options.AnchorText));
+    }
+    if( Options.clickEvent){
+      anchorElt.addEventListener('click', Options.clickEvent, false);
+    }
+    return anchorElt;
+  };
   // Make sure we're on a profile.
   var statsTable = xpathFirst('.//td[@class="stats_left"]', innerPageElt);
   if (!statsTable) return false;
@@ -7331,9 +7414,24 @@ function customizeProfile() {
   if (statsDiv) {
     // On another player's profile page. Add extra options.
     var tabElt = xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(text(), "Profile")]', innerPageElt);
-    if (tabElt && tabElt.getAttribute('onclick').match(/user=(\d+)/)) {
-      id = RegExp.$1;
-
+    if (tabElt){
+      var remoteuserid;
+      var tmpKey;
+      var cbKey;
+      if( tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=(\d+)/)) {
+        tmpKey = 'tmp='+RegExp.$1+'&';
+        cbKey = 'tmp='+RegExp.$2+'&';
+        remoteuserid = RegExp.$3;
+      }
+      if (!remoteuserid && tabElt.getAttribute('onclick').match(/user=(\d+)/)){
+        remoteuserid = RegExp.$1;
+      }
+      if( !tmpKey && tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&/)){
+        tmpKey = 'tmp='+RegExp.$1+'&';
+      }
+      if( !cbKey && tabElt.getAttribute('onclick').match(/cb=([\d,a-z]+)&/)){
+        cbKey = 'tmp='+RegExp.$2+'&';
+      }
       // See if this player is in our mafia.
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
@@ -7354,55 +7452,126 @@ function customizeProfile() {
             }
           }
         }
-        loadUrl (getHitUrl(id), urlLoaded);
+        loadUrl (getHitUrl(remoteuserid), urlLoaded);
       }
 
       // Facebook profile
-      makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + id}).appendChild(document.createTextNode('Facebook Profile'));
+      makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + remoteuserid}).appendChild(document.createTextNode('Facebook Profile'));
       statsDiv.appendChild(document.createTextNode(' | '));
 
       // Add as Facebook friend
-      makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + id}).appendChild(document.createTextNode('Add as Friend'));
+      makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remoteuserid}).appendChild(document.createTextNode('Add as Friend'));
 
-      if (!removeElt) {
-        // Not currently in mafia. Show option to add.
+      if (!removeElt) {// Not in mafia. Show options to add/remove from fight lists.
+        makeElement('br', statsDiv,{});
+        statsDiv.appendChild(document.createTextNode('Enemy Mafia Options: '));
+        this.buildAnchor( { 'AnchorText':'Add to Mafia',
+                            'URLSegment': 'xw_controller=war&'+
+                                          'xw_action=add&'+
+                                          'xw_city=+ (city + 1) +&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'friend_id=' + remoteuserid});
+        var isOnFightList = (getSavedList('fightList').indexOf(remoteuserid) != -1);
         statsDiv.appendChild(document.createTextNode(' | '));
-        makeElement('a', statsDiv, {'href':'http://mwfb.zynga.com/mwfb' + SCRIPT.controller + 'war' + SCRIPT.action + 'add' + SCRIPT.city + (city + 1) + '&friend_id=' + id}).appendChild(document.createTextNode('Add to Mafia'));
+        this.buildAnchor( { 'AnchorText':isOnFightList?'Remove from Fight List':'Add to Fight List',
+                            'title':'In the settings box, under the stamina tab\nIf you have selected fight specific opponents\nFight these opponents:',
+                            'clickEvent':isOnFightList?clickFightListRemove:clickFightListAdd
+                          });
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( { 'AnchorText':'Manual Ice Check',
+                            'title':'Placeholder:does not work',
+                            'clickEvent':function() { alert("Placeholder:No Worky :-(")}
+                          });
       }
 
-      // Promote
-      statsDiv.appendChild(document.createTextNode(' | '))
-      makeElement('a', statsDiv, {'href':'http://apps.facebook.com/inthemafia/track.php?next_controller=group' +
-                                  '&next_action=view&next_params={"xw_city":"' + (city + 1) +
-                                  '","promote":"yes","uid":"' + id + '"};'}).appendChild(document.createTextNode('Promote'));
-
-      var elt;
-      if (removeElt) {
+      if (removeElt) { // Promote
+      	//href Example:http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=group&xw_action=view&xw_city=4&tmp=9c2d83eaf30b28fa29319feb437e4f7e&cb=18309240931265744553&promote=yes&uid=48608018
+      	//OnClick Example: return do_ajax('inner_page', 'remote/html_server.php?xw_controller=group&xw_action=view&xw_city=4&tmp=9c2d83eaf30b28fa29319feb437e4f7e&cb=18309240931265744553&promote=yes&uid=48608018', 1, 1, 0, 0); return false;
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( { 'AnchorText':'Promote',
+                            'URLSegment': 'xw_controller=group&'+
+                                          'xw_action=view&'+
+                                          'xw_city=+ (city + 1) +&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'promote=yes&'+
+                                          'uid=' + remoteuserid});
+      }
+      if (removeElt) {//Add or Remove from War List
+        var isOnWarList = (getSavedList('autoWarTargetList').indexOf(remoteuserid) != -1);
         // In my mafia. Show options to add/remove from war list.
         statsDiv.appendChild(document.createTextNode(' | '));
-        elt = makeElement('a', statsDiv, {'id':id});
-        var warList = getSavedList('autoWarTargetList');
-        if (warList.indexOf(id) != -1) {
-          elt.appendChild(document.createTextNode('Remove from War List'));
-          elt.addEventListener('click', clickWarListRemove, false);
-        } else {
-          elt.appendChild(document.createTextNode('Add to War List'));
-          elt.addEventListener('click', clickWarListAdd, false);
-        }
+        this.buildAnchor( { 'AnchorText':isOnWarList?'Remove from War List':'Remove from War List',
+                            'title':'In the settings box, under the mafia tab\nIf you have selected war friends from a list\nupdates the friends ids in the box',
+                            'clickEvent':isOnWarList?clickWarListRemove:clickWarListAdd
+                          });
       }
 
-      if (!removeElt) {
-        // Not in mafia. Show options to add/remove from fight lists.
+      if (removeElt){//Second line for Job Help
+        makeElement('br', statsDiv,{});
+        this.buildAnchor( { 'AnchorText':'NY - Give help',
+                            'URLSegment': 'xw_controller=job&'+
+                                          'xw_action=give_help&'+
+                                          'xw_city=+ (city + 1) +&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'target_id='+remoteuserid+'&'+
+                                          'job_city=1'
+                          });
         statsDiv.appendChild(document.createTextNode(' | '));
-        elt = makeElement('a', statsDiv, {'id':id});
-        var fightList = getSavedList('fightList');
-        if (fightList.indexOf(id) != -1) {
-          elt.appendChild(document.createTextNode('Remove from Fight List'));
-          elt.addEventListener('click', clickFightListRemove, false);
-        } else {
-          elt.appendChild(document.createTextNode('Add to Fight List'));
-          elt.addEventListener('click', clickFightListAdd, false);
-        }
+        this.buildAnchor( { 'AnchorText':'Cuba - Give help',
+                            'title':'A test of the title',
+                            'URLSegment': 'xw_controller=job&'+
+                                          'xw_action=give_help&'+
+                                          'xw_city=+ (city + 1) +&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'target_id='+remoteuserid+'&'+
+                                          'job_city=2'
+                          });
+        statsDiv.appendChild(document.createTextNode(' | Moscow:( '));
+        this.buildAnchor( { 'AnchorText':'Give Help',
+                            'title':'does not work',
+                            'clickEvent':function() { alert("No Worky")}
+                          });
+
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( { 'AnchorText':'Finish Episode ',
+                            'URLSegment': 'xw_controller=episode&'+
+                                          'xw_action=give_help_moscow_boss&'+
+                                          'xw_city=+ (city + 1) +&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'target_id='+remoteuserid+'&'+
+                                          'job_city=3'
+                          });
+        statsDiv.appendChild(document.createTextNode(') | Bangkok: ('));
+        this.buildAnchor( {'AnchorText':'Give help',
+                            'URLSegment': 'xw_controller=story&'+
+                                          'xw_action=give_help_social&'+
+                                          'xw_city=+ (city + 1) +&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'target_id='+remoteuserid+'&'+
+                                          'job_city=4'
+                          });
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( { 'AnchorText':'Finish Episode',
+                            'title':'does not work',
+                            'clickEvent':function() { alert("No Worky")}
+                          });
+        statsDiv.appendChild(document.createTextNode(')'));
+        makeElement('br', statsDiv,{});
+        this.buildAnchor( { 'AnchorText':'Mafia Gift',
+                            'title':'Requires that you set the giftkey in advance, see documentation',
+                            'href':'http://www.spockholm.com/mafia/?id='+remoteuserid
+                          });
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( { 'AnchorText':'Load ChuckACrap',
+                            'title':'From spockholm.com',
+                            'clickEvent':eventclick_chuckaCrap
+                          });
       }
     }
   } else {
@@ -7493,6 +7662,8 @@ function customizeJobs() {
       }
 
       var costElt = xpathFirst('.//span[@class="bold_number"]', jobCost);
+      // Skip this for jobs without cost
+      if (!costElt) continue;
       var cost = parseInt(costElt.innerHTML);
 
       var expElt = xpathFirst('.//span[@class="bold_number"]', jobReward);
@@ -7969,7 +8140,7 @@ function jobCombo(element) {
     for (i = 0, iLength=multiple_jobs_list.length; i < iLength; ++i) {
       var job = multiple_jobs_list[i];
       var mission = missions[job];
-
+      if(!mission) continue;
       // Put non-available jobs at the end of the queue
       if (availableJobs[mission[4]][mission[3]] != null &&
           availableJobs[mission[4]][mission[3]].indexOf(parseInt(job)) == -1) {
@@ -8912,6 +9083,17 @@ function autoGiftWaiting() {
   return false;
 }
 
+// Get the name from the stats box
+function getFBNameInfo() {
+  if (nameChecked) return;
+
+  var elt = xpathFirst('.//div[@class="profile_middle"]//a', innerPageElt);
+  if(elt){
+    GM_setValue('FBName', elt.text);
+    nameChecked = true;
+  }
+}
+
 // This function will retrieve the top mafia info
 // FIXME: Create a TopMafia object should we need the TopMafia info to persist
 function getTopMafiaInfo(skipAutoplay) {
@@ -9574,8 +9756,7 @@ function goPropertyNav() {
   var elt = xpathFirst('.//span[@id="nav_link_properties"]//a')
 
   if (!elt) {
-    addToLog('warning Icon', 'Can\'t find properties nav link to click. Using fallback method.');
-    loadPropertyNav();
+    addToLog('warning Icon', 'Can\'t find properties nav link to click.');
     return;
   }
   clickElement(elt);
@@ -10661,7 +10842,7 @@ function updateScript() {
   try {
     GM_xmlhttpRequest({
       method: 'GET',
-      url: SCRIPT.metadata + '?' + new Date().getTime(),
+      url: SCRIPT.metadata + '?' + Math.random(),
       onload: function(result) {
         if (result.status != 200) {
           return;
@@ -10832,10 +11013,14 @@ function loadUrl (url, funcStateChange) {
 
 // Load AttackX script by Spockholm
 function attackXfromProfile() {
-  var a = document.createElement("script");
-  a.type = "text/javascript";
-  a.src = "http://www.spockholm.com/mafia/attackX-beta.js?" + Math.random();
-  document.getElementsByTagName("head")[0].appendChild(a)
+  var src = 'http://www.spockholm.com/mafia/attackX-beta.js?' + Math.random();
+  reMakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
+}
+
+// Load Chuck-A-Crap script by Spockholm
+function eventclick_chuckaCrap() {
+  var src = 'http://userscripts.org/scripts/source/68186.user.js?' + Math.random();
+  reMakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
 function getHitUrl (targetId) {
@@ -11030,7 +11215,8 @@ function saveCheckBoxElement(eltId) {
 
 // Check if a GM value is the same as the passed value
 function isEqual (gmName, gmValue) {
-  return GM_getValue(gmName) == gmValue;
+  if (gvar.isGreasemonkey) return GM_getValue(gmName) == gmValue;
+  return GM_getValue(gmName) + '' == gmValue + '';
 }
 
 // Check if a GM value is checked
@@ -11059,6 +11245,16 @@ function makeElement(type, appendto, attributes, checked, chkdefault) {
     appendto.appendChild(element);
   }
   return element;
+}
+
+function destroyByID( id){
+  var elt = document.getElementById(id);
+  if (elt) elt.parentNode.removeChild(elt);
+}
+
+function remakeElement(type, appendto, attributes, checked, chkdefault) {
+  if (attributes.id) destroyByID(attributes.id);
+  return makeElement(type, appendto, attributes, checked, chkdefault);
 }
 
 /******************************** CASH PARSING ********************************/
@@ -11250,7 +11446,7 @@ function encode64(input) {
 }
 
 (function(){
-  if (!needApiUpgrade) return;
+  if (gvar.isGreaseMonkey) return;
 
   /* atomic objects */
   if (!Boolean.prototype.toSource)  Boolean.prototype.toSource = function(){
