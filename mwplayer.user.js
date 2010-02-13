@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.56
-// @build       194
+// @version     1.0.57
+// @build       197
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.56',
-  build: '194',
+  version: '1.0.57',
+  build: '197',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1716,7 +1716,7 @@ function doAutoPlay () {
   }
 
   // Auto-buy properties
-  if (running && !maxed && isChecked('autoBuy')) {
+  if (false && running && !maxed && isChecked('autoBuy')) {
     if (propertyBuy()) return;
   }
 
@@ -2245,35 +2245,15 @@ function collectNYTake() {
     return true;
   }
 
-  if (!onRacketNav()) {
-    if (onPropertyNav()) {
-      window.location = "http://mwfb.zynga.com/mwfb/remote/json_server.php?xw_controller=propertyV2&xw_action=collectall&xw_city=1&requesttype=json";
-      setGMTime("nextNYTake", "3:00:00");
-      var eltCollected = xpathFirst('.//td[@class="message_body" and contains(.,"$0")]');
-      if (eltCollected) {
-        Autoplay.fx = function() {
-          clickAction = 'collect ny take';
-          DEBUG('Nothing to collect. Coming back in 3 hours');
-        };
-        Autoplay.delay = 5000;
-        Autoplay.start();
-        return false;
-      } else {
-          Autoplay.fx = function() {
-            clickAction = 'collect ny take';
-          DEBUG('The take has been collected. Coming back in 3 hours');
-          };
-          Autoplay.delay = 5000;
-          Autoplay.start();
-          return true;
-        }
-    }
-    else {
-      Autoplay.fx = goPropertyNav;
-      Autoplay.start();
-      return true;
+  // Handle JSON response
+  var urlLoaded = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      logJSONResponse(this.responseText, 'collect ny take')
     }
   }
+
+  loadUrl(getMWUrl('json_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':'1', 'requesttype':'json'}), urlLoaded);
+
   return false;
 }
 
@@ -7416,10 +7396,8 @@ function customizeProfile() {
             if (titleElt) {
               var flagElt = makeElement('span', titleElt, {'class': (alive ? 'good' : 'bad')});
               flagElt.innerHTML = (alive ? '*LIVE* ' : '*ICED* ');
-              if (alive) {
-                var attackXElt = makeElement('input', flagElt, {'type':'button','value':'AttackX?'});
-                attackXElt.addEventListener('click', attackXfromProfile, false);
-              }
+              var attackXElt = makeElement('input', flagElt, {'type':'button','value':'AttackX?'});
+              attackXElt.addEventListener('click', attackXfromProfile, false);
               titleElt.insertBefore(flagElt, titleElt.firstChild);
             }
           }
@@ -10382,6 +10360,33 @@ function randomizeStamina() {
   }
 }
 
+// Interpret the JSON response from a request
+function logJSONResponse(responseText, action) {
+  try {
+    var resp = responseText;
+    var respJSON = eval ('(' + resp + ')');
+
+    // Log any message from collection NY take.
+    switch (action) {
+      case 'collect ny take':
+        if (respJSON.message.match("You collected")) {
+          addToLog(cities[city][CITY_CASH_CSS], respJSON.message);
+        } else {
+          DEBUG(resp);
+        }
+        setGMTime ('nextNYTake', '3 hours');
+        break;
+
+      default:
+        addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' +
+                 action + '".');
+        DEBUG(resp);
+    }
+  } catch (ex) {
+    DEBUG('Exception (logJSONResponse): ' + ex);
+  }
+}
+
 // Interprets the response to an action that was taken.
 //
 // rootElt: An element whose descendents contain the response to interpret.
@@ -10801,16 +10806,6 @@ function logResponse(rootElt, action, context) {
       }
       break;
 
-    case 'collect ny take':
-      // Log any message from collection NY take.
-      var collectNYTake = xpathFirst('.//td[contains(.,"You collected")]');
-      if (collectNYTake) {
-        addToLog(cities[city][CITY_CASH_CSS], collectNYTake.innerHTML);
-      } else {
-        DEBUG(inner);
-      }
-      break;
-
     // FIXME: Add parsing here
     case 'buy item':
       break;
@@ -11010,23 +11005,28 @@ function eventclick_chuckaCrap() {
   reMakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
-function getHitUrl (targetId) {
-  var hitURL = document.location.href;
-  hitURL = hitURL.replace(/xw_controller=\w+/,'xw_controller=hitlist');
-  hitURL = hitURL.replace(/xw_action=\w+/,'xw_action=set');
-  hitURL += hitURL.replace('#','');
-  hitURL += '&target_id=' + targetId;
-  return hitURL;
+function getMWUrl (server, params) {
+  var mwURL = document.location.href;
+  mwURL = mwURL.replace(/html_server/, server);
+  mwURL = mwURL.replace('#','');
+
+  // Create or Replace params
+  for (var i in params) {
+    if (new RegExp(i + '=\\w+').test(mwURL))
+      mwURL = mwURL.replace(new RegExp(i + '=\\w+'), i + '=' + params[i]);
+    else
+      mwURL += '&' + i + '=' + params[i];
+  }
+
+  return mwURL;
 }
 
-function getProfileUrl (useId) {
-  var profileURL = document.location.href;
-  DEBUG(profileURL);
-  profileURL = profileURL.replace(/xw_controller=\w+/,'xw_controller=stats');
-  profileURL = profileURL.replace(/xw_action=\w+/,'xw_action=view');
-  profileURL += profileURL.replace('#','');
-  profileURL += '&user=' + useId;
-  return profileURL;
+function getHitUrl (targetId) {
+  return getMWUrl ('html_server', {'xw_controller':'hitlist', 'xw_action':'set', 'target_id':targetId});
+}
+
+function getProfileUrl (userId) {
+  return getMWUrl ('html_server', {'xw_controller':'stats', 'xw_action':'view', 'user':userId});
 }
 
 function stripURI(img) {

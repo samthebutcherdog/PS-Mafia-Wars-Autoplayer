@@ -1,0 +1,18 @@
+{
+   "content_scripts": [ {
+      "js": [ "mwplayer.user.js" ],
+      "matches": [ "http://mwfb.zynga.com/mwfb/*",
+                   "http://apps.facebook.com/inthemafia/*",
+                   "http://apps.new.facebook.com/inthemafia/*",
+                   "http://www.facebook.com/connect/*" ]
+   } ],
+   "description": "Mafia Wars Autoplayer for Google Chrome",
+   "icons": {
+      "128": "mwap128.png",
+      "48": "mwap48.png"
+   },
+
+   "name": "Autoplayer for Mafia Wars (Facebook)",
+   "version": "1.0.57",
+   "minimum_chrome_version": "4.0"
+}
