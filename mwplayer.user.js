@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.58
-// @build       200
+// @build       201
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.58',
-  build: '200',
+  build: '201',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -3883,7 +3883,7 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'showLevel','hideFriendLadder','moneyRacketCheck']);
+                            'showLevel','hideFriendLadder','moneyRacketCheck','autoWarRallyPublish']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -5158,6 +5158,13 @@ function createMafiaTab() {
   makeElement('br', lhs, {'class':'hide'});
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Publish war declaration '));
+
+  // Publish rally for help
+  title = 'Automatically publish rally for help';
+  id = 'autoWarRallyPublish';
+  makeElement('br', lhs, {'class':'hide'});
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Publish rally for help'));
 
   // Publish call for back up
   title = 'Automatically publish the call for help to your mafia';
@@ -6616,6 +6623,9 @@ function handlePublishing() {
       // War back up request
       if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
+      // War rally for help
+      if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
+
       // War Declaration
       if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
     }
@@ -7085,19 +7095,31 @@ function refreshMWAPCSS() {
 
 // Perform click actions here
 function doQuickClicks() {
-  // Click the level up bonus
-  var eltLevel = xpathFirst('.//a[contains(@onclick,"levelUpBoost")]');
-  if (eltLevel && isChecked('autoLevelPublish')) {
-    clickElement(eltLevel);
-    DEBUG('Clicked to publish Level Up');
+  // Common clicking method
+  var doClick = function (xpath, gmFlag) {
+    var elt = xpathFirst (xpath);
+    if (elt && isChecked(gmFlag)) {
+      clickElement(eltLevel);
+      DEBUG('Clicked button for ' + gmFlag);
+      return true;
+    }
+    return false;
   }
 
+  // Click the level up bonus
+  if (doClick('.//a[contains(@onclick,"levelUpBoost")]', 'autoLevelPublish')) return;
+
   // Click the achievement bonus
-  var eltAchievementPublish = xpathFirst('.//a[contains(.,"Share the wealth!")]');
-  if (eltAchievementPublish && isChecked('autoAchievementPublish')) {
-    clickElement(eltAchievementPublish);
-    DEBUG('Clicked to publish achievement bonus');
-  }
+  if (doClick('.//a[contains(.,"Share the wealth!")]', 'autoAchievementPublish')) return;
+
+  // Click the reward button
+  if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
+
+  // Click the 'Call for Help!' button
+  if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', 'autoWarResponsePublish')) return;
+
+  // Click the 'Rally More Help!' button
+  if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 }
 
 // Parse certain messages appearing on the message window
@@ -7345,18 +7367,18 @@ function customizeProfile() {
     } else {
       buildAnchorOptions.href='#';
     }
-    if( !Options.clickEvent && Options.URLSegment){
+    if(!Options.clickEvent && Options.URLSegment){
       buildAnchorOptions.onclick ='return do_ajax(\'inner_page\', \'/remote/html_server.php?'+Options.URLSegment+'\', 1, 1, 0, 0); return false; ';
     }
-    if(Options.title){
-      buildAnchorOptions.title=Options.title;
+    if(Options.id){
+      buildAnchorOptions.id=Options.id;
     }
 
     var anchorElt = makeElement('a', statsDiv, buildAnchorOptions);
     if(Options.AnchorText){
       anchorElt.appendChild(document.createTextNode(Options.AnchorText));
     }
-    if( Options.clickEvent){
+    if(Options.clickEvent){
       anchorElt.addEventListener('click', Options.clickEvent, false);
     }
     return anchorElt;
@@ -7428,6 +7450,7 @@ function customizeProfile() {
         var isOnFightList = (getSavedList('fightList').indexOf(remoteuserid) != -1);
         statsDiv.appendChild(document.createTextNode(' | '));
         this.buildAnchor( { 'AnchorText':isOnFightList?'Remove from Fight List':'Add to Fight List',
+                            'id':remoteuserid,
                             'title':'In the settings box, under the stamina tab\nIf you have selected fight specific opponents\nFight these opponents:',
                             'clickEvent':isOnFightList?clickFightListRemove:clickFightListAdd
                           });
@@ -7451,6 +7474,7 @@ function customizeProfile() {
         // In my mafia. Show options to add/remove from war list.
         statsDiv.appendChild(document.createTextNode(' | '));
         this.buildAnchor( { 'AnchorText':isOnWarList?'Remove from War List':'Remove from War List',
+                            'id':remoteuserid,
                             'title':'In the settings box, under the mafia tab\nIf you have selected war friends from a list\nupdates the friends ids in the box',
                             'clickEvent':isOnWarList?clickWarListRemove:clickWarListAdd
                           });
@@ -7461,7 +7485,7 @@ function customizeProfile() {
         this.buildAnchor( { 'AnchorText':'NY - Give help',
                             'URLSegment': 'xw_controller=job&'+
                                           'xw_action=give_help&'+
-                                          'xw_city=+ (city + 1) +&'+
+                                          'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
                                           'target_id='+remoteuserid+'&'+
@@ -7472,23 +7496,17 @@ function customizeProfile() {
                             'title':'A test of the title',
                             'URLSegment': 'xw_controller=job&'+
                                           'xw_action=give_help&'+
-                                          'xw_city=+ (city + 1) +&'+
+                                          'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
                                           'target_id='+remoteuserid+'&'+
                                           'job_city=2'
                           });
-        statsDiv.appendChild(document.createTextNode(' | Moscow:( '));
-        this.buildAnchor( { 'AnchorText':'Give Help',
-                            'title':'does not work',
-                            'clickEvent':function() { alert("No Worky")}
-                          });
-
         statsDiv.appendChild(document.createTextNode(' | '));
         this.buildAnchor( { 'AnchorText':'Finish Episode ',
                             'URLSegment': 'xw_controller=episode&'+
                                           'xw_action=give_help_moscow_boss&'+
-                                          'xw_city=+ (city + 1) +&'+
+                                          'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
                                           'target_id='+remoteuserid+'&'+
@@ -7498,16 +7516,11 @@ function customizeProfile() {
         this.buildAnchor( {'AnchorText':'Give help',
                             'URLSegment': 'xw_controller=story&'+
                                           'xw_action=give_help_social&'+
-                                          'xw_city=+ (city + 1) +&'+
+                                          'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
                                           'target_id='+remoteuserid+'&'+
                                           'job_city=4'
-                          });
-        statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':'Finish Episode',
-                            'title':'does not work',
-                            'clickEvent':function() { alert("No Worky")}
                           });
         statsDiv.appendChild(document.createTextNode(')'));
         makeElement('br', statsDiv,{});
@@ -8299,6 +8312,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Publish war declaration: <strong>' + showIfUnchecked(GM_getValue('autoWarPublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Publish call for backup: <strong>' + showIfUnchecked(GM_getValue('autoWarResponsePublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Publish reward: <strong>' + showIfUnchecked(GM_getValue('autoWarRewardPublish')) + '</strong><br>' +
+        '&nbsp;&nbsp;Publish rally for help: <strong>' + showIfUnchecked(GM_getValue('autoWarRallyPublish')) + '</strong><br>' +
         '-------------------Autostat Tab--------------------<br>' +
         'Enable auto-stat: <strong>' + showIfUnchecked(GM_getValue('autoStat')) + '</strong><br>' +
         'Disable auto-stat: <strong>' + showIfUnchecked(GM_getValue('autoStatDisable')) + '</strong><br>' +
@@ -8950,32 +8964,6 @@ function autoWar() {
       clickContext = warStartButton;
       clickElement(warStartButton);
       DEBUG('Clicked to start a new war.');
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  // We're on the page, does it have a reward button
-  warRewardButton = xpathFirst('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends!")]', innerPageElt);
-  if (warRewardButton && isChecked('autoWarRewardPublish')) {
-    Autoplay.fx = function() {
-      clickAction = action;
-      clickContext = warRewardButton;
-      clickElement(warRewardButton);
-      DEBUG('Clicked the war reward button.');
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  // We're on the page, grab the 'Call for Help!' button if it exists
-  var warHelpMeButton = xpathFirst('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', innerPageElt);
-  if (warHelpMeButton && isChecked('autoWarResponsePublish')) {
-    Autoplay.fx = function() {
-      clickAction = action;
-      clickContext = warHelpMeButton;
-      clickElement(warHelpMeButton);
-      DEBUG('Clicked to get help with my war.');
     };
     Autoplay.start();
     return true;
