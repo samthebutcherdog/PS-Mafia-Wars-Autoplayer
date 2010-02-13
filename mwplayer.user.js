@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.57
-// @build       197
+// @version     1.0.58
+// @build       199
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.57',
-  build: '197',
+  version: '1.0.58',
+  build: '199',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1445,6 +1445,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   }
   String.prototype.untag = function() {
     return this.replace(/<[^>]*>/g, '');
+  }
+  String.prototype.clean = function() {
+    return this.replace(/<\/?[^>]+(>|$)/g, '');
   }
 
   Array.prototype.searchArray = function(target, index) {
@@ -7559,7 +7562,7 @@ function customizeJobs() {
     jobsFound +=  jobNames.snapshotLength;
 
     for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
-      var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].trim();
+      var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].clean().trim();
 
       // Skip this name if job row is not found
       var jobRow = getJobRow (jobName);
@@ -8059,7 +8062,7 @@ function jobMastery(element) {
           // Find the first unmastered job of this next tier.
           var findMastery = function(v, i, a) { return (a[i].innerHTML.indexOf('Mastery') > 0)? 1:0; };
           var nonMasteredJobs = tierJobs.filter(findMastery);
-          var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].trim();
+          var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].clean().trim();
 
           var matches = missions.searchArray(jobName, 0);
           if (!matches) {
