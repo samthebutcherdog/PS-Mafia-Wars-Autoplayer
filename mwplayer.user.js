@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.59
-// @build       202
+// @version     1.0.60
+// @build       203
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.59',
-  build: '202',
+  version: '1.0.60',
+  build: '203',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -10994,13 +10994,13 @@ function loadUrl (url, funcStateChange) {
 // Load AttackX script by Spockholm
 function attackXfromProfile() {
   var src = 'http://www.spockholm.com/mafia/attackX-beta.js?' + Math.random();
-  reMakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
+  remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
 // Load Chuck-A-Crap script by Spockholm
 function eventclick_chuckaCrap() {
   var src = 'http://userscripts.org/scripts/source/68186.user.js?' + Math.random();
-  reMakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
+  remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
 function getMWUrl (server, params) {
