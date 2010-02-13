@@ -38,7 +38,7 @@
 
 var SCRIPT = {
   version: '1.0.56',
-  build: '174',
+  build: '193',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -2247,61 +2247,32 @@ function collectNYTake() {
 
   if (!onRacketNav()) {
     if (onPropertyNav()) {
-      var takeTimer = xpathFirst('.//span[@id="prop_eng_timer_span"]', innerPageElt);
-      if (takeTimer) {
-        var d, prodReadyIn = timeLeft(takeTimer.innerHTML);
-        if (prodReadyIn == 0 || prodReadyIn >= 10500) { //If the timer says between 0 or 2:55:00
-          var elt = xpathFirst('.//a[contains(., "Collect take")]', innerPageElt);
-          if (elt) {
-            Autoplay.fx = function() {
-              clickAction = 'collect ny take';
-              clickElement(elt);
-              DEBUG('Collecting NY Take');
-              setGMTime("nextNYTake", "3:00:00");
-              if (GM_getValue("tempAutoBuy")) {
-                GM_setValue("autoBuy", GM_getValue("tempAutoBuy"));
-                GM_setValue("tempAutoBuy", 0);
-                DEBUG("Turning auto buy back on.");
-              }
-            };
-            Autoplay.start();
-            return true;
-          } else {
-            // Nothing to collect.
-            setGMTime("nextNYTake", takeTimer.innerHTML);
-            d = new Date();
-            d.setMilliseconds(0);
-            d.setTime(d.getTime()+(timeLeft(takeTimer.innerHTML)*1000));
-            DEBUG('The take has been collected. Coming back at: ' + d);
-            return false;
-          }
-        } else {
-          //It's more than 5 minutes after a take being ready, so we'll come back when the next take is ready.
-          setGMTime("nextNYTake", takeTimer.innerHTML);
-          d = new Date();
-          d.setMilliseconds(0);
-          d.setTime(d.getTime()+(timeLeft(takeTimer.innerHTML)*1000));
-          DEBUG('Take will be available at: ' + d);
-          if (GM_getValue("autoBuy")) {
-            GM_setValue("tempAutoBuy", GM_getValue("autoBuy"));
-            GM_setValue("autoBuy", 0);
-            DEBUG('Turning auto buy off till next take is collected.');
-          }
-          return false;
-        }
+      window.location = "http://mwfb.zynga.com/mwfb/remote/json_server.php?xw_controller=propertyV2&xw_action=collectall&xw_city=1&requesttype=json";
+      setGMTime("nextNYTake", "3:00:00");
+      var eltCollected = xpathFirst('.//td[@class="message_body" and contains(.,"$0")]');
+      if (eltCollected) {
+        Autoplay.fx = function() {
+          clickAction = 'collect ny take';
+          DEBUG('Nothing to collect. Coming back in 3 hours');
+        };
+        Autoplay.delay = 5000;
+        Autoplay.start();
+        return false;
       } else {
-        //Disabling collect NY take
-        GM_setValue("collectNYTake", 0);
-        DEBUG('Turning off collect NY Take. Player does not have take timer.')
-      }
-    } else {
+          Autoplay.fx = function() {
+            clickAction = 'collect ny take';
+          DEBUG('The take has been collected. Coming back in 3 hours');
+          };
+          Autoplay.delay = 5000;
+          Autoplay.start();
+          return true;
+        }
+    }
+    else {
       Autoplay.fx = goPropertyNav;
       Autoplay.start();
       return true;
     }
-  } else {
-    GM_setValue("collectNYTake", 0);
-    DEBUG('Turning off collect NY Take. Player does not have take timer.')
   }
   return false;
 }
@@ -9246,7 +9217,7 @@ function onWarNav() {
 
 function onPropertyNav() {
   // Return true if we're on the property nav, false otherwise.
-  if (city == NY && xpathFirst('.//input[@name="buy_props"]', innerPageElt)) {
+  if (city == NY && xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) {
     return true;
   }
 
@@ -10827,11 +10798,12 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'collect ny take':
-      if (innerNoTags.match(/You just collected take for production of/i)) {
-        var production = innerNoTags.match(/^You just collected take for production of \d+ worth \$[\d,]*./i);
-        addToLog(cities[city][CITY_CASH_CSS], production);
+      // Log any message from collection NY take.
+      var collectNYTake = xpathFirst('.//td[contains(.,"You collected")]');
+      if (collectNYTake) {
+        addToLog(cities[city][CITY_CASH_CSS], collectNYTake.innerHTML);
       } else {
-        DEBUG(inner);
+         DEBUG(inner);
       }
       break;
 
