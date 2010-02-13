@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.58
-// @build       201
+// @version     1.0.59
+// @build       202
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.58',
-  build: '201',
+  version: '1.0.59',
+  build: '202',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7353,6 +7353,7 @@ function getPlayerStats() {
 }
 
 function customizeProfile() {
+  // FIXME: Need to rewrite buildAnchor, need to make it more flexible
   this.buildAnchor = function (Options) {
     //Options.URLSegment = common portions if URL
     //Options.href = allow for full control of href
