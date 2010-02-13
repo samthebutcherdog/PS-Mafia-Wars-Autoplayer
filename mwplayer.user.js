@@ -7428,11 +7428,6 @@ function customizeProfile() {
                             'title':'In the settings box, under the stamina tab\nIf you have selected fight specific opponents\nFight these opponents:',
                             'clickEvent':isOnFightList?clickFightListRemove:clickFightListAdd
                           });
-        statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':'Manual Ice Check',
-                            'title':'Placeholder:does not work',
-                            'clickEvent':function() { alert("Placeholder:No Worky :-(")}
-                          });
       }
 
       if (removeElt) { // Promote
@@ -9637,8 +9632,14 @@ function goJobTab(tabno) {
     return;
   }
 
-  var tabParamName = city == MOSCOW ? 'episode_tab' : (city == BANGKOK ? 'story_tab' : 'tab');
+  var tabParamName = (city == MOSCOW || city == BANGKOK) ? 'story_tab' : 'tab';
   elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&' + tabParamName + '=' + tabno + '")]', innerPageElt);
+
+  // Handle old tab property
+  if (!elt) {
+    tabParamName = 'episode_tab';
+    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&' + tabParamName + '=' + tabno + '")]', innerPageElt);
+  }
 
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
