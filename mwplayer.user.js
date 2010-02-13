@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.55
-// @build       173
+// @version     1.0.56
+// @build       174
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.55',
-  build: '173',
+  version: '1.0.56',
+  build: '174',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7982,10 +7982,21 @@ function setJobReqs (element) {
     necessaryItems.forEach(
       function(i){
         DEBUG('Missing : ' +i.alt);
+        // Try fetching the items from the same city first
         requirementJob.forEach(
           function(j){
             // Get requirement from the same city
             if (city == j[2] && j[0] == i.alt && j[1] != xJob) {
+              jobs.push(j[1]);
+              items.push(i.alt);
+            }
+          }
+        );
+        // If none are found, try fetching the items with lower level req
+        requirementJob.forEach(
+          function(j){
+            // Get requirement with lower level reqs
+            if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt && j[1] != xJob) {
               jobs.push(j[1]);
               items.push(i.alt);
             }
