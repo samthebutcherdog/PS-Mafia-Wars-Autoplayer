@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.58
-// @build       199
+// @build       200
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.58',
-  build: '199',
+  build: '200',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7929,6 +7929,7 @@ function setJobReqs (element) {
   if (necessaryItems.length > 0) {
     necessaryItems.forEach(
       function(i){
+      	var itemFound = false;
         DEBUG('Missing : ' +i.alt);
         // Try fetching the items from the same city first
         requirementJob.forEach(
@@ -7937,19 +7938,23 @@ function setJobReqs (element) {
             if (city == j[2] && j[0] == i.alt && j[1] != xJob) {
               jobs.push(j[1]);
               items.push(i.alt);
+              itemFound = true;
             }
           }
         );
+
         // If none are found, try fetching the items with lower level req
-        requirementJob.forEach(
-          function(j){
-            // Get requirement with lower level reqs
-            if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt && j[1] != xJob) {
-              jobs.push(j[1]);
-              items.push(i.alt);
+        if (!itemFound) {
+          requirementJob.forEach(
+            function(j){
+              // Get requirement with lower level reqs
+              if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt && j[1] != xJob) {
+                jobs.push(j[1]);
+                items.push(i.alt);
+              }
             }
-          }
-        );
+          );
+        }
       }
     );
     setSavedList('itemList', items.unique());
