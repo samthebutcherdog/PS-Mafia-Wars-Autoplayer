@@ -38,7 +38,7 @@
 
 var SCRIPT = {
   version: '1.0.61',
-  build: '204',
+  build: '205',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -6127,7 +6127,7 @@ function createCashTab () {
   makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
   var collectNYTake = makeElement('div', cashTab, {'style':'top: 120px; right: 10px;'});
-  collectNYTake.appendChild(document.createTextNode('Automatically collect NY 3 hour take'));
+  collectNYTake.appendChild(document.createTextNode('Automatically collect NY take every hour'));
   makeElement('input', collectNYTake, {'type':'checkbox', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
 
   // Racketing
@@ -10372,7 +10372,7 @@ function logJSONResponse(responseText, action) {
         } else {
           DEBUG(resp);
         }
-        setGMTime ('nextNYTake', '3 hours');
+        setGMTime ('nextNYTake', '1 hour');
         break;
 
       default:
