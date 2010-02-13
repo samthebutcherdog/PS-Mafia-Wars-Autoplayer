@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.60
-// @build       203
+// @version     1.0.61
+// @build       204
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.60',
-  build: '203',
+  version: '1.0.61',
+  build: '204',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7099,7 +7099,7 @@ function doQuickClicks() {
   var doClick = function (xpath, gmFlag) {
     var elt = xpathFirst (xpath);
     if (elt && isChecked(gmFlag)) {
-      clickElement(eltLevel);
+      clickElement(elt);
       DEBUG('Clicked button for ' + gmFlag);
       return true;
     }
