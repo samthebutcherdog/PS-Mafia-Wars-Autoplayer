@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.56
-// @build       174
+// @build       194
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.56',
-  build: '193',
+  build: '194',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -2168,8 +2168,8 @@ function collectMoneyRacket() {
     //turning off rackets
     GM_setValue("moneyRacketCheck", 0);
     DEBUG("Turning off racket options. We're on properties page.");
-    return false;
   }
+  return false;
 }
 
 // Collect Racket
@@ -7289,6 +7289,7 @@ function customizeHome() {
 
   // Is an energy pack waiting to be used?
   energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
+  energyPackElt = energyPackElt ? energyPackElt : xpathFirst('.//a[contains(@onclick, "xw_action=use_energy_pak")]', innerPageElt);
   energyPack = energyPackElt? true : false;
 
   // Get the name from the stats box
@@ -7593,7 +7594,7 @@ function customizeJobs() {
 
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
-      if (!jobMatch) { masteredJobsCount; continue; }
+      if (!jobMatch) { masteredJobsCount++; continue; }
 
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
@@ -9217,7 +9218,7 @@ function onWarNav() {
 
 function onPropertyNav() {
   // Return true if we're on the property nav, false otherwise.
-  if (city == NY && xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) {
+  if (city == NY && xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2"]', innerPageElt)) {
     return true;
   }
 
@@ -10317,8 +10318,11 @@ function logFightResponse(rootElt, resultElt, context) {
     // Click Attack Again immediately to milk our cash-cow
     if (experience && canSpendStamina() && ptsToNextLevel > 6) {
       var attackAgain = isChecked ('staminaReattack') &&
-                        parseCash(cost) >= GM_getValue('reattackThreshold') &&
-                        (cost.indexOf(cities[city][CITY_CASH_SYMBOL]) != -1);
+                        (
+                          (parseCash(cost) + GM_getValue('reattackThreshold') == 0) ||
+                          (parseCash(cost) >= GM_getValue('reattackThreshold') &&
+                           cost.indexOf(cities[city][CITY_CASH_SYMBOL]) != -1)
+                         );
       if (attackAgain && attackAgainElt) {
         // Attack again immediately.
         Autoplay.fx = function() {
@@ -10803,7 +10807,7 @@ function logResponse(rootElt, action, context) {
       if (collectNYTake) {
         addToLog(cities[city][CITY_CASH_CSS], collectNYTake.innerHTML);
       } else {
-         DEBUG(inner);
+        DEBUG(inner);
       }
       break;
 
