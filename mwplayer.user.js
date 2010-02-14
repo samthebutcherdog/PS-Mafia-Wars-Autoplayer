@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.63
-// @build       208
+// @build       209
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.63',
-  build: '208',
+  build: '209',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -1331,21 +1331,21 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Remove Matsumura\'s Loyal Lieutenants',104,93,5,BANGKOK,132],            // FINALE
     ['Execute Oyabun Matsumura',0,94,5,BANGKOK,0],                             // BOSS JOB no energy or exp points known yet
     // BANGKOK EPISODE 5B-Dragon Head
-    ['Set Up A Drug Shipment To China',49,86,6,BANGKOK,79],                    // CHAPTER 1
-    ['Dodge Customs At The Port of Hong Kong',64,87,6,BANGKOK,102],            // CHAPTER 1
-    ['Win A Shoot-Out With The Kowloon Police',149,88,6,BANGKOK,208],          // CHAPTER 1  HELP JOB
-    ['Intimidate Wealthy Expatriates',64,90,6,BANGKOK,102],                    // CHOICE POINT CHAPTER 2 (Yakuza = 90, Triad = 93)
-    ['Make An Example Of A Wealthy Industrialist',64,91,6,BANGKOK,102],        // CHAPTER 2  Yakuza
-    ['Fence The Goods Stolen From The Mansion',60,92,6,BANGKOK,97],            // CHAPTER 2  Yakuza
-    ['Extort The Head Of The Hong Kong Polo Club',67,94,6,BANGKOK,106],        // CHAPTER 2  Triad
-    ['Fix The Hong Kong Polo Invitational',64,95,6,BANGKOK,102],               // CHAPTER 2  Triad
-    ['Talk With Wei\'s Disloyal Enforcers',71,96,6,BANGKOK,115],                // CHOICE POINT CHAPTER 3 (Yakuza = 96, Triad = 99)
-    ['Sneak An Industrial Spy Into Hong Kong',64,97,6,BANGKOK,102],            // CHAPTER 3  Yakuza
-    ['Break In To Cheng-Wei Ballistics',67,98,6,BANGKOK,106],                  // CHAPTER 3  Yakuza
-    ['Kidnap One Of Wei\'s Trusted Advisors',56,100,6,BANGKOK,88],             // CHAPTER 3  Triad
-    ['Bury The Body Under A Construction Site',60,101,6,BANGKOK,97],           // Chapter 3  Triad
-    ['Attack Wei\'s Gambling Halls',96,102,6,BANGKOK,155],                     // FINALE
-    ['Dispose Of Mountain Master Wei',0,103,6,BANGKOK,0]                       // BOOS JOB
+    ['Set Up A Drug Shipment To China',49,96,6,BANGKOK,79],                    // CHAPTER 1
+    ['Dodge Customs At The Port of Hong Kong',64,97,6,BANGKOK,102],            // CHAPTER 1
+    ['Win A Shoot-Out With The Kowloon Police',149,98,6,BANGKOK,208],          // CHAPTER 1  HELP JOB
+    ['Intimidate Wealthy Expatriates',64,100,6,BANGKOK,102],                    // CHOICE POINT CHAPTER 2 (Yakuza = 90, Triad = 93)
+    ['Make An Example Of A Wealthy Industrialist',64,101,6,BANGKOK,102],        // CHAPTER 2  Yakuza
+    ['Fence The Goods Stolen From The Mansion',60,102,6,BANGKOK,97],            // CHAPTER 2  Yakuza
+    ['Extort The Head Of The Hong Kong Polo Club',67,104,6,BANGKOK,106],        // CHAPTER 2  Triad
+    ['Fix The Hong Kong Polo Invitational',64,105,6,BANGKOK,102],               // CHAPTER 2  Triad
+    ['Talk With Wei\'s Disloyal Enforcers',71,106,6,BANGKOK,115],                // CHOICE POINT CHAPTER 3 (Yakuza = 96, Triad = 99)
+    ['Sneak An Industrial Spy Into Hong Kong',64,107,6,BANGKOK,102],            // CHAPTER 3  Yakuza
+    ['Break In To Cheng-Wei Ballistics',67,108,6,BANGKOK,106],                  // CHAPTER 3  Yakuza
+    ['Kidnap One Of Wei\'s Trusted Advisors',56,110,6,BANGKOK,88],             // CHAPTER 3  Triad
+    ['Bury The Body Under A Construction Site',60,111,6,BANGKOK,97],           // Chapter 3  Triad
+    ['Attack Wei\'s Gambling Halls',96,112,6,BANGKOK,155],                     // FINALE
+    ['Dispose Of Mountain Master Wei',0,113,6,BANGKOK,0]                       // BOOS JOB
   );
 
   var missionTabs = new Array(
@@ -9646,12 +9646,12 @@ function goJobTab(tabno) {
   DEBUG('Clicked to go to job tab ' + tabno + '.');
 }
 
-function jobBurst (clickElt) {
-  var numClicks = 1;
-  if (isChecked('burstJob')) {
-    numClicks = GM_getValue('burstJobCount', 1);
-  }
-  clickBurst (clickElt, parseInt(numClicks));
+function jobBurst (clickElt) { 
+var numClicks = 1; 
+if (isChecked('burstJob') && (ptsToNextLevel > 1000)) { 
+numClicks = GM_getValue('burstJobCount', 1); 
+} 
+clickBurst (clickElt, parseInt(numClicks)); 
 }
 
 function goJob(jobno, context) {
