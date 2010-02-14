@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.62
-// @build       207
+// @version     1.0.63
+// @build       208
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.62',
-  build: '207',
+  version: '1.0.63',
+  build: '208',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -54,7 +54,7 @@ var SCRIPT = {
 
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
-if (window.location.href.match(/facebook.com/)) {
+if (/facebook.com/.test(window.location.href)) {
   var profElt = xpathFirst('.//ud[@id="pageNav"]//a[@accesskey="6"]');
   if (profElt && profElt.getAttribute('href').match(/id=(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
@@ -66,7 +66,7 @@ if (window.location.href.match(/facebook.com/)) {
   }
 }
 
-if (window.location.href.match(/mwfb.zynga.com/)) {
+if (/mwfb.zynga.com/.test(window.location.href)) {
   var docUrl = document.location.href;
   if (docUrl.match(/sf_xw_user_id=(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
@@ -82,7 +82,7 @@ function GM_ApiBrowserCheck() {
   if(typeof(GM_setValue)!='undefined') {
     var gsv=GM_setValue.toString();
     if(gsv.indexOf('staticArgs')>0) { gvar.isGreaseMonkey=true; GM_log('GreaseMonkey Api detected...'); } // test GM_hitch
-    else if(gsv.match(/not\s+supported/)) { needApiUpgrade=true; gvar.isBuggedChrome=true; GM_log('Bugged Chrome GM Api detected...'); }
+    else if(/not\s+supported/.test(gsv)) { needApiUpgrade=true; gvar.isBuggedChrome=true; GM_log('Bugged Chrome GM Api detected...'); }
   } else { needApiUpgrade=true; GM_log('No GM Api detected...'); }
 
   if(needApiUpgrade) {
@@ -118,8 +118,8 @@ GM_ApiBrowserCheck();
 // Handle Publishing
 function checkInPublishPopup() {
   if (GM_getValue('isRunning') &&
-      window.document.referrer.match(/mwfb.zynga.com/) &&
-      window.location.href.match(/prompt_feed/))  {
+      /mwfb.zynga.com/.test(window.document.referrer) &&
+      /prompt_feed/.test(window.location.href))  {
     GM_setValue('postClicked', false);
     setGMTime('postTimer', '00:10');
     window.setTimeout(handlePublishing, 2000);
@@ -131,7 +131,7 @@ function checkInPublishPopup() {
 // Load the iframe
 function checkLoadIframe() {
   var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
-  if (iFrameCanvas && top && top.document.domain.match(/facebook.com/)) {
+  if (iFrameCanvas && top && /facebook.com/.test(top.document.domain)) {
 
     if (gvar.isGreaseMonkey) checkLanguage();
 
@@ -748,7 +748,7 @@ var newStaminaMode;             // New stamina mode for random fighting
 var nameChecked = false;
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
-    (document.referrer.match(/inthemafia/) || window.location.href.match(/mwfb.zynga.com/))) {
+    (/inthemafia/.test(document.referrer.match) || /mwfb.zynga.com/.test(window.location.href))) {
   var tabURI = "Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUg"+
   "bGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3"+
   "dGgsIDA3IHRvIHZlcnNpb24gMi4wLiBDb250YWlucyBudW1lcm91cyBpbXByb3ZlbWVudHM6DQov"+
@@ -7130,7 +7130,7 @@ function doParseMessages() {
       var currNode = msgs.firstChild.childNodes[i];
 
       // Log Minipack kick-off
-      if (currNode.innerHTML.match(/Mini Energy Buff/)) {
+      if (/Mini Energy Buff/.test(currNode.innerHTML)) {
         addToLog('yeah Icon', currNode.innerHTML);
       }
     }
@@ -7284,7 +7284,7 @@ function customizeHome() {
   var msgs = xpathFirst('//table[@class="messages"]');
   if (msgs) {
     for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
-      if (msgs.firstChild.childNodes[i].innerHTML.match(/You have gifts available to send./)) {
+      if (/You have gifts available to send/.test(msgs.firstChild.childNodes[i].innerHTML)) {
         if (iLength == 1) hideElement(msgs, isChecked('hideGifts'));
         else hideElement(msgs.firstChild.childNodes[i], isChecked('hideGifts'));
         break;
@@ -7396,7 +7396,7 @@ function customizeProfile() {
       var remoteuserid;
       var tmpKey;
       var cbKey;
-      if( tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=(\d+)/)) {
+      if (tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=(\d+)/)) {
         tmpKey = 'tmp='+RegExp.$1+'&';
         cbKey = 'cb='+RegExp.$2+'&';
         remoteuserid = RegExp.$3;
@@ -7404,10 +7404,10 @@ function customizeProfile() {
       if (!remoteuserid && tabElt.getAttribute('onclick').match(/user=(\d+)/)){
         remoteuserid = RegExp.$1;
       }
-      if( !tmpKey && tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&/)){
+      if (!tmpKey && tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&/)){
         tmpKey = 'tmp='+RegExp.$1+'&';
       }
-      if( !cbKey && tabElt.getAttribute('onclick').match(/cb=([\d,a-z]+)&/)){
+      if (!cbKey && tabElt.getAttribute('onclick').match(/cb=([\d,a-z]+)&/)){
         cbKey = 'cb='+RegExp.$2+'&';
       }
       // See if this player is in our mafia.
@@ -7561,7 +7561,7 @@ function customizeJobs() {
   }
 
   var isJobMastered = function (jobInfo) {
-    return (jobInfo && jobInfo.innerHTML.match(/Level\s+(\d+)\s+Mastered/i));
+    return (jobInfo && /Level\s+(\d+)\s+Mastered/i.test(jobInfo.innerHTML));
   }
 
   // Display an experience to energy payoff ratio for each job.
@@ -11015,6 +11015,10 @@ function getMWUrl (server, params) {
 
   // Create or Replace params
   for (var i in params) {
+
+    // For chrome, do not place this in params
+    if (/tosource/i.test(params[i])) continue;
+
     if (new RegExp(i + '=\\w+').test(mwURL))
       mwURL = mwURL.replace(new RegExp(i + '=\\w+'), i + '=' + params[i]);
     else
