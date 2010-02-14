@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.62
-// @build       206
+// @build       207
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.62',
-  build: '206',
+  build: '207',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -7398,7 +7398,7 @@ function customizeProfile() {
       var cbKey;
       if( tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=(\d+)/)) {
         tmpKey = 'tmp='+RegExp.$1+'&';
-        cbKey = 'tmp='+RegExp.$2+'&';
+        cbKey = 'cb='+RegExp.$2+'&';
         remoteuserid = RegExp.$3;
       }
       if (!remoteuserid && tabElt.getAttribute('onclick').match(/user=(\d+)/)){
@@ -7408,7 +7408,7 @@ function customizeProfile() {
         tmpKey = 'tmp='+RegExp.$1+'&';
       }
       if( !cbKey && tabElt.getAttribute('onclick').match(/cb=([\d,a-z]+)&/)){
-        cbKey = 'tmp='+RegExp.$2+'&';
+        cbKey = 'cb='+RegExp.$2+'&';
       }
       // See if this player is in our mafia.
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
