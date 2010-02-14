@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.61
-// @build       204
+// @version     1.0.62
+// @build       206
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.61',
-  build: '205',
+  version: '1.0.62',
+  build: '206',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -10408,6 +10408,11 @@ function logResponse(rootElt, action, context) {
   // Normal message
   if (!messagebox) {
     messagebox = xpathFirst('.//table[@class="messages"]', rootElt);
+  }
+
+  // New message box message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@id="msg_box_div_1"]', rootElt);
   }
 
   if (action=='withdraw' && context) {
