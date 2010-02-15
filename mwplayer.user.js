@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.63
-// @build       209
+// @build       210
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.63',
-  build: '209',
+  build: '210',
   name: 'inthemafia',
   appID: 'app10979261223',
   ajaxPage: 'inner2',
@@ -9648,8 +9648,10 @@ function goJobTab(tabno) {
 
 function jobBurst (clickElt) { 
 var numClicks = 1; 
-if (isChecked('burstJob') && (ptsToNextLevel > 1000)) { 
-numClicks = GM_getValue('burstJobCount', 1); 
+if (isChecked('burstJob')){ 
+  var nextJobXp = missions[GM_getValue('selectMission', 1)][6];
+  numClicks = GM_getValue('burstJobCount', 1);
+  while (((nextJobXp * numClicks) > ptsToNextLevel) && (numClicks > 1)) numClicks--;
 } 
 clickBurst (clickElt, parseInt(numClicks)); 
 }
