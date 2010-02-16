@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.64
-// @build       212
+// @build       213
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.64',
-  build: '212',
+  build: '213',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -933,12 +933,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_FIGHT_RANDOM = 0;  // Random fighting.
   const STAMINA_HOW_FIGHT_LIST   = 1;  // List fighting.
   const STAMINA_HOW_HITMAN       = 2;  // Hitman.
-  const STAMINA_HOW_RANDOM       = 3;  // Random spending of stamina in random cities.
+  const STAMINA_HOW_AUTOHIT      = 3;  // Place bounties.
+  const STAMINA_HOW_RANDOM       = 4;  // Random spending of stamina in random cities.
 
   var staminaSpendChoices = [];
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
   staminaSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific opponents';
   staminaSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect hitlist bounties';
+  staminaSpendChoices[STAMINA_HOW_AUTOHIT]      = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
 
   // Define Bounty Selection options
@@ -2715,6 +2717,88 @@ function canSpendStamina(minHealth) {
   return true;
 }
 
+function autoHitlist() {
+  // Go to the correct city.
+  var loc = GM_getValue('autoHitLocation', NY);
+  if (city != loc) {
+    Autoplay.fx = function() { goLocation(loc); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+  // Make sure we're on the fight tab.
+  if (!onFightTab() && !autoHitlist.profileSearch && !autoHitlist.setBounty) {
+    Autoplay.fx = goFightTab;
+    Autoplay.delay = 0;
+    Autoplay.start();
+    return true;
+  }
+  // Go to the opponent's profile. 
+  var id = parseInt(GM_getValue('autoHitOpponentList', ''));
+  if (!id) {
+    // If nothing is here, and fighting is "random", fight someone else
+    if (isEqual('staminaSpendHow', STAMINA_HOW_RANDOM)) return false;
+    // The user-specified list is empty or invalid.
+    addToLog('warning Icon', 'Can\'t autohit because the list of opponents is empty or invalid. Turning automatic hitlisting off.');
+    GM_setValue('staminaSpend', 0);
+    return false;
+    }
+  opponent = new Player();
+  opponent.id = String(id);
+ 
+  if (!onProfileNav() && !autoHitlist.setBounty) {
+    // Go to the opponent's profile.
+    autoHitlist.profileSearch = opponent;
+    Autoplay.fx = goProfileNav(opponent);
+    Autoplay.start();
+    return true;
+  }   
+  if (autoHitlist.profileSearch && onProfileNav()) {
+    opponent = autoHitlist.profileSearch;
+    autoHitlist.profileSearch = undefined;
+    opponent.profileHitlist = xpathFirst('.//a[contains(., "Add to Hitlist")]', innerPageElt);
+    DEBUG('Hitlisting from profile');
+    var hitlistElt = opponent.profileHitlist;
+    autoHitlist.setBounty = true;
+    var elt = xpathFirst('.//a[contains(., "Add to Hitlist")]', innerPageElt);
+    if (elt) {
+      Autoplay.fx = function() {
+        clickAction = 'autohit';
+        clickContext = opponent;
+        clickElement(elt);
+        DEBUG('Clicked "Add to Hitlist".');
+      };
+      Autoplay.start();
+      return true;
+    }
+  }
+  if(autoHitlist.setBounty){
+    autoHitlist.setBounty = undefined; 
+    var formElt = xpathFirst('.//form[@id="createhit"]', innerPageElt);
+    // Set the amount (random).
+    var amountElt = xpathFirst('.//input[@type="text"]', formElt);
+    if (!amountElt) return true;
+
+    if(isChecked('autoHitListRandom')){
+      amountElt.value = Math.pow(10, (Math.floor(Math.random()*4)+4));
+    } else {
+      amountElt.value = parseCash(GM_getValue('autoHitListBounty', 0));
+    }
+  // Make the hit
+    var submitElt = xpathFirst('.//input[@type="submit"]', formElt);
+    if (!submitElt) {
+      return true;
+    }
+    Autoplay.fx = function() {
+      clickAction = 'autohit';
+      clickContext = opponent;
+      submitElt.click();
+      DEBUG('Clicked to Set Bounty');
+  }
+  Autoplay.start();
+  return true;
+  }
+}
 function autoFight(how) {
   // Go to the correct city.
   var loc = GM_getValue('fightLocation', NY);
@@ -2972,6 +3056,9 @@ function autoStaminaSpend() {
 
     case STAMINA_HOW_HITMAN:
       return autoHitman(how);
+   
+    case STAMINA_HOW_AUTOHIT:
+      return autoHitlist();
 
     default:
       addToLog('warning Icon', 'BUG DETECTED: Unrecognized stamina setting: ' +
@@ -6059,6 +6146,58 @@ function createStaminaTab() {
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
   // End of options specific to hitman
 
+  //
+  // Settings for list hitlisting
+  //
+
+  // Container for a list of settings.
+  list = makeElement('div', staminaTabSub, {'id':'autoHitListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+
+  // Location setting
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  lhs.appendChild(document.createTextNode('Place bounties in:'));
+  id = 'autoHitListLoc';
+  var autoHitListLoc = makeElement('select', rhs, {'id':id});
+  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
+    autoHitListLoc.appendChild(choice);
+  }
+  autoHitListLoc.selectedIndex = GM_getValue('autoHitLocation', NY);
+
+ // bounty amount
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'autoHitListBounty';
+  title = 'Place a fixed bounty or check random',
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Bounty:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351', 'value':GM_getValue('autoHitListBounty', '0')});
+
+  title = 'Place Random Bounties';
+  id = 'autoHitListRandom';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'autoHitListRandom');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' random'));
+
+  // Opponent list
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  lhs.appendChild(document.createTextNode('Hitlist these opponents:'));
+  makeElement('textarea', rhs, {'style':'position: static; width: 180px; height: 105px;', 'id':'autoHitOpponentList', 'title':'Enter each opponent\'s ID (not their name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('autoHitOpponentList', '')));
+  makeElement('br', rhs);
+  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each Facebook ID on a separate line.'));
+
+
+  // End of options specific to hitlisting
 
   // Handler for switching sub-areas.
   var handleSpendChanged = function() {
@@ -6381,6 +6520,27 @@ function validateStaminaTab() {
       var min = parseCash(s.hitmanBountyMin);
       if (isNaN(min) || min < 0) {
         alert('Please enter a minimum bounty amount.');
+        return {};
+      }
+      break;
+
+    case STAMINA_HOW_AUTOHIT: // Place hitlist bounties
+       s.autoHitListLocation = document.getElementById('autoHitListLoc').selectedIndex;
+       s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
+       s.autoHitListRandom = checked('autoHitListRandom');
+       s.autoHitOpponentList = document.getElementById('autoHitOpponentList').value;
+
+      // Validate the bounty.
+      var min = parseCash(s.autoHitListBounty);
+      if (isNaN(min) || min < 10000 && !s.autoHitListRandom) {
+        alert('Please enter a minimum bounty amount of at least $10,000');
+        return {};
+      }
+      
+      // Validate the autohit list.
+      var list = s.autoHitOpponentList.split('\n');
+      if (!list[0]) {
+        alert('Enter the Facebook ID of at least one opponent to hitlist.');
         return {};
       }
       break;
@@ -7484,6 +7644,17 @@ function customizeProfile() {
       // Add as Facebook friend
       makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remoteuserid}).appendChild(document.createTextNode('Add as Friend'));
 
+      statsDiv.appendChild(document.createTextNode(' | '));
+      var isOnAutoHitList = (getSavedList('autoHitOpponentList').indexOf(remoteuserid) != -1);
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( { 'AnchorText':isOnAutoHitList?'Remove from AutoHit List':'Add to AutoHit List',
+                            'id':remoteuserid,
+                            'title':'In the settings box, under the stamina tab\nIf you have selected hitlist opponents \nHitlist these opponents:',
+                            'clickEvent':isOnAutoHitList?clickAutoHitListRemove:clickAutoHitListAdd
+                          });
+
+
+
       if (!removeElt) {// Not in mafia. Show options to add/remove from fight lists.
         makeElement('br', statsDiv,{});
         statsDiv.appendChild(document.createTextNode('Enemy Mafia Options: '));
@@ -7896,7 +8067,49 @@ function clickFightListRemove() {
   if (el) {
     el.value = GM_getValue('fightList', '');
   }
+}// Callback for clicking 'Add to AutoHit List' on profile page.
+function clickAutoHitListAdd() {
+  addSavedListItem('autoHitOpponentList', this.id);
+  this.firstChild.nodeValue = 'Remove from AutoHit List';
+  this.removeEventListener('click', clickAutoHitListAdd, false);
+  this.addEventListener('click', clickAutoHitListRemove, false);
+  var el = document.getElementById('autoHitOpponentList');
+  if (el) {
+    el.value = GM_getValue('autoHitOpponentList', '');
+  }
 }
+
+// Callback for clicking 'Remove from AutoHit List' on profile page.
+function clickAutoHitListRemove() {
+  while(removeSavedListItem('autoHitOpponentList', this.id))
+  this.firstChild.nodeValue = 'Add to AutoHit List';
+  this.removeEventListener('click', clickAutoHitListRemove, false);
+  this.addEventListener('click', clickAutoHitListAdd, false);
+  var el = document.getElementById('autoHitOpponentList');
+  if (el) {
+    el.value = GM_getValue('autoHitOpponentList', '');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Callback for clicking 'Add to War List' on profile page.
 function clickWarListAdd() {
@@ -10357,13 +10570,28 @@ function logFightResponse(rootElt, resultElt, context) {
       }
     }
 
-  } else if (innerNoTags.indexOf('too weak') != -1) {
-    addToLog('info Icon', '<span style="color:#FF9999;">' + 'Too weak to fight.'+ '</span>');
+  
   } else if (innerNoTags.match(/you cannot fight|part of your mafia/i)) {
     if (context.id) {
       DEBUG('Opponent (' + context.id + ') is part of your mafia. Avoiding.');
       setFightOpponentAvoid(context);
     }
+    
+  } else if (innerNoTags.match(/You just set/)) {
+      cycleSavedList('autoHitOpponentList');
+      var fbPopupElt = xpathFirst('//a[@id="fb_dialog_cancel_button"]');
+      if (fbPopupElt) {
+        Autoplay.fx = function() {
+          clickElement(fbPopupElt);
+          DEBUG('Clicked Dismissed Popup!');
+        };
+      Autoplay.start();
+      return true;
+      }
+  } else if (innerNoTags.match(/There is already a bounty/) || innerNoTags.match(/You can\'t add/)) {
+      cycleSavedList('autoHitOpponentList');    
+  }  else if (innerNoTags.indexOf('too weak') != -1) {
+    addToLog('info Icon', '<span style="color:#FF9999;">' + 'Too weak to fight.'+ '</span>');
   } else {
     DEBUG('Unrecognized fight response:');
     DEBUG(inner);
@@ -10465,6 +10693,8 @@ function logResponse(rootElt, action, context) {
     return true;
   }
   if (!messagebox) {
+  
+    if(action == 'autohit') return false;
     DEBUG('logResponse: HTML=' + rootElt.innerHTML);
     DEBUG('Unexpected response page: no message box found!');
 
@@ -10488,6 +10718,8 @@ function logResponse(rootElt, action, context) {
   var cost, experience, result;
 
   switch (action) {
+  
+    case 'autohit':
     case 'fight':
       return logFightResponse(rootElt, messagebox, context);
       break;
