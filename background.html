@@ -1,0 +1,44 @@
+<html>
+<head>
+<script>
+
+Storage.prototype.setObject = function(key, value) {
+  this.setItem(key, JSON.stringify(value));
+}
+
+Storage.prototype.getObject = function(key) {
+  return JSON.parse(this.getItem(key));
+}
+
+function setMWValue(gmName, gmValue) {
+  localStorage.setItem(gmName, gmValue);
+}
+
+function getMWValue(gmName) {
+  return localStorage.getItem(gmName);
+}
+
+chrome.extension.onRequest.addListener(
+  function(request, sender, sendResponse) {
+    var resp = {};
+    if (request.action == "setGM") {
+      for (var i in request) {
+        if (i == 'action' || /function/i.test(i)) continue;
+        localStorage.setObject(i, request[i]);
+      }
+    } else if (request.action == "getGM") {
+      for (var i in request) {
+        if (i == 'action' || /function/i.test(i)) continue;
+        resp[i] = localStorage.getObject(i);
+      }
+    }
+
+    sendResponse(resp);
+  });
+
+</script>
+</head>
+<body onload="">
+</body>
+</html>
+

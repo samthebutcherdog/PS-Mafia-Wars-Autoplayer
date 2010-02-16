@@ -33,14 +33,15 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.63
-// @build       210
+// @build       211
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.63',
-  build: '210',
+  build: '211',
   name: 'inthemafia',
   appID: 'app10979261223',
+  appNo: '10979261223',
   ajaxPage: 'inner2',
   presentationurl: 'http://userscripts.org/scripts/show/64720',
   url: 'http://userscripts.org/scripts/source/64720.user.js',
@@ -60,8 +61,8 @@ if (/facebook.com/.test(window.location.href)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
   }
 
-  var profLink = xpathFirst('.//a[@class="UIIntentionalStory_Pic"]');
-  if (profLink && profLink.getAttribute('href').match(/id=(\w+)/)) {
+  var profLink = xpathFirst('.//div[contains(@id,"div_story_") and contains(@data-ft,"actrs")]');
+  if (profLink && profLink.getAttribute('data-ft').match(/"actrs":"(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
   }
 }
@@ -117,8 +118,7 @@ GM_ApiBrowserCheck();
 
 // Handle Publishing
 function checkInPublishPopup() {
-  if (GM_getValue('isRunning') &&
-      /mwfb.zynga.com/.test(window.document.referrer) &&
+  if (xpathFirst('.//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
       /prompt_feed/.test(window.location.href))  {
     GM_setValue('postClicked', false);
     setGMTime('postTimer', '00:10');
@@ -128,13 +128,18 @@ function checkInPublishPopup() {
   return false;
 }
 
+function fetchPubOptions() {
+  copyMWValues(['isRunning', 'autoGiftSkipOpt', 'autoLottoOpt', 'autoSecretStash',
+                'autoIcePublish', 'autoLevelPublish', 'autoAchievementPublish',
+                'autoAskJobHelp', 'autoShareWishlist', 'autoWarRewardPublish',
+                'autoWarResponsePublish', 'autoWarRallyPublish', 'autoWarPublish']);
+}
+
 // Load the iframe
 function checkLoadIframe() {
   var iFrameCanvas = xpathFirst('//iframe[@name="mafiawars"]');
-  if (iFrameCanvas && top && /facebook.com/.test(top.document.domain)) {
-
-    if (gvar.isGreaseMonkey) checkLanguage();
-
+  if (iFrameCanvas) {
+    setFBParams();
     window.location.replace(iFrameCanvas.src);
     return true;
   }
@@ -745,7 +750,6 @@ var shakeDownFlag = false;      // Flag so shake down again doesnt get interrupt
 var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var newStaminaMode;             // New stamina mode for random fighting
-var nameChecked = false;
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     (/inthemafia/.test(document.referrer.match) || /mwfb.zynga.com/.test(window.location.href))) {
@@ -1538,11 +1542,18 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var initialized = true;
   DEBUG('Completed initialize.');
 
-  // Check language.
-  if (gvar.isGreaseMonkey && GM_getValue('language') != 'en') {
-    DEBUG('Language is "' + GM_getValue('language') + '".');
-    addToLog('warning Icon', 'Unfortunately, only the English version of the game is fully supported. If you experience problems, set your Facebook language to English and try again.');
-  }
+  // Get language.
+  copyMWValues(['language', 'FBName']);
+  updateCommonStorage();
+}
+
+// Send settings to background storage
+function updateCommonStorage() {
+  if (gvar.isGreaseMonkey) return;
+  sendMWValues(['isRunning', 'autoGiftSkipOpt', 'autoLottoOpt', 'autoSecretStash',
+                'autoIcePublish', 'autoLevelPublish', 'autoAchievementPublish',
+                'autoAskJobHelp', 'autoShareWishlist', 'autoWarRewardPublish',
+                'autoWarResponsePublish', 'autoWarRallyPublish', 'autoWarPublish']);
 }
 
 function Animate() {
@@ -4011,6 +4022,7 @@ function saveSettings() {
   toggleSettings();
   updateLogStats();
   refreshMWAPCSS();
+  updateCommonStorage();
 }
 
 function updateMastheadMenu() {
@@ -4053,6 +4065,7 @@ function pause() {
   // Update the running state.
   GM_setValue('isRunning', false);
   running = false;
+  sendMWValues(['isRunning']);
 
   // Clear all timers.
   Autoplay.clearTimeout();
@@ -4075,6 +4088,7 @@ function unPause() {
   // Update the running state.
   GM_setValue('isRunning', true);
   running = true;
+  sendMWValues(['isRunning']);
 
   addToLog('play Icon', 'Autoplayer resuming...');
   updateMastheadMenu();
@@ -6556,85 +6570,88 @@ function handleContentModified(e) {
 }
 
 function handlePublishing() {
-  try {
-    // Publishing/skipping posts
-    var skipElt = xpathFirst('.//input[@id="cancel"]');
-    var pubElt = xpathFirst('.//input[@id="publish"]');
-    var okElt = xpathFirst('.//input[@id="okay"]');
-    var closeElt = xpathFirst('.//input[@id="fb_dialog_cancel_button"]');
+  fetchPubOptions();
+  if (GM_getValue('isRunning')) {
+    try {
 
-    // If OK button is found, close the window by pressing it
-    if (okElt) {
-      clickElement(okElt);
+      // Publishing/skipping posts
+      var skipElt = xpathFirst('.//input[@id="cancel"]');
+      var pubElt = xpathFirst('.//input[@id="publish"]');
+      var okElt = xpathFirst('.//input[@id="okay"]');
 
-    // If (1) Pub/Skip already clicked or
-    //    (2) It's been 10 seconds since the post window loaded
-    // Then close the window
-    } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
-      clickElement(closeElt);
-      clickElement(skipElt);
+      // If OK button is found, close the window by pressing it
+      if (okElt) {
+        clickElement(okElt);
 
-    // Perform publishing logic once posting buttons have loaded
-    } else if (skipElt && pubElt) {
-      // Generic publishing function
-      var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
-        var eltDiv = xpathFirst(xpathString);
-        if (eltDiv) {
-          if (isChecked(gmFlag))
-            clickElement(pubElt);
-          else
-            clickElement(skipElt);
+      // If (1) Pub/Skip already clicked or
+      //    (2) It's been 10 seconds since the post window loaded
+      // Then close the window
+      } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
+        clickElement(skipElt);
 
-          // Wait for 2 seconds before trying to close window manually
-          GM_setValue('postClicked', true);
-          window.setTimeout(handlePublishing, 2000);
-          return true;
-        }
-        return false;
-      };
+      // Perform publishing logic once posting buttons have loaded
+      } else if (skipElt && pubElt) {
+        // Generic publishing function
+        var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
+          var eltDiv = xpathFirst(xpathString);
+          if (eltDiv) {
+            if (isChecked(gmFlag))
+              clickElement(pubElt);
+            else
+              clickElement(skipElt);
 
-      // Gift post
-      if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipElt, pubElt)) return;
+            // Wait for 2 seconds before trying to close window manually
+            GM_setValue('postClicked', true);
+            window.setTimeout(handlePublishing, 2000);
+            return true;
+          }
+          return false;
+        };
 
-      // Daily chance
-      if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipElt, pubElt)) return;
+        // Gift post
+        if (checkPublish('.//div[contains(., "sent")]/a[contains(@href, "sendgiftshort")]','autoGiftSkipOpt', skipElt, pubElt)) return;
 
-      // Secret Stash
-      if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubElt, skipElt)) return;
+        // Daily chance
+        if (checkPublish('.//div[contains(., "prizes are given away each week")]','autoLottoOpt', skipElt, pubElt)) return;
 
-      // Iced Opponent
-      if (checkPublish('.//div[contains(.,"just iced")]','autoIcePublish', pubElt, skipElt)) return;
+        // Secret Stash
+        if (checkPublish('.//div[contains(.,"secret stash")]','autoSecretStash', pubElt, skipElt)) return;
 
-      // Level up bonus
-      if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
+        // Iced Opponent
+        if (checkPublish('.//div[contains(.,"just iced")]','autoIcePublish', pubElt, skipElt)) return;
 
-      // Achievement bonus
-      if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
+        // Level up bonus
+        if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
 
-      // Job Help
-      if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
+        // Achievement bonus
+        if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
 
-      // Share wishlist
-      if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
+        // Job Help
+        if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
-      // War Reward
-      if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
+        // Share wishlist
+        if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
 
-      // War back up request
-      if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
+        // War Reward
+        if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
-      // War rally for help
-      if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
+        // War back up request
+        if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
-      // War Declaration
-      if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
+        // War rally for help
+        if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
+
+        // War Declaration
+        if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
+      }
+    } catch (ex) {
+      // Ignore exceptions
+      GM_log('Publishing error: ' + ex);
     }
-  } catch (ex) {
-    // Ignore exceptions
   }
+
   // Retry until window is closed
   window.setTimeout(handlePublishing, 2000);
-  return;
 }
 
 // Turns on/off the high-level event listener for the game.
@@ -6963,9 +6980,41 @@ function getEnergyGainRate() {
   return rate? rate : 0;
 }
 
-function checkLanguage() {
+function setFBParams() {
+  // Get FB name
+  var fbName = document.getElementById("navAccountName");
+  if (fbName) GM_setValue('FBName', fbName.innerHTML);
+
+  // Get language
   GM_setValue('language', document.documentElement.lang);
-  return;
+
+  sendMWValues(['language','FBName']);
+}
+
+
+// [CHROME] Copy GM values to background storage
+// Note: This method is not synchronous
+function copyMWValues (gmKeys) {
+  if (gvar.isGreaseMonkey) return;
+  var gmPairs = {};
+  for (var i in gmKeys)
+    gmPairs[gmKeys[i]] = '';
+  gmPairs.action = 'getGM';
+  chrome.extension.sendRequest(gmPairs, function(response) {
+    for (var i in response)
+      GM_setValue(i, response[i])
+  });
+}
+
+// [CHROME] Fetch GM values from background storage
+// Note: This method is not synchronous
+function sendMWValues(gmKeys) {
+  if (gvar.isGreaseMonkey) return;
+  var gmPairs = {};
+  for (var i in gmKeys)
+    gmPairs[gmKeys[i]] = GM_getValue(gmKeys[i]);
+  gmPairs.action = 'setGM';
+  chrome.extension.sendRequest(gmPairs);
 }
 
 function customizeLayout() {
@@ -7296,9 +7345,6 @@ function customizeHome() {
   energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
   energyPackElt = energyPackElt ? energyPackElt : xpathFirst('.//a[contains(@onclick, "xw_action=use_energy_pak")]', innerPageElt);
   energyPack = energyPackElt? true : false;
-
-  // Get the name from the stats box
-  getFBNameInfo();
 
   // Display a message next to the energy pack button.
   if (energyPackElt) {
@@ -8228,6 +8274,11 @@ function debugDumpSettings() {
     selectTier = cities[parseInt(selectedTierValue[0])][0] + ' - ' + missionTabs[NY][parseInt(selectedTierValue[1]) - 1];
   }
 
+  if (GM_getValue('language') != 'en') {
+    DEBUG('Language is "' + GM_getValue('language') + '".');
+    addToLog('warning Icon', 'Unfortunately, only the English version of the game is fully supported. If you experience problems, set your Facebook language to English and try again.');
+  }
+
   DEBUG('[code]>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
         'Script Version: <strong>' + SCRIPT.version + ' build ' + SCRIPT.build + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
@@ -9036,17 +9087,6 @@ function autoGiftWaiting() {
   return false;
 }
 
-// Get the name from the stats box
-function getFBNameInfo() {
-  if (nameChecked) return;
-
-  var elt = xpathFirst('.//div[@class="profile_middle"]//a', innerPageElt);
-  if(elt){
-    GM_setValue('FBName', elt.text);
-    nameChecked = true;
-  }
-}
-
 // This function will retrieve the top mafia info
 // FIXME: Create a TopMafia object should we need the TopMafia info to persist
 function getTopMafiaInfo(skipAutoplay) {
@@ -9646,14 +9686,14 @@ function goJobTab(tabno) {
   DEBUG('Clicked to go to job tab ' + tabno + '.');
 }
 
-function jobBurst (clickElt) { 
-var numClicks = 1; 
-if (isChecked('burstJob')){ 
-  var nextJobXp = missions[GM_getValue('selectMission', 1)][6];
-  numClicks = GM_getValue('burstJobCount', 1);
-  while (((nextJobXp * numClicks) > ptsToNextLevel) && (numClicks > 1)) numClicks--;
-} 
-clickBurst (clickElt, parseInt(numClicks)); 
+function jobBurst (clickElt) {
+  var numClicks = 1;
+  if (isChecked('burstJob')){
+    var nextJobXp = missions[GM_getValue('selectMission', 1)][6];
+    numClicks = GM_getValue('burstJobCount', 1);
+    while (((nextJobXp * numClicks) > ptsToNextLevel) && (numClicks > 1)) numClicks--;
+  }
+  clickBurst (clickElt, parseInt(numClicks));
 }
 
 function goJob(jobno, context) {
@@ -10384,6 +10424,7 @@ function logJSONResponse(responseText, action) {
     }
   } catch (ex) {
     DEBUG('Exception (logJSONResponse): ' + ex);
+    loadHome();
   }
 }
 
