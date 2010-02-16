@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.64
-// @build       213
+// @build       214
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.64',
-  build: '213',
+  build: '214',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2777,7 +2777,10 @@ function autoHitlist() {
     var formElt = xpathFirst('.//form[@id="createhit"]', innerPageElt);
     // Set the amount (random).
     var amountElt = xpathFirst('.//input[@type="text"]', formElt);
-    if (!amountElt) return true;
+    if (!amountElt){
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
+      return true;
+    }
 
     if(isChecked('autoHitListRandom')){
       amountElt.value = Math.pow(10, (Math.floor(Math.random()*4)+4));
@@ -2787,6 +2790,7 @@ function autoHitlist() {
   // Make the hit
     var submitElt = xpathFirst('.//input[@type="submit"]', formElt);
     if (!submitElt) {
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
       return true;
     }
     Autoplay.fx = function() {
@@ -3047,6 +3051,11 @@ function autoStaminaSpend() {
       DEBUG('Not within reach of a level up. Stamina burning is off.');
     }
   }
+  
+  if (isChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+   return autoHitlist();
+  }
+  
 
   var how = getStaminaMode();
   switch (how) {
@@ -6169,6 +6178,13 @@ function createStaminaTab() {
   }
   autoHitListLoc.selectedIndex = GM_getValue('autoHitLocation', NY);
 
+  title = 'Set Bounties in background';
+  id = 'bgAutoHitCheck';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'bgAutoHitCheck');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Enable Background mode'));
+
+
  // bounty amount
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6529,6 +6545,7 @@ function validateStaminaTab() {
        s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
        s.autoHitListRandom = checked('autoHitListRandom');
        s.autoHitOpponentList = document.getElementById('autoHitOpponentList').value;
+       s.bgAutoHitCheck  = checked('bgAutoHitCheck');
 
       // Validate the bounty.
       var min = parseCash(s.autoHitListBounty);
@@ -7644,7 +7661,7 @@ function customizeProfile() {
       // Add as Facebook friend
       makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remoteuserid}).appendChild(document.createTextNode('Add as Friend'));
 
-      statsDiv.appendChild(document.createTextNode(' | '));
+      // Add to AutoHitlist
       var isOnAutoHitList = (getSavedList('autoHitOpponentList').indexOf(remoteuserid) != -1);
         statsDiv.appendChild(document.createTextNode(' | '));
         this.buildAnchor( { 'AnchorText':isOnAutoHitList?'Remove from AutoHit List':'Add to AutoHit List',
@@ -10579,6 +10596,7 @@ function logFightResponse(rootElt, resultElt, context) {
     
   } else if (innerNoTags.match(/You just set/)) {
       cycleSavedList('autoHitOpponentList');
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
       var fbPopupElt = xpathFirst('//a[@id="fb_dialog_cancel_button"]');
       if (fbPopupElt) {
         Autoplay.fx = function() {
@@ -10589,7 +10607,8 @@ function logFightResponse(rootElt, resultElt, context) {
       return true;
       }
   } else if (innerNoTags.match(/There is already a bounty/) || innerNoTags.match(/You can\'t add/)) {
-      cycleSavedList('autoHitOpponentList');    
+      cycleSavedList('autoHitOpponentList');  
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");  
   }  else if (innerNoTags.indexOf('too weak') != -1) {
     addToLog('info Icon', '<span style="color:#FF9999;">' + 'Too weak to fight.'+ '</span>');
   } else {
