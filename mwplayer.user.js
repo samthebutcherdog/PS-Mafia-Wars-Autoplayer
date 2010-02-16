@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.63
-// @build       211
+// @version     1.0.64
+// @build       212
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.63',
-  build: '211',
+  version: '1.0.64',
+  build: '212',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8425,6 +8425,7 @@ function debugDumpSettings() {
         '-------------------Stamina Tab-------------------<br>' +
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
+        '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
         '&nbsp;&nbsp;-Fight all sides: <strong>' + showIfUnchecked(GM_getValue('fightAllSides')) + '</strong><br>' +
         '&nbsp;&nbsp;-Fight in: <strong>' + cities[GM_getValue('fightLocation', 0)][CITY_NAME] + '</strong><br>' +
