@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.65
-// @build       219
+// @build       220
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.65',
-  build: '219',
+  build: '220',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7815,7 +7815,7 @@ function customizeJobs() {
   var masteredJobsCount = 0;
   var jobsFound = 0;
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
-    var jobNames = xpath('.//td[@class="job_name" or @class="job_name_oneline job_no_border"]', jobTables[x]);
+    var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
     jobsFound +=  jobNames.snapshotLength;
 
     for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
