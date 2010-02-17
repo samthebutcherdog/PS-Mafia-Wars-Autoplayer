@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.64
-// @build       215
+// @build       216
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.64',
-  build: '215',
+  build: '216',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -933,14 +933,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_FIGHT_RANDOM = 0;  // Random fighting.
   const STAMINA_HOW_FIGHT_LIST   = 1;  // List fighting.
   const STAMINA_HOW_HITMAN       = 2;  // Hitman.
-  const STAMINA_HOW_AUTOHIT      = 3;  // Place bounties.
+  const STAMINA_HOW_AUTOHITLIST  = 3;  // Place bounties.
   const STAMINA_HOW_RANDOM       = 4;  // Random spending of stamina in random cities.
 
   var staminaSpendChoices = [];
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
   staminaSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific opponents';
   staminaSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect hitlist bounties';
-  staminaSpendChoices[STAMINA_HOW_AUTOHIT]      = 'Place hitlist bounties';
+  staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
 
   // Define Bounty Selection options
@@ -1060,7 +1060,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // job description, unadjusted energy cost, job number, tab number, city, unadjusted exp payout
   var missions = new Array(
     ['Chase Away Thugs',1,1,1,NY,1],
-    ['Rob a Pimp',3,2,1,NY,3],
+    ['Rob a Drug Runner',3,2,1,NY,3],
     ['Rough Up Dealers',5,3,1,NY,5],
     ['Rob the Warehouse',7,4,1,NY,8],
     ['Collect Protection Money',2,5,1,NY,2],
@@ -1676,11 +1676,11 @@ function doAutoPlay () {
   if (running && !maxed && isChecked('logPlayerUpdates')) {
     if (autoPlayerUpdates()) return;
   }
+
   // Background mode hitlisting
   if (running && isChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
   }
-
 
   // Racketing
   if (running && !maxed  && !timeLeftGM('nextRacket')) {
@@ -2699,7 +2699,7 @@ function canSpendStamina(minHealth) {
   if (!minHealth) {
     // Up to 28 damage can be received in a fight.
     minHealth = 29;
-    if (getStaminaMode() == STAMINA_HOW_AUTOHIT) minHealth = 0;
+    if (getStaminaMode() == STAMINA_HOW_AUTOHITLIST) minHealth = 0;
   }
 
   if (health < minHealth) {
@@ -2732,6 +2732,7 @@ function autoHitlist() {
     Autoplay.start();
     return true;
   }
+
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoHitlist.profileSearch && !autoHitlist.setBounty) {
     Autoplay.fx = goFightTab;
@@ -2739,7 +2740,8 @@ function autoHitlist() {
     Autoplay.start();
     return true;
   }
-  // Go to the opponent's profile. 
+
+  // Go to the opponent's profile.
   var id = parseInt(GM_getValue('autoHitOpponentList', ''));
   if (!id) {
     // If nothing is here, and fighting is "random", fight someone else
@@ -2748,17 +2750,19 @@ function autoHitlist() {
     addToLog('warning Icon', 'Can\'t autohit because the list of opponents is empty or invalid. Turning automatic hitlisting off.');
     GM_setValue('staminaSpend', 0);
     return false;
-    }
+  }
+
   opponent = new Player();
   opponent.id = String(id);
- 
+
   if (!onProfileNav() && !autoHitlist.setBounty) {
     // Go to the opponent's profile.
     autoHitlist.profileSearch = opponent;
     Autoplay.fx = goProfileNav(opponent);
     Autoplay.start();
     return true;
-  }   
+  }
+
   if (autoHitlist.profileSearch && onProfileNav()) {
     opponent = autoHitlist.profileSearch;
     autoHitlist.profileSearch = undefined;
@@ -2778,13 +2782,14 @@ function autoHitlist() {
       return true;
     }
   }
+
   if(autoHitlist.setBounty){
-    autoHitlist.setBounty = undefined; 
+    autoHitlist.setBounty = undefined;
     var formElt = xpathFirst('.//form[@id="createhit"]', innerPageElt);
     // Set the amount (random).
     var amountElt = xpathFirst('.//input[@type="text"]', formElt);
     if (!amountElt){
-      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");
       return true;
     }
 
@@ -2793,10 +2798,11 @@ function autoHitlist() {
     } else {
       amountElt.value = parseCash(GM_getValue('autoHitListBounty', 0));
     }
-  // Make the hit
+
+    // Make the hit
     var submitElt = xpathFirst('.//input[@type="submit"]', formElt);
     if (!submitElt) {
-      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");
       return true;
     }
     Autoplay.fx = function() {
@@ -2804,11 +2810,12 @@ function autoHitlist() {
       clickContext = opponent;
       submitElt.click();
       DEBUG('Clicked to Set Bounty');
-  }
-  Autoplay.start();
-  return true;
+    }
+    Autoplay.start();
+    return true;
   }
 }
+
 function autoFight(how) {
   // Go to the correct city.
   var loc = GM_getValue('fightLocation', NY);
@@ -2910,6 +2917,7 @@ function autoFight(how) {
     if (/You can't add/.test(loadUrlWait (hitUrl))) {
       DEBUG('Target is iced/dead, skipping opponent, id=' + opponent.id);
       setFightOpponentInactive(opponent);
+      cycleSavedList('fightList');
       return false;
     } else {
       setFightOpponentActive(opponent);
@@ -3066,8 +3074,8 @@ function autoStaminaSpend() {
 
     case STAMINA_HOW_HITMAN:
       return autoHitman(how);
-   
-    case STAMINA_HOW_AUTOHIT:
+
+    case STAMINA_HOW_AUTOHITLIST:
       return autoHitlist();
 
     default:
@@ -6186,7 +6194,7 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode(' Enable Background mode'));
 
 
- // bounty amount
+  // Bounty amount
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -6541,12 +6549,12 @@ function validateStaminaTab() {
       }
       break;
 
-    case STAMINA_HOW_AUTOHIT: // Place hitlist bounties
-       s.autoHitListLocation = document.getElementById('autoHitListLoc').selectedIndex;
-       s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
-       s.autoHitListRandom = checked('autoHitListRandom');
-       s.autoHitOpponentList = document.getElementById('autoHitOpponentList').value;
-       s.bgAutoHitCheck  = checked('bgAutoHitCheck');
+    case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
+      s.autoHitListLocation = document.getElementById('autoHitListLoc').selectedIndex;
+      s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
+      s.autoHitListRandom = checked('autoHitListRandom');
+      s.autoHitOpponentList = document.getElementById('autoHitOpponentList').value;
+      s.bgAutoHitCheck  = checked('bgAutoHitCheck');
 
       // Validate the bounty.
       var min = parseCash(s.autoHitListBounty);
@@ -6554,7 +6562,7 @@ function validateStaminaTab() {
         alert('Please enter a minimum bounty amount of at least $10,000');
         return {};
       }
-      
+
       // Validate the autohit list.
       var list = s.autoHitOpponentList.split('\n');
       if (!list[0]) {
@@ -6965,7 +6973,7 @@ function chooseSides() {
   choiceJobs.forEach( function(job) {
     var jobMatch = missions.searchArray(job[2], 0)[0];
     // For Bangkok, simply change the jobNo of the jobs above to support sides
-    if (jobMatch)
+    if (jobMatch !== false)
       missions[jobMatch][2] = job[GM_getValue('sideBangkok', 0)];
   });
 
@@ -7819,7 +7827,7 @@ function customizeJobs() {
 
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
-      if (!jobMatch) { masteredJobsCount++; continue; }
+      if (jobMatch === false) { masteredJobsCount++; continue; }
 
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
@@ -8361,7 +8369,7 @@ function jobMastery(element) {
           var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].clean().trim();
 
           var matches = missions.searchArray(jobName, 0);
-          if (!matches) {
+          if (matches === false) {
             addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
                      ' not found in mission array.');
             return;
@@ -10593,17 +10601,17 @@ function logFightResponse(rootElt, resultElt, context) {
       }
     }
 
-  
+
   } else if (innerNoTags.match(/you cannot fight|part of your mafia/i)) {
     if (context.id) {
       DEBUG('Opponent (' + context.id + ') is part of your mafia. Avoiding.');
       setFightOpponentAvoid(context);
     }
-    
+
   } else if (innerNoTags.match(/You just set/)) {
       cycleSavedList('autoHitOpponentList');
       addToLog('yeah Icon', inner);
-      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");
       var fbPopupElt = xpathFirst('//a[@id="fb_dialog_cancel_button"]');
       if (fbPopupElt) {
         Autoplay.fx = function() {
@@ -10614,8 +10622,8 @@ function logFightResponse(rootElt, resultElt, context) {
       return true;
       }
   } else if (innerNoTags.match(/There is already a bounty/) || innerNoTags.match(/You can\'t add/)) {
-      cycleSavedList('autoHitOpponentList');  
-      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");  
+      cycleSavedList('autoHitOpponentList');
+      if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");
   }  else if (innerNoTags.indexOf('too weak') != -1) {
     addToLog('info Icon', '<span style="color:#FF9999;">' + 'Too weak to fight.'+ '</span>');
   } else {
@@ -10630,7 +10638,9 @@ function logFightResponse(rootElt, resultElt, context) {
 // Spend Stamina successful, change fight location and spend mode
 function randomizeStamina() {
   if (isEqual('staminaSpendHow', STAMINA_HOW_RANDOM)) {
-    var spendMode = Math.floor(Math.random()*(staminaSpendChoices.length - 1));
+
+    // Do not include autohit list
+    var spendMode = Math.floor(Math.random() * STAMINA_HOW_AUTOHITLIST);
 
     // Randomize stamina spend mode
     if (spendMode != newStaminaMode) {
@@ -10719,7 +10729,7 @@ function logResponse(rootElt, action, context) {
     return true;
   }
   if (!messagebox) {
-  
+
     if(action == 'autohit') return false;
     DEBUG('logResponse: HTML=' + rootElt.innerHTML);
     DEBUG('Unexpected response page: no message box found!');
@@ -10744,7 +10754,7 @@ function logResponse(rootElt, action, context) {
   var cost, experience, result;
 
   switch (action) {
-  
+
     case 'autohit':
     case 'fight':
       return logFightResponse(rootElt, messagebox, context);
