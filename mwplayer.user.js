@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.65
-// @build       222
+// @build       223
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.65',
-  build: '222',
+  build: '223',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1593,7 +1593,7 @@ function doAutoPlay () {
   }
 
   // Player updates
-  if (running && !maxed && isChecked('logPlayerUpdates')) {
+  if (running && !maxed && isChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
   }
 
@@ -2212,9 +2212,9 @@ function autoPlayerUpdates() {
   // Are there are less updates than we've already seen?
   // FIXME: This could be better. Need to also detect the case where we are
   //        on the home page with zero updates showing and a non-zero count.
-  if (pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) {
+  if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) || pUpdatesLen == 0) {
     // The player updates must have been cleared.
-    DEBUG('Player updates were unexpectedly cleared.');
+    DEBUG('Player updates were cleared.');
     logPlayerUpdatesCount = 0;
     GM_setValue('logPlayerUpdatesCount', 0);
   }
@@ -2669,6 +2669,7 @@ function autoHitlist() {
     // The user-specified list is empty or invalid.
     addToLog('warning Icon', 'Can\'t autohit because the list of opponents is empty or invalid. Turning automatic hitlisting off.');
     GM_setValue('staminaSpend', 0);
+    if(isChecked('bgAutoHitCheck')) GM_setValue('bgAutoHitCheck',0);
     return false;
   }
 
@@ -6889,11 +6890,7 @@ function innerPageChanged() {
   }
   setListenContent(true);
 
-  // Check for deleted news.
-  if (xpathFirst('.//td[text()="News deleted"]', innerPageElt)) {
-    DEBUG('The player updates were cleared.');
-    GM_setValue('logPlayerUpdatesCount', 0);
-  }
+ 
 
   try {
     // If a click action was taken, check the response.
