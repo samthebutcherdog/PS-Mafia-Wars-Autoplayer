@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.65
-// @build       220
+// @build       221
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.65',
-  build: '220',
+  build: '221',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10704,7 +10704,7 @@ function logJSONResponse(responseText, action) {
         DEBUG(resp);
     }
   } catch (ex) {
-    DEBUG('Exception (logJSONResponse): ' + ex);
+    DEBUG('Exception (logJSONResponse): ' + ex + ', response: ' + responseText + '.');
     loadHome();
   }
 }
