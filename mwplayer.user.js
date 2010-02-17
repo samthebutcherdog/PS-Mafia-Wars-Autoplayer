@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.64
-// @build       214
+// @build       215
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.64',
-  build: '214',
+  build: '215',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1676,6 +1676,11 @@ function doAutoPlay () {
   if (running && !maxed && isChecked('logPlayerUpdates')) {
     if (autoPlayerUpdates()) return;
   }
+  // Background mode hitlisting
+  if (running && isChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+    if(autoHitlist()) return;
+  }
+
 
   // Racketing
   if (running && !maxed  && !timeLeftGM('nextRacket')) {
@@ -2694,6 +2699,7 @@ function canSpendStamina(minHealth) {
   if (!minHealth) {
     // Up to 28 damage can be received in a fight.
     minHealth = 29;
+    if (getStaminaMode() == STAMINA_HOW_AUTOHIT) minHealth = 0;
   }
 
   if (health < minHealth) {
@@ -2719,7 +2725,7 @@ function canSpendStamina(minHealth) {
 
 function autoHitlist() {
   // Go to the correct city.
-  var loc = GM_getValue('autoHitLocation', NY);
+  var loc = GM_getValue('autoHitListLoc', NY);
   if (city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.delay = getAutoPlayDelay();
@@ -3051,11 +3057,6 @@ function autoStaminaSpend() {
       DEBUG('Not within reach of a level up. Stamina burning is off.');
     }
   }
-  
-  if (isChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
-   return autoHitlist();
-  }
-  
 
   var how = getStaminaMode();
   switch (how) {
@@ -6176,7 +6177,7 @@ function createStaminaTab() {
     choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
     autoHitListLoc.appendChild(choice);
   }
-  autoHitListLoc.selectedIndex = GM_getValue('autoHitLocation', NY);
+  autoHitListLoc.selectedIndex = GM_getValue('autoHitListLoc', NY);
 
   title = 'Set Bounties in background';
   id = 'bgAutoHitCheck';
@@ -8674,6 +8675,11 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Hitman bounty selection: <strong>' + bountySelectionChoices[(GM_getValue('bountySelection'))] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman avoid names: <strong>' + showIfUnchecked(GM_getValue('hitmanAvoidNames')) + '</strong><br>' +
         'Families list: <strong>' + GM_getValue('clanName') + '</strong><br>' +
+        '&nbsp;&nbsp;-AutoHit bounty: <strong>' + parseCash(GM_getValue('autoHitListBounty')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Set Bounties in: <strong>' + cities[GM_getValue('autoHitListLoc', 0)][CITY_NAME] + '</strong><br>' +
+        '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
+        '&nbsp;&nbsp;-AutoHit opponents: <strong>' + GM_getValue('autoHitOpponentList') + '</strong><br>' +
+        '&nbsp;&nbsp;-AutoHit background: <strong>' + showIfUnchecked(GM_getValue('bgAutoHitCheck')) + '</strong><br>' +
         'Stamina threshold: <strong>' + GM_getValue('selectStaminaUse') + ' ' + numberSchemes[GM_getValue('selectStaminaUseMode', 0)] + ' (refill to ' + SpendStamina.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Stamina use started: <strong>' + GM_getValue('useStaminaStarted') + '</strong><br>' +
         'Stamina reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
@@ -10596,6 +10602,7 @@ function logFightResponse(rootElt, resultElt, context) {
     
   } else if (innerNoTags.match(/You just set/)) {
       cycleSavedList('autoHitOpponentList');
+      addToLog('yeah Icon', inner);
       if(isChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00"); 
       var fbPopupElt = xpathFirst('//a[@id="fb_dialog_cancel_button"]');
       if (fbPopupElt) {
