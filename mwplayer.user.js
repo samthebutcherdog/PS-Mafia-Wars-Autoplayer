@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.65
-// @build       218
+// @build       219
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.65',
-  build: '218',
+  build: '219',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11348,7 +11348,7 @@ function getMWUrl (server, params) {
     if (/tosource/i.test(params[i])) continue;
 
     if (new RegExp(i + '=\\w+').test(mwURL))
-      mwURL = mwURL.replace(new RegExp(i + '=\\w+'), i + '=' + params[i]);
+      mwURL = mwURL.replace(new RegExp(i + '=\\w*'), i + '=' + params[i]);
     else
       mwURL += '&' + i + '=' + params[i];
   }
