@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.64
-// @build       216
+// @build       217
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.64',
-  build: '216',
+  build: '217',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1678,7 +1678,7 @@ function doAutoPlay () {
   }
 
   // Background mode hitlisting
-  if (running && isChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+  if (running && !maxed && isChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
   }
 
@@ -6973,7 +6973,7 @@ function chooseSides() {
   choiceJobs.forEach( function(job) {
     var jobMatch = missions.searchArray(job[2], 0)[0];
     // For Bangkok, simply change the jobNo of the jobs above to support sides
-    if (jobMatch !== false)
+    if (jobMatch)
       missions[jobMatch][2] = job[GM_getValue('sideBangkok', 0)];
   });
 
@@ -7827,7 +7827,7 @@ function customizeJobs() {
 
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
-      if (jobMatch === false) { masteredJobsCount++; continue; }
+      if (jobMatch != 0 && !jobMatch) { masteredJobsCount++; continue; }
 
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
@@ -8185,7 +8185,8 @@ function buyJobRowItems(element){
   var currentJobRow = getJobRow(currentJob, element);
   if (!currentJobRow) return false;
 
-  buyItemElts = xpath('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
+  var buyItemElts = xpath('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
+  // Click to buy items
   if (buyItemElts.snapshotLength>0){
     addToLog('search Icon', 'Attempting to purchase required items.');
     for (var currentItem = 0, numItems=buyItemElts.snapshotLength; currentItem < numItems; ++currentItem) {
@@ -8197,6 +8198,19 @@ function buyJobRowItems(element){
       break;
     }
     return true;
+  }
+
+  // Withdraw money
+  var amtElt = xpathFirst('.//td[@class="job_energy"]//span[@class="money"]', currentJobRow);
+  if (amtElt) {
+    var cashDiff = getJobClicks() * parseCash(amtElt.innerHTML) - cities[city][CITY_CASH];
+
+    // Withdraw the amount we need
+    if (cashDiff > 0) {
+      suspendBank = true;
+      autoBankWithdraw(cashDiff);
+      return true;
+    }
   }
   return false;
 }
@@ -8369,7 +8383,7 @@ function jobMastery(element) {
           var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].clean().trim();
 
           var matches = missions.searchArray(jobName, 0);
-          if (matches === false) {
+          if (matches != 0 && !matches) {
             addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
                      ' not found in mission array.');
             return;
@@ -9931,14 +9945,15 @@ function goJobTab(tabno) {
   DEBUG('Clicked to go to job tab ' + tabno + '.');
 }
 
-function jobBurst (clickElt) {
+// Get the number of job clicks to attempt
+function getJobClicks() {
   var numClicks = 1;
   if (isChecked('burstJob')){
     var nextJobXp = missions[GM_getValue('selectMission', 1)][6];
     numClicks = GM_getValue('burstJobCount', 1);
     while (((nextJobXp * numClicks) > ptsToNextLevel) && (numClicks > 1)) numClicks--;
   }
-  clickBurst (clickElt, parseInt(numClicks));
+  return parseInt(numClicks);
 }
 
 function goJob(jobno, context) {
@@ -9947,7 +9962,8 @@ function goJob(jobno, context) {
   if (elt) {
     clickAction = 'job';
     clickContext = context;
-    jobBurst(elt);
+    suspendBank = false;
+    clickBurst (elt, getJobClicks());
     DEBUG('Clicked job ' + jobno + '.');
   } else {
     xJob = missions[GM_getValue('selectMission')][0];
