@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.65
-// @build       223
+// @build       224
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.65',
-  build: '223',
+  build: '224',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1676,6 +1676,10 @@ function doAutoPlay () {
     if (autoGiftWaiting()) return;
   }
 
+  // Mini-pack check
+  if (running && !maxed && isChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
+    if (miniPack()) return;
+  }
   // Auto-energypack
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
   var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
@@ -1730,10 +1734,6 @@ function doAutoPlay () {
     return;
   }
 
-  // Mini-pack check
-  if (running && isChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
-    if (miniPack()) return;
-  }
 
   // Auto-send energy pack
   if (running && isChecked('sendEnergyPack')) {
@@ -6515,7 +6515,7 @@ function validateStaminaTab() {
       break;
 
     case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
-      s.autoHitListLocation = document.getElementById('autoHitListLoc').selectedIndex;
+      s.autoHitListLoc = document.getElementById('autoHitListLoc').selectedIndex;
       s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
       s.autoHitListRandom = checked('autoHitListRandom');
       s.autoHitOpponentList = document.getElementById('autoHitOpponentList').value;
