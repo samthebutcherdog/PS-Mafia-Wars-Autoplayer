@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.65
-// @build       225
+// @version     1.0.66
+// @build       226
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.65',
-  build: '225',
+  version: '1.0.66',
+  build: '226',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7189,10 +7189,15 @@ function refreshMWAPCSS() {
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
-                 (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +  // Hide the Zynga bar, progress bar, email bar, sms link
-                 ' #mwapHide, #mw_zbar, #mw_zbar iframe,#setup_progress_bar, .fb_email_prof_header, .mw_sms '  +// Hide action boxes
-                 (isChecked('hideActionBox') ? ' , .action_box_container' : '' ) +              // Hide feature notice updates
+                 (isChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +
+                 // Hide the Zynga bar, progress bar, email bar, sms link
+                 ' #mwapHide, #mw_zbar, #mw_zbar iframe,#setup_progress_bar, .fb_email_prof_header, .mw_sms '  +
+                 // Hide action boxes
+                 (isChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
+                 // Hide feature notice updates
                  (isChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
+                 // Hide friends ladder
+                 (isChecked('hideFriendLadder') ? ' , .friendladder_box' : '' ) +
                  ' {position: absolute !important; margin:0 !important; ' +
                  '  height:0 !important; width: 0 !important; display:none !important;}' +
                  // ********************** Stats Tab CSS **********************
@@ -7468,11 +7473,8 @@ function customizeHome() {
   // Set xJob
   xJob = '';
 
-    // Deal with limited time offers
+  // Deal with limited time offers
   hideElement(xpathFirst('//div[@class="tab_box" and contains(.,"Limited Time Offers")]'), isChecked('hideOffer'));
-
-  // Deal with friends ladder
-  hideElement(xpathFirst('//div[@class="friendladder_box"]'), isChecked('hideFriendLadder'));
 
   // Deal the mailing list
   hideElement(xpathFirst('//div[contains(@style,"mailing_list_bg")]'), isChecked('hideMailList'));
