@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.66
-// @build       226
+// @build       227
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.66',
-  build: '226',
+  build: '227',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2216,11 +2216,8 @@ function autoPlayerUpdates() {
     GM_setValue('logPlayerUpdatesCount', logPlayerUpdatesCount);
   }
 
-  // Are there are less updates than we've already seen?
-  // FIXME: This could be better. Need to also detect the case where we are
-  //        on the home page with zero updates showing and a non-zero count.
   if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) || pUpdatesLen == 0) {
-    // The player updates must have been cleared.
+    // Player updates have been cleared.
     DEBUG('Player updates were cleared.');
     logPlayerUpdatesCount = 0;
     GM_setValue('logPlayerUpdatesCount', 0);
@@ -3782,15 +3779,6 @@ function saveDefaultSettings() {
 }
 
 function saveSettings() {
-/*
-  //FIXME: works once then crashes... not good
-
-  // Transfer statLog to graphBox
-  if (typeof(GM_getValue('statLog') != 'undefined')) {
-    GM_setValue('graphBox', GM_getValue('statLog'));
-    GM_deleteValue('statLog');
-  }
-*/
   var i;
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
   var healthLevel = parseInt(document.getElementById('healthLevel').value);
@@ -4353,11 +4341,11 @@ function DEBUG(line, level) {
   }
 }
 
-function CyclePropertyList() {
+function cyclePropertyList() {
   var i;
-  DEBUG('CyclePropertyList(): '+ GM_getValue('propertyId', ''));
+  DEBUG('cyclePropertyList(): '+ GM_getValue('propertyId', ''));
   if (GM_getValue('propertyId') <= 6) {
-    CyclePropertyList();
+    cyclePropertyList();
     i = 12; //back to casinos
   } else {
     i = GM_getValue('propertyId') - 1;
@@ -6890,12 +6878,7 @@ function innerPageChanged() {
       !customizeJobs() &&
       !customizeProfile() &&
       !customizeHitlist()) {
-    if (onPropertyNav()) {
-      // Property
-      propertyGet();
-    } else {
-      customizeFight();
-    }
+    customizeFight();
   }
   setListenContent(true);
 
@@ -9501,230 +9484,6 @@ function onFightTab() {
 function onHitlistTab() {
   // Return true if we're on the hitlist tab, false otherwise.
   if (xpathFirst('.//table[@class="hit_list"]', innerPageElt)) {
-    return true;
-  }
-
-  return false;
-}
-
-function propertyGet() {
-//FIXME: Why is reloading necessary? If it is, then the caller should be
-//       checking this function's return value. If it isn't necessary
-//       then it should be removed.
-  var reloadProperty = false;
-
-  if (running) {
-    // check for messages
-    var messageCheck = xpathFirst('.//div[@class="message_float"]', innerPageElt);
-
-    if (messageCheck) {
-      messageCheck = messageCheck.innerHTML.untag();
-      if (messageCheck.match(/you just bought (.*) for ([A-Z]?\$[\d,]*\d)/i)) {
-        addToLog(cities[city][CITY_CASH_CSS], '<strong>Bought</strong> ' +
-                 '<span class="good">' +
-                 RegExp.$1 + '</span>' + ' for ' +
-                 '<span class="expense">' + RegExp.$2 + '</span>.');
-      } else {
-        addToLog('warning Icon', 'Auto-buy error: ' + messageCheck);
-      }
-      reloadProperty = true;
-
-    } else {
-      messageCheck = xpathFirst('.//td[@class="message_body"]', innerPageElt);
-      if (messageCheck) {
-        messageCheck = messageCheck.innerHTML.untag();
-        if (messageCheck.match(/successfully sold (.*) for ([A-Z]?\$[\d,]*\d)/i)) {
-          addToLog(cities[city][CITY_CASH_CSS], '<strong>Sold</strong> ' +
-                   '<span class="bad">' +
-                   RegExp.$1 + '</span>' + ' for ' +
-                   '<span class="money">' + RegExp.$2 + '</span>.');
-        } else {
-          addToLog('info Icon', messageCheck);
-        }
-        reloadProperty = true;
-      }
-    }
-  }
-
-  var allPropertyRowsPath = './/table[@class="main_table"]/tbody/tr';
-  var allPropertyRows = xpath(allPropertyRowsPath, innerPageElt);
-
-  // get number of payments per day
-  var payments, tempObj = xpathFirst('.//div[contains(text(), "Cash Flow")]', innerPageElt);
-  if (tempObj && tempObj.innerHTML.match(/every (.+) minutes/i)) {
-    payments = 1440 / parseInt(RegExp.$1);
-  } else {
-    payments = 24;
-  }
-
-  if (allPropertyRows.snapshotLength > 0) {
-    var allProperties = new Array();
-    var bestProperty = { id:false, roi:0, row:0 };
-    var selectProperties = GM_getValue('selectProperties');
-    if (!selectProperties && isChecked('autoBuy')) {
-      addToLog('warning Icon', 'Auto-buy cannot work because no properties have been selected in the Properties tab of the settings menu. Turning auto-buy off.');
-      GM_setValue('autoBuy', 0);
-    }
-
-    for (var currentRow = 0, numRows=allPropertyRows.snapshotLength; currentRow < numRows; ++currentRow) {
-      var currentRowHtml = allPropertyRows.snapshotItem(currentRow).innerHTML;
-
-      if (/prop_[\w\d]+\.jpg/.test(currentRowHtml)) {
-        var currentProperty = { id:0, roi:0, cost:0, name:'', row:0, path:'', income:0, mobsize:0, amount:0, owned:0, requiredId:0, requiredCost:0, requiredName:'' }
-        var currentRowXpath = allPropertyRowsPath + "[" + (currentRow+1) + "]/";
-
-        // get id
-        tempObj = xpathFirst(currentRowXpath + 'td[3]/table/tbody/tr/td[2]/form/table/tbody/tr/td/input[@name="property"]', innerPageElt);
-        if (tempObj) {
-          currentProperty.id = tempObj.value;
-        }
-
-        // get required mafia size
-        tempObj = xpathFirst(currentRowXpath + "td[3]/table/tbody/tr[1]/td[1]", innerPageElt);
-        if (tempObj) {
-          currentProperty.mobsize = tempObj.innerHTML.match(/<strong>(\d+)<\/strong>/) ? parseInt(RegExp.$1) : 0;
-        }
-
-        // get max buy amount and select
-        tempObj = xpathFirst('.//form[@id="propBuy_' + currentProperty.id + '"]/table/tbody/tr/td/select[@name="amount"]', innerPageElt);
-        if (tempObj) {
-          if (tempObj.length) {
-            currentProperty.amount = tempObj.length;
-            tempObj[currentProperty.amount - 1].selected = true;
-          }
-        }
-
-        // get name & income
-        tempObj = xpath(currentRowXpath + "td[2]/strong | " + currentRowXpath + "td[2]/div/strong", innerPageElt);
-        if (tempObj.snapshotLength > 1) {
-          currentProperty.name = tempObj.snapshotItem(0).innerHTML;
-          currentProperty.income = parseCash(tempObj.snapshotItem(1).innerHTML);
-        }
-
-        //tempObj = xpath(currentRowXpath + "/td[3]/table/tbody/tr[2]/td | " + currentRowXpath + "td[2]/div/strong", innerPageElt);
-
-        // get cost
-        tempObj = xpathFirst(currentRowXpath + "td[3]/table/tbody/tr[1]/td", innerPageElt);
-        if (tempObj) {
-          tempObj = tempObj.innerHTML;
-          if (tempObj) {
-            // cost of required undeveloped space
-            if (tempObj.match(/Built on: ([\w\s]+)/i)) {
-              for (var j = 0, numProps=allProperties.length; j < numProps; ++j) {
-                if (allProperties[j].name == RegExp.$1) {
-                  var property = allProperties[j];
-                  currentProperty.requiredCost = property.cost;
-                  if (property.owned < currentProperty.amount) {
-                    currentProperty.requiredId   = property.id;
-                    currentProperty.requiredName = property.name;
-                  }
-                  break;
-                }
-              }
-            }
-            // cost of property
-            if (tempObj.match(REGEX_CASH)) {
-              currentProperty.cost = parseCash(RegExp.lastMatch);
-            }
-          }
-        }
-
-        // get number of owned
-        tempObj = xpathFirst(currentRowXpath + "td[3]/table/tbody/tr[2]/td", innerPageElt);
-        if (tempObj && tempObj.innerHTML.match(/(\d+)/)) {
-          currentProperty.owned = RegExp.$1;
-        } else {
-          tempObj = xpathFirst(currentRowXpath + "td[2]/div/strong[2]", innerPageElt);
-          if (tempObj && tempObj.innerHTML.match(/(\d+)/)) {
-            currentProperty.owned = RegExp.$1;
-          }
-        }
-
-        // calculate roi and check if its the highest
-        if (currentProperty.income > 0 && currentProperty.cost > 0) {
-          currentProperty.roi = currentProperty.income / (currentProperty.cost + currentProperty.requiredCost);
-          if (selectProperties.indexOf(currentProperty.name) != -1 && bestProperty.roi < currentProperty.roi && mafia >= currentProperty.mobsize) {
-            bestProperty = currentProperty;
-            bestProperty.row  = currentRow;
-            bestProperty.path = xpathFirst(currentRowXpath + "td[3]/table/tbody/tr[1]/td/strong", innerPageElt);
-          }
-        }
-
-        // display roi & total income on page
-        if (currentProperty.roi > 0) {
-          var tempItem = xpath(currentRowXpath + 'td[2]/strong', innerPageElt).snapshotLength == 1 ? 0 : 1;
-          var roiText = xpath(currentRowXpath + 'td[2]/div', innerPageElt);
-          roiText = makeElement('div', roiText.snapshotItem(tempItem), {'style':'margin:10px 0 10px 0; font-size:13px'});
-          roiText.appendChild(document.createTextNode('Total Income: $' + makeCommaValue(currentProperty.owned * currentProperty.income)));
-          roiText.appendChild(document.createElement("br"));
-          roiText.appendChild(document.createTextNode('ROI: '));
-          makeElement('strong', roiText, { 'style':'color:#FFD927'}).appendChild(document.createTextNode(''+Math.round(currentProperty.roi*100000000)/100000));
-          var roiTime = (1/currentProperty.roi) / payments; // days
-          var roiTimeText;
-          if (roiTime > 3652.5) { // display years
-            roiTime /= 365.25;
-            roiTimeText = ' years)';
-          } else if (roiTime > 365.25) { // display months
-            roiTime /= 30.4375;
-            roiTimeText = ' months)';
-          } else {
-            roiTimeText = ' days)';
-          }
-          roiText.appendChild(document.createTextNode(' (' + (Math.round(roiTime * 100) / 100) + roiTimeText));
-        }
-
-        allProperties.push(currentProperty);
-      }
-    }
-
-    // highlight best property
-    if (bestProperty.row > 0) {
-      allPropertyRows.snapshotItem(bestProperty.row).style.backgroundColor="#020";
-      best = makeElement('div', bestProperty.path, {'style':'color:#52E259; font-size: 10px; margin-top:10px'});
-      makeElement('img', best, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
-      best.appendChild(document.createTextNode(' BEST'));
-    }
-
-    if (isChecked('autoBuy')) {
-      if (bestProperty.amount) {
-        // Display next property for auto-buy.
-        if (bestProperty.requiredId > 0) {
-          makeElement('div', xpathFirst('.//div[@class="text"]', innerPageElt), {'style':'margin-top:12px'}).appendChild(document.createTextNode('Next auto-buy property: ' + bestProperty.amount + 'x ' + bestProperty.requiredName + ' ($' + makeCommaValue(bestProperty.requiredCost * bestProperty.amount) + ') to build ' + bestProperty.name));
-        } else {
-          makeElement('div', xpathFirst('.//div[@class="text"]', innerPageElt), {'style':'margin-top:12px'}).appendChild(document.createTextNode('Next auto-buy property: ' + bestProperty.amount + 'x ' + bestProperty.name + ' ($' + makeCommaValue(bestProperty.cost * bestProperty.amount) + ')'));
-        }
-
-        // Remember the next property for auto-buy.
-        if (bestProperty.requiredId > 0 && (GM_getValue('buyType', 0) != bestProperty.requiredId || GM_getValue('buyCost', 0) != bestProperty.requiredCost * bestProperty.amount)) {
-          GM_setValue('buyName', bestProperty.requiredName);
-          GM_setValue('buyType', bestProperty.requiredId);
-          // Save as a string because 32-bit integers aren't big enough.
-          GM_setValue('buyCost', '' + bestProperty.requiredCost * bestProperty.amount);
-          GM_setValue('buyRequired', true);
-          addToLog('process Icon', 'Next auto-buy property: ' + bestProperty.amount + 'x <span class="good">' + bestProperty.requiredName + '</span> (<span class="expense">$' + makeCommaValue(bestProperty.requiredCost * bestProperty.amount) + '</span>) to build ' + bestProperty.name);
-        } else if (GM_getValue('buyType', 0) != bestProperty.id || GM_getValue('buyCost', 0) != bestProperty.cost * bestProperty.amount) {
-          GM_setValue('buyName', bestProperty.name);
-          GM_setValue('buyType', bestProperty.id);
-          // Save as a string because 32-bit integers aren't big enough.
-          GM_setValue('buyCost', '' + bestProperty.cost * bestProperty.amount);
-          GM_setValue('buyRequired', false);
-          addToLog('process Icon', 'Next auto-buy property: ' + bestProperty.amount + 'x <span class="good">' + bestProperty.name + '</span> (<span class="expense">$' + makeCommaValue(bestProperty.cost * bestProperty.amount) + '</span>)');
-        }
-
-        DEBUG('Next auto-buy: name=' + GM_getValue('buyName', '') + ', id=' + GM_getValue('buyType', '') + ', cost=' + GM_getValue('buyCost', '') + ', req=' + GM_getValue('buyRequired', '') + ', reqMafia=' + bestProperty.mobsize + ', mafia=' + mafia);
-      } else {
-        // Nothing available to buy.
-        GM_setValue('buyCost', 0);
-        makeElement('div', xpathFirst('.//div[@class="text"]', innerPageElt), {'style':'margin-top:12px'}).appendChild(document.createTextNode('Next auto-buy property: Nothing available for purchase.'));
-        addToLog('process Icon', 'Next auto-buy property: Nothing available for purchase.');
-      }
-    }
-  }
-
-  if (reloadProperty == true) {
-    Autoplay.fx = goPropertyNav;
-    Autoplay.delay = getAutoPlayDelay();
-    Autoplay.start();
     return true;
   }
 

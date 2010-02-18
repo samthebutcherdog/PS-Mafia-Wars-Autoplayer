@@ -10,14 +10,6 @@ Storage.prototype.getObject = function(key) {
   return JSON.parse(this.getItem(key));
 }
 
-function setMWValue(gmName, gmValue) {
-  localStorage.setItem(gmName, gmValue);
-}
-
-function getMWValue(gmName) {
-  return localStorage.getItem(gmName);
-}
-
 var GM_xmlhttpRequest = function(obj) {
         var request=new XMLHttpRequest();
         request.onreadystatechange=function() { if(obj.onreadystatechange) { obj.onreadystatechange(request); }; if(request.readyState==4 && obj.onload) { obj.onload(request); } }
