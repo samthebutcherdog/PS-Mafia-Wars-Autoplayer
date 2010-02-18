@@ -18,6 +18,52 @@ function getMWValue(gmName) {
   return localStorage.getItem(gmName);
 }
 
+var GM_xmlhttpRequest = function(obj) {
+        var request=new XMLHttpRequest();
+        request.onreadystatechange=function() { if(obj.onreadystatechange) { obj.onreadystatechange(request); }; if(request.readyState==4 && obj.onload) { obj.onload(request); } }
+        request.onerror=function() { if(obj.onerror) { obj.onerror(request); } }
+        try { request.open(obj.method,obj.url,true); } catch(e) { if(obj.onerror) { obj.onerror( {readyState:4,responseHeaders:'',responseText:'',responseXML:'',status:403,statusText:'Forbidden'} ); }; return; }
+        if(obj.headers) { for(name in obj.headers) { request.setRequestHeader(name,obj.headers[name]); } }
+        request.send(obj.data); return request;
+}
+
+function grabUpdateInfo() {
+  localStorage.setObject('newRevList', '');
+  localStorage.setObject('oldRevList', '');
+  GM_xmlhttpRequest({
+    method: 'GET',
+    url: 'http://code.google.com/p/mwplayer/updates/list',
+    headers: {'Accept': 'application/atom+xml'},
+    onload: function (responseDetails) {
+      s = (responseDetails.responseText);
+      var count = 0;
+      var oldBuild = localStorage.getObject('build');
+      var newBuild = localStorage.getObject('newbuild');
+      var changes = Math.min(parseInt(newBuild) - parseInt(isNaN(oldBuild) ? 5 : oldBuild), 10);
+      var newRevList = '';
+      var oldRevList = '';
+      while (count < changes + 5) {
+        var a = s.indexOf('g-unit g-first');
+        a = a + 10;
+        s = s.substring(a);
+        var searchString = s.match(/href\x3D\x22\x2Fp\x2Fmwplayer\x2Fsource\x2Fdetail\x3Fr\x3D([0-9]+)\x22\x3E/);
+        var revisionString = RegExp.$1;
+        var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
+        var commentString = RegExp.$1;
+        var revLine = 'r' + revisionString + '... ' + commentString.replace('- ', '') + '<br>';
+        if (count < changes)
+          newRevList += revLine;
+        else
+          oldRevList += revLine;
+        count++;
+      }
+      localStorage.setObject('newRevList', newRevList);
+      localStorage.setObject('oldRevList', oldRevList);
+      localStorage.setObject('build', newBuild);
+    }
+  });
+}
+
 chrome.extension.onRequest.addListener(
   function(request, sender, sendResponse) {
     var resp = {};
@@ -31,6 +77,11 @@ chrome.extension.onRequest.addListener(
         if (i == 'action' || /function/i.test(i)) continue;
         resp[i] = localStorage.getObject(i);
       }
+    }
+
+    // Grab update info
+    if (request.newbuild && localStorage.getObject('build') != localStorage.getObject('newbuild')) {
+      grabUpdateInfo ();
     }
 
     sendResponse(resp);

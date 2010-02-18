@@ -13,7 +13,7 @@
       "128": "mwap128.png",
       "48": "mwap48.png"
    },
-
+   "permissions": [ "http://code.google.com/p/mwplayer/*" ],
    "name": "Autoplayer for Mafia Wars (Facebook)",
    "version": "1.0.65",
    "minimum_chrome_version": "4.0"

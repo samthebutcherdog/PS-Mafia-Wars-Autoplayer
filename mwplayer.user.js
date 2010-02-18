@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.65
-// @build       224
+// @build       225
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.65',
-  build: '224',
+  build: '225',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1423,6 +1423,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Check for a version change.
   if (GM_getValue('version') != SCRIPT.version ||
       GM_getValue('build') != SCRIPT.build) {
+    GM_setValue('newbuild', SCRIPT.build);
+    sendMWValues(['version','build', 'newbuild']);
     grabUpdateInfo(GM_getValue('build'));
     handleVersionChange();
   }
@@ -1464,14 +1466,18 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var initialized = true;
   DEBUG('Completed initialize.');
 
-  // Get language.
-  copyMWValues(['language', 'FBName']);
-  updateCommonStorage();
+  // For chrome
+  sendSettings();
+  copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
+}
+
+// Copy settings from background storage
+function synchSettings() {
+  copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
 }
 
 // Send settings to background storage
-function updateCommonStorage() {
-  if (gvar.isGreaseMonkey) return;
+function sendSettings() {
   sendMWValues(['isRunning', 'autoGiftSkipOpt', 'autoLottoOpt', 'autoSecretStash',
                 'autoIcePublish', 'autoLevelPublish', 'autoAchievementPublish',
                 'autoAskJobHelp', 'autoShareWishlist', 'autoWarRewardPublish',
@@ -1680,6 +1686,7 @@ function doAutoPlay () {
   if (running && !maxed && isChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
     if (miniPack()) return;
   }
+
   // Auto-energypack
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
   var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
@@ -4048,7 +4055,7 @@ function saveSettings() {
   toggleSettings();
   updateLogStats();
   refreshMWAPCSS();
-  updateCommonStorage();
+  sendSettings();
 }
 
 function updateMastheadMenu() {
@@ -6338,6 +6345,7 @@ function createAboutTab() {
 }
 
 function grabUpdateInfo(oldBuild) {
+  if (!gvar.isGreaseMonkey) return;
   GM_setValue('newRevList', '');
   GM_setValue('oldRevList', '');
   GM_xmlhttpRequest({
@@ -6658,6 +6666,7 @@ function handleModificationTimer() {
     return;
   }
   refreshSettings();
+  synchSettings();
 
   // Find the visible inner page.
   var pageChanged = false;
@@ -6889,8 +6898,6 @@ function innerPageChanged() {
     }
   }
   setListenContent(true);
-
- 
 
   try {
     // If a click action was taken, check the response.
