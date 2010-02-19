@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.68
-// @build       230
+// @build       231
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.68',
-  build: '230',
+  build: '231',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -120,7 +120,6 @@ GM_ApiBrowserCheck();
 function checkInPublishPopup() {
   if (xpathFirst('.//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
       /prompt_feed/.test(window.location.href))  {
-    GM_setValue('postClicked', false);
     setGMTime('postTimer', '00:10');
     window.setTimeout(handlePublishing, 2000);
     return true;
@@ -6731,14 +6730,15 @@ function handlePublishing() {
       if (okElt) {
         clickElement(okElt);
 
-      // If (1) Pub/Skip already clicked or
+      // If (1) Pub button is not found anymore; or
       //    (2) It's been 10 seconds since the post window loaded
       // Then close the window
-      } else if (GM_getValue('postClicked') || !timeLeftGM('postTimer')) {
+      } else if (!pubElt || !timeLeftGM('postTimer')) {
         clickElement(skipElt);
+      }
 
       // Perform publishing logic once posting buttons have loaded
-      } else if (skipElt && pubElt) {
+      if (skipElt && pubElt) {
         // Generic publishing function
         var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
           var eltDiv = xpathFirst(xpathString);
@@ -6749,7 +6749,6 @@ function handlePublishing() {
               clickElement(skipElt);
 
             // Wait for 2 seconds before trying to close window manually
-            GM_setValue('postClicked', true);
             window.setTimeout(handlePublishing, 2000);
             return true;
           }
