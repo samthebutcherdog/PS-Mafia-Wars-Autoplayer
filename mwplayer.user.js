@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.66
-// @build       227
+// @version     1.0.67
+// @build       228
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.66',
-  build: '227',
+  version: '1.0.67',
+  build: '228',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10413,16 +10413,17 @@ function randomizeStamina() {
 // Interpret the JSON response from a request
 function logJSONResponse(responseText, action) {
   try {
-    var resp = responseText;
-    var respJSON = eval ('(' + resp + ')');
+    DEBUG(responseText);
+    var respJSON = eval ('(' + responseText + ')');
 
     // Log any message from collection NY take.
     switch (action) {
       case 'collect ny take':
-        if (respJSON.message.match("You collected")) {
-          addToLog(cities[city][CITY_CASH_CSS], respJSON.message);
-        } else {
-          DEBUG(resp);
+        for (var i in respJSON) {
+          if (/collected/i.test(respJSON[i])) {
+            addToLog(cities[city][CITY_CASH_CSS], respJSON[i]);
+            break;
+          }
         }
         setGMTime ('nextNYTake', '1 hour');
         break;
@@ -10430,7 +10431,6 @@ function logJSONResponse(responseText, action) {
       default:
         addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' +
                  action + '".');
-        DEBUG(resp);
     }
   } catch (ex) {
     DEBUG('Exception (logJSONResponse): ' + ex + ', response: ' + responseText + '.');
