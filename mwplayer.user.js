@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.67
-// @build       228
+// @build       229
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.67',
-  build: '228',
+  build: '229',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1352,7 +1352,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Stick of Dynamite', 'Sabotage The Plan From The Inside',MOSCOW],
     ['Stick of Dynamite','Stop The ULF Attack',MOSCOW],
     ['Mansion Details','Break Into An Architect\'s Office',MOSCOW],
-    ['Mansion Details', 'Threaten A Mafiya Moneyman\'s Family',MOSCOW]
+    ['Mansion Details', 'Threaten A Mafiya Moneyman\'s Family',MOSCOW],
+    ['Satellite Phone', 'Hijack A Boat Load Of Electronics',BANGKOK]
   );
 
   // FIXME: Should this be selectable by users?
