@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.68
-// @build       231
+// @build       232
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.68',
-  build: '231',
+  build: '232',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8124,10 +8124,12 @@ function getJobRow(jobName, contextNode) {
       }
     }
     rowElt = xpathFirst('.//table[@class="job_list"]//tr//td['+conTxt+']', contextNode);
-    while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
+    if (rowElt)
+      while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
+    else
+      return false;
   } catch(ex) {
-      DEBUG (conTxt);
-      addToLog('warning Icon', 'BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + job + ']');
+    addToLog('warning Icon', 'BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + jobName + ']');
   }
   return rowElt;
 }
@@ -8252,16 +8254,25 @@ function jobMastery(element) {
     return;
   }
 
-  var selectMission = parseInt(GM_getValue('selectMission', 1));
-  var currentJob = missions[selectMission][0];
-  var jobno      = missions[selectMission][2];
-  var tabno      = missions[selectMission][3];
-  var cityno     = missions[selectMission][4];
+  var selectMission = parseInt(GM_getValue('selectMission', 1)) + 1;
+  var tabno      = missions[selectMission - 1][3];
+  var cityno     = missions[selectMission - 1][4];
 
   if (city != cityno || !onJobTab(tabno)) return;
 
+  var currentJobRow = false;
+  // Move back one job IF the job is not found on this page
+  while (!currentJobRow && city == cityno && onJobTab(tabno)) {
+    selectMission--;
+    var currentJob = missions[selectMission][0];
+    var jobno      = missions[selectMission][2];
+    tabno      = missions[selectMission][3];
+    cityno     = missions[selectMission][4];
+    var currentJobRow = getJobRow(currentJob, element);
+  }
+
   DEBUG('Calculating progress for ' + currentJob + '.');
-  var currentJobRow = getJobRow(currentJob, element);
+
 
   // Calculate tier mastery.
   DEBUG("Checking mastery for each job.");
@@ -8298,7 +8309,7 @@ function jobMastery(element) {
   DEBUG("Checking current job mastery.");
   var currentJobMastered;
   if (currentJobRow) currentJobMastered = currentJobRow.innerHTML.indexOf('Mastered');
-  if (!currentJobMastered ||currentJobMastered > 0) {
+  if (!currentJobMastered || currentJobMastered > 0) {
     var jobList = getSavedList('jobsToDo');
     if (!jobList.length) {
       addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
