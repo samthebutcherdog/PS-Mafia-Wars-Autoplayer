@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.68
-// @build       232
+// @build       233
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.68',
-  build: '232',
+  build: '233',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3902,8 +3902,8 @@ function saveSettings() {
                             'hideInHospital','autoStat','autoStatDisable','autoStatAttackFallback',
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
-                            'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack','hideMailList',
-                            'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac','hideNotice',
+                            'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
+                            'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','hideOffer',
                             'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok', 'collectNYTake',
@@ -4998,7 +4998,7 @@ function createDisplayTab() {
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
   makeElement('label', item).appendChild(document.createTextNode(' Hide game elements '));
 
-  // Hide safe house gifts
+  // Hide gifts
   item = makeElement('div', list, {'class':'single'});
   id = 'hideGifts';
   title = 'Hide gifting items';
@@ -5011,23 +5011,11 @@ function createDisplayTab() {
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Action Boxes '));
 
-  // Hide Feature Notice
-  id = 'hideNotice';
-  title = 'Hide feature notice updates';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Feature Notice '));
-
   // Hide Limited Time Offers
   id = 'hideOffer';
   title = 'Hide limited time offers';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Offers '));
-
-  // Hide Mailing List
-  id = 'hideMailList';
-  title = 'Hide mailing list';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Mail List '));
 
   // Hide Friend Ladder
   id = 'hideFriendLadder';
@@ -7176,8 +7164,12 @@ function refreshMWAPCSS() {
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe,#setup_progress_bar, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
-                 // Hide feature notice updates
-                 (isGMChecked('hideNotice') ? ' , .feature_update_notice' : '' ) +
+                 // Hide Limited Time Offers
+                 (isGMChecked('hideOffer') ? ' , div[class="tab_box"]:not([style])' : '' ) +
+                 // Hide Holiday Free Gifts / Gift Safe House / Mystery Gifts
+                 (isGMChecked('hideGifts') ? ' , img[alt="Free Holiday Gifts!"]' +
+                                             ' , img[alt="Gift Safe House"]' +
+                                             ' , img[alt="Free Mystery Bag!"]' : '' ) +
                  // Hide friends ladder
                  (isGMChecked('hideFriendLadder') ? ' , .friendladder_box' : '' ) +
                  ' {position: absolute !important; margin:0 !important; ' +
@@ -7455,30 +7447,6 @@ function customizeHome() {
   // Set xJob
   xJob = '';
 
-  // Deal with limited time offers
-  hideElement(xpathFirst('//div[@class="tab_box" and contains(.,"Limited Time Offers")]'), isGMChecked('hideOffer'));
-
-  // Deal the mailing list
-  hideElement(xpathFirst('//div[contains(@style,"mailing_list_bg")]'), isGMChecked('hideMailList'));
-
-  // Deal with Holiday Free Gifts
-  hideElement(xpathFirst('//div/a/img[@alt="Free Holiday Gifts!"]'), isGMChecked('hideGifts'));
-
-  // Deal with gift safe houses
-  hideElement(xpathFirst('.//a/img[@alt="Gift Safe House"]'), isGMChecked('hideGifts'));
-
-  // Deal with free gifts
-  var msgs = xpathFirst('//table[@class="messages"]');
-  if (msgs) {
-    for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
-      if (/You have gifts available to send/.test(msgs.firstChild.childNodes[i].innerHTML)) {
-        if (iLength == 1) hideElement(msgs, isGMChecked('hideGifts'));
-        else hideElement(msgs.firstChild.childNodes[i], isGMChecked('hideGifts'));
-        break;
-      }
-    }
-  }
-
   // Is an energy pack waiting to be used?
   energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
   energyPackElt = energyPackElt ? energyPackElt : xpathFirst('.//a[contains(@onclick, "xw_action=use_energy_pak")]', innerPageElt);
@@ -7669,7 +7637,7 @@ function customizeProfile() {
         var isOnWarList = (getSavedList('autoWarTargetList').indexOf(remoteuserid) != -1);
         // In my mafia. Show options to add/remove from war list.
         statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':isOnWarList?'Remove from War List':'Remove from War List',
+        this.buildAnchor( { 'AnchorText':isOnWarList?'Remove from War List':'Add to War List',
                             'id':remoteuserid,
                             'title':'In the settings box, under the mafia tab\nIf you have selected war friends from a list\nupdates the friends ids in the box',
                             'clickEvent':isOnWarList?clickWarListRemove:clickWarListAdd
@@ -8551,8 +8519,6 @@ function debugDumpSettings() {
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
         'Hide Action Boxes: <strong>'+ showIfUnchecked(GM_getValue('hideActionBox')) + '</strong><br>' +
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
-        'Hide Feature Notice: <strong>'+ showIfUnchecked(GM_getValue('hideNotice')) + '</strong><br>' +
-        'Hide Mailing List: <strong>'+ showIfUnchecked(GM_getValue('hideMailList')) + '</strong><br>' +
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Hide Friend Ladder: <strong>'+ showIfUnchecked(GM_getValue('hideFriendLadder')) + '</strong><br>' +
         'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
