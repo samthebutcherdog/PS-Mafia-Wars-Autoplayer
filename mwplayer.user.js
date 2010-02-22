@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.69
-// @build       236
+// @build       237
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.69',
-  build: '236',
+  build: '237',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6674,6 +6674,10 @@ function handleModificationTimer() {
   }
   if (!innerPageElt) return;
 
+  // Make the wishlist appear
+  var wishElt = xpathFirst('.//div[@class="tab_box"]', innerPageElt);
+  if (wishElt && !onHome()) wishElt.setAttribute('style','display: block;');
+
   // Make sure our private AJAX page exists and isn't visible.
   var ajaxID = SCRIPT.ajaxPage;
   elt = xpathFirst('//div[@id="' + ajaxID + '"]');
@@ -7557,10 +7561,6 @@ function customizeProfile() {
   // Make sure we're on a profile.
   var statsTable = xpathFirst('.//td[@class="stats_left"]', innerPageElt);
   if (!statsTable) return false;
-
-  // Make the wishlist appear
-  var wishElt = xpathFirst('.//div[@class="tab_box"]', innerPageElt);
-  if (wishElt) wishElt.setAttribute('style','display: block;');
 
   var statsDiv = xpathFirst('.//a[contains(., "Sucker Punch")]/..', innerPageElt);
   if (statsDiv) {
