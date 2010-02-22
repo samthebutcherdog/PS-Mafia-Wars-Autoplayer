@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.69
-// @build       238
+// @version     1.0.70
+// @build       239
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.69',
-  build: '238',
+  version: '1.0.70',
+  build: '239',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6951,6 +6951,22 @@ function refreshGlobalStats() {
 
   var cityElt = document.getElementById('mw_city_wrapper');
   if (!cityElt) return false;
+
+  // Once we see a post pop-up, set the timer to close it
+  var skipPostElt = document.getElementById('fb_dialog_cancel_button');
+  if (running && skipPostElt) {
+    // Start the timer
+    if (GM_getValue('postWaitStarted') != true) {
+      setGMTime('postWaitTimer', '10 seconds');
+      GM_setValue('postWaitStarted', true);
+    }
+
+    // Time's up! Close that post pop-up
+    if (GM_getValue('postWaitStarted') && !timeLeftGM('postWaitTimer')) {
+      clickElement(skipPostElt);
+      GM_setValue('postWaitStarted', false);
+    }
+  }
 
   // Set all the element globals. They change.
   cashNYCElt = document.getElementById('user_cash_nyc');
