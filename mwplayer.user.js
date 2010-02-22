@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.68
-// @build       233
+// @version     1.0.69
+// @build       234
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.68',
-  build: '233',
+  version: '1.0.69',
+  build: '234',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -956,6 +956,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$'],
     ['Bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$']
   );
+
+  var fightFaction = '';
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -2856,7 +2858,7 @@ function autoFight(how) {
     staminaBurst (BURST_ALWAYS, attackElt);
     DEBUG('Clicked to fight: name=' + opponent.name +
           ', id=' + opponent.id + ', level=' + opponent.level +
-          ', mafia=' + opponent.mafia);
+          ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   };
   Autoplay.delay = getAutoPlayDelay();
   Autoplay.start();
@@ -3251,6 +3253,9 @@ function getDisplayedOpponents(element, forceRefresh) {
 // Searches the fight table in the subtree of the given element for new
 // random targets. Returns a new opponent, or undefined.
 function findFightOpponent(element) {
+  // This will force the fight logic to refresh target list everytime.
+  fightListNew.set([]);
+
   // Don't bother searching if we still have plenty.
   var newOpponents = fightListNew.get();
   var len = newOpponents.length;
@@ -3263,6 +3268,24 @@ function findFightOpponent(element) {
   if (!opponents) {
     // No opponents displayed on this page.
     return newOpponents[Math.floor(Math.random() * len)];
+  }
+
+  // Calculate faction points
+  var factionElts = xpath('.//div[@class="faction_container"]', innerPageElt);
+  DEBUG('Factions found: ' + factionElts.snapshotLength);
+  if (factionElts.snapshotLength > 0) {
+    fightFaction = '';
+    var maxPts = 0;
+    for (var i = 0, iLength = factionElts.snapshotLength; i < iLength; ++i) {
+      var factionElt = factionElts.snapshotItem(i);
+      var factionName = xpathFirst('.//div[@class="faction_name"]',factionElt).innerHTML.trim();
+      var factionPts = parseFloat(eval(xpathFirst('.//div[@class="zy_progress_bar_faction_text"]',factionElt).innerHTML.trim()));
+      if (factionPts > maxPts) {
+        fightFaction = factionName;
+        maxPts = factionPts;
+      }
+    }
+    DEBUG('Kick: ' + factionName);
   }
 
   // Get the user's criteria for opponents.
@@ -3308,8 +3331,8 @@ function findFightOpponent(element) {
   for(var i = 0, iLength=opponents.length; i < iLength; ++i) {
     var opponent = opponents[i];
 
-    // Check faction
-    if (!isGMChecked('fightAllSides') && opponent.faction == cities[city][CITY_SIDES][GM_getValue('side' + cities[city][CITY_NAME], 0)]) {
+    // Balance faction points
+    if (opponent.faction.length > 0 && fightFaction.length > 0 && opponent.faction != fightFaction) {
       factionCount++;
       continue;
     }
@@ -3361,7 +3384,7 @@ function findFightOpponent(element) {
     // This opponent is new and acceptable.
     DEBUG('Found new fight opponent: name=' + opponent.name +
           ', id=' + opponent.id + ', level=' + opponent.level +
-          ', mafia=' + opponent.mafia);
+          ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   }
   DEBUG(levelMaxCount + ' disqualified on max level, ' +
         mafiaMaxCount + ' on max mafia, ' +
@@ -5827,12 +5850,7 @@ function createStaminaTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  makeElement('label', lhs).appendChild(document.createTextNode('Fight ('));
-  id = 'fightAllSides';
-  title = 'Check this to enable fighting all sides randomly';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('all sides?) in:'));
+  makeElement('label', lhs).appendChild(document.createTextNode('Fight in:'));
   id = 'fightRandomLoc';
   var fightRandomLoc = makeElement('select', rhs, {'id':id});
   for (i = 0, iLength=cities.length; i < iLength; ++i) {
@@ -6392,7 +6410,6 @@ function validateStaminaTab() {
   switch (s.staminaSpendHow) {
     case STAMINA_HOW_FIGHT_RANDOM: // Random fighting
       // Get the settings.
-      s.fightAllSides = checked('fightAllSides');
       s.fightLocation = document.getElementById('fightRandomLoc').selectedIndex;
       s.fightLevelMax = parseInt(document.getElementById('fightLevelMax').value);
       s.fightLevelMaxRelative = checked('fightLevelMaxRelative');
@@ -7161,7 +7178,7 @@ function refreshMWAPCSS() {
     var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
                  (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +
                  // Hide the Zynga bar, progress bar, email bar, sms link
-                 ' #mwapHide, #mw_zbar, #mw_zbar iframe,#setup_progress_bar, .fb_email_prof_header, .mw_sms '  +
+                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
                  // Hide Limited Time Offers
@@ -7173,7 +7190,7 @@ function refreshMWAPCSS() {
                  // Hide friends ladder
                  (isGMChecked('hideFriendLadder') ? ' , .friendladder_box' : '' ) +
                  ' {position: absolute !important; margin:0 !important; ' +
-                 '  height:0 !important; width: 0 !important; display:none !important;}' +
+                 '  height:0 !important; width: 0 !important; display: none !important;}' +
                  // ********************** Stats Tab CSS **********************
                  '#statsWindow #sWindowTabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
                  '#statsWindow #sWindowTabNav div.selected{background : rgb(60,60,100);}' +
@@ -8609,7 +8626,6 @@ function debugDumpSettings() {
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
-        '&nbsp;&nbsp;-Fight all sides: <strong>' + showIfUnchecked(GM_getValue('fightAllSides')) + '</strong><br>' +
         '&nbsp;&nbsp;-Fight in: <strong>' + cities[GM_getValue('fightLocation', 0)][CITY_NAME] + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack <strong>' + showIfUnchecked(GM_getValue('staminaReattack')) + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack threshold:<strong>' + GM_getValue('reattackThreshold') + '</strong><br>' +
