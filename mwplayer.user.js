@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.69
-// @build       237
+// @build       238
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.69',
-  build: '237',
+  build: '238',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -110,7 +110,7 @@ function GM_ApiBrowserCheck() {
         request.onreadystatechange=function() { if(obj.onreadystatechange) { obj.onreadystatechange(request); }; if(request.readyState==4 && obj.onload) { obj.onload(request); } }
         request.onerror=function() { if(obj.onerror) { obj.onerror(request); } }
         try { request.open(obj.method,obj.url,true); } catch(e) { if(obj.onerror) { obj.onerror( {readyState:4,responseHeaders:'',responseText:'',responseXML:'',status:403,statusText:'Forbidden'} ); }; return; }
-        if(obj.headers) { for(name in obj.headers) { request.setRequestHeader(name,obj.headers[name]); } }
+        if(obj.headers) { for(name in obj.headers) { if (/tosource/i.test(name)) continue; request.setRequestHeader(name,obj.headers[name]); } }
         request.send(obj.data); return request;
   } } }
 }
@@ -958,6 +958,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   var fightFaction = '';
+  var quickBankFail = false;
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -1868,7 +1869,7 @@ function autoHeal() {
   }
 
   // Use our custom instant-heal element (if present).
-  var healElt = document.getElementById('ap_heal');
+  var healElt = document.getElementById('mwap_heal');
   if (healElt) {
     // FIXME: Should make quick healing optional
     if (false) {
@@ -3014,6 +3015,8 @@ function autoStaminaSpend() {
 }
 
 function autoBankDeposit(amount) {
+  if (!quickBankFail) return false;
+
   // Make sure we're at the bank.
   var formElt = xpathFirst('.//form[@id="bank_deposit"]', innerPageElt);
   if (!formElt) {
@@ -3039,6 +3042,7 @@ function autoBankDeposit(amount) {
     return false;
   }
   Autoplay.fx = function() {
+    quickBankFail = false;
     clickAction = 'deposit';
     submitElt.click();
     DEBUG('Clicked to deposit.');
@@ -7323,6 +7327,11 @@ function doQuickClicks() {
 
   // Click the 'Rally More Help!' button
   if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
+
+  // Quick banking
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
+                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
+  if (canBank) quickBank();
 }
 
 // Parse certain messages appearing on the message window
@@ -7380,10 +7389,10 @@ function customizeStats() {
   setListenStats(false);
 
   // Make health icon clickable for instant healing.
-  var healLinkElt = document.getElementById('ap_heal');
+  var healLinkElt = document.getElementById('mwap_heal');
   var healImgElt = xpathFirst('//img[@alt="Health"]');
   if (healImgElt && !healLinkElt) {
-    healLinkElt = makeElement('a', null, {'id':'ap_heal', 'title':'Click to heal immediately.'})
+    healLinkElt = makeElement('a', null, {'id':'mwap_heal', 'title':'Click to heal immediately.'})
     healImgElt.parentNode.insertBefore(healLinkElt, healImgElt);
     healLinkElt.appendChild(healImgElt);
   }
@@ -7437,7 +7446,63 @@ function customizeStats() {
     GM_setValue('healWaitStarted', true);
   }
 
+  // Make bank icon clicable for instant banking
+  var bankLinkElt = document.getElementById('mwap_bank');
+  var bankElt = xpathFirst('//div[@class="cash_stats" and contains(@style,"block")]', innerPageElt);
+
+  if (bankElt && !bankLinkElt) {
+    bankLinkElt = makeElement('a', null, {
+      'id': 'mwap_bank',
+      'title': 'Click to bank immediately.'
+    })
+    var bankImgElt = xpathFirst('.//img', bankElt);
+    bankElt.insertBefore(bankLinkElt, bankImgElt);
+    bankLinkElt.appendChild(bankImgElt);
+    bankLinkElt.addEventListener('click', quickBank, false);
+  }
+
   setListenStats(true);
+}
+
+function quickBank(amount) {
+  // Get the URL
+  var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit','xw_city':(city + 1)});
+
+  // Form the post data
+  if (!amount) amount = cities[city][CITY_CASH];
+  var postData = 'ajax=1&amount=' + amount;
+  if (!depositUrl.match(/sf_xw_user_id=(\w+)/)) {
+    DEBUG('Cannot find \'sf_xw_user_id\' from the URL.');
+    return "";
+  }
+  postData += '&sf_xw_user_id=' + RegExp.$1;
+
+  if (!depositUrl.match(/sf_xw_sig=(\w+)/)) {
+    DEBUG('Cannot find \'sf_xw_sig\' from the URL.');
+    return "";
+  }
+  postData += '&sf_xw_sig=' + RegExp.$1;
+
+  // Bank asynchronously
+  GM_xmlhttpRequest({
+    method: "POST",
+    url: depositUrl,
+    data: postData,
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+    onload: function (response) {
+      if (response.responseText.match(/([0-9,,]+)<\/span/)) {
+        addToLog(cities[city][CITY_CASH_CSS],
+                 '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
+                 cities[city][CITY_CASH] +
+                 '</span> was deposited in your account after the bank\'s fee.');
+        cities[city][CITY_CASH] = 0;
+      } else {
+        quickBankFail = true;
+      }
+    }
+  });
 }
 
 function customizeNames() {
@@ -9809,34 +9874,6 @@ function goLocation(toCity) {
 
   addToLog('warning Icon', 'Unable to find ' + cities[toCity][CITY_NAME] +
            ' travel link. ');
-}
-
-function handleResponse(responseDetails, action, context) {
-  //  DEBUG('handleResponse: status='+ responseDetails.status);
-  //  DEBUG('handleResponse: statusText='+ responseDetails.statusText);
-  //  DEBUG('handleResponse: responseHeaders='+ responseDetails.responseHeaders);
-  //  DEBUG('handleResponse: responseText='+ responseDetails.responseText);
-
-  // Check for error pages.
-  if (responseDetails.responseText.indexOf('Error while loading page') != -1) {
-    DEBUG('Response: "Error while loading page..." (service interruption)');
-    return;
-  }
-  if (responseDetails.responseText.indexOf('request was not processed') != -1) {
-    DEBUG('Request was not processed.');
-    return;
-  }
-  if (responseDetails.responseText.indexOf('Login to Facebook') != -1) {
-    addToLog('warning Icon', '<span class="warn">WARNING:</span> Reached the Mafia Wars login page.');
-    addToLog('warning Icon', '<span class="warn">Please adjust your browser\'s settings to allow third-party cookies.</span>');
-    addToLog('warning Icon', '<span class="warn">Or is this Facebook user logged in on another computer?</span>');
-    return;
-  }
-
-  // Interpret the response.
-  var doc = document.createElement('div');
-  doc.innerHTML = responseDetails.responseText;
-  logResponse(doc, action, context);
 }
 
 //ATK
