@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.70
-// @build       239
+// @build       240
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.70',
-  build: '239',
+  build: '240',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7489,12 +7489,14 @@ function quickBank(amount) {
   var postData = 'ajax=1&amount=' + amount;
   if (!depositUrl.match(/sf_xw_user_id=(\w+)/)) {
     DEBUG('Cannot find \'sf_xw_user_id\' from the URL.');
-    return "";
+    quickBankFail = true;
+    return;
   }
   postData += '&sf_xw_user_id=' + RegExp.$1;
 
   if (!depositUrl.match(/sf_xw_sig=(\w+)/)) {
     DEBUG('Cannot find \'sf_xw_sig\' from the URL.');
+    quickBankFail = true;
     return "";
   }
   postData += '&sf_xw_sig=' + RegExp.$1;
@@ -7514,6 +7516,7 @@ function quickBank(amount) {
                  cities[city][CITY_CASH] +
                  '</span> was deposited in your account after the bank\'s fee.');
         cities[city][CITY_CASH] = 0;
+        quickBankFail = false;
       } else {
         quickBankFail = true;
       }
