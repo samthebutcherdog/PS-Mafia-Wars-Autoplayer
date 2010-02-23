@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.71
-// @build       242
+// @version     1.0.72
+// @build       243
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.71',
-  build: '242',
+  version: '1.0.72',
+  build: '243',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7488,8 +7488,6 @@ function quickBank(amount) {
         "Content-Type": "application/x-www-form-urlencoded"
     },
     onload: function (resp) {
-      if (resp.status != 200) return;
-
       var respTxt = resp.responseText;
       if (/was deposited/.test(respTxt) && respTxt.match(/([0-9,,]+)<\/span/)) {
         addToLog(cities[city][CITY_CASH_CSS],
