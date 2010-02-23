@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.73
-// @build       244
+// @build       245
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.73',
-  build: '244',
+  build: '245',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7489,6 +7489,7 @@ function quickBank(amount) {
     },
     onload: function (resp) {
       var respTxt = resp.responseText;
+      // Money deposited
       if (/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) {
         addToLog(cities[city][CITY_CASH_CSS],
                  '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
@@ -7496,11 +7497,19 @@ function quickBank(amount) {
                  '</span> was deposited in your account after the bank\'s fee.');
         cities[city][CITY_CASH] = 0;
         quickBankFail = false;
+      // Not enough money
+      } else if (/have enough money/.test(respTxt)) {
+        quickBankFail = false;
+      // Minimum deposit not met ($10)
       } else if (/deposit at least/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/td/)) {
         addToLog(cities[city][CITY_CASH_CSS],
                  'You need to deposit at least <span class="money">' + cities[city][CITY_CASH_SYMBOL] +
                  RegExp.$1);
-        quickBankFail = true;
+        quickBankFail = false;
+      // URL variables have expired
+      } else if (/top.location.href/.test(respTxt)) {
+        DEBUG('URL variables have expired, re-loading...');
+        loadHome();
       } else {
         DEBUG (respTxt);
         quickBankFail = true;
