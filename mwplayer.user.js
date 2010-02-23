@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.74
-// @build       246
+// @version     1.0.75
+// @build       247
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.74',
-  build: '246',
+  version: '1.0.75',
+  build: '247',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7322,7 +7322,7 @@ function doQuickClicks() {
   // Quick banking
   var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-  if (canBank) quickBank();
+  if (canBank) quickBank(cities[city][CITY_CASH]);
 }
 
 // Parse certain messages appearing on the message window
@@ -7439,7 +7439,7 @@ function customizeStats() {
 
   // Make bank icon clicable for instant banking
   var bankLinkElt = document.getElementById('mwap_bank');
-  var bankElt = xpathFirst('//div[@class="cash_stats" and contains(@style,"block")]', innerPageElt);
+  var bankElt = xpathFirst('//div[@id="cash_stats_'+cities[city][CITY_ALIAS]+'"]', innerPageElt);
 
   if (bankElt && !bankLinkElt) {
     bankLinkElt = makeElement('a', null, {
@@ -7492,8 +7492,17 @@ function quickBank(amount) {
                  '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
                  RegExp.$1 +
                  '</span> was deposited in your account after the bank\'s fee.');
-        cities[city][CITY_CASH] = 0;
         quickBankFail = false;
+
+        // Attempt to correct the displayed cash value
+        var cashLeft = 0;
+        var cityCashElt = xpathFirst('.//strong[@id="user_cash_' + cities[city][CITY_ALIAS] + '"]');
+        if (cityCashElt) {
+          cashLeft = parseCash(cityCashElt.innerHTML) - parseCash(RegExp.$1);
+          cityCashElt.innerHTML = cities[city][CITY_CASH_SYMBOL] + (isNaN(cashLeft) ? '0' : cashLeft);
+        }
+
+        cities[city][CITY_CASH] = 0;
       // Not enough money
       } else if (/have enough money/.test(respTxt)) {
         quickBankFail = false;
