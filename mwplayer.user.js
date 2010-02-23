@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.72
-// @build       243
+// @version     1.0.73
+// @build       244
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.72',
-  build: '243',
+  version: '1.0.73',
+  build: '244',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7489,14 +7489,14 @@ function quickBank(amount) {
     },
     onload: function (resp) {
       var respTxt = resp.responseText;
-      if (/was deposited/.test(respTxt) && respTxt.match(/([0-9,,]+)<\/span/)) {
+      if (/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) {
         addToLog(cities[city][CITY_CASH_CSS],
                  '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
                  RegExp.$1 +
                  '</span> was deposited in your account after the bank\'s fee.');
         cities[city][CITY_CASH] = 0;
         quickBankFail = false;
-      } else if (/deposit at least/.test(respTxt) && respTxt.match(/([0-9,,]+)<\/td/)) {
+      } else if (/deposit at least/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/td/)) {
         addToLog(cities[city][CITY_CASH_CSS],
                  'You need to deposit at least <span class="money">' + cities[city][CITY_CASH_SYMBOL] +
                  RegExp.$1);
