@@ -5,7 +5,7 @@
       "matches": [ "http://mwfb.zynga.com/mwfb/*",
                    "http://apps.facebook.com/inthemafia/*",
                    "http://apps.new.facebook.com/inthemafia/*",
-                   "http://www.facebook.com/connect/*" ],
+                   "http://www.facebook.com/connect/prompt_feed*" ],
       "all_frames":true
    } ],
    "description": "Mafia Wars Autoplayer for Google Chrome",

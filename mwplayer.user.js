@@ -31,14 +31,14 @@
 // @include     http://mwfb.zynga.com/mwfb/*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @include     http://www.facebook.com/connect/*
+// @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.75
-// @build       247
+// @build       248
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.75',
-  build: '247',
+  build: '248',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -56,7 +56,7 @@ var SCRIPT = {
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
 if (/facebook.com/.test(window.location.href)) {
-  var profElt = xpathFirst('.//ud[@id="pageNav"]//a[@accesskey="6"]');
+  var profElt = xpathFirst('.//ul[@id="pageNav"]//a[@accesskey="6"]');
   if (profElt && profElt.getAttribute('href').match(/id=(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
   }
