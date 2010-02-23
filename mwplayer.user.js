@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
-// @version     1.0.73
-// @build       245
+// @version     1.0.74
+// @build       246
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.73',
-  build: '245',
+  version: '1.0.74',
+  build: '246',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2325,7 +2325,7 @@ function autoStat() {
       case DEFENSE_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=defense")]', innerPageElt);        break;
       case HEALTH_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_health")]', innerPageElt);     break;
       case ENERGY_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_energy")]', innerPageElt);     break;
-      case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence"])', innerPageElt);  break;
+      case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence")]', innerPageElt);  break;
       case STAMINA_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_stamina")]', innerPageElt);    break;
 
       default             :
@@ -2403,8 +2403,8 @@ function canMission() {
   if (isGMChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
 
-    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
-    var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{},3:{}})"));
+    var availableJobs = eval(GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})'));
+    var masteredJobs = eval(GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})'));
     var expLeft = lvlExp - curExp;
     var ratio = Math.round(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
@@ -2421,11 +2421,8 @@ function canMission() {
       job = mastery_jobs_list[i];
 
       // Only push jobs that does not exist on the main list
-      if (multiple_jobs_list.indexOf(job) == -1) {
+      if (multiple_jobs_list.indexOf(job) == -1)
         multiple_jobs_list.push(job);
-        // Tag job as mastery
-        missions[job][9] = true;
-      }
     }
 
     for (i = 0, iLength= multiple_jobs_list.length; i < iLength; ++i) {
@@ -4057,8 +4054,8 @@ function saveSettings() {
   setSavedList('itemList', []);
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', "({0:{},1:{},2:{},3:{}})");
-  GM_setValue('availableJobs', "({0:{},1:{},2:{},3:{}})");
+  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{}})');
+  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{}})');
 
   // Clear the fight/hit state.
   fightListNew.set([]);
@@ -7812,8 +7809,8 @@ function customizeJobs() {
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
   if (!jobTables || !jobTables[0]) return false;
 
-  var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
-  var masteredJobs = eval(GM_getValue("masteredJobs", "({0:{},1:{},2:{},3:{}})"));
+  var availableJobs = eval(GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})'));
+  var masteredJobs = eval(GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})'));
   var currentTab = currentJobTab();
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
@@ -7831,12 +7828,12 @@ function customizeJobs() {
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
   var reselectJob = false;
+  var masteryList = getSavedList('masteryJobsList');
 
   var masteredJobsCount = 0;
   var jobsFound = 0;
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
     var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
-    jobsFound +=  jobNames.snapshotLength;
 
     for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
       var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].clean().trim();
@@ -7844,6 +7841,8 @@ function customizeJobs() {
       // Skip this name if job row is not found
       var jobRow = getJobRow (jobName);
       if (!jobRow) continue;
+
+      jobsFound++;
 
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
@@ -7855,21 +7854,19 @@ function customizeJobs() {
       var jobAction = xpathFirst('.//td[contains(@class,"job_action")]', jobRow);
 
       // Determine available jobs
-      if (isGMChecked('multipleJobs') &&
-          GM_getValue('isRunning') === true) {
-
+      if (running && isGMChecked('multipleJobs')) {
         // Ignore mastered jobs
         if (isJobMastered(jobInfo)) {
-          if (missions[jobMatch][9] == true) {
+          if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
             masteredJobs[city][currentTab].push(jobMatch);
-            DEBUG('The job ' + missions[jobMatch][0] + ' is already mastered. Adding to ignore list.');
-          }
           masteredJobsCount++;
         }
 
         // Ignore locked jobs
         if (isJobLocked(jobAction)) {
-          DEBUG('Job ' + missions[jobMatch][0] + '(' + jobMatch + ') is not available yet. Skipping.');
+          // Consider "locked" job as mastered
+          DEBUG('Job ' + jobName + '(' + jobMatch + ') is not available yet. Skipping.');
+          masteredJobsCount++;
         } else {
           availableJobs[city][currentTab].push(jobMatch);
         }
@@ -7971,11 +7968,10 @@ function customizeJobs() {
 
   setLevelUpRatio();
   if(reselectJob) canMission();
-  GM_setValue("availableJobs", availableJobs.toSource());
-  GM_setValue("masteredJobs", masteredJobs.toSource());
+  GM_setValue('availableJobs', availableJobs.toSource());
+  GM_setValue('masteredJobs', masteredJobs.toSource());
 
-  if (isGMChecked('multipleJobs') &&
-      GM_getValue('isRunning') === true &&
+  if (running && isGMChecked('multipleJobs') &&
       GM_getValue('selectTier') != '0.0') {
     selectedTierValue = GM_getValue('selectTier').split('.');
     masteryCity = parseInt(selectedTierValue[0]);
@@ -8440,7 +8436,7 @@ function jobCombo(element) {
   var i;
   if (isGMChecked('multipleJobs')) {
     // Cycle jobs with the same ratio
-    var availableJobs = eval(GM_getValue("availableJobs", "({0:{},1:{},2:{},3:{}})"));
+    var availableJobs = eval(GM_getValue('availableJobs', "({0:{},1:{},2:{},3:{}})"));
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var cycle_jobs = new Object();
 
