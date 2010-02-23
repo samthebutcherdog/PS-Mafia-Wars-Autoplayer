@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/*
 // @version     1.0.70
-// @build       240
+// @build       241
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.70',
-  build: '240',
+  build: '241',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -635,9 +635,6 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
 
 var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
-var cashNYElt;                  // NY cash DOM element
-var cashCubaElt;                // Cuba cash DOM element
-var cashMoscowElt;              // Moscow cash DOM element
 var cash;                       // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
@@ -934,27 +931,28 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Constants to access city attributes
   const CITY_NAME        = 0;
-  const CITY_SIDES       = 1;
-  const CITY_CASH        = 2;
-  const CITY_LEVEL       = 3;
-  const CITY_CASH_ICON   = 4;
-  const CITY_CASH_CSS    = 5;
-  const CITY_AUTOBANK    = 6;
-  const CITY_BANKCONFG   = 7;
-  const CITY_SELLCRATES  = 8;
-  const CITY_BUYCRATES   = 9;
-  const CITY_CASH_SYMBOL = 10;
+  const CITY_ALIAS       = 1;
+  const CITY_SIDES       = 2;
+  const CITY_CASH        = 3;
+  const CITY_LEVEL       = 4;
+  const CITY_CASH_ICON   = 5;
+  const CITY_CASH_CSS    = 6;
+  const CITY_AUTOBANK    = 7;
+  const CITY_BANKCONFG   = 8;
+  const CITY_SELLCRATES  = 9;
+  const CITY_BUYCRATES   = 10;
+  const CITY_CASH_SYMBOL = 11;
 
   // Add city variables in this format
-  // Name, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol
+  // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$'],
-    ['Cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$'],
+    ['New York', 'nyc', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$'],
+    ['Cuba', 'cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$'],
     // Add support for choosing sides in Moscow later on
-    ['Moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$'],
-    ['Bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$']
+    ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$'],
+    ['Bangkok', 'bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$']
   );
 
   var fightFaction = '';
@@ -6349,8 +6347,10 @@ function grabUpdateInfo(oldBuild) {
     method: 'GET',
     url: 'http://code.google.com/p/mwplayer/updates/list',
     headers: {'Accept': 'application/atom+xml'},
-    onload: function (responseDetails) {
-      s = (responseDetails.responseText);
+    onload: function (resp) {
+      if (resp.status != 200) return;
+
+      s = (resp.responseText);
       var count = 0;
       var changes = Math.min(parseInt(SCRIPT.build) - parseInt(isNaN(oldBuild) ? 5 : oldBuild), 10);
       var newRevList = '';
@@ -6851,12 +6851,6 @@ function statsInserted(e) {
   } else if (parentElt == staminaElt) {
     stamina = parseInt(e.target.nodeValue);
     staminaElt.style.textDecoration = (stamina == maxStamina)? 'blink' : 'none';
-  } else if (parentElt == cashNYElt && city == NY) {
-    cities[NY][CITY_CASH] = parseCash(e.target.nodeValue);
-  } else if (parentElt == cashCubaElt && city == CUBA) {
-    cities[CUBA][CITY_CASH] = parseCash(e.target.nodeValue);
-  } else if (parentElt == cashMoscowElt && city == MOSCOW) {
-    cities[MOSCOW][CITY_CASH] = parseCash(e.target.nodeValue);
   } else if (parentElt == healthElt) {
     // NOTE: At one time, health was updated on with a timer. Leave
     //       this here in case it goes back to being that way.
@@ -6952,6 +6946,11 @@ function refreshGlobalStats() {
   var cityElt = document.getElementById('mw_city_wrapper');
   if (!cityElt) return false;
 
+  if (cityElt.className.match(/mw_city(\d+)/))
+    city = parseInt (RegExp.$1) - 1;
+  else
+    city = NY;
+
   // Once we see a post pop-up, set the timer to close it
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
   if (running && skipPostElt) {
@@ -6969,10 +6968,7 @@ function refreshGlobalStats() {
   }
 
   // Set all the element globals. They change.
-  cashNYCElt = document.getElementById('user_cash_nyc');
-  cashCubaElt = document.getElementById('user_cash_cuba');
-  cashMoscowElt = document.getElementById('user_cash_moscow');
-  cashBangkokElt = document.getElementById('user_cash_bangkok');
+  cashElt = document.getElementById('user_cash_' + cities[city][CITY_ALIAS]);
   healthElt = document.getElementById('user_health');
   maxHealthElt = document.getElementById('user_max_health');
   energyElt = document.getElementById('user_energy');
@@ -6986,25 +6982,7 @@ function refreshGlobalStats() {
   lvlExpElt = document.getElementById('exp_for_next_level');
 
   // Update basic player information.
-  switch(cityElt.className){
-    case 'mw_city1':
-     city = NY;
-     cities[NY][CITY_CASH] = parseCash(cashNYCElt.innerHTML);
-     break;
-  case 'mw_city2':
-     city = CUBA;
-     cities[CUBA][CITY_CASH] = parseCash(cashCubaElt.innerHTML);
-     break;
-  case 'mw_city3':
-     city = MOSCOW;
-     cities[MOSCOW][CITY_CASH] = parseCash(cashMoscowElt.innerHTML);
-     break;
-  case 'mw_city4':
-     city = BANGKOK;
-     cities[BANGKOK][CITY_CASH] = parseCash(cashBangkokElt.innerHTML);
-     break;
-  }
-
+  cities[city][CITY_CASH] = parseCash(cashElt.innerHTML);
   health = parseInt(healthElt.innerHTML);
   maxHealth = parseInt(maxHealthElt.innerHTML);
   energy = parseInt(energyElt.firstChild.nodeValue);
@@ -7485,7 +7463,7 @@ function quickBank(amount) {
   var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit','xw_city':(city + 1)});
 
   // Form the post data
-  if (!amount) amount = cities[city][CITY_CASH];
+  if (isNaN(amount)) amount = cities[city][CITY_CASH];
   var postData = 'ajax=1&amount=' + amount;
   if (!depositUrl.match(/sf_xw_user_id=(\w+)/)) {
     DEBUG('Cannot find \'sf_xw_user_id\' from the URL.');
@@ -7509,15 +7487,24 @@ function quickBank(amount) {
     headers: {
         "Content-Type": "application/x-www-form-urlencoded"
     },
-    onload: function (response) {
-      if (response.responseText.match(/([0-9,,]+)<\/span/)) {
+    onload: function (resp) {
+      if (resp.status != 200) return;
+      
+      var respTxt = resp.responseText;
+      if (/was deposited/.test(respTxt) && respTxt.match(/([0-9,,]+)<\/span/)) {
         addToLog(cities[city][CITY_CASH_CSS],
                  '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
-                 cities[city][CITY_CASH] +
+                 RegExp.$1 +
                  '</span> was deposited in your account after the bank\'s fee.');
         cities[city][CITY_CASH] = 0;
         quickBankFail = false;
+      } else if (/deposit at least/.test(respTxt) && respTxt.match(/([0-9,,]+)<\/td/)) {
+        addToLog(cities[city][CITY_CASH_CSS],
+                 'You need to deposit at least <span class="money">' + cities[city][CITY_CASH_SYMBOL] +
+                 RegExp.$1);
+        quickBankFail = true;
       } else {
+        DEBUG (respTxt);
         quickBankFail = true;
       }
     }
@@ -8585,9 +8572,9 @@ function debugDumpSettings() {
         'Energy pack waiting? <strong>' + energyPack + '</strong><br>' +
         'Current location: <strong>' + cities[city][CITY_NAME] + '</strong><br>' +
         'NY cash: <strong>' + (isUndefined(cities[NY][CITY_CASH]) ? 'unknown' : '$' + makeCommaValue(cities[NY][CITY_CASH])) + '</strong><br>' +
-        'Cuba cash: <strong>' + (isUndefined([CUBA][CITY_CASH]) ? 'unknown' : 'C$' + makeCommaValue(cities[CUBA][CITY_CASH])) + '</strong><br>' +
-        'Moscow cash: <strong>' + (isUndefined([MOSCOW][CITY_CASH]) ? 'unknown' : 'R$' + makeCommaValue(cities[MOSCOW][CITY_CASH])) + '</strong><br>' +
-        'Bangkok cash: <strong>' + (isUndefined([BANGKOK][CITY_CASH]) ? 'unknown' : 'B$' + makeCommaValue(cities[BANGKOK][CITY_CASH])) + '</strong><br>' +
+        'Cuba cash: <strong>' + (isUndefined(cities[CUBA][CITY_CASH]) ? 'unknown' : 'C$' + makeCommaValue(cities[CUBA][CITY_CASH])) + '</strong><br>' +
+        'Moscow cash: <strong>' + (isUndefined(cities[MOSCOW][CITY_CASH]) ? 'unknown' : 'R$' + makeCommaValue(cities[MOSCOW][CITY_CASH])) + '</strong><br>' +
+        'Bangkok cash: <strong>' + (isUndefined(cities[BANGKOK][CITY_CASH]) ? 'unknown' : 'B$' + makeCommaValue(cities[BANGKOK][CITY_CASH])) + '</strong><br>' +
         '-------------------General Tab-------------------<br>' +
         'Enable auto-refresh: <strong>' + showIfUnchecked(GM_getValue('autoClick'))+ '</strong><br>' +
         '&nbsp;&nbsp;-Refresh rate low: <strong>'+ GM_getValue('r1') + '</strong><br>' +
@@ -10940,14 +10927,13 @@ function updateScript() {
     GM_xmlhttpRequest({
       method: 'GET',
       url: SCRIPT.metadata + '?' + Math.random(),
-      onload: function(result) {
-        if (result.status != 200) {
-          return;
-        }
-        if (!result.responseText.match(/@build\s+(\d+)/)) return;
+      onload: function(resp) {
+        if (resp.status != 200) return;
+
+        if (!resp.responseText.match(/@build\s+(\d+)/)) return;
         var theOtherBuild = parseInt(RegExp.$1);
         var runningBuild = parseInt(SCRIPT.build);
-        var theOtherVersion = result.responseText.match(/@version\s+([\d.]+)/)? RegExp.$1 : '';
+        var theOtherVersion = resp.responseText.match(/@version\s+([\d.]+)/)? RegExp.$1 : '';
         if (theOtherBuild < runningBuild) {
           if (window.confirm('You have a beta version (build ' + runningBuild + ') installed.\n\nDo you want to DOWNGRADE to the most recent official release (version ' + theOtherVersion + ')?\n')) {
             window.location.href = SCRIPT.url;
