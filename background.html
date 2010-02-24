@@ -15,7 +15,7 @@ var GM_xmlhttpRequest = function(obj) {
         request.onreadystatechange=function() { if(obj.onreadystatechange) { obj.onreadystatechange(request); }; if(request.readyState==4 && obj.onload) { obj.onload(request); } }
         request.onerror=function() { if(obj.onerror) { obj.onerror(request); } }
         try { request.open(obj.method,obj.url,true); } catch(e) { if(obj.onerror) { obj.onerror( {readyState:4,responseHeaders:'',responseText:'',responseXML:'',status:403,statusText:'Forbidden'} ); }; return; }
-        if(obj.headers) { for(name in obj.headers) { request.setRequestHeader(name,obj.headers[name]); } }
+        if(obj.headers) { for(name in obj.headers) { if (/tosource/i.test(name)) continue; request.setRequestHeader(name,obj.headers[name]); } }
         request.send(obj.data); return request;
 }
 
@@ -40,7 +40,7 @@ function grabUpdateInfo() {
         s = s.substring(a);
         var searchString = s.match(/href\x3D\x22\x2Fp\x2Fmwplayer\x2Fsource\x2Fdetail\x3Fr\x3D([0-9]+)\x22\x3E/);
         var revisionString = RegExp.$1;
-        var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
+        var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x22,\x3F,\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
         var commentString = RegExp.$1;
         var revLine = 'r' + revisionString + '... ' + commentString.replace('- ', '') + '<br>';
         if (count < changes)
