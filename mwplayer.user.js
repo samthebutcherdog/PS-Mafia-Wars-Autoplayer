@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.76
-// @build       249
+// @version     1.0.77
+// @build       250
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.76',
-  build: '249',
+  version: '1.0.77',
+  build: '250',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2254,7 +2254,7 @@ function miniPack() {
 
 function autoStat() {
   // Load profile
-  if (!onProfileNav()) {
+  if (!onProfileNav() && isUndefined(curAttack)) {
     Autoplay.fx = goMyProfile;
     Autoplay.start();
     return true;
@@ -7323,10 +7323,9 @@ function doQuickClicks() {
   var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
-  // Do quick banking on increments of 100,000 tops;
+  // Do quick banking
   if (canBank && !isNaN(cities[city][CITY_CASH])) {
-    var bankAmount = Math.min(cities[city][CITY_CASH], 100000);
-    quickBank(bankAmount);
+    quickBank(cities[city][CITY_CASH]);
   }
 }
 
@@ -7464,10 +7463,8 @@ function quickBank(amount) {
   // Get the URL
   var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit','xw_city':(city + 1)});
 
-  if (isNaN(amount)) amount = cities[city][CITY_CASH];
-
   // Form the post data
-  var postData = 'ajax=1&amount=' + amount;
+  var postData = 'ajax=1';
   if (!depositUrl.match(/sf_xw_user_id=(\w+)/)) {
     DEBUG('Cannot find \'sf_xw_user_id\' from the URL.');
     quickBankFail = true;
@@ -7481,6 +7478,15 @@ function quickBank(amount) {
     return "";
   }
   postData += '&sf_xw_sig=' + RegExp.$1;
+
+  if (isNaN(amount)) amount = cities[city][CITY_CASH];
+  postData += '&amount=' + amount;
+
+  // If cash being deposited is greater than 1 billion, do NOT quick-bank!
+  if (amount > 1000000000) {
+    addToLog('updateBad Icon', cities[city][CITY_CASH_SYMBOL] + amount + ' !?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
+    return;
+  }
 
   // Bank asynchronously
   GM_xmlhttpRequest({
@@ -7576,46 +7582,35 @@ function customizeHome() {
     linkElt.parentNode.appendChild(document.createTextNode(txt));
   }
 
-  // Fetch Player Stats
-  getPlayerStats();
-
   return true;
 }
 
 function getPlayerStats() {
-  var statElt = $x('.//*[@class="profile_stat_number"]', innerPageElt);
+  var statTable = xpathFirst('.//table[contains(.,"Attack:") and contains(.,"Defense:")]', innerPageElt);
 
-  // Fetch defense and attack values from old home format
-  if (!(statElt == null)) {
-    if (!(statElt[0] == null))
-      curAttack  = parseInt(statElt[0].innerHTML);
-    if (!(statElt[1] == null))
-      curDefense = parseInt(statElt[1].innerHTML);
+  DEBUG('Fetching stats from profile page');
+
+  // Fetch defense and attack values from profile
+  if (statTable) {
+    // Attack
+    var curAttackRow  = xpathFirst('.//tr[contains(.,"Attack:")]', statTable);
+    if (curAttackRow && curAttackRow.innerHTML.match(/>\s*(\d+)/))
+      curAttack = parseInt(RegExp.$1);
+
+    // Defense
+    var curDefenseRow  = xpathFirst('.//tr[contains(.,"Defense:")]', statTable);
+    if (curDefenseRow && curDefenseRow.innerHTML.match(/>\s*(\d+)/))
+      curDefense = parseInt(RegExp.$1);
+  } else {
+    addToLog('info icon', 'Current status attributes cannot be detected, turning off auto-stat.');
+    GM_setValue('autoStat', 0);
   }
-
-  // Some players would have the beta homepage (flash updates)
-  // Try retrieving Attack/Defense details from mw_* tags in javascript
-  if (isNaN (curDefense) || isNaN(curAttack)) {
-    var pJavaScripts = xpath("//script[@type='text/javascript']");
-    var tempStat;
-
-    for (var i=0, iLength=pJavaScripts.snapshotLength; i < iLength; ++i ) {
-      tempStat = pJavaScripts.snapshotItem(i).innerHTML.match(/"mw_attack", "([0-9]+)/);
-      if (tempStat) {
-        curAttack = tempStat[1];
-      }
-      tempStat = pJavaScripts.snapshotItem(i).innerHTML.match(/"mw_defense", "([0-9]+)/);
-      if (tempStat) {
-        curDefense = tempStat[1];
-        return true;
-      }
-    }
-  }
-
-  return true;
 }
 
 function customizeProfile() {
+  // Fetch Player Stats
+  getPlayerStats();
+
   // FIXME: Need to rewrite buildAnchor, need to make it more flexible
   this.buildAnchor = function (Options) {
     //Options.URLSegment = common portions if URL
