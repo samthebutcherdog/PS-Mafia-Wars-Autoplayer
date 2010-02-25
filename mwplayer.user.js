@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.78
-// @build       251
+// @version     1.0.79
+// @build       252
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.78',
-  build: '251',
+  version: '1.0.79',
+  build: '252',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2254,7 +2254,7 @@ function miniPack() {
 
 function autoStat() {
   // Load profile
-  if (!onProfileNav() && isUndefined(curAttack)) {
+  if (!onProfileNav() || isUndefined(curAttack)) {
     Autoplay.fx = goMyProfile;
     Autoplay.start();
     return true;
