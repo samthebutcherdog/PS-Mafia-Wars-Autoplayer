@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.77
-// @build       250
+// @version     1.0.78
+// @build       251
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.77',
-  build: '250',
+  version: '1.0.78',
+  build: '251',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5264,6 +5264,7 @@ function createAutostatTab() {
   var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
 
   id = 'autoStat';
+  title = 'Check this this to enable auto-statting';
   var autoStats = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; left: 20px;'});
   makeElement('input', autoStats, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('img', autoStats, {'src':stripURI(plussignIcon)});
@@ -7588,10 +7589,10 @@ function customizeHome() {
 function getPlayerStats() {
   var statTable = xpathFirst('.//table[contains(.,"Attack:") and contains(.,"Defense:")]', innerPageElt);
 
-  DEBUG('Fetching stats from profile page');
-
   // Fetch defense and attack values from profile
   if (statTable) {
+    DEBUG('Fetching stats from profile page');
+
     // Attack
     var curAttackRow  = xpathFirst('.//tr[contains(.,"Attack:")]', statTable);
     if (curAttackRow && curAttackRow.innerHTML.match(/>\s*(\d+)/))
@@ -7601,9 +7602,12 @@ function getPlayerStats() {
     var curDefenseRow  = xpathFirst('.//tr[contains(.,"Defense:")]', statTable);
     if (curDefenseRow && curDefenseRow.innerHTML.match(/>\s*(\d+)/))
       curDefense = parseInt(RegExp.$1);
-  } else {
-    addToLog('info icon', 'Current status attributes cannot be detected, turning off auto-stat.');
-    GM_setValue('autoStat', 0);
+
+    //
+    if (isUndefined(curAttack)) {
+      addToLog('info icon', 'Current status attributes cannot be detected, turning off auto-stat.');
+      GM_setValue('autoStat', 0);
+    }
   }
 }
 
@@ -9055,6 +9059,7 @@ function autoLotto() {
   var elt = xpathFirst('//*[@id="nav_link_godfather_unlock"]//a');
   var eltDailyChance = xpathFirst('.//a[contains(.,"Daily Chance")]');
   var eltClickGfOnce = xpathFirst('.//div[@class="tab_middle" and contains(.,"Player Updates")]');
+
   // Click the godfather nav only when in home page
   if(eltClickGfOnce){
     clickElement(elt);
