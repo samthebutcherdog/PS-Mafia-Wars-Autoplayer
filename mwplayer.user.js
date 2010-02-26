@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.80
-// @build       254
+// @version     1.0.81
+// @build       255
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.80',
-  build: '254',
+  version: '1.0.81',
+  build: '255',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7152,8 +7152,9 @@ function refreshMWAPCSS() {
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
                  (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +
-                 // Hide the Zynga bar, progress bar, email bar, sms link
-                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, .fb_email_prof_header, .mw_sms '  +
+                 // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
+                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, ' +
+                 ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
                  // Hide Limited Time Offers
@@ -9281,6 +9282,12 @@ function autoWarAttack() {
       return true;
     }
   }
+  
+  if (helpWar) {
+    // Help attempt was processed. Increment the update count.
+    GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
+    helpWar = false;
+  }  
 
   // Click the last attack button found
   var attackElts = xpath('.//div//a[@class="sexy_button"]//span[contains(.,"Attack")]', innerPageElt);
@@ -9290,12 +9297,6 @@ function autoWarAttack() {
       clickAction = 'war';
       clickContext = warAttackButton;
       clickElement(warAttackButton);
-
-      if (helpWar) {
-        // Help attempt was processed. Increment the update count.
-        GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
-        helpWar = false;
-      }
       DEBUG('Clicked the war attack button.');
     };
     Autoplay.start();
