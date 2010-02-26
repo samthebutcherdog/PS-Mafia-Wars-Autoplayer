@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.82
-// @build       256
+// @build       257
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.82',
-  build: '256',
+  build: '257',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6903,6 +6903,11 @@ function chooseSides() {
   // FIXME: Moscow Side-Handling
 }
 
+function closePopUp() {
+  var skipPostElt = document.getElementById('fb_dialog_cancel_button');
+  if (skipPostElt) clickElement (skipPostElt);
+}
+
 function refreshGlobalStats() {
   // NOTE: In this function, only elements displayed in and above the
   //       navigation bar should be examined. Everything in the inner page
@@ -6919,19 +6924,8 @@ function refreshGlobalStats() {
 
   // Once we see a post pop-up, set the timer to close it
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
-  if (running && skipPostElt) {
-    // Start the timer
-    if (GM_getValue('postWaitStarted') != true) {
-      setGMTime('postWaitTimer', '10 seconds');
-      GM_setValue('postWaitStarted', true);
-    }
-
-    // Time's up! Close that post pop-up
-    if (GM_getValue('postWaitStarted') && !timeLeftGM('postWaitTimer')) {
-      clickElement(skipPostElt);
-      GM_setValue('postWaitStarted', false);
-    }
-  }
+  if (running && skipPostElt)
+    window.setTimeout(closePopUp, 10000);
 
   // Set all the element globals. They change.
   cashElt = document.getElementById('user_cash_' + cities[city][CITY_ALIAS]);
