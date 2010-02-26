@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.81
-// @build       255
+// @version     1.0.82
+// @build       256
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.81',
-  build: '255',
+  version: '1.0.82',
+  build: '256',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1630,9 +1630,6 @@ function doAutoPlay () {
           isGMChecked(cities[i][CITY_SELLCRATES]) &&
           !timeLeftGM('sellHour' + cities[i][CITY_NAME])) {
 
-        // Deposit first if selling output on another city
-        if (city != i && canBank) if (autoBankDeposit()) return;
-
         // Sell crates
         if (autoSellCrates(i)) return;
       }
@@ -2002,7 +1999,7 @@ function autoBuyCrates(buyCity) {
 
   // Nothing to buy.
   setGMTime('buyHour' + cities[buyCity][CITY_NAME], '3 hours');
-  DEBUG('Cannot buy any business or upgrade in ' + cities[buyCity][CITY_NAME] + ' . Checking again in 3 hours.');
+  DEBUG('Cannot buy any business or upgrade in ' + cities[buyCity][CITY_NAME] + '. Checking again in 3 hours.');
 
   // Visit home after selling all output
   Autoplay.fx = goHome;
@@ -5012,7 +5009,7 @@ function createDisplayTab() {
   id = 'hideOffer';
   title = 'Hide limited time offers';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Offers '));
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Featured Items '));
 
   // Hide Friend Ladder
   id = 'hideFriendLadder';
@@ -6651,10 +6648,6 @@ function handleModificationTimer() {
   }
   if (!innerPageElt) return;
 
-  // Make the wishlist appear
-  var wishElt = xpathFirst('.//div[@class="tab_box"]', innerPageElt);
-  if (wishElt && !onHome()) wishElt.setAttribute('style','display: block;');
-
   // Make sure our private AJAX page exists and isn't visible.
   var ajaxID = SCRIPT.ajaxPage;
   elt = xpathFirst('//div[@id="' + ajaxID + '"]');
@@ -7152,13 +7145,18 @@ function refreshMWAPCSS() {
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
                  (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +
+                 // Adjust player updates table when hiding friend ladder
+                 (isGMChecked('hideFriendLadder') ?
+                 ' .update_item, .update_txt {width: 680px !important} ' +
+                 ' .player_updates {width: 730px !important} ' +
+                 ' .tab_box_content, .playerupdate_box {width: 740px !important} ' : '' ) +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
                  // Hide Limited Time Offers
-                 (isGMChecked('hideOffer') ? ' , div[class="tab_box"]:not([style])' : '' ) +
+                 (isGMChecked('hideOffer') ? ' , div[class="tab_box"][style*="left"]' : '' ) +
                  // Hide Holiday Free Gifts / Gift Safe House / Mystery Gifts
                  (isGMChecked('hideGifts') ? ' , img[alt="Free Holiday Gifts!"]' +
                                              ' , img[alt="Gift Safe House"]' +
@@ -9055,9 +9053,9 @@ function profileFix() {
 }
 
 // Fetch the action message box
-function getActionBox(boxTitle) {
+function getActionBox(boxDesc) {
   if (!onHome()) return false;
-  var boxElt = xpathFirst('.//div[@class="msg_box_div_contents" and contains(.,"'+boxTitle+'")]', innerPageElt);
+  var boxElt = xpathFirst('.//div[@class="msg_box_div_contents" and contains(.,"'+boxDesc+'")]', innerPageElt);
   if (boxElt) return boxElt;
   return false;
 }
@@ -9282,12 +9280,12 @@ function autoWarAttack() {
       return true;
     }
   }
-  
+
   if (helpWar) {
     // Help attempt was processed. Increment the update count.
     GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
     helpWar = false;
-  }  
+  }
 
   // Click the last attack button found
   var attackElts = xpath('.//div//a[@class="sexy_button"]//span[contains(.,"Attack")]', innerPageElt);
@@ -9414,7 +9412,7 @@ function autoWar() {
 
 function autoGiftWaiting() {
   // Check for gift waiting button
-  var actionElt = getActionBox('Gifts');
+  var actionElt = getActionBox('You have a gift waiting for you');
   if (actionElt) {
     // Check if there's a gift waiting to be opened
     var actionLink = getActionLink (actionElt, 'Open it!');
