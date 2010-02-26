@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.79
-// @build       252
+// @build       253
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.79',
-  build: '252',
+  build: '253',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -836,7 +836,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-  var xJob = ''; // Keep track of previously failed job
 
   var debug = isGMChecked('enableDebug');
   var filter = isGMChecked('filterLog');
@@ -1669,7 +1668,7 @@ function doAutoPlay () {
   }
 
   // Auto-lotto
-  if (running && !maxed && isGMChecked('autoLottoOpt') && !timeLeftGM('dailyChance')) {
+  if (running && !maxed && isGMChecked('autoLottoOpt')) {
     if (autoLotto()) return;
   }
 
@@ -1740,12 +1739,6 @@ function doAutoPlay () {
   if (autoMissionif) {
     autoMission();
     return;
-  }
-
-
-  // Auto-send energy pack
-  if (running && isGMChecked('sendEnergyPack')) {
-    if (autoSendEnergyPack()) return;
   }
 
   // If we reach this point, the script is considered to be idle. Anything the
@@ -1824,33 +1817,6 @@ function autoAccept() {
   };
   Autoplay.start();
   return true;
-}
-
-function autoSendEnergyPack() {
-  if (timeLeftGM('energyAllTimeLeft') > 0) return false;
-
-  // Make sure we're on the home page.
-  if (!onHome()) {
-    Autoplay.fx = goHome;
-    Autoplay.start();
-    return true;
-  }
-
-  // Reset the timer.
-  setGMTime('energyAllTimeLeft','1 hour');
-
-  // Send energy packs.
-  var sendPackButton = xpathFirst('.//div[@class="energy_all_prompt"]//a[contains(., "Send")]', innerPageElt);
-  if (sendPackButton) {
-    clickElement(sendPackButton);
-    addToLog('info Icon','You have sent energy packs to your Mafia.');
-    return true;
-  } else {
-      DEBUG('WARNING: Can\'t find inner button to send mafia energy pack.');
-      return false;
-  }
-
-  return false;
 }
 
 function autoHeal() {
@@ -1934,8 +1900,14 @@ function autoSellCrates(sellCity) {
   }
 
   // Nothing to sell.
-  setGMTime('sellHour' + cities[sellCity][CITY_NAME], '3 hours');
-  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in 3 hours.');
+  var nextTakeTime = '1 hour';
+  var nextTakeElt = document.getElementById('business_timer_span');
+  if (nextTakeElt) {
+    nextTakeTime = nextTakeElt.innerHTML;
+  }
+
+  setGMTime('sellHour' + cities[sellCity][CITY_NAME], nextTakeTime);
+  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in... ' + nextTakeTime + '. ');
 
   // Visit home after selling all output
   Autoplay.fx = goHome;
@@ -2541,9 +2513,10 @@ function canMission() {
 }
 
 function autoMission() {
-  var jobno       = missions[GM_getValue('selectMission', 1)][2];
-  var tabno       = missions[GM_getValue('selectMission', 1)][3];
-  var cityno      = missions[GM_getValue('selectMission', 1)][4];
+  var jobid       = GM_getValue('selectMission', 1);
+  var jobno       = missions[jobid][2];
+  var tabno       = missions[jobid][3];
+  var cityno      = missions[jobid][4];
 
   if (SpendEnergy.floor &&
       isGMChecked('allowEnergyToLevelUp') &&
@@ -2571,7 +2544,9 @@ function autoMission() {
   }
 
   // Buy requirements first, if any
-  if (buyJobRowItems(innerPageElt)) {
+  if (getJobRowItems(innerPageElt)) {
+    if (jobid != GM_getValue('selectMission', 1))
+      Autoplay.fx = autoMission;
     Autoplay.delay = 0;
     Autoplay.start();
     return;
@@ -7294,39 +7269,69 @@ function refreshMWAPCSS() {
 
 // Perform click actions here
 function doQuickClicks() {
-  // Common clicking method
-  var doClick = function (xpath, gmFlag) {
-    var elt = xpathFirst (xpath);
-    if (elt && isGMChecked(gmFlag)) {
-      clickElement(elt);
-      DEBUG('Clicked button for ' + gmFlag);
-      return true;
+  try {
+    // Common clicking method
+    var doClick = function (xpath, gmFlag) {
+      var elt = xpathFirst (xpath);
+      if (elt && isGMChecked(gmFlag)) {
+        clickElement(elt);
+        DEBUG('Clicked button for ' + gmFlag);
+        return true;
+      }
+      return false;
     }
-    return false;
-  }
 
-  // Click the level up bonus
-  if (doClick('.//a[contains(@onclick,"levelUpBoost")]', 'autoLevelPublish')) return;
+    // Click the level up bonus
+    if (doClick('.//a[contains(@onclick,"levelUpBoost")]', 'autoLevelPublish')) return;
 
-  // Click the achievement bonus
-  if (doClick('.//a[contains(.,"Share the wealth!")]', 'autoAchievementPublish')) return;
+    // Click the achievement bonus
+    if (doClick('.//a[contains(.,"Share the wealth!")]', 'autoAchievementPublish')) return;
 
-  // Click the reward button
-  if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
+    // Click the reward button
+    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
 
-  // Click the 'Call for Help!' button
-  if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', 'autoWarResponsePublish')) return;
+    // Click the 'Call for Help!' button
+    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', 'autoWarResponsePublish')) return;
 
-  // Click the 'Rally More Help!' button
-  if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
+    // Click the 'Rally More Help!' button
+    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
-  // Can bank flag
-  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
-                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
+    // Can bank flag
+    var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
+                  cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
-  // Do quick banking
-  if (canBank && !isNaN(cities[city][CITY_CASH])) {
-    quickBank(cities[city][CITY_CASH]);
+    // Do quick banking
+    if (canBank && !isNaN(cities[city][CITY_CASH])) {
+      quickBank(cities[city][CITY_CASH]);
+    }
+
+    // Auto-send energy pack
+    var actionElt = getActionBox('Send an energy pack to your mafia');
+    if (actionElt && isGMChecked('sendEnergyPack')) {
+      var actionLink = getActionLink (actionElt, 'Send Energy Pack');
+      DEBUG(actionLink.innerHTML);
+      if (actionLink) {
+        clickElement(actionLink);
+        DEBUG('Clicked to send energy pack to my mafia.');
+      }
+    }
+
+    // Click hide action box elements
+    var hideElts = xpath('.//a[contains(@onclick,"xw_action=dismiss_message")]', innerPageElt);
+    for (var i = 0, iLength = hideElts.snapshotLength; i < iLength; ++i) {
+      if (hideElts.snapshotItem(i)) clickElement(hideElts.snapshotItem(i));
+    }
+
+    // Click mystery gift elements
+    var mysteryElts = xpath('.//div[@class="msg_box_div_contents" and contains(.,"Mystery Bag")]', innerPageElt);
+    for (var i = 0, iLength = mysteryElts.snapshotLength; i < iLength; ++i) {
+      if (mysteryElts.snapshotItem(i) && !/display: none/.test(mysteryElts.snapshotItem(i).innerHTML)) {
+        var linkElt = getActionLink (mysteryElts.snapshotItem(i), 'Open It!');
+        if (linkElt) clickElement(linkElt);
+      }
+    }
+  } catch (ex) {
+    DEBUG('Error @doQuickClicks: ' + ex);
   }
 }
 
@@ -7561,9 +7566,6 @@ function customizeNames() {
 
 function customizeHome() {
   if (!onHome()) return false;
-
-  // Set xJob
-  xJob = '';
 
   // Is an energy pack waiting to be used?
   energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
@@ -8212,7 +8214,7 @@ function getJobRow(jobName, contextNode) {
   return rowElt;
 }
 
-function buyJobRowItems(element){
+function getJobRowItems(element){
   var currentJob = missions[GM_getValue('selectMission', 1)][0];
   var currentJobRow = getJobRow(currentJob, element);
   if (!currentJobRow) return false;
@@ -8232,6 +8234,59 @@ function buyJobRowItems(element){
     return true;
   }
 
+  // Logic to switch to the required job first
+  var items = getSavedList('itemList');
+  var jobs = getSavedList('jobsToDo', '');
+  var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
+
+  // Save the current job for later. The current job should not already
+  // exist in the list, so check first.
+  if (jobs.indexOf(currentJob) == -1) {
+    jobs.push(currentJob);
+    DEBUG('Saving ' + currentJob + ' for later. Need to fetch pre-req items first.');
+    setSavedList('jobsToDo', jobs);
+  }
+
+  // Figure out which loot items are needed before this job can be attempted
+  // again and, consequently, which jobs will have to be done to get them.
+  if (necessaryItems.length > 0) {
+    necessaryItems.forEach(
+      function(i){
+        var itemFound = false;
+        DEBUG('Missing : ' +i.alt);
+        // Try fetching the items from the same city first
+        requirementJob.forEach(
+          function(j){
+            // Get requirement from the same city
+            if (city == j[2] && j[0] == i.alt) {
+              jobs.push(j[1]);
+              items.push(i.alt);
+              itemFound = true;
+            }
+          }
+        );
+
+        // If none are found, try fetching the items with lower level req
+        if (!itemFound) {
+          requirementJob.forEach(
+            function(j){
+              // Get requirement with lower level reqs
+              if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt) {
+                jobs.push(j[1]);
+                items.push(i.alt);
+              }
+            }
+          );
+        }
+      }
+    );
+    setSavedList('itemList', items.unique());
+    setSavedList('jobsToDo', jobs);
+
+    popJob();
+    return true;
+  }
+
   // Withdraw money
   var amtElt = xpathFirst('.//td[contains(@class,"job_energy")]//span[@class="money" or @class="bad"]', currentJobRow);
   if (amtElt) {
@@ -8247,73 +8302,12 @@ function buyJobRowItems(element){
   return false;
 }
 
-function setJobReqs (element) {
-  // If we are here then we have already failed the job.
-  addToLog('process Icon', 'Getting job requirements.');
-
-  // Find the job row.
-  var currentJob = missions[GM_getValue('selectMission', 1)][0];
-  var currentJobRow = getJobRow(currentJob, element);
-  if (!currentJobRow) return;
-
-  var items = getSavedList('itemList');
-  var jobs = getSavedList('jobsToDo', '');
-  var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
-  // Save the current job for later. The current job should not already
-  // exist in the list, so check first.
-  if (jobs.indexOf(currentJob) == -1) {
-    jobs.push(currentJob);
-    DEBUG('Saving ' + currentJob + ' for later.');
-    setSavedList('jobsToDo', jobs);
-  } else {
-    DEBUG(currentJob + ' is already in the jobs to-do list.');
-  }
-
-  // Figure out which loot items are needed before this job can be attempted
-  // again and, consequently, which jobs will have to be done to get them.
-  if (necessaryItems.length > 0) {
-    necessaryItems.forEach(
-      function(i){
-        var itemFound = false;
-        DEBUG('Missing : ' +i.alt);
-        // Try fetching the items from the same city first
-        requirementJob.forEach(
-          function(j){
-            // Get requirement from the same city
-            if (city == j[2] && j[0] == i.alt && j[1] != xJob) {
-              jobs.push(j[1]);
-              items.push(i.alt);
-              itemFound = true;
-            }
-          }
-        );
-
-        // If none are found, try fetching the items with lower level req
-        if (!itemFound) {
-          requirementJob.forEach(
-            function(j){
-              // Get requirement with lower level reqs
-              if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt && j[1] != xJob) {
-                jobs.push(j[1]);
-                items.push(i.alt);
-              }
-            }
-          );
-        }
-      }
-    );
-    setSavedList('itemList', items.unique());
-    setSavedList('jobsToDo', jobs);
-  } else { addToLog('warning Icon', 'BUG DETECTED: Broken item detection.'); }
-}
-
 function popJob(){
   var jobs = getSavedList('jobsToDo', '');
   // Set the very next job to perform.
   var doJob = jobs.pop();
   setSavedList('jobsToDo', jobs);
   var i = 0;
-  DEBUG('Will do job ' + doJob + ' next.');
   missions.forEach(
     function(f) {
       if (f[0] == doJob) {
@@ -9053,37 +9047,62 @@ function profileFix() {
   }
 }
 
+// Fetch the action message box
+function getActionBox(boxTitle) {
+  if (!onHome()) return false;
+  var boxElt = xpathFirst('.//div[@class="msg_box_div_contents" and contains(.,"'+boxTitle+'")]', innerPageElt);
+  if (boxElt) return boxElt;
+  return false;
+}
+
+// Fetch the action link for the given message box
+function getActionLink(boxDiv, linkText) {
+try {
+  var linkElt = xpathFirst('.//a[contains(.,"'+linkText+'")]', boxDiv);
+  if (linkElt) return linkElt;
+  return false;
+  } catch (ex) { DEBUG('amf ka doodle:' + ex)}
+}
+
 function autoLotto() {
   Autoplay.delay = getAutoPlayDelay();
 
-  var elt = xpathFirst('//*[@id="nav_link_godfather_unlock"]//a');
-  var eltDailyChance = xpathFirst('.//a[contains(.,"Daily Chance")]');
-  var eltClickGfOnce = xpathFirst('.//div[@class="tab_middle" and contains(.,"Player Updates")]');
+  var actionElt = getActionBox('Daily Chance');
+  if (actionElt) {
+    // Check if Lotto resuls are out
+    var actionLink = getActionLink (actionElt, 'Check Results');
+    if (actionLink) {
+      Autoplay.fx = function() {
+        clickElement(actionLink);
+        DEBUG('Clicked to see lotto results.');
+      };
+      Autoplay.start();
+      return true;
+    }
 
-  // Click the godfather nav only when in home page
-  if(eltClickGfOnce){
-    clickElement(elt);
-    DEBUG('Clicked to go to godfather.');
+    // Check if free ticket is available
+    actionLink = getActionLink (actionElt, 'Play Now');
+    if (actionLink) {
+      Autoplay.fx = function() {
+        clickElement(actionLink);
+        DEBUG('Clicked to play the daily chance.');
+      };
+      Autoplay.start();
+      return true;
+    }
   }
+
+  if (!onLottoNav()) return false;
 
   var i, j;
   // Go to the daily chance menu
+  var eltDailyChance = xpathFirst('.//a[contains(.,"Daily Chance")]');
   if (!xpathFirst('.//div[@class="minitab_content" and contains(.,"Play")]')) {
     Autoplay.fx = function(){
       if(eltDailyChance){
         clickElement(eltDailyChance);
         DEBUG('Clicked to go to daily chance.');
       }
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  var weeklylottoCheck = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "See if you won")]', innerPageElt);
-  if (weeklylottoCheck) {
-    Autoplay.fx = function() {
-      clickElement(weeklylottoCheck);
-      DEBUG('Clicked to see lotto results.');
     };
     Autoplay.start();
     return true;
@@ -9205,7 +9224,6 @@ function autoLotto() {
     Autoplay.start();
     return true;
   }
-  setGMTime('dailyChance', '24 hours');
 
   return false;
 }
@@ -9266,16 +9284,16 @@ function autoWarAttack() {
       clickAction = 'war';
       clickContext = warAttackButton;
       clickElement(warAttackButton);
+
+      if (helpWar) {
+        // Help attempt was processed. Increment the update count.
+        GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
+        helpWar = false;
+      }
       DEBUG('Clicked the war attack button.');
     };
     Autoplay.start();
     return true;
-  }
-
-  if (helpWar) {
-    // Help attempt was processed. Increment the update count.
-    GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
-    helpWar = false;
   }
 
   return false;
@@ -9285,17 +9303,31 @@ function autoWar() {
   var action = 'war';
   Autoplay.delay = getAutoPlayDelay();
 
-  // Does the main page have a reward button?
-  var warRewardButton = xpathFirst('.//a//span[contains(text(), "Reward your friends now")]', innerPageElt);
-  if (warRewardButton && isGMChecked('autoWarRewardPublish')) {
-    Autoplay.fx = function() {
-      clickAction = action;
-      clickContext = warRewardButton;
-      clickElement(warRewardButton);
-      DEBUG('Clicked to reward my mafia.');
-    };
-    Autoplay.start();
-    return true;
+  var actionElt = getActionBox('War');
+  if (actionElt) {
+    // Check if "War in Progress" is there
+    var actionLink = getActionLink (actionElt, 'Check War');
+    if (actionLink) {
+      Autoplay.fx = function() {
+        setGMTime('warTimer', '00:00');
+        clickElement(actionLink);
+        DEBUG('Clicked to check war in progress.');
+      };
+      Autoplay.start();
+      return true;
+    }
+
+    // Check if "Reward friends" is there
+    actionLink = getActionLink (actionElt, 'Reward Friends');
+    if (actionLink) {
+      Autoplay.fx = function() {
+        setGMTime('warTimer', '00:00');
+        clickElement(actionLink);
+        DEBUG('Clicked to reward friends.');
+      };
+      Autoplay.start();
+      return true;
+    }
   }
 
   // Check the timer, do we even need to go further?
@@ -9374,14 +9406,19 @@ function autoWar() {
 }
 
 function autoGiftWaiting() {
-  var autoCheckButton = xpathFirst('.//table//tbody//tr//td//a[contains(text(), "Click here to see it")]', innerPageElt);
-  if (autoCheckButton) {
-    Autoplay.fx = function() {
-      clickElement(autoCheckButton);
-      DEBUG('Clicked to see the waiting gifts.');
-    };
-    Autoplay.start();
-    return true;
+  // Check for gift waiting button
+  var actionElt = getActionBox('Gifts');
+  if (actionElt) {
+    // Check if there's a gift waiting to be opened
+    var actionLink = getActionLink (actionElt, 'Open it!');
+    if (actionLink) {
+      Autoplay.fx = function() {
+        clickElement(actionLink);
+        DEBUG('Clicked to open gifts.');
+      };
+      Autoplay.start();
+      return true;
+    }
   }
 
   return false;
@@ -9582,16 +9619,6 @@ function loadHome() {
   document.location = 'http://apps.facebook.com/inthemafia/index.php';
 }
 
-function goLinkElement(elt) {
-  if (!elt) {
-    addToLog('warning Icon', 'BUG DETECTED: Null element passed to goLinkElement().');
-    return;
-  }
-
-  clickElement(elt);
-  DEBUG('Clicked element.');
-}
-
 function goHome() {
   // Find the visible home link.
   var elt = xpathFirst('//div[@id="nav_link_home_unlock"]//a');
@@ -9783,10 +9810,10 @@ function goJob(jobno, context) {
     clickBurst (elt, getJobClicks());
     DEBUG('Clicked job ' + jobno + '.');
   } else {
-    xJob = missions[GM_getValue('selectMission')][0];
-    setJobReqs (innerPageElt);
-    popJob();
-    goJobsNav();
+    // Stop automission if job cannot be found
+    var jobName = missions[GM_getValue('selectMission')][0];
+    addToLog('warning Icon', 'Unable to perform job ' + jobName + '. Turning off auto mission');
+    GM_setValue('autoMission', 0);
   }
 }
 
@@ -10734,7 +10761,6 @@ function logResponse(rootElt, action, context) {
       // Go back to war page after betrayal
       else if (innerNoTags.indexOf('You successfully betrayed') != -1) {
         addToLog(logIcon, inner.split('<br><br>')[0] + '</div>');
-        setGMTime('warTimer', '00:00');
         break;
       }
       // Cycle war list after successful war declaration
