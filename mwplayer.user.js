@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.79
-// @build       253
+// @version     1.0.80
+// @build       254
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.79',
-  build: '253',
+  version: '1.0.80',
+  build: '254',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1311,7 +1311,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Lucky Shamrock Medallion', 'Clip the Irish Mob\'s Local Enforcer',NY],
     ['Semi-Automatic Shotgun', 'Fight a Haitian Gang',NY],
     ['Firebomb', 'Steal a Tanker Truck',NY],
-    ['Armored Truck', 'Smuggle Across the Border',NY],
+    ['Armored Truck', 'Smuggle Thai Gems',NY],
     ['Grenade Launcher', 'Repel the Yakuza',NY],
     ['.50 Caliber Rifle', 'Disrupt Rival Smuggling Ring',NY],
     ['Armored Car', 'Invade Tong-controlled Neighborhood',NY],
@@ -7485,12 +7485,18 @@ function quickBank(amount) {
   }
   postData += '&sf_xw_sig=' + RegExp.$1;
 
-  if (isNaN(amount)) amount = cities[city][CITY_CASH];
+  var byUser = false;
+  if (isNaN(amount)) {
+    byUser = true;
+    amount = cities[city][CITY_CASH];
+  }
   postData += '&amount=' + amount;
 
   // If cash being deposited is greater than 1 billion, do NOT quick-bank!
   if (amount > 1000000000) {
-    addToLog('updateBad Icon', cities[city][CITY_CASH_SYMBOL] + amount + ' !?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
+    if (byUser)
+      addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[city][CITY_CASH_SYMBOL] + amount +
+               '</strong>!?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
     return;
   }
 
@@ -9772,14 +9778,11 @@ function goJobTab(tabno) {
     return;
   }
 
-  var tabParamName = (city == MOSCOW || city == BANGKOK) ? 'story_tab' : 'tab';
-  elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&' + tabParamName + '=' + tabno + '")]', innerPageElt);
-
-  // Handle old tab property
-  if (!elt) {
-    tabParamName = 'episode_tab';
-    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&' + tabParamName + '=' + tabno + '")]', innerPageElt);
-  }
+  // Handle old and new tab param names
+  elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[' +
+                   'contains(@onclick, "&story_tab=' + tabno + '") or ' +
+                   'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
+                   'contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
 
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
