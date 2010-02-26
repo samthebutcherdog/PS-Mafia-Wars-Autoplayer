@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.82
-// @build       257
+// @build       258
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.82',
-  build: '257',
+  build: '258',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7143,7 +7143,7 @@ function refreshMWAPCSS() {
                  (isGMChecked('hideFriendLadder') ?
                  ' .update_item, .update_txt {width: 680px !important} ' +
                  ' .player_updates {width: 730px !important} ' +
-                 ' .tab_box_content, .playerupdate_box {width: 740px !important} ' : '' ) +
+                 ' div[class$="tab_box_content"], .playerupdate_box {width: 740px !important} ' : '' ) +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
