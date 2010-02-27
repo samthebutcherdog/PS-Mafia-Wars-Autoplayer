@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.82
-// @build       258
+// @version     1.0.83
+// @build       259
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.82',
-  build: '258',
+  version: '1.0.83',
+  build: '259',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1676,7 +1676,8 @@ function doAutoPlay () {
 
   // Auto-giftwaiting
   if (running && !maxed && GM_getValue('autoGiftWaiting')) {
-    if (autoGiftWaiting()) return;
+    // FIXME: Some people are having problems with this
+    //if (autoGiftWaiting()) return;
   }
 
   // Mini-pack check
@@ -8234,21 +8235,22 @@ function getJobRowItems(element){
   }
 
   // Logic to switch to the required job first
-  var items = getSavedList('itemList');
-  var jobs = getSavedList('jobsToDo', '');
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
-
-  // Save the current job for later. The current job should not already
-  // exist in the list, so check first.
-  if (jobs.indexOf(currentJob) == -1) {
-    jobs.push(currentJob);
-    DEBUG('Saving ' + currentJob + ' for later. Need to fetch pre-req items first.');
-    setSavedList('jobsToDo', jobs);
-  }
 
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
   if (necessaryItems.length > 0) {
+
+    // Save the current job for later. The current job should not already
+    // exist in the list, so check first.
+    var items = getSavedList('itemList');
+    var jobs = getSavedList('jobsToDo', '');
+    if (jobs.indexOf(currentJob) == -1) {
+      jobs.push(currentJob);
+      DEBUG('Saving ' + currentJob + ' for later. Need to fetch pre-req items first.');
+      setSavedList('jobsToDo', jobs);
+    }
+
     necessaryItems.forEach(
       function(i){
         var itemFound = false;
