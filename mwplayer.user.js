@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.83
-// @build       259
+// @build       260
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.83',
-  build: '259',
+  build: '260',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7142,9 +7142,11 @@ function refreshMWAPCSS() {
                  (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +
                  // Adjust player updates table when hiding friend ladder
                  (isGMChecked('hideFriendLadder') ?
-                 ' .update_item, .update_txt {width: 680px !important} ' +
-                 ' .player_updates {width: 730px !important} ' +
-                 ' div[class$="tab_box_content"], .playerupdate_box {width: 740px !important} ' : '' ) +
+                 ' .update_txt {width: 680px !important} ' +
+                 ' .update_item {width: 710px !important} ' +
+                 ' .player_updates {width: 728px !important} ' +
+                 ' div[class$="tab_box_content"] {width: 738px !important} ' +
+                 ' .playerupdate_box {width: 740px !important} ' : '' ) +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
@@ -7491,6 +7493,7 @@ function quickBank(amount) {
     if (byUser)
       addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[city][CITY_CASH_SYMBOL] + amount +
                '</strong>!?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
+    quickBankFail = true;
     return;
   }
 
@@ -10652,10 +10655,10 @@ function logResponse(rootElt, action, context) {
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
       } else if (innerNoTags.match(/You need.*more energy.*requires.*?(\d+).*you only have.*?(\d+)/i)) {
-        addToLog('warning Icon', missions[GM_getValue('selectMission', 1)][0] +
-                 ' requires ' + RegExp.$1 + ' energy. You only have ' +
-                 RegExp.$2 + '.');
-        addToLog('warning Icon', 'Is your wheelman bonus set correctly?');
+        //addToLog('warning Icon', missions[GM_getValue('selectMission', 1)][0] +
+        //         ' requires ' + RegExp.$1 + ' energy. You only have ' +
+        //         RegExp.$2 + '.');
+        //addToLog('warning Icon', 'Is your wheelman bonus set correctly?');
       } else {
         DEBUG('Unrecognized job response.');
       }
