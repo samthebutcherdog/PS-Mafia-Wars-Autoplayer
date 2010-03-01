@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.83
-// @build       260
+// @version     1.0.84
+// @build       261
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.83',
-  build: '260',
+  version: '1.0.84',
+  build: '261',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1258,14 +1258,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Set Up A Drug Shipment To China',49,96,6,BANGKOK,79],                    // CHAPTER 1
     ['Dodge Customs At The Port of Hong Kong',64,97,6,BANGKOK,102],            // CHAPTER 1
     ['Win A Shoot-Out With The Kowloon Police',149,98,6,BANGKOK,208],          // CHAPTER 1  HELP JOB
-    ['Intimidate Wealthy Expatriates',64,100,6,BANGKOK,102],                    // CHOICE POINT CHAPTER 2 (Yakuza = 90, Triad = 93)
-    ['Make An Example Of A Wealthy Industrialist',64,101,6,BANGKOK,102],        // CHAPTER 2  Yakuza
-    ['Fence The Goods Stolen From The Mansion',60,102,6,BANGKOK,97],            // CHAPTER 2  Yakuza
-    ['Extort The Head Of The Hong Kong Polo Club',67,104,6,BANGKOK,106],        // CHAPTER 2  Triad
-    ['Fix The Hong Kong Polo Invitational',64,105,6,BANGKOK,102],               // CHAPTER 2  Triad
-    ['Talk With Wei\'s Disloyal Enforcers',71,106,6,BANGKOK,115],                // CHOICE POINT CHAPTER 3 (Yakuza = 96, Triad = 99)
-    ['Sneak An Industrial Spy Into Hong Kong',64,107,6,BANGKOK,102],            // CHAPTER 3  Yakuza
-    ['Break In To Cheng-Wei Ballistics',67,108,6,BANGKOK,106],                  // CHAPTER 3  Yakuza
+    ['Intimidate Wealthy Expatriates',64,100,6,BANGKOK,102],                   // CHOICE POINT CHAPTER 2 (Yakuza = 100, Triad = 103)
+    ['Make An Example Of A Wealthy Industrialist',64,101,6,BANGKOK,102],       // CHAPTER 2  Yakuza
+    ['Fence The Goods Stolen From The Mansion',60,102,6,BANGKOK,97],           // CHAPTER 2  Yakuza
+    ['Extort The Head Of The Hong Kong Polo Club',67,104,6,BANGKOK,106],       // CHAPTER 2  Triad
+    ['Fix The Hong Kong Polo Invitational',64,105,6,BANGKOK,102],              // CHAPTER 2  Triad
+    ['Talk With Wei\'s Disloyal Enforcers',71,106,6,BANGKOK,115],              // CHOICE POINT CHAPTER 3 (Yakuza = 106, Triad = 109)
+    ['Sneak An Industrial Spy Into Hong Kong',64,107,6,BANGKOK,102],           // CHAPTER 3  Yakuza
+    ['Break In To Cheng-Wei Ballistics',67,108,6,BANGKOK,106],                 // CHAPTER 3  Yakuza
     ['Kidnap One Of Wei\'s Trusted Advisors',56,110,6,BANGKOK,88],             // CHAPTER 3  Triad
     ['Bury The Body Under A Construction Site',60,111,6,BANGKOK,97],           // Chapter 3  Triad
     ['Attack Wei\'s Gambling Halls',96,112,6,BANGKOK,155],                     // FINALE
@@ -2544,7 +2544,7 @@ function autoMission() {
   // Buy requirements first, if any
   if (getJobRowItems(innerPageElt)) {
     if (jobid != GM_getValue('selectMission', 1))
-      Autoplay.fx = autoMission;
+      Autoplay.fx = goJobsNav;
     Autoplay.delay = 0;
     Autoplay.start();
     return;
@@ -6890,8 +6890,8 @@ function chooseSides() {
                     [68, 71, 'Betray Commander Chang and the UWSA'],         // EPISODE 4 CHAPTER 3
                     [81, 84, 'Meet With Boss Matsumura\'s Advisor'],         // EPISODE 5A CHAPTER 2
                     [87, 90, 'Talk With A Police Insider About Matsumura'],  // EPISODE 5A CHAPTER 3
-                    [90, 93, 'Intimidate Wealthy Expatriates'],              // EPISODE 5B CHAPTER 2
-                    [96, 99, 'Talk With Wei\'s Disloyal Enforcers']          // EPISODE 5B CHAPTER 3
+                    [100, 103, 'Intimidate Wealthy Expatriates'],            // EPISODE 5B CHAPTER 2
+                    [106, 109, 'Talk With Wei\'s Disloyal Enforcers']        // EPISODE 5B CHAPTER 3
                    );
 
   choiceJobs.forEach( function(job) {
@@ -9811,10 +9811,19 @@ function goJob(jobno, context) {
     clickBurst (elt, getJobClicks());
     DEBUG('Clicked job ' + jobno + '.');
   } else {
-    // Stop automission if job cannot be found
     var jobName = missions[GM_getValue('selectMission')][0];
-    addToLog('warning Icon', 'Unable to perform job ' + jobName + '. Turning off auto mission');
-    GM_setValue('autoMission', 0);
+    addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
+
+    var jobs = getSavedList('jobsToDo', '');
+    if (jobs.length == 0) {
+      // If no more jobs on the queue, stop automission
+      addToLog('warning Icon', 'Turning off auto mission');
+      GM_setValue('autoMission', 0);
+    } else {
+      // Else Get the next job to perform
+      popJob();
+      goJobsNav;
+    }
   }
 }
 
