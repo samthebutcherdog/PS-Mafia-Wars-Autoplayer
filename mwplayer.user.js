@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.85
-// @build       265
+// @version     1.0.86
+// @build       267
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.85',
-  build: '265',
+  version: '1.0.86',
+  build: '267',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3251,19 +3251,24 @@ function findFightOpponent(element) {
 
   // Calculate faction points
   var factionElts = xpath('.//div[@class="faction_container"]', innerPageElt);
-  DEBUG('Factions found: ' + factionElts.snapshotLength);
+  var factionCnt = factionElts.snapshotLength;
+  DEBUG('Factions found: ' + factionCnt);
   if (factionElts.snapshotLength > 0) {
     allyFaction = '';
     var allyPts = cities[city][CITY_ALLIANCE];
+    var allyCnt = 0;
     for (var i = 0, iLength = factionElts.snapshotLength; i < iLength; ++i) {
       var factionElt = factionElts.snapshotItem(i);
       var factionName = xpathFirst('.//div[@class="faction_name"]',factionElt).innerHTML.trim();
       var factionPts = parseInt(xpathFirst('.//div[@class="zy_progress_bar_faction_text"]',factionElt).innerHTML.split('/')[0].trim());
-      if (factionPts < allyPts) {
+      if (!isNaN(factionPts) && factionPts < allyPts) {
         allyFaction = factionName;
-        DEBUG('Do not attack: ' + allyFaction);
+        allyCnt++;
       }
     }
+
+    // If all faction points are lower than the threshold, do not filter by faction
+    if (allyCnt == factionCnt) allyFaction == '';
   }
 
   // Get the user's criteria for opponents.
@@ -8305,15 +8310,14 @@ function getJobRowItems(element){
 
         // If none are found, try fetching the items with lower level req
         if (!itemFound) {
-          requirementJob.forEach(
-            function(j){
-              // Get requirement with lower level reqs
-              if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt) {
-                jobs.push(j[1]);
-                items.push(i.alt);
-              }
+          for (var x = requirementJob.length - 1; x >= 0; --x) {
+            j = requirementJob[x];
+            // Get requirement with lower level reqs
+            if (level >= cities[j[2]][CITY_LEVEL] && city != j[2] && j[0] == i.alt) {
+              jobs.push(j[1]);
+              items.push(i.alt);
             }
-          );
+          }
         }
       }
     );
