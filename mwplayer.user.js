@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.84
-// @build       261
+// @build       262
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.84',
-  build: '261',
+  build: '262',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -941,20 +941,21 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_SELLCRATES  = 9;
   const CITY_BUYCRATES   = 10;
   const CITY_CASH_SYMBOL = 11;
+  const CITY_ALLIANCE    = 12;
 
   // Add city variables in this format
-  // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol
+  // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', 'nyc', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$'],
-    ['Cuba', 'cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$'],
+    ['New York', 'nyc', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$', 0],
+    ['Cuba', 'cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
     // Add support for choosing sides in Moscow later on
-    ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$'],
-    ['Bangkok', 'bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$']
+    ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
+    ['Bangkok', 'bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 1450]
   );
 
-  var fightFaction = '';
+  var allyFaction = '';
   var quickBankFail = false;
 
   // Spend objects
@@ -2763,6 +2764,7 @@ function autoFight(how) {
         isGMChecked('fightStealth')) {
       var l = fightListInactive.get();
       if (l.length) {
+        addToLog('info Icon', '"Use Fight Stealth" is enabled, attacking previously "deemed" iced targets.');
         opponent = l[Math.floor(Math.random() * l.length)];
         opponent.profileAttack="";//stop TOS screen
         DEBUG('Attacking from inactive list');
@@ -2811,9 +2813,14 @@ function autoFight(how) {
   if (isGMChecked('iceCheck')) {
     var hitUrl = getHitUrl (opponent.id);
     if (/You can't add/.test(loadUrlWait (hitUrl))) {
-      DEBUG('Target is iced/dead, skipping opponent, id=' + opponent.id);
+      addToLog('info Icon','Target is iced/dead, skipping opponent, id=' + opponent.id);
       setFightOpponentInactive(opponent);
-      cycleSavedList('fightList');
+
+      // Cycle fight list
+      if (how == STAMINA_HOW_FIGHT_LIST) {
+        cycleSavedList('fightList');
+      }
+
       return false;
     } else {
       setFightOpponentActive(opponent);
@@ -3246,18 +3253,17 @@ function findFightOpponent(element) {
   var factionElts = xpath('.//div[@class="faction_container"]', innerPageElt);
   DEBUG('Factions found: ' + factionElts.snapshotLength);
   if (factionElts.snapshotLength > 0) {
-    fightFaction = '';
-    var maxPts = 0;
+    allyFaction = '';
+    var allyPts = cities[city][CITY_ALLIANCE];
     for (var i = 0, iLength = factionElts.snapshotLength; i < iLength; ++i) {
       var factionElt = factionElts.snapshotItem(i);
       var factionName = xpathFirst('.//div[@class="faction_name"]',factionElt).innerHTML.trim();
-      var factionPts = parseFloat(eval(xpathFirst('.//div[@class="zy_progress_bar_faction_text"]',factionElt).innerHTML.trim()));
-      if (factionPts > maxPts) {
-        fightFaction = factionName;
-        maxPts = factionPts;
+      var factionPts = parseInt(xpathFirst('.//div[@class="zy_progress_bar_faction_text"]',factionElt).innerHTML.split('/')[0].trim());
+      if (factionPts < allyPts) {
+        allyFaction = factionName;
+        DEBUG('Do not attack: ' + allyFaction);
       }
     }
-    DEBUG('Kick: ' + factionName);
   }
 
   // Get the user's criteria for opponents.
@@ -3300,11 +3306,13 @@ function findFightOpponent(element) {
   var namesCount = 0;
   var factionCount = 0;
   var blacklistCount = 0;
-  for(var i = 0, iLength=opponents.length; i < iLength; ++i) {
+  var countOpp = opponents.length;
+  for(var i = 0; i < countOpp; ++i) {
     var opponent = opponents[i];
 
     // Balance faction points
-    if (opponent.faction.length > 0 && fightFaction.length > 0 && opponent.faction != fightFaction) {
+    if (opponent.faction.length > 0 && allyFaction.length > 0 &&
+        opponent.faction == allyFaction) {
       factionCount++;
       continue;
     }
@@ -3358,12 +3366,16 @@ function findFightOpponent(element) {
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   }
-  DEBUG(levelMaxCount + ' disqualified on max level, ' +
-        mafiaMaxCount + ' on max mafia, ' +
-        mafiaMinCount + ' on min mafia, ' +
-        namesCount + ' on name, ' +
-        factionCount + ' on faction, ' +
-        blacklistCount + ' on blacklist.');
+
+  if (countOpp <= levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + blacklistCount) {
+    addToLog('updateBad Icon', 'Out of the ' + countOpp + ' opponets listed on the fight page: <br>' +
+             levelMaxCount + ' disqualified on max level, <br>' +
+             mafiaMaxCount + ' on max mafia, <br>' +
+             mafiaMinCount + ' on min mafia, <br>' +
+             namesCount + ' on name pattern, <br>' +
+             factionCount + ' on faction, <br>' +
+             blacklistCount + ' by blacklisting (stronger opponents).<br><br>');
+  }
 
   newOpponents = fightListNew.get();
   if (!newOpponents.length) return -1;
@@ -3574,6 +3586,11 @@ function handleVersionChange() {
 
   // Check for invalid settings and upgrade them.
 
+  // Uncheck use fight stealth
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 262) {
+    GM_setValue('fightStealth', '');
+  }
+
   // Delete sellHour values
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 83) {
     for  (var i = 0, iLength = cities.length; i < iLength; ++i)
@@ -3745,8 +3762,6 @@ function saveDefaultSettings() {
   GM_setValue('fightLevelMax', 100);
   GM_setValue('fightMafiaMax', 501);
   GM_setValue('fightMafiaMin', 1);
-  GM_setValue('fightStealth', 'checked');
-  GM_setValue('fightAvoidBodyguards', 'checked');
   GM_setValue('fightAvoidNames', 'checked');
   GM_setValue('fightRemoveStronger', 'checked');
   GM_setValue('hitmanLocation', NY);
@@ -4997,7 +5012,7 @@ function createDisplayTab() {
   item = makeElement('div', list, {'class':'single'});
   id = 'hideGifts';
   title = 'Hide gifting items';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Gifting '));
 
   // Hide Action Box
@@ -5615,14 +5630,14 @@ function createEnergyTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check this box if your character type is Maniac (as opposed to Fearless or Mogul).';
   id = 'isManiac';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'isManiac', 'checked');
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, id);
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Character type is Maniac'));
 
   // Periodically send energy packs?
   title = 'Periodically send energy packs to your fellow mafia members.';
   id = 'sendEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'sendEnergyPack');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
 
@@ -5907,7 +5922,7 @@ function createStaminaTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Prefer opponents who won\'t be notified of your attacks.';
   id = 'fightStealth';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth', 'checked');
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth');
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Use fight stealth'));
 
@@ -7293,7 +7308,7 @@ function doQuickClicks() {
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
     // Can bank flag
-    var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
+    var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
                   cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
     // Do quick banking
@@ -10578,10 +10593,7 @@ function logResponse(rootElt, action, context) {
 
     // If fighting from a user-specified list, cycle it.
     // Otherwise, the problem might repeat indefinitely.
-    if (action == 'fight' &&
-        GM_getValue('staminaSpendHow') == getStaminaMode()) {
-      addToLog('warning Icon', 'Opponent ' + context.id +
-               ' in your fight list may be invalid.');
+    if (action == 'fight' && GM_getValue('staminaSpendHow') == getStaminaMode()) {
       cycleSavedList('fightList');
     }
 
@@ -10663,11 +10675,6 @@ function logResponse(rootElt, action, context) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][0] + '.');
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
-      } else if (innerNoTags.match(/You need.*more energy.*requires.*?(\d+).*you only have.*?(\d+)/i)) {
-        //addToLog('warning Icon', missions[GM_getValue('selectMission', 1)][0] +
-        //         ' requires ' + RegExp.$1 + ' energy. You only have ' +
-        //         RegExp.$2 + '.');
-        //addToLog('warning Icon', 'Is your wheelman bonus set correctly?');
       } else {
         DEBUG('Unrecognized job response.');
       }
