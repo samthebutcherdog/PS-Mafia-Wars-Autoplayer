@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.85
-// @build       263
+// @build       264
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.85',
-  build: '263',
+  build: '264',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7596,11 +7596,14 @@ function customizeHome() {
     var ptsFromEnergyPack = maxEnergy * 1.25 * energyGainRate;
     var ptsNeeded = ptsToNextLevel - energy * energyGainRate -
                     stamina * getStaminaGainRate();
-    var txt = ' XP from Energy Pack = ' + parseInt(ptsFromEnergyPack) +
-              ', Projected XP needed = ' + parseInt(ptsNeeded);
-    var linkElt = energyPackElt.parentNode;
-    linkElt.parentNode.appendChild(document.createElement('br'));
-    linkElt.parentNode.appendChild(document.createTextNode(txt));
+    var txt = 'XP from Energy Pack = ' + parseInt(ptsFromEnergyPack) +
+              '<br>Projected XP needed = ' + parseInt(ptsNeeded);
+    var packParentElt = document.getElementById('clock_energy_pack');
+    if (packParentElt) {
+      var descElt = makeElement('div', null, {'style':'float:left; padding: 2px 10px 0px 0px; font-size: 10px;'});
+      descElt.innerHTML = txt;
+      packParentElt.insertBefore(descElt, packParentElt.firstChild);
+    }
   }
 
   return true;
