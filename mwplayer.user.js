@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.85
-// @build       264
+// @build       265
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.85',
-  build: '264',
+  build: '265',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6213,27 +6213,42 @@ function createCashTab () {
   autoSellCratesBangkok.appendChild(document.createTextNode('Sell Bangkok business output'));
   makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
-  var collectNYTake = makeElement('div', cashTab, {'style':'top: 120px; right: 10px;'});
+  var toggleRadio = function () {
+    var isChecked = this.hasAttribute('checked');
+
+    // Clean-up boxes
+    document.getElementById('collectNYTake').removeAttribute('checked');
+    document.getElementById('racketCollect').removeAttribute('checked');
+    document.getElementById('moneyRacketCheck').removeAttribute('checked');
+
+    this.checked = !isChecked;
+    // Set attribute for checked radio
+    if (this.checked) this.setAttribute('checked','checked');
+  }
+
+  var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
   collectNYTake.appendChild(document.createTextNode('Automatically collect NY take every hour'));
-  makeElement('input', collectNYTake, {'type':'radio', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
+  elt = makeElement('input', collectNYTake, {'type':'radio', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
+  elt.addEventListener('click', toggleRadio, false);
 
   // Racketing
-
-  var racketCollect = makeElement('div', cashTab, {'style':'top: 140px; right: 10px;'});
+  var racketCollect = makeElement('div', cashTab, {'style':'top: 135px; right: 10px;'});
   racketCollect.appendChild(document.createTextNode('Automatically collect racket'));
-  makeElement('input', racketCollect, {'type':'radio', 'name':'props', 'id':'racketCollect', 'value':'checked'}, 'racketCollect');
+  elt = makeElement('input', racketCollect, {'type':'radio', 'name':'props', 'id':'racketCollect', 'value':'checked'}, 'racketCollect');
+  elt.addEventListener('click', toggleRadio, false);
 
-  var racketReshakedown = makeElement('div', cashTab, {'style':'top: 160px; right: 10px;'});
+  var moneyRacketCheck = makeElement('div', cashTab, {'style':'top: 155px; right: 10px;'});
+  moneyRacketCheck.appendChild(document.createTextNode('Money Rackets - Collect XP'));
+  elt = makeElement('input', moneyRacketCheck, {'type':'radio', 'name':'props', 'id':'moneyRacketCheck', 'value':'checked'}, 'moneyRacketCheck')
+  elt.addEventListener('click', toggleRadio, false);
+
+  var racketReshakedown = makeElement('div', cashTab, {'style':'top: 175px; right: 10px;'});
   racketReshakedown.appendChild(document.createTextNode('Shake down again'));
   makeElement('input', racketReshakedown, {'type':'checkbox', 'id':'racketReshakedown', 'value':'checked'}, 'racketReshakedown');
 
-  var racketPermanentShakedown = makeElement('div', cashTab, {'style':'top: 180px; right: 10px;'});
+  var racketPermanentShakedown = makeElement('div', cashTab, {'style':'top: 195px; right: 10px;'});
   racketPermanentShakedown.appendChild(document.createTextNode('Shake down again permanently'));
   makeElement('input', racketPermanentShakedown, {'type':'checkbox', 'id':'racketPermanentShakedown', 'value':'checked'}, 'racketPermanentShakedown');
-
-  var moneyRacketCheck = makeElement('div', cashTab, {'style':'top: 200px; right: 10px;'});
-  moneyRacketCheck.appendChild(document.createTextNode('Money Rackets - Collect XP'));
-  makeElement('input', moneyRacketCheck, {'type':'radio', 'name':'props', 'id':'moneyRacketCheck', 'value':'checked'}, 'moneyRacketCheck');
 
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
