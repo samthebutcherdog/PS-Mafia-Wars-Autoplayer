@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.84
-// @build       262
+// @version     1.0.85
+// @build       263
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.84',
-  build: '262',
+  version: '1.0.85',
+  build: '263',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9816,17 +9816,23 @@ function getJobClicks() {
   return parseInt(numClicks);
 }
 
-function goJob(jobno, context) {
+function goJob(jobno) {
   var elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
+  var jobName = missions[GM_getValue('selectMission')][0];
+
+  // If job cannot be retrieved by job number, try retrieving by jobName
+  if (!elt) {
+    var jobName = missions[GM_getValue('selectMission')][0];
+    var jobRow = getJobRow(jobName, innerPageElt);
+    if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
+  }
 
   if (elt) {
     clickAction = 'job';
-    clickContext = context;
     suspendBank = false;
     clickBurst (elt, getJobClicks());
     DEBUG('Clicked job ' + jobno + '.');
   } else {
-    var jobName = missions[GM_getValue('selectMission')][0];
     addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
 
     var jobs = getSavedList('jobsToDo', '');
