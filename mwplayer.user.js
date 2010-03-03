@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.86
-// @build       268
+// @build       269
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.86',
-  build: '268',
+  build: '269',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8245,9 +8245,15 @@ function getJobRow(jobName, contextNode) {
       }
     }
     rowElt = xpathFirst('.//table[@class="job_list"]//tr//td['+conTxt+']', contextNode);
+
     if (rowElt)
       while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
-    else
+
+    // Fetching logic for new job rows
+    if (!rowElt)
+      rowElt = xpathFirst('.//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix") and '+conTxt+']', contextNode);
+
+    if (!rowElt)
       return false;
   } catch(ex) {
     addToLog('warning Icon', 'BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + jobName + ']');
@@ -9840,9 +9846,8 @@ function getJobClicks() {
 
 function goJob(jobno) {
   var elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
+  if (!elt) elt = xpathFirst('.//div[@id="new_user_jobs"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
   var jobName = missions[GM_getValue('selectMission')][0];
-  var eltNewJobs = xpathFirst('.//a[@class="do_job" and contains(@onclick, "job=' + jobno + '&")]');
-
 
   // If job cannot be retrieved by job number, try retrieving by jobName
   if (!elt) {
@@ -9856,14 +9861,7 @@ function goJob(jobno) {
     suspendBank = false;
     clickBurst (elt, getJobClicks());
     DEBUG('Clicked job ' + jobno + '.');
-  } else
-    if (eltNewJobs) {
-      clickAction = 'job';
-      suspendBank = false;
-      clickBurstNewJobs (eltNewJobs, getJobClicks());
-      DEBUG('Clicked job ' + jobno + '.');
-    }
-  else {
+  } else {
     addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
 
     var jobs = getSavedList('jobsToDo', '');
@@ -11307,17 +11305,6 @@ function clickBurst (elt, clickCount) {
   DEBUG('Clicking ' + clickCount + ' time(s).');
   for (var i = 0; i < clickCount; ++i)
     clickElement (elt);
-}
-// Do multiple clicks NewJobs
-function clickBurstNewJobs (eltNewJobs, clickCount) {
-  if (!eltNewJobs) {
-    addToLog('warning Icon', 'BUG DETECTED: Null element passed to clickBurstNewJobs().');
-    return;
-  }
-
-  DEBUG('Clicking ' + clickCount + ' time(s).');
-  for (var i = 0; i < clickCount; ++i)
-    clickElement (eltNewJobs);
 }
 
 function clickElement(elt) {
