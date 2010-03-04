@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.86
-// @build       269
+// @build       270
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.86',
-  build: '269',
+  build: '270',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -952,7 +952,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Cuba', 'cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
     // Add support for choosing sides in Moscow later on
     ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
-    ['Bangkok', 'bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 1450]
+    ['Bangkok', 'bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 50]
   );
 
   var allyFaction = '';
@@ -1545,6 +1545,11 @@ if (initialized) {
 ///////////////////////////////////////////////////////////////////////////////
 
 function doAutoPlay () {
+  var hasHome = level >= 6;
+  var hasFight = level >= 5;
+  var hasProps = level >= 4;
+  var hasMarket = level >= 7;
+
   // Set the default auto-play timer function and delay.
   Autoplay.fx = goHome;
   Autoplay.delay = getAutoPlayDelay();
@@ -1576,7 +1581,7 @@ function doAutoPlay () {
 
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && canMission();
-  var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina();
+  var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight ;
   var energyMaxed = (autoMissionif && energy >= maxEnergy);
   var staminaMaxed = (autoStaminaSpendif && stamina >= maxStamina);
   var maxed = energyMaxed || staminaMaxed;
@@ -1604,19 +1609,19 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
-  // Background mode hitlisting
-  if (running && !maxed && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+  // Background mode hitlisting (limit to level 4 and above)
+  if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
   }
 
-  // Racketing
-  if (running && !maxed  && !timeLeftGM('nextRacket')) {
+  // Racketing (limit to level 4 and above)
+  if (running && !maxed  && !timeLeftGM('nextRacket') && hasProps) {
     if (isGMChecked('moneyRacketCheck') && collectMoneyRacket()) return;
     if (isGMChecked('racketCollect') && collectRacket()) return;
   }
 
-  // Auto-take for properties (NY)
-  if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake')) {
+  // Auto-take for properties (limit to level 4 and above)
+  if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
       if (collectNYTake()) return;
   }
 
@@ -1624,8 +1629,8 @@ function doAutoPlay () {
   var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
-  // Auto-sell business output
-  if (running && !maxed) {
+  // Auto-sell business output (limit to level 4 and above)
+  if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked(cities[i][CITY_SELLCRATES]) &&
@@ -1637,8 +1642,8 @@ function doAutoPlay () {
     }
   }
 
-  // Auto-buy business
-  if (running && !maxed) {
+  // Auto-buy business (limit to level 4 and above)
+  if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked(cities[i][CITY_BUYCRATES]) &&
@@ -1660,23 +1665,23 @@ function doAutoPlay () {
     if (autoStat()) return;
   }
 
-  // Auto-buy properties
-  if (false && running && !maxed && isGMChecked('autoBuy')) {
+  // Auto-buy properties (limit to level 4 and above)
+  if (false && running && !maxed && isGMChecked('autoBuy') && hasProps) {
     if (propertyBuy()) return;
   }
 
-  // Auto-lotto
-  if (running && !maxed && isGMChecked('autoLottoOpt')) {
+  // Auto-lotto (limit to level 7 and above)
+  if (running && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
     if (autoLotto()) return;
   }
 
-  // Auto-war
-  if (running && !maxed && isGMChecked('autoWar')) {
+  // Auto-war (limit to level 4 and above)
+  if (running && !maxed && isGMChecked('autoWar') && hasFight) {
     if (autoWar()) return;
   }
 
-  // Auto-giftwaiting
-  if (running && !maxed && GM_getValue('autoGiftWaiting')) {
+  // Auto-giftwaiting (limit to level 6 and above)
+  if (running && !maxed && GM_getValue('autoGiftWaiting') && hasHome) {
     // FIXME: Some people are having problems with this
     //if (autoGiftWaiting()) return;
   }
@@ -3169,7 +3174,10 @@ function getDisplayedOpponents(element, forceRefresh) {
     // Get the opponent's details.
     opponent.profile = nameAndLevel.getElementsByTagName('a')[0];
     if (!opponent.profile) continue;
-    opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split('user=')[1].split('\'')[0].split('&')[0]);
+    var onClickText  = opponent.profile.getAttribute('onclick');
+    var oppParamName = 'user=';
+    if (!new RegExp(oppParamName).test(onClickText)) oppParamName = 'opponent_id=';
+    opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split(oppParamName)[1].split('\'')[0].split('&')[0]);
     if (!opponent.id) continue;
 
     // Do icecheck from fightlist
@@ -3255,20 +3263,25 @@ function findFightOpponent(element) {
   DEBUG('Factions found: ' + factionCnt);
   if (factionElts.snapshotLength > 0) {
     allyFaction = '';
-    var allyPts = cities[city][CITY_ALLIANCE];
-    var allyCnt = 0;
+    var maxPts = 0, minPts = 1500;
     for (var i = 0, iLength = factionElts.snapshotLength; i < iLength; ++i) {
       var factionElt = factionElts.snapshotItem(i);
       var factionName = xpathFirst('.//div[@class="faction_name"]',factionElt).innerHTML.trim();
       var factionPts = parseInt(xpathFirst('.//div[@class="zy_progress_bar_faction_text"]',factionElt).innerHTML.split('/')[0].trim());
-      if (!isNaN(factionPts) && factionPts < allyPts) {
+
+      // Keep track of max and min faction pts
+      if (!isNaN(factionPts) && factionPts > maxPts) {
+        maxPts = factionPts;
+      }
+      if (!isNaN(factionPts) && factionPts < minPts) {
+        minPts = factionPts;
         allyFaction = factionName;
-        allyCnt++;
       }
     }
 
-    // If all faction points are lower than the threshold, do not filter by faction
-    if (allyCnt == factionCnt) allyFaction == '';
+    // Do not enable faction filtering
+    if (maxPts - minPts < cities[city][CITY_ALLIANCE])
+      allyFaction == '';
   }
 
   // Get the user's criteria for opponents.
@@ -6672,16 +6685,11 @@ function handleModificationTimer() {
 
   // Find the visible inner page.
   var pageChanged = false;
+  var justPlay = false;
   var prevPageElt = innerPageElt;
   var contentRowElt = document.getElementById('content_row');
-  var result = xpath('./*[contains(@id, "inner_page")]', contentRowElt);
-  for (var i = 0, iLength=result.snapshotLength; i < iLength; i++) {
-    elt = result.snapshotItem(i);
-    if (elt.style.display != 'none') {
-      innerPageElt = elt;
-      break;
-    }
-  }
+  innerPageElt = xpathFirst('.//div[@id="inner_page"]', contentRowElt);
+
   if (!innerPageElt) return;
 
   // Make sure our private AJAX page exists and isn't visible.
@@ -6693,9 +6701,9 @@ function handleModificationTimer() {
   elt.style.display = 'none';
 
   // Determine if the displayed page has changed.
-  if (!xpathFirst('./div[@id="inner_page"]', innerPageElt)) {
+  if (!xpathFirst('.//div[@id="inner_flag"]', innerPageElt)) {
     setListenContent(false);
-    makeElement('div', innerPageElt, {'id':'inner_page', 'style':'display: none'});
+    makeElement('div', innerPageElt, {'id':'inner_flag', 'style':'display: none'});
     setListenContent(true);
     DEBUG('New inner page content: ' + innerPageElt.id);
     pageChanged = true;
@@ -6704,10 +6712,23 @@ function handleModificationTimer() {
     pageChanged = true;
   }
 
+  // Added handling for just job page changes
+  var jobResult = xpathFirst('.//div[@id="new_user_jobs"]//div[@class="job_results"]', innerPageElt);
+  if (jobResult) {
+    if (!xpathFirst('.//div[@id="job_flag"]', jobResult)) {
+      setListenContent(false);
+      makeElement('div', jobResult, {'id':'job_flag', 'style':'display: none'});
+      setListenContent(true);
+      DEBUG('Detected new job results.');
+      pageChanged = true;
+      justPlay = true;
+    }
+  }
+
   // Handle changes to the inner page.
   if (pageChanged) {
     try {
-      innerPageChanged();
+      innerPageChanged(justPlay);
     } catch(ex) {
       addToLog('warning Icon', 'BUG DETECTED (pageChanged): ' + ex);
     }
@@ -6861,7 +6882,7 @@ function statsInserted(e) {
   }
 }
 
-function innerPageChanged() {
+function innerPageChanged(justPlay) {
   // Reset auto-reload (if enabled).
   autoReload();
 
@@ -6877,18 +6898,21 @@ function innerPageChanged() {
   getTopMafiaInfo(true);
 
   // Customize the display.
-  setListenContent(false);
-  customizeMasthead();
-  customizeLayout();
-  customizeStats();
-  customizeNames();
-  if (!customizeHome() &&
-      !customizeJobs() &&
-      !customizeProfile() &&
-      !customizeHitlist()) {
-    customizeFight();
+  if (!justPlay) {
+    setListenContent(false);
+    customizeMasthead();
+    customizeLayout();
+    customizeStats();
+    customizeNames();
+    if (!customizeHome() &&
+        !customizeJobs() &&
+        !customizeNewJobs() &&
+        !customizeProfile() &&
+        !customizeHitlist()) {
+      customizeFight();
+    }
+    setListenContent(true);
   }
-  setListenContent(true);
 
   try {
     // If a click action was taken, check the response.
@@ -7173,8 +7197,11 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
-                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0; float: left}' : '')   +
+    var newCSS = ' #mainDiv {overflow: auto !important; width: 100% !important; ' +
+                 ' height: 100% !important; position: absolute !important;}'   +
+                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0 !important; float: left !important}' : '')   +
+                 // Show hidden jobs for new job layout
+                 ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust player updates table when hiding friend ladder
                  (isGMChecked('hideFriendLadder') ?
                  ' .update_txt {width: 680px !important} ' +
@@ -7183,7 +7210,7 @@ function refreshMWAPCSS() {
                  ' div[class$="tab_box_content"] {width: 738px !important} ' +
                  ' .playerupdate_box {width: 740px !important} ' : '' ) +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
-                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, ' +
+                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
@@ -7861,13 +7888,234 @@ function customizeProfile() {
   return true;
 }
 
+
+// Return the job mastery for new jobs
+function getJobMastery(jobRow) {
+  if (jobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
+    return parseInt(RegExp.$1);
+  else if (jobRow.innerHTML.match(/margin-right:\s+(\d+)%/i))
+    return parseInt(100 - RegExp.$1);
+  return 100;
+}
+
+function customizeNewJobs() {
+  // Handle new job layout
+  var newJobs = $x('//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix")]', innerPageElt);
+
+  if (!newJobs || newJobs.length == 0) return false;
+
+  DEBUG('Found ' + newJobs.length + ' new jobs.');
+
+  var availableJobs = eval('({0:{},1:{},2:{},3:{}})');
+  var masteredJobs = eval('({0:{},1:{},2:{},3:{}})');
+  try {
+    availableJobs = eval(GM_getValue('availableJobs'));
+    masteredJobs = eval(GM_getValue('masteredJobs'));
+  } catch (ex) {
+    // ignore
+  }
+  var currentTab = currentJobTab();
+  availableJobs[city][currentTab] = [];
+  masteredJobs[city][currentTab] = [];
+
+  // FIXME: Change this once we encounter locked jobs for the new layout
+  var isJobLocked = function (thisJob) {
+    return /locked/i.test(thisJob.innerHTML);
+  }
+
+  // Display an experience to energy payoff ratio for each job.
+  var bestJobs = [], worstJobs = [];
+  var bestRatio = 0, worstRatio = 10;
+  var reselectJob = false;
+  var masteryList = getSavedList('masteryJobsList');
+
+  var masteredJobsCount = 0;
+  var jobsFound = newJobs.length;
+  for (var i = 0; i < jobsFound; ++i) {
+    var currentJob = newJobs[i];
+
+    var jobName = xpathFirst('.//div[@class="title_results"]//h3', currentJob).innerHTML.clean().trim();
+    var jobCost = xpathFirst('.//div[@class="use_pay"]//dl[contains(.,"Uses")]', currentJob);
+    var jobReward = xpathFirst('.//div[@class="use_pay"]//dl[contains(.,"Pays")]', currentJob);
+    var jobAction = xpathFirst('.//a', currentJob);
+
+    // Skip jobs not in missions array
+    var jobMatch = missions.searchArray(jobName, 0)[0];
+    if (jobMatch != 0 && !jobMatch) {
+      addToLog('warning Icon', jobName + ' not found in missions array. ');
+      masteredJobsCount++;
+      continue;
+    }
+
+    // Determine available jobs
+    if (running && isGMChecked('multipleJobs')) {
+      // Ignore mastered jobs
+      if (getJobMastery(currentJob) == 100) {
+        if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
+          masteredJobs[city][currentTab].push(jobMatch);
+        masteredJobsCount++;
+      }
+
+      // Ignore locked jobs
+      if (isJobLocked(currentJob)) {
+        // Consider "locked" job as mastered
+        DEBUG('Job ' + jobName + '(' + jobMatch + ') is not available yet. Skipping.');
+        masteredJobsCount++;
+      } else {
+        availableJobs[city][currentTab].push(jobMatch);
+      }
+    }
+
+    // Skip this for jobs without jobCost
+    if (!jobCost) continue;
+
+    // Skip this for jobs without cost
+    var costElt = xpathFirst('.//dd[@class="energy"]', jobCost);
+    if (!costElt) continue;
+    var cost = parseCash(costElt.innerHTML);
+
+    var expElt = xpathFirst('.//dd[@class="experience"]', jobReward);
+    var reward = parseInt(expElt.innerHTML);
+
+    var moneyElt = xpathFirst('.//dd[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', jobReward);
+
+    // XP payout ratio
+    var ratio = Math.round(reward / cost * 100) / 100;
+    var xpTxt = 'XP: ' + ratio + 'x';
+
+    // Money payout ratio
+    var moneyTxt = '';
+    if (moneyElt) {
+      var money = parseCash(moneyElt.innerHTML.untag());
+      var currency = cities[city][CITY_CASH_SYMBOL];
+      var mratio = makeCommaValue(Math.round(money / cost));
+
+      moneyTxt = ', $$$: ' + currency + mratio + 'x';
+    }
+
+    // Calculate time left for each job
+    var timePerEnergy = isGMChecked('isManiac') ? 3 : 5;
+    timePerEnergy = isGMChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
+    timePerEnergy = isGMChecked('hasGoldenThrone') ? timePerEnergy/2: timePerEnergy;
+
+    var timeTxt = ' Time: 0 min';
+    if (cost > energy) timeTxt = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
+
+    makeElement('span', costElt, {'style':'color:red; font-size: 10px'})
+      .appendChild(document.createTextNode(' [' + xpTxt + moneyTxt + ']'));
+    makeElement('span', costElt, {'style':'color:green; font-size: 10px'})
+      .appendChild(document.createTextNode(timeTxt));
+
+    missions[jobMatch][6] = reward;
+    missions[jobMatch][7] = ratio;
+    missions[jobMatch][8] = cost;
+
+    // Keep track of the best & worst payoffs.
+    if (ratio > bestRatio) {
+      bestRatio = ratio;
+      bestJobs = [costElt];
+    } else if (ratio == bestRatio) {
+      bestJobs.push(costElt);
+    }
+    if (ratio < worstRatio) {
+      worstRatio = ratio;
+      worstJobs = [costElt];
+    } else if (ratio == worstRatio) {
+      worstJobs.push(costElt);
+    }
+  }
+
+  // Highlight the best and worst jobs.
+  var elt;
+  if (worstRatio != bestRatio) {
+    while (bestJobs.length) {
+      elt = bestJobs.pop();
+      makeElement('br', elt);
+      elt = makeElement('span', elt, {'style':'color:#52E259; font-size: 10px'});
+      makeElement('img', elt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      elt.appendChild(document.createTextNode(' BEST'));
+    }
+    while (worstJobs.length) {
+      elt = worstJobs.pop();
+      makeElement('br', elt);
+      elt = makeElement('span', elt, {'style':'color:#EC2D2D; font-size: 10px'});
+      makeElement('img', elt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      elt.appendChild(document.createTextNode(' WORST'));
+    }
+  }
+
+  // Show the experience to energy ratio needed to level up.
+  elt = makeElement('div', null, {'id':'level_up_ratio', 'style':'text-align:center; display:none'});
+  makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
+  elt.appendChild(document.createTextNode(''));
+  newJobs[0].parentNode.insertBefore(elt, newJobs[0]);
+
+  setLevelUpRatio();
+  if(reselectJob) canMission();
+  GM_setValue('availableJobs', availableJobs.toSource());
+  GM_setValue('masteredJobs', masteredJobs.toSource());
+
+  // Set the job progress
+  newJobMastery(innerPageElt);
+
+  if (running && isGMChecked('multipleJobs') &&
+      GM_getValue('selectTier') != '0.0') {
+    selectedTierValue = GM_getValue('selectTier').split('.');
+    masteryCity = parseInt(selectedTierValue[0]);
+    masteryTier = parseInt(selectedTierValue[1]);
+    DEBUG(jobsFound + ' ' + masteredJobsCount);
+    if (city == masteryCity &&
+        masteryTier == currentTab &&
+        jobsFound <= masteredJobsCount) {
+      selectTier = cities[masteryCity][0] + ' - ' + missionTabs[masteryCity][masteryTier - 1];
+      addToLog('info Icon', 'Tier ' + selectTier + ' is already mastered. Moving on to the next tier.');
+
+      // Move on the the next tier.
+      if (missionTabs[masteryCity].length == masteryTier) {
+        // We have mastered all tiers. Disable tier mastery logic.
+        if (cities.length == (masteryCity + 1)) {
+          GM_setValue('selectTier', '0.0');
+        // Next City
+        } else {
+          masteryCity++;
+          masteryTier = 1;
+        }
+      // Next Tier
+      } else {
+        masteryTier++;
+      }
+
+      if (GM_getValue('selectTier') != '0.0') {
+        var mastery_jobs_list = [];
+        for (i = 0, iLength = missions.length; i < iLength; i++) {
+          if (masteryCity == missions[i][4] &&
+              masteryTier == missions[i][3]) {
+            mastery_jobs_list.push(i);
+          }
+        }
+        setSavedList('masteryJobsList', mastery_jobs_list);
+        GM_setValue('selectTier', masteryCity + '.' + masteryTier);
+      }
+    }
+  }
+
+  return true;
+}
+
 function customizeJobs() {
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
-  if (!jobTables || !jobTables[0]) return false;
 
-  var availableJobs = eval(GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})'));
-  var masteredJobs = eval(GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})'));
+  if (!jobTables || jobTables.length == 0) return false;
+
+  var availableJobs = eval('({0:{},1:{},2:{},3:{}})');
+  var masteredJobs = eval('({0:{},1:{},2:{},3:{}})');
+  try {
+    availableJobs = eval(GM_getValue('availableJobs'));
+    masteredJobs = eval(GM_getValue('masteredJobs'));
+  } catch (ex) {
+    // ignore
+  }
   var currentTab = currentJobTab();
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
@@ -7995,9 +8243,6 @@ function customizeJobs() {
     }
   }
 
-  // Set the job progress
-  jobMastery (innerPageElt);
-
   // Highlight the best and worst jobs.
   var elt;
   if (worstRatio != bestRatio) {
@@ -8027,6 +8272,9 @@ function customizeJobs() {
   if(reselectJob) canMission();
   GM_setValue('availableJobs', availableJobs.toSource());
   GM_setValue('masteredJobs', masteredJobs.toSource());
+
+  // Set the job progress
+  jobMastery(innerPageElt);
 
   if (running && isGMChecked('multipleJobs') &&
       GM_getValue('selectTier') != '0.0') {
@@ -8266,19 +8514,32 @@ function getJobRowItems(element){
   var currentJobRow = getJobRow(currentJob, element);
   if (!currentJobRow) return false;
 
-  var buyItemElts = xpath('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
+  var buyItemElts = $x('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
   // Click to buy items
-  if (buyItemElts.snapshotLength>0){
+  if (buyItemElts.length > 0){
     addToLog('search Icon', 'Attempting to purchase required items.');
-    for (var currentItem = 0, numItems=buyItemElts.snapshotLength; currentItem < numItems; ++currentItem) {
+    for (var i = 0, numItems=buyItemElts.length; i < numItems; ++i) {
       Autoplay.fx = function() {
         clickAction = 'buy item';
-        clickElement(buyItemElts.snapshotItem(currentItem));
+        clickElement(buyItemElts[i]);
         DEBUG('Clicked to buy item.');
       }
       break;
     }
     return true;
+  }
+
+  // New Job layout handling
+  var amtElt = xpathFirst('.//strong[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', currentJobRow);
+  if (amtElt) {
+    var cashDiff = getJobClicks() * parseCash(amtElt.innerHTML.untag().trim()) - cities[city][CITY_CASH];
+
+    // Withdraw the amount we need
+    if (cashDiff > 0) {
+      suspendBank = true;
+      autoBankWithdraw(cashDiff);
+      return true;
+    }
   }
 
   // Logic to switch to the required job first
@@ -8367,9 +8628,8 @@ function popJob(){
 }
 
 // Set the next job to be mastered for mastery job options
-function jobMastery(element) {
+function newJobMastery(element) {
   if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) {
-    DEBUG('Exiting jobMastery function; multipleJobs / repeatJob is checked.');
     return;
   }
 
@@ -8392,6 +8652,122 @@ function jobMastery(element) {
 
   DEBUG('Calculating progress for ' + currentJob + '.');
 
+  // Calculate tier mastery.
+  DEBUG("Checking mastery for each job.");
+  var tierLevel = 0;
+  var currentJobMastered = getJobMastery(currentJobRow) == 100;
+  if (currentJobRow && currentJobRow.className.match(/mastery_level_(\d+)/i)) {
+    tierLevel = RegExp.$1;
+  }
+
+  var tierJobs = $x('//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix")]', element);
+  var tierPercent = 0;
+  var jobCount = 0;
+
+  if (tierJobs.length > 0) {
+    tierJobs.forEach(
+      function(f) {
+        tierPercent = getJobMastery(f);
+        jobCount++;
+      }
+    );
+    tierPercent = Math.floor(tierPercent / jobCount);
+  }
+
+  if (GM_getValue('tierCompleteStatus') != tierLevel + '|' + tierPercent) {
+    GM_setValue('tierCompleteStatus', tierLevel + '|' + tierPercent);
+    addToLog('info Icon', 'Job tier level ' + tierLevel + ' is ' +
+             tierPercent + '% complete.');
+  }
+
+  // Calculate job mastery
+  DEBUG("Checking current job mastery.");
+  if (currentJobMastered) {
+    var jobList = getSavedList('jobsToDo');
+    if (!jobList.length) {
+      addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
+      DEBUG('Checking job tier mastery.');
+      if (tierPercent == 100) {
+        // Find the first job of the next tier.
+        // NOTE: This assumes that the missions array is sorted by city and
+        //       then by tier.
+        var nextTierJob;
+        for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
+          if (missions[i][4] != cityno) {
+            nextTierJob = i;
+            addToLog('info Icon', 'You have mastered the final job tier in ' +
+                     cities[cityno][CITY_NAME] + '! Moving to the next tier in ' +
+                     cities[missions[nextTierJob][4]][CITY_NAME] + '.');
+            break;
+          }
+          if (missions[i][3] != tabno) {
+            nextTierJob = i;
+            addToLog('info Icon', 'Current job tier is mastered. Moving to next tier in ' + cities[cityno][CITY_NAME] + '.');
+            break;
+          }
+        }
+        if (!nextTierJob) {
+          addToLog('info Icon', 'You have mastered all jobs!');
+        } else {
+          GM_setValue('selectMission', nextTierJob);
+          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
+        }
+      } else {
+          // Find the first unmastered job of this next tier.
+          var findMastery = function(v, i, a) { return (/mastery_level_/.test(a[i].className))? 0:1; };
+          var nonMasteredJobs = tierJobs.filter(findMastery);
+          var jobName = xpathFirst('.//div[@class="title_results"]//h3', nonMasteredJobs[0]).innerHTML.clean().trim();
+
+          var matches = missions.searchArray(jobName, 0);
+          if (matches != 0 && !matches) {
+            addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
+                     ' not found in mission array.');
+            return;
+          }
+          GM_setValue('selectMission', matches[0]);
+          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
+      }
+    } else {
+      DEBUG("There are jobs in the to-do list.");
+    }
+  } else {
+    DEBUG("Job is not mastered. Checking percent of mastery.");
+    var jobPercentComplete = 0;
+    if (currentJobRow.innerHTML.match(/margin-right:\s+(\d+)%/i))
+      jobPercentComplete = parseInt(100 - RegExp.$1);
+    else if (currentJobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
+      jobPercentComplete = parseInt(RegExp.$1);
+    if (GM_getValue('jobCompleteStatus') != (currentJob + '|' + String(jobPercentComplete))) {
+      GM_setValue('jobCompleteStatus', (currentJob + '|' + String(jobPercentComplete)));
+      addToLog('info Icon', '<span class="job">' + currentJob + '</span> is ' + jobPercentComplete + '% complete.');
+    }
+  }
+}
+
+// Set the next job to be mastered for mastery job options
+function jobMastery(element) {
+  if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) {
+    return;
+  }
+
+  var selectMission = parseInt(GM_getValue('selectMission', 1)) + 1;
+  var tabno      = missions[selectMission - 1][3];
+  var cityno     = missions[selectMission - 1][4];
+
+  if (city != cityno || !onJobTab(tabno)) return;
+
+  var currentJobRow = false;
+  // Move back one job IF the job is not found on this page
+  while (!currentJobRow && city == cityno && onJobTab(tabno)) {
+    selectMission--;
+    var currentJob = missions[selectMission][0];
+    var jobno      = missions[selectMission][2];
+    tabno      = missions[selectMission][3];
+    cityno     = missions[selectMission][4];
+    var currentJobRow = getJobRow(currentJob, element);
+  }
+
+  DEBUG('Calculating progress for ' + currentJob + '.');
 
   // Calculate tier mastery.
   DEBUG("Checking mastery for each job.");
@@ -8415,6 +8791,7 @@ function jobMastery(element) {
       }
     }
   );
+
   if (tierJobs.length) {
     tierPercent = Math.floor(tierPercent / jobCount);
   }
@@ -9667,6 +10044,13 @@ function loadHome() {
 }
 
 function goHome() {
+  // Home is not available yet
+  if (level < 6) {
+    DEBUG('Home not available yet, going to jobs instead');
+    goJobsNav();
+    return;
+  }
+
   // Find the visible home link.
   var elt = xpathFirst('//div[@id="nav_link_home_unlock"]//a');
   if (!elt) {
@@ -10610,6 +10994,11 @@ function logResponse(rootElt, action, context) {
     messagebox = xpathFirst('.//table[@class="messages"]', rootElt);
   }
 
+  // New job layout message result
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@class="job_results"]', rootElt);
+  }
+
   // New message box message
   if (!messagebox) {
     messagebox = xpathFirst('.//div[@id="msg_box_div_1"]', rootElt);
@@ -10666,14 +11055,14 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'job':
-      xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
+      var xpGainElt = xpathFirst('.//dd[contains(@class,"experience")]', messagebox);
       if (xpGainElt) {
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' +
                  missions[GM_getValue('selectMission')][0] +
                  '</span> earning <span class="good">' +
                  xpGainElt.innerHTML.toLowerCase() + '</span>';
-        var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
+        var cashGainElt = xpathFirst('.//dd[contains(@class,"cash")]', messagebox);
         if (cashGainElt) {
           result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
         }
@@ -10710,6 +11099,8 @@ function logResponse(rootElt, action, context) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][0] + '.');
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
+      } else if (innerNoTags.indexOf('Success') != -1) {
+        addToLog('process Icon', innerNoTags);
       } else {
         DEBUG('Unrecognized job response.');
       }
