@@ -32,12 +32,12 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.86
+// @version     1.0.87
 // @build       270
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.86',
+  version: '1.0.87',
   build: '270',
   name: 'inthemafia',
   appID: 'app10979261223',
@@ -3260,7 +3260,6 @@ function findFightOpponent(element) {
   // Calculate faction points
   var factionElts = xpath('.//div[@class="faction_container"]', innerPageElt);
   var factionCnt = factionElts.snapshotLength;
-  DEBUG('Factions found: ' + factionCnt);
   if (factionElts.snapshotLength > 0) {
     allyFaction = '';
     var maxPts = 0, minPts = 1500;
@@ -3281,7 +3280,11 @@ function findFightOpponent(element) {
 
     // Do not enable faction filtering
     if (maxPts - minPts < cities[city][CITY_ALLIANCE])
-      allyFaction == '';
+      allyFaction = '';
+    DEBUG('Factions found: ' + factionCnt + '<br>' +
+          'Max faction pts: ' + maxPts + '<br>' +
+          'Min faction pts: ' + minPts + '<br>' +
+          'Ally faction: ' + allyFaction);
   }
 
   // Get the user's criteria for opponents.
@@ -7888,14 +7891,144 @@ function customizeProfile() {
   return true;
 }
 
+// Return the job mastery level
+function getJobMastery(jobRow, newJobs) {
 
-// Return the job mastery for new jobs
-function getJobMastery(jobRow) {
-  if (jobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
+  // Logic for new job layout
+  if (newJobs) {
+    if (jobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
+      return parseInt(RegExp.$1);
+    else if (jobRow.innerHTML.match(/margin-right:\s+(\d+)%/i))
+      return parseInt(100 - RegExp.$1);
+    return 100;
+  }
+
+  // Old job logic
+  if (/Mastered/i.test(jobRow.innerHTML))
+    return 100;
+  else if (jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i))
     return parseInt(RegExp.$1);
-  else if (jobRow.innerHTML.match(/margin-right:\s+(\d+)%/i))
-    return parseInt(100 - RegExp.$1);
-  return 100;
+
+  // Get the job with the highest percentage in choice point jobs
+  var divElts = $x('.//td[@class="job_name job_no_border"]//div[contains(text(),"%")]', jobRow);
+  if (divElts) {
+    var masteryPct = 0;
+    for (var i = 0, iLength = divElts.length; i < iLength; ++i) {
+      if (divElts[i].innerHTML.match(/(\d+)%/) && parseInt(RegExp.$1) > masteryPct)
+        masteryPct = parseInt(RegExp.$1);
+    }
+    return parseInt(masteryPct);
+  }
+
+  DEBUG('No mastery items found. Assuming 0% mastery level.');
+  return 0;
+}
+
+// Set the next job to be mastered for mastery job options
+function jobMastery(element, newJobs) {
+  if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) return;
+
+  var selectMission = parseInt(GM_getValue('selectMission', 1));
+  var currentJob = missions[selectMission][0];
+  var jobno      = missions[selectMission][2];
+  var tabno      = missions[selectMission][3];
+  var cityno     = missions[selectMission][4];
+
+  if (city != cityno || !onJobTab(tabno)) return;
+
+  var currentJobRow = getJobRow(currentJob, element);
+  DEBUG('Calculating progress for ' + currentJob + '.');
+
+  // Calculate tier mastery.
+  DEBUG("Checking mastery for each job.");
+  var tierLevel = 0;
+  var currentJobMastered = getJobMastery(currentJobRow) == 100;
+  if (currentJobRow) {
+    if (newJobs && currentJobRow.className.match(/mastery_level_(\d+)/i))
+      tierLevel = RegExp.$1;
+    else if (currentJobRow.innerHTML.match(/level (\d+)/i))
+      tierLevel = RegExp.$1;
+  }
+
+  var tierPercent = 0;
+  var jobCount = 0;
+  var firstUnmastered = currentJob;
+  var firstFound = false;
+  for (var i = 0, iLength = missions.length; i < iLength; i++) {
+    // Only get the jobs from this city tier
+    if (city == missions[i][4] && tabno == missions[i][3]) {
+      var thisJobRow = getJobRow(missions[i][0]);
+      if (thisJobRow) {
+        var masteryLevel = getJobMastery(thisJobRow, newJobs);
+        tierPercent += masteryLevel;
+        jobCount++;
+
+        // Get the first unmastered job on this tier
+        if (!firstFound && masteryLevel < 100) {
+          firstFound = true;
+          firstUnmastered = missions[i][0];
+        }
+      }
+    }
+  }
+
+  if (jobCount > 0) {
+    tierPercent = Math.floor(tierPercent / jobCount);
+  }
+
+  if (GM_getValue('tierCompleteStatus') != tierLevel + '|' + tierPercent) {
+    GM_setValue('tierCompleteStatus', tierLevel + '|' + tierPercent);
+    addToLog('info Icon', 'Job tier level ' + tierLevel + ' is ' +
+             tierPercent + '% complete.');
+  }
+
+  // Calculate job mastery
+  DEBUG("Checking current job mastery.");
+  if (currentJobMastered) {
+    var jobList = getSavedList('jobsToDo');
+    if (!jobList.length) {
+      addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
+      DEBUG('Checking job tier mastery.');
+      if (tierPercent == 100) {
+        // Find the first job of the next tier.
+        // NOTE: This assumes that the missions array is sorted by city and
+        //       then by tier.
+        var nextTierJob;
+        for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
+          if (missions[i][4] != cityno) {
+            nextTierJob = i;
+            addToLog('info Icon', 'You have mastered the final job tier in ' +
+                     cities[cityno][CITY_NAME] + '! Moving to the next tier in ' +
+                     cities[missions[nextTierJob][4]][CITY_NAME] + '.');
+            break;
+          }
+          if (missions[i][3] != tabno) {
+            nextTierJob = i;
+            addToLog('info Icon', 'Current job tier is mastered. Moving to next tier in ' + cities[cityno][CITY_NAME] + '.');
+            break;
+          }
+        }
+        if (!nextTierJob) {
+          addToLog('info Icon', 'You have mastered all jobs!');
+        } else {
+          GM_setValue('selectMission', nextTierJob);
+          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
+        }
+      } else {
+          GM_setValue('selectMission', firstUnmastered);
+          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
+      }
+    } else {
+      DEBUG("There are jobs in the to-do list.");
+    }
+  } else {
+    DEBUG("Job is not mastered. Checking percent of mastery.");
+    var jobPercentComplete = getJobMastery(currentJobRow);
+    if (GM_getValue('jobCompleteStatus') != (currentJob + '|' + String(jobPercentComplete))) {
+      GM_setValue('jobCompleteStatus', (currentJob + '|' + String(jobPercentComplete)));
+      addToLog('info Icon', '<span class="job">' + currentJob + '</span> is ' + jobPercentComplete + '% complete.');
+    }
+  }
 }
 
 function customizeNewJobs() {
@@ -7930,8 +8063,8 @@ function customizeNewJobs() {
   var masteryList = getSavedList('masteryJobsList');
 
   var masteredJobsCount = 0;
-  var jobsFound = newJobs.length;
-  for (var i = 0; i < jobsFound; ++i) {
+  var jobsFound = 0;
+  for (var i = 0, iLength = newJobs.length; i < iLength; ++i) {
     var currentJob = newJobs[i];
 
     var jobName = xpathFirst('.//div[@class="title_results"]//h3', currentJob).innerHTML.clean().trim();
@@ -7943,14 +8076,16 @@ function customizeNewJobs() {
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (jobMatch != 0 && !jobMatch) {
       addToLog('warning Icon', jobName + ' not found in missions array. ');
-      masteredJobsCount++;
       continue;
     }
+
+    jobsFound++;
+    DEBUG(jobName + ', Mastery level: ' + getJobMastery(currentJob, true));
 
     // Determine available jobs
     if (running && isGMChecked('multipleJobs')) {
       // Ignore mastered jobs
-      if (getJobMastery(currentJob) == 100) {
+      if (getJobMastery(currentJob, true) == 100) {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
           masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
@@ -8056,49 +8191,8 @@ function customizeNewJobs() {
   GM_setValue('masteredJobs', masteredJobs.toSource());
 
   // Set the job progress
-  newJobMastery(innerPageElt);
-
-  if (running && isGMChecked('multipleJobs') &&
-      GM_getValue('selectTier') != '0.0') {
-    selectedTierValue = GM_getValue('selectTier').split('.');
-    masteryCity = parseInt(selectedTierValue[0]);
-    masteryTier = parseInt(selectedTierValue[1]);
-    DEBUG(jobsFound + ' ' + masteredJobsCount);
-    if (city == masteryCity &&
-        masteryTier == currentTab &&
-        jobsFound <= masteredJobsCount) {
-      selectTier = cities[masteryCity][0] + ' - ' + missionTabs[masteryCity][masteryTier - 1];
-      addToLog('info Icon', 'Tier ' + selectTier + ' is already mastered. Moving on to the next tier.');
-
-      // Move on the the next tier.
-      if (missionTabs[masteryCity].length == masteryTier) {
-        // We have mastered all tiers. Disable tier mastery logic.
-        if (cities.length == (masteryCity + 1)) {
-          GM_setValue('selectTier', '0.0');
-        // Next City
-        } else {
-          masteryCity++;
-          masteryTier = 1;
-        }
-      // Next Tier
-      } else {
-        masteryTier++;
-      }
-
-      if (GM_getValue('selectTier') != '0.0') {
-        var mastery_jobs_list = [];
-        for (i = 0, iLength = missions.length; i < iLength; i++) {
-          if (masteryCity == missions[i][4] &&
-              masteryTier == missions[i][3]) {
-            mastery_jobs_list.push(i);
-          }
-        }
-        setSavedList('masteryJobsList', mastery_jobs_list);
-        GM_setValue('selectTier', masteryCity + '.' + masteryTier);
-      }
-    }
-  }
-
+  jobMastery(innerPageElt, true);
+  tierMastery(jobsFound, masteredJobsCount, currentTab);
   return true;
 }
 
@@ -8125,10 +8219,6 @@ function customizeJobs() {
             jobAction.innerHTML.indexOf('Help') == -1);
   }
 
-  var isJobMastered = function (jobInfo) {
-    return (jobInfo && /Level\s+(\d+)\s+Mastered/i.test(jobInfo.innerHTML));
-  }
-
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
@@ -8147,12 +8237,15 @@ function customizeJobs() {
       var jobRow = getJobRow (jobName);
       if (!jobRow) continue;
 
-      jobsFound++;
-
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
-      if (jobMatch != 0 && !jobMatch) { masteredJobsCount++; continue; }
+      if (jobMatch != 0 && !jobMatch) {
+        addToLog('warning Icon', jobName + ' not found in missions array. ');
+        continue;
+      }
 
+      jobsFound++;
+      DEBUG(jobName + ', Mastery level: ' + getJobMastery(jobRow, false));
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -8161,7 +8254,7 @@ function customizeJobs() {
       // Determine available jobs
       if (running && isGMChecked('multipleJobs')) {
         // Ignore mastered jobs
-        if (isJobMastered(jobInfo)) {
+        if (getJobMastery(jobRow, false) == 100) {
           if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
             masteredJobs[city][currentTab].push(jobMatch);
           masteredJobsCount++;
@@ -8175,17 +8268,6 @@ function customizeJobs() {
         } else {
           availableJobs[city][currentTab].push(jobMatch);
         }
-      }
-
-      // Skip jobs with no mastery info
-      var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
-      if (!jobInfo) continue;
-
-      // Tag the jobNames with "Mastery" if not mastered
-      if (!isJobMastered(jobInfo)) {
-        var mastElt = hideElement(makeElement('span',null));
-        mastElt.appendChild(document.createTextNode('Mastery'));
-        jobNames.snapshotItem(i).appendChild(mastElt);
       }
 
       var costElt = xpathFirst('.//span[@class="bold_number"]', jobCost);
@@ -8274,8 +8356,12 @@ function customizeJobs() {
   GM_setValue('masteredJobs', masteredJobs.toSource());
 
   // Set the job progress
-  jobMastery(innerPageElt);
+  jobMastery(innerPageElt, false);
+  tierMastery(jobsFound, masteredJobsCount, currentTab);
+  return true;
+}
 
+function tierMastery(jobsFound, jobsMastered, currentTab) {
   if (running && isGMChecked('multipleJobs') &&
       GM_getValue('selectTier') != '0.0') {
     selectedTierValue = GM_getValue('selectTier').split('.');
@@ -8283,7 +8369,7 @@ function customizeJobs() {
     masteryTier = parseInt(selectedTierValue[1]);
     if (city == masteryCity &&
         masteryTier == currentTab &&
-        jobsFound <= masteredJobsCount) {
+        jobsFound <= jobsMastered) {
       selectTier = cities[masteryCity][0] + ' - ' + missionTabs[masteryCity][masteryTier - 1];
       addToLog('info Icon', 'Tier ' + selectTier + ' is already mastered. Moving on to the next tier.');
 
@@ -8315,8 +8401,6 @@ function customizeJobs() {
       }
     }
   }
-
-  return true;
 }
 
 function customizeFight() {
@@ -8625,242 +8709,6 @@ function popJob(){
       i++;
     }
   );
-}
-
-// Set the next job to be mastered for mastery job options
-function newJobMastery(element) {
-  if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) {
-    return;
-  }
-
-  var selectMission = parseInt(GM_getValue('selectMission', 1)) + 1;
-  var tabno      = missions[selectMission - 1][3];
-  var cityno     = missions[selectMission - 1][4];
-
-  if (city != cityno || !onJobTab(tabno)) return;
-
-  var currentJobRow = false;
-  // Move back one job IF the job is not found on this page
-  while (!currentJobRow && city == cityno && onJobTab(tabno)) {
-    selectMission--;
-    var currentJob = missions[selectMission][0];
-    var jobno      = missions[selectMission][2];
-    tabno      = missions[selectMission][3];
-    cityno     = missions[selectMission][4];
-    var currentJobRow = getJobRow(currentJob, element);
-  }
-
-  DEBUG('Calculating progress for ' + currentJob + '.');
-
-  // Calculate tier mastery.
-  DEBUG("Checking mastery for each job.");
-  var tierLevel = 0;
-  var currentJobMastered = getJobMastery(currentJobRow) == 100;
-  if (currentJobRow && currentJobRow.className.match(/mastery_level_(\d+)/i)) {
-    tierLevel = RegExp.$1;
-  }
-
-  var tierJobs = $x('//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix")]', element);
-  var tierPercent = 0;
-  var jobCount = 0;
-
-  if (tierJobs.length > 0) {
-    tierJobs.forEach(
-      function(f) {
-        tierPercent = getJobMastery(f);
-        jobCount++;
-      }
-    );
-    tierPercent = Math.floor(tierPercent / jobCount);
-  }
-
-  if (GM_getValue('tierCompleteStatus') != tierLevel + '|' + tierPercent) {
-    GM_setValue('tierCompleteStatus', tierLevel + '|' + tierPercent);
-    addToLog('info Icon', 'Job tier level ' + tierLevel + ' is ' +
-             tierPercent + '% complete.');
-  }
-
-  // Calculate job mastery
-  DEBUG("Checking current job mastery.");
-  if (currentJobMastered) {
-    var jobList = getSavedList('jobsToDo');
-    if (!jobList.length) {
-      addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
-      DEBUG('Checking job tier mastery.');
-      if (tierPercent == 100) {
-        // Find the first job of the next tier.
-        // NOTE: This assumes that the missions array is sorted by city and
-        //       then by tier.
-        var nextTierJob;
-        for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
-          if (missions[i][4] != cityno) {
-            nextTierJob = i;
-            addToLog('info Icon', 'You have mastered the final job tier in ' +
-                     cities[cityno][CITY_NAME] + '! Moving to the next tier in ' +
-                     cities[missions[nextTierJob][4]][CITY_NAME] + '.');
-            break;
-          }
-          if (missions[i][3] != tabno) {
-            nextTierJob = i;
-            addToLog('info Icon', 'Current job tier is mastered. Moving to next tier in ' + cities[cityno][CITY_NAME] + '.');
-            break;
-          }
-        }
-        if (!nextTierJob) {
-          addToLog('info Icon', 'You have mastered all jobs!');
-        } else {
-          GM_setValue('selectMission', nextTierJob);
-          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
-        }
-      } else {
-          // Find the first unmastered job of this next tier.
-          var findMastery = function(v, i, a) { return (/mastery_level_/.test(a[i].className))? 0:1; };
-          var nonMasteredJobs = tierJobs.filter(findMastery);
-          var jobName = xpathFirst('.//div[@class="title_results"]//h3', nonMasteredJobs[0]).innerHTML.clean().trim();
-
-          var matches = missions.searchArray(jobName, 0);
-          if (matches != 0 && !matches) {
-            addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
-                     ' not found in mission array.');
-            return;
-          }
-          GM_setValue('selectMission', matches[0]);
-          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
-      }
-    } else {
-      DEBUG("There are jobs in the to-do list.");
-    }
-  } else {
-    DEBUG("Job is not mastered. Checking percent of mastery.");
-    var jobPercentComplete = 0;
-    if (currentJobRow.innerHTML.match(/margin-right:\s+(\d+)%/i))
-      jobPercentComplete = parseInt(100 - RegExp.$1);
-    else if (currentJobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
-      jobPercentComplete = parseInt(RegExp.$1);
-    if (GM_getValue('jobCompleteStatus') != (currentJob + '|' + String(jobPercentComplete))) {
-      GM_setValue('jobCompleteStatus', (currentJob + '|' + String(jobPercentComplete)));
-      addToLog('info Icon', '<span class="job">' + currentJob + '</span> is ' + jobPercentComplete + '% complete.');
-    }
-  }
-}
-
-// Set the next job to be mastered for mastery job options
-function jobMastery(element) {
-  if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) {
-    return;
-  }
-
-  var selectMission = parseInt(GM_getValue('selectMission', 1)) + 1;
-  var tabno      = missions[selectMission - 1][3];
-  var cityno     = missions[selectMission - 1][4];
-
-  if (city != cityno || !onJobTab(tabno)) return;
-
-  var currentJobRow = false;
-  // Move back one job IF the job is not found on this page
-  while (!currentJobRow && city == cityno && onJobTab(tabno)) {
-    selectMission--;
-    var currentJob = missions[selectMission][0];
-    var jobno      = missions[selectMission][2];
-    tabno      = missions[selectMission][3];
-    cityno     = missions[selectMission][4];
-    var currentJobRow = getJobRow(currentJob, element);
-  }
-
-  DEBUG('Calculating progress for ' + currentJob + '.');
-
-  // Calculate tier mastery.
-  DEBUG("Checking mastery for each job.");
-  var tierLevel;
-  if (currentJobRow && currentJobRow.innerHTML.match(/level (\d+)/i)) {
-    tierLevel = RegExp.$1
-  }
-  var tierJobs = $x('.//table[@class="job_list"]//tr/td[@class="job_name" or @class="job_name_oneline job_no_border"]', element);
-  var tierPercent = 0;
-  var jobCount = 0;
-  tierJobs.forEach(
-    function(f) {
-      if (f.innerHTML.indexOf('Mastered') != -1 || f.innerHTML.indexOf('Mastery') == -1) {
-        tierPercent += 100;
-        jobCount++;
-      } else if (f.innerHTML.match(/Mastery\s+(\d+)%/i)) {
-        tierPercent += parseInt(RegExp.$1);
-        jobCount++;
-      } else {
-        jobCount++;
-      }
-    }
-  );
-
-  if (tierJobs.length) {
-    tierPercent = Math.floor(tierPercent / jobCount);
-  }
-  if (GM_getValue('tierCompleteStatus') != tierLevel + '|' + tierPercent) {
-    GM_setValue('tierCompleteStatus', tierLevel + '|' + tierPercent);
-    addToLog('info Icon', 'Job tier level ' + tierLevel + ' is ' +
-             tierPercent + '% complete.');
-  }
-
-  // Calculate job mastery.  If we cant find the current job, then assume its mastered and disappeared in moscow
-  DEBUG("Checking current job mastery.");
-  var currentJobMastered;
-  if (currentJobRow) currentJobMastered = currentJobRow.innerHTML.indexOf('Mastered');
-  if (!currentJobMastered || currentJobMastered > 0) {
-    var jobList = getSavedList('jobsToDo');
-    if (!jobList.length) {
-      addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
-      DEBUG('Checking job tier mastery.');
-      if (tierPercent == 100) {
-        // Find the first job of the next tier.
-        // NOTE: This assumes that the missions array is sorted by city and
-        //       then by tier.
-        var nextTierJob;
-        for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
-          if (missions[i][4] != cityno) {
-            nextTierJob = i;
-            addToLog('info Icon', 'You have mastered the final job tier in ' +
-                     cities[cityno][CITY_NAME] + '! Moving to the next tier in ' +
-                     cities[missions[nextTierJob][4]][CITY_NAME] + '.');
-            break;
-          }
-          if (missions[i][3] != tabno) {
-            nextTierJob = i;
-            addToLog('info Icon', 'Current job tier is mastered. Moving to next tier in ' + cities[cityno][CITY_NAME] + '.');
-            break;
-          }
-        }
-        if (!nextTierJob) {
-          addToLog('info Icon', 'You have mastered all jobs!');
-        } else {
-          GM_setValue('selectMission', nextTierJob);
-          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
-        }
-      } else {
-          // Find the first unmastered job of this next tier.
-          var findMastery = function(v, i, a) { return (a[i].innerHTML.indexOf('Mastery') > 0)? 1:0; };
-          var nonMasteredJobs = tierJobs.filter(findMastery);
-          var jobName = nonMasteredJobs[0].innerHTML.split('<br>')[0].split('<span')[0].clean().trim();
-
-          var matches = missions.searchArray(jobName, 0);
-          if (matches != 0 && !matches) {
-            addToLog('warning Icon', 'BUG DETECTED: ' + jobName +
-                     ' not found in mission array.');
-            return;
-          }
-          GM_setValue('selectMission', matches[0]);
-          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
-      }
-    } else {
-      DEBUG("There are jobs in the to-do list.");
-    }
-  } else {
-    DEBUG("Job is not mastered. Checking percent of mastery.");
-    var jobPercentComplete = currentJobRow.innerHTML.split('Mastery ')[1].split('%')[0];
-    if (GM_getValue('jobCompleteStatus') != (currentJob + '|' + String(jobPercentComplete))) {
-      GM_setValue('jobCompleteStatus', (currentJob + '|' + String(jobPercentComplete)));
-      addToLog('info Icon', '<span class="job">' + currentJob + '</span> is ' + jobPercentComplete + '% complete.');
-    }
-  }
 }
 
 // Set the next job to be done for job combination options
