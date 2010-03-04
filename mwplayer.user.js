@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.87
-// @build       270
+// @version     1.0.88
+// @build       271
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.87',
-  build: '270',
+  version: '1.0.88',
+  build: '271',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1120,7 +1120,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Fix A Local Election for the Vory',66,17,2,MOSCOW,91],
     ['Extract A Favor From The Winner',97,18,2,MOSCOW,128],
     ['Catch Karpov Accepting A Bribe',77,19,2,MOSCOW,105],
-    ['Abduct A Candidate\'s Wife for the Mafiya',66,20,2,MOSCOW,89],
+    ['Abduct A Candidate\'s Wife For the Mafiya',66,20,2,MOSCOW,89],
     ['"Convince" The Candidate To Withdraw',90,21,2,MOSCOW,126],
     ['Kill An Investigative Reporter',75,22,2,MOSCOW,107],
     ['Pay Off The Port Authority In Arkhangelsk',57,23,2,MOSCOW,77],
@@ -1396,6 +1396,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
       } else if (this[i][index] === target) {
         returnArray.push(i);
       }
+
+      // Case insensitive checking
+      //if (typeof(target) == 'string' && this[i][index].toLowerCase() == target.toLowerCase()) {
+      //  returnArray.push(i);
     }
     return returnArray.length? returnArray : false;
   }
@@ -7904,7 +7908,13 @@ function getJobMastery(jobRow, newJobs) {
   }
 
   // Old job logic
-  if (/Mastered/i.test(jobRow.innerHTML))
+  var isJobLocked = function (thisJob) {
+    return (thisJob.innerHTML.indexOf('sexy_button_locked') >= 0 &&
+            thisJob.innerHTML.indexOf('Help') == -1);
+  }
+
+  // Locked jobs are mastered too
+  if (/Mastered/i.test(jobRow.innerHTML) || isJobLocked(jobRow))
     return 100;
   else if (jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i))
     return parseInt(RegExp.$1);
@@ -7940,9 +7950,12 @@ function jobMastery(element, newJobs) {
   DEBUG('Calculating progress for ' + currentJob + '.');
 
   // Calculate tier mastery.
-  DEBUG("Checking mastery for each job.");
+  DEBUG('Checking mastery for each job.');
   var tierLevel = 0;
-  var currentJobMastered = getJobMastery(currentJobRow) == 100;
+  var jobPercentComplete = -1;
+  if (currentJobRow) jobPercentComplete = getJobMastery(currentJobRow, newJobs);
+
+  var currentJobMastered = (jobPercentComplete == 100);
   if (currentJobRow) {
     if (newJobs && currentJobRow.className.match(/mastery_level_(\d+)/i))
       tierLevel = RegExp.$1;
@@ -7952,7 +7965,7 @@ function jobMastery(element, newJobs) {
 
   var tierPercent = 0;
   var jobCount = 0;
-  var firstUnmastered = currentJob;
+  var firstUnmastered = selectMission;
   var firstFound = false;
   for (var i = 0, iLength = missions.length; i < iLength; i++) {
     // Only get the jobs from this city tier
@@ -7966,7 +7979,7 @@ function jobMastery(element, newJobs) {
         // Get the first unmastered job on this tier
         if (!firstFound && masteryLevel < 100) {
           firstFound = true;
-          firstUnmastered = missions[i][0];
+          firstUnmastered = i;
         }
       }
     }
@@ -7984,10 +7997,13 @@ function jobMastery(element, newJobs) {
 
   // Calculate job mastery
   DEBUG("Checking current job mastery.");
-  if (currentJobMastered) {
+  if (currentJobMastered || jobPercentComplete == -1) {
     var jobList = getSavedList('jobsToDo');
-    if (!jobList.length) {
-      addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
+    if (jobList.length == 0) {
+      if (currentJobMastered)
+        addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
+      else
+        addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');
       DEBUG('Checking job tier mastery.');
       if (tierPercent == 100) {
         // Find the first job of the next tier.
@@ -8023,7 +8039,6 @@ function jobMastery(element, newJobs) {
     }
   } else {
     DEBUG("Job is not mastered. Checking percent of mastery.");
-    var jobPercentComplete = getJobMastery(currentJobRow);
     if (GM_getValue('jobCompleteStatus') != (currentJob + '|' + String(jobPercentComplete))) {
       GM_setValue('jobCompleteStatus', (currentJob + '|' + String(jobPercentComplete)));
       addToLog('info Icon', '<span class="job">' + currentJob + '</span> is ' + jobPercentComplete + '% complete.');
@@ -8080,12 +8095,13 @@ function customizeNewJobs() {
     }
 
     jobsFound++;
-    DEBUG(jobName + ', Mastery level: ' + getJobMastery(currentJob, true));
+    var jobPercentage = getJobMastery(currentJob, true);
+    DEBUG(jobName + ', Mastery level: ' + jobPercentage);
 
     // Determine available jobs
     if (running && isGMChecked('multipleJobs')) {
       // Ignore mastered jobs
-      if (getJobMastery(currentJob, true) == 100) {
+      if (jobPercentage == 100) {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
           masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
@@ -8240,12 +8256,13 @@ function customizeJobs() {
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
       if (jobMatch != 0 && !jobMatch) {
-        addToLog('warning Icon', jobName + ' not found in missions array. ');
+        addToLog('warning Icon', jobName + ' not found in missions array.');
         continue;
       }
 
       jobsFound++;
-      DEBUG(jobName + ', Mastery level: ' + getJobMastery(jobRow, false));
+      var jobPercentage = getJobMastery(jobRow, false);
+      DEBUG(jobName + ', Mastery level: ' + jobPercentage);
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -8254,7 +8271,7 @@ function customizeJobs() {
       // Determine available jobs
       if (running && isGMChecked('multipleJobs')) {
         // Ignore mastered jobs
-        if (getJobMastery(jobRow, false) == 100) {
+        if (jobPercentage == 100) {
           if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
             masteredJobs[city][currentTab].push(jobMatch);
           masteredJobsCount++;
