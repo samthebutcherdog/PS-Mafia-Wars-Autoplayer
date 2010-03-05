@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.88
-// @build       274
+// @version     1.0.89
+// @build       275
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.88',
-  build: '274',
+  version: '1.0.89',
+  build: '275',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -952,7 +952,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$', 0],
     ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
     // Add support for choosing sides in Moscow later on
-    ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
+    ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
     ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 50]
   );
 
@@ -1052,6 +1052,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Make Arrangements for a Visiting Don',40,74,9,NY,60],
     ['Take Control of a Casino',70,75,9,NY,110],
     ['Travel to the Old Country',52,76,9,NY,82],
+    // CUBA
     ['Rob Your Cab Driver',12,1,1,CUBA,16],
     ['Secure A Safehouse',36,2,1,CUBA,49],
     ['Intimidate The Locals',52,3,1,CUBA,70],
@@ -1102,77 +1103,107 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Help Get An Associate A No Bid Contract',56,48,6,CUBA,85],
     ['Trans-Ship A Container Full of Refugees',48,49,6,CUBA,73],
     ['Meet With "The Russian"',58,50,6,CUBA,89],
+    // MOSCOW EPISODE 1
     ['Smuggle Consumer Electronics for the Vory',46,1,1,MOSCOW,61],
     ['Arrange A Drug Shipment for the Mafiya',40,2,1,MOSCOW,53],
     ['Fight Off An Ultra-National Gang',112,3,1,MOSCOW,115],
+    // CHOICE POINT (Vory = 4, Mafia = 7)
     ['Kidnap A Local Gang Leader for the Vory',47,4,1,MOSCOW,63],
+    //['Kill A Local Gang Leader for the Mafiya',47,7,1,MOSCOW,63],
+    // CHOICE RESULT (Vory)
     ['Collect The Ransom',50,5,1,MOSCOW,64],
-    ['Receive Vory Intel On Dmitri',40,6,1,MOSCOW,54],
-    ['Kill A Local Gang Leader for the Mafiya',47,7,1,MOSCOW,63],
+    //['Receive Vory Intel On Dmitri',40,6,1,MOSCOW,54],
+    // CHOICE RESULT (Mafia)
     ['Collect the Hit Payoff',56,8,1,MOSCOW,76],
-    ['Buy Mafiya Intel On Dmitri',52,9,1,MOSCOW,74],
+    //['Buy Mafiya Intel On Dmitri',52,9,1,MOSCOW,74],
+    //
     ['Threaten A Gang\'s Supplier',58,10,1,MOSCOW,79],
     ['Hijack An Arms Shipment From A Militant Gang',67,11,1,MOSCOW,90],
     ['Hospitalize Some Nationalists',76,12,1,MOSCOW,104],
     ['Confront Gang Leader Dmitri Leonov',76,13,1,MOSCOW,104],
+    // MOSCOW EPISODE 2
     ['Bribe An Election Official',57,14,2,MOSCOW,77],
     ['Silence A Political Critic',53,15,2,MOSCOW,73],
     ['Violently Break Up A Campaign Rally',137,16,2,MOSCOW,141],
+    // CHOICE POINT (Vory = 17, Mafia = 20)
     ['Fix A Local Election for the Vory',66,17,2,MOSCOW,91],
+    //['Abduct A Candidate\'s Wife For the Mafiya',66,20,2,MOSCOW,89],
+    // CHOICE RESULT (Vory)
     ['Extract A Favor From The Winner',97,18,2,MOSCOW,128],
-    ['Catch Karpov Accepting A Bribe',77,19,2,MOSCOW,105],
-    ['Abduct A Candidate\'s Wife For the Mafiya',66,20,2,MOSCOW,89],
+    //['Catch Karpov Accepting A Bribe',77,19,2,MOSCOW,105],
+    // CHOICE RESULT (Mafia)
     ['"Convince" The Candidate To Withdraw',90,21,2,MOSCOW,126],
-    ['Kill An Investigative Reporter',75,22,2,MOSCOW,107],
+    //['Kill An Investigative Reporter',75,22,2,MOSCOW,107],
+    //
     ['Pay Off The Port Authority In Arkhangelsk',57,23,2,MOSCOW,77],
     ['Re-route An Equipment Shipment',80,24,2,MOSCOW,106],
     ['Circulate Damaging Photos',99,25,2,MOSCOW,137],
     ['Take Down Party Boss Karpov',76,26,2,MOSCOW,109],
+    // MOSCOW EPISODE 3
     ['Case The RossijaBanc Building',65,31,3,MOSCOW,88],
     ['Map Out The Escape Route',80,32,3,MOSCOW,108],
     ['Rob The RossijaBanc Central Repository',165,33,3,MOSCOW,172],
+    // CHOICE POINT (Vory = 34, Mafia = 37)
     ['Take A Guard Hostage During Your Escape',82,34,3,MOSCOW,112],
+    //['Execute A Bank Guard During Your Escape',82,37,3,MOSCOW,112],
+    // CHOICE RESULT (Vory)
     ['Use The Guard\'s Keys To Access the Bank Armory',105,35,3,MOSCOW,140],
-    ['"Borrow" The Guard\'s Uniform After Releasing Him',88,36,3,MOSCOW,117],
-    ['Execute A Bank Guard During Your Escape',82,37,3,MOSCOW,112],
+    //['"Borrow" The Guard\'s Uniform After Releasing Him',88,36,3,MOSCOW,117],
+    // CHOICE RESULT (Mafia)
     ['Steal The Bank President\'s Car Keys',99,38,3,MOSCOW,132],
-    ['Strip A Uniform Off The Corpse',91,39,3,MOSCOW,121],
+    //['Strip A Uniform Off The Corpse',91,39,3,MOSCOW,121],
+    //
     ['Blackmail A Secretary For An Exec\'s Itinerary',96,40,3,MOSCOW,129],
     ['Dispose Of A RossijaBanc Exec At Sea',89,41,3,MOSCOW,118],
     ['Replace A Guard With Your Own Man',118,42,3,MOSCOW,165],
+    // MOSCOW EPISODE 4
     ['Manage An Escort Service Catering to Soldiers',111,44,4,MOSCOW,151],
     ['Support The Habit Of A Procurement Officer',125,45,4,MOSCOW,170],
     ['Ransack A Defense Contractor\'s Office',198,46,4,MOSCOW,210],
+    // CHOICE POINT (Vory = 47, Mafia = 50)
     ['Fly To The Siberian Military District',118,47,4,MOSCOW,161],
+    //['Travel To The Volga Military District',118,50,4,MOSCOW,161],
+    // CHOICE RESULT (Vory)
     ['Rob A Troop Convoy',108,48,4,MOSCOW,143],
-    ['Intercept The Base\'s Pay Shipment',105,49,4,MOSCOW,143],
-    ['Travel To The Volga Military District',118,50,4,MOSCOW,161],
+    //['Intercept The Base\'s Pay Shipment',105,49,4,MOSCOW,143],
+    // CHOICE RESULT (Mafia)
     ['Arrange The Sale Of Weapons-Grade Explosives',119,51,4,MOSCOW,158],
-    ['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
+    //['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
+    //
     ['Make Connections With An Arms Dealer',123,53,4,MOSCOW,168],
     ['Transport Some Stolen Military Hardware',125,54,4,MOSCOW,165],
     ['Buy Off The General\'s Command Team',134,55,4,MOSCOW,188],
+    // MOSCOW EPISODE 5
     ['Stop A Terrorist Attack In Moscow',116,61,5,MOSCOW,159],
     ['Discover Who Was Responsible',124,62,5,MOSCOW,170],
     ['Hunt Down A Ural Liberation Front Contact',215,63,5,MOSCOW,230],
+    // CHOICE POINT (Vory = 64, Mafia = 67)
     ['Infiltrate The ULF Cell',132,64,5,MOSCOW,181],
+    //['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
+    // CHOICE RESULT (Vory)
     ['Help "Plan" The Next Attack',121,65,5,MOSCOW,160],
-    ['Sabotage The Plan From The Inside',127,66,5,MOSCOW,174],
-    ['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
+    //['Sabotage The Plan From The Inside',127,66,5,MOSCOW,174],
+    // CHOICE RESULT (Mafia)
     ['Kill A Lookout',127,68,5,MOSCOW,170],
-    ['Stop The ULF Attack',131,69,5,MOSCOW,180],
+    //['Stop The ULF Attack',131,69,5,MOSCOW,180],
+    //
     ['Torture A ULF Lieutenant',120,70,5,MOSCOW,164],
     ['Look For The Boss\' Mountain Hideout',135,71,5,MOSCOW,180],
     ['Start An Avalanche Above The Terrorist Camp',145,72,5,MOSCOW,205],
+    // MOSCOW EPISODE 6
     ['Foil The Sabotage Of Your Moscow Holdings',130,74,6,MOSCOW,180],
     ['Acquire Classified Files On Crime Syndicates',122,75,6,MOSCOW,169],
     ['Gun Down Some Russian Muscle',238,76,6,MOSCOW,258],
+    // CHOICE POINT (Vory = 77, Mafia = 80)
     ['Attack A Mafiya Business',136,77,6,MOSCOW,188],
+    //['Burn Down A Vory Safehouse',136,80,6,MOSCOW,188],
+    // CHOICE RESULT (Vory)
     ['Hijack A Mafiya Cargo',134,78,6,MOSCOW,179],
-    ['Threaten A Mafiya Moneyman\'s Family',128,79,6,MOSCOW,176],
-    ['Burn Down A Vory Safehouse',136,80,6,MOSCOW,188],
+    //['Threaten A Mafiya Moneyman\'s Family',128,79,6,MOSCOW,176],
+    // CHOICE RESULT (Mafia)
     ['Hit A Vory Nightclub',128,81,6,MOSCOW,171],
-    ['Break Into An Architect\'s Office',134,82,6,MOSCOW,185],
+    //['Break Into An Architect\'s Office',134,82,6,MOSCOW,185],
+    //
     ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
     ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
     ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
@@ -1294,6 +1325,26 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   var choiceJobs = new Array (
     // Job no and Job names array must corresponding with each cities CITY_SIDES array
+    // MOSCOW
+    [[4,7], ['Kidnap A Local Gang Leader for the Vory', 'Kill A Local Gang Leader for the Mafiya'], MOSCOW],
+    [[5, 8], ['Collect The Ransom', 'Collect the Hit Payoff'], MOSCOW],
+    [[6, 9], ['Receive Vory Intel On Dmitri', 'Buy Mafiya Intel On Dmitri'], MOSCOW],
+    [[17, 20], ['Fix A Local Election for the Vory', 'Abduct A Candidate\'s Wife For the Mafiya'], MOSCOW],
+    [[18, 21], ['Extract A Favor From The Winner', '"Convince" The Candidate To Withdraw'], MOSCOW],
+    [[19, 22], ['Catch Karpov Accepting A Bribe', 'Kill An Investigative Reporter'], MOSCOW],
+    [[34, 37], ['Take A Guard Hostage During Your Escape', 'Execute A Bank Guard During Your Escape'], MOSCOW],
+    [[35, 38], ['Use The Guard\'s Keys To Access the Bank Armory', 'Steal The Bank President\'s Car Keys'], MOSCOW],
+    [[36, 39], ['"Borrow" The Guard\'s Uniform After Releasing Him', 'Strip A Uniform Off The Corpse'], MOSCOW],
+    [[47, 50], ['Fly To The Siberian Military District', 'Travel To The Volga Military District'], MOSCOW],
+    [[48, 51], ['Rob A Troop Convoy', 'Arrange The Sale Of Weapons-Grade Explosives'], MOSCOW],
+    [[49, 52], ['Intercept The Base\'s Pay Shipment', 'Capitalize On An Officer\'s Gambling Problem'], MOSCOW],
+    [[64, 67], ['Infiltrate The ULF Cell', 'Discover The Location Of The Next ULF Attack'], MOSCOW],
+    [[65, 68], ['Help "Plan" The Next Attack', 'Kill A Lookout'], MOSCOW],
+    [[66, 69], ['Sabotage The Plan From The Inside', 'Stop The ULF Attack'], MOSCOW],
+    [[77, 80], ['Attack A Mafiya Business', 'Burn Down A Vory Safehouse'], MOSCOW],
+    [[78, 81], ['Hijack A Mafiya Cargo', 'Hit A Vory Nightclub'], MOSCOW],
+    [[79, 82], ['Threaten A Mafiya Moneyman\'s Family', 'Break Into An Architect\'s Office'], MOSCOW],
+    // BANGKOK
     [[5, 8], ['Meet A Gang\'s Rep In A Go-Go Bar', 'Meet A Gang\'s Rep In A Go-Go Bar'], BANGKOK],
     [[11, 14], ['Intercept An Ammo Shipment', 'Intercept An Ammo Shipment'], BANGKOK],
     [[24, 27], ['Set Up A Phony Business', 'Set Up A Phony Business'], BANGKOK],
