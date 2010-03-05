@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.92
-// @build       278
+// @version     1.0.93
+// @build       279
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.92',
-  build: '278',
+  version: '1.0.93',
+  build: '279',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3697,7 +3697,7 @@ function handleVersionChange() {
   // Check for invalid settings and upgrade them.
 
   // Clear invalid jobs
-  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 278) {
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 279) {
     var selectS = GM_getValue('selectMission', 0);
     if (selectS > 268)
       GM_setValue('selectMission', 268);
@@ -3705,7 +3705,7 @@ function handleVersionChange() {
     var selectM = getSavedList('selectMissionMultiple');
     if (selectM && selectM.length) {
       selectM = selectM.filter(function(v, i, a) { return (a[i] > 268) ? 0:1; });
-      setSavedList(selectM);
+      setSavedList('selectMissionMultiple', selectM);
     }
   }
 
