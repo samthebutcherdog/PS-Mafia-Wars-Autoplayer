@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.89
-// @build       275
+// @version     1.0.90
+// @build       276
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.89',
-  build: '275',
+  version: '1.0.90',
+  build: '276',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3696,6 +3696,16 @@ function handleVersionChange() {
 
   // Check for invalid settings and upgrade them.
 
+  // Clear invalid jobs
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 276) {
+    var selectS = GM_getValue('selectMission', 0);
+    if (selectS > 268)
+      GM_setValue('selectMission', 268);
+
+    var selectM = getSavedList('selectMissionMultiple').filter(function(v, i, a) { return (a[i] > 268) ? 0:1; });
+    setSavedList(newJobs);
+  }
+
   // Uncheck use fight stealth
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 262) {
     GM_setValue('fightStealth', '');
@@ -7284,9 +7294,8 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = ' #mainDiv {overflow: auto !important; width: 100% !important; ' +
-                 ' height: 100% !important; position: absolute !important;}'   +
-                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin:0 !important; float: left !important}' : '')   +
+    var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
+                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin: 0; float: left}' : '')   +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust player updates table when hiding friend ladder
@@ -8336,8 +8345,11 @@ function customizeJobs() {
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
       if (jobMatch != 0 && !jobMatch) {
-        if (!/Level[\s\w]+Master/.test(jobName))
-          addToLog('warning Icon', jobName + ' not found in missions array.');
+        if (!/Level[\s\w]+Master/.test(jobName)) {
+          var choiceMatch = choiceJobs.searchArray(jobName,1)[0];
+          if (choiceMatch != 0 && !choiceMatch)
+            addToLog('warning Icon', jobName + ' not found in missions array.');
+        }
         continue;
       }
 
@@ -10169,7 +10181,7 @@ function getJobClicks() {
   if (isGMChecked('burstJob')){
     var nextJobXp = missions[GM_getValue('selectMission', 1)][6];
     numClicks = GM_getValue('burstJobCount', 1);
-    while (((nextJobXp * numClicks) > ptsToNextLevel) && (numClicks > 1)) numClicks--;
+    while (((nextJobXp * numClicks) >= ptsToNextLevel) && (numClicks > 1)) numClicks--;
   }
   return parseInt(numClicks);
 }
