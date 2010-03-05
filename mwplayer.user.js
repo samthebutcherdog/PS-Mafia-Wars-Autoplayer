@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.88
-// @build       271
+// @build       272
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.88',
-  build: '271',
+  build: '272',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -110,7 +110,7 @@ function GM_ApiBrowserCheck() {
         request.onreadystatechange=function() { if(obj.onreadystatechange) { obj.onreadystatechange(request); }; if(request.readyState==4 && obj.onload) { obj.onload(request); } }
         request.onerror=function() { if(obj.onerror) { obj.onerror(request); } }
         try { request.open(obj.method,obj.url,true); } catch(e) { if(obj.onerror) { obj.onerror( {readyState:4,responseHeaders:'',responseText:'',responseXML:'',status:403,statusText:'Forbidden'} ); }; return; }
-        if(obj.headers) { for(name in obj.headers) { if (/tosource/i.test(name)) continue; request.setRequestHeader(name,obj.headers[name]); } }
+        if(obj.headers) { for(name in obj.headers) { request.setRequestHeader(name,obj.headers[name]); } }
         request.send(obj.data); return request;
   } } }
 }
@@ -3974,8 +3974,6 @@ function saveSettings() {
       }
     }
   }
-  // Invoke choose sides
-  chooseSides();
 
   var selectProperties = '';
   if (saveCheckBoxElement('abandoned'))
@@ -4073,6 +4071,9 @@ function saveSettings() {
   // Clear the fight/hit state.
   fightListNew.set([]);
   skipStaminaSpend = false;
+
+  // Invoke choose sides
+  chooseSides();
 
   toggleSettings();
   updateLogStats();
@@ -6945,26 +6946,35 @@ function innerPageChanged(justPlay) {
 function chooseSides() {
   // Bangkok Side-Handling
   var choiceJobs = new Array (
-                    // Yakuza job no, Triad job no, Job name
-                    [5, 8, 'Meet A Gang\'s Rep In A Go-Go Bar'],
-                    [11, 14, 'Intercept An Ammo Shipment'],
-                    [24, 27, 'Set Up A Phony Business'],
-                    [30, 33, 'Pay Off The Guards At Bangkwang Prison'],
-                    [43, 46, 'Hijack A Boat Load Of Electronics'],           // EPISODE 3 CHAPTER 2
-                    [49, 52, 'Steal Shipping Manifests'],                    // EPISODE 3 CHAPTER 3
-                    [62, 65, 'Establish Contact With A CIA Agent'],          // EPISODE 4 CHAPTER 2
-                    [68, 71, 'Betray Commander Chang and the UWSA'],         // EPISODE 4 CHAPTER 3
-                    [81, 84, 'Meet With Boss Matsumura\'s Advisor'],         // EPISODE 5A CHAPTER 2
-                    [87, 90, 'Talk With A Police Insider About Matsumura'],  // EPISODE 5A CHAPTER 3
-                    [100, 103, 'Intimidate Wealthy Expatriates'],            // EPISODE 5B CHAPTER 2
-                    [106, 109, 'Talk With Wei\'s Disloyal Enforcers']        // EPISODE 5B CHAPTER 3
+                    // Yakuza job no, Triad job no, Yakuza job name, Triad job name
+                    [5, 8, 'Meet A Gang\'s Rep In A Go-Go Bar', 'Meet A Gang\'s Rep In A Go-Go Bar'],
+                    [11, 14, 'Intercept An Ammo Shipment', 'Intercept An Ammo Shipment'],
+                    [24, 27, 'Set Up A Phony Business', 'Set Up A Phony Business'],
+                    [30, 33, 'Pay Off The Guards At Bangkwang Prison', 'Pay Off The Guards At Bangkwang Prison'],
+                    [43, 46, 'Hijack A Boat Load Of Electronics', 'Hijack A Boat Load Of Electronics'],
+                    [49, 52, 'Steal Shipping Manifests', 'Steal Shipping Manifests'],
+                    [62, 65, 'Establish Contact With A CIA Agent', 'Establish Contact With A CIA Agent'],
+                    [68, 71, 'Betray Commander Chang and the UWSA', 'Betray Commander Chang and the UWSA'],
+                    [81, 84, 'Meet With Boss Matsumura\'s Advisor', 'Meet With Boss Matsumura\'s Advisor'],
+                    [87, 90, 'Talk With A Police Insider About Matsumura', 'Talk With A Police Insider About Matsumura'],
+                    [100, 103, 'Intimidate Wealthy Expatriates', 'Intimidate Wealthy Foreign Expatriates'],
+                    [106, 109, 'Talk With Wei\'s Disloyal Enforcers', 'Talk With Wei\'s Disloyal Enforcers']
                    );
 
   choiceJobs.forEach( function(job) {
-    var jobMatch = missions.searchArray(job[2], 0)[0];
-    // For Bangkok, simply change the jobNo of the jobs above to support sides
-    if (jobMatch)
+    var jobMatch = undefined;
+
+    // Search the missions array for each name on the list above
+    for (var i = 2; i < 4; ++i) {
+      jobMatch = missions.searchArray(job[i], 0)[0];
+      if (jobMatch) break;
+    }
+
+    // For Bangkok, simply change the jobNo / jobName based on the above list
+    if (jobMatch) {
+      missions[jobMatch][0] = job[2 + GM_getValue('sideBangkok', 0)];
       missions[jobMatch][2] = job[GM_getValue('sideBangkok', 0)];
+    }
   });
 
   // FIXME: Moscow Side-Handling
@@ -8203,8 +8213,8 @@ function customizeNewJobs() {
 
   setLevelUpRatio();
   if(reselectJob) canMission();
-  GM_setValue('availableJobs', availableJobs.toSource());
-  GM_setValue('masteredJobs', masteredJobs.toSource());
+  GM_setValue('availableJobs', JSON.stringify(availableJobs));
+  GM_setValue('masteredJobs', JSON.stringify(masteredJobs));
 
   // Set the job progress
   jobMastery(innerPageElt, true);
@@ -8256,7 +8266,8 @@ function customizeJobs() {
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
       if (jobMatch != 0 && !jobMatch) {
-        addToLog('warning Icon', jobName + ' not found in missions array.');
+        if (!/Level[\s\w]+Master/.test(jobName))
+          addToLog('warning Icon', jobName + ' not found in missions array.');
         continue;
       }
 
@@ -8369,8 +8380,8 @@ function customizeJobs() {
 
   setLevelUpRatio();
   if(reselectJob) canMission();
-  GM_setValue('availableJobs', availableJobs.toSource());
-  GM_setValue('masteredJobs', masteredJobs.toSource());
+  GM_setValue('availableJobs', JSON.stringify(availableJobs));
+  GM_setValue('masteredJobs', JSON.stringify(masteredJobs));
 
   // Set the job progress
   jobMastery(innerPageElt, false);
@@ -11465,10 +11476,6 @@ function getMWUrl (server, params) {
 
   // Create or Replace params
   for (var i in params) {
-
-    // For chrome, do not place this in params
-    if (/tosource/i.test(params[i])) continue;
-
     if (new RegExp(i + '=\\w+').test(mwURL))
       mwURL = mwURL.replace(new RegExp(i + '=\\w*'), i + '=' + params[i]);
     else
@@ -11892,49 +11899,3 @@ function encode64(input) {
 
   return output;
 }
-
-(function(){
-  if (gvar.isGreaseMonkey) return;
-
-  /* atomic objects */
-  if (!Boolean.prototype.toSource)  Boolean.prototype.toSource = function(){
-      return this.toString();
-  };
-  if (!Number.prototype.toSource)    Number.prototype.toSource = function(){
-      return this.toString();
-  };
-  if (!String.prototype.toSource)    String.prototype.toSource = function(){
-      return this.toString().replace(/[\\\"\']/g, function(m0){
-          return '\\' + m0;
-      });
-  };
-  if (!Date.prototype.toSource)        Date.prototype.toSource = function(){
-      return '(new Date(' + this.valueOf() + '))';
-  };
-  if (!RegExp.prototype.toSource)    RegExp.prototype.toSource = function(){
-      return this.toString();
-  };
-  /* and built-ins */
-  if (!Function.prototype.toSource) Function.prototype.toSource = function(){
-      return this.toString();
-  }
-  if (!Array.prototype.toSource)       Array.prototype.toSource = function(){
-      var src = [];
-      for (var i = 0, l = this.length; i < l; i++){
-          src[i] = this[i].toSource();
-      }
-      return '[' + src.toString() + ']';
-  };
-  if (! Object.prototype.toSource)    Object.prototype.toSource = function(){
-      var src = []; // a-ha!
-      for (var p in this){
-          if (!this.hasOwnProperty(p)) continue;
-          src[src.length] =
-              p.toSource() + ':'
-              + (this[p]               ? this[p].toSource() :
-                 this[p] === undefined ? 'undefined' : 'null');
-      }
-      // parens needed to make eval() happy
-      return '({' + src.toString() + '})';
-  };
-})();
