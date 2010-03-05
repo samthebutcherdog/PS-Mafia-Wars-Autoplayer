@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.90
-// @build       276
+// @version     1.0.91
+// @build       277
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.90',
-  build: '276',
+  version: '1.0.91',
+  build: '277',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3697,13 +3697,13 @@ function handleVersionChange() {
   // Check for invalid settings and upgrade them.
 
   // Clear invalid jobs
-  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 276) {
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 277) {
     var selectS = GM_getValue('selectMission', 0);
     if (selectS > 268)
       GM_setValue('selectMission', 268);
 
     var selectM = getSavedList('selectMissionMultiple').filter(function(v, i, a) { return (a[i] > 268) ? 0:1; });
-    setSavedList(newJobs);
+    setSavedList(selectM);
   }
 
   // Uncheck use fight stealth
