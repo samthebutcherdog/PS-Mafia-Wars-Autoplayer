@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.88
-// @build       273
+// @build       274
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.88',
-  build: '273',
+  build: '274',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -932,27 +932,28 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_NAME        = 0;
   const CITY_ALIAS       = 1;
   const CITY_SIDES       = 2;
-  const CITY_CASH        = 3;
-  const CITY_LEVEL       = 4;
-  const CITY_CASH_ICON   = 5;
-  const CITY_CASH_CSS    = 6;
-  const CITY_AUTOBANK    = 7;
-  const CITY_BANKCONFG   = 8;
-  const CITY_SELLCRATES  = 9;
-  const CITY_BUYCRATES   = 10;
-  const CITY_CASH_SYMBOL = 11;
-  const CITY_ALLIANCE    = 12;
+  const CITY_SIDE_NAME   = 3;
+  const CITY_CASH        = 4;
+  const CITY_LEVEL       = 5;
+  const CITY_CASH_ICON   = 6;
+  const CITY_CASH_CSS    = 7;
+  const CITY_AUTOBANK    = 8;
+  const CITY_BANKCONFG   = 9;
+  const CITY_SELLCRATES  = 10;
+  const CITY_BUYCRATES   = 11;
+  const CITY_CASH_SYMBOL = 12;
+  const CITY_ALLIANCE    = 13;
 
   // Add city variables in this format
   // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', 'nyc', [], undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$', 0],
-    ['Cuba', 'cuba', [], undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
+    ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$', 0],
+    ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
     // Add support for choosing sides in Moscow later on
-    ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
-    ['Bangkok', 'bangkok', ['Yakuza','Triad'], undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 50]
+    ['Moscow', 'moscow', [/*'Vory','Mafiya'*/], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
+    ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 50]
   );
 
   var allyFaction = '';
@@ -1287,6 +1288,26 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head']
   );
 
+  const CHOICE_JOBNO   = 0;
+  const CHOICE_JOBNAME = 1;
+  const CHOICE_CITY    = 2;
+
+  var choiceJobs = new Array (
+    // Job no and Job names array must corresponding with each cities CITY_SIDES array
+    [[5, 8], ['Meet A Gang\'s Rep In A Go-Go Bar', 'Meet A Gang\'s Rep In A Go-Go Bar'], BANGKOK],
+    [[11, 14], ['Intercept An Ammo Shipment', 'Intercept An Ammo Shipment'], BANGKOK],
+    [[24, 27], ['Set Up A Phony Business', 'Set Up A Phony Business'], BANGKOK],
+    [[30, 33], ['Pay Off The Guards At Bangkwang Prison', 'Pay Off The Guards At Bangkwang Prison'], BANGKOK],
+    [[43, 46], ['Hijack A Boat Load Of Electronics', 'Hijack A Boat Load Of Electronics'], BANGKOK],
+    [[49, 52], ['Steal Shipping Manifests', 'Steal Shipping Manifests'], BANGKOK],
+    [[62, 65], ['Establish Contact With A CIA Agent', 'Establish Contact With A CIA Agent'], BANGKOK],
+    [[68, 71], ['Betray Commander Chang and the UWSA', 'Betray Commander Chang and the UWSA'], BANGKOK],
+    [[81, 84], ['Meet With Boss Matsumura\'s Advisor', 'Meet With Boss Matsumura\'s Advisor'], BANGKOK],
+    [[87, 90], ['Talk With A Police Insider About Matsumura', 'Talk With A Police Insider About Matsumura'], BANGKOK],
+    [[100, 103], ['Intimidate Wealthy Expatriates', 'Intimidate Wealthy Foreign Expatriates'], BANGKOK],
+    [[106, 109], ['Talk With Wei\'s Disloyal Enforcers', 'Talk With Wei\'s Disloyal Enforcers'], BANGKOK]
+  );
+
   var requirementJob = new Array(
     // Item, Job, City
     ['Liquor', 'Distill Some Liquor',NY],
@@ -1386,20 +1407,33 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // NOTE: "target" can be a regular expression. If the array element
     //       is a string, it is compared for a pattern match.
     var returnArray = [];
-    for (var i = 0, iLength = this.length; i<iLength; ++i) {
-      if (typeof(target) == 'function' &&
-          typeof(this[i][index]) == 'string') {
+    var checkArray = function (exp, item) {
+      if (typeof(exp) == 'function' &&
+          typeof(item) == 'string') {
         // Assume target is a regex to be matched against the string.
-        if (target.test(this[i][index])) {
-          returnArray.push(i);
+        if (target.test(item)) {
+          return true;
         }
-      } else if (this[i][index] === target) {
+      } else if (item === exp) {
+        return true;
+      // Case insensitive checking
+      } else if (typeof(exp) == 'string' && item.toLowerCase() == exp.toLowerCase()) {
+        return true;
+      }
+      return false;
+    }
+
+    for (var i = 0, iLength = this.length; i<iLength; ++i) {
+      if (typeof(this[i][index]) == 'object') {
+        for (var j = 0, jLength = this[i][index].length; j < jLength; ++j) {
+          if (checkArray(target, this[i][index][j])) {
+            returnArray.push(i);
+            break;
+          }
+        }
+      } else if (checkArray(target, this[i][index])) {
         returnArray.push(i);
       }
-
-      // Case insensitive checking
-      //if (typeof(target) == 'string' && this[i][index].toLowerCase() == target.toLowerCase()) {
-      //  returnArray.push(i);
     }
     return returnArray.length? returnArray : false;
   }
@@ -3968,7 +4002,7 @@ function saveSettings() {
   // Save "Choose Sides settings
   for (i = 0, iLength=cities.length; i < iLength; ++i) {
     if (cities[i][CITY_SIDES].length > 0) {
-      var id = 'side' + cities[i][CITY_NAME];
+      var id = cities[i][CITY_SIDE_NAME];
       for (var j = 0, jLength = cities[i][CITY_SIDES].length; j < jLength; ++j) {
         GM_setValue(id, document.getElementById(id).selectedIndex);
       }
@@ -4888,7 +4922,7 @@ function createGeneralTab() {
   for (i = 0, iLength=cities.length; i < iLength; ++i) {
     var sideOpt;
     if (cities[i][CITY_SIDES].length > 0) {
-      id = 'side' + cities[i][CITY_NAME];
+      id = cities[i][CITY_SIDE_NAME];
       makeElement('label', rhs).appendChild(document.createTextNode(' ' + cities[i][CITY_NAME] + ' '));
       sideOpt = makeElement('select', rhs, {'id':id});
 
@@ -6944,36 +6978,21 @@ function innerPageChanged(justPlay) {
 }
 
 function chooseSides() {
-  // Bangkok Side-Handling
-  var choiceJobs = new Array (
-                    // Yakuza job no, Triad job no, Yakuza job name, Triad job name
-                    [5, 8, 'Meet A Gang\'s Rep In A Go-Go Bar', 'Meet A Gang\'s Rep In A Go-Go Bar'],
-                    [11, 14, 'Intercept An Ammo Shipment', 'Intercept An Ammo Shipment'],
-                    [24, 27, 'Set Up A Phony Business', 'Set Up A Phony Business'],
-                    [30, 33, 'Pay Off The Guards At Bangkwang Prison', 'Pay Off The Guards At Bangkwang Prison'],
-                    [43, 46, 'Hijack A Boat Load Of Electronics', 'Hijack A Boat Load Of Electronics'],
-                    [49, 52, 'Steal Shipping Manifests', 'Steal Shipping Manifests'],
-                    [62, 65, 'Establish Contact With A CIA Agent', 'Establish Contact With A CIA Agent'],
-                    [68, 71, 'Betray Commander Chang and the UWSA', 'Betray Commander Chang and the UWSA'],
-                    [81, 84, 'Meet With Boss Matsumura\'s Advisor', 'Meet With Boss Matsumura\'s Advisor'],
-                    [87, 90, 'Talk With A Police Insider About Matsumura', 'Talk With A Police Insider About Matsumura'],
-                    [100, 103, 'Intimidate Wealthy Expatriates', 'Intimidate Wealthy Foreign Expatriates'],
-                    [106, 109, 'Talk With Wei\'s Disloyal Enforcers', 'Talk With Wei\'s Disloyal Enforcers']
-                   );
-
+  // Side-Handling
   choiceJobs.forEach( function(job) {
     var jobMatch = undefined;
 
-    // Search the missions array for each name on the list above
-    for (var i = 2; i < 4; ++i) {
-      jobMatch = missions.searchArray(job[i], 0)[0];
+    // Search the missions array for each name on the choice jobs
+    for (var i = 0, iLength = job[CHOICE_JOBNAME].length; i < iLength; ++i) {
+      jobMatch = missions.searchArray(job[CHOICE_JOBNAME][i], [0])[0];
       if (jobMatch) break;
     }
 
-    // For Bangkok, simply change the jobNo / jobName based on the above list
+    // Change the jobNo / jobName
     if (jobMatch) {
-      missions[jobMatch][0] = job[2 + GM_getValue('sideBangkok', 0)];
-      missions[jobMatch][2] = job[GM_getValue('sideBangkok', 0)];
+      var sideIndex = GM_getValue(cities[job[CHOICE_CITY]][CITY_SIDE_NAME], 0);
+      missions[jobMatch][0] = job[CHOICE_JOBNAME][sideIndex];
+      missions[jobMatch][2] = job[CHOICE_JOBNO][sideIndex];
     }
   });
 
@@ -10111,9 +10130,25 @@ function goJob(jobno) {
 
   // If job cannot be retrieved by job number, try retrieving by jobName
   if (!elt) {
-    var jobName = missions[GM_getValue('selectMission')][0];
     var jobRow = getJobRow(jobName, innerPageElt);
-    if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
+
+    // If cannot retrieve by this job's name,
+    // also search for jobs from another faction
+    if (!jobRow) {
+      var altNames = choiceJobs.searchArray(jobName, 1)[0];
+      if (altNames != 0 && !altNames) {
+        for (var i = 0, iLength = altNames.length; i < iLength; ++i) {
+          if (jobName == altNames[i]) continue;
+          jobRow = getJobRow(jobName, innerPageElt);
+          if (jobRow) break;
+        }
+      }
+    }
+
+    // Get the action element
+    if (jobRow) {
+      elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
+    }
   }
 
   if (elt) {
