@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.88
-// @build       272
+// @build       273
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.88',
-  build: '272',
+  build: '273',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2383,8 +2383,8 @@ function canMission() {
   if (isGMChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
 
-    var availableJobs = eval(GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})'));
-    var masteredJobs = eval(GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})'));
+    var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})') + ')');
+    var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})') + ')');
     var expLeft = lvlExp - curExp;
     var ratio = Math.round(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
@@ -4138,8 +4138,8 @@ function unPause() {
   }
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', "({0:{},1:{},2:{},3:{}})");
-  GM_setValue('availableJobs', "({0:{},1:{},2:{},3:{}})");
+  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{}})');
+  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{}})');
 
   // Update the running state.
   GM_setValue('isRunning', true);
@@ -8067,8 +8067,8 @@ function customizeNewJobs() {
   var availableJobs = eval('({0:{},1:{},2:{},3:{}})');
   var masteredJobs = eval('({0:{},1:{},2:{},3:{}})');
   try {
-    availableJobs = eval(GM_getValue('availableJobs'));
-    masteredJobs = eval(GM_getValue('masteredJobs'));
+    availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
+    masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
   } catch (ex) {
     // ignore
   }
@@ -8231,8 +8231,8 @@ function customizeJobs() {
   var availableJobs = eval('({0:{},1:{},2:{},3:{}})');
   var masteredJobs = eval('({0:{},1:{},2:{},3:{}})');
   try {
-    availableJobs = eval(GM_getValue('availableJobs'));
-    masteredJobs = eval(GM_getValue('masteredJobs'));
+    availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
+    masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
   } catch (ex) {
     // ignore
   }
@@ -8744,7 +8744,7 @@ function jobCombo(element) {
   var i;
   if (isGMChecked('multipleJobs')) {
     // Cycle jobs with the same ratio
-    var availableJobs = eval(GM_getValue('availableJobs', "({0:{},1:{},2:{},3:{}})"));
+    var availableJobs = eval('(' + GM_getValue('availableJobs', "{0:{},1:{},2:{},3:{}}") + ')');
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var cycle_jobs = new Object();
 
