@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.95
-// @build       282
+// @version     1.0.96
+// @build       283
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.95',
-  build: '282',
+  version: '1.0.96',
+  build: '283',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7044,16 +7044,16 @@ function innerPageChanged(justPlay) {
 function chooseSides() {
   // Side-Handling
   choiceJobs.forEach( function(job) {
-    var jobMatch = undefined;
+    var jobMatch;
 
     // Search the missions array for each name on the choice jobs
     for (var i = 0, iLength = job[CHOICE_JOBNAME].length; i < iLength; ++i) {
       jobMatch = missions.searchArray(job[CHOICE_JOBNAME][i], [0])[0];
-      if (jobMatch) break;
+      if (!isNaN(jobMatch)) break;
     }
 
     // Change the jobNo / jobName
-    if (jobMatch) {
+    if (!isNaN(jobMatch)) {
       var sideIndex = GM_getValue(cities[job[CHOICE_CITY]][CITY_SIDE_NAME], 0);
       missions[jobMatch][0] = job[CHOICE_JOBNAME][sideIndex];
       missions[jobMatch][2] = job[CHOICE_JOBNO][sideIndex];
@@ -8181,7 +8181,7 @@ function customizeNewJobs() {
 
     // Skip jobs not in missions array
     var jobMatch = missions.searchArray(jobName, 0)[0];
-    if (jobMatch != 0 && !jobMatch) {
+    if (isNaN(jobMatch)) {
       addToLog('warning Icon', jobName + ' not found in missions array. ');
       continue;
     }
@@ -8347,10 +8347,10 @@ function customizeJobs() {
 
       // Skip jobs not in missions array
       var jobMatch = missions.searchArray(jobName, 0)[0];
-      if (jobMatch != 0 && !jobMatch) {
+      if (isNaN(jobMatch)) {
         if (!/Level[\s\w]+Master/.test(jobName)) {
           var choiceMatch = choiceJobs.searchArray(jobName,1)[0];
-          if (choiceMatch != 0 && !choiceMatch)
+          if (isNaN(choiceMatch))
             addToLog('warning Icon', jobName + ' not found in missions array.');
         }
         continue;
@@ -8914,7 +8914,7 @@ function jobLoot(element) {
     var jobResult;
     for (i = 0, numItems=items.length; i < numItems; ++i) {
       jobResult = requirementJob.searchArray(items[i], 0);
-      if (jobResult === false) {
+      if (isNaN(jobResult)) {
         addToLog('warning Icon', 'BUG DETECTED: ' + items[i] + ' not found in requirementJob array.');
       } else {
         if (typeof(requirementJob[jobResult]) != 'undefined' &&
@@ -10202,7 +10202,7 @@ function goJob(jobno) {
     // also search for jobs from another faction
     if (!jobRow) {
       var altNames = choiceJobs.searchArray(jobName, 1)[0];
-      if (altNames != 0 && !altNames) {
+      if (!isNaN(altNames)) {
         for (var i = 0, iLength = altNames.length; i < iLength; ++i) {
           if (jobName == altNames[i]) continue;
           jobRow = getJobRow(jobName, innerPageElt);
