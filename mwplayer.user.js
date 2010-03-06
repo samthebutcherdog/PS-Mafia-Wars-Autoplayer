@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.93
-// @build       280
+// @version     1.0.94
+// @build       281
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.93',
-  build: '280',
+  version: '1.0.94',
+  build: '281',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8740,7 +8740,7 @@ function getJobRowItems(element){
   }
 
   // Logic to switch to the required job first
-  var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
+  var necessaryItems = $x('.//div[@class="req_item"]//img//span[contains(text(),"NEED")]', currentJobRow);
 
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
