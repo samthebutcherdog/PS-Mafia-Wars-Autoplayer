@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.93
-// @build       279
+// @build       280
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.93',
-  build: '279',
+  build: '280',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5043,10 +5043,10 @@ function createDisplayTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = 'Check this to enable log-filtering';
+  title = 'Check this to enable log filtering';
   id = 'filterLog';
   makeElement('input', lhs, {'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Enable log-filtering:'));
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Enable log filtering:'));
 
   id = 'filterOpt';
   var filterOpt = makeElement('select', rhs, {'id':id});
@@ -7297,8 +7297,8 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = ' #mainDiv {overflow: auto; width: 100%; height: 100%; position: absolute;}'   +
-                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {margin: 0; float: left}' : '')   +
+    var newCSS = 'html { overflow-y: auto !important } #mainDiv {margin-right: auto; margin-left: auto; width: 800px;}'   +
+                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {position: absolute; margin: 0; top: 0px; left: 0px;}' : '')   +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust player updates table when hiding friend ladder
@@ -9001,7 +9001,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Logging length: <strong>' + GM_getValue('autoLogLength') + '</strong><br>' +
         'Log player updates: <strong>' + showIfUnchecked(GM_getValue('logPlayerUpdates')) + '</strong><br>' +
         '&nbsp;&nbsp;-Updates length: <strong>' + GM_getValue('logPlayerUpdatesMax') + '</strong><br>' +
-        'Enable log-filtering: <strong>' + showIfUnchecked(GM_getValue('filterLog')) + '</strong><br>' +
+        'Enable log filtering: <strong>' + showIfUnchecked(GM_getValue('filterLog')) + '</strong><br>' +
         '&nbsp;&nbsp;Filter mode: <strong>' + GM_getValue('filterOpt') + '</strong><br>' +
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
         '&nbsp;&nbsp;Filter fail: <strong>' + GM_getValue('filterFail') + '</strong><br>' +
