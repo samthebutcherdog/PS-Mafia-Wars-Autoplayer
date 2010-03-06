@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.96
-// @build       283
+// @version     1.0.97
+// @build       284
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.96',
-  build: '283',
+  version: '1.0.97',
+  build: '284',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8740,11 +8740,11 @@ function getJobRowItems(element){
   }
 
   // Logic to switch to the required job first
-  var necessaryItems = $x('.//div[@class="req_item"]//img//span[contains(text(),"NEED")]', currentJobRow);
+  var necessaryItems = $x('.//div[@class="req_item"]//img]', currentJobRow);
 
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
-  if (necessaryItems.length > 0) {
+  if (necessaryItems.length > 0 && currentJob != 'Overtake Phone Central') {
 
     // Save the current job for later. The current job should not already
     // exist in the list, so check first.
