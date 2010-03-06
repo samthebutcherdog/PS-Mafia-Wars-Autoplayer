@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.94
-// @build       281
+// @version     1.0.95
+// @build       282
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.94',
-  build: '281',
+  version: '1.0.95',
+  build: '282',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1112,9 +1112,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     //['Kill A Local Gang Leader for the Mafiya',47,7,1,MOSCOW,63],
     // CHOICE RESULT (Vory)
     ['Collect The Ransom',50,5,1,MOSCOW,64],
-    //['Receive Vory Intel On Dmitri',40,6,1,MOSCOW,54],
+    ['Receive Vory Intel On Dmitri',40,6,1,MOSCOW,54],
     // CHOICE RESULT (Mafia)
-    ['Collect the Hit Payoff',56,8,1,MOSCOW,76],
+    //['Collect the Hit Payoff',56,8,1,MOSCOW,76],
     //['Buy Mafiya Intel On Dmitri',52,9,1,MOSCOW,74],
     //
     ['Threaten A Gang\'s Supplier',58,10,1,MOSCOW,79],
@@ -1130,9 +1130,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     //['Abduct A Candidate\'s Wife For the Mafiya',66,20,2,MOSCOW,89],
     // CHOICE RESULT (Vory)
     ['Extract A Favor From The Winner',97,18,2,MOSCOW,128],
-    //['Catch Karpov Accepting A Bribe',77,19,2,MOSCOW,105],
+    ['Catch Karpov Accepting A Bribe',77,19,2,MOSCOW,105],
     // CHOICE RESULT (Mafia)
-    ['"Convince" The Candidate To Withdraw',90,21,2,MOSCOW,126],
+    //['"Convince" The Candidate To Withdraw',90,21,2,MOSCOW,126],
     //['Kill An Investigative Reporter',75,22,2,MOSCOW,107],
     //
     ['Pay Off The Port Authority In Arkhangelsk',57,23,2,MOSCOW,77],
@@ -1148,9 +1148,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     //['Execute A Bank Guard During Your Escape',82,37,3,MOSCOW,112],
     // CHOICE RESULT (Vory)
     ['Use The Guard\'s Keys To Access the Bank Armory',105,35,3,MOSCOW,140],
-    //['"Borrow" The Guard\'s Uniform After Releasing Him',88,36,3,MOSCOW,117],
+    ['"Borrow" The Guard\'s Uniform After Releasing Him',88,36,3,MOSCOW,117],
     // CHOICE RESULT (Mafia)
-    ['Steal The Bank President\'s Car Keys',99,38,3,MOSCOW,132],
+    //['Steal The Bank President\'s Car Keys',99,38,3,MOSCOW,132],
     //['Strip A Uniform Off The Corpse',91,39,3,MOSCOW,121],
     //
     ['Blackmail A Secretary For An Exec\'s Itinerary',96,40,3,MOSCOW,129],
@@ -1165,10 +1165,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     //['Travel To The Volga Military District',118,50,4,MOSCOW,161],
     // CHOICE RESULT (Vory)
     ['Rob A Troop Convoy',108,48,4,MOSCOW,143],
-    //['Intercept The Base\'s Pay Shipment',105,49,4,MOSCOW,143],
+    ['Intercept The Base\'s Pay Shipment',105,49,4,MOSCOW,143],
     // CHOICE RESULT (Mafia)
     ['Arrange The Sale Of Weapons-Grade Explosives',119,51,4,MOSCOW,158],
-    //['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
+    ['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
     //
     ['Make Connections With An Arms Dealer',123,53,4,MOSCOW,168],
     ['Transport Some Stolen Military Hardware',125,54,4,MOSCOW,165],
@@ -1179,12 +1179,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Hunt Down A Ural Liberation Front Contact',215,63,5,MOSCOW,230],
     // CHOICE POINT (Vory = 64, Mafia = 67)
     ['Infiltrate The ULF Cell',132,64,5,MOSCOW,181],
-    //['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
+    ['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
     // CHOICE RESULT (Vory)
     ['Help "Plan" The Next Attack',121,65,5,MOSCOW,160],
-    //['Sabotage The Plan From The Inside',127,66,5,MOSCOW,174],
+    ['Sabotage The Plan From The Inside',127,66,5,MOSCOW,174],
     // CHOICE RESULT (Mafia)
-    ['Kill A Lookout',127,68,5,MOSCOW,170],
+    //['Kill A Lookout',127,68,5,MOSCOW,170],
     //['Stop The ULF Attack',131,69,5,MOSCOW,180],
     //
     ['Torture A ULF Lieutenant',120,70,5,MOSCOW,164],
@@ -1199,9 +1199,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     //['Burn Down A Vory Safehouse',136,80,6,MOSCOW,188],
     // CHOICE RESULT (Vory)
     ['Hijack A Mafiya Cargo',134,78,6,MOSCOW,179],
-    //['Threaten A Mafiya Moneyman\'s Family',128,79,6,MOSCOW,176],
+    ['Threaten A Mafiya Moneyman\'s Family',128,79,6,MOSCOW,176],
     // CHOICE RESULT (Mafia)
-    ['Hit A Vory Nightclub',128,81,6,MOSCOW,171],
+    //['Hit A Vory Nightclub',128,81,6,MOSCOW,171],
     //['Break Into An Architect\'s Office',134,82,6,MOSCOW,185],
     //
     ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
