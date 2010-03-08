@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.99
-// @build       288
+// @build       289
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.99',
-  build: '288',
+  build: '289',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1155,6 +1155,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Blackmail A Secretary For An Exec\'s Itinerary',96,40,3,MOSCOW,129],
     ['Dispose Of A RossijaBanc Exec At Sea',89,41,3,MOSCOW,118],
     ['Replace A Guard With Your Own Man',118,42,3,MOSCOW,165],
+    ['"Fire" Bank President Gregor Belikov',100,43,3,MOSCOW,100],
     // MOSCOW EPISODE 4
     ['Manage An Escort Service Catering to Soldiers',111,44,4,MOSCOW,151],
     ['Support The Habit Of A Procurement Officer',125,45,4,MOSCOW,170],
@@ -1166,12 +1167,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Rob A Troop Convoy',108,48,4,MOSCOW,143],
     ['Intercept The Base\'s Pay Shipment',105,49,4,MOSCOW,143],
     // CHOICE RESULT (Mafia)
-    ['Arrange The Sale Of Weapons-Grade Explosives',119,51,4,MOSCOW,158],
-    ['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
+    //['Arrange The Sale Of Weapons-Grade Explosives',119,51,4,MOSCOW,158],
+    //['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
     //
     ['Make Connections With An Arms Dealer',123,53,4,MOSCOW,168],
     ['Transport Some Stolen Military Hardware',125,54,4,MOSCOW,165],
     ['Buy Off The General\'s Command Team',134,55,4,MOSCOW,188],
+    ['Forcibly Demote General Osipov',100,56,4,MOSCOW,100],
     // MOSCOW EPISODE 5
     ['Stop A Terrorist Attack In Moscow',116,61,5,MOSCOW,159],
     ['Discover Who Was Responsible',124,62,5,MOSCOW,170],
@@ -1189,6 +1191,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Torture A ULF Lieutenant',120,70,5,MOSCOW,164],
     ['Look For The Boss\' Mountain Hideout',135,71,5,MOSCOW,180],
     ['Start An Avalanche Above The Terrorist Camp',145,72,5,MOSCOW,205],
+    ['Battle Sonya "The Wolf" Bassinov',100,73,5,MOSCOW,100],
     // MOSCOW EPISODE 6
     ['Foil The Sabotage Of Your Moscow Holdings',130,74,6,MOSCOW,180],
     ['Acquire Classified Files On Crime Syndicates',122,75,6,MOSCOW,169],
@@ -1206,6 +1209,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
     ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
     ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
+    ['Take Out Viktor "Sibirchik" Titov',100,86,6,MOSCOW,100],
     // BANGKOK EPISODE 1
     ['Move Stolen Art Through Suvarnabhumi Airport',71,1,1,BANGKOK,111],
     ['Show A Cocky Biker Who\'s In Charge',63,2,1,BANGKOK,101],
@@ -1304,9 +1308,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Dispose Of Mountain Master Wei',0,113,6,BANGKOK,0]                       // BOOS JOB
   );
 
-  // Load the missions array from previously saved value
+  // Load the missions array from previously saved value if no new jobs are inserted
   if (!isGMUndefined('missions')) {
-    missions = eval ('(' + GM_getValue('missions') + ')');
+    var savedMissions = eval ('(' + GM_getValue('missions') + ')');
+    missions = (savedMissions.length < missions.length) ? missions : savedMissions;
   }
 
   var missionTabs = new Array(
