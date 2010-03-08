@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.99
-// @build       289
+// @build       290
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.99',
-  build: '289',
+  build: '290',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1308,10 +1308,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Dispose Of Mountain Master Wei',0,113,6,BANGKOK,0]                       // BOOS JOB
   );
 
-  // Load the missions array from previously saved value if no new jobs are inserted
+  // Load the missions array from previously saved value
   if (!isGMUndefined('missions')) {
     var savedMissions = eval ('(' + GM_getValue('missions') + ')');
-    missions = (savedMissions.length < missions.length) ? missions : savedMissions;
+    missions = (savedMissions.length != missions.length) ? missions : savedMissions;
   }
 
   var missionTabs = new Array(
