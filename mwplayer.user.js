@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.98
-// @build       285
+// @build       286
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.98',
-  build: '285',
+  build: '286',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7887,7 +7887,7 @@ function customizeProfile() {
         this.buildAnchor( { 'AnchorText':'Add to Mafia',
                             'URLSegment': 'xw_controller=war&'+
                                           'xw_action=add&'+
-                                          'xw_city=+ (city + 1) +&'+
+                                          'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
                                           'friend_id=' + remoteuserid});
@@ -7907,7 +7907,7 @@ function customizeProfile() {
         this.buildAnchor( { 'AnchorText':'Promote',
                             'URLSegment': 'xw_controller=group&'+
                                           'xw_action=view&'+
-                                          'xw_city=+ (city + 1) +&'+
+                                          'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
                                           'promote=yes&'+
