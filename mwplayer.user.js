@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.1
-// @build       294
+// @build       295
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.1',
-  build: '294',
+  build: '295',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4490,8 +4490,8 @@ function createSettingsBox() {
 
   // NOTE: Use the 1st line below to center the button bar, or the 2nd line
   //       to put the bar on the left side.
-  //elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; text-align: center'});
-  elt = makeElement('div', settingsBox, {'style':'position: static; width: 100%; text-align: left'});
+  elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; text-align: center'});
+  //elt = makeElement('div', settingsBox, {'style':'position: static; width: 100%; text-align: left'});
 
   var tabNav = makeElement('div', elt, {'id':'tabNav', 'style':'position: static; display: inline-block; background: transparent repeat-x scroll 0 0; border: 1px solid #AAAAAA; fontsize: 13px; line-height: 28px; '});
     var generalTabLink = makeElement('div', tabNav, {'class':'selected', 'id':'General_Tab'});
@@ -6249,7 +6249,7 @@ function createAboutTab() {
   var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 10px; font-size: 18px; font-weight: bold;'});
   versionInfo.appendChild(document.createTextNode('Version ' + SCRIPT.version + '  Build ' + SCRIPT.build));
 
-  var devs = makeElement('div', aboutTab, {'style': 'top: 50px; left: 10px; font-size: 12px; font-weight: bold;'});
+  var devs = makeElement('div', aboutTab, {'style': 'top: 50px; width: 550px; left: 10px; font-size: 12px; font-weight: bold;'});
   devs.appendChild(document.createTextNode('Contributors:'));
   makeElement('br', devs);
 
