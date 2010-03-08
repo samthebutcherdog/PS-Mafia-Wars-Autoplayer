@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.98
-// @build       287
+// @version     1.0.99
+// @build       288
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.98',
-  build: '287',
+  version: '1.0.99',
+  build: '288',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -830,7 +830,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   var settingsOpen = false;
   var statsOpen = false;
-  var didJobCalculations = false;
   var scratchpad = document.createElement('textarea');
   var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
@@ -977,7 +976,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   // Define all jobs. The array elements are:
-  // job description, unadjusted energy cost, job number, tab number, city, unadjusted exp payout
+  // job description, energy cost, job number, tab number, city, exp payout
   var missions = new Array(
     ['Chase Away Thugs',1,1,1,NY,1],
     ['Rob a Drug Runner',3,2,1,NY,3],
@@ -1304,6 +1303,11 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Attack Wei\'s Gambling Halls',96,112,6,BANGKOK,155],                     // FINALE
     ['Dispose Of Mountain Master Wei',0,113,6,BANGKOK,0]                       // BOOS JOB
   );
+
+  // Load the missions array from previously saved value
+  if (!isGMUndefined('missions')) {
+    missions = eval ('(' + GM_getValue('missions') + ')');
+  }
 
   var missionTabs = new Array(
     // NEW YORK
@@ -1659,13 +1663,6 @@ function doAutoPlay () {
       health < maxHealth &&
       (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
     if (autoHeal()) return;
-  }
-
-  // Check top mafia bonus
-  if (running && (isGMUndefined('selectEnergyBonus'))) {
-    getTopMafiaInfo();
-    Autoplay.start();
-    return;
   }
 
   // Determine whether a job and/or fight/hit could be attempted.
@@ -2421,41 +2418,16 @@ function autoStat() {
   }
 }
 
-// Calculate job cost and reward
-function calcJobinfo() {
-  var energyBonus = 1 - (GM_getValue('selectEnergyBonus', 0) / 100);
-  var expBonusMultiplier = 1 + (GM_getValue('selectExpBonus', 0) / 100);
-  missions.forEach(function(mission) {
-
-    var cost = mission[1];
-    if (cost > 5) {
-      // Adjust for energy bonus.
-      cost = Math.floor(cost * energyBonus);
-    }
-    var reward = mission[5];
-    if (isGMChecked('hasPrivateIsland')) {
-      // Adjust for private island.
-      reward = Math.round(reward * 1.05);
-    }
-    // Adjust for mastermind.
-    reward = Math.floor(reward * expBonusMultiplier);
-    mission[6] = reward;
-    mission[8] = cost;
-  });
-  didJobCalculations = true;
-}
-
 // Get reward to cost ratio:
 function calcJobratio(job) {
-  if (!didJobCalculations) calcJobinfo();
-  return Math.round(missions[job][6] / missions[job][8] * 100) / 100;
+  var ratio = Math.round(missions[job][5] / missions[job][1] * 100) / 100;
+  return isNaN(ratio) ? 0 : ratio;
 }
 
 // Retreive if and how much energy can be salvaged for the next level (eg after spending an energy pack)
 function canSalvageEnergy(job) {
   if (energy <= maxEnergy) return false;
-  if (!didJobCalculations) calcJobinfo();
-  var amount = energy - (Math.ceil((lvlExp - curExp) / missions[job][6]) * missions[job][8]) - maxEnergy;
+  var amount = energy - (Math.ceil((lvlExp - curExp) / missions[job][5]) * missions[job][1]) - maxEnergy;
   if (amount > 0) return amount;
   else return false;
 }
@@ -2463,7 +2435,6 @@ function canSalvageEnergy(job) {
 function canMission() {
   if (!isGMChecked('autoMission')) return false;
 
-  if (!didJobCalculations) calcJobinfo();
   var i, job;
   if (isGMChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
@@ -2504,10 +2475,10 @@ function canMission() {
       }
 
       // Determine the job's experience-to-energy ratio.
-      mission[7] = calcJobratio(job);
-      if (mission[8] <= energy) {
+      if (isNaN(mission[6])) mission[6] = calcJobratio(job);
+      if (mission[1] <= energy) {
         enoughEnergy = true;
-        if (mission[6] >= expLeft) {
+        if (mission[5] >= expLeft) {
           singleJobLevelUp.push(job);
           singleJobLevelUpPossible = true;
         }
@@ -2525,14 +2496,14 @@ function canMission() {
       multiple_jobs_ratio_sorted.push(job);
     }
 
-    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][7] - missions[a][7]; });
+    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][6] - missions[a][6]; });
     if (!enoughEnergy) return false;
 
     var doJob;
 
     // Don't do expBurners or biggest exp job if energy can be salvaged
     if (singleJobLevelUp.length > 0 && !canSalvage) {
-      singleJobLevelUp.sort(function(a, b) { return missions[b][6] - missions[a][6]; });
+      singleJobLevelUp.sort(function(a, b) { return missions[b][5] - missions[a][5]; });
       // One job is enough to level up. Pick the one that pays the most.
       doJob = singleJobLevelUp[0];
 
@@ -2540,8 +2511,8 @@ function canMission() {
         // Burn up exp before leveling up to maximize energy
         for (i = 0, iLength=expBurners.length; i < iLength; ++i) {
           var expBurner = expBurners[i];
-          if ( (energy - missions[singleJobLevelUp[0]][8]) > missions[expBurner][8] &&
-             expLeft > Math.floor(missions[expBurner][6] * 1.5) ) {
+          if ( (energy - missions[singleJobLevelUp[0]][1]) > missions[expBurner][1] &&
+             expLeft > Math.floor(missions[expBurner][5] * 1.5) ) {
             doJob = expBurner;
             break;
           }
@@ -2550,8 +2521,8 @@ function canMission() {
     } else {
       // Can't level up. Pick a job we can do whose ratio is high enough.
       for (i = 0; i < multiple_jobs_ratio_sorted.length; i++) {
-        if (energy >= missions[multiple_jobs_ratio_sorted[i]][8] &&
-            ratio <= missions[multiple_jobs_ratio_sorted[i]][7]) {
+        if (energy >= missions[multiple_jobs_ratio_sorted[i]][1] &&
+            ratio <= missions[multiple_jobs_ratio_sorted[i]][6]) {
           jobs_selection.push(multiple_jobs_ratio_sorted[i]);
         }
       }
@@ -2580,13 +2551,13 @@ function canMission() {
     }
   }
 
-  if (energy < calcEnergyCost()) {
-    DEBUG('Skipping jobs: energy=' + energy + ', cost=' + calcEnergyCost());
+  if (energy < missions[GM_getValue('selectMission', 1)][1]) {
+    DEBUG('Skipping jobs: energy=' + energy + ', cost=' + missions[GM_getValue('selectMission', 1)][1]);
     return false;
   }
 
   // If spending energy will set energy below Energy floor, skip jobs
-  var nextJobEnergy =  missions[GM_getValue('selectMission', 1)][8];
+  var nextJobEnergy =  missions[GM_getValue('selectMission', 1)][1];
   if (energy - nextJobEnergy < SpendEnergy.floor && !SpendEnergy.canBurn) {
     DEBUG('Not spending energy: energy=' + energy +
           ', floor=' + SpendEnergy.floor +
@@ -3642,55 +3613,6 @@ function hideStatsWindow() {
   }
 }
 
-function upgradeFightRobTab() {
-  // Get the fight/rob tab settings that need to change.
-  var autoFightOn = isGMChecked('autoFight');
-  var useFightList = isGMChecked('rFightList');
-  var list = GM_getValue('fightList', '');
-  var levelMax = parseInt(GM_getValue('fightLevel', 100));
-  var mafiaMax = parseInt(GM_getValue('fightmafiaSize', 501));
-  var mafiaMin = parseInt(GM_getValue('fightmafiaMinSize', 1));
-  var levelMaxRelative = GM_getValue('fightLevelRelative', 0);
-  var mafiaMaxRelative = GM_getValue('fightMafiaRelative', 0);
-  var mafiaMinRelative = GM_getValue('fightMafiaMinRelative', 0);
-  var avoidNames = GM_getValue('clanMember', 0);
-  var removeStronger = GM_getValue('fightRemoveStronger', 'checked');
-  var loc = NY;
-  if (isGMChecked('fightLocationCUBA')) {
-    loc = CUBA;
-  } else if (isGMChecked('fightLocationMOSCOW')) {
-    loc = MOSCOW;
-  }
-
-  // Spend stamina automatically?
-  if (autoFightOn || autoRobOn) {
-    GM_setValue('staminaSpend', 'checked');
-  }
-
-  // How?
-  if (autoFightOn) {
-    if (useFightList) {
-      GM_setValue('staminaSpendHow', STAMINA_HOW_FIGHT_LIST);
-    } else {
-      GM_setValue('staminaSpendHow', STAMINA_HOW_FIGHT_RANDOM);
-    }
-  }
-
-  // Other settings
-  GM_setValue('fightLocation', loc);
-  GM_setValue('fightLevelMax', levelMax);
-  GM_setValue('fightLevelMaxRelative', levelMaxRelative);
-  GM_setValue('fightMafiaMax', mafiaMax);
-  GM_setValue('fightMafiaMaxRelative', mafiaMaxRelative);
-  GM_setValue('fightMafiaMin', mafiaMin);
-  GM_setValue('fightMafiaMinRelative', mafiaMinRelative);
-  GM_setValue('fightAvoidNames', avoidNames);
-  GM_setValue('fightList', list);
-  GM_setValue('fightRemoveStronger', removeStronger);
-  GM_setValue('hitmanLocation', loc);
-  GM_setValue('hitmanAvoidNames', avoidNames);
-}
-
 function handleVersionChange() {
   addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' build ' + SCRIPT.build);
 
@@ -3714,109 +3636,9 @@ function handleVersionChange() {
     GM_setValue('fightStealth', '');
   }
 
-  // Delete sellHour values
-  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 83) {
-    for  (var i = 0, iLength = cities.length; i < iLength; ++i)
-      GM_setValue('sellHour' + cities[i][CITY_NAME], 0);
-  }
-
-  // Change heal location to New York to be on the safe-side
-  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 72) {
-    if (GM_getValue('healLocation') > 2)
-      GM_setValue('healLocation', 0);
-  }
-
-  // In an old version, the bonus had been up to 15%.
-  var val = GM_getValue('selectEnergyBonus');
-  if (val > 11) {
-    GM_setValue('selectEnergyBonus', 11);
-    didJobCalculations = false;
-  }
-
-  // In an old version, there was no cap. But it definitely must be under 100,
-  // and it probably wouldn't work properly with more than 75.
-  val = parseInt(GM_getValue('logPlayerUpdatesMax', '100'));
-  if (isNaN(val) || val > 75) {
-    GM_setValue('logPlayerUpdatesMax', '75');
-  }
-
-  // Heal location used to be radio buttons.
-  if (isGMUndefined('healLocation')) {
-    var loc = NY;
-    if (isGMChecked('healLocationCuba')) {
-      loc = CUBA;
-    } else if (isGMChecked('healLocationMoscow')) {
-      loc = MOSCOW;
-    }
-    GM_setValue('healLocation', loc);
-  }
-
-  // Set the stamina keep and stamina usage threshold
-  if (isGMUndefined('selectStaminaKeepMode')) {
-    GM_setValue('selectStaminaKeep', Math.round((1 - parseInt(GM_getValue('selectStaminaKeep', 0)) * .10)*100));
-    GM_setValue('selectStaminaUse', Math.round((1 - parseInt(GM_getValue('selectStaminaUse', 0)) * .10)*100));
-  }
-
-  // Handle force healing changes
-  if (isGMUndefined('hideInHospital')) {
-    GM_setValue('hideInHospital',0);
-    if (isGMChecked('forceHealOpt2'))
-      GM_setValue('hideInHospital','checked');
-    if (isGMChecked('forceHealOpt1'))
-      GM_setValue('hideInHospital',0);
-  }
-
-  // Handle filtering changes
-  if (isGMUndefined('filterPass')) {
-    // Set to accept patterns filter
-    if (isGMUndefined('filterOpt')) {
-      GM_setValue('filterOpt',0);
-    }
-
-    // Get old accept filter patterns
-    if (GM_getValue('logFilterPass') && GM_getValue('logFilterPass').length > 0) {
-      GM_setValue('filterPass',GM_getValue('logFilterPass'));
-    }
-
-    // Get old accept filter patterns
-    if (GM_getValue('logFilterFail') && GM_getValue('logFilterFail').length > 0) {
-      GM_setValue('filterFail',GM_getValue('logFilterFail'));
-    }
-
-    // Get patterns
-    if (GM_getValue('filterPatterns') && GM_getValue('filterPatterns').length > 0) {
-      if (GM_getValue('filterOpt') == 0)
-        GM_setValue('filterPass',GM_getValue('filterPatterns'));
-      else
-        GM_setValue('filterFail',GM_getValue('filterPatterns'));
-    }
-  }
-
-  // Upgrade fight/rob tab (builds 522 and under) to stamina tab settings.
-  if (isGMUndefined('staminaSpend') && !isGMUndefined('autoFight')) {
-    upgradeFightRobTab();
-    addToLog('process Icon', 'Upgraded stamina tab settings.');
-  }
-
-  // Upgrade Misc Tab settings
-  clearOldCheckBoxStatuValues()
-
   // Update saved script version
   GM_setValue('version', SCRIPT.version);
   GM_setValue('build', SCRIPT.build);
-}
-
-function clearOldCheckBoxStatuValues() {
-  // Clear old checkbox values
-  var i;
-  for (i = 0, iLength=autoStatBases.length; i < iLength; i++)
-    if (isNaN (parseInt (GM_getValue(autoStatBases[i]))))
-      GM_setValue(autoStatBases[i], 0);
-
-  for (i = 0, iLength=autoStatRatios.length; i < iLength; i++)
-    if (isNaN (parseInt (GM_getValue(autoStatRatios[i]))))
-      GM_setValue(autoStatRatios[i], 0);
-
 }
 
 function saveDefaultSettings() {
@@ -4024,10 +3846,6 @@ function saveSettings() {
   GM_setValue('healLocation', document.getElementById('healLocation').value);
   GM_setValue('burnOption', document.getElementById('burnOption').value);
 
-  if (document.getElementById('hasPrivateIsland').checked !== isGMChecked('hasPrivateIsland')) {
-    didJobCalculations = false;
-  }
-
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks',
                             'autoMission','autoBank','autoBankMoscow','allowEnergyToLevelUp',
@@ -4036,10 +3854,10 @@ function saveSettings() {
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
-                            'hasHelicopter','hasPrivateIsland','hasGoldenThrone','isManiac',
-                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','idleInCity',
-                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','hideOffer',
-                            'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok', 'collectNYTake',
+                            'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
+                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','collectNYTake',
+                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
+                            'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok',
                             'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
@@ -4254,11 +4072,6 @@ function unPause() {
   Autoplay.fx = goHome;
   Autoplay.delay = 150;
   Autoplay.start();
-}
-
-function calcEnergyCost() {
-  if (!didJobCalculations) calcJobinfo();
-  return missions[GM_getValue('selectMission', 1)][8];
 }
 
 function isFamily(username) {
@@ -5580,8 +5393,6 @@ function createEnergyTab() {
   var cityno = -1;
   var tabno = -1;
   var divChoice, choiceM, choiceS;
-  //var energyBonus = 1 - (GM_getValue('selectEnergyBonus', 0) / 100);
-  //var expBonusMultiplier = 1 + (GM_getValue('selectExpBonus', 0) / 100);
 
   var chkHandler = function () {
     var eltId = this.getAttribute('chkId');
@@ -5601,7 +5412,6 @@ function createEnergyTab() {
 
   var tmpListArray = getSavedList('selectMissionMultiple');
 
-  if (!didJobCalculations) calcJobinfo();
   for (var i = 0, iLength=missions.length; i < iLength; ++i) {
     var mission = missions[i];
     if (mission[4] != cityno) {
@@ -5645,7 +5455,7 @@ function createEnergyTab() {
     }
 
     // Determine the job's experience-to-energy ratio.
-    var ratio = calcJobratio(i);
+    var ratio = isNaN(mission[6]) ? calcJobratio(i) : mission[6];
 
     // Add a row for the job.
     id = missions[i][0];
@@ -5778,11 +5588,6 @@ function createEnergyTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'hasHelicopter');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Helicopter  '));
-  title = 'Check this if you were awarded the Private Island for mastering all Underboss jobs.';
-  id = 'hasPrivateIsland';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'hasPrivateIsland');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Private Island  '));
   title = 'Check this if you were awarded the Golden Throne for mastering all Boss jobs.';
   id = 'hasGoldenThrone';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'hasGoldenThrone');
@@ -7000,8 +6805,6 @@ function innerPageChanged(justPlay) {
       autoWishlist();
     }
   }
-
-  getTopMafiaInfo(true);
 
   // Customize the display.
   if (!justPlay) {
@@ -8249,9 +8052,7 @@ function customizeNewJobs() {
     makeElement('span', costElt, {'style':'color:green; font-size: 10px'})
       .appendChild(document.createTextNode(timeTxt));
 
-    missions[jobMatch][6] = reward;
-    missions[jobMatch][7] = ratio;
-    missions[jobMatch][8] = cost;
+    updateJobInfo(jobMatch, cost, reward, ratio);
 
     // Keep track of the best & worst payoffs.
     if (ratio > bestRatio) {
@@ -8399,9 +8200,7 @@ function customizeJobs() {
       makeElement('br', costElt.parentNode);
       makeElement('span', costElt.parentNode, {'style':'color:#666666; font-size: 10px'}).appendChild(document.createTextNode('Pays ' + ratio + 'x'));
 
-      missions[jobMatch][6] = reward;
-      missions[jobMatch][7] = ratio;
-      missions[jobMatch][8] = cost;
+      updateJobInfo(jobMatch, cost, reward, ratio);
 
       if (moneyElt) {
         var money = parseCash(moneyElt.innerHTML);
@@ -8472,6 +8271,23 @@ function customizeJobs() {
   jobMastery(innerPageElt, false);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
   return true;
+}
+
+function updateJobInfo (jobMatch, cost, reward, ratio) {
+  var missionItem = missions[jobMatch];
+  // If values are not in synch, update mission array
+  if (!isNaN(jobMatch) &&
+      (missionItem[1] != cost ||
+       missionItem[5] != reward ||
+       missionItem[6] != ratio)) {
+
+    missions[jobMatch][1] = cost;
+    missions[jobMatch][5] = reward;
+    missions[jobMatch][6] = ratio;
+
+    // Save joblist
+    GM_setValue('missions', JSON.stringify(missions));
+  }
 }
 
 function tierMastery(jobsFound, jobsMastered, currentTab) {
@@ -8841,13 +8657,13 @@ function jobCombo(element) {
       // Put non-available jobs at the end of the queue
       if (availableJobs[mission[4]][mission[3]] != null &&
           availableJobs[mission[4]][mission[3]].indexOf(parseInt(job)) == -1) {
-        mission[7] = 0;
+        mission[6] = 0;
       }
 
-      if (cycle_jobs[mission[7]] == null) {
-        cycle_jobs[mission[7]] = [];
+      if (cycle_jobs[mission[6]] == null) {
+        cycle_jobs[mission[6]] = [];
       }
-      cycle_jobs[mission[7]].push(multiple_jobs_list[i]);
+      cycle_jobs[mission[6]].push(multiple_jobs_list[i]);
     }
 
     // Rebuild the job list array
@@ -8855,7 +8671,7 @@ function jobCombo(element) {
     for (i in cycle_jobs) {
       if (cycle_jobs[i].length > 1) {
         // Only cycle the current job's ratio group
-        if (missions[GM_getValue('selectMission', 1)][7] == i) {
+        if (missions[GM_getValue('selectMission', 1)][6] == i) {
           cycle_jobs[i].push(cycle_jobs[i].shift());
         }
         for (var n = 0, nLength=cycle_jobs[i].length; n < nLength; ++n) {
@@ -9080,12 +8896,9 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;&nbsp;&nbsp;-Jobs: <strong>' + ratioJobs + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;&nbsp;-Mastery Tier: <strong>' + selectTier + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;&nbsp;-Optimize at end level: <strong>' + showIfUnchecked(GM_getValue('endLevelOptimize')) + '</strong><br>' +
-        'Mastermind bonus: <strong>' + GM_getValue('selectExpBonus') + '%</strong><br>' +
-        'Wheelman savings: <strong>' + GM_getValue('selectEnergyBonus') + '%</strong><br>' +
         'Enable auto-energy pack: <strong>' + showIfUnchecked(GM_getValue('autoEnergyPack')) + '</strong><br>' +
         'Estimated job ratio: <strong>' + GM_getValue('estimateJobRatio') + '</strong><br>' +
         'Has helicopter: <strong>' + showIfUnchecked(GM_getValue('hasHelicopter')) + '</strong><br>' +
-        'Has private island: <strong>' + showIfUnchecked(GM_getValue('hasPrivateIsland')) + '</strong><br>' +
         'Has golden throne: <strong>' + showIfUnchecked(GM_getValue('hasGoldenThrone')) + '</strong><br>' +
         'Is Maniac: <strong>' + showIfUnchecked(GM_getValue('isManiac')) + '</strong><br>' +
         'Auto send energy pack: <strong>' + showIfUnchecked(GM_getValue('sendEnergyPack')) + '</strong><br>' +
@@ -9809,69 +9622,6 @@ function autoGiftWaiting() {
   return false;
 }
 
-// This function will retrieve the top mafia info
-// FIXME: Create a TopMafia object should we need the TopMafia info to persist
-function getTopMafiaInfo(skipAutoplay) {
-
-  // Skip these steps if NOT invoked from doAutoPlay
-  if (!skipAutoplay) {
-    // Load My Mafia
-    if (!onMyMafiaNav()) {
-      Autoplay.fx = goMyMafiaNav;
-      Autoplay.start();
-      return true;
-    }
-
-    // Load My Mafia Tab
-    if (!onMyMafiaTab()) {
-      Autoplay.fx = goMyMafiaTab;
-      Autoplay.start();
-      return true;
-    }
-  }
-
-  if (!onMyMafiaTab()) return false;
-
-  // Get the wheelman bonus.
-  var bonus, elt = xpathFirst('.//span[@class="good" and contains(text(), "Less Energy")]', innerPageElt);
-  if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
-    bonus = parseInt(RegExp.$1);
-    if (bonus && (bonus !== GM_getValue('selectEnergyBonus')) || (isGMUndefined('selectEnergyBonus'))) {
-      GM_setValue('selectEnergyBonus', bonus);
-      DEBUG('Set Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
-      didJobCalculations = false;
-    }
-  } else {
-    if (isGMUndefined('selectEnergyBonus')) {
-      GM_setValue('selectEnergyBonus', 0);
-      addToLog('warning Icon', 'Can\'t find Wheelman bonus, setting Wheelman bonus to ' + GM_getValue('selectEnergyBonus') + '%');
-      didJobCalculations = false;
-    } else {
-      addToLog('warning Icon', 'Can\'t find Wheelman bonus');
-    }
-  }
-
-  // Get the mastermind bonus.
-  elt = xpathFirst('.//span[@class="good" and contains(text(), "More Experience")]', innerPageElt);
-  if (elt && elt.innerHTML.untag().match(/(\d+)%/)) {
-    bonus = parseInt(RegExp.$1);
-    if (bonus && (bonus !== GM_getValue('selectExpBonus')) || (isGMUndefined('selectExpBonus'))) {
-      GM_setValue('selectExpBonus', bonus);
-      DEBUG('Set Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
-      didJobCalculations = false;
-    }
-  } else {
-    if (isGMUndefined('selectExpBonus')) {
-      GM_setValue('selectExpBonus', 0);
-      addToLog('warning Icon', 'Can\'t find Mastermind bonus, setting Mastermind bonus to ' + GM_getValue('selectExpBonus') + '%');
-      didJobCalculations = false;
-    } else {
-      addToLog('warning Icon', 'Can\'t find Mastermind bonus');
-    }
-  }
-  return false;
-}
-
 // This function returns false if nothing was done, true otherwise.
 function propertyBuy() {
   var buyCost = parseInt(GM_getValue('buyCost', 0));
@@ -10182,7 +9932,7 @@ function goJobTab(tabno) {
 function getJobClicks() {
   var numClicks = 1;
   if (isGMChecked('burstJob')){
-    var nextJobXp = missions[GM_getValue('selectMission', 1)][6];
+    var nextJobXp = missions[GM_getValue('selectMission', 1)][5];
     numClicks = GM_getValue('burstJobCount', 1);
     while (((nextJobXp * numClicks) >= ptsToNextLevel) && (numClicks > 1)) numClicks--;
   }
