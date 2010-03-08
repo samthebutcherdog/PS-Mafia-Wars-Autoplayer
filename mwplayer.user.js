@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.1
-// @build       295
+// @version     1.1.2
+// @build       296
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.1',
-  build: '295',
+  version: '1.1.2',
+  build: '296',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1437,7 +1437,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   // Sort requirement jobs by level requirement, ascending
-  requirementJob.sort(function(a, b) { return cities[a[2]][CITY_LEVEL] - cities[b[2]][CITY_LEVEL]; });
+  // FIXME: Change back to do the higher energy jobs first
+  requirementJob.sort(function(a, b) { return cities[b[2]][CITY_LEVEL] - cities[a[2]][CITY_LEVEL]; });
 
   // FIXME: Should this be selectable by users?
   // These jobs pays 5, 3, 2, 1 exp respectively.
