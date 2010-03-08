@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.2
-// @build       296
+// @build       297
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.2',
-  build: '296',
+  build: '297',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -971,6 +971,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Force Heal options
   var healOptions = new Array(
     ['forceHealOpt3','Heal if stamina can be spent'],
+    ['forceHealOpt4','Heal if stamina is full'],
     ['forceHealOpt5','Heal after 5 minutes']
   );
 
@@ -1669,7 +1670,7 @@ function doAutoPlay () {
       isGMChecked('autoHeal') &&
       health < GM_getValue('healthLevel', 0) &&
       health < maxHealth &&
-      ((SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
+      (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
     if (autoHeal()) return;
   }
 
@@ -2647,6 +2648,10 @@ function canForceHeal() {
 
   // Heal when stamina can be spent
   if (isGMChecked('forceHealOpt3') && canSpendStamina(0))
+    return true;
+
+  // Heal when stamina is full
+  if (isGMChecked('forceHealOpt4') && stamina >= maxStamina)
     return true;
 
   // Heal after 5 minutes
@@ -3853,7 +3858,7 @@ function saveSettings() {
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks',
                             'autoMission','autoBank','autoBankMoscow','allowEnergyToLevelUp',
-                            'autoBankCuba','autoHeal','forceHealOpt3','forceHealOpt5',
+                            'autoBankCuba','autoHeal','forceHealOpt3','forceHealOpt4','forceHealOpt5',
                             'hideInHospital','autoStat','autoStatDisable','autoStatAttackFallback',
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
@@ -8811,6 +8816,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
         'Idle in City: <strong>' + showIfUnchecked(GM_getValue('idleInCity')) + '</strong><br>' +
         '&nbsp;&nbsp;Selected city: <strong>' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '</strong><br>' +
