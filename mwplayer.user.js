@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.0.98
-// @build       286
+// @build       287
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.0.98',
-  build: '286',
+  build: '287',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1179,7 +1179,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Hunt Down A Ural Liberation Front Contact',215,63,5,MOSCOW,230],
     // CHOICE POINT (Vory = 64, Mafia = 67)
     ['Infiltrate The ULF Cell',132,64,5,MOSCOW,181],
-    ['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
+    //['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
     // CHOICE RESULT (Vory)
     ['Help "Plan" The Next Attack',121,65,5,MOSCOW,160],
     ['Sabotage The Plan From The Inside',127,66,5,MOSCOW,174],
