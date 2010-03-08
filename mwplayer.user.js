@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.0
-// @build       292
+// @build       293
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.0',
-  build: '292',
+  build: '293',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8506,14 +8506,24 @@ function clickWarListRemove() {
 function getJobRow(jobName, contextNode) {
   var rowElt, conTxt = '';
   try {
-    var jobNameTokens = jobName.replace (/"/g,' ').replace(/'/g, ' ').split(' ');
-    for (var i = 0; i < jobNameTokens.length; ++i) {
-      if (jobNameTokens[i].length > 1) {
-        if (conTxt.length > 0) conTxt += ' and ';
-        conTxt += 'contains(., "'+jobNameTokens[i]+'")';
-      }
+    var jobMatch = missions.searchArray(jobName, 0)[0];
+    if (!isNaN(jobMatch)) {
+      // Retrieve by job number first
+      rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + missions[jobMatch][2] + '&")]', contextNode);
+      if (!rowElt) rowElt = xpathFirst('.//div[@id="new_user_jobs"]//a[contains(@onclick, "job=' + missions[jobMatch][2] + '&")]', contextNode);
     }
-    rowElt = xpathFirst('.//table[@class="job_list"]//tr//td[contains(@class,"job_name") and '+conTxt+']', contextNode);
+
+    if (!rowElt) {
+      // Tokenize job name words
+      var jobNameTokens = jobName.replace (/"/g,' ').replace(/'/g, ' ').split(' ');
+      for (var i = 0; i < jobNameTokens.length; ++i) {
+        if (jobNameTokens[i].length > 1) {
+          if (conTxt.length > 0) conTxt += ' and ';
+          conTxt += 'contains(., "'+jobNameTokens[i]+'")';
+        }
+      }
+      rowElt = xpathFirst('.//table[@class="job_list"]//tr//td[contains(@class,"job_name") and '+conTxt+']', contextNode);
+    }
 
     if (rowElt)
       while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
@@ -8814,6 +8824,7 @@ function debugDumpSettings() {
         'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
         'Spend all: <strong>' + showIfUnchecked(GM_getValue('burnFirst')) + ' == ' + burnModes[GM_getValue('burnOption')] + '</strong><br>' +
         'Choose Sides: <br>' +
+        '&nbsp;&nbsp;Moscow: <strong>' + cities[MOSCOW][CITY_SIDES][GM_getValue('sideMoscow', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;Bangkok: <strong>' + cities[BANGKOK][CITY_SIDES][GM_getValue('sideBangkok', 0)] + '</strong><br>' +
         '---------------------Display Tab--------------------<br>' +
         'Enable logging: <strong>' + showIfUnchecked(GM_getValue('autoLog')) + '</strong><br>' +
@@ -9943,18 +9954,13 @@ function getJobClicks() {
 }
 
 function goJob(jobno) {
-  var elt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
-  if (!elt) elt = xpathFirst('.//div[@id="new_user_jobs"]//a[contains(@onclick, "job=' + jobno + '&")]', innerPageElt);
+  // Retrieve the jobRow
   var jobName = missions[GM_getValue('selectMission')][0];
+  var jobRow = getJobRow(jobName, innerPageElt);
 
-  // If job cannot be retrieved by job number, try retrieving by jobName
-  if (!elt) {
-    var jobRow = getJobRow(jobName, innerPageElt);
-
-    // Get the action element
-    if (jobRow) {
-      elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
-    }
+  // Get the action element
+  if (jobRow) {
+    elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
   }
 
   if (elt) {
