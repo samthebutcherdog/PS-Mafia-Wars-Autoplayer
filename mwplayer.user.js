@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.0.99
-// @build       290
+// @version     1.1.0
+// @build       291
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.0.99',
-  build: '290',
+  version: '1.1.0',
+  build: '291',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8565,7 +8565,7 @@ function getJobRowItems(element){
 
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
-  if (necessaryItems.length > 0 && currentJob != 'Overtake Phone Central') {
+  if (necessaryItems.length > 0) {
 
     // Save the current job for later. The current job should not already
     // exist in the list, so check first.
@@ -8577,10 +8577,10 @@ function getJobRowItems(element){
       setSavedList('jobsToDo', jobs);
     }
 
+    var itemsFound = false;
     necessaryItems.forEach(
       function(i){
         var itemFound = false;
-        DEBUG('Missing : ' +i.alt);
         // Try fetching the items from the same city first
         requirementJob.forEach(
           function(j){
@@ -8593,24 +8593,33 @@ function getJobRowItems(element){
           }
         );
 
-        // If none are found, try fetching the items with lower level req
+        // If none are found, try fetching the items from other cities
         if (!itemFound) {
-          for (var x = requirementJob.length - 1; x >= 0; --x) {
-            j = requirementJob[x];
-            // Get requirement with lower level reqs
-            if (level >= cities[j[2]][CITY_LEVEL] && city != j[2] && j[0] == i.alt) {
-              jobs.push(j[1]);
-              items.push(i.alt);
+          requirementJob.forEach(
+            function(j){
+              if (level >= cities[j[2]][CITY_LEVEL] && city != j[2] && j[0] == i.alt) {
+                jobs.push(j[1]);
+                items.push(i.alt);
+                itemFound = true;
+              }
             }
-          }
+          );
         }
+
+        // Set the flag if at least one item is found
+        if (itemFound) itemsFound = true;
+        else DEBUG(i.alt + ' not found in the requirement job array.');
       }
     );
-    setSavedList('itemList', items.unique());
-    setSavedList('jobsToDo', jobs);
 
-    popJob();
-    return true;
+    // At least one item found
+    if (itemsFound) {
+      setSavedList('itemList', items.unique());
+      setSavedList('jobsToDo', jobs);
+
+      popJob();
+      return true;
+    }
   }
 
   // Withdraw money
