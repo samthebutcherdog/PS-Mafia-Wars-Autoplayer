@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.0
-// @build       291
+// @build       292
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.0',
-  build: '291',
+  build: '292',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1437,6 +1437,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Satellite Phone', 'Hijack A Boat Load Of Electronics',BANGKOK]
   );
 
+  // Sort requirement jobs by level requirement, ascending
+  requirementJob.sort(function(a, b) { return cities[a[2]][CITY_LEVEL] - cities[b[2]][CITY_LEVEL]; });
+
   // FIXME: Should this be selectable by users?
   // These jobs pays 5, 3, 2, 1 exp respectively.
   var expBurners = [2, 1, 4, 0];
@@ -2501,10 +2504,10 @@ function canMission() {
       multiple_jobs_ratio_sorted.push(job);
     }
 
-    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][6] - missions[a][6]; });
     if (!enoughEnergy) return false;
 
     var doJob;
+    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][6] - missions[a][6]; });
 
     // Don't do expBurners or biggest exp job if energy can be salvaged
     if (singleJobLevelUp.length > 0 && !canSalvage) {
@@ -8010,7 +8013,7 @@ function customizeNewJobs() {
       // Ignore locked jobs
       if (isJobLocked(currentJob)) {
         // Consider "locked" job as mastered
-        DEBUG('Job ' + jobName + '(' + jobMatch + ') is not available yet. Skipping.');
+        DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
         masteredJobsCount++;
       } else {
         availableJobs[city][currentTab].push(jobMatch);
@@ -8182,7 +8185,7 @@ function customizeJobs() {
         // Ignore locked jobs
         if (isJobLocked(jobAction)) {
           // Consider "locked" job as mastered
-          DEBUG('Job ' + jobName + '(' + jobMatch + ') is not available yet. Skipping.');
+          DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
           masteredJobsCount++;
         } else {
           availableJobs[city][currentTab].push(jobMatch);
@@ -8510,7 +8513,7 @@ function getJobRow(jobName, contextNode) {
         conTxt += 'contains(., "'+jobNameTokens[i]+'")';
       }
     }
-    rowElt = xpathFirst('.//table[@class="job_list"]//tr//td['+conTxt+']', contextNode);
+    rowElt = xpathFirst('.//table[@class="job_list"]//tr//td[contains(@class,"job_name") and '+conTxt+']', contextNode);
 
     if (rowElt)
       while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
@@ -8581,30 +8584,16 @@ function getJobRowItems(element){
     necessaryItems.forEach(
       function(i){
         var itemFound = false;
-        // Try fetching the items from the same city first
+        // Try fetching the items from the job requirement array
         requirementJob.forEach(
           function(j){
-            // Get requirement from the same city
-            if (city == j[2] && j[0] == i.alt) {
+            if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt) {
               jobs.push(j[1]);
               items.push(i.alt);
               itemFound = true;
             }
           }
         );
-
-        // If none are found, try fetching the items from other cities
-        if (!itemFound) {
-          requirementJob.forEach(
-            function(j){
-              if (level >= cities[j[2]][CITY_LEVEL] && city != j[2] && j[0] == i.alt) {
-                jobs.push(j[1]);
-                items.push(i.alt);
-                itemFound = true;
-              }
-            }
-          );
-        }
 
         // Set the flag if at least one item is found
         if (itemFound) itemsFound = true;
@@ -9962,19 +9951,6 @@ function goJob(jobno) {
   if (!elt) {
     var jobRow = getJobRow(jobName, innerPageElt);
 
-    // If cannot retrieve by this job's name,
-    // also search for jobs from another faction
-    if (!jobRow) {
-      var altNames = choiceJobs.searchArray(jobName, 1)[0];
-      if (!isNaN(altNames)) {
-        for (var i = 0, iLength = altNames.length; i < iLength; ++i) {
-          if (jobName == altNames[i]) continue;
-          jobRow = getJobRow(jobName, innerPageElt);
-          if (jobRow) break;
-        }
-      }
-    }
-
     // Get the action element
     if (jobRow) {
       elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
@@ -9985,7 +9961,7 @@ function goJob(jobno) {
     clickAction = 'job';
     suspendBank = false;
     clickBurst (elt, getJobClicks());
-    DEBUG('Clicked job ' + jobno + '.');
+    DEBUG('Clicked to perform job: ' + jobName + '.');
   } else {
     addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
 
