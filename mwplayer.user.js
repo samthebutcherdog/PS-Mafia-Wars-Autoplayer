@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.2
-// @build       297
+// @version     1.1.3
+// @build       298
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.2',
-  build: '297',
+  version: '1.1.3',
+  build: '298',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1438,8 +1438,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   // Sort requirement jobs by level requirement, ascending
-  // FIXME: Change back to do the higher energy jobs first
-  requirementJob.sort(function(a, b) { return cities[b[2]][CITY_LEVEL] - cities[a[2]][CITY_LEVEL]; });
+  requirementJob.sort(function(a, b) { return cities[a[2]][CITY_LEVEL] - cities[b[2]][CITY_LEVEL]; });
 
   // FIXME: Should this be selectable by users?
   // These jobs pays 5, 3, 2, 1 exp respectively.
@@ -1972,6 +1971,7 @@ function autoHeal() {
 }
 
 function autoSellCrates(sellCity) {
+  Autoplay.delay = 0;
   // Go to the correct city.
   if (city != sellCity) {
     Autoplay.fx = function(){goLocation(sellCity)};
@@ -2587,6 +2587,7 @@ function canMission() {
 
 function autoMission() {
   var jobid       = GM_getValue('selectMission', 1);
+  var jobName     = missions[jobid][0];
   var jobno       = missions[jobid][2];
   var tabno       = missions[jobid][3];
   var cityno      = missions[jobid][4];
@@ -2602,16 +2603,33 @@ function autoMission() {
     }
   }
 
+  // Common function if job has failed
+  var doJobFunction = function (jobResult) {
+    if (!jobResult) {
+      addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
+      var jobs = getSavedList('jobsToDo', '');
+      if (jobs.length == 0) {
+        // If no more jobs on the queue, stop automission
+        addToLog('warning Icon', 'Turning off auto mission');
+        GM_setValue('autoMission', 0);
+      } else {
+        // Else Get the next job to perform
+        popJob();
+        goJobsNav();
+      }
+    }
+  }
+
   // Go to the correct city.
   if (city != cityno) {
-    Autoplay.fx = function() { goLocation(cityno); };
+    Autoplay.fx = function() { doJobFunction(goLocation(cityno)); };
     Autoplay.start();
     return;
   }
 
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
-    Autoplay.fx = function() { goJobTab(tabno); };
+    Autoplay.fx = function() { doJobFunction(goJobTab(tabno)); };
     Autoplay.start();
     return;
   }
@@ -2626,7 +2644,7 @@ function autoMission() {
   }
 
   // Do the job
-  Autoplay.fx = function() { goJob(jobno); };
+  Autoplay.fx = function() { doJobFunction(goJob(jobno)); };
   Autoplay.start();
 }
 
@@ -7826,8 +7844,9 @@ function getJobMastery(jobRow, newJobs) {
   // Get the job with the highest percentage in choice point jobs
   var divElts = $x('.//td[@class="job_name job_no_border"]//div[contains(text(),"%")]', jobRow);
   if (divElts) {
-    var masteryPct = 0;
-    for (var i = 0, iLength = divElts.length; i < iLength; ++i) {
+    var iLength = divElts.length;
+    var masteryPct = (iLength == 1) ? 100 : 0;
+    for (var i = 0; i < iLength; ++i) {
       if (divElts[i].innerHTML.match(/(\d+)%/) && parseInt(RegExp.$1) > masteryPct)
         masteryPct = parseInt(RegExp.$1);
     }
@@ -8507,13 +8526,14 @@ function clickWarListRemove() {
 function getJobRow(jobName, contextNode) {
   var rowElt, conTxt = '';
   try {
+    // Retrieve by job number first
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (!isNaN(jobMatch)) {
-      // Retrieve by job number first
-      rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + missions[jobMatch][2] + '&")]', contextNode);
-      if (!rowElt) rowElt = xpathFirst('.//div[@id="new_user_jobs"]//a[contains(@onclick, "job=' + missions[jobMatch][2] + '&")]', contextNode);
+      var jobno = missions[jobMatch][2];
+      rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', contextNode);
     }
 
+    // If no rows found, retrieve by name
     if (!rowElt) {
       // Tokenize job name words
       var jobNameTokens = jobName.replace (/"/g,' ').replace(/'/g, ' ').split(' ');
@@ -8523,9 +8543,10 @@ function getJobRow(jobName, contextNode) {
           conTxt += 'contains(., "'+jobNameTokens[i]+'")';
         }
       }
-      rowElt = xpathFirst('.//table[@class="job_list"]//tr//td[contains(@class,"job_name") and '+conTxt+']', contextNode);
+      rowElt = xpathFirst('.//table[@class="job_list"]//tr//td['+conTxt+']', contextNode);
     }
 
+    // Get the parent TR
     if (rowElt)
       while (rowElt.tagName != "TR") rowElt = rowElt.parentNode;
 
@@ -8533,11 +8554,11 @@ function getJobRow(jobName, contextNode) {
     if (!rowElt)
       rowElt = xpathFirst('.//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix") and '+conTxt+']', contextNode);
 
-    if (!rowElt)
-      return false;
   } catch(ex) {
     addToLog('warning Icon', 'BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + jobName + ']');
   }
+
+  if (!rowElt) return false;
   return rowElt;
 }
 
@@ -9896,10 +9917,11 @@ function goJobsNav() {
   var elt = xpathFirst('//div[@class="nav_link jobs_link"]/a');
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find jobs nav link to click.');
-    return;
+    return false;
   }
   clickElement(elt);
   DEBUG('Clicked to go to jobs.');
+  return true;
 }
 
 function goJobTab(tabno) {
@@ -9907,12 +9929,11 @@ function goJobTab(tabno) {
   var currentTab = currentJobTab();
   if (currentTab == -1) {
     // We're not even on a jobs page yet. Go there.
-    goJobsNav();
-    return;
+    return goJobsNav();
   }
   if (currentTab == tabno) {
     DEBUG('Already on job tab ' + tabno + '.');
-    return;
+    return true;
   }
 
   // No job tab. Make sure we're on the correct job bar.
@@ -9922,11 +9943,11 @@ function goJobTab(tabno) {
     elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&bar=' + barno + '")]', innerPageElt);
     if (!elt) {
       addToLog('warning Icon', 'BUG DETECTED: Can\'t find jobs bar ' + barno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
-      return;
+      return false;
     }
     clickElement(elt);
     DEBUG('Clicked to go to job bar ' + barno + '.');
-    return;
+    return true;
   }
 
   // Handle old and new tab param names
@@ -9937,10 +9958,11 @@ function goJobTab(tabno) {
 
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
-    return;
+    return false;
   }
   clickElement(elt);
   DEBUG('Clicked to go to job tab ' + tabno + '.');
+  return true;
 }
 
 // Get the number of job clicks to attempt
@@ -9960,28 +9982,17 @@ function goJob(jobno) {
   var jobRow = getJobRow(jobName, innerPageElt);
 
   // Get the action element
-  if (jobRow) {
-    elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
-  }
+  var elt;
+  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
 
   if (elt) {
     clickAction = 'job';
     suspendBank = false;
     clickBurst (elt, getJobClicks());
     DEBUG('Clicked to perform job: ' + jobName + '.');
+    return true;
   } else {
-    addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
-
-    var jobs = getSavedList('jobsToDo', '');
-    if (jobs.length == 0) {
-      // If no more jobs on the queue, stop automission
-      addToLog('warning Icon', 'Turning off auto mission');
-      GM_setValue('autoMission', 0);
-    } else {
-      // Else Get the next job to perform
-      popJob();
-      goJobsNav;
-    }
+    return false;
   }
 }
 
@@ -10072,14 +10083,14 @@ function goMoscow() {
 function goLocation(toCity) {
   if (toCity == city) {
     DEBUG('Already in ' + cities[toCity][CITY_NAME] + '.');
-    return;
+    return true;
   }
 
   // Check if level allows traveling to certain cities
   if (level < cities[toCity][CITY_LEVEL]) {
     addToLog('warning Icon', 'WARNING: Current level does not allow travel to ' + cities[toCity][CITY_NAME] + '. ');
     DEBUG('Staying in ' + cities[city][CITY_NAME]);
-    return;
+    return false;
   }
 
   // Find and click the travel element for the given destination.
@@ -10088,11 +10099,12 @@ function goLocation(toCity) {
   if (elt) {
     clickElement(elt);
     DEBUG('Clicked to travel to ' + cities[toCity][CITY_NAME] + '.');
-    return;
+    return true;
   }
 
   addToLog('warning Icon', 'Unable to find ' + cities[toCity][CITY_NAME] +
            ' travel link. ');
+  return false;
 }
 
 //ATK
