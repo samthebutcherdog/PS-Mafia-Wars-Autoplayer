@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.3
-// @build       298
+// @version     1.1.4
+// @build       299
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.3',
-  build: '298',
+  version: '1.1.4',
+  build: '299',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2615,7 +2615,7 @@ function autoMission() {
       } else {
         // Else Get the next job to perform
         popJob();
-        goJobsNav();
+        autoMission();
       }
     }
   }
@@ -2637,7 +2637,7 @@ function autoMission() {
   // Buy requirements first, if any
   if (getJobRowItems(innerPageElt)) {
     if (jobid != GM_getValue('selectMission', 1))
-      Autoplay.fx = goJobsNav;
+      Autoplay.fx = autoMission;
     Autoplay.delay = 0;
     Autoplay.start();
     return;
@@ -5559,23 +5559,23 @@ function createEnergyTab() {
   masterAllJobs.addEventListener('change', handler, false);
   multipleJobs.addEventListener('change', handler, false);
 
-  // Spend energy packs?
+  // Spend buff packs?
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Spend energy packs:'));
+  label.appendChild(document.createTextNode(' Spend buff packs:'));
 
   // Mini packs
-  title = 'Periodically check for mini energy Packs.';
+  title = 'Periodically check for mini buffs.';
   id = 'checkMiniPack';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'checkMiniPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Mini packs '));
 
-  // Full packs
-  title = 'Spend energy packs if it will not waste any energy, as determined by the estimated job ratio setting and your stamina statistics.';
+  // Energy packs
+  title = 'Spend energy packs if it will not waste energy, as determined by the estimated job ratio setting and your stamina statistics.';
   id = 'autoEnergyPack';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'autoEnergyPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
@@ -7324,14 +7324,13 @@ function doQuickClicks() {
 
 // Parse certain messages appearing on the message window
 function doParseMessages() {
-  var msgs = xpathFirst('//table[@class="messages"]');
-  if (msgs) {
-    for (var i = 0, iLength=msgs.firstChild.childNodes.length; i < iLength; ++i) {
-      var currNode = msgs.firstChild.childNodes[i];
-
+  var msgs = $x('//td[@class="message_body"]');
+  if (msgs && msgs.length > 0) {
+    for (var i = 0, iLength=msgs.length; i < iLength; ++i) {
       // Log Minipack kick-off
-      if (/Mini Energy Buff/.test(currNode.innerHTML)) {
-        addToLog('yeah Icon', currNode.innerHTML);
+      if (/Mini[\s\w]+Buff/i.test(msgs[i].innerHTML)) {
+        addToLog('yeah Icon', msgs[i].innerHTML);
+        setGMTime('miniPackTimer', '8 hours');
       }
     }
   }
@@ -9501,7 +9500,6 @@ function autoWarAttack() {
       var betrayFriend = betrayElts[Math.floor(Math.random() * betrayElts.length)];
       Autoplay.fx = function() {
         clickAction = 'war';
-        clickContext = betrayFriend;
         clickElement(betrayFriend);
         DEBUG('Clicked betray friend button.');
       };
@@ -9516,14 +9514,24 @@ function autoWarAttack() {
     helpWar = false;
   }
 
-  // Click the last attack button found
-  var attackElts = xpath('.//div//a[@class="sexy_button"]//span[contains(.,"Attack")]', innerPageElt);
-  if (attackElts && attackElts.snapshotLength > 0) {
-    var warAttackButton = attackElts.snapshotItem(attackElts.snapshotLength-1);
+  // Click only the attack button on the right side of the war screen
+  var getWarAttackElt = function (parentElt) {
+    // Get the "right" side elements
+    if (parentElt && parentElt.childNodes[5]) {
+      var atkElt = xpathFirst('.//a[@class="sexy_button"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
+      if (atkElt) return atkElt;
+    }
+    return false;
+  };
+
+  // Retrieve attack button
+  var attackElt = getWarAttackElt(xpathFirst('.//div[contains(@style,"700px") and contains(.,"vs")]'));
+  if (!attackElt) attackElt = getWarAttackElt(xpathFirst('.//div[contains(@style,"700px") and contains(.,"Top Mafia")]'));
+
+  if (attackElt) {
     Autoplay.fx = function() {
       clickAction = 'war';
-      clickContext = warAttackButton;
-      clickElement(warAttackButton);
+      clickElement(attackElt);
       DEBUG('Clicked the war attack button.');
     };
     Autoplay.start();
@@ -9579,7 +9587,6 @@ function autoWar() {
   if (warStartButton) {
     Autoplay.fx = function() {
       clickAction = action;
-      clickContext = warStartButton;
       clickElement(warStartButton);
       DEBUG('Clicked to start a new war.');
     };
