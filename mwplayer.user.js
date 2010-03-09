@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.4
-// @build       299
+// @build       300
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.4',
-  build: '299',
+  build: '300',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2684,7 +2684,7 @@ function canSpendStamina(minHealth) {
   if (!stamina) return false;
   if (!isGMChecked('staminaSpend')) return false;
 
-  if (!minHealth) {
+  if (isNaN(minHealth)) {
     // Up to 28 damage can be received in a fight.
     minHealth = 29;
     if (getStaminaMode() == STAMINA_HOW_AUTOHITLIST) minHealth = 0;
