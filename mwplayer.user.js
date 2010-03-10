@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.5
-// @build       302
+// @build       303
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.5',
-  build: '302',
+  build: '303',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10799,14 +10799,14 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'job':
-      var xpGainElt = xpathFirst('.//dd[contains(@class,"experience")]', messagebox);
+      xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
       if (xpGainElt) {
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' +
                  missions[GM_getValue('selectMission')][0] +
                  '</span> earning <span class="good">' +
                  xpGainElt.innerHTML.toLowerCase() + '</span>';
-        var cashGainElt = xpathFirst('.//dd[contains(@class,"cash")]', messagebox);
+        var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
         if (cashGainElt) {
           result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
         }
@@ -10844,7 +10844,7 @@ function logResponse(rootElt, action, context) {
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
       } else if (innerNoTags.indexOf('Success') != -1) {
-        addToLog('process Icon', innerNoTags);
+        addToLog('process Icon', inner);
       } else {
         DEBUG('Unrecognized job response.');
       }
