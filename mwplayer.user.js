@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.4
-// @build       300
+// @version     1.1.5
+// @build       301
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.4',
-  build: '300',
+  version: '1.1.5',
+  build: '301',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
