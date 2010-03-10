@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.5
-// @build       301
+// @build       302
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.5',
-  build: '301',
+  build: '302',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9986,11 +9986,12 @@ function getJobClicks() {
 function goJob(jobno) {
   // Retrieve the jobRow
   var jobName = missions[GM_getValue('selectMission')][0];
+  var jobNo = missions[GM_getValue('selectMission')][2];
   var jobRow = getJobRow(jobName, innerPageElt);
 
   // Get the action element
   var elt;
-  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
+  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
 
   if (elt) {
     clickAction = 'job';
