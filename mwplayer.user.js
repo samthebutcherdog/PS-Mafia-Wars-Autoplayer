@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.5
-// @build       303
+// @version     1.1.6
+// @build       304
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.5',
-  build: '303',
+  version: '1.1.6',
+  build: '304',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -664,6 +664,7 @@ var idle = true;                // Is the script currently idle?
 var shakeDownFlag = false;      // Flag so shake down again doesnt get interrupted
 var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
+var skipJobs = false;           // Skip doing jobs for a while
 var newStaminaMode;             // New stamina mode for random fighting
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
@@ -1674,7 +1675,7 @@ function doAutoPlay () {
   }
 
   // Determine whether a job and/or fight/hit could be attempted.
-  var autoMissionif = running && canMission();
+  var autoMissionif = running && !skipJobs && canMission();
   var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight ;
   var energyMaxed = (autoMissionif && energy >= maxEnergy);
   var staminaMaxed = (autoStaminaSpendif && stamina >= maxStamina);
@@ -1851,9 +1852,10 @@ function doAutoPlay () {
     return;
   }
 
-  // If fight/hit is being skipped, turn it back on and go to the home page
-  if (running && skipStaminaSpend) {
+  // If fight/hit/jobs are being skipped, turn them back on and go to the home page
+  if (running && (skipStaminaSpend || skipJobs)) {
     skipStaminaSpend = false;
+    skipJobs = false;
     Autoplay.start();
     return;
   }
@@ -2609,9 +2611,9 @@ function autoMission() {
       addToLog('warning Icon', 'Unable to perform job ' + jobName + '.');
       var jobs = getSavedList('jobsToDo', '');
       if (jobs.length == 0) {
-        // If no more jobs on the queue, stop automission
-        addToLog('warning Icon', 'Turning off auto mission');
-        GM_setValue('autoMission', 0);
+        // Skip jobs temporarily, and check the home page
+        skipJobs = true;
+        goHome();
       } else {
         // Else Get the next job to perform
         popJob();
