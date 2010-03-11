@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.6
-// @build       304
+// @build       305
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.6',
-  build: '304',
+  build: '305',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2688,7 +2688,7 @@ function canSpendStamina(minHealth) {
 
   if (isNaN(minHealth)) {
     // Up to 28 damage can be received in a fight.
-    minHealth = 29;
+    minHealth = isGMChecked('attackCritical') ? 20 : 29;
     if (getStaminaMode() == STAMINA_HOW_AUTOHITLIST) minHealth = 0;
   }
 
@@ -3876,7 +3876,7 @@ function saveSettings() {
   GM_setValue('burnOption', document.getElementById('burnOption').value);
 
   // Place all checkbox element saving here
-  saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks',
+  saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks','attackCritical',
                             'autoMission','autoBank','autoBankMoscow','allowEnergyToLevelUp',
                             'autoBankCuba','autoHeal','forceHealOpt3','forceHealOpt4','forceHealOpt5',
                             'hideInHospital','autoStat','autoStatDisable','autoStatAttackFallback',
@@ -4707,6 +4707,12 @@ function createGeneralTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
+  title = 'Check to attack even when at critical health (20-28 health points) ';
+  id = 'attackCritical';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(attackIcon)});
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Attack at critical health'));
+  makeElement('br', rhs, {'class':'hide'});
   title = 'Hide in hospital while health is below 20';
   id = 'hideInHospital';
   var hideInHosp = makeElement('input', rhs, {'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
@@ -8836,6 +8842,7 @@ function debugDumpSettings() {
         'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
         '&nbsp;&nbsp;-Heal in : <strong>' + (GM_getValue('healLocation') == cities.length ? 'Active City' : cities[GM_getValue('healLocation')][CITY_NAME]) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
+        '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
