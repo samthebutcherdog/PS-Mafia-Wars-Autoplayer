@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.6
-// @build       305
+// @build       306
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.6',
-  build: '305',
+  build: '306',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8766,21 +8766,6 @@ function jobLoot(element) {
         removeJobForItem('jobsToDo', itemName);
         popJob();
       }
-    }
-  }
-  if (!itemFound) {
-    var jobResult;
-    for (i = 0, numItems=items.length; i < numItems; ++i) {
-      jobResult = requirementJob.searchArray(items[i], 0);
-      if (isNaN(jobResult)) {
-        addToLog('warning Icon', 'BUG DETECTED: ' + items[i] + ' not found in requirementJob array.');
-      } else {
-        if (typeof(requirementJob[jobResult]) != 'undefined' &&
-            missions[GM_getValue('selectMission', 1)][0] != requirementJob[jobResult][1]) {
-          DEBUG(items[i] + ' cannot be found doing this job.');
-        }
-      }
-      DEBUG(items[i] + ' not found.');
     }
   }
 }
