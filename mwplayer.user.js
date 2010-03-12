@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.6
-// @build       306
+// @version     1.1.7
+// @build       307
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.6',
-  build: '306',
+  version: '1.1.7',
+  build: '307',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -665,6 +665,7 @@ var shakeDownFlag = false;      // Flag so shake down again doesnt get interrupt
 var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
+var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
@@ -2525,6 +2526,7 @@ function canMission() {
           if ( (energy - missions[singleJobLevelUp[0]][1]) > missions[expBurner][1] &&
              expLeft > Math.floor(missions[expBurner][5] * 1.5) ) {
             doJob = expBurner;
+            jobOptimizeOn = true;
             break;
           }
         }
@@ -9969,10 +9971,10 @@ function goJobTab(tabno) {
 // Get the number of job clicks to attempt
 function getJobClicks() {
   var numClicks = 1;
-  if (isGMChecked('burstJob')){
+  if (isGMChecked('burstJob') && !jobOptimizeOn){
     var nextJobXp = missions[GM_getValue('selectMission', 1)][5];
     numClicks = GM_getValue('burstJobCount', 1);
-    while (((nextJobXp * numClicks) >= ptsToNextLevel) && (numClicks > 1)) numClicks--;
+    while (((nextJobXp * numClicks) >= ptsToNextLevel - 100) && (numClicks > 1)) numClicks--;
   }
   return parseInt(numClicks);
 }
@@ -10795,6 +10797,7 @@ function logResponse(rootElt, action, context) {
     case 'job':
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
       if (xpGainElt) {
+        jobOptimizeOn = false;
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' +
                  missions[GM_getValue('selectMission')][0] +
@@ -10838,6 +10841,7 @@ function logResponse(rootElt, action, context) {
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
       } else if (innerNoTags.indexOf('Success') != -1) {
+        jobOptimizeOn = false;
         addToLog('process Icon', inner);
       } else {
         DEBUG('Unrecognized job response.');
