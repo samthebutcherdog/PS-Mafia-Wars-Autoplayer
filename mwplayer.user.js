@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.7
-// @build       307
+// @build       308
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.7',
-  build: '307',
+  build: '308',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9943,7 +9943,15 @@ function goJobTab(tabno) {
   var barno = city == NY? (tabno < 6? 0 : 1) : 0;
   var currentBar = city == NY? (currentTab < 6? 0 : 1) : 0;
   if (currentBar != barno) {
-    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[contains(@onclick, "&bar=' + barno + '")]', innerPageElt);
+    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]'+
+                     '//a[contains(@onclick, "&bar=' + barno + '")]', innerPageElt);
+
+    // Handle changing link when on the street thug tier
+    if (!elt && (city == NY)) {
+      elt = xpathFirst('.//ul[@id="jobs_bar0"]'+
+                       '//a[contains(@onclick, "&story_tab=6")]', innerPageElt);
+    }
+
     if (!elt) {
       addToLog('warning Icon', 'BUG DETECTED: Can\'t find jobs bar ' + barno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
       return false;
