@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.8
-// @build       312
+// @version     1.1.9
+// @build       313
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.8',
-  build: '312',
+  version: '1.1.9',
+  build: '313',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8052,10 +8052,11 @@ function customizeNewJobs() {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
           masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
-      // Consider "locked" job as mastered
-      } else if (isJobLocked(currentJob)) {
+      }
+
+      // Skip locked jobs
+      if (isJobLocked(currentJob)) {
         DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
-        masteredJobsCount++;
       } else {
         availableJobs[city][currentTab].push(jobMatch);
       }
@@ -8221,10 +8222,11 @@ function customizeJobs() {
           if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
             masteredJobs[city][currentTab].push(jobMatch);
           masteredJobsCount++;
-        // Consider "locked" job as mastered
-        } else if (isJobLocked(jobAction)) {
+        }
+
+        // Skip locked jobs
+        if (isJobLocked(jobRow)) {
           DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
-          masteredJobsCount++;
         } else {
           availableJobs[city][currentTab].push(jobMatch);
         }
@@ -9953,21 +9955,11 @@ function goJobTab(tabno) {
   var barno = city == NY? (tabno < 6? 0 : 1) : 0;
   var currentBar = city == NY? (currentTab < 6? 0 : 1) : 0;
   if (currentBar != barno) {
-    elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]'+
-                     '//a[contains(@onclick, "&bar=' + barno + '")]', innerPageElt);
-
-    // Handle changing link when on the street thug tier
-    if (!elt && (city == NY)) {
-      elt = xpathFirst('.//ul[@id="jobs_bar0"]'+
-                       '//a[contains(@onclick, "&story_tab=6")]', innerPageElt);
-    }
-
-    if (!elt) {
-      addToLog('warning Icon', 'BUG DETECTED: Can\'t find jobs bar ' + barno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
-      return false;
-    }
+    var jobWord = currentBar == 1 ? "Easy Jobs" : "More Jobs";
+    elt = xpathFirst('.//ul[contains(@id,"jobs_bar")]' +
+                     '//a[contains(text(), "'+jobWord+'")]', innerPageElt);
     clickElement(elt);
-    DEBUG('Clicked to go to job bar ' + barno + '.');
+    DEBUG('Clicked to go to job bar ' + barno + '. ');
     return true;
   }
 
