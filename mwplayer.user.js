@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.7
-// @build       310
+// @build       311
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.7',
-  build: '310',
+  build: '311',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7148,9 +7148,10 @@ function refreshMWAPCSS() {
                  ' .player_updates {width: 728px !important} ' +
                  ' div[class$="tab_box_content"] {width: 738px !important} ' +
                  ' .playerupdate_box {width: 740px !important} ' : '' ) +
-                 ' #instruction_container {display: none !important} '  +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
+                 // Hide Help
+                 ' #instruction_container, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
@@ -8032,17 +8033,14 @@ function customizeNewJobs() {
     DEBUG(jobName + ', Mastery level: ' + jobPercentage);
 
     // Determine available jobs
-    if (running && isGMChecked('multipleJobs')) {
+    if (isGMChecked('multipleJobs')) {
       // Ignore mastered jobs
       if (jobPercentage == 100) {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
           masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
-      }
-
-      // Ignore locked jobs
-      if (isJobLocked(currentJob)) {
-        // Consider "locked" job as mastered
+      // Consider "locked" job as mastered
+      } else if (isJobLocked(currentJob)) {
         DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
         masteredJobsCount++;
       } else {
@@ -8204,17 +8202,14 @@ function customizeJobs() {
       var jobAction = xpathFirst('.//td[contains(@class,"job_action")]', jobRow);
 
       // Determine available jobs
-      if (running && isGMChecked('multipleJobs')) {
+      if (isGMChecked('multipleJobs')) {
         // Ignore mastered jobs
         if (jobPercentage == 100) {
           if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)
             masteredJobs[city][currentTab].push(jobMatch);
           masteredJobsCount++;
-        }
-
-        // Ignore locked jobs
-        if (isJobLocked(jobAction)) {
-          // Consider "locked" job as mastered
+        // Consider "locked" job as mastered
+        } else if (isJobLocked(jobAction)) {
           DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
           masteredJobsCount++;
         } else {
@@ -8307,6 +8302,7 @@ function customizeJobs() {
 
   // Set the job progress
   jobMastery(innerPageElt, false);
+  DEBUG('Jobs found: ' + jobsFound + ', Mastered jobs: ' + masteredJobsCount);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
   return true;
 }
