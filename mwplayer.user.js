@@ -7148,6 +7148,7 @@ function refreshMWAPCSS() {
                  ' .player_updates {width: 728px !important} ' +
                  ' div[class$="tab_box_content"] {width: 738px !important} ' +
                  ' .playerupdate_box {width: 740px !important} ' : '' ) +
+                 ' #instruction_container {display: none !important} '  +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
