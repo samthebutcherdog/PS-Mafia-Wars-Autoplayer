@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.7
-// @build       311
+// @version     1.1.8
+// @build       312
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.7',
-  build: '311',
+  version: '1.1.8',
+  build: '312',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7362,10 +7362,23 @@ function customizeMasthead() {
   var mastheadElt = document.getElementById('mw_masthead');
   if (!mastheadElt) return;
 
+  // Links
+  var linkElt = makeElement('div', mastheadElt,
+    {'id':'ap_links', 'style':'position: absolute; top: 4px; right: 17px; text-align: left;' +
+     'font-size: 12px; font-weight: bold;'});
+  makeElement('a', linkElt, {'href':'http://userscripts.org/scripts/show/64720','target':'_blank'})
+    .appendChild(document.createTextNode('For Firefox'));
+  linkElt.appendChild(document.createTextNode(' | '));
+  makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk','target':'_blank'})
+    .appendChild(document.createTextNode('For Chrome'));
+  linkElt.appendChild(document.createTextNode(' | '));
+  makeElement('a', linkElt, {'href':'http://playerscripts.com/index.php?option=com_jfusion&Itemid=2','target':'_blank'})
+    .appendChild(document.createTextNode('Discussions'));
+
   // Make a container for the autoplayer menu.
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
-  makeElement('div', mastheadElt, {'style':'position: absolute; top: 24px; right: 17px; text-align: left; font-size: 11px; font-weight: bold; color: #FFFFFF'}).appendChild(document.createTextNode(mwapTitle));
-  var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 38px; right: 17px; text-align: left;'});
+  makeElement('div', mastheadElt, {'style':'position: absolute; top: 21px; right: 17px; text-align: left; font-size: 12px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
+  var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 35px; right: 17px; text-align: left;'});
 
   // Settings Link
   menuElt.appendChild(document.createTextNode(' | '));
