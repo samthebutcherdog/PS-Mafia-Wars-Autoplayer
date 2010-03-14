@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.9
-// @build       313
+// @build       314
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.9',
-  build: '313',
+  build: '314',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7148,10 +7148,12 @@ function refreshMWAPCSS() {
                  ' .player_updates {width: 728px !important} ' +
                  ' div[class$="tab_box_content"] {width: 738px !important} ' +
                  ' .playerupdate_box {width: 740px !important} ' : '' ) +
+                 // Move menus
+                 ' div[onmouseover="travelopen()"] {position: absolute !important; left: 300px !important;} ' +
+                 ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;} ' +
+                 ' #instruction_container, a[@class$="sexy_help_new"] {width: 220px !important;} ' +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
-                 // Hide Help
-                 ' #instruction_container, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
@@ -7364,23 +7366,51 @@ function customizeMasthead() {
 
   // Links
   var linkElt = makeElement('div', mastheadElt,
-    {'id':'ap_links', 'style':'position: absolute; top: 4px; right: 17px; text-align: left;' +
+    {'id':'ap_links', 'style':'position: absolute; top: 4px; right: 10px; text-align: left;' +
      'font-size: 12px; font-weight: bold;'});
   makeElement('a', linkElt, {'href':'http://userscripts.org/scripts/show/64720','target':'_blank'})
     .appendChild(document.createTextNode('For Firefox'));
   linkElt.appendChild(document.createTextNode(' | '));
   makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk','target':'_blank'})
     .appendChild(document.createTextNode('For Chrome'));
-  linkElt.appendChild(document.createTextNode(' | '));
+  /*linkElt.appendChild(document.createTextNode(' | '));
   makeElement('a', linkElt, {'href':'http://playerscripts.com/index.php?option=com_jfusion&Itemid=2','target':'_blank'})
-    .appendChild(document.createTextNode('Discussions'));
+    .appendChild(document.createTextNode('Discussions'));*/
 
   // Make a container for the autoplayer menu.
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
-  makeElement('div', mastheadElt, {'style':'position: absolute; top: 21px; right: 17px; text-align: left; font-size: 12px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
-  var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 35px; right: 17px; text-align: left;'});
+  makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
+  var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 34px; font-size: 11px; right: 10px; text-align: left;'});
+
+  var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
+  var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
+  titleElt.innerHTML = "MWAP";
+  var helpMenu = xpathFirst('.//div[@id="instruction_menu"]', helpElt);
+  helpMenu.innerHTML = /*'<a href="#" onClick="toggleSettings"> ' +
+                       '  <div class="sexy_destination middle"> ' +
+                       '    <span id="autoPlay">Settings</span></div>' +
+                       '</a> ' +*/
+                       '<a href="http://userscripts.org/scripts/show/64720" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">For Firefox</div> ' +
+                       '</a> ' +
+                       '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">For Chrome</div> ' +
+                       '</a> ' +
+                       '<a href="http://playerscripts.com/index.php?option=com_jfusion&Itemid=2" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">Discussions</div> ' +
+                       '</a>' +
+                       '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">Zynga Forums</div> ' +
+                       '</a> ' +
+                       '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
   // Settings Link
+  var lobjAutoPlay = makeElement('a', null, {'id':'autoPlay'});
+  lobjAutoPlay.innerHTML = '<div class="sexy_destination middle"> ' +
+                           '  <span id="autoPlay">Settings</span></div>';
+  lobjAutoPlay.addEventListener('click', toggleSettings, false);
+  helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
+
   menuElt.appendChild(document.createTextNode(' | '));
   var lobjAutoPlay = makeElement('span', menuElt, {'id':'autoPlay'});
   lobjAutoPlay.appendChild(document.createTextNode('Settings'));
@@ -8043,7 +8073,7 @@ function customizeNewJobs() {
 
     jobsFound++;
     var jobPercentage = getJobMastery(currentJob, true);
-    DEBUG(jobName + ', Mastery level: ' + jobPercentage);
+    //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
@@ -8209,7 +8239,7 @@ function customizeJobs() {
 
       jobsFound++;
       var jobPercentage = getJobMastery(jobRow, false);
-      DEBUG(jobName + ', Mastery level: ' + jobPercentage);
+      //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -8636,6 +8666,7 @@ function getJobRowItems(element){
     var itemsFound = false;
     necessaryItems.forEach(
       function(i){
+        DEBUG('Missing: ' + i.alt);
         var itemFound = false;
         // Try fetching the items from the job requirement array
         requirementJob.forEach(
