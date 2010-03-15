@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.9
-// @build       315
+// @build       316
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.9',
-  build: '315',
+  build: '316',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1915,6 +1915,15 @@ function autoAccept() {
   if (!elt) {
     DEBUG('Can\'t find accept link to click. ');
     return true;
+  } else {
+    // Get the ajax link from the profile element
+    var eltProfile = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
+    if (eltProfile) {
+      elt.setAttribute('onclick',eltProfile.getAttribute('onclick')
+        .replace(/xw_controller=stats/i,'xw_controller=recruit')
+        .replace(/xw_action=view/i,'xw_action=accept&user_id=all&skip_req_frame=1')
+      );
+    }
   }
 
   // Accept all invitations.
