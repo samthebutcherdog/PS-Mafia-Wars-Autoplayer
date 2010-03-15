@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.9
-// @build       314
+// @build       315
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.9',
-  build: '314',
+  build: '315',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1442,6 +1442,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Sort requirement jobs by level requirement, ascending
   requirementJob.sort(function(a, b) { return cities[a[2]][CITY_LEVEL] - cities[b[2]][CITY_LEVEL]; });
 
+  // Business items
+  var bizJobItems = new Array(
+    ['Politico Corrupto', CUBA],
+    ['Pirate', BANGKOK],
+    ['Drug Shipment', BANGKOK]
+  );
+
   // FIXME: Should this be selectable by users?
   // These jobs pays 5, 3, 2, 1 exp respectively.
   var expBurners = [2, 1, 4, 0];
@@ -2639,7 +2646,7 @@ function autoMission() {
   }
 
   // Buy requirements first, if any
-  if (getJobRowItems(innerPageElt)) {
+  if (getJobRowItems(jobName)) {
     if (jobid != GM_getValue('selectMission', 1))
       Autoplay.fx = autoMission;
     Autoplay.delay = 0;
@@ -2690,7 +2697,7 @@ function canSpendStamina(minHealth) {
 
   if (isNaN(minHealth)) {
     // Up to 28 damage can be received in a fight.
-    minHealth = isGMChecked('attackCritical') ? 20 : 29;
+    minHealth = isGMChecked('attackCritical') ? 21 : 29;
     if (getStaminaMode() == STAMINA_HOW_AUTOHITLIST) minHealth = 0;
   }
 
@@ -7151,7 +7158,7 @@ function refreshMWAPCSS() {
                  // Move menus
                  ' div[onmouseover="travelopen()"] {position: absolute !important; left: 300px !important;} ' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;} ' +
-                 ' #instruction_container, a[@class$="sexy_help_new"] {width: 220px !important;} ' +
+                 //' #instruction_container, a[@class$="sexy_help_new"] {width: 220px !important;} ' +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
                  ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
@@ -7373,24 +7380,18 @@ function customizeMasthead() {
   linkElt.appendChild(document.createTextNode(' | '));
   makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk','target':'_blank'})
     .appendChild(document.createTextNode('For Chrome'));
-  /*linkElt.appendChild(document.createTextNode(' | '));
-  makeElement('a', linkElt, {'href':'http://playerscripts.com/index.php?option=com_jfusion&Itemid=2','target':'_blank'})
-    .appendChild(document.createTextNode('Discussions'));*/
 
   // Make a container for the autoplayer menu.
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
   var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 34px; font-size: 11px; right: 10px; text-align: left;'});
 
+  // Change help intructions :D
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
   var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
   titleElt.innerHTML = "MWAP";
   var helpMenu = xpathFirst('.//div[@id="instruction_menu"]', helpElt);
-  helpMenu.innerHTML = /*'<a href="#" onClick="toggleSettings"> ' +
-                       '  <div class="sexy_destination middle"> ' +
-                       '    <span id="autoPlay">Settings</span></div>' +
-                       '</a> ' +*/
-                       '<a href="http://userscripts.org/scripts/show/64720" target="_blank"> ' +
+  helpMenu.innerHTML = '<a href="http://userscripts.org/scripts/show/64720" target="_blank"> ' +
                        '  <div class="sexy_destination middle">For Firefox</div> ' +
                        '</a> ' +
                        '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
@@ -7404,13 +7405,14 @@ function customizeMasthead() {
                        '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
-  // Settings Link
+  // Settings Link (MWAP menu)
   var lobjAutoPlay = makeElement('a', null, {'id':'autoPlay'});
   lobjAutoPlay.innerHTML = '<div class="sexy_destination middle"> ' +
                            '  <span id="autoPlay">Settings</span></div>';
   lobjAutoPlay.addEventListener('click', toggleSettings, false);
   helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
 
+  // Settings Link main page
   menuElt.appendChild(document.createTextNode(' | '));
   var lobjAutoPlay = makeElement('span', menuElt, {'id':'autoPlay'});
   lobjAutoPlay.appendChild(document.createTextNode('Settings'));
@@ -7883,12 +7885,6 @@ function getJobMastery(jobRow, newJobs) {
     return 100;
   }
 
-  // Old job logic
-  var isJobLocked = function (thisJob) {
-    return (thisJob.innerHTML.indexOf('sexy_button_locked') >= 0 &&
-            thisJob.innerHTML.indexOf('Help') == -1);
-  }
-
   // Locked jobs are mastered too
   if (/Mastered/i.test(jobRow.innerHTML) || isJobLocked(jobRow))
     return 100;
@@ -8185,6 +8181,23 @@ function customizeNewJobs() {
   return true;
 }
 
+function isJobLocked (jobAction) {
+  return (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
+          jobAction.innerHTML.indexOf('Help') == -1);
+}
+
+// Return item name if missing job item is from a business
+function requiresBizItem (jobRow) {
+  var reqItems = $x('.//div[@class="req_item"]//img', jobRow);
+  if (reqItems && reqItems.length > 0) {
+    for (var i = 0, iLength = reqItems.length; i < iLength; ++i) {
+      if (!isNaN(bizJobItems.searchArray(reqItems[i].alt, 0)[0]))
+        return reqItems[i].alt;
+    }
+  }
+  return false;
+}
+
 function customizeJobs() {
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
@@ -8202,11 +8215,6 @@ function customizeJobs() {
   var currentTab = currentJobTab();
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
-
-  var isJobLocked = function (jobAction) {
-    return (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
-            jobAction.innerHTML.indexOf('Help') == -1);
-  }
 
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
@@ -8258,7 +8266,12 @@ function customizeJobs() {
         if (isJobLocked(jobRow)) {
           DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked. Skipping.');
         } else {
-          availableJobs[city][currentTab].push(jobMatch);
+          var item = requiresBizItem (jobRow);
+          if (item != false) {
+            DEBUG('Not enough business items ['+item+'] for ' + jobName + ' [' + jobMatch + ']. Skipping.');
+          } else {
+            availableJobs[city][currentTab].push(jobMatch);
+          }
         }
       }
 
@@ -8613,9 +8626,9 @@ function getJobRow(jobName, contextNode) {
   return rowElt;
 }
 
-function getJobRowItems(element){
-  var currentJob = missions[GM_getValue('selectMission', 1)][0];
-  var currentJobRow = getJobRow(currentJob, element);
+function getJobRowItems(jobName) {
+  var currentJob = jobName;
+  var currentJobRow = getJobRow(currentJob, innerPageElt);
   if (!currentJobRow) return false;
 
   var buyItemElts = $x('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
