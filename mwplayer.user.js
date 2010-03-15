@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       317
+// @build       318
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '317',
+  build: '318',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1123,7 +1123,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Threaten A Gang\'s Supplier',58,10,1,MOSCOW,79],
     ['Hijack An Arms Shipment From A Militant Gang',67,11,1,MOSCOW,90],
     ['Hospitalize Some Nationalists',76,12,1,MOSCOW,104],
-    ['Confront Gang Leader Dmitri Leonov',76,13,1,MOSCOW,104],
+    ['Confront Gang Leader Dmitri Leonov',1,13,1,MOSCOW,3],
     // MOSCOW EPISODE 2
     ['Bribe An Election Official',57,14,2,MOSCOW,77],
     ['Silence A Political Critic',53,15,2,MOSCOW,73],
@@ -1141,7 +1141,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Pay Off The Port Authority In Arkhangelsk',57,23,2,MOSCOW,77],
     ['Re-route An Equipment Shipment',80,24,2,MOSCOW,106],
     ['Circulate Damaging Photos',99,25,2,MOSCOW,137],
-    ['Take Down Party Boss Karpov',76,26,2,MOSCOW,109],
+    ['Take Down Party Boss Karpov',1,26,2,MOSCOW,3],
     // MOSCOW EPISODE 3
     ['Case The RossijaBanc Building',65,31,3,MOSCOW,88],
     ['Map Out The Escape Route',80,32,3,MOSCOW,108],
@@ -1159,7 +1159,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Blackmail A Secretary For An Exec\'s Itinerary',96,40,3,MOSCOW,129],
     ['Dispose Of A RossijaBanc Exec At Sea',89,41,3,MOSCOW,118],
     ['Replace A Guard With Your Own Man',118,42,3,MOSCOW,165],
-    ['"Fire" Bank President Gregor Belikov',100,43,3,MOSCOW,100],
+    ['"Fire" Bank President Gregor Belikov',1,43,3,MOSCOW,3],
     // MOSCOW EPISODE 4
     ['Manage An Escort Service Catering to Soldiers',111,44,4,MOSCOW,151],
     ['Support The Habit Of A Procurement Officer',125,45,4,MOSCOW,170],
@@ -1177,7 +1177,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Make Connections With An Arms Dealer',123,53,4,MOSCOW,168],
     ['Transport Some Stolen Military Hardware',125,54,4,MOSCOW,165],
     ['Buy Off The General\'s Command Team',134,55,4,MOSCOW,188],
-    ['Forcibly Demote General Osipov',100,56,4,MOSCOW,100],
+    ['Forcibly Demote General Osipov',1,56,4,MOSCOW,3],
     // MOSCOW EPISODE 5
     ['Stop A Terrorist Attack In Moscow',116,61,5,MOSCOW,159],
     ['Discover Who Was Responsible',124,62,5,MOSCOW,170],
@@ -1195,7 +1195,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Torture A ULF Lieutenant',120,70,5,MOSCOW,164],
     ['Look For The Boss\' Mountain Hideout',135,71,5,MOSCOW,180],
     ['Start An Avalanche Above The Terrorist Camp',145,72,5,MOSCOW,205],
-    ['Battle Sonya "The Wolf" Bassinov',100,73,5,MOSCOW,100],
+    ['Battle Sonya "The Wolf" Bassinov',1,73,5,MOSCOW,3],
     // MOSCOW EPISODE 6
     ['Foil The Sabotage Of Your Moscow Holdings',130,74,6,MOSCOW,180],
     ['Acquire Classified Files On Crime Syndicates',122,75,6,MOSCOW,169],
@@ -1213,7 +1213,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
     ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
     ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
-    ['Take Out Viktor "Sibirchik" Titov',100,86,6,MOSCOW,100],
+    ['Take Out Viktor "Sibirchik" Titov',1,86,6,MOSCOW,3],
     // BANGKOK EPISODE 1
     ['Move Stolen Art Through Suvarnabhumi Airport',71,1,1,BANGKOK,111],
     ['Show A Cocky Biker Who\'s In Charge',63,2,1,BANGKOK,101],
@@ -1229,7 +1229,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102],        // Triad
     ['Bribe A Dock Guard',52,16,1,BANGKOK,78],                          // Triad
     ['Blow Up Suchart\'s Warehouse',111,17,1,BANGKOK,164],
-    ['Take Down Boss Suchart',100,18,1,BANGKOK,100],
+    ['Take Down Boss Suchart',1,18,1,BANGKOK,3],
     // BANGKOK EPISODE 2
     ['Force A Local Landowner To Sell',67,20,2,BANGKOK,95],
     ['Receive A Kickback From The Buyer',73,21,2,BANGKOK,102],
@@ -1245,7 +1245,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Break A Triad Hitman Out',57,34,2,BANGKOK,77],                    // Triad
     ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
     ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
-    ['Discredit Police Commissioner Chatri',100,37,2,BANGKOK,100],
+    ['Discredit Police Commissioner Chatri',1,37,2,BANGKOK,3],
     // BANGKOK EPISODE 3
     ['Secure A Pirate Vessel',43,39,3,BANGKOK,46],                             // CHAPTER 1
     ['Hire An Unsavory Crew',35,40,3,BANGKOK,53],                              // CHAPTER 1
@@ -1261,7 +1261,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Hire Divers To Retrieve The Gold Bars',49,51,3,BANGKOK,75],              // CHAPTER 3  Yakuza
     ['Sink A Chinese Metals Freighter',53,50,3,BANGKOK,84],                    // CHAPTER 3  Yakuza
     ['Sink A Fleet Vessel',107,55,3,BANGKOK,135],                              // FINALE
-    ['Send Captain Mok Overboard',0,56,3,BANGKOK,0],                           // Boss job no energy or exp points known yet
+    ['Send Captain Mok Overboard',1,56,3,BANGKOK,3],                           // BOSS JOB
     // BANGKOK EPISODE 4
     ['Buy Some Chemicals On The Black Market',68,58,4,BANGKOK,84],             // CHAPTER 1
     ['Make Contact With The United Wa State Army',52,59,4,BANGKOK,64],         // CHAPTER 1
@@ -1277,7 +1277,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Eliminate An Insurgent Escort',60,72,4,BANGKOK,72],                      // CHAPTER 3  Triad
     ['Make Off With Stolen Military Hardware',56,73,4,BANGKOK,68],             // CHAPTER 3  Triad
     ['Attack Chang\'s Heroin-Processing Facility',88,74,4,BANGKOK,112],        // FINALE
-    ['Kill Commander Chang',0,75,4,BANGKOK,0],                                 // BOSS job no energy or exp points known yet
+    ['Kill Commander Chang',1,75,4,BANGKOK,3],                                 // BOSS JOB
     // BANGKOK EPISODE 5A-Oyabun
     ['Ship Burmese Sapphires Into Thailand',72,77,5,BANGKOK,92],               // CHAPTER 1
     ['Smuggle The Sapphires Into Tokyo',52,78,5,BANGKOK,68],                   // CHAPTER 1
@@ -1293,7 +1293,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Spread Distrust Among The Yakuza Families',78,91,5,BANGKOK,124],         // CHAPTER 3  Triad
     ['Start A War Between Matsumura and Minato',78,92,5,BANGKOK,124],          // CHAPTER 3  Triad
     ['Remove Matsumura\'s Loyal Lieutenants',104,93,5,BANGKOK,132],            // FINALE
-    ['Execute Oyabun Matsumura',0,94,5,BANGKOK,0],                             // BOSS JOB no energy or exp points known yet
+    ['Execute Oyabun Matsumura',1,94,5,BANGKOK,3],                             // BOSS JOB
     // BANGKOK EPISODE 5B-Dragon Head
     ['Set Up A Drug Shipment To China',49,96,6,BANGKOK,79],                    // CHAPTER 1
     ['Dodge Customs At The Port of Hong Kong',64,97,6,BANGKOK,102],            // CHAPTER 1
@@ -1309,7 +1309,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Kidnap One Of Wei\'s Trusted Advisors',56,110,6,BANGKOK,88],             // CHAPTER 3  Triad
     ['Bury The Body Under A Construction Site',60,111,6,BANGKOK,97],           // Chapter 3  Triad
     ['Attack Wei\'s Gambling Halls',96,112,6,BANGKOK,155],                     // FINALE
-    ['Dispose Of Mountain Master Wei',0,113,6,BANGKOK,0]                       // BOOS JOB
+    ['Dispose Of Mountain Master Wei',1,113,6,BANGKOK,3]                       // BOSS JOB
   );
 
   // Load the missions array from previously saved value
@@ -3666,6 +3666,10 @@ function handleVersionChange() {
   addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' build ' + SCRIPT.build);
 
   // Check for invalid settings and upgrade them.
+
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 318) {
+    GM_deleteValue('missions');
+  }
 
   // Clear invalid jobs
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 279) {
