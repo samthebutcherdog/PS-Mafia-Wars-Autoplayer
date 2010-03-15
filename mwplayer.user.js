@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.9
-// @build       316
+// @version     1.1.10
+// @build       317
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.9',
-  build: '316',
+  version: '1.1.10',
+  build: '317',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -956,6 +956,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
     ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 50]
   );
+
+  var locations = ['New York','Cuba','Moscow','Bangkok','Active City'];
 
   var allyFaction = '';
   var quickBankFail = false;
@@ -2734,7 +2736,7 @@ function canSpendStamina(minHealth) {
 function autoHitlist() {
   // Go to the correct city.
   var loc = GM_getValue('autoHitListLoc', NY);
-  if (city != loc) {
+  if (loc != cities.length && city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
@@ -2828,7 +2830,7 @@ function autoHitlist() {
 function autoFight(how) {
   // Go to the correct city.
   var loc = GM_getValue('fightLocation', NY);
-  if (city != loc) {
+  if (loc != cities.length && city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
@@ -2965,7 +2967,7 @@ function staminaBurst (burstMode, clickElt) {
 function autoHitman() {
   // Go to the correct city.
   var i, loc = GM_getValue('hitmanLocation', NY);
-  if (city != loc) {
+  if (loc != cities.length && city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.start();
     return true;
@@ -4704,16 +4706,12 @@ function createGeneralTab() {
   makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Heal in:'));
   id = 'healLocation';
   var healLocation = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
+    choice.appendChild(document.createTextNode(locations[i]));
     healLocation.appendChild(choice);
   }
-  choice = document.createElement('option');
-  choice.value = i;
-  choice.appendChild(document.createTextNode('Active City'));
-  healLocation.appendChild(choice);
 
   healLocation.selectedIndex = GM_getValue('healLocation', NY);
   makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' when health falls below '));
@@ -5823,10 +5821,10 @@ function createStaminaTab() {
   makeElement('label', lhs).appendChild(document.createTextNode('Fight in:'));
   id = 'fightRandomLoc';
   var fightRandomLoc = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
+    choice.appendChild(document.createTextNode(locations[i]));
     fightRandomLoc.appendChild(choice);
   }
   fightRandomLoc.selectedIndex = GM_getValue('fightLocation', NY);
@@ -5947,10 +5945,10 @@ function createStaminaTab() {
   lhs.appendChild(document.createTextNode('Fight in:'));
   id = 'fightListLoc';
   var fightListLoc = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
+    choice.appendChild(document.createTextNode(locations[i]));
     fightListLoc.appendChild(choice);
   }
   fightListLoc.selectedIndex = GM_getValue('fightLocation', NY);
@@ -6005,10 +6003,10 @@ function createStaminaTab() {
   lhs.appendChild(document.createTextNode('Collect bounties in:'));
   id = 'hitmanLoc';
   var hitmanLoc = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
+    choice.appendChild(document.createTextNode(locations[i]));
     hitmanLoc.appendChild(choice);
   }
   hitmanLoc.selectedIndex = GM_getValue('hitmanLocation', NY);
@@ -6070,10 +6068,10 @@ function createStaminaTab() {
   lhs.appendChild(document.createTextNode('Place bounties in:'));
   id = 'autoHitListLoc';
   var autoHitListLoc = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=cities.length; i < iLength; ++i) {
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(cities[i][CITY_NAME]));
+    choice.appendChild(document.createTextNode(locations[i]));
     autoHitListLoc.appendChild(choice);
   }
   autoHitListLoc.selectedIndex = GM_getValue('autoHitListLoc', NY);
@@ -8892,7 +8890,7 @@ function debugDumpSettings() {
         'Delay rate low: <strong>'+ GM_getValue('d1') + '</strong><br>' +
         'Delay rate high: <strong>' + GM_getValue('d2') + '</strong><br>' +
         'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Heal in : <strong>' + (GM_getValue('healLocation') == cities.length ? 'Active City' : cities[GM_getValue('healLocation')][CITY_NAME]) + '</strong><br>' +
+        '&nbsp;&nbsp;-Heal in : <strong>' + locations[GM_getValue('healLocation')] + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
@@ -9007,7 +9005,7 @@ function debugDumpSettings() {
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
-        '&nbsp;&nbsp;-Fight in: <strong>' + cities[GM_getValue('fightLocation', 0)][CITY_NAME] + '</strong><br>' +
+        '&nbsp;&nbsp;-Fight in: <strong>' + locations[GM_getValue('fightLocation', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack <strong>' + showIfUnchecked(GM_getValue('staminaReattack')) + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack threshold:<strong>' + GM_getValue('reattackThreshold') + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight max level: <strong>' + GM_getValue('fightLevelMax') + ' (' + showIfRelative('fightLevelMaxRelative') + ')</strong><br>' +
@@ -9018,13 +9016,13 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Random fight avoid names: <strong>' + showIfUnchecked(GM_getValue('fightAvoidNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-List fight opponents: <strong>' + GM_getValue('fightList') + '</strong><br>' +
         '&nbsp;&nbsp;-List fight remove stronger: <strong>' + showIfUnchecked(GM_getValue('fightRemoveStronger')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Collect hitman bounties in: <strong>' + cities[GM_getValue('hitmanLocation', 0)][CITY_NAME] + '</strong><br>' +
+        '&nbsp;&nbsp;-Collect hitman bounties in: <strong>' + locations[GM_getValue('hitmanLocation', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman min bounty: <strong>' + parseCash(GM_getValue('hitmanBountyMin')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman bounty selection: <strong>' + bountySelectionChoices[(GM_getValue('bountySelection'))] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman avoid names: <strong>' + showIfUnchecked(GM_getValue('hitmanAvoidNames')) + '</strong><br>' +
         'Families list: <strong>' + GM_getValue('clanName') + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit bounty: <strong>' + parseCash(GM_getValue('autoHitListBounty')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Set Bounties in: <strong>' + cities[GM_getValue('autoHitListLoc', 0)][CITY_NAME] + '</strong><br>' +
+        '&nbsp;&nbsp;-Set Bounties in: <strong>' + locations[GM_getValue('autoHitListLoc', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit opponents: <strong>' + GM_getValue('autoHitOpponentList') + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit background: <strong>' + showIfUnchecked(GM_getValue('bgAutoHitCheck')) + '</strong><br>' +
