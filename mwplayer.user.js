@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       325
+// @build       326
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '325',
+  build: '326',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3950,7 +3950,11 @@ function saveSettings() {
   if (isNaN(burstJobCount)) {
     alert('Please enter numeric values for burstJobCount.');
     return;
+  } else if (parseInt(burstJobCount) > 50) {
+    alert('Please limit job bursts to 50.');
+    return;
   }
+
   GM_setValue('burstJobCount', burstJobCount);
 
   if (document.getElementById('masterAllJobs').checked === true) {
@@ -5425,7 +5429,7 @@ function createEnergyTab() {
   id = 'burstJobCount';
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Fire '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '10')});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '2')});
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' job attempts everytime'));
 
@@ -5774,7 +5778,7 @@ function createStaminaTab() {
   id = 'burstPoints';
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '10')});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '3')});
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' points '));
 
@@ -6420,10 +6424,15 @@ function validateStaminaTab() {
 
   if (isNaN(s.burstPoints)) {
     alert('Please enter numeric values for burstPoints.');
+    return false;
+  } else if (parseInt(s.burstPoints) > maxStamina) {
+    alert('Stamina bursts cannot exceed the max stamina.');
+    return false;
   }
 
   if (isNaN(s.selectStaminaUse) || isNaN(s.selectStaminaKeep)) {
     alert('Please enter numeric values for Stamina reserve and Stamina threshold.');
+    return false;
   }
 
   // The method of getting and verifying the rest of the settings depends
@@ -6448,52 +6457,54 @@ function validateStaminaTab() {
       // Validate reattack settings.
       if (isNaN(s.reattackThreshold)) {
         alert('Please enter the threshold for reattacking opponents.');
+        return false;
       } else if (s.reattackThreshold < 0) {
         alert('Please enter a reattack threshold of zero or more.');
+        return false;
       }
 
       // Validate the maximum level settings.
       if (isNaN(s.fightLevelMax)) {
         alert('Please enter a maximum level for fighting.');
-        return {};
+        return false;;
       } else if (s.fightLevelMaxRelative && s.fightLevelMax < 0) {
         alert('Please enter a maximum relative level of zero or more.');
-        return {};
+        return false;;
       } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level) {
         addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
         s.fightLevelMax = level;
       } else if (!s.fightLevelMaxRelative && level >= 180 &&
                  s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a maximum fight level of 200 at the very least. If necessary, lower the maximum mafia size to compensate.');
-        return {};
+        return false;;
       } else if (s.fightLevelMaxRelative && level >= 180 &&
                 level + s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a relative fight level of at least ' + (200 - s.fightLevelMax) + '. If necessary, lower the maximum mafia size to compensate.');
-        return {};
+        return false;;
       }
 
       // Validate the maximum mafia size settings.
       if (isNaN(s.fightMafiaMax)) {
         alert('Please enter a maximum mafia size for fighting.');
-        return {};
+        return false;;
       } else if (!s.fightMafiaMaxRelative && (s.fightMafiaMax < 1)) {
         alert('Please enter a maximum mafia size of one or more for fighting.');
-        return {};
+        return false;;
       } else if (s.fightMafiaMaxRelative && (s.fightMafiaMax + mafia < 1)) {
         alert('Please enter a larger relative mafia size for fighting.');
-        return {};
+        return false;;
       }
 
       // Validate the minimum mafia size settings.
       if (isNaN(s.fightMafiaMin)) {
         alert('Please enter a minimum mafia size for fighting.');
-        return {};
+        return false;;
       } else if (!s.fightMafiaMinRelative && (s.fightMafiaMin < 1)) {
         alert('Please enter a minimum mafia size of one or more for fighting.');
-        return {};
+        return false;;
       } else if (s.fightMafiaMinRelative && (mafia - s.fightMafiaMin < 1)) {
         alert('Please enter a smaller relative mafia size for fighting.');
-        return {};
+        return false;;
       }
       break;
 
@@ -6515,7 +6526,7 @@ function validateStaminaTab() {
       var list = s.fightList.split('\n');
       if (!list[0]) {
         alert('Enter the Facebook ID of at least one opponent to fight.');
-        return {};
+        return false;;
       }
       break;
 
@@ -6531,7 +6542,7 @@ function validateStaminaTab() {
       var min = parseCash(s.hitmanBountyMin);
       if (isNaN(min) || min < 0) {
         alert('Please enter a minimum bounty amount.');
-        return {};
+        return false;;
       }
       break;
 
@@ -6546,14 +6557,14 @@ function validateStaminaTab() {
       var min = parseCash(s.autoHitListBounty);
       if (isNaN(min) || min < 10000 && !s.autoHitListRandom) {
         alert('Please enter a minimum bounty amount of at least $10,000');
-        return {};
+        return false;;
       }
 
       // Validate the autohit list.
       var list = s.autoHitOpponentList.split('\n');
       if (!list[0]) {
         alert('Enter the Facebook ID of at least one opponent to hitlist.');
-        return {};
+        return false;;
       }
       break;
 
