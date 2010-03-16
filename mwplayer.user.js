@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       324
+// @build       325
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '324',
+  build: '325',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7446,7 +7446,9 @@ function customizeMasthead() {
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
                        '  <div class="sexy_destination middle">Zynga Forums</div> ' +
                        '</a> ' +
-                       '<div id=BuildButton><a href="http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11" onclick=" return do_ajax(\'popup_fodder\', \'remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11\', 1, 0, 0, 0); return false; " class="sexy_button_new short_black"><div class="sexy_destination middle">Build</div></a></div>'+
+                       '<a href="http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11" onclick=" return do_ajax(\'popup_fodder\', \'remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11\', 1, 0, 0, 0); return false; "> ' +
+                       '  <div class="sexy_destination middle">Build Red Angel</div> ' +
+                       '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
   // Settings Link (MWAP menu)
