@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.10
-// @build       326
+// @version     1.1.11
+// @build       327
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.10',
-  build: '326',
+  version: '1.1.11',
+  build: '327',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -962,6 +962,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var allyFaction = '';
   var quickBankFail = false;
 
+  // FIXME: Add more car names here
+  // Cars
+  var cityCars = ['Red Angel', 'Red Angel',
+                  'Red Angel', 'Red Angel',
+                  'Red Angel', 'Red Angel',
+                  'Red Angel', 'Red Angel',
+                  'Red Angel', 'Red Angel'];
+
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
                                 'selectStaminaKeepMode', 'selectStaminaKeep',
@@ -1743,9 +1751,10 @@ function doAutoPlay () {
     }
   }
 
-  // Build Red Angel
-  if (running && !maxed && isGMChecked('redAngel') && !timeLeftGM('redAngelTimer')) {
-    redAngel();
+  // FIXME: Add option to select which car to build
+  // Build Cars
+  if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
+    if (buildCar(10)) return;
   }
 
   // Auto-buy business (limit to level 4 and above)
@@ -1992,17 +2001,24 @@ function autoHeal() {
   return true;
 }
 
-function redAngel(){
-  var elt = xpathFirst('//div[@id="instruction_menu"]//a[contains(., "Build")]');
-  if(elt){
+// Pass the car id
+function buildCar(carId){
+  // Build the clickable element
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
+                        '"remote/html_server.php?xw_controller=propertyV2&' +
+                        'xw_action=craft&xw_city=1&recipe='+carId+'&building_type=11")'});
+  if (elt) {
     Autoplay.fx = function() {
-    clickElement(elt);
-    DEBUG('Clicked to build red angel.');
-  };
-  Autoplay.start();
-  setGMTime('redAngelTimer', '24 hours');
-  return true;
+      clickAction = 'build car';
+      clickContext = cityCars[carId - 1];
+      clickElement(elt);
+      DEBUG('Clicked to build ' + cityCars[carId - 1] + '.');
+    };
+
+    Autoplay.start();
+    return true;
   }
+  return false;
 }
 
 function autoSellCrates(sellCity) {
@@ -3943,7 +3959,7 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'showLevel','hideFriendLadder','moneyRacketCheck','autoWarRallyPublish','redAngel']);
+                            'showLevel','hideFriendLadder','moneyRacketCheck','autoWarRallyPublish','buildCar']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -6174,7 +6190,7 @@ function createCashTab () {
   makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, 'autoBuy');
   autoBuy.appendChild(document.createTextNode('Enable Auto-buy'));
 
-  var selectProperties = makeElement('div', cashTab, {'style':'top: 35px;'});
+  var selectProperties = makeElement('div', cashTab, {'style':'top: 35px; left: 10px;'});
   selectPropertiesTitle = makeElement('span', selectProperties, {'style':'margin-left:6px;'});
   selectPropertiesTitle.appendChild(document.createTextNode('Select the properties you want to buy:'));
   makeElement('br', selectProperties);
@@ -6201,10 +6217,16 @@ function createCashTab () {
     selectProperties.appendChild(document.createTextNode(propItem[1]));
   });
 
+  // Option to build a car
   makeElement('br', selectProperties);
   makeElement('br', selectProperties);
-  selectPropertiesNote = makeElement('span', selectProperties, {'style':'font-size: 10px;'});
-  selectPropertiesNote.appendChild(document.createTextNode('* Properties that cannot be robbed'));
+  title = 'Check this to build a car every 24 hours';
+  id = 'buildCar';
+  var buildCar = makeElement('div', selectProperties);
+  makeElement('input', selectProperties, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', selectProperties, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Build Cars'));
+
 
   title = 'Never spend below this amount of cash';
   var buyMinAmount = makeElement('div', cashTab, {'style':'top: 10px; right: 10px;'});
@@ -6314,13 +6336,6 @@ function createCashTab () {
   makeElement('input', autoBuyCratesOutput, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
 
   // end auto buy crates
-
-  title = 'Check this to build Red Angel every 24 hours';
-  id = 'redAngel';
-  var redAngel = makeElement('div', cashTab, {'style':'top: 410px; right: 10px;'});
-  label = makeElement('label', redAngel, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Build Red Angel:'));
-  makeElement('input', redAngel, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
   return cashTab;
 }
@@ -7456,9 +7471,6 @@ function customizeMasthead() {
                        '</a>' +
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
                        '  <div class="sexy_destination middle">Zynga Forums</div> ' +
-                       '</a> ' +
-                       '<a href="http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11" onclick=" return do_ajax(\'popup_fodder\', \'remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11\', 1, 0, 0, 0); return false; "> ' +
-                       '  <div class="sexy_destination middle">Build Red Angel</div> ' +
                        '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
@@ -9091,7 +9103,7 @@ function debugDumpSettings() {
         'Buy Bangkok business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesBangkok')) + '</strong><br>' +
         '&nbsp;&nbsp;-Upgrade First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesUpgrade')) + '</strong><br>' +
         '&nbsp;&nbsp;-Output First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesOutput')) + '</strong><br>' +
-        'Build Red Angel: <strong>' + showIfUnchecked(GM_getValue('redAngel')) + '</strong><br>' +
+        'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Collect Racket: <strong>' + showIfUnchecked(GM_getValue('racketCollect')) + '</strong><br>' +
@@ -11234,6 +11246,15 @@ function logResponse(rootElt, action, context) {
 
     // FIXME: Add parsing here
     case 'buy item':
+      break;
+
+    case 'build car':
+      addToLog('info Icon', inner);
+      // Visit again after 1 hour if you cannot craft yet
+      if (/You cannot craft/i.test(inner))
+        setGMTime('buildCarTimer', '1 hour');
+      else
+        setGMTime('buildCarTimer', '24 hours');
       break;
 
     default:
