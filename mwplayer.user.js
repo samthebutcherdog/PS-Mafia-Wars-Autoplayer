@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       321
+// @build       322
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '321',
+  build: '322',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2540,7 +2540,7 @@ function canMission() {
       if (isGMChecked('endLevelOptimize')) {
         // Get the exp burner from the missions array
         var expBurnFilter = function(v, i, a) { return (i > 6 && i < singleJobLevelUp[0][0] &&
-                                                        a[i][5] < 3 &&
+                                                        a[i][6] < 3 &&
                                                         a[i][1] < singleJobLevelUp[0][1] * 0.5) ? 1:0; };
         var expBurners = missions.filter(expBurnFilter);
         expBurners.sort(function(a, b) { return b[5] - a[5]; });
