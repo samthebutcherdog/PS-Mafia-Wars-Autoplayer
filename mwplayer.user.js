@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       322
+// @build       323
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '322',
+  build: '323',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10047,8 +10047,8 @@ function getJobClicks() {
     var nextJobXp = missions[GM_getValue('selectMission', 1)][5];
     var nextJobCost = missions[GM_getValue('selectMission', 1)][1];
     numClicks = GM_getValue('burstJobCount', 1);
-    while (nextJobCost * numClicks >= energy - 100 &&
-           nextJobXp   * numClicks >= ptsToNextLevel - 100 &&
+    while (nextJobCost * numClicks >= energy - nextJobCost &&
+           nextJobXp   * numClicks >= ptsToNextLevel - nextJobXp &&
                          numClicks >  1
            ) numClicks--;
   }
