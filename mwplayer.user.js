@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       318
+// @build       319
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '318',
+  build: '319',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1451,10 +1451,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Drug Shipment', BANGKOK]
   );
 
-  // FIXME: Should this be selectable by users?
-  // These jobs pays 5, 3, 2, 1 exp respectively.
-  var expBurners = [2, 1, 4, 0];
-
   String.prototype.trim = function() {
     return this.replace(/^\s+|\s+$/g, '');
   }
@@ -2411,14 +2407,14 @@ function autoStat() {
 
     // Add stats to the attribute farthest from the goal
     // (or the nextStat if fallback kicked in)
-    var upgradeElt;
+    var upgradeElt, upgradeKey;
     switch (statIndex) {
-      case ATTACK_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=attack")]', innerPageElt);         break;
-      case DEFENSE_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=defense")]', innerPageElt);        break;
-      case HEALTH_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_health")]', innerPageElt);     break;
-      case ENERGY_STAT    : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_energy")]', innerPageElt);     break;
-      case INFLUENCE_STAT : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_influence")]', innerPageElt);  break;
-      case STAMINA_STAT   : upgradeElt = xpathFirst('.//a[contains(@href,"upgrade_key=max_stamina")]', innerPageElt);    break;
+      case ATTACK_STAT    : upgradeKey = 'attack';        break;
+      case DEFENSE_STAT   : upgradeKey = 'defense';       break;
+      case HEALTH_STAT    : upgradeKey = 'max_health';    break;
+      case ENERGY_STAT    : upgradeKey = 'max_energy';    break;
+      case INFLUENCE_STAT : upgradeKey = 'max_influence'; break;
+      case STAMINA_STAT   : upgradeKey = 'max_stamina';   break;
 
       default             :
         // Disable auto-stats when maxPts calculated is NaN
@@ -2426,6 +2422,9 @@ function autoStat() {
         addToLog('warning Icon', 'BUG DETECTED: Invalid calculated maxPts value "' + maxPts + '". Auto-stat disabled.');
         return false;
     }
+
+    var upgrateAmt = (stats > 4 && maxPtDiff > 4)? 5 : 1;
+    var upgradeElt = xpathFirst('.//a[contains(@onclick,"upgrade_key='+upgradeKey+'") and contains(@onclick,"upgrade_amt='+upgrateAmt+'")]', innerPageElt);
 
     if (!upgradeElt){
       DEBUG('Couldnt find link to upgrade stat.');
@@ -2509,7 +2508,8 @@ function canMission() {
       if (mission[1] <= energy) {
         enoughEnergy = true;
         if (mission[5] >= expLeft) {
-          singleJobLevelUp.push(job);
+          var levelJob = [job, mission[1], mission[5]];
+          singleJobLevelUp.push(levelJob);
           singleJobLevelUpPossible = true;
         }
       }
@@ -2533,17 +2533,22 @@ function canMission() {
 
     // Don't do expBurners or biggest exp job if energy can be salvaged
     if (singleJobLevelUp.length > 0 && !canSalvage) {
-      singleJobLevelUp.sort(function(a, b) { return missions[b][5] - missions[a][5]; });
+      singleJobLevelUp.sort(function(a, b) { return b[2] - a[2]; });
       // One job is enough to level up. Pick the one that pays the most.
-      doJob = singleJobLevelUp[0];
+      doJob = singleJobLevelUp[0][0];
 
       if (isGMChecked('endLevelOptimize')) {
+        // Get the exp burner from the missions array
+        var expBurnFilter = function(v, i, a) { return (i > 6 && a[i][1] < singleJobLevelUp[0][1] * 0.5) ? 1:0; };
+        var expBurners = missions.filter(expBurnFilter);
+        expBurners.sort(function(a, b) { return b[5] - a[5]; });
+
         // Burn up exp before leveling up to maximize energy
-        for (i = 0, iLength=expBurners.length; i < iLength; ++i) {
+        for (var i = 0, iLength=expBurners.length; i < iLength; ++i) {
           var expBurner = expBurners[i];
-          if ( (energy - missions[singleJobLevelUp[0]][1]) > missions[expBurner][1] &&
-             expLeft > Math.floor(missions[expBurner][5] * 1.5) ) {
-            doJob = expBurner;
+          if ( (energy - singleJobLevelUp[0][1]) > expBurner[1] &&
+             expLeft >= Math.floor(expBurner[5]) * 1.5) {
+            doJob = missions.searchArray(expBurner[0], 0)[0];
             jobOptimizeOn = true;
             break;
           }
@@ -10038,8 +10043,12 @@ function getJobClicks() {
   var numClicks = 1;
   if (isGMChecked('burstJob') && !jobOptimizeOn){
     var nextJobXp = missions[GM_getValue('selectMission', 1)][5];
+    var nextJobCost = missions[GM_getValue('selectMission', 1)][1];
     numClicks = GM_getValue('burstJobCount', 1);
-    while (((nextJobXp * numClicks) >= ptsToNextLevel - 100) && (numClicks > 1)) numClicks--;
+    while (nextJobCost * numClicks >= energy - 100 &&
+           nextJobXp   * numClicks >= ptsToNextLevel - 100 &&
+                         numClicks >  1
+           ) numClicks--;
   }
   return parseInt(numClicks);
 }
@@ -11041,42 +11050,21 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'stats':
-      if (innerNoTags.match(/You just upgraded your (\w+)/i)) {
-        var stat = RegExp.$1.toLowerCase();
-        switch (stat) {
-          case 'attack':
-            curAttack++;
-            GM_setValue('nextStat' , DEFENSE_STAT)
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded '+ attackIcon + ' attack.</span>');
-            break;
-          case 'defense':
-            curDefense++;
-            GM_setValue('nextStat' , HEALTH_STAT)
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded '+ defenseIcon + ' defense.</span>');
-            break;
-          case 'health':
-            maxHealth++;
-            GM_setValue('nextStat' , ENERGY_STAT)
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded '+ healthIcon + ' health.</span>');
-            break;
-          case 'energy':
-            maxEnergy++;
-            GM_setValue('nextStat' , STAMINA_STAT)
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded '+ energyIcon + ' energy.</span>');
-            break;
-          case 'stamina':
-            maxStamina++;
-            GM_setValue('nextStat' , INFLUENCE_STAT)
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded '+ staminaIcon + ' stamina.</span>');
-            break;
-          case 'influence':
-            maxInfluence++;
-            GM_setValue('nextStat' , ATTACK_STAT)
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded '+ influenceIcon + ' influence.</span>');
-            break;
-          default:
-            addToLog('process Icon', '<span style="color:#885588;">'+'You upgraded ' + stat + '.</span>');
+      if (innerNoTags.match(/You just upgraded your (\w+) by (\d+)/i)) {
+        var statName = RegExp.$1;
+        var statIndex = eval(statName.toUpperCase() + '_STAT');
+        var statIcon = eval(statName.toLowerCase() + 'Icon');
+        var statInc = isNaN(RegExp.$2) ? 1 : parseInt(RegExp.$2);
+        GM_setValue('nextStat' , (statIndex + 1) % 5);
+        switch (statIndex) {
+          case ATTACK_STAT:    curAttack    += statInc; break;
+          case DEFENSE_STAT:   curDefense   += statInc; break;
+          case HEALTH_STAT:    maxHealth    += statInc; break;
+          case ENERGY_STAT:    maxEnergy    += statInc; break;
+          case STAMINA_STAT:   maxStamina   += statInc; break;
+          case INFLUENCE_STAT: maxInfluence += statInc; break;
         }
+        addToLog('process Icon', '<span style="color:#885588;">'+statIcon+' '+statName+' increased by '+statInc+' point(s).</span>');
       } else {
         DEBUG('Failed to increment stat.');
       }
