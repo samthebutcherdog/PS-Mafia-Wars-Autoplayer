@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.10
-// @build       323
+// @build       324
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.10',
-  build: '323',
+  build: '324',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1743,6 +1743,11 @@ function doAutoPlay () {
     }
   }
 
+  // Build Red Angel
+  if (running && !maxed && isGMChecked('redAngel') && !timeLeftGM('redAngelTimer')) {
+    redAngel();
+  }
+
   // Auto-buy business (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -1985,6 +1990,19 @@ function autoHeal() {
   };
   Autoplay.start();
   return true;
+}
+
+function redAngel(){
+  var elt = xpathFirst('//div[@id="instruction_menu"]//a[contains(., "Build")]');
+  if(elt){
+    Autoplay.fx = function() {
+    clickElement(elt);
+    DEBUG('Clicked to build red angel.');
+  };
+  Autoplay.start();
+  setGMTime('redAngelTimer', '24 hours');
+  return true;
+  }
 }
 
 function autoSellCrates(sellCity) {
@@ -3925,7 +3943,7 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'showLevel','hideFriendLadder','moneyRacketCheck','autoWarRallyPublish']);
+                            'showLevel','hideFriendLadder','moneyRacketCheck','autoWarRallyPublish','redAngel']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -6293,6 +6311,13 @@ function createCashTab () {
 
   // end auto buy crates
 
+  title = 'Check this to build Red Angel every 24 hours';
+  id = 'redAngel';
+  var redAngel = makeElement('div', cashTab, {'style':'top: 410px; right: 10px;'});
+  label = makeElement('label', redAngel, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Build Red Angel:'));
+  makeElement('input', redAngel, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+
   return cashTab;
 }
 
@@ -7421,6 +7446,7 @@ function customizeMasthead() {
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
                        '  <div class="sexy_destination middle">Zynga Forums</div> ' +
                        '</a> ' +
+                       '<div id=BuildButton><a href="http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11" onclick=" return do_ajax(\'popup_fodder\', \'remote/html_server.php?xw_controller=propertyV2&amp;xw_action=craft&amp;xw_city=1&amp;recipe=10&amp;building_type=11\', 1, 0, 0, 0); return false; " class="sexy_button_new short_black"><div class="sexy_destination middle">Build</div></a></div>'+
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
   // Settings Link (MWAP menu)
@@ -9052,6 +9078,7 @@ function debugDumpSettings() {
         'Buy Bangkok business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesBangkok')) + '</strong><br>' +
         '&nbsp;&nbsp;-Upgrade First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesUpgrade')) + '</strong><br>' +
         '&nbsp;&nbsp;-Output First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesOutput')) + '</strong><br>' +
+        'Build Red Angel: <strong>' + showIfUnchecked(GM_getValue('redAngel')) + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Collect Racket: <strong>' + showIfUnchecked(GM_getValue('racketCollect')) + '</strong><br>' +
