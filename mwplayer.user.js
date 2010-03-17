@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.11
-// @build       328
+// @build       329
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.11',
-  build: '328',
+  build: '329',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1326,12 +1326,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Dispose Of Mountain Master Wei',1,113,6,BANGKOK,3]                       // BOSS JOB
   );
 
-  // Load the missions array from previously saved value
-  if (!isGMUndefined('missions')) {
-    var savedMissions = eval ('(' + GM_getValue('missions') + ')');
-    missions = (savedMissions.length != missions.length) ? missions : savedMissions;
-  }
-
   var missionTabs = new Array(
     // NEW YORK
     ['Street Thug (Levels 1-4)','Associate (Levels 5-8)','Soldier (Levels 9-12)',
@@ -1550,6 +1544,17 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     sendMWValues(['version','build', 'newbuild']);
     grabUpdateInfo(GM_getValue('build'));
     handleVersionChange();
+  }
+
+  // Load the missions array from previously saved value
+  if (!isGMUndefined('missions')) {
+    var savedMissions = eval ('(' + GM_getValue('missions') + ')');
+    if (savedMissions.length == missions.length) {
+      missions = savedMissions;
+      DEBUG('Using saved missions array.');
+    } else {
+      DEBUG('Missions array updated.');
+    }
   }
 
   // Set the initial run state.
@@ -3713,8 +3718,8 @@ function handleVersionChange() {
 
   // Check for invalid settings and upgrade them.
 
-  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 318) {
-    GM_deleteValue('missions');
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 329) {
+    GM_setValue('missions', JSON.stringify('[]'));
   }
 
   // Clear invalid jobs
