@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.11
-// @build       327
+// @build       328
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.11',
-  build: '327',
+  build: '328',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -962,13 +962,19 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var allyFaction = '';
   var quickBankFail = false;
 
-  // FIXME: Add more car names here
   // Cars
-  var cityCars = ['Red Angel', 'Red Angel',
-                  'Red Angel', 'Red Angel',
-                  'Red Angel', 'Red Angel',
-                  'Red Angel', 'Red Angel',
-                  'Red Angel', 'Red Angel'];
+  var cityCars = new Array (
+    ['Random Common Car', 'Requires 10 car parts'],
+    ['Random Rare Car', 'Requires 25 car parts'],
+    ['Tasmanian', 'Requires 30 car parts | 36 attack, 34 defense'],
+    ['CM Santiago R10', 'Requires 30 car parts, 2 Cuban car parts | 42 attack, 30 defense'],
+    ['Rebel 2', 'Requires 45 car parts and 2 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
+    ['Russian Dazatz 45', 'Requires 50 car parts and 2 Russian car parts | 18 attack, 46 defense'],
+    ['Solar Flare', 'Requires 65 car parts and 1 solar panel | 34 attack, 34 defense, +5 energy'],
+    ['Thai XS Max', 'Requires 75 car parts and 2x Thai car parts | 45 attack, 35 defense'],
+    ['Trio Napoli', 'Requires 95 car parts | 47 attack, 23 defense'],
+    ['Red Angel', 'Requires 115 car parts | 16 attack, 49 defense']
+  );
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -1751,10 +1757,9 @@ function doAutoPlay () {
     }
   }
 
-  // FIXME: Add option to select which car to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
-    if (buildCar(10)) return;
+    if (buildCar(GM_getValue('buildCarId',9))) return;
   }
 
   // Auto-buy business (limit to level 4 and above)
@@ -2006,13 +2011,13 @@ function buildCar(carId){
   // Build the clickable element
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=craft&xw_city=1&recipe='+carId+'&building_type=11")'});
+                        'xw_action=craft&xw_city=1&recipe='+(carId + 1)+'&building_type=11")'});
   if (elt) {
     Autoplay.fx = function() {
       clickAction = 'build car';
-      clickContext = cityCars[carId - 1];
+      clickContext = cityCars[carId][0];
       clickElement(elt);
-      DEBUG('Clicked to build ' + cityCars[carId - 1] + '.');
+      DEBUG('Clicked to build ' + cityCars[carId][0] + '.');
     };
 
     Autoplay.start();
@@ -2457,7 +2462,7 @@ function autoStat() {
         return false;
     }
 
-    var upgrateAmt = (stats > 4 && maxPtDiff > 4)? 5 : 1;
+    var upgrateAmt = (stats > 4 && (maxPtDiff > 4 || maxPtDiff <= 0))? 5 : 1;
     var upgradeElt = xpathFirst('.//a[contains(@onclick,"upgrade_key='+upgradeKey+'") and contains(@onclick,"upgrade_amt='+upgrateAmt+'")]', innerPageElt);
 
     if (!upgradeElt){
@@ -3939,6 +3944,7 @@ function saveSettings() {
   GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
   GM_setValue('healLocation', document.getElementById('healLocation').value);
   GM_setValue('burnOption', document.getElementById('burnOption').value);
+  GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
 
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks','attackCritical',
@@ -6225,8 +6231,17 @@ function createCashTab () {
   var buildCar = makeElement('div', selectProperties);
   makeElement('input', selectProperties, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', selectProperties, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Build Cars'));
+  label.appendChild(document.createTextNode(' Build Car '));
 
+  // Car list
+  id = 'buildCarId';
+  var carType = makeElement('select', selectProperties, {'id':id,'style':'margin-left: 5px;'});
+  for (i = 0, iLength=cityCars.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityCars[i][1]});
+    choice.appendChild(document.createTextNode(cityCars[i][0]));
+    carType.appendChild(choice);
+  }
+  carType.selectedIndex = GM_getValue(id, 9);
 
   title = 'Never spend below this amount of cash';
   var buyMinAmount = makeElement('div', cashTab, {'style':'top: 10px; right: 10px;'});
@@ -9104,6 +9119,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Upgrade First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesUpgrade')) + '</strong><br>' +
         '&nbsp;&nbsp;-Output First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesOutput')) + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
+        '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Collect Racket: <strong>' + showIfUnchecked(GM_getValue('racketCollect')) + '</strong><br>' +
