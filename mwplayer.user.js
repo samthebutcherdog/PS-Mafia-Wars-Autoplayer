@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.11
-// @build       329
+// @build       330
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.11',
-  build: '329',
+  build: '330',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1782,7 +1782,7 @@ function doAutoPlay () {
 
   // Auto-bank
   if (running && !maxed && canBank) {
-    if (autoBankDeposit()) return;
+    if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
 
   // Auto-stat
@@ -3154,7 +3154,7 @@ function autoStaminaSpend() {
   return false;
 }
 
-function autoBankDeposit(amount) {
+function autoBankDeposit(bankCity, amount) {
   if (!quickBankFail) return false;
 
   // Make sure we're at the bank.
@@ -3181,8 +3181,16 @@ function autoBankDeposit(amount) {
     addToLog('warning Icon', 'BUG DETECTED: No submit input at bank.');
     return false;
   }
+
+  // Do not bank if city has changed
+  if (city != bankCity) {
+    addToLog('warning Icon', 'Switching city too fast, not banking cash.');
+    return false;
+  }
+
   Autoplay.fx = function() {
     quickBankFail = false;
+    clickContext = bankCity;
     clickAction = 'deposit';
     submitElt.click();
     DEBUG('Clicked to deposit.');
@@ -7398,8 +7406,8 @@ function doQuickClicks() {
                   cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
     // Do quick banking
-    if (canBank && !isNaN(cities[city][CITY_CASH])) {
-      quickBank(cities[city][CITY_CASH]);
+    if (canBank && !isNaN(city) && !isNaN(cities[city][CITY_CASH])) {
+      quickBank(city, cities[city][CITY_CASH]);
     }
 
     // Auto-send energy pack
@@ -7597,9 +7605,17 @@ function customizeStats() {
   setListenStats(true);
 }
 
-function quickBank(amount) {
+function quickBank(bankCity, amount) {
+  var byUser = false;
+  // Handle user-click action
+  if (isNaN(amount) || isNaN(bankCity)) {
+    byUser = true;
+    bankCity = city;
+    amount = cities[bankCity][CITY_CASH];
+  }
+
   // Get the URL
-  var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit','xw_city':(city + 1)});
+  var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit','xw_city':(bankCity + 1)});
 
   // Form the post data
   var postData = 'ajax=1';
@@ -7616,20 +7632,20 @@ function quickBank(amount) {
     return "";
   }
   postData += '&sf_xw_sig=' + RegExp.$1;
-
-  var byUser = false;
-  if (isNaN(amount)) {
-    byUser = true;
-    amount = cities[city][CITY_CASH];
-  }
   postData += '&amount=' + amount;
 
   // If cash being deposited is greater than 1 billion, do NOT quick-bank!
   if (amount > 1000000000) {
     if (byUser)
-      addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[city][CITY_CASH_SYMBOL] + amount +
+      addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[bankCity][CITY_CASH_SYMBOL] + amount +
                '</strong>!?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
     quickBankFail = true;
+    return;
+  }
+
+  // Do not quick-bank if city has changed
+  if (city != bankCity) {
+    DEBUG('Switching city too fast, not quick-banking.');
     return;
   }
 
@@ -7643,6 +7659,15 @@ function quickBank(amount) {
     },
     onload: function (resp) {
       var respTxt = resp.responseText;
+
+      // Log if city has changed after banking
+      if (city != bankCity) {
+        addToLog('warning Icon', 'Warning! You have traveled from ' +
+                 cities[bankCity][CITY_NAME] + ' to ' +
+                 cities[city][CITY_NAME] +
+                 ' while banking. Check your money.');
+      }
+
       // Money deposited
       if (/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) {
         addToLog(cities[city][CITY_CASH_CSS],
@@ -11250,6 +11275,14 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'deposit':
+      // Log if city has changed after banking
+      if (city != clickContext) {
+        addToLog('warning Icon', 'Warning! You have traveled from ' +
+                 cities[clickContext][CITY_NAME] + ' to ' +
+                 cities[city][CITY_NAME] +
+                 ' while banking. Check your money.');
+      }
+
       if (innerNoTags.match(/deposited/i)) {
         addToLog(cities[city][CITY_CASH_CSS], inner);
       } else {
