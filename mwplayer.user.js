@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.12
-// @build       332
+// @build       333
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.12',
-  build: '332',
+  build: '333',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1741,7 +1741,7 @@ function doAutoPlay () {
   }
 
   // Auto-take for properties (limit to level 4 and above)
-  if (false && running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
+  if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
       if (collectNYTake()) return;
   }
 
@@ -2333,8 +2333,7 @@ function collectNYTake() {
     }
   }
 
-  loadUrl(getMWUrl('json_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':'1', 'requesttype':'json'}), urlLoaded);
-
+  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':'1', 'requesttype':'json'}), urlLoaded);
   return false;
 }
 
