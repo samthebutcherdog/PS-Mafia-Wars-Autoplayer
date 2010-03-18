@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.11
-// @build       330
+// @version     1.1.12
+// @build       331
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.11',
-  build: '330',
+  build: '331',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1741,7 +1741,7 @@ function doAutoPlay () {
   }
 
   // Auto-take for properties (limit to level 4 and above)
-  if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
+  if (false && running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
       if (collectNYTake()) return;
   }
 
