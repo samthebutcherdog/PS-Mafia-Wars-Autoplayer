@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.12
-// @build       333
+// @build       334
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.12',
-  build: '333',
+  build: '334',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8966,7 +8966,7 @@ function debugDumpSettings() {
     addToLog('warning Icon', 'Unfortunately, only the English version of the game is fully supported. If you experience problems, set your Facebook language to English and try again.');
   }
 
-  DEBUG('[code]>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
+  DEBUG('>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
         'Script Version: <strong>' + SCRIPT.version + ' build ' + SCRIPT.build + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
         'Player current level: <strong>' + level + '</strong><br>' +
@@ -9163,7 +9163,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Minimum deposit: R$<strong>' + GM_getValue('bankConfigMoscow') + '</strong><br>' +
         'Enable auto-bank in Bangkok: <strong>' + showIfUnchecked(GM_getValue('autoBankBangkok')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: B$<strong>' + GM_getValue('bankConfigBangkok') + '</strong><br>' +
-        '>  >  >  >  >  END SETTINGS DUMP  <  <  <  <  <[/code]');
+        '>  >  >  >  >  END SETTINGS DUMP  <  <  <  <  <');
 }
 
 // This function returns false if some further action has been taken and the
@@ -10863,6 +10863,7 @@ function logJSONResponse(responseText, action) {
     // Log any message from collection NY take.
     switch (action) {
       case 'collect ny take':
+        respJSON = eval ('(' + respJSON['data']  + ')');
         for (var i in respJSON) {
           if (/collected/i.test(respJSON[i])) {
             addToLog(cities[city][CITY_CASH_CSS], respJSON[i]);
@@ -11277,7 +11278,7 @@ function logResponse(rootElt, action, context) {
       // Log if city has changed after banking
       if (city != clickContext) {
         addToLog('warning Icon', 'Warning! You have traveled from ' +
-                 cities[clickContext][CITY_NAME] + ' to ' +
+                 cities[context][CITY_NAME] + ' to ' +
                  cities[city][CITY_NAME] +
                  ' while banking. Check your money.');
       }
