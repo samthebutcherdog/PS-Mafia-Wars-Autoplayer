@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.13
-// @build       335
+// @build       336
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.13',
-  build: '335',
+  build: '336',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1745,10 +1745,6 @@ function doAutoPlay () {
       if (collectNYTake()) return;
   }
 
-  // Auto-bank flag
-  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
-                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-
   // Auto-sell business output (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -1781,6 +1777,8 @@ function doAutoPlay () {
   }
 
   // Auto-bank
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
+                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
   if (running && !maxed && canBank) {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
@@ -1811,17 +1809,20 @@ function doAutoPlay () {
     //if (autoGiftWaiting()) return;
   }
 
-  // Mini-pack check
-  if (running && !maxed && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
-    if (miniPack()) return;
-  }
-
   // Auto-energypack
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
   var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
   var autoEnergyPackWaiting = running && energyPack &&
                               ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
                               isGMChecked('autoEnergyPack');
+
+  // Mini-pack check
+  var xpPtsFromEnergy = (energy + 200) * getEnergyGainRate();
+  var xpPtsFromStamina = (stamina + 200) * getStaminaGainRate();
+  var canUseMiniPack = (xpPtsFromEnergy < ptsToNextLevel) && (xpPtsFromStamina < ptsToNextLevel);
+  if (running && !maxed && canUseMiniPack && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
+    if (miniPack()) return;
+  }
 
   if (autoEnergyPackWaiting && energy <= 2) {
     DEBUG('ptsToNextLevel=' + ptsToNextLevel +
@@ -2376,7 +2377,6 @@ function autoPlayerUpdates() {
 }
 
 // MiniPack!
-// FIXME: As the energy pack, needs AI to control when to use this
 function miniPack() {
   setGMTime('miniPackTimer', '8 hours');
   DEBUG('Redirecting to use mini Energy');
@@ -2468,6 +2468,11 @@ function autoStat() {
 
     var upgrateAmt = (stats > 4 && (maxPtDiff > 4 || maxPtDiff <= 0))? 5 : 1;
     var upgradeElt = xpathFirst('.//a[contains(@onclick,"upgrade_key='+upgradeKey+'") and contains(@onclick,"upgrade_amt='+upgrateAmt+'")]', innerPageElt);
+
+    // Try to fallback to 1 skill point button
+    if (!upgradeElt){
+      upgradeElt = xpathFirst('.//a[contains(@onclick,"upgrade_key='+upgradeKey+'")]', innerPageElt);
+    }
 
     if (!upgradeElt){
       DEBUG('Couldnt find link to upgrade stat.');
@@ -9893,7 +9898,7 @@ function propertyBuy() {
   var buyCost = parseInt(GM_getValue('buyCost', 0));
   var buyMinAmount = parseInt(GM_getValue('buyMinAmount', 0));
 
-  // Make sure there something to buy and the amounts are valid.
+  // Make sure there's something to buy and the amounts are valid.
   if (!buyCost || isNaN(buyMinAmount) || !cities[NY][CITY_CASH]) return false;
 
   // Make sure enough cash will be left over.
