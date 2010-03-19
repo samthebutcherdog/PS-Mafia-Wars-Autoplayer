@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.16
-// @build       339
+// @build       340
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.16',
-  build: '339',
+  build: '340',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8529,10 +8529,10 @@ function customizeProps() {
     if (isGMChecked('autoBuy')) {
       GM_setValue('autoBuy', 0);
       addToLog('warning Icon', 'Auto buying of properties disabled.');
+      addToLog('updateBad Icon', 'You must disable flash from your browser for autoBuy to work. <br>' +
+               'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
+               '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
     }
-    addToLog('updateBad Icon', 'You must disable flash from your browser for autoBuy to work. <br>' +
-             'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
-             '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
     return true;
   }
 
