@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.15
-// @build       338
+// @version     1.1.16
+// @build       339
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.15',
-  build: '338',
+  version: '1.1.16',
+  build: '339',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -914,6 +914,21 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Array of lottery bonus items
   var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', '1 skill point', '+20 energy points', '1-5 Godfather points'];
+
+  // Prop Income
+  var propsData = new Array (
+    // Name, income per level per hour
+    ['Louie\'s Deli', 250],
+    ['Flophouse', 300],
+    ['Pawnshop', 700],
+    ['Tenement', 5000],
+    ['Warehouse', 10000],
+    ['Restaurant', 12000],
+    ['Dockyard', 50000],
+    ['Office Park', 150000],
+    ['Uptown Hotel', 200000],
+    ['Mega Casino', 300000]
+  );
 
   // Stat Ordinal constants
   const ATTACK_STAT  = 0;
@@ -8531,11 +8546,11 @@ function customizeProps() {
 
     var prop =  {'name'  : props[0].innerHTML,
                  'id'    : (i + 1),
-                 'level' : props[1].innerHTML,
-                 'cost'  : props[2].innerHTML.untag().replace(/[\D]/gi,''),
-                 'income'  : eval (props[3].innerHTML.replace(/[$|,|hrs]/gi,''))}
-                 //'collect' : /href=/.test(props[4].innerHTML) ? 1 : timeLeft(props[4].innerHTML) / 60 / 60 / 24}
-    prop['roi'] = Math.round(10000 * prop['income'] / prop['cost']) / 10000;
+                'level'  : parseFloat(props[1].innerHTML),
+                'cost'   : parseFloat(props[2].innerHTML.untag().replace(/[\D]/gi,''))}
+
+    // ROI
+    prop['roi'] = (propsData[i][1] / prop['cost']).toExponential(4);
 
     // Set next take time
     if  (/href=/.test(props[4].innerHTML))
@@ -8545,7 +8560,7 @@ function customizeProps() {
 
     // Show ROI
     if (i > 0 && !isNaN(prop['roi'])) {
-      props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">Est. ROI: '+prop['roi']+'</span>'
+      props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">ROI: '+prop['roi']+'</span>'
 
       // Best ROI
       if (prop['roi'] > bestROI) {
