@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.13
-// @build       336
+// @version     1.1.14
+// @build       337
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.13',
-  build: '336',
+  version: '1.1.14',
+  build: '337',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1789,8 +1789,8 @@ function doAutoPlay () {
   }
 
   // Auto-buy properties (limit to level 4 and above)
-  if (false && running && !maxed && isGMChecked('autoBuy') && hasProps) {
-    if (propertyBuy()) return;
+  if (running && !maxed && isGMChecked('autoBuy') && hasProps) {
+    if (buyProperties()) return;
   }
 
   // Auto-lotto (limit to level 7 and above)
@@ -4012,27 +4012,6 @@ function saveSettings() {
     }
   }
 
-  var selectProperties = '';
-  if (saveCheckBoxElement('flophouse'))
-    selectProperties += 'Flophouse';
-  if (saveCheckBoxElement('pawnshop'))
-    selectProperties += 'Pawnshop';
-  if (saveCheckBoxElement('tenement'))
-    selectProperties += 'Tenement';
-  if (saveCheckBoxElement('warehouse'))
-    selectProperties += 'Warehouse';
-  if (saveCheckBoxElement('restaurant'))
-    selectProperties += 'Restaurant';
-  if (saveCheckBoxElement('dockyard'))
-    selectProperties += 'Dockyard';
-  if (saveCheckBoxElement('office'))
-    selectProperties += 'Office Park';
-  if (saveCheckBoxElement('hotel'))
-    selectProperties += 'Uptown Hotel';
-  if (saveCheckBoxElement('casino'))
-    selectProperties += 'Mega Casino';
-
-  GM_setValue('selectProperties', selectProperties);
   GM_setValue('estimateJobRatio', document.getElementById('estimateJobRatio').value);
 
   if (saveCheckBoxElement('autoPauseBefore')) {
@@ -6201,46 +6180,24 @@ function createCashTab () {
   var elt, title, id, label;
   var cashTab = makeElement('div', null, {'id':'cashTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
+  title = 'Check this auto-buy properties in New York';
+  id = 'autoBuy';
   var autoBuy = makeElement('div', cashTab, {'style':'top: 10px;'});
-  makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, 'autoBuy');
-  autoBuy.appendChild(document.createTextNode('Enable Auto-buy'));
-
-  var selectProperties = makeElement('div', cashTab, {'style':'top: 35px; left: 10px;'});
-  selectPropertiesTitle = makeElement('span', selectProperties, {'style':'margin-left:6px;'});
-  selectPropertiesTitle.appendChild(document.createTextNode('Select the properties you want to buy:'));
-  makeElement('br', selectProperties);
-
-  var propItems = new Array(
-    ['flophouse', 'Flophouse'],
-    ['pawnshop', 'Pawnshop'],
-    ['tenement','Tenement'],
-    ['warehouse','Warehouse'],
-    ['restaurant','Restaurant'],
-    ['dockyard','Dockyard'],
-    ['office','Office Park'],
-    ['hotel','Uptown Hotel'],
-    ['casino','Mega Casino']
-  );
-
-  propItems.forEach(function(propItem) {
-    makeElement('br', selectProperties);
-    makeElement('input', selectProperties, {'type':'checkbox', 'id':propItem[0], 'value':'checked'}, propItem[0], 'checked');
-    selectProperties.appendChild(document.createTextNode(propItem[1]));
-  });
+  makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, id);
+  label = makeElement('label', autoBuy, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Auto-buy NY properties '));
 
   // Option to build a car
-  makeElement('br', selectProperties);
-  makeElement('br', selectProperties);
   title = 'Check this to build a car every 24 hours';
   id = 'buildCar';
-  var buildCar = makeElement('div', selectProperties);
-  makeElement('input', selectProperties, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  label = makeElement('label', selectProperties, {'for':id, 'title':title});
+  var buildCar = makeElement('div', cashTab, {'style':'top: 40px; width: 100%;'});
+  makeElement('input', buildCar, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', buildCar, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Build Car '));
 
   // Car list
   id = 'buildCarId';
-  var carType = makeElement('select', selectProperties, {'id':id,'style':'margin-left: 5px;'});
+  var carType = makeElement('select', buildCar, {'id':id, 'style':'margin-left: 5px;'});
   for (i = 0, iLength=cityCars.length; i < iLength; ++i) {
     var choice = makeElement('option', null, {'value':i,'title':cityCars[i][1]});
     choice.appendChild(document.createTextNode(cityCars[i][0]));
@@ -8565,17 +8522,18 @@ function customizeProps() {
   }
 
   // Calculate ROIs and best buy
-  var propRows = $x('.//tr[@style="margin-bottom:10px;"]', propsDiv);
+  var propRows = $x('.//tr[contains(@style,"margin-bottom")]', propsDiv);
   var bestElt, bestROI = 0;
   var worstElt, worstROI = 10;
   var nextTake = '1 day';
   for (var i = 0, iLength = propRows.length; i < iLength - 1; ++i) {
-    var props = $x('.//td[@style="padding-right:10px"]', propRows[i]);
+    var props = $x('.//td[contains(@style,"padding-right")]', propRows[i]);
 
     var prop =  {'name'  : props[0].innerHTML,
+                 'id'    : (i + 1),
                  'level' : props[1].innerHTML,
                  'cost'  : props[2].innerHTML.untag().replace(/[\D]/gi,''),
-                'income'  : eval (props[3].innerHTML.replace(/[$|,|hrs]/gi,''))}
+                 'income'  : eval (props[3].innerHTML.replace(/[$|,|hrs]/gi,''))}
                  //'collect' : /href=/.test(props[4].innerHTML) ? 1 : timeLeft(props[4].innerHTML) / 60 / 60 / 24}
     prop['roi'] = Math.round(10000 * prop['income'] / prop['cost']) / 10000;
 
@@ -8593,6 +8551,7 @@ function customizeProps() {
       if (prop['roi'] > bestROI) {
         bestElt = props[3];
         bestROI = prop['roi'];
+        GM_setValue('bestProp', JSON.stringify(prop));
       }
 
       // Worst ROI
@@ -9893,17 +9852,7 @@ function autoGiftWaiting() {
   return false;
 }
 
-// This function returns false if nothing was done, true otherwise.
-function propertyBuy() {
-  var buyCost = parseInt(GM_getValue('buyCost', 0));
-  var buyMinAmount = parseInt(GM_getValue('buyMinAmount', 0));
-
-  // Make sure there's something to buy and the amounts are valid.
-  if (!buyCost || isNaN(buyMinAmount) || !cities[NY][CITY_CASH]) return false;
-
-  // Make sure enough cash will be left over.
-  if (buyCost > cities[NY][CITY_CASH] - buyMinAmount) return false;
-
+function goProperties() {
   // Make sure we're in New York.
   if (city != NY) {
     Autoplay.fx = goNY;
@@ -9922,25 +9871,40 @@ function propertyBuy() {
     }
   }
 
-  var buyType = GM_getValue('buyType', 0);
-  var buyName = GM_getValue('buyName', '');
-  var buySelection = GM_getValue('selectProperties', '');
-  var buyRequired  = GM_getValue('buyRequired', '');
-  var buySuccess = false;
-  DEBUG('Auto-buy: name=' + buyName + ', id=' + buyType + ', cost=' + buyCost + ', req=' + buyRequired + ', mafia=' + mafia);
-  if (buyType > 0 && (buyRequired || buySelection.indexOf(buyName) > -1)) {
-    var buyamountSelects = xpathFirst('.//form[@id="propBuy_' + buyType + '"]/table/tbody/tr/td/select[@name="amount"]', innerPageElt);
-    if (buyamountSelects && buyamountSelects.length) {
-      buyamountSelects[buyamountSelects.length - 1].selected = true;
-      var buyform = xpathFirst('.//form[@id="propBuy_' + buyType + '"]/table/tbody/tr/td[2]/span/input', innerPageElt);
-      if (buyform) {
-        buySuccess = true;
-        buyform.click();
-        return true;
-      }
-    }
-  } else {
-    addToLog('warning Icon', 'BUG DETECTED: Can\'t buy ' + buyName + '.');
+  return false;
+}
+
+// This function returns false if nothing was done, true otherwise.
+function buyProperties() {
+  DEBUG(isGMUndefined('bestProp'));
+  if (isGMUndefined('bestProp') || isNaN(cities[NY][CITY_CASH])) {
+    if (goProperties()) return true;
+  }
+
+  var bestProp = eval('(' + GM_getValue('bestProp') + ')');
+  var buyCost = parseFloat(bestProp['cost']);
+  var buyMinAmount = parseInt(GM_getValue('buyMinAmount', 0));
+
+  DEBUG(GM_getValue('bestProp') + ' ' + buyCost + ' ' + buyMinAmount + ' ' + cities[NY][CITY_CASH]);
+
+  // Make sure there's something to buy and the amounts are valid.
+  if (isNaN(buyCost) || isNaN(buyMinAmount) || isNaN(cities[NY][CITY_CASH])) return false;
+
+  // Make sure enough cash will be left over.
+  if (buyCost > cities[NY][CITY_CASH] - buyMinAmount) return false;
+
+  if (goProperties()) return true;
+
+  DEBUG('Auto-buy: name=' + bestProp['name'] + ', id=' + bestProp['id'] + ', cost=' + bestProp['cost']);
+  var buyElt = xpathFirst('.//a[contains(@onclick,"building_type=' + bestProp['id'] + '")]', innerPageElt);
+  if (buyElt) {
+    Autoplay.fx = function() {
+      clickAction = 'buy property';
+      clickElement(buyElt);
+      DEBUG('Clicked to buy ' + bestProp['name'] + '.');
+    };
+    Autoplay.start();
+    return true;
   }
 
   return false;
@@ -10921,7 +10885,7 @@ function logJSONResponse(responseText, action) {
     DEBUG(responseText);
     var respJSON = eval ('(' + responseText + ')');
 
-    // Log any message from collection NY take.
+    // Log any message from collecting NY take.
     switch (action) {
       case 'collect ny take':
         respJSON = eval ('(' + respJSON['data']  + ')');
@@ -11361,6 +11325,10 @@ function logResponse(rootElt, action, context) {
 
     // FIXME: Add parsing here
     case 'buy item':
+      break;
+
+    case 'buy property':
+      addToLog('info Icon', inner);
       break;
 
     case 'build car':
