@@ -33,12 +33,12 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @version     1.1.16
-// @build       340
+// @build       341
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.16',
-  build: '340',
+  build: '341',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2534,7 +2534,7 @@ function canMission() {
     var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})') + ')');
     var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})') + ')');
     var expLeft = lvlExp - curExp;
-    var ratio = Math.round(expLeft / energy * 100) / 100;
+    var ratio = Math.ceil(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var multiple_jobs_ratio_sorted = [];
     var jobs_selection = [];
