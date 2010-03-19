@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.12
-// @build       334
+// @version     1.1.13
+// @build       335
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.12',
-  build: '334',
+  version: '1.1.13',
+  build: '335',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1061,7 +1061,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Ambush a Rival at a Sit Down',55,66,8,NY,80],
     ['Order a Hit on a Public Official',35,67,8,NY,55],
     ['Take Over an Identity Theft Ring',36,68,8,NY,52],
-    ['Settle a Beef... Permanently',40,69,9,NY,64],
+    ['Settle a Beef... Permanently',35,69,9,NY,74],
     ['Buy Off a Federal Agent',35,70,9,NY,50],
     ['Make a Deal with the Mexican Cartel',40,71,9,NY,60],
     ['Blackmail the District Attorney',44,72,9,NY,66],
@@ -3725,7 +3725,7 @@ function handleVersionChange() {
 
   // Check for invalid settings and upgrade them.
 
-  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 329) {
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 335) {
     GM_setValue('missions', JSON.stringify('[]'));
   }
 
@@ -4008,30 +4008,22 @@ function saveSettings() {
   }
 
   var selectProperties = '';
-  if (saveCheckBoxElement('abandoned'))
-    selectProperties += 'Abandoned Lot';
-  if (saveCheckBoxElement('commercial'))
-    selectProperties += 'Commercial Block';
-  if (saveCheckBoxElement('downtown'))
-    selectProperties += 'Prime Downtown Lot';
-  if (saveCheckBoxElement('beachfront'))
-    selectProperties += 'Beachfront Property';
-  if (saveCheckBoxElement('mike'))
-    selectProperties += 'Mafia Mike\'s';
-  if (saveCheckBoxElement('rent'))
-    selectProperties += 'Rent House';
+  if (saveCheckBoxElement('flophouse'))
+    selectProperties += 'Flophouse';
+  if (saveCheckBoxElement('pawnshop'))
+    selectProperties += 'Pawnshop';
+  if (saveCheckBoxElement('tenement'))
+    selectProperties += 'Tenement';
+  if (saveCheckBoxElement('warehouse'))
+    selectProperties += 'Warehouse';
   if (saveCheckBoxElement('restaurant'))
-    selectProperties += 'Italian Restaurant';
-  if (saveCheckBoxElement('apartment'))
-    selectProperties += 'Apartment Complex';
-  if (saveCheckBoxElement('valu'))
-    selectProperties += 'Valu-Mart';
-  if (saveCheckBoxElement('tourist'))
-    selectProperties += 'Marina Tourist Shops';
+    selectProperties += 'Restaurant';
+  if (saveCheckBoxElement('dockyard'))
+    selectProperties += 'Dockyard';
   if (saveCheckBoxElement('office'))
-    selectProperties += 'Office Building';
+    selectProperties += 'Office Park';
   if (saveCheckBoxElement('hotel'))
-    selectProperties += '5-Star Hotel';
+    selectProperties += 'Uptown Hotel';
   if (saveCheckBoxElement('casino'))
     selectProperties += 'Mega Casino';
 
@@ -6214,18 +6206,14 @@ function createCashTab () {
   makeElement('br', selectProperties);
 
   var propItems = new Array(
-    ['abandoned', 'Abandoned Lot *'],
-    ['commercial', 'Commercial Block *'],
-    ['downtown','Prime Downtown Lot *'],
-    ['beachfront','Beachfront Property *'],
-    ['mike','Mafia Mike\'s *'],
-    ['rent','Rent House *'],
-    ['restaurant','Italian Restaurant'],
-    ['apartment','Apartment Complex'],
-    ['valu','Valu-Mart'],
-    ['tourist','Marina Tourist Shops'],
-    ['office','Office Building'],
-    ['hotel','5-Star Hotel'],
+    ['flophouse', 'Flophouse'],
+    ['pawnshop', 'Pawnshop'],
+    ['tenement','Tenement'],
+    ['warehouse','Warehouse'],
+    ['restaurant','Restaurant'],
+    ['dockyard','Dockyard'],
+    ['office','Office Park'],
+    ['hotel','Uptown Hotel'],
     ['casino','Mega Casino']
   );
 
@@ -6957,6 +6945,7 @@ function innerPageChanged(justPlay) {
         !customizeJobs() &&
         !customizeNewJobs() &&
         !customizeProfile() &&
+        !customizeProps() &&
         !customizeHitlist()) {
       customizeFight();
     }
@@ -7108,12 +7097,6 @@ function refreshGlobalStats() {
     GM_setValue('currentLevel', level);
     addToLog('experience Icon', '<span style="color:#00FFCC;"> Congratulations on reaching level <strong>' + level + '</strong>!</span>');
     GM_setValue('restAutoStat', 0);
-  }
-
-  // Trick auto-buy into checking the property page if mafia has grown.
-  if (running && mafia && mafia != GM_getValue('currentMafia')) {
-    GM_setValue('currentMafia', mafia);
-    GM_setValue('buyCost', 1);
   }
 
   //ATK
@@ -8557,6 +8540,79 @@ function customizeFight() {
       parentElt.insertBefore(elt, parentElt.firstChild);
     }
   }
+  return true;
+}
+
+function customizeProps() {
+  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) return false;
+
+  // Check flash
+  var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
+  if (!propsDiv) {
+    if (isGMChecked('autoBuy')) {
+      GM_setValue('autoBuy', 0);
+      addToLog('warning Icon', 'Auto buying of properties disabled.');
+    }
+    addToLog('updateBad Icon', 'You must disable flash from your browser for autoBuy to work. <br>' +
+             'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
+             '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
+    return true;
+  }
+
+  // Calculate ROIs and best buy
+  var propRows = $x('.//tr[@style="margin-bottom:10px;"]', propsDiv);
+  var bestElt, bestROI = 0;
+  var worstElt, worstROI = 10;
+  var nextTake = '1 day';
+  for (var i = 0, iLength = propRows.length; i < iLength - 1; ++i) {
+    var props = $x('.//td[@style="padding-right:10px"]', propRows[i]);
+
+    var prop =  {'name'  : props[0].innerHTML,
+                 'level' : props[1].innerHTML,
+                 'cost'  : props[2].innerHTML.untag().replace(/[\D]/gi,''),
+                'income'  : eval (props[3].innerHTML.replace(/[$|,|hrs]/gi,''))}
+                 //'collect' : /href=/.test(props[4].innerHTML) ? 1 : timeLeft(props[4].innerHTML) / 60 / 60 / 24}
+    prop['roi'] = Math.round(10000 * prop['income'] / prop['cost']) / 10000;
+
+    // Set next take time
+    if  (/href=/.test(props[4].innerHTML))
+      nextTake = '00:00';
+    else if (timeLeft(props[4].innerHTML) < timeLeft(nextTake))
+      nextTake = props[4].innerHTML;
+
+    // Show ROI
+    if (i > 0 && !isNaN(prop['roi'])) {
+      props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">Est. ROI: '+prop['roi']+'</span>'
+
+      // Best ROI
+      if (prop['roi'] > bestROI) {
+        bestElt = props[3];
+        bestROI = prop['roi'];
+      }
+
+      // Worst ROI
+      if (prop['roi'] < worstROI) {
+        worstElt = props[3];
+        worstROI = prop['roi'];
+      }
+    }
+    DEBUG(JSON.stringify(prop));
+  }
+
+  // Set next collection time
+  DEBUG('Next take: ' + nextTake);
+  setGMTime('nextNYTake', nextTake);
+
+  // Label best roi
+  var elt = makeElement('span', bestElt, {'style':'color:#52E259; font-size: 10px'});
+  makeElement('img', bestElt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+  elt.appendChild(document.createTextNode(' BEST'));
+
+  // Label worst roi
+  elt = makeElement('span', worstElt, {'style':'color:#EC2D2D; font-size: 10px'});
+  makeElement('img', worstElt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+  elt.appendChild(document.createTextNode(' WORST'));
+
   return true;
 }
 
@@ -11828,6 +11884,8 @@ function timeLeft(timeToConvert) {
           returnVal = returnVal + (parseInt(firstPart));
         else if ((secondPart == 'hours') || (secondPart == 'hour'))
           returnVal = returnVal + (parseInt(firstPart * 60 * 60));
+        else if ((secondPart == 'days') || (secondPart == 'day'))
+          returnVal = returnVal + (parseInt(firstPart * 24 * 60 * 60));
       }
     }
   }
