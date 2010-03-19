@@ -15,6 +15,6 @@
    },
    "permissions": [ "http://code.google.com/p/mwplayer/*" ],
    "name": "Autoplayer for Mafia Wars (Facebook)",
-   "version": "1.1.14",
+   "version": "1.1.15",
    "minimum_chrome_version": "4.0"
 }
