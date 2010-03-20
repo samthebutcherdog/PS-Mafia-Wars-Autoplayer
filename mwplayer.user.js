@@ -32,13 +32,13 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
-// @version     1.1.16
-// @build       341
+// @version     1.1.17
+// @build       342
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.16',
-  build: '341',
+  version: '1.1.17',
+  build: '342',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8550,7 +8550,7 @@ function customizeProps() {
                 'cost'   : parseFloat(props[2].innerHTML.untag().replace(/[\D]/gi,''))}
 
     // ROI
-    prop['roi'] = (propsData[i][1] / prop['cost']).toExponential(4);
+    prop['roi'] = propsData[i][1] / prop['cost'];
 
     // Set next take time
     if  (/href=/.test(props[4].innerHTML))
@@ -8560,7 +8560,7 @@ function customizeProps() {
 
     // Show ROI
     if (i > 0 && !isNaN(prop['roi'])) {
-      props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">ROI: '+prop['roi']+'</span>'
+      props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">ROI: '+prop['roi'].toExponential(4)+'</span>'
 
       // Best ROI
       if (prop['roi'] > bestROI) {
