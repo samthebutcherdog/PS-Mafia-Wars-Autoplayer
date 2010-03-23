@@ -33,13 +33,14 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
+// @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=freegifts*
 // @version     1.1.17
-// @build       343
+// @build       344
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.17',
-  build: '343',
+  build: '344',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
