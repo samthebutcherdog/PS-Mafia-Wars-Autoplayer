@@ -32,13 +32,14 @@
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
+// @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @version     1.1.17
-// @build       342
+// @build       343
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.17',
-  build: '342',
+  build: '343',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8636,7 +8637,7 @@ function setLevelUpRatio() {
   var elt = document.getElementById('level_up_ratio');
   if (elt) {
     if (energy) {
-      var ratio = Math.round((lvlExp - curExp) / energy * 100) / 100;
+      var ratio = Math.ceil((lvlExp - curExp) / energy * 100) / 100;
       elt.childNodes[1].nodeValue = ' A ' + (ratio > 10? '>10' : ratio) + 'x pay ratio would be needed to level up on energy alone.';
       elt.style.display = 'block';
     } else {
