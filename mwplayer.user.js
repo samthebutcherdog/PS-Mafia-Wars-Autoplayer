@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=freegifts*
 // @version     1.1.17
-// @build       344
+// @build       345
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.17',
-  build: '344',
+  build: '345',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9787,7 +9787,7 @@ function autoWar() {
   }
 
   // Click Start a new war
-  var warStartButton = xpathFirst('.//div//a[@class="sexy_button" and contains(text(),"Start a new war")]', innerPageElt);
+  var warStartButton = xpathFirst('.//div//a[@class="sexy_button" and contains(.,"Start a new war")]', innerPageElt);
   if (warStartButton) {
     Autoplay.fx = function() {
       clickAction = action;
