@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.18
-// @build       347
+// @build       348
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.18',
-  build: '347',
+  build: '348',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3578,7 +3578,7 @@ function findFightOpponent(element) {
   }
 
   if (countOpp <= levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + blacklistCount) {
-    addToLog('updateBad Icon', 'Out of the ' + countOpp + ' opponets listed on the fight page: <br>' +
+    addToLog('updateBad Icon', 'Out of the ' + countOpp + ' opponents listed on the fight page: <br>' +
              levelMaxCount + ' disqualified on max level, <br>' +
              mafiaMaxCount + ' on max mafia, <br>' +
              mafiaMinCount + ' on min mafia, <br>' +
@@ -9893,7 +9893,6 @@ function goProperties() {
 
 // This function returns false if nothing was done, true otherwise.
 function buyProperties() {
-  DEBUG(isGMUndefined('bestProp'));
   if (isGMUndefined('bestProp') || isNaN(cities[NY][CITY_CASH])) {
     if (goProperties()) return true;
   }
@@ -9901,8 +9900,6 @@ function buyProperties() {
   var bestProp = eval('(' + GM_getValue('bestProp') + ')');
   var buyCost = parseFloat(bestProp['cost']);
   var buyMinAmount = parseInt(GM_getValue('buyMinAmount', 0));
-
-  DEBUG(GM_getValue('bestProp') + ' ' + buyCost + ' ' + buyMinAmount + ' ' + cities[NY][CITY_CASH]);
 
   // Make sure there's something to buy and the amounts are valid.
   if (isNaN(buyCost) || isNaN(buyMinAmount) || isNaN(cities[NY][CITY_CASH])) return false;
@@ -9913,6 +9910,7 @@ function buyProperties() {
   if (goProperties()) return true;
 
   DEBUG('Auto-buy: name=' + bestProp['name'] + ', id=' + bestProp['id'] + ', cost=' + bestProp['cost']);
+
   var buyElt = xpathFirst('.//a[contains(@onclick,"building_type=' + bestProp['id'] + '")]', innerPageElt);
   if (buyElt) {
     Autoplay.fx = function() {
