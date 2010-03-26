@@ -34,13 +34,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.17
-// @build       346
+// @version     1.1.18
+// @build       347
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.17',
-  build: '346',
+  version: '1.1.18',
+  build: '347',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6989,7 +6989,7 @@ function refreshGlobalStats() {
   if (!cityElt) return false;
 
   if (cityElt.className.match(/mw_city(\d+)/))
-    city = parseInt (RegExp.$1) - 1;
+    city = parseInt (cityElt.className.replace('mw_city','')) - 1;
   else
     city = NY;
 
@@ -10216,7 +10216,7 @@ function goJob(jobno) {
 }
 
 function goFightNav() {
-  var elt = xpathFirst('//div[@id="nav_link_fight_unlock"]//a');
+  var elt = xpathFirst('//div[@id="nav_link_fight"]//a');
   if (!elt) {
     // Find the visible fight link
     var elts = $x('//div[@class="nav_link fight_link"]//a');
