@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.18
-// @build       348
+// @build       349
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.18',
-  build: '348',
+  build: '349',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4367,7 +4367,7 @@ function debugOnOff() {
   var filterElt = document.getElementById('ap_filter_log');
 
   if (isGMChecked('enableDebug')) {
-    addToLog('info Icon', 'Debug logging disabled.');
+    addToLog('info Icon', '[code]Debug logging disabled.');
     GM_setValue('enableDebug', 0);
     debug = false;
     if (GM_getValue('logOpen') != 'open') {
@@ -4380,7 +4380,7 @@ function debugOnOff() {
     GM_setValue('enableDebug', 'checked');
     debug = true;
     showMafiaLogBox();
-    addToLog('info Icon', 'Debug logging enabled.');
+    addToLog('info Icon', 'Debug logging enabled.[/code]');
     if (debugElt) debugElt.style.color = 'rgb(255, 0, 0)';
     if (filterElt) filterElt.style.display = 'none';
 
