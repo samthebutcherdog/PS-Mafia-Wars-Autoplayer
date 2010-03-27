@@ -34,13 +34,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.18
-// @build       349
+// @version     1.1.19
+// @build       350
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.18',
-  build: '349',
+  version: '1.1.19',
+  build: '350',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2747,7 +2747,7 @@ function currentJobTab() {
   if (!elt || !elt.getAttribute('onclick').match(/tab=(\d+)/)) {
     return -1;
   }
-  return parseInt(RegExp.$1);
+  return parseInt(elt.getAttribute('onclick').split('tab=')[1].split("'")[0]);
 }
 
 function onJobTab(tabno) {
@@ -7037,19 +7037,17 @@ function refreshGlobalStats() {
   ptsToNextLevel = lvlExp - curExp;
 
   // Get the mafia size and pending invites.
-  // NOTE: Using contains() for compatibility with "Exp Remaining" script.
-  var mafiaLinks = xpath('//div[contains(@class, "mafia_link")]//a');
-  mafia = mafiaLinks.snapshotItem(1);
-  mafia = document.getElementById('user_group_size');
+  mafia = xpathFirst('.//span[@id="user_group_size"]');
   if (mafia) {
     mafia = parseInt(mafia.innerHTML.untag());
   }
   if (!mafia || mafia < 1) {
     addToLog('warning Icon', 'BUG DETECTED: Unable to read mafia size.');
   }
-  invites = mafiaLinks.snapshotItem(2);
-  if (invites && invites.innerHTML.untag().match(/\+(\d+)/)) {
-    invites = parseInt(RegExp.$1);
+
+  invites = xpathFirst('.//span[@id="user_request"]');
+  if (invites) {
+    invites = parseInt(invites.innerHTML.untag());
   } else {
     invites = 0;
   }
@@ -7206,6 +7204,8 @@ function refreshMWAPCSS() {
                  (isGMChecked('leftAlign') ? ' #mw_city_wrapper {position: absolute; margin: 0; top: 0px; left: 0px;}' : '')   +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
+                 // Adjust level/experience CSS
+                 ' div[class="user_xp_level"] * {font-size: 11px !important} ' +
                  // Adjust player updates table when hiding friend ladder
                  (isGMChecked('hideFriendLadder') ?
                  ' .update_txt {width: 680px !important} ' +
@@ -7219,7 +7219,7 @@ function refreshMWAPCSS() {
                  //' #instruction_container, a[@class$="sexy_help_new"] {width: 220px !important;} ' +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
-                 ' .marketplace_new_bouncy_button, .fb_email_prof_header, .mw_sms '  +
+                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
                  // Hide Limited Time Offers
@@ -7598,7 +7598,7 @@ function quickBank(bankCity, amount) {
   // If cash being deposited is greater than 1 billion, do NOT quick-bank!
   if (amount > 1000000000) {
     if (byUser)
-      addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[bankCity][CITY_CASH_SYMBOL] + amount +
+      addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[bankCity][CITY_CASH_SYMBOL] + makeCommaValue(amount) +
                '</strong>!?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
     quickBankFail = true;
     return;
@@ -10074,7 +10074,7 @@ function goMyProfile() {
 }
 
 function goMyMafiaNav() {
-  var elt = xpathFirst('.//div[@class="mafia_link"]//a[contains(.,"My Mafia")]');
+  var elt = xpathFirst('.//div[@class="nav_link mafia_link"]//a[contains(.,"My Mafia")]');
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find My Mafia nav link to click.');
     return;
@@ -10198,9 +10198,12 @@ function goJob(jobno) {
   var jobNo = missions[GM_getValue('selectMission')][2];
   var jobRow = getJobRow(jobName, innerPageElt);
 
-  // Get the action element
+  // Get the action element by job no first
   var elt;
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
+
+  // If retrieving by job no fails, simply retrieve the job link
+  if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
 
   if (elt) {
     clickAction = 'job';
