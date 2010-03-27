@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.19
-// @build       350
+// @build       351
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.19',
-  build: '350',
+  build: '351',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2747,6 +2747,8 @@ function currentJobTab() {
   if (!elt || !elt.getAttribute('onclick').match(/tab=(\d+)/)) {
     return -1;
   }
+  // FIXME: Not working for chrome at the moment
+  //return parseInt(RegExp.$1);
   return parseInt(elt.getAttribute('onclick').split('tab=')[1].split("'")[0]);
 }
 
@@ -6989,6 +6991,8 @@ function refreshGlobalStats() {
   if (!cityElt) return false;
 
   if (cityElt.className.match(/mw_city(\d+)/))
+    // FIXME: Not working for chrome at the moment
+    //city = parseInt (RegExp.$1) - 1;
     city = parseInt (cityElt.className.replace('mw_city','')) - 1;
   else
     city = NY;
