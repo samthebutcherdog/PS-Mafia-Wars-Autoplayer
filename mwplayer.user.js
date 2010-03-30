@@ -34,13 +34,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.19
-// @build       351
+// @version     1.1.20
+// @build       352
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.19',
-  build: '351',
+  version: '1.1.20',
+  build: '352',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1990,20 +1990,16 @@ function autoHeal() {
   }
 
   // Use our custom instant-heal element (if present).
-  var healElt = document.getElementById('mwap_heal');
+  var healElt = xpathFirst('.//div[@id="popup_fodder"]//a[contains(@onclick,"xw_action=heal")]', innerPageElt)
   if (healElt) {
     // FIXME: Should make quick healing optional
     if (false) {
       healElt.setAttribute("onclick", healElt.getAttribute("onclick").replace('inner_page', SCRIPT.ajaxPage));
       DEBUG('Clicked to quick heal.');
       return false;
-    } else {
-      healElt.setAttribute("onclick", healElt.getAttribute("onclick").replace(SCRIPT.ajaxPage,'inner_page'));
     }
   // If not, go to hospital manually
   } else  {
-    DEBUG('WARNING: Can\'t find instant-heal link.');
-
     // Go to the hospital.
     var hospitalElt = xpathFirst('//a[@class="heal_link"]');
     if (hospitalElt) {
@@ -3181,8 +3177,8 @@ function autoBankDeposit(bankCity, amount) {
   if (!quickBankFail) return false;
 
   // Make sure we're at the bank.
-  var formElt = xpathFirst('.//form[@id="bank_deposit"]', innerPageElt);
-  if (!formElt) {
+  var bankElt = xpathFirst('.//div[@id="bank_popup"]', innerPageElt);
+  if (!bankElt) {
     Autoplay.fx = goBank;
     Autoplay.start();
     return true;
@@ -3190,7 +3186,7 @@ function autoBankDeposit(bankCity, amount) {
 
   // Set the amount (if provided).
   if (amount) {
-    var amountElt = xpathFirst('.//input[@type="text"]', formElt);
+    var amountElt = xpathFirst('.//input[@id="deposit_amount"]', bankElt);
     if (!amountElt) {
       addToLog('warning Icon', 'BUG DETECTED: No text input at bank.');
       return false;
@@ -3199,7 +3195,7 @@ function autoBankDeposit(bankCity, amount) {
   }
 
   // Make the deposit.
-  var submitElt = xpathFirst('.//input[@type="submit"]', formElt);
+  var submitElt = xpathFirst('.//div[@id="bank_dep_button"]//a', bankElt);
   if (!submitElt) {
     addToLog('warning Icon', 'BUG DETECTED: No submit input at bank.');
     return false;
@@ -3215,7 +3211,7 @@ function autoBankDeposit(bankCity, amount) {
     quickBankFail = false;
     clickContext = bankCity;
     clickAction = 'deposit';
-    submitElt.click();
+    clickElement (submitElt);
     DEBUG('Clicked to deposit.');
   }
   Autoplay.start();
@@ -3224,7 +3220,7 @@ function autoBankDeposit(bankCity, amount) {
 
 function autoBankWithdraw(amount) {
   // Make sure we're at the bank.
-  var formElt = xpathFirst('.//form[@id="bank_withdraw"]', innerPageElt);
+  var formElt = xpathFirst('.//div[@id="bank_popup"]', innerPageElt);
   if (!formElt) {
     Autoplay.fx = goBank;
     clickAction = 'withdraw';
@@ -3235,7 +3231,7 @@ function autoBankWithdraw(amount) {
 
   // Set the amount (if provided).
   if (amount) {
-    var amountElt = xpathFirst('.//input[@type="text"]', formElt);
+    var amountElt = xpathFirst('.//input[@id="withdraw_amount"]', formElt);
     if (!amountElt) {
       addToLog('warning Icon', 'BUG DETECTED: No text input at bank.');
       return false;
@@ -3244,14 +3240,14 @@ function autoBankWithdraw(amount) {
   }
 
   // Make the withdrawal.
-  var submitElt = xpathFirst('.//input[@type="submit"]', formElt);
+  var submitElt = xpathFirst('.//div[@id="bank_with_button"]//a', formElt);
   if (!submitElt) {
     addToLog('warning Icon', 'BUG DETECTED: No submit input at bank.');
     return false;
   }
   Autoplay.fx = function() {
     clickAction = 'withdraw';
-    submitElt.click();
+    clickElement (submitElt);
     DEBUG('Clicked to withdraw.');
   }
   Autoplay.start();
@@ -6716,9 +6712,8 @@ function handleModificationTimer() {
   var ajaxID = SCRIPT.ajaxPage;
   elt = xpathFirst('//div[@id="' + ajaxID + '"]');
   if (!elt) {
-    elt = makeElement('div', innerPageElt.parentNode, {'id':ajaxID});
+    elt = makeElement('div', innerPageElt.parentNode, {'id':ajaxID, 'style':'display: none;'});
   }
-  elt.style.display = 'none';
 
   // Determine if the displayed page has changed.
   if (!xpathFirst('.//div[@id="inner_flag"]', innerPageElt)) {
@@ -6743,6 +6738,13 @@ function handleModificationTimer() {
       pageChanged = true;
       justPlay = true;
     }
+  }
+
+  // Handling for pop-ups
+  var popupElt = xpathFirst('.//div[@id="popup_fodder"]', innerPageElt);
+  if (popupElt && popupElt.innerHTML.length > 0) {
+    pageChanged = true;
+    DEBUG('Detected pop-up.');
   }
 
   // Handle changes to the inner page.
@@ -7527,8 +7529,7 @@ function customizeStats() {
     var hospitalElt = xpathFirst('//a[@class="heal_link"]');
     if (hospitalElt) {
       // Make instant heal work without switching pages.
-      healLinkElt.setAttribute("onclick", hospitalElt.getAttribute("onclick").replace(/view/, 'heal'));
-      healLinkElt.setAttribute("onclick", healLinkElt.getAttribute("onclick").replace(/'inner_page'/, "'" + SCRIPT.ajaxPage + "'"));
+      healLinkElt.setAttribute('onclick', hospitalElt.getAttribute('onclick').replace('view', 'heal').replace('popup_fodder', SCRIPT.ajaxPage));
     }
   }
 
@@ -7622,51 +7623,8 @@ function quickBank(bankCity, amount) {
     headers: {
         "Content-Type": "application/x-www-form-urlencoded"
     },
-    onload: function (resp) {
-      var respTxt = resp.responseText;
-
-      // Log if city has changed after banking
-      if (city != bankCity) {
-        addToLog('warning Icon', 'Warning! You have traveled from ' +
-                 cities[bankCity][CITY_NAME] + ' to ' +
-                 cities[city][CITY_NAME] +
-                 ' while banking. Check your money.');
-      }
-
-      // Money deposited
-      if (/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) {
-        addToLog(cities[city][CITY_CASH_CSS],
-                 '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
-                 RegExp.$1 +
-                 '</span> was deposited in your account after the bank\'s fee.');
-        quickBankFail = false;
-
-        // Attempt to correct the displayed cash value
-        var cashLeft = 0;
-        var cityCashElt = xpathFirst('.//strong[@id="user_cash_' + cities[city][CITY_ALIAS] + '"]');
-        if (cityCashElt && !isNaN(RegExp.$1)) {
-          cashLeft = parseCash(cityCashElt.innerHTML) - parseCash(RegExp.$1);
-          cityCashElt.innerHTML = cities[city][CITY_CASH_SYMBOL] + (isNaN(cashLeft) ? '0' : Math.max(cashLeft, 0));
-        }
-
-        cities[city][CITY_CASH] = 0;
-      // Not enough money
-      } else if (/have enough money/.test(respTxt)) {
-        quickBankFail = false;
-      // Minimum deposit not met ($10)
-      } else if (/deposit at least/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/td/)) {
-        addToLog(cities[city][CITY_CASH_CSS],
-                 'You need to deposit at least <span class="money">' + cities[city][CITY_CASH_SYMBOL] +
-                 RegExp.$1);
-        quickBankFail = false;
-      // URL variables have expired
-      } else if (/top.location.href/.test(respTxt)) {
-        DEBUG('URL variables have expired, re-loading...');
-        loadHome();
-      } else {
-        DEBUG (respTxt);
-        quickBankFail = true;
-      }
+    onload: function (xml) {
+      logJSONResponse(xml.responseText, 'deposit', bankCity);
     }
   });
 }
@@ -10902,7 +10860,7 @@ function randomizeStamina() {
 }
 
 // Interpret the JSON response from a request
-function logJSONResponse(responseText, action) {
+function logJSONResponse(responseText, action, context) {
   try {
     DEBUG(responseText);
     var respJSON = eval ('(' + responseText + ')');
@@ -10910,14 +10868,61 @@ function logJSONResponse(responseText, action) {
     // Log any message from collecting NY take.
     switch (action) {
       case 'collect ny take':
-        respJSON = eval ('(' + respJSON['data']  + ')');
-        for (var i in respJSON) {
-          if (/collected/i.test(respJSON[i])) {
-            addToLog(cities[city][CITY_CASH_CSS], respJSON[i]);
+        var respData = respJSON['data'];
+        for (var i in respData) {
+          if (/collected/i.test(respData[i])) {
+            addToLog(cities[city][CITY_CASH_CSS], respData[i]);
             break;
           }
         }
         setGMTime ('nextNYTake', '1 hour');
+        break;
+
+      case 'deposit':
+        var respTxt = respJSON['deposit_message'];
+        var bankCity = context;
+        // Log if city has changed after banking
+        if (city != bankCity) {
+          addToLog('warning Icon', 'Warning! You have traveled from ' +
+                   cities[bankCity][CITY_NAME] + ' to ' +
+                   cities[city][CITY_NAME] +
+                   ' while banking. Check your money.');
+        }
+
+        // Money deposited
+        if (/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) {
+          addToLog(cities[city][CITY_CASH_CSS],
+                   '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
+                   RegExp.$1 +
+                   '</span> was deposited in your account after the bank\'s fee.');
+          quickBankFail = false;
+
+          // Attempt to correct the displayed cash value
+          var cashLeft = 0;
+          var cityCashElt = xpathFirst('.//strong[@id="user_cash_' + cities[city][CITY_ALIAS] + '"]');
+          if (cityCashElt && !isNaN(RegExp.$1)) {
+            cashLeft = parseCash(cityCashElt.innerHTML) - parseCash(RegExp.$1);
+            cityCashElt.innerHTML = cities[city][CITY_CASH_SYMBOL] + (isNaN(cashLeft) ? '0' : Math.max(cashLeft, 0));
+          }
+
+          cities[city][CITY_CASH] = 0;
+        // Not enough money
+        } else if (/have enough money/.test(respTxt)) {
+          quickBankFail = false;
+        // Minimum deposit not met ($10)
+        } else if (/deposit at least/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/td/)) {
+          addToLog(cities[city][CITY_CASH_CSS],
+                   'You need to deposit at least <span class="money">' + cities[city][CITY_CASH_SYMBOL] +
+                   RegExp.$1);
+          quickBankFail = false;
+        // URL variables have expired
+        } else if (/top.location.href/.test(respTxt)) {
+          DEBUG('URL variables have expired, re-loading...');
+          loadHome();
+        } else {
+          DEBUG (respTxt);
+          quickBankFail = true;
+        }
         break;
 
       default:
@@ -10963,6 +10968,16 @@ function logResponse(rootElt, action, context) {
   // New message box message
   if (!messagebox) {
     messagebox = xpathFirst('.//div[@id="msg_box_div_1"]', rootElt);
+  }
+
+  // Bank message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@id="bank_messages"]', rootElt);
+  }
+
+  // Hospital message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@id="hospital_message"]', rootElt);
   }
 
   if (action=='withdraw' && context) {
