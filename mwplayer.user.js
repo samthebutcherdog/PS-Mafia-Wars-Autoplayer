@@ -34,13 +34,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.20
-// @build       352
+// @version     1.1.21
+// @build       353
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.20',
-  build: '352',
+  version: '1.1.21',
+  build: '353',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8791,14 +8791,15 @@ function getJobRowItems(jobName) {
     var itemsFound = false;
     necessaryItems.forEach(
       function(i){
-        DEBUG('Missing: ' + i.alt);
+        var itmSearch = i.alt.replace(/set of/i, '').trim();
+        DEBUG('Missing: ' + itmSearch);
         var itemFound = false;
         // Try fetching the items from the job requirement array
         requirementJob.forEach(
           function(j){
-            if (level >= cities[j[2]][CITY_LEVEL] && j[0] == i.alt) {
+            if (level >= cities[j[2]][CITY_LEVEL] && j[0] == itmSearch) {
               jobs.push(j[1]);
-              items.push(i.alt);
+              items.push(itmSearch);
               itemFound = true;
             }
           }
@@ -8806,7 +8807,7 @@ function getJobRowItems(jobName) {
 
         // Set the flag if at least one item is found
         if (itemFound) itemsFound = true;
-        else DEBUG(i.alt + ' not found in the requirement job array.');
+        else DEBUG(itmSearch + ' not found in the requirement job array.');
       }
     );
 
