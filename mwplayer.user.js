@@ -34,13 +34,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.21
-// @build       353
+// @version     1.1.22
+// @build       354
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.21',
-  build: '353',
+  version: '1.1.22',
+  build: '354',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6744,6 +6744,7 @@ function handleModificationTimer() {
   var popupElt = xpathFirst('.//div[@id="popup_fodder"]', innerPageElt);
   if (popupElt && popupElt.innerHTML.length > 0) {
     pageChanged = true;
+    justPlay = true;
     DEBUG('Detected pop-up.');
   }
 
@@ -9546,7 +9547,7 @@ function autoLotto() {
   var randomTicket = xpathFirst('.//div[@class="sexy_button" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
   if (randomTicket) {
     clickElement(randomTicket);
-    var submitTicket = xpathFirst('.//span[@class="sexy_button"]/input[@class="sexy_lotto" and @type="submit" and @value="Submit Ticket(s)"]', innerPageElt);
+    var submitTicket = xpathFirst('.//input[@class="sexy_lotto" and @type="submit" and contains(@value,"Submit Ticket")]', innerPageElt);
 
     if (submitTicket) {
       var ticket = ' ';
