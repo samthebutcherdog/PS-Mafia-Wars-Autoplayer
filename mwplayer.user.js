@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.22
-// @build       355
+// @build       356
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.22',
-  build: '354',
+  build: '356',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7233,15 +7233,15 @@ function refreshMWAPCSS() {
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
                  ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #inner2, '  +
                  // Hide action boxes
-                 (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
+                 (isGMChecked('hideActionBox') ? ' .action_box_container, ' : '' ) +
                  // Hide Limited Time Offers
-                 (isGMChecked('hideOffer') ? ' , div[class="tab_box"][style*="left"]' : '' ) +
+                 (isGMChecked('hideOffer') ? ' div[class="tab_box"][style*="left"], ' : '' ) +
                  // Hide Holiday Free Gifts / Gift Safe House / Mystery Gifts
-                 (isGMChecked('hideGifts') ? ' , img[alt="Free Holiday Gifts!"]' +
-                                             ' , img[alt="Gift Safe House"]' +
-                                             ' , img[alt="Free Mystery Bag!"]' : '' ) +
+                 (isGMChecked('hideGifts') ? ' img[alt="Free Holiday Gifts!"], ' +
+                                             ' img[alt="Gift Safe House"], ' +
+                                             ' img[alt="Free Mystery Bag!"], ' : '' ) +
                  // Hide friends ladder
-                 (isGMChecked('hideFriendLadder') ? ' , .friendladder_box' : '' ) +
+                 (isGMChecked('hideFriendLadder') ? ' .friendladder_box ' : '' ) +
                  ' {position: absolute !important; margin:0 !important; ' +
                  '  height:0 !important; width: 0 !important; display: none !important;}' +
                  // ********************** Stats Tab CSS **********************
