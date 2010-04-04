@@ -35,7 +35,7 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.22
-// @build       354
+// @build       355
 // ==/UserScript==
 
 var SCRIPT = {
@@ -981,16 +981,20 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Cars
   var cityCars = new Array (
-    ['Random Common Car', 'Requires 10 car parts'],
-    ['Random Rare Car', 'Requires 25 car parts'],
-    ['Tasmanian', 'Requires 30 car parts | 36 attack, 34 defense'],
-    ['CM Santiago R10', 'Requires 30 car parts, 2 Cuban car parts | 42 attack, 30 defense'],
-    ['Rebel 2', 'Requires 45 car parts and 2 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
-    ['Russian Dazatz 45', 'Requires 50 car parts and 2 Russian car parts | 18 attack, 46 defense'],
-    ['Solar Flare', 'Requires 65 car parts and 1 solar panel | 34 attack, 34 defense, +5 energy'],
-    ['Thai XS Max', 'Requires 75 car parts and 2x Thai car parts | 45 attack, 35 defense'],
-    ['Trio Napoli', 'Requires 95 car parts | 47 attack, 23 defense'],
-    ['Red Angel', 'Requires 115 car parts | 16 attack, 49 defense']
+    ['Random Common Car', 1, 'Requires 10 car parts'],
+    ['Random Rare Car', 2, 'Requires 25 car parts'],
+    ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
+    ['CM Santiago R10', 4, 'Requires 30 car parts, 2 Cuban car parts | 42 attack, 30 defense'],
+    ['Rebel 2', 5, 'Requires 45 car parts and 2 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
+    ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
+    ['Russian Dazatz 45', 6, 'Requires 50 car parts and 2 Russian car parts | 18 attack, 46 defense'],
+    ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
+    ['Solar Flare', 7, 'Requires 65 car parts and 1 solar panel | 34 attack, 34 defense, +5 energy'],
+    ['Thai XS Max', 8, 'Requires 75 car parts and 2x Thai car parts | 45 attack, 35 defense'],
+    ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
+    ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
+    ['Mugati Sport', 13, 'Requires 135 car parts, 1 High Tech car part | 35 attack, 51 defense, +3 defense'],
+    ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 High Tech car parts | 52 attack, 29 defense, +3 attack']
   );
 
   // Spend objects
@@ -1777,7 +1781,7 @@ function doAutoPlay () {
 
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
-    if (buildCar(GM_getValue('buildCarId',9))) return;
+    if (buildCar(GM_getValue('buildCarId',1))) return;
   }
 
   // Auto-buy business (limit to level 4 and above)
@@ -2026,17 +2030,17 @@ function autoHeal() {
 }
 
 // Pass the car id
-function buildCar(carId){
+function buildCar(carIndex){
   // Build the clickable element
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=craft&xw_city=1&recipe='+(carId + 1)+'&building_type=11")'});
+                        'xw_action=craft&xw_city=1&recipe='+cityCars[carIndex][1]+'&building_type=11")'});
   if (elt) {
     Autoplay.fx = function() {
       clickAction = 'build car';
-      clickContext = cityCars[carId][0];
+      clickContext = cityCars[carIndex][0];
       clickElement(elt);
-      DEBUG('Clicked to build ' + cityCars[carId][0] + '.');
+      DEBUG('Clicked to build ' + cityCars[carIndex][0] + '.');
     };
 
     Autoplay.start();
@@ -3977,6 +3981,7 @@ function saveSettings() {
   GM_setValue('healLocation', document.getElementById('healLocation').value);
   GM_setValue('burnOption', document.getElementById('burnOption').value);
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
+  setGMTime('buildCarTimer', '00:00');
 
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks','attackCritical',
@@ -6214,7 +6219,7 @@ function createCashTab () {
   id = 'buildCarId';
   var carType = makeElement('select', buildCar, {'id':id, 'style':'margin-left: 5px;'});
   for (i = 0, iLength=cityCars.length; i < iLength; ++i) {
-    var choice = makeElement('option', null, {'value':i,'title':cityCars[i][1]});
+    var choice = makeElement('option', null, {'value':i,'title':cityCars[i][2]});
     choice.appendChild(document.createTextNode(cityCars[i][0]));
     carType.appendChild(choice);
   }
@@ -7226,7 +7231,7 @@ function refreshMWAPCSS() {
                  //' #instruction_container, a[@class$="sexy_help_new"] {width: 220px !important;} ' +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
-                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms '  +
+                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #inner2, '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' , .action_box_container' : '' ) +
                  // Hide Limited Time Offers
@@ -11373,10 +11378,12 @@ function logResponse(rootElt, action, context) {
     case 'build car':
       addToLog('info Icon', inner);
       // Visit again after 1 hour if you cannot craft yet
-      if (/You cannot craft/i.test(inner))
+      if (/You cannot craft/i.test(inner) ||
+          /You do not have/i.test(inner)) {
         setGMTime('buildCarTimer', '1 hour');
-      else
+      } else {
         setGMTime('buildCarTimer', '24 hours');
+      }
       break;
 
     default:
