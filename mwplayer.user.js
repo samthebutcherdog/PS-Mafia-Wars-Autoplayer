@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.23
-// @build       357
+// @build       358
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.23',
-  build: '357',
+  build: '358',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1718,16 +1718,26 @@ function doAutoPlay () {
 
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && !skipJobs && canMission();
-  var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight ;
+  var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight;
   var energyMaxed = (autoMissionif && energy >= maxEnergy);
   var staminaMaxed = (autoStaminaSpendif && stamina >= maxStamina);
   var maxed = energyMaxed || staminaMaxed;
 
   // Check if energy / stamina burning is prioritized
-  if (isGMChecked('burnFirst') && !maxed && (autoMissionif || autoStaminaSpendif)) {
+  if (isGMChecked('burnFirst')) {
     var spendFirst = GM_getValue('burnOption');
-    if (autoMissionif && spendFirst == BURN_ENERGY) autoStaminaSpendif = false;
-    if (autoStaminaSpendif && spendFirst == BURN_STAMINA) autoMissionif = false;
+
+    // Prioritize using energy
+    if (stamina < maxStamina && running && canMission() && spendFirst == BURN_ENERGY) {
+      autoMissionif = true;
+      autoStaminaSpendif = false;
+    }
+
+    // Prioritize using stamina
+    if (energy < maxEnergy && running && canSpendStamina() && hasFight && spendFirst == BURN_STAMINA) {
+      autoMissionif = false;
+      autoStaminaSpendif = true;
+    }
   }
 
   // Auto-accept
