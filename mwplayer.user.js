@@ -34,13 +34,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.22
-// @build       356
+// @version     1.1.23
+// @build       357
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.22',
-  build: '356',
+  version: '1.1.23',
+  build: '357',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -663,7 +663,6 @@ var clickContext;               // Context for clickAction
 var modificationTimer;          // Timer used to wait for content changes
 var helpWar = false;            // Helping a friend's war?
 var idle = true;                // Is the script currently idle?
-var shakeDownFlag = false;      // Flag so shake down again doesnt get interrupted
 var lastOpponent;               // Last opponent fought (object)
 var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
@@ -975,6 +974,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   var locations = ['New York','Cuba','Moscow','Bangkok','Active City'];
+
+  // Featured job locations
+  var featJobNames = ['Left Job', 'Middle Job', 'Right Job'];
 
   var allyFaction = '';
   var quickBankFail = false;
@@ -1705,12 +1707,6 @@ function doAutoPlay () {
   var previouslyIdle = idle;
   idle = false;
 
-  // Don't let healing interrupt shake down again
-  if (running && shakeDownFlag) {
-    if (isGMChecked('moneyRacketCheck') && collectMoneyRacket()) return;
-    if (isGMChecked('racketCollect') && collectRacket()) return;
-  }
-
   // Auto-heal
   if (running &&
       isGMChecked('autoHeal') &&
@@ -1753,12 +1749,6 @@ function doAutoPlay () {
   // Background mode hitlisting (limit to level 4 and above)
   if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
-  }
-
-  // Racketing (limit to level 4 and above)
-  if (running && !maxed  && !timeLeftGM('nextRacket') && hasProps) {
-    if (isGMChecked('moneyRacketCheck') && collectMoneyRacket()) return;
-    if (isGMChecked('racketCollect') && collectRacket()) return;
   }
 
   // Auto-take for properties (limit to level 4 and above)
@@ -1830,13 +1820,6 @@ function doAutoPlay () {
     //if (autoGiftWaiting()) return;
   }
 
-  // Auto-energypack
-  var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
-  var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
-  var autoEnergyPackWaiting = running && energyPack &&
-                              ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
-                              isGMChecked('autoEnergyPack');
-
   // Mini-pack check
   var xpPtsFromEnergy = (energy + 200) * getEnergyGainRate();
   var xpPtsFromStamina = (stamina + 200) * getStaminaGainRate();
@@ -1844,6 +1827,13 @@ function doAutoPlay () {
   if (running && !maxed && canUseMiniPack && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
     if (miniPack()) return;
   }
+
+  // Auto-energypack
+  var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
+  var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
+  var autoEnergyPackWaiting = running && energyPack &&
+                              ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
+                              isGMChecked('autoEnergyPack');
 
   if (autoEnergyPackWaiting && energy <= 2) {
     DEBUG('ptsToNextLevel=' + ptsToNextLevel +
@@ -2186,153 +2176,6 @@ function autoBuyCrates(buyCity) {
   Autoplay.fx = goHome;
   Autoplay.start();
   return true;
-}
-
-// Collect Money Racket
-function collectMoneyRacket() {
-  // Go to NY first
-  DEBUG('Got to the rackets');
-  shakeDownFlag = true;
-  if (city != NY) {
-    Autoplay.fx = goNY;
-    Autoplay.start();
-    return true;
-  }
-
-  if (!onPropertyNav()) {
-    if (onRacketNav()) {
-      //clean up busted cash only rackets
-      elt = xpathFirst('.//a/img/div[@class="racket_imgbar" and contains(.,"Clean Up")]', innerPageElt);
-      if (elt && cities[NY][CITY_CASH] > 250) {
-        Autoplay.fx = function() {
-          clickElement(elt);
-          DEBUG('Clicked "Clean Up".');
-          //get the racket we want to do
-          elt = xpathFirst('.//a[contains(@onclick, "racket=1")]', innerPageElt);
-          if (elt) {
-            Autoplay.fx = function() {
-              clickElement(elt);
-              DEBUG('Clicked on new racket.');
-            };
-            Autoplay.start();
-            return true;
-          }
-        };
-        Autoplay.start();
-        return true;
-      }
-
-      //shake down the cash only rackets
-      elt = xpathFirst('.//a/div[@class="racket_empty_text"]', innerPageElt);
-      if (elt && cities[NY][CITY_CASH] > 250){
-        clickElement(elt);
-        DEBUG('Clicked "Shake Down".');
-
-        //get the racket we want to do
-        elt = xpathFirst('.//a[contains(@onclick, "racket=1")]', innerPageElt);
-        if (elt) {
-          Autoplay.fx = function() {
-            clickElement(elt);
-            DEBUG('Clicked on new racket.');
-          };
-          Autoplay.start();
-          return true;
-        }
-         //we should not hit this so if we do return false
-         return false;
-      }
-
-      elt = xpathFirst('.//img[contains(@title, "Ready to Collect")]', innerPageElt);
-      if (elt) {
-        Autoplay.fx = function() {
-          clickElement(elt);
-          DEBUG('Clicked "Ready to Collect".');
-        };
-        Autoplay.start();
-        return true;
-      }
-
-      // no racket comeback again 3.9 minutes
-      shakeDownFlag = false;
-      setGMTime("nextRacket", "03:50");
-      DEBUG('Setting racket timer for 4 minutes');
-    } else {
-      Autoplay.fx = goPropertyNav;
-      Autoplay.start();
-      return true;
-    }
-
-    return false;
-  } else {
-    //turning off rackets
-    GM_setValue("moneyRacketCheck", 0);
-    DEBUG("Turning off racket options. We're on properties page.");
-  }
-  return false;
-}
-
-// Collect Racket
-function collectRacket() {
-  // Go to NY first
-  if (city != NY) {
-    Autoplay.fx = goNY;
-    Autoplay.start();
-    return true;
-  }
-
-  if (!onPropertyNav()) {
-    if (onRacketNav()) {
-      if(isGMChecked('racketReshakedown')) {
-        var elt = xpathFirst('.//a/span[@class="sexy_influence" and contains(.,"Shake Down Again")]', innerPageElt);
-        if(elt) {
-          shakeDownFlag= false;
-          var mastered=xpathFirst('.//div[@class="zy_progress_bar_text" and contains(.,"100% Mastered")]', innerPageElt);
-          if(mastered && !isGMChecked('racketPermanentShakedown')) {
-            addToLog('info Icon', 'Racket is 100% mastered');
-            return false;
-          } else {
-            Autoplay.fx = function() {
-              clickAction = 'shakedown again';
-              addToLog('info Icon', 'Shake down again');
-              clickElement(elt);
-            };
-            Autoplay.start();
-          }
-          return true;
-        }
-      }
-
-      elt = xpathFirst('.//a/div[@class="zy_progress_bar_outer"]/div[@class="zy_progress_bar_text" and contains(.,"Ready to Collect")]', innerPageElt);
-      if(elt) {
-        if(isGMChecked('racketReshakedown')) {
-          shakeDownFlag= true;
-        }
-        Autoplay.fx = function() {
-          clickAction = 'collect racket';
-          addToLog('info Icon', 'Collect racket');
-          clickElement(elt);
-        };
-        Autoplay.start();
-        return true;
-      } else {
-        // no racket comeback again 15 minutes
-        setGMTime("nextRacket", "0:15:00");
-      }
-    } else {
-      Autoplay.fx = goPropertyNav;
-      Autoplay.start();
-      return true;
-    }
-
-    return false;
-  } else {
-   //turning off rackets
-   GM_setValue("racketReshakedown", 0);
-   GM_setValue("racketPermanentShakedown", 0);
-   GM_setValue("racketCollect", 0);
-   DEBUG("Turning off racket options. We're on properties page.");
-   return false;
-  }
 }
 
 // Collect NY take
@@ -3978,6 +3821,7 @@ function saveSettings() {
   GM_setValue('filterOpt', filterOpt);
 
   GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
+  GM_setValue('featJobIndex', document.getElementById('featJobIndex').selectedIndex);
   GM_setValue('healLocation', document.getElementById('healLocation').value);
   GM_setValue('burnOption', document.getElementById('burnOption').value);
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
@@ -3995,14 +3839,14 @@ function saveSettings() {
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','collectNYTake',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
                             'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok',
-                            'endLevelOptimize','racketCollect','racketReshakedown', 'racketPermanentShakedown',
+                            'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'showLevel','hideFriendLadder','moneyRacketCheck','autoWarRallyPublish','buildCar']);
+                            'buildCar','featJob']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4902,6 +4746,24 @@ function createGeneralTab() {
   }
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' first if both are not maxed'));
   burnOpt.selectedIndex = GM_getValue('burnOption', BURN_ENERGY);
+
+  // Featured jobs
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Check to automatically perform featured jobs';
+  id = 'featJob';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Perform featured jobs:'));
+  var featJobs = makeElement('select', rhs, {'id':'featJobIndex'});
+  for (i = 0, iLength=featJobNames.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(featJobNames[i]));
+    featJobs.appendChild(choice);
+  }
+  featJobs.selectedIndex = GM_getValue('featJobIndex', 0);
 
   // Choose Sides
   item = makeElement('div', list);
@@ -6245,42 +6107,9 @@ function createCashTab () {
   autoSellCratesBangkok.appendChild(document.createTextNode('Sell Bangkok business output'));
   makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
-  var toggleRadio = function () {
-    var isChecked = this.hasAttribute('checked');
-
-    // Clean-up boxes
-    document.getElementById('collectNYTake').removeAttribute('checked');
-    document.getElementById('racketCollect').removeAttribute('checked');
-    document.getElementById('moneyRacketCheck').removeAttribute('checked');
-
-    this.checked = !isChecked;
-    // Set attribute for checked radio
-    if (this.checked) this.setAttribute('checked','checked');
-  }
-
   var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
-  collectNYTake.appendChild(document.createTextNode('Automatically collect NY take every hour'));
-  elt = makeElement('input', collectNYTake, {'type':'radio', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
-  elt.addEventListener('click', toggleRadio, false);
-
-  // Racketing
-  var racketCollect = makeElement('div', cashTab, {'style':'top: 135px; right: 10px;'});
-  racketCollect.appendChild(document.createTextNode('Automatically collect racket'));
-  elt = makeElement('input', racketCollect, {'type':'radio', 'name':'props', 'id':'racketCollect', 'value':'checked'}, 'racketCollect');
-  elt.addEventListener('click', toggleRadio, false);
-
-  var moneyRacketCheck = makeElement('div', cashTab, {'style':'top: 155px; right: 10px;'});
-  moneyRacketCheck.appendChild(document.createTextNode('Money Rackets - Collect XP'));
-  elt = makeElement('input', moneyRacketCheck, {'type':'radio', 'name':'props', 'id':'moneyRacketCheck', 'value':'checked'}, 'moneyRacketCheck')
-  elt.addEventListener('click', toggleRadio, false);
-
-  var racketReshakedown = makeElement('div', cashTab, {'style':'top: 175px; right: 10px;'});
-  racketReshakedown.appendChild(document.createTextNode('Shake down again'));
-  makeElement('input', racketReshakedown, {'type':'checkbox', 'id':'racketReshakedown', 'value':'checked'}, 'racketReshakedown');
-
-  var racketPermanentShakedown = makeElement('div', cashTab, {'style':'top: 195px; right: 10px;'});
-  racketPermanentShakedown.appendChild(document.createTextNode('Shake down again permanently'));
-  makeElement('input', racketPermanentShakedown, {'type':'checkbox', 'id':'racketPermanentShakedown', 'value':'checked'}, 'racketPermanentShakedown');
+  collectNYTake.appendChild(document.createTextNode('Automatically collect NY take'));
+  elt = makeElement('input', collectNYTake, {'type':'checkbox', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
 
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -6357,7 +6186,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics';
+                 'nitr0genics, DTPN';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -7406,6 +7235,37 @@ function doQuickClicks() {
       if (mysteryElts.snapshotItem(i) && !/display: none/.test(mysteryElts.snapshotItem(i).innerHTML)) {
         var linkElt = getActionLink (mysteryElts.snapshotItem(i), 'Open It!');
         if (linkElt) clickElement(linkElt);
+      }
+    }
+
+    var featJobsElt = xpathFirst('.//div[contains(@style,"graphics/featjob/")]', innerPageElt);
+    if (isGMChecked('featJob') && onHome() && featJobsElt) {
+      var collectElt = getActionLink (featJobsElt, 'Collect!');
+      var chooseElt = getActionLink (featJobsElt, 'Choose Job');
+      var jobIndex = parseInt(GM_getValue('featJobIndex',0)) + 1;
+      var jobElt = xpathFirst('.//a[contains(@onclick,"xw_action=do_holiday_job") and ' +
+                              'contains(@onclick,"job_period_id='+jobIndex+'")]', featJobsElt);
+
+      var energyReq = 30;
+      switch (jobIndex) {
+        case 1: energyReq = 30; break;
+        case 2: energyReq = 60; break;
+        case 3: energyReq = 100;
+      }
+
+      // Collect Bonus from feature jobs
+      if (collectElt) {
+        clickElement(collectElt);
+        addToLog('yeah Icon', "Clicked to collect bonus from featured job.");
+
+      // Do featured job
+      } else if (energy >= energyReq && jobElt) {
+        clickElement(jobElt);
+        addToLog('yeah Icon', "Clicked to do a feature job.");
+
+      // Choose job
+      } else if (energy >= energyReq && chooseElt) {
+        clickElement(linkElt);
       }
     }
   } catch (ex) {
@@ -9015,6 +8875,8 @@ function debugDumpSettings() {
         'Enable collect lotto bonus: <strong>' + showIfUnchecked(GM_getValue('autoLottoBonus'))  + ' == ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)] + '</strong><br>' +
         'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
         'Spend all: <strong>' + showIfUnchecked(GM_getValue('burnFirst')) + ' == ' + burnModes[GM_getValue('burnOption')] + '</strong><br>' +
+        'Perform featured jobs: <strong>' + showIfUnchecked(GM_getValue('featJob')) + '</strong><br>' +
+        '&nbsp;&nbsp;Selected job: <strong>' + featJobNames[GM_getValue('featJobIndex', 0)] + '</strong><br>' +
         'Choose Sides: <br>' +
         '&nbsp;&nbsp;Moscow: <strong>' + cities[MOSCOW][CITY_SIDES][GM_getValue('sideMoscow', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;Bangkok: <strong>' + cities[BANGKOK][CITY_SIDES][GM_getValue('sideBangkok', 0)] + '</strong><br>' +
@@ -9157,10 +9019,6 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
-        'Collect Racket: <strong>' + showIfUnchecked(GM_getValue('racketCollect')) + '</strong><br>' +
-        'Shakedown again: <strong>' + showIfUnchecked(GM_getValue('racketReshakedown')) + '</strong><br>' +
-        'Shakedown again permanently: <strong>' + showIfUnchecked(GM_getValue('racketPermanentShakedown')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextRacket', 0) + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -9463,11 +9321,9 @@ function getActionBox(boxDesc) {
 
 // Fetch the action link for the given message box
 function getActionLink(boxDiv, linkText) {
-try {
   var linkElt = xpathFirst('.//a[contains(.,"'+linkText+'")]', boxDiv);
   if (linkElt) return linkElt;
   return false;
-  } catch (ex) { DEBUG('amf ka doodle:' + ex)}
 }
 
 function autoLotto() {
@@ -9847,14 +9703,9 @@ function goProperties() {
   }
 
   if (!onPropertyNav()) {
-    if (onRacketNav()) {
-      GM_setValue('autoBuy', 0);
-      DEBUG("Turning property buy off. We have rackets.");
-    } else {
-      Autoplay.fx = goPropertyNav;
-      Autoplay.start();
-      return true;
-    }
+    Autoplay.fx = goPropertyNav;
+    Autoplay.start();
+    return true;
   }
 
   return false;
@@ -9941,13 +9792,6 @@ function onMyMafiaNav() {
     return true;
   }
 
-  return false;
-}
-
-function onRacketNav() {
-  if (city == NY && xpathFirst('.//div[@class="racket_description" and contains(.,"Earn money")]', innerPageElt)) {
-    return true;
-  }
   return false;
 }
 
