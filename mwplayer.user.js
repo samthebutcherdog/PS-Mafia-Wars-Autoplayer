@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.23
-// @build       359
+// @build       360
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.23',
-  build: '359',
+  build: '360',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7266,12 +7266,12 @@ function doQuickClicks() {
       // Collect Bonus from feature jobs
       if (collectElt) {
         clickElement(collectElt);
-        addToLog('yeah Icon', "Clicked to collect bonus from featured job.");
+        addToLog('yeah Icon', 'Clicked to collect bonus from featured job.');
 
       // Do featured job
       } else if (energy >= energyReq && jobElt) {
         clickElement(jobElt);
-        addToLog('yeah Icon', "Clicked to do a feature job.");
+        addToLog('yeah Icon', 'Clicked to peform featured job -> '+featJobNames[jobIndex - 1]+'.');
 
       // Choose job
       } else if (energy >= energyReq && chooseElt) {
@@ -10827,6 +10827,11 @@ function logResponse(rootElt, action, context) {
   }
 
   // New message box message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@id="msg_box_div_1"]', rootElt);
+  }
+
+  // Message box (new layout)
   if (!messagebox) {
     messagebox = xpathFirst('.//div[@id="mbox_generic_1"]', rootElt);
   }
