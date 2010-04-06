@@ -28,19 +28,19 @@
 // @name        Facebook Mafia Wars Autoplayer
 // @namespace   mafiawars
 // @description Autoplayer for the facebook application - Mafia Wars
-// @include     http://mwfb.zynga.com/mwfb/*
+// @include     http://mwfb.zynga.com/mwfb/remote/html_server.php*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.23
-// @build       360
+// @version     1.1.24
+// @build       361
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.23',
-  build: '360',
+  version: '1.1.24',
+  build: '361',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7067,10 +7067,6 @@ function refreshMWAPCSS() {
                  // Move menus
                  ' div[onmouseover="travelopen()"] {position: absolute !important; left: 300px !important;} ' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;} ' +
-                 //' #instruction_container, a[@class$="sexy_help_new"] {width: 220px !important;} ' +
-                 // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
-                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
-                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #inner2, '  +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' .action_box_container, ' : '' ) +
                  // Hide Limited Time Offers
@@ -7080,7 +7076,10 @@ function refreshMWAPCSS() {
                                              ' img[alt="Gift Safe House"], ' +
                                              ' img[alt="Free Mystery Bag!"], ' : '' ) +
                  // Hide friends ladder
-                 (isGMChecked('hideFriendLadder') ? ' .friendladder_box ' : '' ) +
+                 (isGMChecked('hideFriendLadder') ? ' .friendladder_box, ' : '' ) +
+                 // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
+                 ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
+                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #inner2 '  +
                  ' {position: absolute !important; margin:0 !important; ' +
                  '  height:0 !important; width: 0 !important; display: none !important;}' +
                  // ********************** Stats Tab CSS **********************

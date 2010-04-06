@@ -4,7 +4,7 @@
       "js": [ "mwplayer.user.js" ],
       "exclude_globs": [ "http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*",
                          "http://mwfb.zynga.com/mwfb/*#*"  ],
-      "matches": [ "http://mwfb.zynga.com/mwfb/*",
+      "matches": [ "http://mwfb.zynga.com/mwfb/remote/html_server.php*",
                    "http://apps.facebook.com/inthemafia/*",
                    "http://apps.new.facebook.com/inthemafia/*",
                    "http://www.facebook.com/connect/prompt_feed*" ],
@@ -17,6 +17,6 @@
    },
    "permissions": [ "http://code.google.com/p/mwplayer/*" ],
    "name": "Autoplayer for Mafia Wars (Facebook)",
-   "version": "1.1.23",
+   "version": "1.1.24",
    "minimum_chrome_version": "4.0"
 }
