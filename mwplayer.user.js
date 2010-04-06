@@ -35,12 +35,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.23
-// @build       358
+// @build       359
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.23',
-  build: '358',
+  build: '359',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10828,7 +10828,7 @@ function logResponse(rootElt, action, context) {
 
   // New message box message
   if (!messagebox) {
-    messagebox = xpathFirst('.//div[@id="msg_box_div_1"]', rootElt);
+    messagebox = xpathFirst('.//div[@id="mbox_generic_1"]', rootElt);
   }
 
   // Bank message
@@ -11126,7 +11126,7 @@ function logResponse(rootElt, action, context) {
       } else if (innerNoTags.indexOf('You are too late') != -1) {
           addToLog('info Icon', 'You are too late to help ' +
                    (user? ' ' + user : '') + ' with this job.');
-      } else if (innerNoTags.indexOf('Not Again') != -1) {
+      } else if (innerNoTags.indexOf('already helped') != -1) {
           addToLog('info Icon', 'Already helped ' + user + ' with this job.');
       } else if (innerNoTags.indexOf('You received') != -1 ||
                  innerNoTags.indexOf('You helped') != -1) {
