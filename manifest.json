@@ -3,7 +3,9 @@
    "content_scripts": [ {
       "js": [ "mwplayer.user.js" ],
       "exclude_globs": [ "http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*",
-                         "http://mwfb.zynga.com/mwfb/*#*"  ],
+                         "http://mwfb.zynga.com/mwfb/*#*",
+                         "http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*",
+                         "http://facebook.mafiawars.com/mwfb/*#*" ],
       "matches": [ "http://facebook.mafiawars.com/mwfb/remote/html_server.php*",
                    "http://mwfb.zynga.com/mwfb/remote/html_server.php*",
                    "http://apps.facebook.com/inthemafia/*",
