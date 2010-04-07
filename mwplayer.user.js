@@ -28,19 +28,20 @@
 // @name        Facebook Mafia Wars Autoplayer
 // @namespace   mafiawars
 // @description Autoplayer for the facebook application - Mafia Wars
+// @include     http://facebook.mafiawars.com/mwfb/remote/html_server.php*
 // @include     http://mwfb.zynga.com/mwfb/remote/html_server.php*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.24
-// @build       361
+// @version     1.1.25
+// @build       362
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.24',
-  build: '361',
+  version: '1.1.25',
+  build: '362',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -670,7 +671,9 @@ var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
-    (/inthemafia/.test(document.referrer.match) || /mwfb.zynga.com/.test(window.location.href))) {
+    (/inthemafia/.test(document.referrer.match) ||
+     /mwfb.zynga.com/.test(window.location.href) ||
+     /facebook.mafiawars.com/.test(window.location.href))) {
   var tabURI = "Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUg"+
   "bGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3"+
   "dGgsIDA3IHRvIHZlcnNpb24gMi4wLiBDb250YWlucyBudW1lcm91cyBpbXByb3ZlbWVudHM6DQov"+
