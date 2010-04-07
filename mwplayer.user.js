@@ -36,12 +36,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.25
-// @build       362
+// @build       363
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.25',
-  build: '362',
+  build: '363',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7339,8 +7339,8 @@ function customizeMasthead() {
                        '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
                        '  <div class="sexy_destination middle">For Chrome</div> ' +
                        '</a> ' +
-                       '<a href="http://playerscripts.com/index.php?option=com_jfusion&Itemid=2" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">Discussions</div> ' +
+                       '<a href="http://www.playerscripts.com/forum/" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">PlayerScripts</div> ' +
                        '</a>' +
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
                        '  <div class="sexy_destination middle">Zynga Forums</div> ' +
