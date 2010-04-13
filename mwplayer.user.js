@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.26
-// @build       368
+// @build       369
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.26',
-  build: '368',
+  build: '369',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1004,6 +1004,20 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 High Tech car parts | 52 attack, 29 defense, +3 attack']
   );
 
+  // Weapons build
+  var cityWeapons = new Array (
+    ['Random Common Weapon', 1, 'Requires 1 weapon parts'],
+    ['Random Uncommon Weapon', 2, 'Requires 3 weapon parts'],
+    ['Random Rare Weapon', 3, 'Requires 5 weapon parts'],
+    ['Ninja Sai', 4, 'Requires 30 weapon parts | 30 attack, 40 defense'],
+    ['First Blood', 5, 'Requires 8 weapon parts and 1 explosive arrow | 49 attack, 13 defense'],
+    ['Ultrasonic Gun', 6, 'Requires 12 weapon parts and 1 sonic emitter | 22 attack, 48 defense'],
+    ['Lazer Guided RPG', 7, 'Requires 21 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
+    ['Robber\'s Utility Belt', 8, 'Requires 24 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
+    ['Railgun', 9, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
+    ['Plasma Rifle', 10, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
+  );
+
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
                                 'selectStaminaKeepMode', 'selectStaminaKeep',
@@ -1789,6 +1803,11 @@ function doAutoPlay () {
     if (buildCar(GM_getValue('buildCarId',1))) return;
   }
 
+  // Build Weapons
+  if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
+    if (buildWeapon(GM_getValue('buildWeaponId',1))) return;
+  }
+
   // Auto-buy business (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -2046,6 +2065,26 @@ function buildCar(carIndex){
       clickContext = cityCars[carIndex][0];
       clickElement(elt);
       DEBUG('Clicked to build ' + cityCars[carIndex][0] + '.');
+    };
+
+    Autoplay.start();
+    return true;
+  }
+  return false;
+}
+
+// Pass the weapon id
+function buildWeapon(weaponIndex){
+  // Build the clickable element
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
+                        '"remote/html_server.php?xw_controller=propertyV2&' +
+                        'xw_action=craft&xw_city=1&recipe='+cityWeapons[weaponIndex][1]+'&building_type=12")'});
+  if (elt) {
+    Autoplay.fx = function() {
+      clickAction = 'build weapon';
+      clickContext = cityWeapons[weaponIndex][0];
+      clickElement(elt);
+      DEBUG('Clicked to build ' + cityWeapons[weaponIndex][0] + '.');
     };
 
     Autoplay.start();
@@ -3841,6 +3880,8 @@ function saveSettings() {
   GM_setValue('burnOption', document.getElementById('burnOption').value);
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
   setGMTime('buildCarTimer', '00:00');
+  GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
+  setGMTime('buildWeaponTimer', '00:00');
 
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks','attackCritical',
@@ -3861,7 +3902,7 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
                             'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
                             'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'buildCar','featJob']);
+                            'buildCar','featJob','buildWeapon']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -6101,6 +6142,24 @@ function createCashTab () {
     carType.appendChild(choice);
   }
   carType.selectedIndex = GM_getValue(id, 9);
+
+  // Option to build a weapon
+  title = 'Check this to build a weapon every 24 hours';
+  id = 'buildWeapon';
+  var buildWeapon = makeElement('div', cashTab, {'style':'top: 70px; width: 100%;'});
+  makeElement('input', buildWeapon, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', buildWeapon, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Build Weapon '));
+
+  // Weapon list
+  id = 'buildWeaponId';
+  var weaponType = makeElement('select', buildWeapon, {'id':id, 'style':'margin-left: 5px;'});
+  for (i = 0, iLength=cityWeapons.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityWeapons[i][2]});
+    choice.appendChild(document.createTextNode(cityWeapons[i][0]));
+    weaponType.appendChild(choice);
+  }
+  weaponType.selectedIndex = GM_getValue(id, 9);
 
   title = 'Never spend below this amount of cash';
   var buyMinAmount = makeElement('div', cashTab, {'style':'top: 10px; right: 10px;'});
@@ -9035,6 +9094,8 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Output First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesOutput')) + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
+        'Build Weapongs: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
+        '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
@@ -11250,6 +11311,17 @@ function logResponse(rootElt, action, context) {
         setGMTime('buildCarTimer', '1 hour');
       } else {
         setGMTime('buildCarTimer', '24 hours');
+      }
+      break;
+
+    case 'build weapon':
+      addToLog('info Icon', inner);
+      // Visit again after 1 hour if you cannot craft yet
+      if (/You cannot craft/i.test(inner) ||
+          /You do not have/i.test(inner)) {
+        setGMTime('buildWeaponTimer', '1 hour');
+      } else {
+        setGMTime('buildWeaponTimer', '24 hours');
       }
       break;
 
