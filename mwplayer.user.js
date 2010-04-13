@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.26
-// @build       367
+// @build       368
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.26',
-  build: '367',
+  build: '368',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7073,7 +7073,8 @@ function refreshMWAPCSS() {
                  ' div[onmouseover="travelopen()"] {position: absolute !important; left: 300px !important;} ' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;} ' +
                  // Hide action boxes
-                 (isGMChecked('hideActionBox') ? ' .action_box_container, ' : '' ) +
+                 (isGMChecked('hideActionBox') ? ' .message_box_full, ' : '' ) +
+                 (isGMChecked('hideActionBox') ? ' .menu_divider, ' : '' ) +
                  // Hide Limited Time Offers
                  (isGMChecked('hideOffer') ? ' div[class="tab_box"][style*="left"], ' : '' ) +
                  // Hide Holiday Free Gifts / Gift Safe House / Mystery Gifts
