@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.27
-// @build       371
+// @build       372
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.27',
-  build: '371',
+  build: '372',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1009,16 +1009,16 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Weapons build
   var cityWeapons = new Array (
-    ['Random Common Weapon', 1, 'Requires 1 weapon parts'],
-    ['Random Uncommon Weapon', 2, 'Requires 3 weapon parts'],
-    ['Random Rare Weapon', 3, 'Requires 5 weapon parts'],
-    ['Ninja Sai', 4, 'Requires 30 weapon parts | 30 attack, 40 defense'],
-    ['First Blood', 5, 'Requires 8 weapon parts and 1 explosive arrow | 49 attack, 13 defense'],
-    ['Ultrasonic Gun', 6, 'Requires 12 weapon parts and 1 sonic emitter | 22 attack, 48 defense'],
-    ['Lazer Guided RPG', 7, 'Requires 21 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
-    ['Robber\'s Utility Belt', 8, 'Requires 24 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
-    ['Railgun', 9, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
-    ['Plasma Rifle', 10, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
+    ['Random Common Weapon', 15, 'Requires 1 weapon parts'],
+    ['Random Uncommon Weapon', 16, 'Requires 3 weapon parts'],
+    ['Random Rare Weapon', 17, 'Requires 5 weapon parts'],
+    ['Ninja Sai', 18, 'Requires 30 weapon parts | 30 attack, 40 defense'],
+    ['First Blood', 19, 'Requires 8 weapon parts and 1 explosive arrow | 49 attack, 13 defense'],
+    ['Ultrasonic Gun', 20, 'Requires 12 weapon parts and 1 sonic emitter | 22 attack, 48 defense'],
+    ['Lazer Guided RPG', 21, 'Requires 21 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
+    ['Robber\'s Utility Belt', 22, 'Requires 24 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
+    ['Railgun', 23, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
+    ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
 
   // Spend objects
