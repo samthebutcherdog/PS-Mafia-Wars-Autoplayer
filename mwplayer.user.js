@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.27
-// @build       373
+// @build       374
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.27',
-  build: '373',
+  build: '374',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -871,11 +871,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
   const BOUNTY_LONGEST_TIME   = 1;  // Select qualified bounties with longest time on the hitlist.
   const BOUNTY_HIGHEST_BOUNTY = 2;  // Select qualified bounties with the highest bounty.
-  const BOUNTY_RANDOM         = 3;  // Select random qualified bounty.
+  const BOUNTY_EXACT_AMOUNT   = 3;  // Select qualified bounties with exact dollar amount.
+  const BOUNTY_RANDOM         = 4;  // Select random qualified bounty.
   var bountySelectionChoices = [];
   bountySelectionChoices[BOUNTY_SHORTEST_TIME]  = 'Shortest time';
   bountySelectionChoices[BOUNTY_LONGEST_TIME]   = 'Longest time';
   bountySelectionChoices[BOUNTY_HIGHEST_BOUNTY] = 'Highest bounty';
+  bountySelectionChoices[BOUNTY_EXACT_AMOUNT] = 'Exact dollar amount';
   bountySelectionChoices[BOUNTY_RANDOM]         = 'No preference (random)';
 
   // Define war modes
@@ -3103,6 +3105,7 @@ function autoHitman() {
   var bountyCount = 0;
   var namesCount = 0;
   var opponentsQualified = [];
+  var exactBounty = (GM_getValue('bountySelection', BOUNTY_HIGHEST_BOUNTY) == BOUNTY_EXACT_AMOUNT);
   for (i = 0, iLength=opponents.length; i < iLength; i++) {
     var opponent = opponents[i];
     if (blacklist.indexOf(opponent.id) != -1) {
@@ -3110,7 +3113,7 @@ function autoHitman() {
       continue;
     }
     var bounty = parseCash(opponent.bounty);
-    if (bounty && bounty < bountyMin) {
+    if (bounty && ((bounty < bountyMin)|| (exactBounty && (bounty > bountyMin)))) {
       bountyCount++;
       continue;
     }
