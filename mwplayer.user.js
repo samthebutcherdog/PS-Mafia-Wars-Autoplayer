@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.26
-// @build       369
+// @version     1.1.27
+// @build       370
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.26',
-  build: '369',
+  version: '1.1.27',
+  build: '370',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1800,12 +1800,12 @@ function doAutoPlay () {
 
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
-    if (buildCar(GM_getValue('buildCarId',1))) return;
+    if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
   }
 
   // Build Weapons
   if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
-    if (buildWeapon(GM_getValue('buildWeaponId',1))) return;
+    if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
   }
 
   // Auto-buy business (limit to level 4 and above)
@@ -2053,38 +2053,19 @@ function autoHeal() {
   return true;
 }
 
-// Pass the car id
-function buildCar(carIndex){
+// Pass the item array, item id, and building type
+function buildItem(itemArray, itemIndex, buildType){
   // Build the clickable element
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=craft&xw_city=1&recipe='+cityCars[carIndex][1]+'&building_type=11")'});
+                        'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'")'});
+
   if (elt) {
     Autoplay.fx = function() {
-      clickAction = 'build car';
-      clickContext = cityCars[carIndex][0];
+      clickAction = 'build item';
+      clickContext = {'itemName': itemArray[itemIndex][0], 'buildType': buildType};
       clickElement(elt);
-      DEBUG('Clicked to build ' + cityCars[carIndex][0] + '.');
-    };
-
-    Autoplay.start();
-    return true;
-  }
-  return false;
-}
-
-// Pass the weapon id
-function buildWeapon(weaponIndex){
-  // Build the clickable element
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
-                        '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=craft&xw_city=1&recipe='+cityWeapons[weaponIndex][1]+'&building_type=12")'});
-  if (elt) {
-    Autoplay.fx = function() {
-      clickAction = 'build weapon';
-      clickContext = cityWeapons[weaponIndex][0];
-      clickElement(elt);
-      DEBUG('Clicked to build ' + cityWeapons[weaponIndex][0] + '.');
+      DEBUG('Clicked to build ' + clickContext.itemName + '.');
     };
 
     Autoplay.start();
@@ -11303,25 +11284,19 @@ function logResponse(rootElt, action, context) {
       addToLog('info Icon', inner);
       break;
 
-    case 'build car':
+    case 'build item':
       addToLog('info Icon', inner);
-      // Visit again after 1 hour if you cannot craft yet
-      if (/You cannot craft/i.test(inner) ||
-          /You do not have/i.test(inner)) {
-        setGMTime('buildCarTimer', '1 hour');
-      } else {
-        setGMTime('buildCarTimer', '24 hours');
+      var timerName = 'buildCarTimer';
+      switch (context.buildType) {
+        case 11: timerName = 'buildCarTimer'; break;
+        case 12: timerName = 'buildWeaponTimer'; break;
       }
-      break;
-
-    case 'build weapon':
-      addToLog('info Icon', inner);
       // Visit again after 1 hour if you cannot craft yet
       if (/You cannot craft/i.test(inner) ||
           /You do not have/i.test(inner)) {
-        setGMTime('buildWeaponTimer', '1 hour');
+        setGMTime(timerName, '1 hour');
       } else {
-        setGMTime('buildWeaponTimer', '24 hours');
+        setGMTime(timerName, '24 hours');
       }
       break;
 
