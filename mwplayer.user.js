@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.27
-// @build       370
+// @build       371
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.27',
-  build: '370',
+  build: '371',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -854,13 +854,16 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_FIGHT_RANDOM = 0;  // Random fighting.
   const STAMINA_HOW_FIGHT_LIST   = 1;  // List fighting.
   const STAMINA_HOW_HITMAN       = 2;  // Hitman.
-  const STAMINA_HOW_AUTOHITLIST  = 3;  // Place bounties.
-  const STAMINA_HOW_RANDOM       = 4;  // Random spending of stamina in random cities.
+  const STAMINA_HOW_ROBBING      = 3;  // Robbing
+  const STAMINA_HOW_AUTOHITLIST  = 4;  // Place bounties.
+  const STAMINA_HOW_RANDOM       = 5;  // Random spending of stamina in random cities.
+
 
   var staminaSpendChoices = [];
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
   staminaSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific opponents';
   staminaSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect hitlist bounties';
+  staminaSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random opponents';
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
 
@@ -2658,10 +2661,16 @@ function canSpendStamina(minHealth) {
   if (!stamina) return false;
   if (!isGMChecked('staminaSpend')) return false;
 
+  var stamMode = getStaminaMode();
+
   if (isNaN(minHealth)) {
     // Up to 28 damage can be received in a fight.
     minHealth = isGMChecked('attackCritical') ? 21 : 29;
-    if (getStaminaMode() == STAMINA_HOW_AUTOHITLIST) minHealth = 0;
+    switch (stamMode) {
+      case STAMINA_HOW_AUTOHITLIST:
+      case STAMINA_HOW_ROBBING:
+        minHealth = 0;
+    }
   }
 
   if (health < minHealth) {
@@ -2681,6 +2690,13 @@ function canSpendStamina(minHealth) {
           ', ceiling=' + SpendStamina.ceiling + ', burn=' + SpendStamina.canBurn);
     return false;
   }
+
+  // only spend if stamina >= 20
+  // minimum robbing is 20 stamina
+  DEBUG('rob stamina :' + stamina);
+  DEBUG('getStaminaMode :' + getStaminaMode());
+  if(stamMode == STAMINA_HOW_ROBBING)
+    return (stamina >= 20);
 
   return true;
 }
@@ -2916,6 +2932,114 @@ function staminaBurst (burstMode, clickElt) {
   clickBurst (clickElt, parseInt(numClicks));
 }
 
+function autoRob() {
+  if (city != NY) {
+    DEBUG("going ny");
+    Autoplay.fx = function() { goLocation(NY); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+
+  // Make sure we're on the fight tab.
+  if (!onRobbingTab()) {
+  DEBUG("going robtab");
+    Autoplay.fx = goRobbingTab;
+    Autoplay.delay = 0;
+    Autoplay.start();
+    return true;
+  }
+
+  if(needToRefresh()){
+    DEBUG("refreshing grid");
+    // refresh the 3x3 grid.
+    Autoplay.fx = refreshRobbingGrid;
+    Autoplay.delay = 0;
+    Autoplay.start();
+    return true;
+  } else{
+    clickAction = 'autoRob';
+    clickContext = getCurRobSlotId();;
+    DEBUG("context : " + clickContext);
+    DEBUG("doing the robbing");
+    Autoplay.fx = doRob;
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+}
+
+function onRobbingTab() {
+  // Return true if we're on the robbing tab, false otherwise.
+  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Robbing")]')) {
+  DEBUG("on rob tab");
+    return true;
+  }
+  DEBUG("not on rob tab");
+  return false;
+}
+
+function goRobbingTab() {
+  var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Robbing")]');
+  if (!elt) {
+    goFightNav();
+    return;
+  }
+  clickElement(elt);
+  DEBUG('Clicked to go to robbing tab.');
+}
+
+function needToRefresh()
+{
+    var eltRefreshLink = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]/span/span[contains(.,"Get New Targets (0 stamina)")]');
+    if(eltRefreshLink)
+        return true;
+
+    return false;
+}
+function refreshRobbingGrid(){
+  var elt = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]');
+  if(elt)
+    clickElement(elt);
+  DEBUG('Clicked to refresh robbing grid.');
+};
+
+function doRob(){
+  var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+  if(eltRob)
+    clickElement(eltRob);
+  DEBUG('Clicked to rob.');
+}
+function getCurRobSlotId(){
+  var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+  if(eltRob) // rob btn, rob target, rob slot
+    return eltRob.parentNode.parentNode.parentNode.id;
+  return null;
+}
+
+function logRobResponse(rootElt, resultElt, context) {
+  var robSlotId = context;
+  var eltRob = xpathFirst('.//div[@id="'+ robSlotId +'" and @class="rob_slot"]');
+  var targetElt = xpathFirst('.//div[@class="rob_res_target_name"]/a',eltRob);
+  var expElt   = xpathFirst('.//div[@class="rob_res_expanded_details_exp"]',eltRob);
+  var cashElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
+  var itemElt = xpathFirst('.//div[@class="rob_res_expanded_details_item"]',eltRob);
+  var user   = linkToString(targetElt, 'user');
+  var result = 'Rob ' + user + ' ';
+  if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
+    if(cashElt)
+      result += '<span class="good">Success '+ cashElt.innerHTML +'</span>';
+    else
+      result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
+  }
+  else
+    result += '<span class="bad">Failed</span>';
+
+  result += ' and <span class="good">' + expElt.innerHTML + ' experience</span>.';
+
+  addToLog('yeah Icon', result);
+}
+
 function autoHitman() {
   // Go to the correct city.
   var i, loc = GM_getValue('hitmanLocation', NY);
@@ -3040,6 +3164,9 @@ function autoStaminaSpend() {
     case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:
       return autoFight(how);
+
+    case STAMINA_HOW_ROBBING:
+      return autoRob();
 
     case STAMINA_HOW_HITMAN:
       return autoHitman(how);
@@ -6015,6 +6142,9 @@ function createStaminaTab() {
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
   // End of options specific to hitman
 
+  // Robbing settings
+  list = makeElement('div', staminaTabSub, {'id':'autoRobSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+
   //
   // Settings for list hitlisting
   //
@@ -6442,6 +6572,9 @@ function validateStaminaTab() {
       }
       break;
 
+    case STAMINA_HOW_ROBBING: // Robbing
+      break;
+
     case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
       s.autoHitListLoc = document.getElementById('autoHitListLoc').selectedIndex;
       s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
@@ -6463,7 +6596,6 @@ function validateStaminaTab() {
         return false;;
       }
       break;
-
     case STAMINA_HOW_RANDOM: // Random stamina spending
       break;
 
@@ -6624,6 +6756,20 @@ function handleModificationTimer() {
       makeElement('div', jobResult, {'id':'job_flag', 'style':'display: none'});
       setListenContent(true);
       DEBUG('Detected new job results.');
+      pageChanged = true;
+      justPlay = true;
+    }
+  }
+  
+  // Added handling for just rob page changes
+  var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]', innerPageElt);
+  //var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]/span/span', innerPageElt);
+  if (robResult) {
+    if (!xpathFirst('.//div[@id="rob_flag"]', robResult)) {
+      setListenContent(false);
+      makeElement('div', robResult, {'id':'rob_flag', 'style':'display: none'});
+      setListenContent(true);
+      DEBUG('Detected new rob results.');
       pageChanged = true;
       justPlay = true;
     }
@@ -10896,6 +11042,11 @@ function logResponse(rootElt, action, context) {
     messagebox = xpathFirst('.//div[@id="hospital_message"]', rootElt);
   }
 
+  // Rob message
+  if (!messagebox) {
+    messagebox = xpathFirst('.//div[@id="'+ context +'" and @class="rob_slot"]');
+  }
+
   if (action=='withdraw' && context) {
     autoBankWithdraw(context);
     Autoplay.start();
@@ -10929,7 +11080,10 @@ function logResponse(rootElt, action, context) {
     case 'fight':
       return logFightResponse(rootElt, messagebox, context);
       break;
-
+      
+    case 'autoRob':
+        return logRobResponse(rootElt, messagebox, context);
+	
     case 'heal':
       if (innerNoTags.indexOf('doctor healed') != -1) {
         GM_setValue('healWaitStarted',false);
