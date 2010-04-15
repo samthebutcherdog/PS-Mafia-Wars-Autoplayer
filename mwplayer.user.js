@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.28
-// @build       376
+// @build       377
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.28',
-  build: '376',
+  build: '377',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2727,10 +2727,8 @@ function canSpendStamina(minHealth) {
     return false;
   }
 
-  // only spend if stamina >= 20
-  // minimum robbing is 20 stamina
+  // Only spend if stamina >= 20
   DEBUG('rob stamina :' + stamina);
-  DEBUG('getStaminaMode :' + getStaminaMode());
   if(stamMode == STAMINA_HOW_ROBBING)
     return (stamina >= 20);
 
@@ -11369,6 +11367,7 @@ function logResponse(rootElt, action, context) {
 
     case 'energypack':
       addToLog('energyPack Icon', 'Used an <span class="good">Energy Pack</span>.');
+      energyPackElt = undefined;
       DEBUG(inner);
       break;
 
