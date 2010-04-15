@@ -18,7 +18,7 @@
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
-            scooy78, crazydude, SamTheButcher, dwightwilbanks
+            scooy78, crazydude, SamTheButcher, dwightwilbanks, nonoy
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.27
-// @build       375
+// @version     1.1.28
+// @build       376
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.27',
-  build: '375',
+  version: '1.1.28',
+  build: '376',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -877,7 +877,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   bountySelectionChoices[BOUNTY_SHORTEST_TIME]  = 'Shortest time';
   bountySelectionChoices[BOUNTY_LONGEST_TIME]   = 'Longest time';
   bountySelectionChoices[BOUNTY_HIGHEST_BOUNTY] = 'Highest bounty';
-  bountySelectionChoices[BOUNTY_EXACT_AMOUNT] = 'Exact dollar amount';
+  bountySelectionChoices[BOUNTY_EXACT_AMOUNT]   = 'Exact dollar amount';
   bountySelectionChoices[BOUNTY_RANDOM]         = 'No preference (random)';
 
   // Define war modes
@@ -1805,7 +1805,7 @@ function doAutoPlay () {
   }
 
   // Click attack if on warNav
-  if (running && onWarNav() && (isGMChecked('autoWar') || helpWar )) {
+  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
   }
 
@@ -2970,7 +2970,6 @@ function staminaBurst (burstMode, clickElt) {
 
 function autoRob() {
   if (city != NY) {
-    DEBUG("going ny");
     Autoplay.fx = function() { goLocation(NY); };
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
@@ -2979,21 +2978,20 @@ function autoRob() {
 
   // Make sure we're on the fight tab.
   if (!onRobbingTab()) {
-  DEBUG("going robtab");
     Autoplay.fx = goRobbingTab;
     Autoplay.delay = 0;
     Autoplay.start();
     return true;
   }
 
-  if(needToRefresh()){
+  if (needToRefresh()) {
     DEBUG("refreshing grid");
     // refresh the 3x3 grid.
     Autoplay.fx = refreshRobbingGrid;
     Autoplay.delay = 0;
     Autoplay.start();
     return true;
-  } else{
+  } else {
     clickAction = 'autoRob';
     clickContext = getCurRobSlotId();;
     DEBUG("context : " + clickContext);
@@ -3008,10 +3006,8 @@ function autoRob() {
 function onRobbingTab() {
   // Return true if we're on the robbing tab, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Robbing")]')) {
-  DEBUG("on rob tab");
     return true;
   }
-  DEBUG("not on rob tab");
   return false;
 }
 
@@ -3033,6 +3029,7 @@ function needToRefresh()
 
     return false;
 }
+
 function refreshRobbingGrid(){
   var elt = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]');
   if(elt)
@@ -3046,6 +3043,7 @@ function doRob(){
     clickElement(eltRob);
   DEBUG('Clicked to rob.');
 }
+
 function getCurRobSlotId(){
   var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
   if(eltRob) // rob btn, rob target, rob slot
@@ -3056,24 +3054,35 @@ function getCurRobSlotId(){
 function logRobResponse(rootElt, resultElt, context) {
   var robSlotId = context;
   var eltRob = xpathFirst('.//div[@id="'+ robSlotId +'" and @class="rob_slot"]');
-  var targetElt = xpathFirst('.//div[@class="rob_res_target_name"]/a',eltRob);
-  var expElt   = xpathFirst('.//div[@class="rob_res_expanded_details_exp"]',eltRob);
-  var cashElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
-  var itemElt = xpathFirst('.//div[@class="rob_res_expanded_details_item"]',eltRob);
-  var user   = linkToString(targetElt, 'user');
-  var result = 'Rob ' + user + ' ';
-  if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
+  if (eltRob) {
+    var m;
+    var targetElt = xpathFirst('.//div[@class="rob_res_target_name"]/a',eltRob);
+    var expElt   = xpathFirst('.//div[@class="rob_res_expanded_details_exp"]',eltRob);
+    var cashElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
+    var itemElt = xpathFirst('.//div[@class="rob_res_expanded_details_item"]',eltRob);
+    var user   = linkToString(targetElt, 'user');
+    var result = 'Rob ' + user + ' ';
+    if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
     if(cashElt)
       result += '<span class="good">Success '+ cashElt.innerHTML +'</span>';
     else
       result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
-  }
-  else
+    }
+    else
     result += '<span class="bad">Failed</span>';
+    result += ' and <span class="good">' + expElt.innerHTML + ' experience</span>.';
 
-  result += ' and <span class="good">' + expElt.innerHTML + ' experience</span>.';
+    addToLog('yeah Icon', result);
 
-  addToLog('yeah Icon', result);
+
+    // Look for any loot on rob slot and on popup
+    if (m = /alt="(.*?)"/.exec(eltRob.innerHTML)) {
+      addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[1] + ' in robbing.</span>');
+    }
+    if (m = /You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)<\/div>/.exec(innerPageElt.innerHTML)) {
+      addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[3] + ' on full board.</span>');
+    }
+  }
 }
 
 function autoHitman() {
@@ -6408,7 +6417,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN';
+                 'nitr0genics, DTPN, nonoy';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -6797,7 +6806,7 @@ function handleModificationTimer() {
       justPlay = true;
     }
   }
-  
+
   // Added handling for just rob page changes
   var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]', innerPageElt);
   //var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]/span/span', innerPageElt);
@@ -9820,7 +9829,8 @@ function autoWar() {
   var actionElt = getActionBox('War');
   if (actionElt) {
     // Check if "War in Progress" is there
-    var actionLink = getActionLink (actionElt, 'Check War');
+    // FIXME: Causes looping
+    /*var actionLink = getActionLink (actionElt, 'Check War');
     if (actionLink) {
       Autoplay.fx = function() {
         setGMTime('warTimer', '00:00');
@@ -9829,7 +9839,7 @@ function autoWar() {
       };
       Autoplay.start();
       return true;
-    }
+    }*/
 
     // Check if "Reward friends" is there
     actionLink = getActionLink (actionElt, 'Reward Friends');
@@ -9848,8 +9858,8 @@ function autoWar() {
   if (timeLeftGM('warTimer') > 0) return false;
 
   // We need to be on the war page to go any further
-  if (!onWarNav()) {
-    Autoplay.fx = goWarNav;
+  if (!onWarTab()) {
+    Autoplay.fx = goWarTab;
     Autoplay.start();
     return true;
   }
@@ -10004,7 +10014,7 @@ function onLottoNav() {
   return false;
 }
 
-function onWarNav() {
+function onWarTab() {
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Declare War")]', innerPageElt)) {
     return true;
   }
@@ -10163,7 +10173,7 @@ function onMyMafiaTab() {
   return false;
 }
 
-function goWarNav() {
+function goWarTab() {
   var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Declare War")]', innerPageElt);
   if (!elt) {
     goFightNav();
@@ -10357,6 +10367,13 @@ function goMoscow() {
 }
 
 function goLocation(toCity) {
+  // If on robbing tab, move to war tab first so we can change cities
+  if (onRobbingTab()) {
+    goWarTab();
+    return true;
+  }
+
+  // Already in this city
   if (toCity == city) {
     DEBUG('Already in ' + cities[toCity][CITY_NAME] + '.');
     return true;
@@ -11117,10 +11134,10 @@ function logResponse(rootElt, action, context) {
     case 'fight':
       return logFightResponse(rootElt, messagebox, context);
       break;
-      
+
     case 'autoRob':
         return logRobResponse(rootElt, messagebox, context);
-	
+
     case 'heal':
       if (innerNoTags.indexOf('doctor healed') != -1) {
         GM_setValue('healWaitStarted',false);
@@ -11484,7 +11501,8 @@ function logResponse(rootElt, action, context) {
       }
       // Visit again after 1 hour if you cannot craft yet
       if (/You cannot craft/i.test(inner) ||
-          /You do not have/i.test(inner)) {
+          /You do not have/i.test(inner) ||
+          /You need a higher/i.test(inner) ) {
         setGMTime(timerName, '1 hour');
       } else {
         setGMTime(timerName, '24 hours');
