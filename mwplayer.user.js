@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.28
-// @build       377
+// @version     1.1.29
+// @build       378
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.28',
-  build: '377',
+  version: '1.1.29',
+  build: '378',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -993,8 +993,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Cars
   var cityCars = new Array (
-    ['CARS MENU', 1000, 'CARS MENU'],
-    ['', 1000, 'CARS MENU'],
     ['Random Common Car', 1, 'Requires 10 car parts'],
     ['Random Rare Car', 2, 'Requires 25 car parts'],
     ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
@@ -1008,43 +1006,11 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
     ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
     ['Mugati Sport', 13, 'Requires 135 car parts, 1 High Tech car part | 35 attack, 51 defense, +3 defense'],
-    ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 High Tech car parts | 52 attack, 29 defense, +3 attack'],
-    ['', 10000, 'WEAPONS MENU'],
-    ['WEAPONS MENU', 10000, 'WEAPONS MENU'],
-    ['', 10000, 'WEAPONS MENU'],
-    ['Random Common Weapon', 15, 'Requires 1 weapon parts'],
-    ['Random Uncommon Weapon', 16, 'Requires 3 weapon parts'],
-    ['Random Rare Weapon', 17, 'Requires 5 weapon parts'],
-    ['Ninja Sai', 18, 'Requires 30 weapon parts | 30 attack, 40 defense'],
-    ['First Blood', 19, 'Requires 8 weapon parts and 1 explosive arrow | 49 attack, 13 defense'],
-    ['Ultrasonic Gun', 20, 'Requires 12 weapon parts and 1 sonic emitter | 22 attack, 48 defense'],
-    ['Lazer Guided RPG', 21, 'Requires 21 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
-    ['Robber\'s Utility Belt', 22, 'Requires 24 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
-    ['Railgun', 23, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
-    ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
+    ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 High Tech car parts | 52 attack, 29 defense, +3 attack']
   );
 
   // Weapons build
   var cityWeapons = new Array (
-    ['CARS MENU', 1000, 'CARS MENU'],
-    ['', 1000, 'CARS MENU'],
-    ['Random Common Car', 1, 'Requires 10 car parts'],
-    ['Random Rare Car', 2, 'Requires 25 car parts'],
-    ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
-    ['CM Santiago R10', 4, 'Requires 30 car parts, 2 Cuban car parts | 42 attack, 30 defense'],
-    ['Rebel 2', 5, 'Requires 45 car parts and 2 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
-    ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
-    ['Russian Dazatz 45', 6, 'Requires 50 car parts and 2 Russian car parts | 18 attack, 46 defense'],
-    ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
-    ['Solar Flare', 7, 'Requires 65 car parts and 1 solar panel | 34 attack, 34 defense, +5 energy'],
-    ['Thai XS Max', 8, 'Requires 75 car parts and 2x Thai car parts | 45 attack, 35 defense'],
-    ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
-    ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
-    ['Mugati Sport', 13, 'Requires 135 car parts, 1 High Tech car part | 35 attack, 51 defense, +3 defense'],
-    ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 High Tech car parts | 52 attack, 29 defense, +3 attack'],
-    ['', 10000, 'WEAPONS MENU'],
-    ['WEAPONS MENU', 10000, 'WEAPONS MENU'],
-    ['', 10000, 'WEAPONS MENU'],
     ['Random Common Weapon', 15, 'Requires 1 weapon parts'],
     ['Random Uncommon Weapon', 16, 'Requires 3 weapon parts'],
     ['Random Rare Weapon', 17, 'Requires 5 weapon parts'],
