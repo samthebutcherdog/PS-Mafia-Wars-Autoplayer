@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.30
-// @build       380
+// @build       381
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.30',
-  build: '380',
+  build: '381',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3240,7 +3240,7 @@ function autoBankDeposit(bankCity, amount) {
   if (!quickBankFail) return false;
 
   // Make sure we're at the bank.
-  var bankElt = xpathFirst('.//div[@id="bank_popup"]', innerPageElt);
+  var bankElt = xpathFirst('.//div[@id="bank_popup"]', contentRowElt);
   if (!bankElt) {
     Autoplay.fx = goBank;
     Autoplay.start();
@@ -3283,7 +3283,7 @@ function autoBankDeposit(bankCity, amount) {
 
 function autoBankWithdraw(amount) {
   // Make sure we're at the bank.
-  var formElt = xpathFirst('.//div[@id="bank_popup"]', innerPageElt);
+  var formElt = xpathFirst('.//div[@id="bank_popup"]', contentRowElt);
   if (!formElt) {
     Autoplay.fx = goBank;
     clickAction = 'withdraw';
@@ -11096,7 +11096,7 @@ function logResponse(rootElt, action, context) {
 
   // Bank message
   if (!messagebox) {
-    messagebox = xpathFirst('.//div[@id="bank_messages"]', rootElt);
+    messagebox = xpathFirst('.//div[@id="bank_messages"]', contentRowElt);
   }
 
   // Hospital message
@@ -11483,6 +11483,10 @@ function logResponse(rootElt, action, context) {
       } else {
         DEBUG(inner);
       }
+
+      // Close banking
+      var closePopElt = xpathFirst('.//div[@class="pop_box"]//a[@class="pop_close"]')
+      clickElement(closePopElt);
       break;
 
     case 'withdraw':
@@ -11491,6 +11495,10 @@ function logResponse(rootElt, action, context) {
       } else {
         DEBUG(inner);
       }
+
+      // Close banking
+      var closePopElt = xpathFirst('.//div[@class="pop_box"]//a[@class="pop_close"]')
+      clickElement(closePopElt);
       break;
 
     // FIXME: Add parsing here
