@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.29
-// @build       378
+// @version     1.1.30
+// @build       379
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.29',
-  build: '378',
+  version: '1.1.30',
+  build: '379',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -640,6 +640,7 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
 
 var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
+var contentRowElt;              // The currently visible content page
 var cash;                       // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
@@ -2023,7 +2024,7 @@ function autoHeal() {
   }
 
   // Use our custom instant-heal element (if present).
-  var healElt = xpathFirst('.//div[@id="popup_fodder"]//a[contains(@onclick,"xw_action=heal")]', innerPageElt)
+  var healElt = xpathFirst('.//div[@id="popup_fodder"]//div[@class="hospital_pop"]//div[@class="pop_box" and contains(@style,"block")]//a[contains(@onclick,"xw_action=heal")]');
   if (healElt) {
     // FIXME: Should make quick healing optional
     if (false) {
@@ -2140,13 +2141,17 @@ function autoBuyCrates(buyCity) {
 
   // Buy anything we can.
   eltTakeOver = xpathFirst('.//a[contains(.,"Take over for")]', innerPageElt);
-  needMoreMoneyTake = xpathFirst('.//td[contains(.,"more to purchase")]');
-  needMoreMoneyUpgrade = xpathFirst('.//td[contains(.,"more to upgrade")]');
   eltUpgradeProduces = xpathFirst('.//a[contains(.,"Upgrade to")]', innerPageElt);
   eltUpgradeOutput = xpathFirst('.//a[contains(.,"Upgrade Output to")]', innerPageElt);
 
+  var cashTakeOver       = eltTakeOver ? parseCash(eltTakeOver.innerHTML.split('$')[1].split('</span>')[0]) : cities[city][CITY_CASH] + 1;
+  var cashUpgradeProduce = eltUpgradeProduces ? parseCash (eltUpgradeProduces.innerHTML.split('$')[1].split('</span>')[0]) : cities[city][CITY_CASH] + 1;
+  var cashUpgradeOutput  = eltUpgradeOutput ? parseCash (eltUpgradeOutput.innerHTML.split('$')[1].split('</span>')[0]) : cities[city][CITY_CASH] + 1;
+
+  // FIXME: Following code needs some refactoring
+
   if(isGMChecked('autoBuyCratesOutput')){
-    if (eltUpgradeOutput && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+    if (eltUpgradeOutput && cashUpgradeOutput <= cities[city][CITY_CASH]) {
       Autoplay.fx = function() {
         clickAction = 'upgrade output';
         clickElement(eltUpgradeOutput);
@@ -2156,7 +2161,7 @@ function autoBuyCrates(buyCity) {
       return true;
     }
     else
-    if (eltUpgradeProduces && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+    if (eltUpgradeProduces && cashUpgradeProduce <= cities[city][CITY_CASH]) {
       Autoplay.fx = function() {
         clickAction = 'upgrade produce';
         clickElement(eltUpgradeProduces);
@@ -2166,7 +2171,7 @@ function autoBuyCrates(buyCity) {
       return true;
     }
     else
-    if (eltTakeOver && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+    if (eltTakeOver && cashTakeOver <= cities[city][CITY_CASH]) {
       Autoplay.fx = function() {
         clickAction = 'buy business';
         clickElement(eltTakeOver);
@@ -2177,7 +2182,7 @@ function autoBuyCrates(buyCity) {
     }
     }
   else{
-    if (eltUpgradeProduces && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+    if (eltUpgradeProduces && cashUpgradeOutput <= cities[city][CITY_CASH]) {
       Autoplay.fx = function() {
         clickAction = 'upgrade produce';
         clickElement(eltUpgradeProduces);
@@ -2187,7 +2192,7 @@ function autoBuyCrates(buyCity) {
       return true;
     }
     else
-    if (eltUpgradeOutput && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+    if (eltUpgradeOutput && cashUpgradeProduce <= cities[city][CITY_CASH]) {
       Autoplay.fx = function() {
         clickAction = 'upgrade output';
         clickElement(eltUpgradeOutput);
@@ -2197,7 +2202,7 @@ function autoBuyCrates(buyCity) {
       return true;
     }
     else
-    if (eltTakeOver && !needMoreMoneyTake && !needMoreMoneyUpgrade) {
+    if (eltTakeOver && cashTakeOver <= cities[city][CITY_CASH]) {
       Autoplay.fx = function() {
         clickAction = 'buy business';
         clickElement(eltTakeOver);
@@ -2694,7 +2699,6 @@ function canSpendStamina(minHealth) {
   }
 
   // Only spend if stamina >= 20
-  DEBUG('rob stamina :' + stamina);
   if(stamMode == STAMINA_HOW_ROBBING)
     return (stamina >= 20);
 
@@ -6734,7 +6738,7 @@ function handleModificationTimer() {
   var pageChanged = false;
   var justPlay = false;
   var prevPageElt = innerPageElt;
-  var contentRowElt = document.getElementById('content_row');
+  contentRowElt = document.getElementById('content_row');
   innerPageElt = xpathFirst('.//div[@id="inner_page"]', contentRowElt);
 
   if (!innerPageElt) return;
@@ -6786,7 +6790,7 @@ function handleModificationTimer() {
   }
 
   // Handling for pop-ups
-  var popupElt = xpathFirst('.//div[@id="popup_fodder"]', innerPageElt);
+  var popupElt = xpathFirst('.//div[@id="popup_fodder"]', contentRowElt);
   if (popupElt && popupElt.innerHTML.length > 0) {
     pageChanged = true;
     justPlay = true;
@@ -11057,7 +11061,7 @@ function logResponse(rootElt, action, context) {
 
   // Hospital message
   if (!messagebox) {
-    messagebox = xpathFirst('.//div[@id="hospital_message"]', rootElt);
+    messagebox = xpathFirst('.//div[@id="hospital_message"]', contentRowElt);
   }
 
   // Rob message
