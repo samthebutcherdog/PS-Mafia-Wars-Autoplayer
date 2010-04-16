@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.30
-// @build       379
+// @build       380
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.30',
-  build: '379',
+  build: '380',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3021,36 +3021,76 @@ function getCurRobSlotId(){
 
 function logRobResponse(rootElt, resultElt, context) {
   var robSlotId = context;
+  var m;
   var eltRob = xpathFirst('.//div[@id="'+ robSlotId +'" and @class="rob_slot"]');
   if (eltRob) {
-    var m;
+    var success = false;
     var targetElt = xpathFirst('.//div[@class="rob_res_target_name"]/a',eltRob);
     var expElt   = xpathFirst('.//div[@class="rob_res_expanded_details_exp"]',eltRob);
     var cashElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
     var itemElt = xpathFirst('.//div[@class="rob_res_expanded_details_item"]',eltRob);
     var user   = linkToString(targetElt, 'user');
     var result = 'Rob ' + user + ' ';
+
     if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
-    if(cashElt)
-      result += '<span class="good">Success '+ cashElt.innerHTML +'</span>';
-    else
-      result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
+      success = true;
+      if (cashElt)
+        result += '<span class="good">Success '+ cashElt.innerHTML +'</span>';
+      else
+        result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
     }
     else
-    result += '<span class="bad">Failed</span>';
-    result += ' and <span class="good">' + expElt.innerHTML + ' experience</span>.';
+      result += '<span class="bad">Failed</span>';
+
+    result += ' and <span class="good">' + expElt.innerHTML + '</span>.';
 
     addToLog('yeah Icon', result);
 
-
-    // Look for any loot on rob slot and on popup
+    // Look for any loot on rob slot
     if (m = /alt="(.*?)"/.exec(eltRob.innerHTML)) {
       addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[1] + ' in robbing.</span>');
     }
-    if (m = /You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)<\/div>/.exec(innerPageElt.innerHTML)) {
-      addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[3] + ' on full board.</span>');
+
+    if (m = /(\d+) Experience/.exec(expElt.innerHTML)) {
+      var exp = m[1].replace(/[^0-9]/g, '');
+      updateRobStatistics(success,parseInt(exp));
     }
   }
+
+  var popUp = xpathFirst('.//div[contains(@class, "pop_box") and contains(@style, "block")]');
+  if (popUp) {
+    // Look for any loot on popup
+    if (m = /You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)<\/div>/.exec(popUp.innerHTML)) {
+      addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[3] + ' on board.</span>');
+    }
+
+    if (m = /(\d+) Bonus Experience/.exec(popUp.innerHTML)) {
+      var exp = m[1].replace(/[^0-9]/g, '');
+      updateRobStatistics(null,parseInt(exp));
+    }
+
+    // close the popup button
+    var closeElt = xpathFirst('.//a[@class="pop_close"]',popUp);
+    if (closeElt) {
+      clickElement(closeElt);
+      DEBUG('Clicked to close rob popup.');
+    }
+  }
+}
+
+function updateRobStatistics (success,exp) {
+  if (success)
+    GM_setValue('robSuccessCountInt', GM_getValue('robSuccessCountInt', 0) + 1);
+  if(!success)
+    GM_setValue('robFailedCountInt', GM_getValue('robFailedCountInt', 0) + 1);
+
+  if (exp)
+    GM_setValue('totalRobExpInt', GM_getValue('totalRobExpInt', 0) + parseInt(exp) );
+
+  // TODO : add/show on log statistics
+  DEBUG("Rob total exp : " + GM_getValue('totalRobExpInt',0));
+  DEBUG("Rob success : " + GM_getValue('robSuccessCountInt',0));
+  DEBUG("Rob failed : " + GM_getValue('robFailedCountInt',0));
 }
 
 function autoHitman() {
