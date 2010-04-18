@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.30
-// @build       381
+// @version     1.1.31
+// @build       382
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.30',
-  build: '381',
+  version: '1.1.31',
+  build: '382',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3808,6 +3808,14 @@ function handleVersionChange() {
 
   // Check for invalid settings and upgrade them.
 
+  if (GM_getValue('buildCarId') >= cityCars.length) {
+    GM_setValue('buildCarId', cityCars.length - 1)
+  }
+
+  if (GM_getValue('buildWeaponId') >= cityWeapons.length) {
+    GM_setValue('buildWeaponId', cityWeapons.length - 1)
+  }
+
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 335) {
     GM_setValue('missions', JSON.stringify('[]'));
   }
@@ -4041,9 +4049,7 @@ function saveSettings() {
   GM_setValue('healLocation', document.getElementById('healLocation').value);
   GM_setValue('burnOption', document.getElementById('burnOption').value);
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
-  setGMTime('buildCarTimer', '00:00');
   GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
-  setGMTime('buildWeaponTimer', '00:00');
 
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks','attackCritical',
@@ -6227,7 +6233,6 @@ function createStaminaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'bgAutoHitCheck');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Enable Background mode'));
-
 
   // Bounty amount
   item = makeElement('div', list);
