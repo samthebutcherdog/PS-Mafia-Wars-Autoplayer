@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.31
-// @build       383
+// @build       384
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.31',
-  build: '383',
+  build: '384',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6375,7 +6375,7 @@ function createCashTab () {
   autoSellCratesBangkok.appendChild(document.createTextNode('Sell Bangkok business output'));
   makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
-//*  var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
+/*  var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
   collectNYTake.appendChild(document.createTextNode('Automatically collect NY take'));
   elt = makeElement('input', collectNYTake, {'type':'checkbox', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
 */
