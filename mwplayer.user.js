@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.32
-// @build       387
+// @version     1.1.33
+// @build       389
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.32',
-  build: '387',
+  version: '1.1.33',
+  build: '389',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -956,21 +956,18 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_CASH_CSS    = 7;
   const CITY_AUTOBANK    = 8;
   const CITY_BANKCONFG   = 9;
-  const CITY_TAKE        = 10;
-  const CITY_BUYCRATES   = 11;
-  const CITY_CASH_SYMBOL = 12;
-  const CITY_ALLIANCE    = 13;
+  const CITY_CASH_SYMBOL = 10;
+  const CITY_ALLIANCE    = 11;
 
   // Add city variables in this format
   // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'collectNYTake', 'autoBuyCratesNY', '$', 0],
-    ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
-    // Add support for choosing sides in Moscow later on
-    ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
-    ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'autoSellCratesBangkok', 'autoBuyCratesBangkok', 'B$', 50]
+    ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', '$', 0],
+    ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'C$', 0],
+    ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'R$', 0],
+    ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50]
   );
 
   var locations = ['New York','Cuba','Moscow','Bangkok','Active City'];
@@ -1779,7 +1776,7 @@ function doAutoPlay () {
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
-          isGMChecked(cities[i][CITY_TAKE]) &&
+          isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
           !timeLeftGM('takeHour' + cities[i][CITY_NAME])) {
 
         // Collect take
@@ -1798,19 +1795,6 @@ function doAutoPlay () {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
   }
 
-  // Auto-buy business (limit to level 4 and above)
-  if (running && !maxed && hasProps) {
-    for (var i = 0, iLength = cities.length; i < iLength; ++i) {
-      if (level >= cities[i][CITY_LEVEL] &&
-          isGMChecked(cities[i][CITY_BUYCRATES]) &&
-          !timeLeftGM('buyHour' + cities[i][CITY_NAME])) {
-
-        // Buy crates
-        if (autoBuyCrates(i)) return;
-      }
-    }
-  }
-
   // Auto-bank
   var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
@@ -1821,11 +1805,6 @@ function doAutoPlay () {
   // Auto-stat
   if (running && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
-  }
-
-  // Auto-buy properties (limit to level 4 and above)
-  if (running && !maxed && isGMChecked('autoBuy') && hasProps) {
-    if (buyProperties()) return;
   }
 
   // Auto-lotto (limit to level 7 and above)
@@ -1904,6 +1883,22 @@ function doAutoPlay () {
   if (autoMissionif) {
     autoMission();
     return;
+  }
+
+  // Auto-upgrade properties (limit to level 4 and above)
+  if (running && isGMChecked('autoBuy') && hasProps) {
+    for (var i = 0, iLength = cities.length; i < iLength; ++i) {
+      if (level >= cities[i][CITY_LEVEL]) {
+
+        // Upgrade properties
+        if (upgradeProps(i)) return;
+      }
+    }
+  }
+
+  // Auto-upgrade properties (limit to level 4 and above)
+  if (running && isGMChecked('autoBuy') && hasProps) {
+
   }
 
   // If we reach this point, the script is considered to be idle. Anything the
@@ -2062,105 +2057,6 @@ function buildItem(itemArray, itemIndex, buildType){
     return true;
   }
   return false;
-}
-
-function autoBuyCrates(buyCity) {
-  // Go to the correct city.
-  if (city != buyCity) {
-    Autoplay.fx = function(){goLocation(buyCity)};
-    Autoplay.start();
-    return true;
-  }
-
-  // Go to the businesses.
-  if (!onPropertyNav()) {
-    Autoplay.fx = goPropertyNav;
-    Autoplay.start();
-    return true;
-  }
-
-  // Buy anything we can.
-  eltTakeOver = xpathFirst('.//a[contains(.,"Take over for")]', innerPageElt);
-  eltUpgradeProduces = xpathFirst('.//a[contains(.,"Upgrade to")]', innerPageElt);
-  eltUpgradeOutput = xpathFirst('.//a[contains(.,"Upgrade Output to")]', innerPageElt);
-
-  var cashTakeOver       = eltTakeOver ? parseCash(eltTakeOver.innerHTML.split('$')[1].split('</span>')[0]) : cities[city][CITY_CASH] + 1;
-  var cashUpgradeProduce = eltUpgradeProduces ? parseCash (eltUpgradeProduces.innerHTML.split('$')[1].split('</span>')[0]) : cities[city][CITY_CASH] + 1;
-  var cashUpgradeOutput  = eltUpgradeOutput ? parseCash (eltUpgradeOutput.innerHTML.split('$')[1].split('</span>')[0]) : cities[city][CITY_CASH] + 1;
-
-  // FIXME: Following code needs some refactoring
-
-  if(isGMChecked('autoBuyCratesOutput')){
-    if (eltUpgradeOutput && cashUpgradeOutput <= cities[city][CITY_CASH]) {
-      Autoplay.fx = function() {
-        clickAction = 'upgrade output';
-        clickElement(eltUpgradeOutput);
-        DEBUG('Clicked to upgrade output.');
-      };
-      Autoplay.start();
-      return true;
-    }
-    else
-    if (eltUpgradeProduces && cashUpgradeProduce <= cities[city][CITY_CASH]) {
-      Autoplay.fx = function() {
-        clickAction = 'upgrade produce';
-        clickElement(eltUpgradeProduces);
-        DEBUG('Clicked to upgrade produce.');
-      };
-      Autoplay.start();
-      return true;
-    }
-    else
-    if (eltTakeOver && cashTakeOver <= cities[city][CITY_CASH]) {
-      Autoplay.fx = function() {
-        clickAction = 'buy business';
-        clickElement(eltTakeOver);
-        DEBUG('Clicked to take over business.');
-      };
-      Autoplay.start();
-      return true;
-    }
-    }
-  else{
-    if (eltUpgradeProduces && cashUpgradeOutput <= cities[city][CITY_CASH]) {
-      Autoplay.fx = function() {
-        clickAction = 'upgrade produce';
-        clickElement(eltUpgradeProduces);
-        DEBUG('Clicked to upgrade produce.');
-      };
-      Autoplay.start();
-      return true;
-    }
-    else
-    if (eltUpgradeOutput && cashUpgradeProduce <= cities[city][CITY_CASH]) {
-      Autoplay.fx = function() {
-        clickAction = 'upgrade output';
-        clickElement(eltUpgradeOutput);
-        DEBUG('Clicked to upgrade output.');
-      };
-      Autoplay.start();
-      return true;
-    }
-    else
-    if (eltTakeOver && cashTakeOver <= cities[city][CITY_CASH]) {
-      Autoplay.fx = function() {
-        clickAction = 'buy business';
-        clickElement(eltTakeOver);
-        DEBUG('Clicked to take over business.');
-      };
-      Autoplay.start();
-      return true;
-    }
-  }
-
-  // Nothing to buy.
-  setGMTime('buyHour' + cities[buyCity][CITY_NAME], '3 hours');
-  DEBUG('Cannot buy any business or upgrade in ' + cities[buyCity][CITY_NAME] + '. Checking again in 3 hours.');
-
-  // Visit home after selling all output
-  Autoplay.fx = goHome;
-  Autoplay.start();
-  return true;
 }
 
 function autoCollectTake(takeCity) {
@@ -3752,6 +3648,10 @@ function handleVersionChange() {
 
   // Check for invalid settings and upgrade them.
 
+  if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 388) {
+    GM_setValue('minCashNew York', GM_getValue('buyMinAmount'));
+  }
+
   if (GM_getValue('buildCarId') >= cityCars.length) {
     GM_setValue('buildCarId', cityCars.length - 1)
   }
@@ -3868,12 +3768,13 @@ function saveDefaultSettings() {
   GM_setValue('selectEnergyUseMode', 0);
 
   // Property tab.
-  GM_setValue('buyMinAmount', '0');
+  GM_setValue('minCashNew York', '0');
+  GM_setValue('minCashCuba', '0');
+  GM_setValue('minCashMoscow', '0');
+  GM_setValue('minCashBangkok', '0');
 
   // Other settings.
   GM_setValue('logOpen', 'open');
-  GM_setValue('autoBuyCratesUpgrade', 'checked');
-  GM_setValue('autoBuyCratesOutput', 0);
 
   addToLog('process Icon', 'Options reset to defaults.');
 }
@@ -4001,20 +3902,19 @@ function saveSettings() {
                             'autoBankCuba','autoHeal','forceHealOpt3','forceHealOpt4','forceHealOpt5',
                             'hideInHospital','autoStat','autoStatDisable','autoStatAttackFallback',
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
-                            'autoStatStaminaFallback','hourlyStatsOpt',
-                            'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
+                            'autoStatStaminaFallback','hourlyStatsOpt','buildCar','featJob','buildWeapon',
+                            'autoGiftSkipOpt','autoBuy','autoEnergyPack','filterLog','autoHelp',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
-                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','collectNYTake',
+                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
-                            'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
-                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist','autoShareWishlistTime',
-                            'autoBankBangkok','hideActionBox','autoBuyCratesCuba','autoBuyCratesMoscow',
-                            'autoBuyCratesBangkok','autoBuyCratesOutput','autoBuyCratesUpgrade','showPulse',
-                            'buildCar','featJob','buildWeapon']);
+                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist',
+                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
+                            'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow',
+                            'collectTakeBangkok']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4068,7 +3968,10 @@ function saveSettings() {
   GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
   GM_setValue('autoLogLength', document.getElementById('autoLogLength').value);
   GM_setValue('logPlayerUpdatesMax', logPlayerUpdatesMax);
-  GM_setValue('buyMinAmount', document.getElementById('buyMinAmount').value);
+  GM_setValue('minCashNew York', document.getElementById('minCashNew York').value);
+  GM_setValue('minCashCuba', document.getElementById('minCashCuba').value);
+  GM_setValue('minCashMoscow', document.getElementById('minCashMoscow').value);
+  GM_setValue('minCashBangkok', document.getElementById('minCashBangkok').value);
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
   GM_setValue('autoShareWishlistTime', document.getElementById('autoShareWishlistTime').value);
   GM_setValue('autoLottoBonusItem', document.getElementById('autoLottoList').selectedIndex);
@@ -5101,9 +5004,9 @@ function createDisplayTab() {
 
   // Hide Action Box
   id = 'hideActionBox';
-  title = 'Hide action boxes on homepage';
+  title = 'Hide daily list on homepage';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Action Boxes '));
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Daily List '));
 
   // Hide Limited Time Offers
   id = 'hideOffer';
@@ -6235,17 +6138,28 @@ function createCashTab () {
   var elt, title, id, label;
   var cashTab = makeElement('div', null, {'id':'cashTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  title = 'Check this auto-buy properties in New York';
+  title = 'Check this to auto-upgrade properties';
   id = 'autoBuy';
   var autoBuy = makeElement('div', cashTab, {'style':'top: 10px;'});
-  makeElement('input', autoBuy, {'type':'checkbox', 'id':'autoBuy', 'value':'checked'}, id);
+  makeElement('input', autoBuy, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', autoBuy, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Auto-buy NY properties '));
+  label.appendChild(document.createTextNode(' Auto-upgrade properties '));
+
+  var xTop = 35;
+  for (var i = 0, iLength = cities.length; i < iLength; ++i) {
+    title = 'Never spend below this amount of cash ('+cities[i][CITY_NAME]+')';
+    id = 'minCash' + cities[i][CITY_NAME];
+    var minCash = makeElement('div', cashTab, {'style':'top: '+xTop+'px; left: 10px;'});
+    minCash.appendChild(document.createTextNode('Minimum cash ('+cities[i][CITY_NAME]+'): '));
+    makeElement('input', minCash, {'type':'text', 'style':'width: 80px;', 'title':title, 'value':GM_getValue(id, '0'), 'id':id, 'size':'5'});
+    xTop += 25;
+  }
 
   // Option to build a car
+  xTop += 25;
   title = 'Check this to build a car every 24 hours';
   id = 'buildCar';
-  var buildCar = makeElement('div', cashTab, {'style':'top: 40px; width: 100%;'});
+  var buildCar = makeElement('div', cashTab, {'style':'top: '+xTop+'px; width: 100%;'});
   makeElement('input', buildCar, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', buildCar, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Build Car '));
@@ -6261,9 +6175,10 @@ function createCashTab () {
   carType.selectedIndex = GM_getValue(id, 9);
 
   // Option to build a weapon
+  xTop += 25;
   title = 'Check this to build a weapon every 24 hours';
   id = 'buildWeapon';
-  var buildWeapon = makeElement('div', cashTab, {'style':'top: 70px; width: 100%;'});
+  var buildWeapon = makeElement('div', cashTab, {'style':'top: '+xTop+'px; width: 100%;'});
   makeElement('input', buildWeapon, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', buildWeapon, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Build Weapon '));
@@ -6278,24 +6193,22 @@ function createCashTab () {
   }
   weaponType.selectedIndex = GM_getValue(id, 9);
 
-  title = 'Never spend below this amount of cash';
-  var buyMinAmount = makeElement('div', cashTab, {'style':'top: 10px; right: 10px;'});
-  buyMinAmount.appendChild(document.createTextNode('Minimum cash: '));
-  makeElement('input', buyMinAmount, {'type':'text', 'style':'width: 80px;', 'title':title, 'value':GM_getValue('buyMinAmount', '0'), 'id':'buyMinAmount', 'size':'5'});
-
   var xTop = 50;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
-  	id = cities[i][CITY_TAKE];
-	  var autoTake = makeElement('div', cashTab, {'style':'top: '+(i*25 + xTop)+'px; right: 10px;'});
-	  autoTake.appendChild(document.createTextNode('Collect ' + cities[i][CITY_NAME] + ' take'));
-	  makeElement('input', autoTake, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+    title = 'Automatically collect ' + cities[i][CITY_NAME] + ' take';
+    id = 'collectTake' + cities[i][CITY_NAME];
+    var autoTake = makeElement('div', cashTab, {'style':'top: '+xTop+'px; right: 10px;'});
+    label = makeElement('label', autoTake, {'for':id, 'title':title});
+    label.appendChild(document.createTextNode('Collect ' + cities[i][CITY_NAME] + ' take'));
+    makeElement('input', autoTake, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+    xTop += 25;
   }
 
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
     id = cities[i][CITY_AUTOBANK];
     title = 'Enable ' + cities[i][CITY_NAME] + ' banking ';
-    var curBank = makeElement('div', cashTab, {'style':'top: '+(i*25 + xTop)+'px; right: 10px;'});
+    var curBank = makeElement('div', cashTab, {'style':'top: '+xTop+'px; right: 10px;'});
     makeElement('input', curBank, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
     makeElement('label', curBank, {'for':id}).appendChild(document.createTextNode(title));
     makeElement('img', curBank, {'src':stripURI(cities[i][CITY_CASH_ICON])});
@@ -6303,45 +6216,8 @@ function createCashTab () {
     title = 'Minimum deposit amount in ' + cities[i][CITY_NAME];
     makeElement('input', curBank, {'type':'text', 'style':'width: 80px;margin-left:5px; text-align: right', 'title':title, 'value':GM_getValue(id, '50000'), 'id':id, 'size':'5'});
     curBank.addEventListener('change', minBankCheck, false);
+    xTop += 25;
   }
-
-  // auto buy crates
-  title = 'Check this to auto-buy/upgrade businesses in Cuba';
-  id = 'autoBuyCratesCuba';
-  var autoBuyCratesCuba = makeElement('div', cashTab, {'style':'top: 330px; right: 10px;'});
-  label = makeElement('label', autoBuyCratesCuba, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Buy Cuban Business:'));
-  makeElement('input', autoBuyCratesCuba, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-
-  title = 'Check this to auto-buy/upgrade businesses in Moscow';
-  id = 'autoBuyCratesMoscow';
-  var autoBuyCratesMoscow = makeElement('div', cashTab, {'style':'top: 350px; right: 10px;'});
-  label = makeElement('label', autoBuyCratesMoscow, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Buy Moscow Business:'));
-  makeElement('input', autoBuyCratesMoscow, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-
-  title = 'Check this to auto-buy/upgrade businesses in Bangkok';
-  id = 'autoBuyCratesBangkok';
-  var autoBuyCratesBangkok = makeElement('div', cashTab, {'style':'top: 370px; right: 10px;'});
-  label = makeElement('label', autoBuyCratesBangkok, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Buy Bangkok Business:'));
-  makeElement('input', autoBuyCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-
-  title = 'Select this to Upgrade the Produce First';
-  id = 'autoBuyCratesUpgrade';
-  var autoBuyCratesUpgrade = makeElement('div', cashTab, {'style':'top: 390px; right: 100px;'});
-  label = makeElement('label', autoBuyCratesUpgrade, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Upgrade'));
-  makeElement('input', autoBuyCratesUpgrade, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
-
-  title = 'Select this to Upgrade the Output First';
-  id = 'autoBuyCratesOutput';
-  var autoBuyCratesOutput = makeElement('div', cashTab, {'style':'top: 390px; right: 10px;'});
-  label = makeElement('label', autoBuyCratesOutput, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Output'));
-  makeElement('input', autoBuyCratesOutput, {'type':'radio', 'name':'r10', 'id':id, 'value':'checked'}, id);
-
-  // end auto buy crates
 
   return cashTab;
 }
@@ -7398,12 +7274,23 @@ function doQuickClicks() {
 
     // Auto-send energy pack
     var actionElt = getActionBox('Send an energy pack to your mafia');
-    if (actionElt && isGMChecked('sendEnergyPack')) {
+    if (false && actionElt && isGMChecked('sendEnergyPack')) {
       var actionLink = getActionLink (actionElt, 'Send Energy Pack');
       DEBUG(actionLink.innerHTML);
       if (actionLink) {
         clickElement(actionLink);
         DEBUG('Clicked to send energy pack to my mafia.');
+      }
+    }
+
+    // Get daily checklist bonus
+    var actionElt = getActionBox('Daily Checklist Complete');
+    if (false && actionElt) {
+      var actionLink = getActionLink (actionElt, 'Collect Skill Point');
+      DEBUG(actionLink.innerHTML);
+      if (actionLink) {
+        clickElement(actionLink);
+        DEBUG('Clicked to collect checklist bonus.');
       }
     }
 
@@ -8541,15 +8428,15 @@ function customizeProps() {
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
     if (isGMChecked('autoBuy') ||
-        isGMChecked('collectNYTake') ||
-        isGMChecked('autoSellCrates') ||
-        isGMChecked('autoSellCratesBangkok') ||
-        isGMChecked('autoSellCratesMoscow')) {
+        isGMChecked('collectTakeNew York') ||
+        isGMChecked('collectTakeCuba') ||
+        isGMChecked('collectTakeMoscow') ||
+        isGMChecked('collectTakeBangkok')) {
       GM_setValue('autoBuy', 0);
-      GM_setValue('collectNYTake', 0);
-      GM_setValue('autoSellCrates', 0);
-      GM_setValue('autoSellCratesBangkok', 0);
-      GM_setValue('autoSellCratesMoscow', 0);
+      GM_setValue('collectTakeNew York', 0);
+      GM_setValue('collectTakeCuba', 0);
+      GM_setValue('collectTakeMoscow', 0);
+      GM_setValue('collectTakeBangkok', 0);
       addToLog('warning Icon', 'Property functions disabled.');
       addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to work on properties. <br>' +
                'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
@@ -8557,6 +8444,8 @@ function customizeProps() {
     }
     return true;
   }
+
+  GM_setValue('bestProp' + cities[city][CITY_NAME], 'skip');
 
   // Calculate ROIs and best buy
   var propRows = $x('.//tr[contains(@style,"margin-bottom")]', propsDiv);
@@ -8581,14 +8470,14 @@ function customizeProps() {
       nextTake = props[4].innerHTML;
 
     // Show ROI
-    if (city == NY && i > 0 && !isNaN(prop['roi'])) {
+    if (i > 0 && !isNaN(prop['roi'])) {
       props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">ROI: '+prop['roi'].toExponential(4)+'</span>'
 
       // Best ROI
       if (prop['roi'] > bestROI) {
         bestElt = props[3];
         bestROI = prop['roi'];
-        GM_setValue('bestProp', JSON.stringify(prop));
+        GM_setValue('bestProp' + cities[city][CITY_NAME], JSON.stringify(prop));
       }
 
       // Worst ROI
@@ -8607,8 +8496,6 @@ function customizeProps() {
   DEBUG('Next '+cities[city][CITY_NAME]+' take: ' + nextTake);
   setGMTime('takeHour' + cities[city][CITY_NAME], nextTake);
 
-  if (city != NY) return true;
-
   // Label best roi
   var elt = makeElement('span', bestElt, {'style':'color:#52E259; font-size: 10px'});
   makeElement('img', bestElt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
@@ -8618,6 +8505,8 @@ function customizeProps() {
   elt = makeElement('span', worstElt, {'style':'color:#EC2D2D; font-size: 10px'});
   makeElement('img', worstElt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
   elt.appendChild(document.createTextNode(' WORST'));
+
+  DEBUG('Best ' + cities[city][CITY_NAME] + ' property: ' + JSON.stringify(GM_getValue('bestProp' + cities[city][CITY_NAME])));
 
   return true;
 }
@@ -9086,7 +8975,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
         '&nbsp;&nbsp;Filter fail: <strong>' + GM_getValue('filterFail') + '</strong><br>' +
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
-        'Hide Action Boxes: <strong>'+ showIfUnchecked(GM_getValue('hideActionBox')) + '</strong><br>' +
+        'Hide Daily List: <strong>'+ showIfUnchecked(GM_getValue('hideActionBox')) + '</strong><br>' +
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Hide Friend Ladder: <strong>'+ showIfUnchecked(GM_getValue('hideFriendLadder')) + '</strong><br>' +
@@ -9196,22 +9085,23 @@ function debugDumpSettings() {
         'Stamina reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
         'Ignore reserve to level-up: <strong>' + showIfUnchecked(GM_getValue('allowStaminaToLevelUp')) + '</strong><br>' +
         '------------------Cash Tab-------------------<br>' +
-        'Enable auto-buy <strong>' + showIfUnchecked(GM_getValue('autoBuy')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Min cash: <strong>' + GM_getValue('buyMinAmount') + '</strong><br>' +
-        'Sell Cuban business output: <strong>' + showIfUnchecked(GM_getValue('autoSellCrates')) + '</strong><br>' +
-        'Sell Moscow business output <strong>' + showIfUnchecked(GM_getValue('autoSellCratesMoscow')) + '</strong><br>' +
-        'Sell Bangkok business output <strong>' + showIfUnchecked(GM_getValue('autoSellCratesBangkok')) + '</strong><br>' +
-        'Buy Cuban business: <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesCuba')) + '</strong><br>' +
-        'Buy Moscow business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesMoscow')) + '</strong><br>' +
-        'Buy Bangkok business <strong>' + showIfUnchecked(GM_getValue('autoBuyCratesBangkok')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Upgrade First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesUpgrade')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Output First: <strong>' + showIfSelected(GM_getValue('autoBuyCratesOutput')) + '</strong><br>' +
+        'Enable auto-upgrade <strong>' + showIfUnchecked(GM_getValue('autoBuy')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Min cash (NY): <strong>' + GM_getValue('minCashNew York') + '</strong><br>' +
+        '&nbsp;&nbsp;-Min cash (Cuba): <strong>' + GM_getValue('minCashCuba') + '</strong><br>' +
+        '&nbsp;&nbsp;-Min cash (Moscow): <strong>' + GM_getValue('minCashMoscow') + '</strong><br>' +
+        '&nbsp;&nbsp;-Min cash (Bangkok): <strong>' + GM_getValue('minCashBangkok') + '</strong><br>' +
+        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeNew York')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourNew York', 0) + '</strong><br>' +
+        'Collect Cuba Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeCuba')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourCuba', 0) + '</strong><br>' +
+        'Collect Moscow Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeMoscow')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourMoscow', 0) + '</strong><br>' +
+        'Collect Bangkok Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeBangkok')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourBangkok', 0) + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapongs: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
-        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -9888,14 +9778,15 @@ function autoGiftWaiting() {
   return false;
 }
 
-function goProperties() {
-  // Make sure we're in New York.
-  if (city != NY) {
-    Autoplay.fx = goNY;
+function goProperties(propCity) {
+  // Make sure we're in the correct city
+  if (city != propCity) {
+    Autoplay.fx = function () { goLocation(propCity); };
     Autoplay.start();
     return true;
   }
 
+  // Go to the city's property nav
   if (!onPropertyNav()) {
     Autoplay.fx = goPropertyNav;
     Autoplay.start();
@@ -9906,24 +9797,29 @@ function goProperties() {
 }
 
 // This function returns false if nothing was done, true otherwise.
-function buyProperties() {
-  if (isGMUndefined('bestProp') || isNaN(cities[NY][CITY_CASH])) {
-    if (goProperties()) return true;
+function upgradeProps(propCity) {
+  var bestPropName = 'bestProp' + cities[propCity][CITY_NAME];
+
+  // Skipping logic
+  if (GM_getValue(bestPropName) == 'skip') return false;
+
+  if (isGMUndefined(bestPropName) || isNaN(cities[propCity][CITY_CASH])) {
+    if (goProperties(propCity)) return true;
   }
 
-  var bestProp = eval('(' + GM_getValue('bestProp') + ')');
+  var bestProp = eval('(' + GM_getValue(bestPropName) + ')');
   var buyCost = parseFloat(bestProp['cost']);
-  var buyMinAmount = parseInt(GM_getValue('buyMinAmount', 0));
+  var minCash = parseInt(GM_getValue('minCash' + cities[propCity][CITY_NAME], 0));
 
   // Make sure there's something to buy and the amounts are valid.
-  if (isNaN(buyCost) || isNaN(buyMinAmount) || isNaN(cities[NY][CITY_CASH])) return false;
+  if (isNaN(buyCost) || isNaN(minCash) || isNaN(cities[propCity][CITY_CASH])) return false;
 
   // Make sure enough cash will be left over.
-  if (buyCost > cities[NY][CITY_CASH] - buyMinAmount) return false;
+  if (buyCost > cities[propCity][CITY_CASH] - minCash) return false;
 
-  if (goProperties()) return true;
+  if (goProperties(propCity)) return true;
 
-  DEBUG('Auto-buy: name=' + bestProp['name'] + ', id=' + bestProp['id'] + ', cost=' + bestProp['cost']);
+  DEBUG('Auto-upgrade: name=' + bestProp['name'] + ', id=' + bestProp['id'] + ', cost=' + bestProp['cost']);
 
   var buyElt = xpathFirst('.//a[contains(@onclick,"building_type=' + bestProp['id'] + '")]', innerPageElt);
   if (buyElt) {
@@ -11347,36 +11243,6 @@ function logResponse(rootElt, action, context) {
       }
       Autoplay.start();
       return true;
-      break;
-
-    case 'upgrade produce':
-      // Log any message from upgrading a business produce.
-      var buyUpgradeProduce = xpathFirst('.//td[contains(.,"Improvements in production efficiency") or contains(.,"You\'ve invested")]', innerPageElt);
-      if (buyUpgradeProduce) {
-        addToLog(cities[city][CITY_CASH_CSS], buyUpgradeProduce.innerHTML);
-      } else {
-         DEBUG(inner);
-      }
-      break;
-
-    case 'upgrade output':
-      // Log any message from a upgrading a business output.
-      var buyUpgradeOutput = xpathFirst('.//td[contains(.,"Improvements in production efficiency")]', innerPageElt);
-      if (buyUpgradeOutput) {
-        addToLog(cities[city][CITY_CASH_CSS], buyUpgradeOutput.innerHTML);
-      } else {
-         DEBUG(inner);
-      }
-      break;
-
-    case 'buy business':
-      // Log any message from a buying a business.
-      var buyBusiness = xpathFirst('.//td[contains(.,"Congratulations on your purchase")]', innerPageElt);
-      if (buyBusiness) {
-        addToLog(cities[city][CITY_CASH_CSS], buyBusiness.innerHTML);
-      } else {
-         DEBUG(inner);
-      }
       break;
 
     case 'deposit':
