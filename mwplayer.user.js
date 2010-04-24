@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.31
-// @build       384
+// @version     1.1.32
+// @build       385
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.31',
-  build: '384',
+  version: '1.1.32',
+  build: '385',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -967,7 +967,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_CASH_CSS    = 7;
   const CITY_AUTOBANK    = 8;
   const CITY_BANKCONFG   = 9;
-  const CITY_SELLCRATES  = 10;
+  const CITY_TAKE        = 10;
   const CITY_BUYCRATES   = 11;
   const CITY_CASH_SYMBOL = 12;
   const CITY_ALLIANCE    = 13;
@@ -977,7 +977,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Array container for city variables
   var cities = new Array(
-    ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'autoSellCratesNY', 'autoBuyCratesNY', '$', 0],
+    ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', 'collectNYTake', 'autoBuyCratesNY', '$', 0],
     ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'autoSellCrates', 'autoBuyCratesCuba', 'C$', 0],
     // Add support for choosing sides in Moscow later on
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'autoSellCratesMoscow', 'autoBuyCratesMoscow', 'R$', 0],
@@ -1786,20 +1786,15 @@ function doAutoPlay () {
     if(autoHitlist()) return;
   }
 
-  // Auto-take for properties (limit to level 4 and above)
-  /*if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
-      if (collectNYTake()) return;
-  }*/
-
-  // Auto-sell business output (limit to level 4 and above)
+  // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
-          isGMChecked(cities[i][CITY_SELLCRATES]) &&
-          !timeLeftGM('sellHour' + cities[i][CITY_NAME])) {
+          isGMChecked(cities[i][CITY_TAKE]) &&
+          !timeLeftGM('takeHour' + cities[i][CITY_NAME])) {
 
-        // Sell crates
-        if (autoSellCrates(i)) return;
+        // Collect take
+        if (autoCollectTake(i)) return;
       }
     }
   }
@@ -2079,51 +2074,7 @@ function buildItem(itemArray, itemIndex, buildType){
   }
   return false;
 }
-/*
-function autoSellCrates(sellCity) {
-  Autoplay.delay = 0;
-  // Go to the correct city.
-  if (city != sellCity) {
-    Autoplay.fx = function(){goLocation(sellCity)};
-    Autoplay.start();
-    return true;
-  }
 
-  // Go to the businesses.
-  if (!xpathFirst('.//div[@class="business_description"]', innerPageElt)) {
-    Autoplay.fx = goBusinessesNav;
-    Autoplay.start();
-    return true;
-  }
-
-  // Sell anything we can.
-  elt = xpathFirst('.//div[@class="business_sell_row"]/div[@class="business_sell_button"]//a', innerPageElt);
-  if (elt) {
-    Autoplay.fx = function() {
-      clickAction = 'sell output';
-      clickElement(elt);
-      DEBUG('Clicked to sell output.');
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  // Nothing to sell.
-  var nextTakeTime = '1 hour';
-  var nextTakeElt = document.getElementById('business_timer_span');
-  if (nextTakeElt) {
-    nextTakeTime = nextTakeElt.innerHTML;
-  }
-
-  setGMTime('sellHour' + cities[sellCity][CITY_NAME], nextTakeTime);
-  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in... ' + nextTakeTime + '. ');
-
-  // Visit home after selling all output
-  Autoplay.fx = goHome;
-  Autoplay.start();
-  return true;
-}
-*/
 function autoBuyCrates(buyCity) {
   // Go to the correct city.
   if (city != buyCity) {
@@ -2133,8 +2084,8 @@ function autoBuyCrates(buyCity) {
   }
 
   // Go to the businesses.
-  if (!xpathFirst('.//div[@class="business_description"]', innerPageElt)) {
-    Autoplay.fx = goBusinessesNav;
+  if (!onPropertyNav()) {
+    Autoplay.fx = goPropertyNav;
     Autoplay.start();
     return true;
   }
@@ -2222,12 +2173,18 @@ function autoBuyCrates(buyCity) {
   Autoplay.start();
   return true;
 }
-/*
-// Collect NY take
-function collectNYTake() {
+
+function autoCollectTake(takeCity) {
   // Go to the correct city.
-  if (city != NY) {
-    Autoplay.fx = goNY;
+  if (city != takeCity) {
+    Autoplay.fx = function(){goLocation(takeCity)};
+    Autoplay.start();
+    return true;
+  }
+
+  // Visit the property Nav
+  if (!onPropertyNav()) {
+    Autoplay.fx = goPropertyNav;
     Autoplay.start();
     return true;
   }
@@ -2235,35 +2192,12 @@ function collectNYTake() {
   // Handle JSON response
   var urlLoaded = function () {
     if (this.readyState == 4 && this.status == 200) {
-      logJSONResponse(this.responseText, 'collect ny take')
+      logJSONResponse(this.responseText, 'collect take')
     }
   }
 
-  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':'1', 'requesttype':'json'}), urlLoaded);
-  return false;
-}
-*/
-function autoSellCrates(sellCity) {
-  // Go to the correct city.
-  if (city != sellCity) {
-    Autoplay.fx = function(){goLocation(sellCity)};
-    Autoplay.start();
-    return true;
-  }
+  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':city+1, 'requesttype':'json'}), urlLoaded);
 
-  // Handle JSON response
-  var urlLoaded = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      logJSONResponse(this.responseText, 'collect ny take')
-    }
-  }
-  // Nothing to sell.
-  var nextTakeTime = '1 hour';
-  var jsonNumber = (sellCity + 1);
-  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':''+jsonNumber+'', 'requesttype':'json'}), urlLoaded);
-  setGMTime('sellHour' + cities[sellCity][CITY_NAME], nextTakeTime);
-  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in... ' + nextTakeTime + '. ');
-  
   return false;
 }
 
@@ -4084,7 +4018,7 @@ function saveSettings() {
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
-                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','autoSellCratesNY',
+                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','collectNYTake',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
                             'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
@@ -4512,6 +4446,9 @@ function refreshLog() {
 
 function clearLog() {
   GM_setValue('itemLog', '');
+
+  //for (var i = 0, iLength = cities.length; i < iLength; ++i)
+  //  setGMTime('takeHour' + cities[i][CITY_NAME], '00:00');
 
   //reset the log box
   var logBox = document.getElementById('logBox');
@@ -6360,29 +6297,13 @@ function createCashTab () {
   buyMinAmount.appendChild(document.createTextNode('Minimum cash: '));
   makeElement('input', buyMinAmount, {'type':'text', 'style':'width: 80px;', 'title':title, 'value':GM_getValue('buyMinAmount', '0'), 'id':'buyMinAmount', 'size':'5'});
 
-  id = 'autoSellCrates';
-  var autoSellCrates = makeElement('div', cashTab, {'style':'top: 50px; right: 10px;'});
-  autoSellCrates.appendChild(document.createTextNode('Sell Cuban business output'));
-  makeElement('input', autoSellCrates, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-
-  id = 'autoSellCratesMoscow';
-  var autoSellCratesMoscow = makeElement('div', cashTab, {'style':'top: 70px; right: 10px;'});
-  autoSellCratesMoscow.appendChild(document.createTextNode('Sell Moscow business output'));
-  makeElement('input', autoSellCratesMoscow, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-
-  id = 'autoSellCratesBangkok';
-  var autoSellCratesBangkok = makeElement('div', cashTab, {'style':'top: 90px; right: 10px;'});
-  autoSellCratesBangkok.appendChild(document.createTextNode('Sell Bangkok business output'));
-  makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-
-/*  var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
-  collectNYTake.appendChild(document.createTextNode('Automatically collect NY take'));
-  elt = makeElement('input', collectNYTake, {'type':'checkbox', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
-*/
-
-  var autoSellCratesNY = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
-  autoSellCratesNY.appendChild(document.createTextNode('Automatically collect NY take'));
-  elt = makeElement('input', autoSellCratesNY, {'type':'checkbox', 'name':'props', 'id':'autoSellCratesNY', 'value':'checked'}, 'autoSellCratesNY');
+  var xTop = 50;
+  for (var i = 0, iLength = cities.length; i < iLength; ++i) {
+  	id = cities[i][CITY_TAKE];
+	  var autoTake = makeElement('div', cashTab, {'style':'top: '+(i*25 + xTop)+'px; right: 10px;'});
+	  autoTake.appendChild(document.createTextNode('Collect ' + cities[i][CITY_NAME] + ' take'));
+	  makeElement('input', autoTake, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  }
 
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -7321,7 +7242,7 @@ function customizeLayout() {
   var unkError = xpathFirst('//div[@class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable ui-resizable"]');
   if (unkError) {
     DEBUG('Error encountered, reloading...');
-    window.location.reload();
+    window.location.reload(true);
   }
 }
 
@@ -8645,10 +8566,18 @@ function customizeProps() {
   // Check flash
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
-    if (isGMChecked('autoBuy')) {
+    if (isGMChecked('autoBuy') ||
+        isGMChecked('collectNYTake') ||
+        isGMChecked('autoSellCrates') ||
+        isGMChecked('autoSellCratesBangkok') ||
+        isGMChecked('autoSellCratesMoscow')) {
       GM_setValue('autoBuy', 0);
-      addToLog('warning Icon', 'Auto buying of properties disabled.');
-      addToLog('updateBad Icon', 'You must disable flash from your browser for autoBuy to work. <br>' +
+      GM_setValue('collectNYTake', 0);
+      GM_setValue('autoSellCrates', 0);
+      GM_setValue('autoSellCratesBangkok', 0);
+      GM_setValue('autoSellCratesMoscow', 0);
+      addToLog('warning Icon', 'Property functions disabled.');
+      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to work on properties. <br>' +
                'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
                '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
     }
@@ -8674,11 +8603,11 @@ function customizeProps() {
     // Set next take time
     if  (/href=/.test(props[4].innerHTML))
       nextTake = '00:00';
-    else if (timeLeft(props[4].innerHTML) < timeLeft(nextTake))
+    else if (!/N\/A/.test(props[4].innerHTML) && timeLeft(props[4].innerHTML) < timeLeft(nextTake))
       nextTake = props[4].innerHTML;
 
     // Show ROI
-    if (i > 0 && !isNaN(prop['roi'])) {
+    if (city == NY && i > 0 && !isNaN(prop['roi'])) {
       props[3].innerHTML += '<br><span style="color: green; font-weight: bold; font-size: 10px;">ROI: '+prop['roi'].toExponential(4)+'</span>'
 
       // Best ROI
@@ -8701,8 +8630,10 @@ function customizeProps() {
   }
 
   // Set next collection time
-  DEBUG('Next take: ' + nextTake);
-  setGMTime('nextNYTake', nextTake);
+  DEBUG('Next '+cities[city][CITY_NAME]+' take: ' + nextTake);
+  setGMTime('takeHour' + cities[city][CITY_NAME], nextTake);
+
+  if (city != NY) return true;
 
   // Label best roi
   var elt = makeElement('span', bestElt, {'style':'color:#52E259; font-size: 10px'});
@@ -9311,8 +9242,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapongs: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
-//        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
-        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('autoSellCratesNY')) + '</strong><br>' +
+        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
@@ -10066,7 +9996,7 @@ function onWarTab() {
 
 function onPropertyNav() {
   // Return true if we're on the property nav, false otherwise.
-  if (city == NY && xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2"]', innerPageElt)) {
+  if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2"]', innerPageElt)) {
     return true;
   }
 
@@ -10375,16 +10305,6 @@ function goPropertyNav() {
   }
   clickElement(elt);
   DEBUG('Clicked to go to properties.');
-}
-
-function goBusinessesNav() {
-  var elt = xpathFirst('//*[@id="nav_link_businesses"]//a');
-  if (!elt) {
-    addToLog('warning Icon', 'Can\'t find businesses nav link to click.');
-    return;
-  }
-  clickElement(elt);
-  DEBUG('Clicked to go to businesses.');
 }
 
 function goDeleteNews() {
@@ -11021,15 +10941,14 @@ function logJSONResponse(responseText, action, context) {
 
     // Log any message from collecting NY take.
     switch (action) {
-      case 'collect ny take':
-        var respData = respJSON['data'];
+      case 'collect take':
+        var respData = eval ('(' + respJSON['data'] + ')');
         for (var i in respData) {
           if (/collected/i.test(respData[i])) {
             addToLog(cities[city][CITY_CASH_CSS], respData[i]);
             break;
           }
         }
-        setGMTime ('nextNYTake', '1 hour');
         break;
 
       case 'deposit':
@@ -11463,17 +11382,6 @@ function logResponse(rootElt, action, context) {
       return true;
       break;
 
-    case 'sell output':
-      // Log any message from a sale of business output.
-      var sellElt = xpathFirst('.//div[contains(.,"sold") or contains(.,"collected")]', messagebox);
-      if (sellElt) {
-        hideElement(xpathFirst('.//img', sellElt));
-        addToLog(cities[city][CITY_CASH_CSS], sellElt.innerHTML);
-      } else {
-        DEBUG(inner);
-      }
-      break;
-
     case 'upgrade produce':
       // Log any message from upgrading a business produce.
       var buyUpgradeProduce = xpathFirst('.//td[contains(.,"Improvements in production efficiency") or contains(.,"You\'ve invested")]', innerPageElt);
@@ -11762,7 +11670,7 @@ function getMWUrl (server, params) {
 
   // Create or Replace params
   for (var i in params) {
-    if (new RegExp(i + '=\\w+').test(mwURL))
+    if (new RegExp(i + '=\\w*').test(mwURL))
       mwURL = mwURL.replace(new RegExp(i + '=\\w*'), i + '=' + params[i]);
     else
       mwURL += '&' + i + '=' + params[i];
