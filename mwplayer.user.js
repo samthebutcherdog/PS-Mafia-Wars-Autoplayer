@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.32
-// @build       386
+// @build       387
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.32',
-  build: '386',
+  build: '387',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2907,7 +2907,7 @@ function autoRob() {
     return true;
   } else {
     clickAction = 'autoRob';
-    clickContext = getCurRobSlotId();;
+    clickContext = getCurRobSlotId();
     DEBUG("context : " + clickContext);
     DEBUG("doing the robbing");
     Autoplay.fx = doRob;
@@ -2937,24 +2937,22 @@ function goRobbingTab() {
 
 function needToRefresh()
 {
-    var eltRefreshLink = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]/span/span[contains(.,"Get New Targets (0 stamina)")]');
-    if(eltRefreshLink)
-        return true;
+  var eltRefreshLink = xpathFirst('.//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]');
+  if(eltRefreshLink)
+    return true;
 
-    return false;
+  return false;
 }
 
-function refreshRobbingGrid(){
-  var elt = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]');
-  if(elt)
-    clickElement(elt);
+function refreshRobbingGrid() {
+  var elt = xpathFirst('.//a[@id="rob_refresh_cost"]');
+  clickElement(elt);
   DEBUG('Clicked to refresh robbing grid.');
 };
 
 function doRob(){
   var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
-  if(eltRob)
-    clickElement(eltRob);
+  clickElement(eltRob);
   DEBUG('Clicked to rob.');
 }
 
@@ -6759,7 +6757,7 @@ function handleModificationTimer() {
   }
 
   // Added handling for just rob page changes
-  var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]', innerPageElt);
+  var robResult = xpathFirst('.//a[@id="rob_refresh_cost"]', innerPageElt);
   //var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]/span/span', innerPageElt);
   if (robResult) {
     if (!xpathFirst('.//div[@id="rob_flag"]', robResult)) {
