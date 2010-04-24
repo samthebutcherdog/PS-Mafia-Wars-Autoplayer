@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.31
-// @build       382
+// @build       383
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.31',
-  build: '382',
+  build: '383',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1787,9 +1787,9 @@ function doAutoPlay () {
   }
 
   // Auto-take for properties (limit to level 4 and above)
-  if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
+  /*if (running && !maxed && isGMChecked('collectNYTake') && !timeLeftGM('nextNYTake') && hasProps) {
       if (collectNYTake()) return;
-  }
+  }*/
 
   // Auto-sell business output (limit to level 4 and above)
   if (running && !maxed && hasProps) {
@@ -2079,7 +2079,7 @@ function buildItem(itemArray, itemIndex, buildType){
   }
   return false;
 }
-
+/*
 function autoSellCrates(sellCity) {
   Autoplay.delay = 0;
   // Go to the correct city.
@@ -2123,7 +2123,7 @@ function autoSellCrates(sellCity) {
   Autoplay.start();
   return true;
 }
-
+*/
 function autoBuyCrates(buyCity) {
   // Go to the correct city.
   if (city != buyCity) {
@@ -2222,7 +2222,7 @@ function autoBuyCrates(buyCity) {
   Autoplay.start();
   return true;
 }
-
+/*
 // Collect NY take
 function collectNYTake() {
   // Go to the correct city.
@@ -2240,6 +2240,30 @@ function collectNYTake() {
   }
 
   loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':'1', 'requesttype':'json'}), urlLoaded);
+  return false;
+}
+*/
+function autoSellCrates(sellCity) {
+  // Go to the correct city.
+  if (city != sellCity) {
+    Autoplay.fx = function(){goLocation(sellCity)};
+    Autoplay.start();
+    return true;
+  }
+
+  // Handle JSON response
+  var urlLoaded = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      logJSONResponse(this.responseText, 'collect ny take')
+    }
+  }
+  // Nothing to sell.
+  var nextTakeTime = '1 hour';
+  var jsonNumber = (sellCity + 1);
+  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':''+jsonNumber+'', 'requesttype':'json'}), urlLoaded);
+  setGMTime('sellHour' + cities[sellCity][CITY_NAME], nextTakeTime);
+  DEBUG('All business output in ' + cities[sellCity][CITY_NAME] + ' sold. Checking again in... ' + nextTakeTime + '. ');
+  
   return false;
 }
 
@@ -4060,7 +4084,7 @@ function saveSettings() {
                             'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
-                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','collectNYTake',
+                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','autoSellCratesNY',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
                             'filterLog','autoHelp','autoSellCratesMoscow','autoSellCratesBangkok',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
@@ -6351,9 +6375,14 @@ function createCashTab () {
   autoSellCratesBangkok.appendChild(document.createTextNode('Sell Bangkok business output'));
   makeElement('input', autoSellCratesBangkok, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
 
-  var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
+//*  var collectNYTake = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
   collectNYTake.appendChild(document.createTextNode('Automatically collect NY take'));
   elt = makeElement('input', collectNYTake, {'type':'checkbox', 'name':'props', 'id':'collectNYTake', 'value':'checked'}, 'collectNYTake');
+*/
+
+  var autoSellCratesNY = makeElement('div', cashTab, {'style':'top: 115px; right: 10px;'});
+  autoSellCratesNY.appendChild(document.createTextNode('Automatically collect NY take'));
+  elt = makeElement('input', autoSellCratesNY, {'type':'checkbox', 'name':'props', 'id':'autoSellCratesNY', 'value':'checked'}, 'autoSellCratesNY');
 
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -7449,7 +7478,7 @@ function doQuickClicks() {
     }
 
     // Click the level up bonus
-    if (doClick('.//a[contains(@onclick,"postLevelUpFeedAndSend")]', 'autoLevelPublish')) return;
+    if (doClick('.//a[contains(@onclick,"postLevelUpFeedAndSend(); levelUpBoost();")]', 'autoLevelPublish')) return;
 
     // Click the achievement bonus
     if (doClick('.//a[contains(.,"Share the wealth!")]', 'autoAchievementPublish')) return;
@@ -9282,7 +9311,8 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapongs: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
-        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
+//        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectNYTake')) + '</strong><br>' +
+        'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('autoSellCratesNY')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take availble at:' + GM_getValue('nextNYTake', 0) + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
