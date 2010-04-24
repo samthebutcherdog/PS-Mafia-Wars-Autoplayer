@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.32
-// @build       385
+// @build       386
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.32',
-  build: '385',
+  build: '386',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -407,14 +407,6 @@ var attackIcon = '<img src="' +
                     'EAOwo=' +
                     '" />';
 
-var influenceIcon = '<img src="' +
-                    'data:image/gif;base64,R0lGODlhEAAQAOZiAOPt8dDg5sLU2gwODlhbXCstLbTJ0VhcXa66vtLg5ePu80dLTNXj6cra3svZ38DT2snX28vW2ubv8sfX3ePt8LHEzNbk8SMnKFRdYLnIztPh6A8PENvj5rTGzX' +
-                    'J7ftnn7ODs9rvP1tzp797q7+rx9MbV2dLd5JqrsdTh5xkcHNLh5+Tx9Nbh5s3b3t3q7qe5wWxydIaPk5KYmdvl6NTj6cXX3XuGiu709svc4+Pv82BqbcLV3CgrLMHT2d3q9NDc4NHh7d7r8Mzb4Ts9PuXs78LQ0z' +
-                    'g/Qu33+cfP0uDr7rnK0N3o6q25vtbk6NHh5/D3+tPg5d3o7dfl7eTs79Tj5dbl6g0ODg8PDwsMDeTv89fm61FXWOHt7tfj59He43uFicfY3bjM1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAGIALAAAAAAQABAAAAd9gGKCg4SFhoeIiYqLRkVgEw1hVAJSAUoLglZfNUsUFgYCXCsgJEktHlg6TT8RHE' +
-                    'APKCMvJllHUzMYAzE9XV4+OwBOGVFBTwAygzYaATQqCh8SDgk3MIVbVSFCIi4sJ0QEhwcQUAxaFUhDiTwlOTgdBYsXCEwpi4IbV/b6+4EAOw==' +
-                    '" />';
-
 var closeButtonIcon = '<img src="' +
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0JbBiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FFpSVENDe3OxDZu8apO5rROJDLo30+Nlvj5RnTlVNAKs1aCVFr7b4BPn6Cls21AWgEQlz2+Dl1h7IdA+i97A/geP65WhbmrnZZ0GIJpr6OqZqYAd5/gJpKox4Mg7pD2YoC2b0/54rJQuJZdm6Izcgma4TW1WZ0h+y8BfbyJMwBmSxkjw+VObNanp5h/adwGhaTXF4NWbLj9gEONyCmUZmd10pGgf1/vwcgOT3tUQE0DdicwIod2EmSbwsKE1P8QoDkcHPJ5YESjgBJkYQpIEZ2KEB51Y6y3ojvY+P8XEDN7uKS0w0ltA7QGCWHCxSWWpwyaCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGtQd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==" />';
 
@@ -648,8 +640,6 @@ var energyElt, energy;          // Energy DOM element and value
 var maxEnergyElt, maxEnergy;    // Maximum energy DOM element and value
 var staminaElt, stamina;        // Stamina DOM element and value
 var maxStaminaElt, maxStamina;  // Maximum stamina DOM element and value
-var influenceElt, influence;    // influence DOM element and value
-var maxInfluenceElt, maxInfluence;  // Maximum influence DOM element and value
 var levelElt, level;            // Level DOM element and value
 var curAttack;                  // Current Attack stat value
 var curDefense;                 // Current Defense stat value
@@ -896,17 +886,17 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const AUTOSTAT_RATIO_STAMINA = 6;
 
   // Auto Stat mode arrays
-  var autoStatDescrips  = ['Level', 'Attack', 'Defense', 'Health', 'Energy', 'Stamina', 'Influence'];
+  var autoStatDescrips  = ['Level', 'Attack', 'Defense', 'Health', 'Energy', 'Stamina'];
   var autoStatModes     = ['autoStatAttackMode', 'autoStatDefenseMode', 'autoStatHealthMode',
-                           'autoStatEnergyMode', 'autoStatStaminaMode', 'autoStatInfluenceMode'];
+                           'autoStatEnergyMode', 'autoStatStaminaMode'];
   var autoStatPrios     = ['autoStatAttackPrio', 'autoStatDefensePrio', 'autoStatHealthPrio',
-                           'autoStatEnergyPrio', 'autoStatStaminaPrio', 'autoStatInfluencePrio'];
+                           'autoStatEnergyPrio', 'autoStatStaminaPrio'];
   var autoStatFallbacks = ['autoStatAttackFallback', 'autoStatDefenseFallback', 'autoStatHealthFallback',
-                           'autoStatEnergyFallback', 'autoStatStaminaFallback', 'autoStatInfluenceFallback'];
+                           'autoStatEnergyFallback', 'autoStatStaminaFallback'];
   var autoStatBases     = ['autoStatAttackBase', 'autoStatDefenseBase', 'autoStatHealthBase',
-                           'autoStatEnergyBase', 'autoStatStaminaBase', 'autoStatInfluenceBase'];
+                           'autoStatEnergyBase', 'autoStatStaminaBase'];
   var autoStatRatios    = ['autoStatAttackRatio', 'autoStatDefenseRatio', 'autoStatHealthRatio',
-                           'autoStatEnergyRatio', 'autoStatStaminaRatio', 'autoStatInfluenceRatio'];
+                           'autoStatEnergyRatio', 'autoStatStaminaRatio'];
 
   // Number Scheme
   const SCHEME_PERCENT = 0;
@@ -948,7 +938,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const HEALTH_STAT  = 2;
   const ENERGY_STAT  = 3;
   const STAMINA_STAT = 4;
-  const INFLUENCE_STAT = 5;
 
   // Define city variables.
   const NY      = 0;
@@ -2256,8 +2245,8 @@ function autoStat() {
 
   if (onProfileNav()) {
     // Array containers for status settings
-    var curStats = [curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
-    var modeStats = [level,curAttack,curDefense,maxHealth,maxEnergy,maxStamina,maxInfluence];
+    var curStats = [curAttack,curDefense,maxHealth,maxEnergy,maxStamina];
+    var modeStats = [level,curAttack,curDefense,maxHealth,maxEnergy,maxStamina];
     var statFallbacks = new Array(curStats.length);
 
     var maxPtDiff = 0;
@@ -2319,7 +2308,6 @@ function autoStat() {
       case DEFENSE_STAT   : upgradeKey = 'defense';       break;
       case HEALTH_STAT    : upgradeKey = 'max_health';    break;
       case ENERGY_STAT    : upgradeKey = 'max_energy';    break;
-      case INFLUENCE_STAT : upgradeKey = 'max_influence'; break;
       case STAMINA_STAT   : upgradeKey = 'max_stamina';   break;
 
       default             :
@@ -4015,7 +4003,7 @@ function saveSettings() {
                             'autoBankCuba','autoHeal','forceHealOpt3','forceHealOpt4','forceHealOpt5',
                             'hideInHospital','autoStat','autoStatDisable','autoStatAttackFallback',
                             'autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback',
-                            'autoStatStaminaFallback','autoStatInfluenceFallback', 'hourlyStatsOpt',
+                            'autoStatStaminaFallback','hourlyStatsOpt',
                             'autoGiftSkipOpt','autoBuy','autoSellCrates','autoEnergyPack',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause','collectNYTake',
@@ -7057,8 +7045,6 @@ function refreshGlobalStats() {
   maxEnergyElt = document.getElementById('user_max_energy');
   staminaElt = document.getElementById('user_stamina');
   maxStaminaElt = document.getElementById('user_max_stamina');
-  influenceElt = document.getElementById('user_influence');
-  maxInfluenceElt = document.getElementById('user_max_influence');
   levelElt = document.getElementById('user_level');
   curExpElt = document.getElementById('user_experience');
   lvlExpElt = document.getElementById('exp_for_next_level');
@@ -7071,16 +7057,6 @@ function refreshGlobalStats() {
   maxEnergy = parseInt(maxEnergyElt.innerHTML);
   stamina = parseInt(staminaElt.firstChild.nodeValue);
   maxStamina = parseInt(maxStaminaElt.innerHTML);
-  if (maxInfluenceElt) {
-    influence = parseInt(influenceElt.firstChild.nodeValue);
-    maxInfluence = parseInt(maxInfluenceElt.innerHTML);
-  }
-
-  // Remove this when influence stat is released to public
-  if (isNaN(influence))
-    influence = 0;
-  if (isNaN(maxInfluence))
-    maxInfluence = 0;
 
   level = parseInt(levelElt.innerHTML);
   curExp = parseInt(curExpElt.innerHTML);
@@ -9066,7 +9042,6 @@ function debugDumpSettings() {
         'Player health: <strong>' + health + '/' + maxHealth + '</strong><br>' +
         'Player energy: <strong>' + energy + '/' + maxEnergy + '</strong><br>' +
         'Player stamina: <strong>' + stamina + '/' + maxStamina + '</strong><br>' +
-        'Player influence: <strong>' + influence + '</strong><br>' +
         'Player skill points: <strong>' + stats + '</strong><br>' +
         'Energy pack waiting? <strong>' + energyPack + '</strong><br>' +
         'Current location: <strong>' + cities[city][CITY_NAME] + '</strong><br>' +
@@ -9151,31 +9126,26 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Health Base: <strong>' + GM_getValue('autoStatHealthBase') + '</strong><br>' +
         '&nbsp;&nbsp;-Energy Base: <strong>' + GM_getValue('autoStatEnergyBase') + '</strong><br>' +
         '&nbsp;&nbsp;-Stamina Base: <strong>' + GM_getValue('autoStatStaminaBase') + '</strong><br>' +
-        '&nbsp;&nbsp;-Influence Base: <strong>' + GM_getValue('autoStatInfluenceBase') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack Ratio: <strong>' + GM_getValue('autoStatAttackRatio') + '</strong><br>' +
         '&nbsp;&nbsp;-Defense Ratio: <strong>' + GM_getValue('autoStatDefenseRatio') + '</strong><br>' +
         '&nbsp;&nbsp;-Health Ratio: <strong>' + GM_getValue('autoStatHealthRatio') + '</strong><br>' +
         '&nbsp;&nbsp;-Energy Ratio: <strong>' + GM_getValue('autoStatEnergyRatio') + '</strong><br>' +
         '&nbsp;&nbsp;-Stamina Ratio: <strong>' + GM_getValue('autoStatStaminaRatio') + '</strong><br>' +
-        '&nbsp;&nbsp;-Influence Ratio: <strong>' + GM_getValue('autoStatInfluenceRatio') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack Mode: <strong>' + GM_getValue('autoStatAttackMode') + '</strong><br>' +
         '&nbsp;&nbsp;-Defense Mode: <strong>' + GM_getValue('autoStatDefenseMode') + '</strong><br>' +
         '&nbsp;&nbsp;-Health Mode: <strong>' + GM_getValue('autoStatHealthMode') + '</strong><br>' +
         '&nbsp;&nbsp;-Energy Mode: <strong>' + GM_getValue('autoStatEnergyMode') + '</strong><br>' +
         '&nbsp;&nbsp;-Stamina Mode: <strong>' + GM_getValue('autoStatStaminaMode') + '</strong><br>' +
-        '&nbsp;&nbsp;-Influence Mode: <strong>' + GM_getValue('autoStatInfluenceMode') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack Prio: <strong>' + GM_getValue('autoStatAttackPrio') + '</strong><br>' +
         '&nbsp;&nbsp;-Defense Prio: <strong>' + GM_getValue('autoStatDefensePrio') + '</strong><br>' +
         '&nbsp;&nbsp;-Health Prio: <strong>' + GM_getValue('autoStatHealthPrio') + '</strong><br>' +
         '&nbsp;&nbsp;-Energy Prio: <strong>' + GM_getValue('autoStatEnergyPrio') + '</strong><br>' +
         '&nbsp;&nbsp;-Stamina Prio: <strong>' + GM_getValue('autoStatStaminaPrio') + '</strong><br>' +
-        '&nbsp;&nbsp;-Influence Prio: <strong>' + GM_getValue('autoStatInfluencePrio') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack Fallback: <strong>' + GM_getValue('autoStatAttackFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Defense Fallback: <strong>' + GM_getValue('autoStatDefenseFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Health Fallback: <strong>' + GM_getValue('autoStatHealthFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Energy Fallback: <strong>' + GM_getValue('autoStatEnergyFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Stamina Fallback: <strong>' + GM_getValue('autoStatStaminaFallback') + '</strong><br>' +
-        '&nbsp;&nbsp;-Influence Fallback: <strong>' + GM_getValue('autoStatInfluenceFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Rest AutoStat: <strong>' + GM_getValue('restAutoStat') + '</strong><br>' +
         '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +
         '-------------------Energy Tab--------------------<br>' +
@@ -11303,14 +11273,13 @@ function logResponse(rootElt, action, context) {
         var statIndex = eval(statName.toUpperCase() + '_STAT');
         var statIcon = eval(statName.toLowerCase() + 'Icon');
         var statInc = isNaN(RegExp.$2) ? 1 : parseInt(RegExp.$2);
-        GM_setValue('nextStat' , (statIndex + 1) % 5);
+        GM_setValue('nextStat' , (statIndex + 1) % 4);
         switch (statIndex) {
           case ATTACK_STAT:    curAttack    += statInc; break;
           case DEFENSE_STAT:   curDefense   += statInc; break;
           case HEALTH_STAT:    maxHealth    += statInc; break;
           case ENERGY_STAT:    maxEnergy    += statInc; break;
           case STAMINA_STAT:   maxStamina   += statInc; break;
-          case INFLUENCE_STAT: maxInfluence += statInc; break;
         }
         addToLog('process Icon', '<span style="color:#885588;">'+statIcon+' '+statName+' increased by '+statInc+' point(s).</span>');
       } else {
