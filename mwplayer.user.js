@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.33
-// @build       389
+// @build       390
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.33',
-  build: '389',
+  build: '390',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8427,10 +8427,18 @@ function customizeProps() {
   // Check flash
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
-    if (isGMChecked('autoBuy') ){
+    if (isGMChecked('autoBuy') ||
+        isGMChecked('collectTakeNew York') ||
+        isGMChecked('collectTakeCuba') ||
+        isGMChecked('collectTakeMoscow') ||
+        isGMChecked('collectTakeBangkok')) {
       GM_setValue('autoBuy', 0);
+      GM_setValue('collectTakeNew York', 0);
+      GM_setValue('collectTakeCuba', 0);
+      GM_setValue('collectTakeMoscow', 0);
+      GM_setValue('collectTakeBangkok', 0);
       addToLog('warning Icon', 'Property functions disabled.');
-      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to auto upgrade properties. <br>' +
+      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to work on properties. <br>' +
                'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
                '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
     }
