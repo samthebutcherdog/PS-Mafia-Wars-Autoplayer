@@ -8427,18 +8427,10 @@ function customizeProps() {
   // Check flash
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
-    if (isGMChecked('autoBuy') ||
-        isGMChecked('collectTakeNew York') ||
-        isGMChecked('collectTakeCuba') ||
-        isGMChecked('collectTakeMoscow') ||
-        isGMChecked('collectTakeBangkok')) {
+    if (isGMChecked('autoBuy') ){
       GM_setValue('autoBuy', 0);
-      GM_setValue('collectTakeNew York', 0);
-      GM_setValue('collectTakeCuba', 0);
-      GM_setValue('collectTakeMoscow', 0);
-      GM_setValue('collectTakeBangkok', 0);
       addToLog('warning Icon', 'Property functions disabled.');
-      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to work on properties. <br>' +
+      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to auto upgrade properties. <br>' +
                'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
                '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
     }
