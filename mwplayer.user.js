@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.33
-// @build       391
+// @version     1.1.34
+// @build       392
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.33',
-  build: '391',
+  version: '1.1.34',
+  build: '392',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2541,8 +2541,15 @@ function canSpendStamina(minHealth) {
   }
 
   // Only spend if stamina >= 20
-  if(stamMode == STAMINA_HOW_ROBBING)
+  if(GM_getValue('staminaSpendHow') != STAMINA_HOW_RANDOM && stamMode == STAMINA_HOW_ROBBING)
     return (stamina >= 20);
+  else if (stamMode == STAMINA_HOW_ROBBING) {
+    if (stamina >= 20) return true;
+    else {
+      randomizeStamina();
+      return canSpendStamina();
+    }
+  }
 
   return true;
 }
@@ -2779,7 +2786,7 @@ function staminaBurst (burstMode, clickElt) {
 }
 
 function autoRob() {
-  var loc = GM_getValue('robLoc', NY);
+  var loc = GM_getValue('robLocation', NY);
   if (city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.delay = getAutoPlayDelay();
@@ -2796,7 +2803,7 @@ function autoRob() {
   }
 
   if (needToRefresh()) {
-    DEBUG("refreshing grid");
+    DEBUG("Refreshing the rob grid.");
     // refresh the 3x3 grid.
     Autoplay.fx = refreshRobbingGrid;
     Autoplay.delay = 0;
@@ -2805,8 +2812,7 @@ function autoRob() {
   } else {
     clickAction = 'autoRob';
     clickContext = getCurRobSlotId();
-    DEBUG("context : " + clickContext);
-    DEBUG("doing the robbing");
+    DEBUG("Context : " + clickContext);
     Autoplay.fx = doRob;
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
@@ -2897,6 +2903,8 @@ function logRobResponse(rootElt, resultElt, context) {
       updateRobStatistics(success,parseInt(exp));
     }
   }
+
+  randomizeStamina();
 
   var popUp = xpathFirst('.//div[contains(@class, "pop_box") and contains(@style, "block")]');
   if (popUp) {
@@ -3758,6 +3766,7 @@ function saveDefaultSettings() {
   GM_setValue('fightRemoveStronger', 'checked');
   GM_setValue('hitmanLocation', NY);
   GM_setValue('hitmanAvoidNames', 'checked');
+  GM_setValue('robLocation', NY);
   GM_setValue('clanName', defaultClans.join('\n'));
   GM_setValue('selectStaminaKeep', 0);
   GM_setValue('selectStaminaUse', 0);
@@ -6001,7 +6010,7 @@ function createStaminaTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   lhs.appendChild(document.createTextNode('Collect bounties in:'));
-  id = 'hitmanLoc';
+  id = 'hitmanLocation';
   var hitmanLoc = makeElement('select', rhs, {'id':id});
   for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
@@ -6053,26 +6062,30 @@ function createStaminaTab() {
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
   // End of options specific to hitman
 
-  // Robbing settings
+  //
+  // Settings for robbing
+  //
+
   // Container for a list of rob settings
   list = makeElement('div', staminaTabSub, {'id':'autoRobSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
-  
+
   // Location setting
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  
+
   lhs.appendChild(document.createTextNode('Rob in:'));
-  id = 'robLoc';
-  var robLocEl = makeElement('select', rhs, {'id':id});
+  id = 'robLocation';
+  var robLocation = makeElement('select', rhs, {'id':id});
   for (i = 0, iLength=locations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
     choice.appendChild(document.createTextNode(locations[i]));
-    robLocEl.appendChild(choice);
+    robLocation.appendChild(choice);
   }
-  robLocEl.selectedIndex = GM_getValue('robLoc', NY);
+  robLocation.selectedIndex = GM_getValue('robLocation', NY);
+
   //
   // Settings for list hitlisting
   //
@@ -6447,7 +6460,7 @@ function validateStaminaTab() {
 
     case STAMINA_HOW_HITMAN: // Hitlist bounty collection ("auto-hitman")
       // Get the settings.
-      s.hitmanLocation = document.getElementById('hitmanLoc').selectedIndex;
+      s.hitmanLocation = document.getElementById('hitmanLocation').selectedIndex;
       s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;
       s.bountySelection = document.getElementById('bountySelection').selectedIndex;
       s.hitmanAvoidNames = checked('hitmanAvoidNames');
@@ -6462,7 +6475,7 @@ function validateStaminaTab() {
       break;
 
     case STAMINA_HOW_ROBBING: // Robbing
-      s.robLoc = document.getElementById('robLoc').selectedIndex;
+      s.robLocation = document.getElementById('robLocation').selectedIndex;
       break;
 
     case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
@@ -9094,6 +9107,7 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Hitman bounty selection: <strong>' + bountySelectionChoices[(GM_getValue('bountySelection'))] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman avoid names: <strong>' + showIfUnchecked(GM_getValue('hitmanAvoidNames')) + '</strong><br>' +
         'Families list: <strong>' + GM_getValue('clanName') + '</strong><br>' +
+        '&nbsp;&nbsp;-Rob in: <strong>' + locations[GM_getValue('robLocation', NY)] + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit bounty: <strong>' + parseCash(GM_getValue('autoHitListBounty')) + '</strong><br>' +
         '&nbsp;&nbsp;-Set Bounties in: <strong>' + locations[GM_getValue('autoHitListLoc', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
@@ -10800,18 +10814,33 @@ function randomizeStamina() {
     }
 
     // Randomize fight location
-    if ((spendMode == STAMINA_HOW_FIGHT_RANDOM || spendMode == STAMINA_HOW_FIGHT_LIST) &&
-        !isGMEqual('fightLocation', fightLoc)) {
-      var fightLoc = Math.floor(Math.random()*(cities.length-1));
-      GM_setValue('fightLocation', fightLoc);
-      DEBUG('Fight location set to : ' + cities[GM_getValue('fightLocation')][CITY_NAME]);
+    while (spendMode == STAMINA_HOW_FIGHT_RANDOM || spendMode == STAMINA_HOW_FIGHT_LIST) {
+      var stamLoc = Math.floor(Math.random()*(cities.length));
+      if (!isGMEqual('fightLocation', stamLoc)) {
+        GM_setValue('fightLocation', stamLoc);
+        DEBUG('Fight location set to : ' + cities[stamLoc][CITY_NAME]);
+        break;
+      }
     }
 
     // Randomize hitman location
-    if ((spendMode == STAMINA_HOW_HITMAN) && !isGMEqual('hitmanLocation', hitmanLoc)) {
-      var hitmanLoc = Math.floor(Math.random()*(cities.length-1));
-      GM_setValue('hitmanLocation', hitmanLoc);
-      DEBUG('Hitman location set to : ' + cities[GM_getValue('hitmanLocation')][CITY_NAME]);
+    while (spendMode == STAMINA_HOW_HITMAN) {
+      var stamLoc = Math.floor(Math.random()*(cities.length));
+      if (!isGMEqual('hitmanLocation', stamLoc)) {
+        GM_setValue('hitmanLocation', stamLoc);
+        DEBUG('Hitman location set to : ' + cities[stamLoc][CITY_NAME]);
+        break;
+      }
+    }
+
+    // Randomize robbing location
+    while (spendMode == STAMINA_HOW_ROBBING) {
+      var stamLoc = Math.floor(Math.random()*(cities.length));
+      if (!isGMEqual('robLocation', stamLoc)) {
+        GM_setValue('robLocation', stamLoc);
+        DEBUG('Robbing location set to : ' + cities[stamLoc][CITY_NAME]);
+        break;
+      }
     }
   }
 }
