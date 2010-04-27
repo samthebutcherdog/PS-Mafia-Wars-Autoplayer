@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.34
-// @build       392
+// @build       393
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.34',
-  build: '392',
+  build: '393',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2040,6 +2040,13 @@ function autoHeal() {
 
 // Pass the item array, item id, and building type
 function buildItem(itemArray, itemIndex, buildType){
+  if (city != NY) {
+    Autoplay.fx = function() { goLocation(NY); };
+    Autoplay.delay = 0;
+    Autoplay.start();
+    return true;
+  }
+
   // Build the clickable element
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
