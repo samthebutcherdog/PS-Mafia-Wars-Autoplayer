@@ -18,7 +18,7 @@
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
-            scooy78, crazydude, SamTheButcher, dwightwilbanks, nonoy
+            scooy78, crazydude, SamTheButcher, dwightwilbanks, nonoymsd
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.33
-// @build       390
+// @build       391
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.33',
-  build: '390',
+  build: '391',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2779,8 +2779,9 @@ function staminaBurst (burstMode, clickElt) {
 }
 
 function autoRob() {
-  if (city != NY) {
-    Autoplay.fx = function() { goLocation(NY); };
+  var loc = GM_getValue('robLoc', NY);
+  if (city != loc) {
+    Autoplay.fx = function() { goLocation(loc); };
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
     return true;
@@ -6053,8 +6054,25 @@ function createStaminaTab() {
   // End of options specific to hitman
 
   // Robbing settings
+  // Container for a list of rob settings
   list = makeElement('div', staminaTabSub, {'id':'autoRobSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
-
+  
+  // Location setting
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  
+  lhs.appendChild(document.createTextNode('Rob in:'));
+  id = 'robLoc';
+  var robLocEl = makeElement('select', rhs, {'id':id});
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(locations[i]));
+    robLocEl.appendChild(choice);
+  }
+  robLocEl.selectedIndex = GM_getValue('robLoc', NY);
   //
   // Settings for list hitlisting
   //
@@ -6242,7 +6260,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoy';
+                 'nitr0genics, DTPN, nonoymsd';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -6444,6 +6462,7 @@ function validateStaminaTab() {
       break;
 
     case STAMINA_HOW_ROBBING: // Robbing
+      s.robLoc = document.getElementById('robLoc').selectedIndex;
       break;
 
     case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
@@ -10195,10 +10214,10 @@ function goMoscow() {
 
 function goLocation(toCity) {
   // If on robbing tab, move to war tab first so we can change cities
-  if (onRobbingTab()) {
-    goWarTab();
-    return true;
-  }
+  //if (onRobbingTab()) {
+  //  goWarTab();
+  //  return true;
+  //}
 
   // Already in this city
   if (toCity == city) {
