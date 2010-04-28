@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.35
-// @build       394
+// @build       395
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.35',
-  build: '394',
+  build: '395',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7313,10 +7313,10 @@ function doQuickClicks() {
 
     // Auto-send energy pack
     var actionElt = getActionBox('Send an energy pack to your mafia');
-    if (false && actionElt && isGMChecked('sendEnergyPack')) {
+    if (actionElt && isGMChecked('sendEnergyPack')) {
       var actionLink = getActionLink (actionElt, 'Send Energy Pack');
       DEBUG(actionLink.innerHTML);
-      if (actionLink) {
+      if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         DEBUG('Clicked to send energy pack to my mafia.');
       }
@@ -7324,10 +7324,9 @@ function doQuickClicks() {
 
     // Get daily checklist bonus
     var actionElt = getActionBox('Daily Checklist Complete');
-    if (false && actionElt) {
+    if (actionElt) {
       var actionLink = getActionLink (actionElt, 'Collect Skill Point');
-      DEBUG(actionLink.innerHTML);
-      if (actionLink) {
+      if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         DEBUG('Clicked to collect checklist bonus.');
       }
