@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.34
-// @build       393
+// @version     1.1.35
+// @build       394
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.34',
-  build: '393',
+  version: '1.1.35',
+  build: '394',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6687,7 +6687,7 @@ function handleModificationTimer() {
 
   // Handling for pop-ups
   var popupElt = xpathFirst('.//div[@id="popup_fodder"]', contentRowElt);
-  if (popupElt && popupElt.innerHTML.length > 0) {
+  if (popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
     pageChanged = true;
     justPlay = true;
     DEBUG('Detected pop-up.');
@@ -10234,12 +10234,6 @@ function goMoscow() {
 }
 
 function goLocation(toCity) {
-  // If on robbing tab, move to war tab first so we can change cities
-  //if (onRobbingTab()) {
-  //  goWarTab();
-  //  return true;
-  //}
-
   // Already in this city
   if (toCity == city) {
     DEBUG('Already in ' + cities[toCity][CITY_NAME] + '.');
