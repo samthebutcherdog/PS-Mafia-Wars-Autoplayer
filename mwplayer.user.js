@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.35
-// @build       396
+// @build       397
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.35',
-  build: '396',
+  build: '397',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -944,6 +944,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CUBA    = 1;
   const MOSCOW  = 2;
   const BANGKOK = 3;
+  const ACTIVE_CITY = 4;
+  const RANDOM_CITY = 5;
 
   // Constants to access city attributes
   const CITY_NAME        = 0;
@@ -971,6 +973,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   var locations = ['New York','Cuba','Moscow','Bangkok','Active City'];
+  var fightLocations = ['New York','Cuba','Moscow','Bangkok','Active City', 'Random City'];
 
   // Featured job locations
   var featJobNames = ['Left Job', 'Middle Job', 'Right Job'];
@@ -2658,7 +2661,11 @@ function autoHitlist() {
 function autoFight(how) {
   // Go to the correct city.
   var loc = GM_getValue('fightLocation', NY);
-  if (loc != cities.length && city != loc) {
+  if( loc == RANDOM_CITY){
+    loc = GM_getValue('fightNewLocation', NY);
+  }
+
+  if (loc != ACTIVE_CITY && city != loc) {
     Autoplay.fx = function() { goLocation(loc); };
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.start();
@@ -2715,6 +2722,7 @@ function autoFight(how) {
 
     if (opponent === -1) {
       DEBUG('No opponents even after seeing the fight list.');
+      setNextFightCity();
       return false;
     }
 
@@ -2782,6 +2790,28 @@ function autoFight(how) {
   Autoplay.start();
 
   return true;
+}
+
+function setNextFightCity(){
+  var loc = GM_getValue('fightLocation', NY);
+  if( loc != RANDOM_CITY){
+    return;
+  }
+
+  var curLoc = city;
+  var cycleCity = function(_city) {
+    _city++;
+    if (_city > BANGKOK)
+      _city = NY;
+    return _city;
+  }
+  var newCity = curLoc;
+  do {
+    newCity = cycleCity(newCity);
+  } while(level < cities[newCity][CITY_LEVEL])
+
+  DEBUG('Setting to ' + cities[newCity][CITY_NAME] + ' for next fight.');
+  GM_setValue('fightNewLocation', newCity);
 }
 
 function staminaBurst (burstMode, clickElt) {
@@ -5837,10 +5867,10 @@ function createStaminaTab() {
   makeElement('label', lhs).appendChild(document.createTextNode('Fight in:'));
   id = 'fightRandomLoc';
   var fightRandomLoc = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=locations.length; i < iLength; ++i) {
+  for (i = 0, iLength=fightLocations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(locations[i]));
+    choice.appendChild(document.createTextNode(fightLocations[i]));
     fightRandomLoc.appendChild(choice);
   }
   fightRandomLoc.selectedIndex = GM_getValue('fightLocation', NY);
