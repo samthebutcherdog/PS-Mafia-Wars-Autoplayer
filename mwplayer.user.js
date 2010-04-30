@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.35
-// @build       395
+// @build       396
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.35',
-  build: '395',
+  build: '396',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10632,7 +10632,7 @@ function logFightResponse(rootElt, resultElt, context) {
     lastOpponent.attackAgain = attackAgainElt ? attackAgainElt : undefined;
 
     // Click the secret stash immediately
-    var eltStash = xpathFirst('.//span[contains(.,"Send") and contains(.,"Now")]', resultElt);
+    var eltStash = document.getElementById('fight_loot_feed_btn');//xpathFirst('.//span[contains(.,"Send") and contains(.,"Now")]', resultElt);
     if (eltStash && isGMChecked('autoSecretStash')) {
       clickElement(eltStash);
       DEBUG('Clicked to publish the secret stash.');
