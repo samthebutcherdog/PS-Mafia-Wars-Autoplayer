@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.35
-// @build       398
+// @build       399
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.35',
-  build: '398',
+  build: '399',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -662,6 +662,7 @@ var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
+var helpJob = false;            // Helping a friend on job
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     (/inthemafia/.test(document.referrer) ||
@@ -1763,6 +1764,11 @@ function doAutoPlay () {
   // Click attack if on warNav
   if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
+  }
+
+  // Click job help
+  if (running && isGMChecked('autoHelp') && helpJob ) {
+    if (autoHelp()) return;
   }
 
   // Player updates
@@ -9333,17 +9339,18 @@ function parsePlayerUpdates(messagebox) {
   } else if (messageTextNoTags.indexOf('needs your help') != -1) {
     if (isGMChecked('autoHelp')) {
       // Help requested by a fellow mafia member.
-      userElt = xpathFirst('.//a[contains(@onclick, "give_help")]', messagebox);
-      elt = xpathFirst('.//a[contains(text(), "Click here to help")]', messagebox);
+      userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+      elt = xpathFirst('.//a[contains(@href, "give_help_social")]', messagebox);
       if (elt) {
         // Help immediately.
         Autoplay.fx = function() {
-          clickAction = 'help';
+          clickAction = 'clickHelp';
           clickContext = {
             user: linkToString(userElt, 'user'),
             help: linkToString(elt)
           };
           clickElement(elt);
+          helpJob = true;
           DEBUG('Clicked to help with a job.');
         };
         Autoplay.delay = 0;
@@ -9667,6 +9674,23 @@ function autoWishlist() {
       }
     }
   }
+}
+
+// Auto Help on jobs
+function autoHelp() {
+  var helpElt = xpathFirst('.//a[@class="sexy_button_new short_white"]');
+  if (helpElt) {
+    Autoplay.fx = function() {
+      clickAction = 'help';
+      clickElement(helpElt);
+      helpJob = false;
+      DEBUG('Clicked the help button.');
+    };
+    Autoplay.start();
+    return true;
+  }
+
+  return false;
 }
 
 // Attack the first war opponent you can
@@ -11275,7 +11299,8 @@ function logResponse(rootElt, action, context) {
       energyPackElt = undefined;
       DEBUG(inner);
       break;
-
+    case 'clickHelp':
+      break;
     case 'help':
       DEBUG('Parsing job help.');
 
