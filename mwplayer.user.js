@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.36
-// @build       401
+// @build       402
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.36',
-  build: '401',
+  build: '402',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7177,6 +7177,7 @@ function refreshMWAPCSS() {
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = 'html { overflow-y: auto !important } #mainDiv {margin-right: auto; margin-left: auto; width: 800px;}'   +
                  (isGMChecked('leftAlign') ? ' #mw_city_wrapper {position: absolute; margin: 0; top: 0px; left: 0px;}' : '')   +
+                 ' div[style$="z-index: 100;"] {position: absolute !important; left: 255px !important; top: 10px !important;}' +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust level/experience CSS
@@ -7459,11 +7460,6 @@ function customizeMasthead() {
   var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
   var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 34px; font-size: 11px; right: 10px; text-align: left;'});
-
-  var newMessageElt = document.evaluate("//div[@style='position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;']", document, null, XPathResult.ANY_TYPE,null).iterateNext();
-  newMessageElt.style.left = '248px';
-  newMessageElt.style.top = '7px';
-  mastheadElt.appendChild(newMessageElt);
 
   // Change help intructions :D
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
