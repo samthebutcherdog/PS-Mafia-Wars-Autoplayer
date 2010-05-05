@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.35
-// @build       399
+// @version     1.1.36
+// @build       400
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.35',
-  build: '399',
+  version: '1.1.36',
+  build: '400',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -666,7 +666,6 @@ var helpJob = false;            // Helping a friend on job
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     (/inthemafia/.test(document.referrer) ||
-     /mwfb.zynga.com/.test(window.location.href) ||
      /facebook.mafiawars.com/.test(window.location.href))) {
   var tabURI = "Ly8qKiBUYWIgQ29udGVudCBzY3JpcHQgdjIuMC0gqSBEeW5hbWljIERyaXZlIERIVE1MIGNvZGUg"+
   "bGlicmFyeSAoaHR0cDovL3d3dy5keW5hbWljZHJpdmUuY29tKQ0KLy8qKiBVcGRhdGVkIE9jdCA3"+
@@ -9133,7 +9132,7 @@ function debugDumpSettings() {
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
-        '&nbsp;&nbsp;-Fight in: <strong>' + locations[GM_getValue('fightLocation', 0)] + '</strong><br>' +
+        '&nbsp;&nbsp;-Fight in: <strong>' + fightLocations[GM_getValue('fightLocation', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack <strong>' + showIfUnchecked(GM_getValue('staminaReattack')) + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack threshold:<strong>' + GM_getValue('reattackThreshold') + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight max level: <strong>' + GM_getValue('fightLevelMax') + ' (' + showIfRelative('fightLevelMaxRelative') + ')</strong><br>' +
@@ -9144,12 +9143,12 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Random fight avoid names: <strong>' + showIfUnchecked(GM_getValue('fightAvoidNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-List fight opponents: <strong>' + GM_getValue('fightList') + '</strong><br>' +
         '&nbsp;&nbsp;-List fight remove stronger: <strong>' + showIfUnchecked(GM_getValue('fightRemoveStronger')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Collect hitman bounties in: <strong>' + locations[GM_getValue('hitmanLocation', 0)] + '</strong><br>' +
+        '&nbsp;&nbsp;-Collect hitman bounties in: <strong>' + fightLocations[GM_getValue('hitmanLocation', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman min bounty: <strong>' + parseCash(GM_getValue('hitmanBountyMin')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman bounty selection: <strong>' + bountySelectionChoices[(GM_getValue('bountySelection'))] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman avoid names: <strong>' + showIfUnchecked(GM_getValue('hitmanAvoidNames')) + '</strong><br>' +
         'Families list: <strong>' + GM_getValue('clanName') + '</strong><br>' +
-        '&nbsp;&nbsp;-Rob in: <strong>' + locations[GM_getValue('robLocation', NY)] + '</strong><br>' +
+        '&nbsp;&nbsp;-Rob in: <strong>' + fightLocations[GM_getValue('robLocation', NY)] + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit bounty: <strong>' + parseCash(GM_getValue('autoHitListBounty')) + '</strong><br>' +
         '&nbsp;&nbsp;-Set Bounties in: <strong>' + locations[GM_getValue('autoHitListLoc', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
