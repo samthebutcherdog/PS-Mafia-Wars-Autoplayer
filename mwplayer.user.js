@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.36
-// @build       402
+// @version     1.1.37
+// @build       403
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.36',
-  build: '402',
+  version: '1.1.37',
+  build: '403',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -662,7 +662,6 @@ var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
-var helpJob = false;            // Helping a friend on job
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     (/inthemafia/.test(document.referrer) ||
@@ -1763,11 +1762,6 @@ function doAutoPlay () {
   // Click attack if on warNav
   if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
-  }
-
-  // Click job help
-  if (running && isGMChecked('autoHelp') && helpJob ) {
-    if (autoHelp()) return;
   }
 
   // Player updates
@@ -6722,7 +6716,7 @@ function handleModificationTimer() {
 
   // Handling for pop-ups
   var popupElt = xpathFirst('.//div[@id="popup_fodder"]', contentRowElt);
-  if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
+  if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.scrollHeight && popupElt.innerHTML.length > 0) {
     pageChanged = true;
     justPlay = true;
     DEBUG('Detected pop-up.');
@@ -7336,7 +7330,7 @@ function doQuickClicks() {
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', 'autoWarResponsePublish')) return;
 
     // Click the 'Rally More Help!' button
-    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
+    //if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
     // Can bank flag
     var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
@@ -7671,7 +7665,7 @@ function customizeHome() {
   energyPack = energyPackElt? true : false;
 
   // Display a message next to the energy pack button.
-  if (energyPackElt) {
+  if (energyPackElt && energyPackElt.scrollWidth && energyPackElt.scrollHeight) {
     var energyGainRate = getEnergyGainRate();
     var ptsFromEnergyPack = maxEnergy * 1.25 * energyGainRate;
     var ptsNeeded = ptsToNextLevel - energy * energyGainRate -
@@ -7684,6 +7678,8 @@ function customizeHome() {
       descElt.innerHTML = txt;
       packParentElt.insertBefore(descElt, packParentElt.firstChild);
     }
+  } else {
+    energyPack = false;
   }
 
   return true;
@@ -9344,13 +9340,12 @@ function parsePlayerUpdates(messagebox) {
       if (elt) {
         // Help immediately.
         Autoplay.fx = function() {
-          clickAction = 'clickHelp';
+          clickAction = 'help';
           clickContext = {
             user: linkToString(userElt, 'user'),
             help: linkToString(elt)
           };
           clickElement(elt);
-          helpJob = true;
           DEBUG('Clicked to help with a job.');
         };
         Autoplay.delay = 0;
@@ -9674,23 +9669,6 @@ function autoWishlist() {
       }
     }
   }
-}
-
-// Auto Help on jobs
-function autoHelp() {
-  var helpElt = xpathFirst('.//a[@class="sexy_button_new short_white"]');
-  if (helpElt) {
-    Autoplay.fx = function() {
-      clickAction = 'help';
-      clickElement(helpElt);
-      helpJob = false;
-      DEBUG('Clicked the help button.');
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  return false;
 }
 
 // Attack the first war opponent you can
@@ -11299,9 +11277,21 @@ function logResponse(rootElt, action, context) {
       energyPackElt = undefined;
       DEBUG(inner);
       break;
-    case 'clickHelp':
-      break;
+
     case 'help':
+      var helpElt = xpathFirst('.//a[contains(.,"Help ")]', messagebox);
+      // If help element is found, click it immediately
+      if (helpElt) {
+        Autoplay.fx = function() {
+          clickElement(helpElt);
+          clickAction = 'help';
+          clickContext = context;
+        }
+        Autoplay.delay = 0;
+        Autoplay.start();
+        return true;
+      }
+
       DEBUG('Parsing job help.');
 
       // Help attempt was processed. Increment the update count.
