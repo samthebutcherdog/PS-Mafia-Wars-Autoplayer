@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.37
-// @build       403
+// @version     1.1.38
+// @build       404
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.37',
-  build: '403',
+  version: '1.1.38',
+  build: '404',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6716,7 +6716,7 @@ function handleModificationTimer() {
 
   // Handling for pop-ups
   var popupElt = xpathFirst('.//div[@id="popup_fodder"]', contentRowElt);
-  if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.scrollHeight && popupElt.innerHTML.length > 0) {
+  if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
     pageChanged = true;
     justPlay = true;
     DEBUG('Detected pop-up.');
@@ -7665,7 +7665,7 @@ function customizeHome() {
   energyPack = energyPackElt? true : false;
 
   // Display a message next to the energy pack button.
-  if (energyPackElt && energyPackElt.scrollWidth && energyPackElt.scrollHeight) {
+  if (energyPackElt && energyPackElt.scrollWidth) {
     var energyGainRate = getEnergyGainRate();
     var ptsFromEnergyPack = maxEnergy * 1.25 * energyGainRate;
     var ptsNeeded = ptsToNextLevel - energy * energyGainRate -
