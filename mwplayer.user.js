@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.38
-// @build       404
+// @build       405
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.38',
-  build: '404',
+  build: '405',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2551,9 +2551,9 @@ function canSpendStamina(minHealth) {
 
   // Only spend if stamina >= 20
   if(GM_getValue('staminaSpendHow') != STAMINA_HOW_RANDOM && stamMode == STAMINA_HOW_ROBBING)
-    return (stamina >= 20);
+    return (stamina >= 25);
   else if (stamMode == STAMINA_HOW_ROBBING) {
-    if (stamina >= 20) return true;
+    if (stamina >= 25) return true;
     else {
       randomizeStamina();
       return canSpendStamina();
@@ -7466,8 +7466,8 @@ function customizeMasthead() {
                        '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
                        '  <div class="sexy_destination middle">For Chrome</div> ' +
                        '</a> ' +
-                       '<a href="http://www.playerscripts.com/forum/" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">PlayerScripts</div> ' +
+                       '<a href="http://www.playerscripts.com/forum/viewforum.php?f=27" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">MWAP Support</div> ' +
                        '</a>' +
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
                        '  <div class="sexy_destination middle">Zynga Forums</div> ' +
