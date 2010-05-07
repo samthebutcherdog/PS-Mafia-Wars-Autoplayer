@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.38
-// @build       405
+// @build       406
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.38',
-  build: '405',
+  build: '406',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7466,7 +7466,7 @@ function customizeMasthead() {
                        '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
                        '  <div class="sexy_destination middle">For Chrome</div> ' +
                        '</a> ' +
-                       '<a href="http://www.playerscripts.com/forum/viewforum.php?f=27" target="_blank"> ' +
+                       '<a href="http://www.playerscripts.com/forum/viewtopic.php?f=27&t=1316" target="_blank"> ' +
                        '  <div class="sexy_destination middle">MWAP Support</div> ' +
                        '</a>' +
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
