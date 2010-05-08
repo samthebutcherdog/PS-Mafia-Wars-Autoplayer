@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.38
-// @build       406
+// @build       407
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.38',
-  build: '406',
+  build: '407',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7170,7 +7170,7 @@ function refreshMWAPCSS() {
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = 'html { overflow-y: auto !important } #mainDiv {margin-right: auto; margin-left: auto; width: 800px;}'   +
-                 (isGMChecked('leftAlign') ? ' #mw_city_wrapper {position: absolute; margin: 0; top: 0px; left: 0px;}' : '')   +
+                 (isGMChecked('leftAlign') ? ' #final_wrapper {position: absolute; margin: 0; top: 0px; left: 0px;}' : '')   +
                  ' div[style$="z-index: 100;"] {position: absolute !important; left: 255px !important; top: 10px !important;}' +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
