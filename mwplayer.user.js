@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       411
+// @build       412
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '411',
+  build: '412',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11375,7 +11375,7 @@ function logResponse(rootElt, action, context) {
 
     case 'deposit':
       // Log if city has changed after banking
-      if (city != clickContext) {
+      if (parseInt(city) != parseInt(context)) {
         addToLog('warning Icon', 'Warning! You have traveled from ' +
                  cities[context][CITY_NAME] + ' to ' +
                  cities[city][CITY_NAME] +
