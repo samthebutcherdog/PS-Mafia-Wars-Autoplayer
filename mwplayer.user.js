@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.39
-// @build       408
+// @build       409
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.38',
-  build: '408',
+  build: '409',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6664,7 +6664,7 @@ function handleModificationTimer() {
   var justPlay = false;
   var prevPageElt = innerPageElt;
   contentRowElt = document.getElementById('content_row');
-  innerPageElt = xpathFirst('.//div[@id="inner_page"]', contentRowElt);
+  innerPageElt = xpathFirst('.//div[@id="inner_page"]');
 
   if (!innerPageElt) return;
 
