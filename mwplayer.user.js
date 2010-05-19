@@ -38,12 +38,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.39
-// @build       409
+// @build       410
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.38',
-  build: '409',
+  build: '410',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1359,7 +1359,38 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Kidnap One Of Wei\'s Trusted Advisors',56,110,6,BANGKOK,88],             // CHAPTER 3  Triad
     ['Bury The Body Under A Construction Site',60,111,6,BANGKOK,97],           // Chapter 3  Triad
     ['Attack Wei\'s Gambling Halls',96,112,6,BANGKOK,155],                     // FINALE
-    ['Dispose Of Mountain Master Wei',1,113,6,BANGKOK,3]                       // BOSS JOB
+    ['Dispose Of Mountain Master Wei',1,113,6,BANGKOK,3],                      // BOSS JOB
+    // BANGKOK EPISODE 6-Saboteur
+    ['Shore Up Control Of Your New Territory',60,115,7,BANGKOK,97],            // CHAPTER 1
+    ['Spread The Wealth To Your New Lieutenants',71,116,7,BANGKOK,115],        // CHAPTER 1
+    ['Eliminate The Last Traces Of Resistance',145,117,7,BANGKOK,199],         // CHAPTER 1  HELP JOB
+    ['Get A Gang Member Back Into Thailand',71,119,7,BANGKOK,115],             // CHOICE POINT CHAPTER 2 (Yakuza = 119, Triad = 122)
+    ['Break Into A Goverment Research Facility',74,120,7,BANGKOK,119],         // CHAPTER 2  Yakuza
+    ['Steal An Experimental Armor Prototype',67,121,7,BANGKOK,106],            // CHAPTER 2  Yakuza
+    ['Kidnap A Trade Consortium Leader',74,123,7,BANGKOK,119],                 // CHAPTER 2  Triad
+    ['Extort The Consortium\'s Remaining Officers',64,124,7,BANGKOK,102],      // CHAPTER 2  Triad
+    ['Undermine Nongchai\'s Support',78,125,7,BANGKOK,124],                    // CHOICE POINT CHAPTER 3 (Yakuza = 125, Triad = 128)
+    ['Acquire Information On A Government Supporter',71,126,7,BANGKOK,115],    // CHAPTER 3  Yakuza
+    ['Assassinate A Bangkok Council Member',67,127,7,BANGKOK,106],             // CHAPTER 3  Yakuza
+    ['Bribe A Royal Thai Army Colonel',74,129,7,BANGKOK,119],                  // CHAPTER 3  Triad
+    ['Route A Drug Shipment Through An Army Post',64,130,7,BANGKOK,102],       // Chapter 3  Triad
+    ['Infiltrate The Parliament House',85,131,7,BANGKOK,137],                  // FINALE
+    ['Depose Prime Minister Nongchai',1,132,7,BANGKOK,3],                      // BOSS JOB
+    // BANGKOK EPISODE 6-Assassin
+    ['Consolidate Political Power In Bangkok',56,134,8,BANGKOK,93],            // CHAPTER 1
+    ['Take Over The Royal Bank Of Thailand',64,135,8,BANGKOK,97],              // CHAPTER 1
+    /* FIXME:
+              Don't know why Foil an attempt is not working properly.. 
+    ['Foil An Attempt On Your Life',156,136,8,BANGKOK,222],                    // CHAPTER 1  HELP JOB
+    */
+    ['Question The Surviving Assassin',74,138,8,BANGKOK,115],                  // CHAPTER 2
+    ['Gather Information On The Shadow King',71,139,8,BANGKOK,115],            // CHAPTER 2
+    ['Eliminate A Spy For The Shadow King',85,140,8,BANGKOK,133],              // CHAPTER 2
+    ['Hire A Guide To Find The Temple of Shadows',64,141,8,BANGKOK,102],       // CHAPTER 3
+    ['Fight Off A Hill Tribe Loyal To The Shadow King',89,142,8,BANGKOK,142],  // CHAPTER 3
+    ['Silence A Shadow Kingdom Patrol',81,143,8,BANGKOK,133],                  // CHAPTER 3
+    ['Battle Your Way Through The Temple',96,144,8,BANGKOK,159],               // FINALE
+    ['Overthrow The Shadow King',1,145,8,BANGKOK,3]                            // BOSS JOB
   );
 
   var missionTabs = new Array(
@@ -1373,7 +1404,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // MOSCOW
     ['Baklany','Boets','Brigadir','Avtoritet','Vor','Pakhan'],
     // BANGKOK
-    ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head']
+    ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head','Saboteur','Assassin']
   );
 
   const CHOICE_JOBNO   = 0;
@@ -1413,7 +1444,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     [[81, 84], ['Meet With Boss Matsumura\'s Advisor', 'Meet With Boss Matsumura\'s Advisor'], BANGKOK],
     [[87, 90], ['Talk With A Police Insider About Matsumura', 'Talk With A Police Insider About Matsumura'], BANGKOK],
     [[100, 103], ['Intimidate Wealthy Expatriates', 'Intimidate Wealthy Foreign Expatriates'], BANGKOK],
-    [[106, 109], ['Talk With Wei\'s Disloyal Enforcers', 'Talk With Wei\'s Disloyal Enforcers'], BANGKOK]
+    [[106, 109], ['Talk With Wei\'s Disloyal Enforcers', 'Talk With Wei\'s Disloyal Enforcers'], BANGKOK],
+    [[119, 122], ['Get A Gang Member Back Into Thailand', 'Get A Gang Member Back Into Thailand'], BANGKOK],
+    [[125, 128], ['Undermine Nongchai\'s Support', 'Undermine Nongchai\'s Support'], BANGKOK]
   );
 
   var requirementJob = new Array(
