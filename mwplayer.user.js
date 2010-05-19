@@ -37,13 +37,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.39
-// @build       410
+// @version     1.1.40
+// @build       411
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.38',
-  build: '410',
+  version: '1.1.40',
+  build: '411',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -632,7 +632,7 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
 
 var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
-var contentRowElt;              // The currently visible content page
+var appLayoutElt;              // The currently visible content page
 var cash;                       // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
@@ -1380,7 +1380,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Consolidate Political Power In Bangkok',56,134,8,BANGKOK,93],            // CHAPTER 1
     ['Take Over The Royal Bank Of Thailand',64,135,8,BANGKOK,97],              // CHAPTER 1
     /* FIXME:
-              Don't know why Foil an attempt is not working properly.. 
+              Don't know why Foil an attempt is not working properly..
     ['Foil An Attempt On Your Life',156,136,8,BANGKOK,222],                    // CHAPTER 1  HELP JOB
     */
     ['Question The Surviving Assassin',74,138,8,BANGKOK,115],                  // CHAPTER 2
@@ -3158,7 +3158,7 @@ function autoBankDeposit(bankCity, amount) {
   if (!quickBankFail) return false;
 
   // Make sure we're at the bank.
-  var bankElt = xpathFirst('.//div[@id="bank_popup"]', contentRowElt);
+  var bankElt = xpathFirst('.//div[@id="bank_popup"]', appLayoutElt);
   if (!bankElt) {
     Autoplay.fx = goBank;
     Autoplay.start();
@@ -3201,7 +3201,7 @@ function autoBankDeposit(bankCity, amount) {
 
 function autoBankWithdraw(amount) {
   // Make sure we're at the bank.
-  var formElt = xpathFirst('.//div[@id="bank_popup"]', contentRowElt);
+  var formElt = xpathFirst('.//div[@id="bank_popup"]', appLayoutElt);
   if (!formElt) {
     Autoplay.fx = goBank;
     clickAction = 'withdraw';
@@ -6696,7 +6696,7 @@ function handleModificationTimer() {
   var pageChanged = false;
   var justPlay = false;
   var prevPageElt = innerPageElt;
-  contentRowElt = document.getElementById('content_row');
+  appLayoutElt = document.getElementById('app_layout');
   innerPageElt = xpathFirst('.//div[@id="inner_page"]');
 
   if (!innerPageElt) return;
@@ -6748,7 +6748,7 @@ function handleModificationTimer() {
   }
 
   // Handling for pop-ups
-  var popupElt = xpathFirst('.//div[@id="popup_fodder"]', contentRowElt);
+  var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
   if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
     pageChanged = true;
     justPlay = true;
@@ -7365,7 +7365,8 @@ function doQuickClicks() {
     // Click the 'Rally More Help!' button
     //if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
-    // Can bank flag
+    // Can bank flag (FIXME: Fix quick banking!)
+    quickBankFail = true;
     var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
                   cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
@@ -7592,7 +7593,8 @@ function customizeStats() {
   }
 
   // Make bank icon clicable for instant banking
-  var bankLinkElt = document.getElementById('mwap_bank');
+  // FIXME: Removed till quick-banking is resolved
+  /*var bankLinkElt = document.getElementById('mwap_bank');
   var bankElt = xpathFirst('//div[@id="cash_stats_'+cities[city][CITY_ALIAS]+'"]', innerPageElt);
 
   if (bankElt && !bankLinkElt) {
@@ -7604,7 +7606,7 @@ function customizeStats() {
     bankElt.insertBefore(bankLinkElt, bankImgElt);
     bankLinkElt.appendChild(bankImgElt);
     bankLinkElt.addEventListener('click', quickBank, false);
-  }
+  }*/
 
   setListenStats(true);
 }
@@ -9827,7 +9829,7 @@ function autoWar() {
     // Html attributes has been changed by Zynga, disable autoWar
     if (!warElt || (warElt && !warElt.getAttribute('onclick').match(/target_id=(\d+)/))) {
       DEBUG('War elements changed by Zynga, disabling autoWar.');
-      GM_getValue('autoWar', 0)
+      GM_setValue('autoWar', 0)
       return false;
     }
     warElt.target_id = RegExp.$1;
@@ -10980,7 +10982,7 @@ function logJSONResponse(responseText, action, context) {
                  action + '".');
     }
   } catch (ex) {
-    DEBUG('Exception (logJSONResponse): ' + ex + ', response: ' + responseText + '.');
+    DEBUG('Exception (logJSONResponse): ' + ex + ', action: ' + action +', response: ' + responseText + '.');
     loadHome();
   }
 }
@@ -11027,12 +11029,12 @@ function logResponse(rootElt, action, context) {
 
   // Bank message
   if (!messagebox) {
-    messagebox = xpathFirst('.//div[@id="bank_messages"]', contentRowElt);
+    messagebox = xpathFirst('.//div[@id="bank_messages"]', appLayoutElt);
   }
 
   // Hospital message
   if (!messagebox) {
-    messagebox = xpathFirst('.//div[@id="hospital_message"]', contentRowElt);
+    messagebox = xpathFirst('.//div[@id="hospital_message"]', appLayoutElt);
   }
 
   // Rob message
