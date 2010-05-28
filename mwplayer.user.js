@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       414
+// @build       415
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '414',
+  build: '415',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7516,7 +7516,7 @@ function refreshMWAPCSS() {
 function resetTimers(popup) {
   // Reset the timers.
   addToLog('warning Icon', 'All active timers have been reset.');
-  GM_setValue('miniPackTimer', 0);
+  if (!timeLeftGM('miniPackTimer')<3600) GM_setValue('miniPackTimer', 0); // only reset this timer if an hour has passed
   GM_setValue('wishListTimer', 0);
   GM_setValue('warTimer', 0);
   GM_setValue('buildCarTimer', 0);
