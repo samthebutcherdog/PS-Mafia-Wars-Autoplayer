@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       413
+// @build       414
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '413',
+  build: '414',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1680,7 +1680,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // For chrome
   sendSettings();
   copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
-  GM_setValue('autoSafehouse','checked');
 }
 
 // Copy settings from background storage
