@@ -17,8 +17,9 @@
 * @package: Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
-            Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, rdmcgraw, moe,
-            scooy78, crazydude, SamTheButcher, dwightwilbanks, nonoymsd
+            Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka, 
+            rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks, 
+            nonoymsd, Bushdaka 
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -38,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       412
+// @build       413
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '412',
+  build: '413',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -57,6 +58,11 @@ var SCRIPT = {
   opponent: '&opponent_id=',
   user: '&user_id='
 };
+
+// Only attach to the top window.
+if (window.top != window.self) {
+  return;
+}
 
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
@@ -829,7 +835,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var settingsOpen = false;
   var statsOpen = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '?', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -1011,6 +1017,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Railgun', 23, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
     ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
+
+  // Gift Accept Choices
+  var giftAcceptChoices = ['XP', 'Energy', 'Stamina'];
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -1649,6 +1658,11 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Choose sides (handling)
   chooseSides();
 
+  // If the user has chosen to reset timers on startup
+  if (GM_getValue('autoResetTimers',0)) {
+    resetTimers(0);
+  }
+
   // This line is optional, but it makes the menu display faster.
   refreshMWAPCSS();
   customizeMasthead();
@@ -1666,6 +1680,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // For chrome
   sendSettings();
   copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
+  GM_setValue('autoSafehouse','checked');
 }
 
 // Copy settings from background storage
@@ -1762,6 +1777,18 @@ function doAutoPlay () {
     if (autoHeal()) return;
   }
 
+  // Auto-GiftAccept
+  if (running && GM_getValue('autoGiftAccept') && hasHome) {
+    if (autoGiftPopups()) return;
+    if (autoGiftQueue()) return;
+    if (autoGiftAccept()) return;
+  }
+
+  // Auto-Safehouse
+  if (running && GM_getValue('autoSafehouse') && hasHome) {
+    if (autoSafehouse()) return;
+  }
+
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && !skipJobs && canMission();
   var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight;
@@ -1854,8 +1881,17 @@ function doAutoPlay () {
 
   // Auto-giftwaiting (limit to level 6 and above)
   if (running && !maxed && GM_getValue('autoGiftWaiting') && hasHome) {
-    // FIXME: Some people are having problems with this
-    //if (autoGiftWaiting()) return;
+    if (autoGiftWaiting()) return;
+  }
+
+  // Auto-dailychecklist
+  if (running && !maxed && GM_getValue('autoDailyChecklist') && hasHome) {
+    if (autoDailyChecklist()) return;
+  }
+
+  // Auto-mainframe
+  if (running && !maxed && GM_getValue('autoMainframe') && hasHome) {
+    if (autoMainframe()) return;
   }
 
   // Mini-pack check
@@ -1867,17 +1903,28 @@ function doAutoPlay () {
   }
 
   // Auto-energypack
+  energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
+  energyPackElt = energyPackElt ? energyPackElt : xpathFirst('.//a[contains(@onclick, "xw_action=use_energy_pak")]', innerPageElt);
+  energyPack = (energyPackElt && onHome()) ? true : false;
+  var energyCountdownElt = xpathFirst('//div[contains(@id, "mbox_energy_timer_container")]', innerPageElt);
+  if (energyCountdownElt) {
+    if (energyCountdownElt.style.display == 'block') {
+      energyPack = false;
+      DEBUG('Energy countdown timer > 0');
+    }
+  }
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
   var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
   var autoEnergyPackWaiting = running && energyPack &&
                               ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
                               isGMChecked('autoEnergyPack');
-
-  if (autoEnergyPackWaiting && energy <= 2) {
-    DEBUG('ptsToNextLevel=' + ptsToNextLevel +
-          'ptsToLevelProjStaminaUse=' + ptsToLevelProjStaminaUse);
-    addToLog('energyPack Icon', 'This energy pack should give you approximately ' + parseInt(ptsFromEnergyPack) + ' xp of your ' + parseInt(ptsToLevelProjStaminaUse) + ' projected remaining xp.' );
-
+  
+  if ((autoEnergyPackWaiting && (energy <= 2)) || (energyPack && isGMChecked('autoEnergyPackForce') && (energy <= GM_getValue('autoEnergyPackForcePts',0)))) {
+    DEBUG('energyPack='+energyPack+'  energy='+energy+ '  ptsToNextLevel=' + ptsToNextLevel +
+          '  ptsToLevelProjStaminaUse=' + ptsToLevelProjStaminaUse);
+    if (autoEnergyPackWaiting) {
+      addToLog('energyPack Icon', 'This energy pack should give you approximately ' + parseInt(ptsFromEnergyPack) + ' xp of your ' + parseInt(ptsToLevelProjStaminaUse) + ' projected remaining xp.' );
+    }
     if (!energyPackElt){
       DEBUG('Cant find energy pack to click');
     } else {
@@ -2124,6 +2171,9 @@ function autoCollectTake(takeCity) {
   }
 
   loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':city+1, 'requesttype':'json'}), urlLoaded);
+  if (GM_getValue('flashed',0)) {
+    setGMTime('takeHour' + cities[takeCity][CITY_NAME], "1 hour");
+  }
 
   return false;
 }
@@ -2712,6 +2762,13 @@ function autoFight(how) {
     return true;
   }
 
+  var eltAttackStrength = xpathFirst('//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
+  if (eltAttackStrength) curAttack = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+  var eltDefenseStrength = xpathFirst('//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
+  if (eltDefenseStrength) curDefense = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+  DEBUG('Loot Stat: Current Attack: ' + curAttack + ' Current Defense: ' + curDefense);
+
+
   // Get an opponent.
   var opponent;
   if (autoFight.profileSearch && onProfileNav()) {
@@ -2953,24 +3010,28 @@ function logRobResponse(rootElt, resultElt, context) {
       if (cashElt)
         result += '<span class="good">Success '+ cashElt.innerHTML +'</span>';
       else
-        result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
+        if (itemElt)
+          result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
     }
     else
       result += '<span class="bad">Failed</span>';
 
-    result += ' and <span class="good">' + expElt.innerHTML + '</span>.';
+    if (expElt)
+      result += ' and <span class="good">' + expElt.innerHTML + '</span>.';
 
     addToLog('yeah Icon', result);
 
-    // Look for any loot on rob slot
-    if (m = /alt="(.*?)"/.exec(eltRob.innerHTML)) {
-      addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[1] + ' in robbing.</span>');
-    }
+    if (eltRob) 
+      // Look for any loot on rob slot
+      if (m = /alt="(.*?)"/.exec(eltRob.innerHTML)) {
+        addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[1] + ' in robbing.</span>');
+      }
 
-    if (m = /(\d+) Experience/.exec(expElt.innerHTML)) {
-      var exp = m[1].replace(/[^0-9]/g, '');
-      updateRobStatistics(success,parseInt(exp));
-    }
+    if (expElt)
+      if (m = /(\d+) Experience/.exec(expElt.innerHTML)) {
+        var exp = m[1].replace(/[^0-9]/g, '');
+        updateRobStatistics(success,parseInt(exp));
+      }
   }
 
   randomizeStamina();
@@ -3797,8 +3858,18 @@ function saveDefaultSettings() {
   GM_setValue('autoLottoBonusItem',3);
   GM_setValue('autoWarTargetList', '');
   GM_setValue('warMode', 0);
+  GM_setValue('autoGiftAccept', 0);
+  GM_setValue('autoGiftAcceptChoice', 0);
+  GM_setValue('autoSafehouse', 0);
+
+  // Display Tab
+  GM_setValue('flashed',0);
 
   // Misc Tab
+  GM_setValue('autoResetTimers', 0);
+  GM_setValue('autoMainframe', 0);
+  GM_setValue('autoMainframeCode', 0);
+  GM_setValue('autoDailyChecklist', 0);
   GM_setValue('autoStat', 0);
   GM_setValue('autoStatDisable', 0);
 
@@ -3824,6 +3895,8 @@ function saveDefaultSettings() {
 
   // Energy tab.
   GM_setValue('estimateJobRatio', '1');
+  GM_setValue('autoEnergyPackForce', 0);
+  GM_setValue('autoEnergyPackForcePts', 0);  
 
   // Stamina tab.
   GM_setValue('staminaSpendHow', STAMINA_HOW_FIGHT_RANDOM);
@@ -3947,6 +4020,16 @@ function saveSettings() {
     }
   }
 
+  // Validate mainframe
+  var autoMainframe        = (document.getElementById('autoMainframe').checked === true);
+  var autoMainframeCode    = document.getElementById('autoMainframeCode').value;
+  var autoMainframeCodeInt = parseInt(autoMainframeCode);
+  if (autoMainframe && (autoMainframeCodeInt == 0)) {
+    alert('You must enter your mainframe code to enable autoMainframe.');
+    return;
+  }
+  GM_setValue('autoMainframeCode', autoMainframeCode);
+ 
   // Validate the stamina tab.
   var staminaTabSettings = validateStaminaTab();
   if (!staminaTabSettings) return;
@@ -3975,6 +4058,8 @@ function saveSettings() {
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
   GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
 
+  GM_setValue('autoEnergyPackForcePts', document.getElementById('autoEnergyPackForcePts').value);
+
   // Place all checkbox element saving here
   saveCheckBoxElementArray(['autoClick','autoLog','logPlayerUpdates','hideAttacks','attackCritical',
                             'autoMission','autoBank','autoBankMoscow','allowEnergyToLevelUp',
@@ -3984,16 +4069,16 @@ function saveSettings() {
                             'autoStatStaminaFallback','hourlyStatsOpt','buildCar','featJob','buildWeapon',
                             'autoGiftSkipOpt','autoBuy','autoEnergyPack','filterLog','autoHelp',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
-                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause',
+                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause', 'autoSafehouse',
                             'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
-                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist',
-                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
-                            'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow',
-                            'collectTakeBangkok']);
+                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept', 
+                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', 'flashed',
+                            'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
+                            'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4056,6 +4141,7 @@ function saveSettings() {
   GM_setValue('autoLottoBonusItem', document.getElementById('autoLottoList').selectedIndex);
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   GM_setValue('warMode', document.getElementById('warMode').selectedIndex);
+  GM_setValue('autoGiftAcceptChoice', document.getElementById('autoGiftAcceptChoice').selectedIndex);
 
   var multiple_jobs_list = [];
   var mastery_jobs_list = [];
@@ -5070,6 +5156,16 @@ function createDisplayTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show level on the hit list page'));
 
+  // Enable flash
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'flashed';
+  title = 'Enable flash, disable ROI';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable flash, disable ROI'));
+
   // Hiding
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
   makeElement('label', item).appendChild(document.createTextNode(' Hide game elements '));
@@ -5239,6 +5335,34 @@ function createMafiaTab() {
   id = 'autoGiftWaiting';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically click the gift waiting option'));
+
+  // Option for accepting gifts
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  title = 'Accept all gifts';
+  id = 'autoGiftAccept';
+  var autoGiftAcceptElt = makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically accept all gifts'));
+  rhs.appendChild(document.createTextNode(' '));
+  id = 'autoGiftAcceptChoice';
+  var autoGiftAcceptChoice = makeElement('select', rhs, {'id':id});
+  for (i = 0, iLength=giftAcceptChoices.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(giftAcceptChoices[i]));
+    autoGiftAcceptChoice.appendChild(choice);
+  }
+  autoGiftAcceptChoice.selectedIndex = GM_getValue('autoGiftAcceptChoice', 0);
+
+  // Option for opening safehouse gifts
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  title = 'Click to open safehouse gifts';
+  id = 'autoSafehouse';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically open safehouse gifts'));
 
   // War - Automatically declare a war
   item = makeElement('div', list);
@@ -5423,6 +5547,27 @@ function createAutostatTab() {
     }
     sel.selectedIndex = GM_getValue(autoStatPrios[i], 0);
   }
+
+  id = 'autoMainframe';
+  title = 'Check this to enable auto-code for the mainframe';
+  var autoMainframe = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 175px; left: 20px;'});
+  makeElement('input', autoMainframe, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', autoMainframe, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-Mainframe'));
+  title = 'Enter mainframe code';
+  id = 'autoMainframeCode';
+  makeElement('input', autoMainframe, {'type':'text', 'style':'width: 80px;margin-left:5px; text-align: right', 'title':title, 'value':GM_getValue(id, ''), 'id':id, 'size':'12'});
+
+  id = 'autoResetTimers';
+  title = 'Check this to reset timers on MWAP startup';
+  var autoResetTimers = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 200px; left: 20px;'});
+  makeElement('input', autoResetTimers, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', autoResetTimers, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-ResetTimers'));
+
+  id = 'autoDailyChecklist';
+  title = 'Check this to have MWAP click through the daily checklist items';
+  var autoDailyChecklist = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 225px; left: 20px;'});
+  makeElement('input', autoDailyChecklist, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', autoDailyChecklist, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-Daily Checklist'));
 
   return autostatTab;
 }
@@ -5685,6 +5830,16 @@ function createEnergyTab() {
   id = 'estimateJobRatio';
   label.appendChild(document.createTextNode(' Full packs @ ratio '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
+
+  // Energy packs force
+  title = 'Spend energy packs if you have less than the set amount of energy.';
+  id = 'autoEnergyPackForce';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'autoEnergyPackForce');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  title = 'Amount of energy remaining to trigger the firing of the energy pack.';
+  id = 'autoEnergyPackForcePts';
+  label.appendChild(document.createTextNode(' Full packs @ points '));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('autoEnergyPackForcePts', '0'), 'size':'1'});
 
   // Maniac character type?
   item = makeElement('div', list);
@@ -6342,7 +6497,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoymsd';
+                 'nitr0genics, DTPN, nonoymsd, Bushdaka';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -6720,16 +6875,16 @@ function handleModificationTimer() {
     pageChanged = true;
   }
 
-  // Added handling for just job page changes
+  // Added handling for the new-style job page changes
   var jobResult = xpathFirst('.//div[@id="new_user_jobs"]//div[@class="job_results"]', innerPageElt);
   if (jobResult) {
     if (!xpathFirst('.//div[@id="job_flag"]', jobResult)) {
       setListenContent(false);
       makeElement('div', jobResult, {'id':'job_flag', 'style':'display: none'});
       setListenContent(true);
-      DEBUG('Detected new job results.');
+      DEBUG('Detected new-style job results.');
       pageChanged = true;
-      justPlay = true;
+      if (running) justPlay = true;
     }
   }
 
@@ -6743,16 +6898,39 @@ function handleModificationTimer() {
       setListenContent(true);
       DEBUG('Detected new rob results.');
       pageChanged = true;
-      justPlay = true;
+      if (running) justPlay = true;
     }
   }
+  if (running) {
+    // Paypal Popup
+    var eltPopup = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"paypal") and contains(@style,"block")]',innerPageElt);
+    if (eltPopup) {
+      var popupIDBG = eltPopup.id.replace('_box','_box_bg');
+      var eltPopupBG = document.getElementById(popupIDBG);
+      // Get rid of this popup!
+      eltPopup.style.display = 'none';
+      eltPopupBG.style.display = 'none';
+      DEBUG('Got rid of Zynga Popup: ' + eltPopup.id);
+    }
 
-  // Handling for pop-ups
-  var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
-  if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
-    pageChanged = true;
-    justPlay = true;
-    DEBUG('Detected pop-up.');
+    // Handling for pop-ups
+    var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
+    if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
+      var popupElts = $x('.//div[contains(@style, "block")]', popupElt);
+      if (popupElts && popupElts.length > 0) {
+        for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
+          if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
+            var foundPopup = true;
+            break;
+          }
+        }
+      }
+      if (foundPopup) {
+        pageChanged = true;
+        justPlay = true;
+        DEBUG('Detected pop-up.');
+      }
+    }
   }
 
   // Handle changes to the inner page.
@@ -7202,9 +7380,9 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = 'html { overflow-y: auto !important } #mainDiv {margin-right: auto; margin-left: auto; width: 800px;}'   +
-                 (isGMChecked('leftAlign') ? ' #final_wrapper {position: absolute; margin: 0; top: 0px; left: 0px;}' : '')   +
-                 ' div[style$="z-index: 100;"] {position: absolute !important; left: 255px !important; top: 10px !important;}' +
+    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;}'   +
+                 (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
+                 ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -10px !important; left: 255px !important; width: 45px; z-index: 100;}' +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust level/experience CSS
@@ -7336,6 +7514,32 @@ function refreshMWAPCSS() {
   }
 }
 
+function resetTimers(popup) {
+  // Reset the timers.
+  addToLog('warning Icon', 'All active timers have been reset.');
+  GM_setValue('miniPackTimer', 0);
+  GM_setValue('wishListTimer', 0);
+  GM_setValue('warTimer', 0);
+  GM_setValue('buildCarTimer', 0);
+  GM_setValue('buildWeaponTimer', 0);
+  GM_setValue('takeHourBangkok', 0);
+  GM_setValue('takeHourCuba', 0);
+  GM_setValue('takeHourMoscow', 0);
+  GM_setValue('takeHourNew York', 0);
+  GM_setValue('dailyChecklistTimer', 0);
+  GM_setValue('autoGiftAcceptTimer', 0);
+  GM_setValue('autoSafehouseTimer', 0);
+  if (popup) {
+    alert('All active timers have been reset.');
+
+    // Restart the timers.
+    Autoplay.delay = 150;
+    Autoplay.start();
+    autoReload();
+  }
+  return;
+}
+
 // Perform click actions here
 function doQuickClicks() {
   try {
@@ -7365,8 +7569,7 @@ function doQuickClicks() {
     // Click the 'Rally More Help!' button
     //if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
-    // Can bank flag (FIXME: Fix quick banking!)
-    quickBankFail = true;
+    // Can bank flag
     var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
                   cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
@@ -7376,13 +7579,25 @@ function doQuickClicks() {
     }
 
     // Auto-send energy pack
-    var actionElt = getActionBox('Send an energy pack to your mafia');
+    var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
     if (actionElt && isGMChecked('sendEnergyPack')) {
-      var actionLink = getActionLink (actionElt, 'Send Energy Pack');
-      DEBUG(actionLink.innerHTML);
-      if (actionLink && actionLink.scrollWidth) {
-        clickElement(actionLink);
-        DEBUG('Clicked to send energy pack to my mafia.');
+      // Ok, if we're here, then there is a number next to the Daily Checklist Energy Pack item
+      // it might be for using the pack, not sending it, so click the menu item
+      var eltPacksClick = xpathFirst('//div[@class="mbox_click_wrapper_two" and contains(@onclick,"energy_packs")]', innerPageElt);
+      if (eltPacksClick) {
+        clickElement(eltPacksClick);
+      }
+      // Grab the container used for sending energy
+      var checkElt = document.getElementById('mbox_energy_send_container');
+      if (checkElt) {
+        // If the 'send energy container' is visible, we can click it
+        if (checkElt.style.display == 'block') {
+          var actionLink = makeElement('a', null, {'onclick':'do_ajax("inner_page","remote/html_server.php?xw_controller=index&xw_action=send_energy_pak&xw_city=1&activehustle=energy_packs&hustle_nrg_use=0&hustle_nrg_send=1")'});
+          if (actionLink) {
+            clickElement(actionLink);
+            DEBUG('Daily Checklist: Clicked to send energy pack to my mafia.');
+          }
+        }
       }
     }
 
@@ -7489,28 +7704,44 @@ function customizeMasthead() {
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
   var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 34px; font-size: 11px; right: 10px; text-align: left;'});
 
-  // Change help intructions :D
+  // Change help instructions
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
   var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
   titleElt.innerHTML = "MWAP";
   var helpMenu = xpathFirst('.//div[@id="instruction_menu"]', helpElt);
-  helpMenu.innerHTML = '<a href="http://userscripts.org/scripts/show/64720" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">For Firefox</div> ' +
+  helpMenu.style.width = "200px";
+  helpMenu.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
+                       '<div class="sexy_destination middle"><b>Downloads</b></div> ' +
+                       '<a href="http://userscripts.org/scripts/show/64720" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
                        '</a> ' +
                        '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">For Chrome</div> ' +
-                       '</a> ' +
-                       '<a href="http://www.playerscripts.com/forum/viewtopic.php?f=27&t=1316" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">MWAP Support</div> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
+                       '</a> ' + 
+                       '<div class="sexy_destination middle"><b>Websites</b></div> ' +
+                       '<a href="http://www.playerscripts.com/forum/" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts</div> ' +
                        '</a>' +
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">Zynga Forums</div> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Zynga Forums</div> ' +
+                       '</a> ' +
+                       '<div class="sexy_destination middle"><b>Bookmarklets</b></div> ' +
+                       '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fuserscripts.org%2Fscripts%2Fsource%2F68186.user.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
                        '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
+  // Reset Timers (MWAP menu)
+  var lobjresetTimers = makeElement('a', null, {'id':'resetTimers'});
+  lobjresetTimers.innerHTML = '<div class="sexy_destination middle"> ' +
+                           '  <span id="resetTimers">Reset Timers</span></div>';
+  lobjresetTimers.addEventListener('click', resetTimers, false);
+  helpMenu.insertBefore(lobjresetTimers, helpMenu.firstChild);
+
   // Settings Link (MWAP menu)
   var lobjAutoPlay = makeElement('a', null, {'id':'autoPlay'});
-  lobjAutoPlay.innerHTML = '<div class="sexy_destination middle"> ' +
+  lobjAutoPlay.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
+                           '<div class="sexy_destination middle"> ' +
                            '  <span id="autoPlay">Settings</span></div>';
   lobjAutoPlay.addEventListener('click', toggleSettings, false);
   helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
@@ -7534,6 +7765,16 @@ function customizeMasthead() {
 function customizeStats() {
   // Don't watch the stats area while we're making changes to it.
   setListenStats(false);
+
+  // Make energy icon clickable for mini pack.
+  var nrgLinkElt = document.getElementById('mwap_nrg');
+  var nrgImgElt = xpathFirst('//img[@alt="Energy"]');
+  if (nrgImgElt && !nrgLinkElt) {
+    nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately.'})
+    nrgImgElt.parentNode.insertBefore(nrgLinkElt, nrgImgElt);
+    nrgLinkElt.appendChild(nrgImgElt);
+    nrgLinkElt.addEventListener('click', miniPack, false);
+  }
 
   // Make health icon clickable for instant healing.
   var healLinkElt = document.getElementById('mwap_heal');
@@ -7592,9 +7833,8 @@ function customizeStats() {
     GM_setValue('healWaitStarted', true);
   }
 
-  // Make bank icon clicable for instant banking
-  // FIXME: Removed till quick-banking is resolved
-  /*var bankLinkElt = document.getElementById('mwap_bank');
+  // Make bank icon clickable for instant banking
+  var bankLinkElt = document.getElementById('mwap_bank');
   var bankElt = xpathFirst('//div[@id="cash_stats_'+cities[city][CITY_ALIAS]+'"]', innerPageElt);
 
   if (bankElt && !bankLinkElt) {
@@ -7606,7 +7846,7 @@ function customizeStats() {
     bankElt.insertBefore(bankLinkElt, bankImgElt);
     bankLinkElt.appendChild(bankImgElt);
     bankLinkElt.addEventListener('click', quickBank, false);
-  }*/
+  }
 
   setListenStats(true);
 }
@@ -7621,23 +7861,10 @@ function quickBank(bankCity, amount) {
   }
 
   // Get the URL
-  var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit','xw_city':(bankCity + 1)});
+  var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
 
   // Form the post data
   var postData = 'ajax=1';
-  if (!depositUrl.match(/sf_xw_user_id=(\w+)/)) {
-    DEBUG('Cannot find \'sf_xw_user_id\' from the URL.');
-    quickBankFail = true;
-    return;
-  }
-  postData += '&sf_xw_user_id=' + RegExp.$1;
-
-  if (!depositUrl.match(/sf_xw_sig=(\w+)/)) {
-    DEBUG('Cannot find \'sf_xw_sig\' from the URL.');
-    quickBankFail = true;
-    return "";
-  }
-  postData += '&sf_xw_sig=' + RegExp.$1;
   postData += '&amount=' + amount;
 
   // If cash being deposited is greater than 1 billion, do NOT quick-bank!
@@ -8176,7 +8403,10 @@ function customizeNewJobs() {
     var cost = parseCash(costElt.innerHTML);
 
     var expElt = xpathFirst('.//dd[@class="experience"]', jobReward);
-    var reward = parseInt(expElt.innerHTML);
+    if (expElt)
+      var reward = parseInt(expElt.innerHTML);
+    else
+      var reward = 0;
 
     var moneyElt = xpathFirst('.//dd[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', jobReward);
 
@@ -8527,6 +8757,7 @@ function customizeFight() {
 }
 
 function customizeProps() {
+  if (GM_getValue('flashed',0)) return false;
   if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) return false;
 
   // Check flash
@@ -8711,26 +8942,6 @@ function clickAutoHitListRemove() {
     el.value = GM_getValue('autoHitOpponentList', '');
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Callback for clicking 'Add to War List' on profile page.
 function clickWarListAdd() {
@@ -9088,6 +9299,7 @@ function debugDumpSettings() {
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
+        'Enable flash, but disable ROI: <strong>' + showIfUnchecked(GM_getValue('flashed')) + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
@@ -9103,6 +9315,9 @@ function debugDumpSettings() {
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
         'Skip gift wall posts: <strong>' + showIfUnchecked(GM_getValue('autoGiftSkipOpt')) + '</strong><br>' +
         'Auto Gift Waiting: <strong>' + showIfUnchecked(GM_getValue('autoGiftWaiting'))  + '</strong><br>' +
+        'Auto Gift Accept: <strong>' + showIfUnchecked(GM_getValue('autoGiftAccept'))  + '</strong><br>' +
+        '&nbsp;&nbsp;Gift Choice: <strong>' + GM_getValue('autoGiftAcceptChoice', 'none')   + '</strong><br>' +
+        'Auto Safehouse: <strong>' + showIfUnchecked(GM_getValue('autoSafehouse'))  + '</strong><br>' +
         'Auto War: <strong>' + showIfUnchecked(GM_getValue('autoWar'))  + '</strong><br>' +
         '&nbsp;&nbsp;War Mode: <strong>' + warModeChoices[GM_getValue('warMode', 0)]  + '</strong><br>' +
         '&nbsp;&nbsp;Auto War Target List: <strong>' + GM_getValue('autoWarTargetList', 0) + '</strong><br>' +
@@ -9140,6 +9355,10 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;-Stamina Fallback: <strong>' + GM_getValue('autoStatStaminaFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Rest AutoStat: <strong>' + GM_getValue('restAutoStat') + '</strong><br>' +
         '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +
+        'autoMainframe: <strong>' + showIfUnchecked(GM_getValue('autoMainframe')) + '</strong><br>' +
+        '&nbsp;&nbsp;-autoMainframeCode: <strong>' + GM_getValue('autoMainframeCode') + '</strong><br>' +
+        'autoResetTimers: <strong>' + showIfUnchecked(GM_getValue('autoResetTimers')) + '</strong><br>' +
+        'autoDailyChecklist: <strong>' + showIfUnchecked(GM_getValue('autoDailyChecklist')) + '</strong><br>' +
         '-------------------Energy Tab--------------------<br>' +
         'Enable auto-mission: <strong>' + showIfUnchecked(GM_getValue('autoMission')) + '</strong><br>' +
         'Enabled job bursts: <strong>' + showIfUnchecked(GM_getValue('burstJob')) + ' == Fire ' + GM_getValue('burstJobCount') + ' job attempts everytime</strong><br>' +
@@ -9159,6 +9378,8 @@ function debugDumpSettings() {
         'Energy threshold: <strong>' + GM_getValue('selectEnergyUse') + ' ' + numberSchemes[GM_getValue('selectEnergyUseMode', 0)] + ' (refill to ' + SpendEnergy.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
         'Energy reserve: <strong>' + + GM_getValue('selectEnergyKeep') + ' ' + numberSchemes[GM_getValue('selectEnergyKeepMode', 0)] + ' (keep above ' + SpendEnergy.floor + ')</strong><br>' +
+        'autoEnergyPackForce: <strong>' + showIfUnchecked(GM_getValue('autoEnergyPackForce')) + '</strong><br>' +
+        '&nbsp;&nbsp;-autoEnergyPackForcePts: <strong>' + GM_getValue('autoEnergyPackForcePts') + '</strong><br>' +
         '-------------------Stamina Tab-------------------<br>' +
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
@@ -9827,7 +10048,7 @@ function autoWar() {
     }
 
     // Html attributes has been changed by Zynga, disable autoWar
-    if (!warElt || (warElt && !warElt.getAttribute('onclick').match(/target_id=(\d+)/))) {
+    if (!warElt || (warElt && !warElt.getAttribute('onclick').match(/target_id=p%7C(\d+)/))) {
       DEBUG('War elements changed by Zynga, disabling autoWar.');
       GM_setValue('autoWar', 0)
       return false;
@@ -9866,21 +10087,444 @@ function autoWar() {
 }
 
 function autoGiftWaiting() {
-  // Check for gift waiting button
-  var actionElt = getActionBox('You have a gift waiting for you');
-  if (actionElt) {
-    // Check if there's a gift waiting to be opened
-    var actionLink = getActionLink (actionElt, 'Open it!');
-    if (actionLink) {
+  // Check the message box menu for gifts, rather than opening each gift, just go to the loot page to see them all
+  var eltGiftsWaiting = xpathFirst('//div[contains(@id, "counter_bg_send_gifts")]', innerPageElt);
+  if (eltGiftsWaiting) {
+    // Build the clickable element
+    // Switch between the loot page and the collections page
+    GM_setValue('autoGiftWaitingPage', GM_getValue('autoGiftWaitingPage',0)?0:1);
+    var page = (GM_getValue('autoGiftWaitingPage') ? 'collection' : 'loot');
+    var pagehtml = '"remote/html_server.php?xw_controller=' + page + '&xw_action=view&xw_city=1"';
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+ pagehtml + ')'});
+    if (elt) {
       Autoplay.fx = function() {
-        clickElement(actionLink);
-        DEBUG('Clicked to open gifts.');
-      };
+        clickElement(elt);
+        DEBUG('Clicked to view gifts by going to the ' + page + ' page via ' + pagehtml);
+      }
       Autoplay.start();
       return true;
     }
   }
 
+  return false;
+}
+
+function autoGiftPopups() {
+  // This is a gift popup
+  var eltGiftSafehouseCongrats = xpathFirst('//div[contains(@id,"zy_popup_box") and (contains(@class,"safehouse_congrats_popup") or contains(@class,"safehouse_results_popup"))]', innerPageElt); 
+  if (eltGiftSafehouseCongrats) {
+    eltGiftSafehouseCongrats.style.display = 'none';
+    DEBUG('Gifts: Cleared safehouse congratulations popup: ' + eltGiftSafehouseCongrats.id);
+    return false;
+  }
+
+  // Check for a Gift Window popup for the safehouse style 3018
+  var eltGift3018 = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"safehouse") and contains(@style,"block")]', innerPageElt); 
+  if (eltGift3018) {
+    // So there's a 3018 popup! Let's let Z do it for us! 
+    // Ok, so JQuery should already exist!
+    $ = unsafeWindow.jQuery;
+
+    var eltGag = document.getElementById('gag_item_id');
+    var eltValue = document.getElementById('value_item_id');
+
+    var eltRewardXP = document.getElementById('xp_gain_url');
+    var eltRewardNRG = document.getElementById('nrg_gain_url');
+    var eltRewardSTA = document.getElementById('sta_gain_url');
+
+    var eltLoyalty = document.getElementById('gift_popup_send_gift');
+
+    $('#cb_value_item').click();
+    switch (GM_getValue('autoGiftAcceptChoice')) {
+      // XP
+      case 0:
+              $('#cb_xp_gain').click();
+              break;
+      // ENERGY
+      case 1:
+              $('#cb_nrg_gain').click();
+              break;
+      // STAMINA
+      case 2:
+              $('#cb_sta_gain').click();
+              break;
+      // just in case
+      default: 
+              $('#cb_xp_gain').click();
+    }
+
+
+    Autoplay.fx = function() { 
+      // Ok, so JQuery should already exist!
+      $ = unsafeWindow.jQuery;
+      $('#gift_popup_send_gift').click();
+      DEBUG('Gifts 3018: Clicked to show loyalty!');
+      return;
+    };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+  return false;
+}
+
+var giftQueue = new Array();
+function autoGiftQueue() {
+  // Any entries in the queue?
+  if (!giftQueue.length) {
+    if (autoGiftWindowClose()) return false;
+    return false;
+  }
+
+  //  Make sure that gift window is open, otherwise we lose the gift!
+  var iframeGiftWindow = document.getElementById('message_center_div_iframe');
+  if (!iframeGiftWindow) {
+    autoGiftWindowOpen();
+    return true;
+  }
+
+  // We're gonna grab entries off the queue 1 at a time
+  var thisGift = giftQueue.pop();
+  DEBUG('Gifts: giftQueue: ' + giftQueue.length + ' ' + thisGift);
+
+  // Simulate a mouse click on the element.
+  if (iframeGiftWindow && thisGift) {
+    var evt = iframeGiftWindow.contentDocument.createEvent('MouseEvents');
+    evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    thisGift.dispatchEvent(evt);
+    DEBUG('Gifts: Click to process gift.');
+    Autoplay.fx = function() { autoGiftQueue(); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+  return false;
+}
+
+function autoGiftWindowClose() {
+  // If there are queue entries, then we still need to process them
+  if (giftQueue.length) return false;  
+
+  // Let's close the window!
+  var iframeGiftWindow = document.getElementById('message_center_div_iframe');
+  if (!iframeGiftWindow) return false;
+  var eltCloseWindow = iframeGiftWindow.contentDocument.evaluate('//a[contains(@onclick,"closeMessageCenter")]', iframeGiftWindow.contentDocument, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
+  if (!eltCloseWindow) return false;
+
+  // Ok, close the gift window! 
+  // Simulate a mouse click on the element.
+  Autoplay.fx = function() {
+    var iframeGiftWindow = document.getElementById('message_center_div_iframe');
+    var eltCloseWindow = iframeGiftWindow.contentDocument.evaluate('//a[contains(@onclick,"closeMessageCenter")]', iframeGiftWindow.contentDocument, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
+    var evt = iframeGiftWindow.contentDocument.createEvent('MouseEvents');
+    evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    eltCloseWindow.dispatchEvent(evt);
+    DEBUG('Gifts: Clicked to close gift window.');
+    autoGiftQueue();
+  }
+
+  // Restart the timers.
+  Autoplay.delay = 1000;
+  Autoplay.start();
+  Reload.delay = 5000;
+  Reload.start();
+  setGMTime('autoGiftAcceptTimer', "00:05:00");
+  return true;
+}
+
+function autoGiftWindowOpen() {
+  // Is it already open?
+  var iframeGiftWindow = document.getElementById('message_center_div_iframe');
+  if (iframeGiftWindow) {
+    // Setup to start the queue!
+    Autoplay.fx = function() { autoGiftQueue(); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+    return true;
+  }
+
+  // Grab the iframe for the envelope and see how many gifts there are
+  // This is the gift count iframe at the top of the page, part of the envelope
+  var iframeGiftCount = document.getElementById('message_center_button');
+  if (!iframeGiftCount) return false;
+  // Valid iframe, now get the gift count button
+  var eltGiftCount = iframeGiftCount.contentDocument.getElementById('button_counter');
+  if (!eltGiftCount) return false;
+
+  // Valid button, now parse the content (if no gifts then this contains &nbsp; which will resolve to 0
+  var giftCount = isNaN(parseInt(eltGiftCount.innerHTML))?0:parseInt(eltGiftCount.innerHTML);
+  DEBUG('Gift Envelope: giftCount = ' +  giftCount);
+
+  // Do we have a gift? If not, time to leave.
+  if (!giftCount) return false;
+
+  // If we are here, then there are gifts to process, so open the Gift Window frame
+  clickElement(eltGiftCount);
+  DEBUG('Clicked to open gift window.');
+
+  // Clear reload timer
+  Reload.clearTimeout();
+
+  // Setup to wait for the window to open!
+  Autoplay.fx = function() { autoGiftAccept(); };
+  Autoplay.delay = getAutoPlayDelay();
+  Autoplay.delay = 20000;
+  Autoplay.start();
+
+  return true;
+}
+
+function autoGiftAccept() {
+  // Damn these frames! 
+  if (!onHome()) return false;
+  // Need to be enabled
+  if (!GM_getValue('autoGiftAccept',0)) return false;
+
+  // If there are queue entries, then we still need to process them
+  if (giftQueue.length) return true;  
+
+  // We're only coming to this routine every few minutes because it opens a window
+  if (timeLeftGM('autoGiftAcceptTimer')) return false;
+
+  // First, let's see if the iframe is already there, if it is, then we may need to process some gifts!
+  // This is the gift window iframe where all the gifts are listed
+  // If this iframe is active then the window is open, or maybe it was previously opened
+  var iframeGiftWindow = document.getElementById('message_center_div_iframe');
+  if (iframeGiftWindow) {
+    // How many gifts are there? Use the frames live data!
+    eltGiftCount = iframeGiftWindow.contentDocument.getElementById("numNewEvents");
+    if (!eltGiftCount) return false;
+    giftCount = parseInt(eltGiftCount.innerHTML);
+    addToLog('info Icon', 'Gifts: Checking ' + giftCount + ' gifts');
+
+    // Grab all the 3012 class gifts
+    var eltGiftContainer3012 = iframeGiftWindow.contentDocument.evaluate('//*[@id="event_container_3012"]//div[@class="event"]', iframeGiftWindow.contentDocument, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    if (eltGiftContainer3012) {
+      var giftCount3012 = eltGiftContainer3012.snapshotLength;
+      DEBUG('Gifts: giftCount3012 = ' + giftCount3012);
+      if (giftCount3012 > 0) {
+        // Ok, we have at least one gift!
+        for (var i =0; i < giftCount3012; i++) {
+          var eltThisGift = eltGiftContainer3012.snapshotItem(i).innerHTML.slice(eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('_main"'));
+          //DEBUG('Gifts: Snapshot ' + i + ': ' + eltThisGift);
+
+          var eltX = 'event_' + eltThisGift + '_main';
+          var eltGiftContent = iframeGiftWindow.contentDocument.getElementById(eltX);
+          var giftSender = eltGiftContent.innerHTML.slice(0, eltGiftContent.innerHTML.indexOf(' has sent you')).untag().clean().ltrim().rtrim();
+          var giftObject = eltGiftContent.innerHTML.slice(eltGiftContent.innerHTML.indexOf(' has sent you')+13,eltGiftContent.innerHTML.indexOf(' in Mafia Wars')).untag().clean().ltrim().rtrim();
+
+          var eltX = 'event_' + eltThisGift + '_buttons';
+          var eltGiftAccept = iframeGiftWindow.contentDocument.evaluate('//div[@id="'+eltX+'"]//input[contains(@value,"Open It") or contains(@value,"Accept")]', iframeGiftWindow.contentDocument, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
+
+          // Add this gift to the queue
+          giftQueue.push(eltGiftAccept);
+          addToLog('info Icon','Gifts: Queued ' + giftObject + ' from ' + giftSender);
+        }
+        // Kick off the Queue!
+        Autoplay.fx = function() { autoGiftQueue(); };
+        Autoplay.delay = getAutoPlayDelay();
+        Autoplay.start();
+        return true;
+      }
+    }
+
+    // Gift Window is open, no 3012 gifts, check for 3018 styles
+
+    // Grab all the 3018 class gifts
+    // For 3018 style gifts we should only do them one at a time, this loop only processes once, it is left here for when/if it is changed.
+    var eltGiftContainer3018 = iframeGiftWindow.contentDocument.evaluate('//*[@id="event_container_3018"]//div[@class="event"]', iframeGiftWindow.contentDocument, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    if (eltGiftContainer3018) {
+      var giftCount3018 = eltGiftContainer3018.snapshotLength;
+      DEBUG('Gifts: giftCount3018 = ' + giftCount3018);
+      if (giftCount3018 > 0) {
+        // Ok, we have at least one gift!
+        for (var i =0; i < giftCount3018; i++) {
+          var eltThisGift = eltGiftContainer3018.snapshotItem(i).innerHTML.slice(eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('_main"'));
+          //DEBUG('Gifts: Snapshot ' + i + ': ' + eltThisGift);
+
+          var eltX = 'event_' + eltThisGift + '_main';
+          var eltGiftContent = iframeGiftWindow.contentDocument.getElementById(eltX);
+          var giftSender = eltGiftContent.innerHTML.slice(0, eltGiftContent.innerHTML.indexOf(' needs a partner')).untag().clean().ltrim().rtrim();
+          var giftObject = eltGiftContent.innerHTML.slice(eltGiftContent.innerHTML.indexOf(' pull off his ')+13,eltGiftContent.innerHTML.indexOf('. Choose to ')).untag().clean().ltrim().rtrim();
+
+          var eltX = 'event_' + eltThisGift + '_buttons';
+          var eltGiftAccept = iframeGiftWindow.contentDocument.evaluate('//div[@id="'+eltX+'"]//input[contains(@value,"Open It") or contains(@value,"Accept")]', iframeGiftWindow.contentDocument, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
+          addToLog('info Icon','Gifts: Grabbed ' + giftObject + ' from ' + giftSender);
+
+          // Simulate a mouse click on the element.
+          var evt = iframeGiftWindow.contentDocument.createEvent('MouseEvents');
+          evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+          eltGiftAccept.dispatchEvent(evt);
+          // NOTICE: Clicking this element causes Mafia Wars to refresh
+          // Processing will pick up in the initialization section where the 3018 popup is handled.
+          Autoplay.delay = getAutoPlayDelay();
+          Autoplay.start();
+          return true;
+        }
+      }
+    }
+    // If we get here, there were 3018 gifts but couldn't get them
+    //return false;
+  } 
+
+  // If we are here, then open the gift window
+  if (autoGiftWindowOpen()) return true;
+
+  // Gift window isn't open, and we have no idea how many gifts, just leave
+  // Restart the timers.
+  Autoplay.fx = function() { autoGiftWindowClose(); };
+  Autoplay.delay = 1000;
+  Autoplay.start();
+  Reload.delay = 5000;
+  Reload.start();
+  return false;
+}
+
+function autoSafehouse() {
+  // Need to be enabled
+  if (!GM_getValue('autoSafehouse',0)) return false;
+
+  // We're only coming to this routine every few minutes
+  if (timeLeftGM('autoSafehouseTimer')) return false;
+
+  if (!onSafehouseNav()) {
+    // Go to Safehouse!
+    Autoplay.fx = goSafehouseNav;
+    Autoplay.start();
+    return true;
+  }
+
+  // Clearing these timeouts helps keep us on the page
+  Autoplay.clearTimeout();
+  Reload.clearTimeout();
+
+  // Grab the first gift location
+  var eltSafehouseGift = xpathFirst('//div[@class="gift_safehouse_gift_display"]', innerPageElt);
+  //DEBUG('eltSafehouseGift = ' + eltSafehouseGift);
+  if (!eltSafehouseGift) {
+    addToLog('info Icon','Safehouse: No gifts available');
+    setGMTime('autoSafehouseTimer', "00:05:00");
+    return false;
+  }
+  var cntSafehouseGiftReady = eltSafehouseGift.innerHTML.indexOf('door_open');
+  if (cntSafehouseGiftReady < 0) {
+    // No gift ready to be open
+    addToLog('info Icon','Safehouse: No gifts available');
+    setGMTime('autoSafehouseTimer', "00:05:00");
+    return false;
+  }
+
+  // Really, this about all that has to be done, the rest is cosmetic
+  // This URL doesn't seem to change at this time since the refresh causes all the gifts to shift
+  addToLog('info Icon','Safehouse: Grabbing a gift!');
+  document.location = "http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=safehouse&xw_action=open_gift_free&xw_city=1&box_num=0";
+
+  // This might never be needed, but let's just do it anyway
+  Autoplay.delay = 30000;
+  Autoplay.start();
+  return true;
+}
+
+function autoDailyChecklist() {
+  // Need to be on the main home page
+  if (!onHome()) return false;
+  // Need to be enabled
+  if (!GM_getValue('autoDailyChecklist',0)) return false;
+
+  // Let's do this code once in a while.
+  if (timeLeftGM('dailyChecklistTimer')) return false;
+  setGMTime('dailyChecklistTimer', "00:15:00");
+
+  // This routines goal is to click the daily checklist to grab the daily skill point
+  // To get the skill point we can 'skip' through the checklist, we just have actually do the skip
+  // The checklist checkmarks are not good indicators of the current skill point status, for example, they may all be
+  // checked but the skill point doesn't appear, but if you click them each again it does. Why were they checked if they
+  // needed to be clicked again? So, every once in a while, let's click through them just because we can.
+
+  addToLog('info Icon','Daily Checklist: Processed.');
+
+  // Challenge Mission
+  var eltTemp = xpathFirst('//*[@id="message_box_menu_checkmark_challenge_mission" and contains(@class, "_checked")]', innerPageElt);
+  var eltTempClick = xpathFirst('//div[@class="mbox_click_wrapper_two" and contains(@onclick,"challenge")]', innerPageElt);
+  if (eltTempClick) {
+    clickElement(eltTempClick);
+  }
+
+  // Grow your family
+  var eltGrow = xpathFirst('//*[@id="message_box_menu_checkmark_mafia" and contains(@class, "_checked")]', innerPageElt);
+  var eltGrowSkip = xpathFirst('//a[@class="sexy_button_new" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
+  if (eltGrowSkip) {
+    clickElement(eltGrowSkip);
+  }
+
+  // Gifts
+  var eltGifts = xpathFirst('//*[@id="message_box_menu_checkmark_send_gifts" and contains(@class, "_checked")]', innerPageElt);
+  var eltGiftsSkip = xpathFirst('//a[@class="sexy_button_new" and contains(@onclick, "skipCategory") and contains(@onclick, "send_gifts")]', innerPageElt);
+  if (eltGiftsSkip) {
+    clickElement(eltGiftsSkip);
+  }
+
+  // Messages
+  // If there is a war in progress, this might need to be clicked.
+  var eltMessages = xpathFirst('//*[@id="message_box_menu_checkmark_messages" and contains(@class, "_checked")]', innerPageElt);
+  var eltMessagesClick = xpathFirst('//div[@class="mbox_click_wrapper_two" and contains(@onclick,"messages")]', innerPageElt);
+  var eltActionTaken = makeElement('a', null, {'onclick':'mboxActionTaken("messages", true);'});
+  if (eltMessagesClick) {
+    clickElement(eltMessagesClick);
+  }
+  if (eltActionTaken) clickElement(eltActionTaken);
+
+  // Energy Packs
+  // There is already a function to handle using and sending the energy packs, this just makes sure the box is checked
+  // If there's an energy pack to send, or if an energy pack is waiting to be used, then we'll not do anything since other code will check this box
+  // Another possibility is that the user has selected to either not send energy packs or to not use them, in that case, we'll never be able to check this box
+  if (!isGMChecked('sendEnergyPack') || (!isGMChecked('autoEnergyPack') && !isGMChecked('autoEnergyPackForce'))) {
+    return false;
+  }
+  var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
+  if (!actionElt) {
+    var eltPacks = xpathFirst('//*[@id="message_box_menu_checkmark_energy_packs" and contains(@class, "_checked")]', innerPageElt);
+    var eltPacksClick = xpathFirst('//div[@class="mbox_click_wrapper_two" and contains(@onclick,"energy_packs")]', innerPageElt);
+    if (eltPacksClick) {
+      clickElement(eltPacksClick);
+    }
+  }
+
+  // When we get here everything has a check mark whether we forced it or not
+  return false;
+}
+
+function autoMainframe() {
+  // Check for mainframe on main page
+  var eltMainframe = xpathFirst('//img[contains(@src, "Code_MessageBox")]', innerPageElt);
+  if (!eltMainframe) return false;
+  //DEBUG('eltMainframe.src = ' + eltMainframe.src);
+  clickElement(eltMainframe);
+  DEBUG('Clicked to open mainframe.');
+
+  var eltSecretCode = xpathFirst('//*[@id="secretcode_input"]');
+  //DEBUG('eltSecretCode = ' + eltSecretCode);
+  if (eltSecretCode) {
+    eltSecretCode.value = GM_getValue('autoMainframeCode',0);
+    eltRedeemButton = xpathFirst('//a[contains(@onclick, "redeemSecretCode")]', innerPageElt);
+    //DEBUG('eltRedeemButton = ' + eltRedeemButton);
+    if (eltRedeemButton) {
+      clickElement(eltRedeemButton);
+      DEBUG('Clicked to redeem mainframe code.');
+    }
+  }
+
+  // Check for the mainframe redeem code success
+  var eltMainframeSuccess = xpathFirst('//div[contains(@class, "secretcode_reward")]//h3', innerPageElt);
+  if (eltMainframeSuccess) {
+    addToLog('info Icon','Mainframe reward: ' + eltMainframeSuccess.innerHTML);
+    var eltMainframeClose = xpathFirst('//a[contains(@class, "sexy_button_new")]//span[contains(text(), "Close")]', innerPageElt);
+    // Ok, close the mainframe
+    clickElement(eltMainframeClose);
+    DEBUG('Clicked to close mainframe.');
+    goHome();
+    return true;
+  }
   return false;
 }
 
@@ -9947,6 +10591,16 @@ function onHome() {
     return true;
   }
 
+  return false;
+}
+
+function onSafehouseNav() {
+  // Return true if we're on the safehouse nav, false otherwise.
+  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', innerPageElt)) {
+    //DEBUG('Safehouse: On safehouse page');
+    return true;
+  }
+  //DEBUG('Safehouse: NOT on safehouse page');
   return false;
 }
 
@@ -10041,6 +10695,20 @@ function goHome() {
   }
   clickElement(elt);
   DEBUG('Clicked to go home.');
+}
+
+function goSafehouseNav() {
+  var elt = makeElement('a', null, {'onclick':'do_ajax("inner_page","remote/html_server.php?xw_controller=safehouse&xw_action=view")'});
+  if (!elt) {
+    addToLog('warning Icon', 'Can\'t make Safehouse nav link to click.');
+    return;
+  } else {
+    clickElement(elt);
+    DEBUG('Clicked to load Safehouse nav.');
+    Autoplay.fx = function() { autoSafehouse(); };
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.start();
+  }
 }
 
 function goProfileNav(player) {
@@ -10699,9 +11367,12 @@ function logFightResponse(rootElt, resultElt, context) {
     lastOpponent.attackAgain = attackAgainElt ? attackAgainElt : undefined;
 
     // Click the secret stash immediately
-    var eltStash = document.getElementById('fight_loot_feed_btn');//xpathFirst('.//span[contains(.,"Send") and contains(.,"Now")]', resultElt);
+    var eltStash = xpathFirst('.//span[contains(.,"Send") and contains(.,"Now")]', resultElt);
     if (eltStash && isGMChecked('autoSecretStash')) {
       clickElement(eltStash);
+      var stashFinder = xpathFirst('.//div[contains(.,"location of a secret stash")]/a', resultElt);
+      var stashUser = linkToString(stashFinder, 'stashUser');
+      addToLog('lootbag Icon','Clicked to send '+stashUser+' secret stash!');
       DEBUG('Clicked to publish the secret stash.');
     }
 
@@ -10802,9 +11473,26 @@ function logFightResponse(rootElt, resultElt, context) {
 
     // Look for any loot.
     if (innerNoTags.match(/found (an? .*) while fighting/i)) {
-      addToLog('lootbag Icon', '<span class="loot">'+' Found '+
-               RegExp.$1 + ' in the fight.</span>');
+      var foundLoot = RegExp.$1
+      var eltAttackStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
+      var newattackStrength = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+      var totalAttack =  Number(newattackStrength) - Number(curAttack);
+
+      var eltDefenseStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
+      var newdefenseStrength = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+      var totalDefense = Number(newdefenseStrength) - Number(curDefense);
+
+      var txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+      if(Number(totalAttack)>0)
+         var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + curAttack + ' New=' + newattackStrength;
+      if(Number(totalDefense)>0)
+         var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + curDefense + ' New=' + newdefenseStrength;
+      addToLog('lootbag Icon', txtLog);
     }
+//    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
+//      addToLog('lootbag Icon', '<span class="loot">'+' Found '+
+//               RegExp.$1 + ' in the fight.</span>');
+//    }
 
     // Update the statistics.
     takeFightStatistics(experience, cost, resultType);
