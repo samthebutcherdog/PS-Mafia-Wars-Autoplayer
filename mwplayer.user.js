@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       417
+// @build       418
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '417',
+  build: '418',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3257,6 +3257,7 @@ function autoBankDeposit(bankCity, amount) {
     clickElement (submitElt);
     DEBUG('Clicked to deposit.');
   }
+  Autoplay.delay = minDelay;
   Autoplay.start();
   return true;
 }
@@ -8083,11 +8084,11 @@ function customizeProfile() {
 	  if (remotefbid) {
         // Facebook profile
         if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
-        makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + remotefbid}).appendChild(document.createTextNode('Facebook Profile'));
+        makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + remotefbid,'target':'_blank'}).appendChild(document.createTextNode('Facebook Profile'));
         statsDiv.appendChild(document.createTextNode(' | '));
 
         // Add as Facebook friend
-        makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remotefbid}).appendChild(document.createTextNode('Add as Friend'));
+        makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remotefbid,'target':'_blank'}).appendChild(document.createTextNode('Add as Friend'));
 		rDisplay = true;
       }
 
@@ -10865,17 +10866,23 @@ function goJobTab(tabno) {
   }
 
   // No job tab. Make sure we're on the correct job bar.
-  var barno = city == NY? (tabno < 6? 0 : 1) : 0;
-  var currentBar = city == NY? (currentTab < 6? 0 : 1) : 0;
+  var barno = 0;
+  if (city == NY) barno = (tabno < 6 ? 0 : 1);
+  if (city == BK) barno = (tabno < 5 ? 0 : 1);
+  var currentBar = 0;
+  if (city == NY) currentBar = (currentTab < 6 ? 0 : 1);
+  if (city == BK) currentBar = (currentTab < 5 ? 0 : 1);
   if (currentBar != barno) {
-    var jobWord = currentBar == 1 ? "Easy Jobs" : "More Jobs";
+    var jobWord;
+    if (city == NY) jobWord	= currentBar == 1 ? "Easy Jobs" : "More Jobs";
+    if (city == BK) jobWord	= currentBar == 1 ? "Previous Episodes" : "More Episodes";
     elt = xpathFirst('.//ul[contains(@id,"jobs_bar")]' +
                      '//a[contains(text(), "'+jobWord+'")]', innerPageElt);
     clickElement(elt);
     DEBUG('Clicked to go to job bar ' + barno + '. ');
     return true;
   }
-
+  
   // Handle old and new tab param names
   elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[' +
                    'contains(@onclick, "&story_tab=' + tabno + '") or ' +
