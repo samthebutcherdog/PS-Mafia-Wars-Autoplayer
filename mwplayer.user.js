@@ -19,7 +19,7 @@
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka, 
             rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks, 
-            nonoymsd, Bushdaka 
+            nonoymsd 
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       415
+// @build       416
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '415',
+  build: '416',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -636,9 +636,10 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
                     'nQcICgsNDxEwhCYGnqutEBIUMoQnnwuitxQVFzSEKaEOrhMUFhgZNoQrrRG4FhcZHB44hC3A1dcd' +
                     'HyA6hC8TFcwaGx6PIzyEMd7YICEkJSY9hDPXHh8hIvaTgBCqcQNHDh07ePj4AQRIEEGBAAA7" />';
 
+const minDelay = 1000;          // Minimum delay on commands
 var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
-var appLayoutElt;              // The currently visible content page
+var appLayoutElt;               // The currently visible content page
 var cash;                       // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
@@ -2072,7 +2073,7 @@ function autoAccept() {
 
 function autoHeal() {
   // NOTE: In the interest of time, delays are waived.
-  Autoplay.delay = 0;
+  Autoplay.delay = minDelay;
 
   // Make sure we're in the preferred city.
   var healLocation = parseInt(GM_getValue('healLocation', NY));
@@ -2123,7 +2124,7 @@ function autoHeal() {
 function buildItem(itemArray, itemIndex, buildType){
   if (city != NY) {
     Autoplay.fx = function() { goLocation(NY); };
-    Autoplay.delay = 0;
+    Autoplay.delay = minDelay;
     Autoplay.start();
     return true;
   }
@@ -2553,7 +2554,7 @@ function autoMission() {
   if (getJobRowItems(jobName)) {
     if (jobid != GM_getValue('selectMission', 1))
       Autoplay.fx = autoMission;
-    Autoplay.delay = 0;
+    Autoplay.delay = minDelay;
     Autoplay.start();
     return;
   }
@@ -2658,7 +2659,7 @@ function autoHitlist() {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoHitlist.profileSearch && !autoHitlist.setBounty) {
     Autoplay.fx = goFightTab;
-    Autoplay.delay = 0;
+    Autoplay.delay = minDelay;
     Autoplay.start();
     return true;
   }
@@ -2756,7 +2757,7 @@ function autoFight(how) {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoFight.profileSearch) {
     Autoplay.fx = goFightTab;
-    Autoplay.delay = 0;
+    Autoplay.delay = minDelay;
     Autoplay.start();
     return true;
   }
@@ -2922,7 +2923,7 @@ function autoRob() {
   // Make sure we're on the fight tab.
   if (!onRobbingTab()) {
     Autoplay.fx = goRobbingTab;
-    Autoplay.delay = 0;
+    Autoplay.delay = minDelay;
     Autoplay.start();
     return true;
   }
@@ -2931,7 +2932,7 @@ function autoRob() {
     DEBUG("Refreshing the rob grid.");
     // refresh the 3x3 grid.
     Autoplay.fx = refreshRobbingGrid;
-    Autoplay.delay = 0;
+    Autoplay.delay = minDelay;
     Autoplay.start();
     return true;
   } else {
@@ -3156,7 +3157,7 @@ function autoHitman() {
     DEBUG('Clicked to hit ' + clickContext.name +
           ' (' + clickContext.id + ').');
   };
-  Autoplay.delay = 0;
+  Autoplay.delay = minDelay;
   Autoplay.start();
   return true;
 }
@@ -3291,6 +3292,7 @@ function autoBankWithdraw(amount) {
     clickElement (submitElt);
     DEBUG('Clicked to withdraw.');
   }
+  Autoplay.delay = minDelay;
   Autoplay.start();
   return true;
 }
@@ -5414,13 +5416,16 @@ function createMafiaTab() {
   makeElement('div', rhs, {'class':'hide', 'style':'height: 5px;'});
 
   // War - autowar targets
-  title = 'Enter opponents facebook ID';
+  title = 'Enter opponents Mafia Wars ID';
   id = 'autoWarTargetList';
-  var warList = makeElement('textarea', rhs, {'style':'width: 12em; height: 6em;', 'id':id, 'title':'Enter each Facebook ID on a separate line.'});
+  var warList = makeElement('textarea', rhs, {'style':'width: 12em; height: 6em;', 'id':id, 'title':'Enter each Mafia Wars ID on a separate line. This will not work with the Facebook ID.'});
   warList.appendChild(document.createTextNode(GM_getValue('autoWarTargetList', '')));
   makeElement('br', rhs, {'class':'hide'});
   var warListLabel = makeElement('font', rhs, {'style':'font-size: 10px;'});
   warListLabel.appendChild(document.createTextNode('Enter each target on a separate line.'));
+  makeElement('br', rhs, {'class':'hide'});
+  var warListLabel = makeElement('font', rhs, {'style':'font-size: 10px;'});
+  warListLabel.appendChild(document.createTextNode('Add the userid part of the p|userid.'));
 
   // Hide list if war mode is random
   var warModeHandler = function () {
@@ -7721,9 +7726,6 @@ function customizeMasthead() {
                        '<a href="http://www.playerscripts.com/forum/" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts</div> ' +
                        '</a>' +
-                       '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Zynga Forums</div> ' +
-                       '</a> ' +
                        '<div class="sexy_destination middle"><b>Bookmarklets</b></div> ' +
                        '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fuserscripts.org%2Fscripts%2Fsource%2F68186.user.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
@@ -8017,22 +8019,35 @@ function customizeProfile() {
     var tabElt = xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(text(), "Profile")]', innerPageElt);
     if (tabElt){
       var remoteuserid;
+	  var remotefbid;
       var tmpKey;
       var cbKey;
-      if (tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=(\d+)/)) {
+      if (tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=p\|(\d+)/)) {
         tmpKey = 'tmp='+RegExp.$1+'&';
         cbKey = 'cb='+RegExp.$2+'&';
-        remoteuserid = RegExp.$3;
+        remoteuserid = 'p|'+RegExp.$3;
       }
-      if (!remoteuserid && tabElt.getAttribute('onclick').match(/user=(\d+)/)){
-        remoteuserid = RegExp.$1;
+      if (!remoteuserid && tabElt.getAttribute('onclick').match(/user=p\|(\d+)/)){
+        remoteuserid = 'p|'+RegExp.$1;
       }
+
+	  // This code is to grab the facebook id for this profile
+	  if ((m=/xw_controller=robbing.*?target=([0-9]+)/.exec(document.getElementById('inner_page').innerHTML))) {
+	    remotefbid = m[1];
+      }
+      if ((m=/xw_action=gift_wishlist.*?user=([0-9]+)/.exec(document.getElementById('inner_page').innerHTML))) {
+	    remotefbid = m[1];
+	  }
+
       if (!tmpKey && tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&/)){
         tmpKey = 'tmp='+RegExp.$1+'&';
       }
       if (!cbKey && tabElt.getAttribute('onclick').match(/cb=([\d,a-z]+)&/)){
         cbKey = 'cb='+RegExp.$2+'&';
       }
+
+	  DEBUG('Profile: Mafia Wars ID: ' + remoteuserid + ' Facebook ID: ' + remotefbid);
+	  
       // See if this player is in our mafia.
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
@@ -8054,47 +8069,31 @@ function customizeProfile() {
         loadUrl (getHitUrl(remoteuserid), urlLoaded);
       }
 
-      // Facebook profile
-      makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + remoteuserid}).appendChild(document.createTextNode('Facebook Profile'));
+	  var rDisplay = false;
+
+	  // Explain the buttons
+      makeElement('a', statsDiv, {'href':'javascript:alert("Due to the way Mafia Wars links to Facebook there are times where MWAP cannot find the Facebook profile ID. In those situations MWAP will not display buttons that require that ID. You can make the Facebook ID available by refreshing the profile page.");'}).appendChild(document.createTextNode('Where are my links?'));
+
+	  // This is a refresh page button
       statsDiv.appendChild(document.createTextNode(' | '));
+      makeElement('a', statsDiv, {'href':'http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=stats&xw_action=view&xw_city=1&user=' + remoteuserid}).appendChild(document.createTextNode('Refresh this profile!'));;
+	  rDisplay = true;
 
-      // Add as Facebook friend
-      makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remoteuserid}).appendChild(document.createTextNode('Add as Friend'));
-
-      // Add to AutoHitlist
-      var isOnAutoHitList = (getSavedList('autoHitOpponentList').indexOf(remoteuserid) != -1);
+	  if (remotefbid) {
+        // Facebook profile
+        if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
+        makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + remotefbid}).appendChild(document.createTextNode('Facebook Profile'));
         statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':isOnAutoHitList?'Remove from AutoHit List':'Add to AutoHit List',
-                            'id':remoteuserid,
-                            'title':'In the settings box, under the stamina tab\nIf you have selected hitlist opponents \nHitlist these opponents:',
-                            'clickEvent':isOnAutoHitList?clickAutoHitListRemove:clickAutoHitListAdd
-                          });
 
-
-
-      if (!removeElt) {// Not in mafia. Show options to add/remove from fight lists.
-        makeElement('br', statsDiv,{});
-        statsDiv.appendChild(document.createTextNode('Enemy Mafia Options: '));
-        this.buildAnchor( { 'AnchorText':'Add to Mafia',
-                            'URLSegment': 'xw_controller=war&'+
-                                          'xw_action=add&'+
-                                          'xw_city=' + (city + 1) + '&'+
-                                          tmpKey+
-                                          cbKey+
-                                          'friend_id=' + remoteuserid});
-        var isOnFightList = (getSavedList('fightList').indexOf(remoteuserid) != -1);
-        statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':isOnFightList?'Remove from Fight List':'Add to Fight List',
-                            'id':remoteuserid,
-                            'title':'In the settings box, under the stamina tab\nIf you have selected fight specific opponents\nFight these opponents:',
-                            'clickEvent':isOnFightList?clickFightListRemove:clickFightListAdd
-                          });
+        // Add as Facebook friend
+        makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remotefbid}).appendChild(document.createTextNode('Add as Friend'));
+		rDisplay = true;
       }
 
       if (removeElt) { // Promote
+        if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
         //href Example:http://mwfb.zynga.com/mwfb/remote/html_server.php?xw_controller=group&xw_action=view&xw_city=4&tmp=9c2d83eaf30b28fa29319feb437e4f7e&cb=18309240931265744553&promote=yes&uid=48608018
         //OnClick Example: return do_ajax('inner_page', 'remote/html_server.php?xw_controller=group&xw_action=view&xw_city=4&tmp=9c2d83eaf30b28fa29319feb437e4f7e&cb=18309240931265744553&promote=yes&uid=48608018', 1, 1, 0, 0); return false;
-        statsDiv.appendChild(document.createTextNode(' | '));
         this.buildAnchor( { 'AnchorText':'Promote',
                             'URLSegment': 'xw_controller=group&'+
                                           'xw_action=view&'+
@@ -8103,20 +8102,57 @@ function customizeProfile() {
                                           cbKey+
                                           'promote=yes&'+
                                           'uid=' + remoteuserid});
+        rDisplay = true;
       }
+      if (rDisplay) makeElement('br', statsDiv,{});
+	  rDisplay = false;
+
       if (removeElt) {//Add or Remove from War List
-        var isOnWarList = (getSavedList('autoWarTargetList').indexOf(remoteuserid) != -1);
+        var warID = remoteuserid.replace('p|','');
+        var isOnWarList = (getSavedList('autoWarTargetList').indexOf(warID) != -1);
         // In my mafia. Show options to add/remove from war list.
-        statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':isOnWarList?'Remove from War List':'Add to War List',
-                            'id':remoteuserid,
+        this.buildAnchor( { 'AnchorText':isOnWarList?'Remove from War List':'Add to AutoWar List',
+                            'id':warID,
                             'title':'In the settings box, under the mafia tab\nIf you have selected war friends from a list\nupdates the friends ids in the box',
                             'clickEvent':isOnWarList?clickWarListRemove:clickWarListAdd
                           });
+		rDisplay = true;
       }
 
-      if (removeElt){//Second line for Job Help
-        makeElement('br', statsDiv,{});
+      if (remotefbid) {	  
+        // Add to AutoHitlist
+        if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
+        var isOnAutoHitList = (getSavedList('autoHitOpponentList').indexOf(remotefbid) != -1);
+        this.buildAnchor( { 'AnchorText':isOnAutoHitList?'Remove from AutoHit List':'Add to AutoHit List',
+                            'id':remotefbid,
+                            'title':'In the settings box, under the stamina tab\nIf you have selected hitlist opponents \nHitlist these opponents:',
+                            'clickEvent':isOnAutoHitList?clickAutoHitListRemove:clickAutoHitListAdd
+                          });
+        rDisplay = true;
+
+        if (!removeElt) {// Not in mafia. Show options to add/remove from fight lists.
+          if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
+		  rDisplay = true;
+          this.buildAnchor( { 'AnchorText':isOnFightList?'Remove from Fight List':'Add to AutoFight List',
+                            'id':remotefbid,
+                            'title':'In the settings box, under the stamina tab\nIf you have selected fight specific opponents\nFight these opponents:',
+                            'clickEvent':isOnFightList?clickFightListRemove:clickFightListAdd
+                          });
+
+          statsDiv.appendChild(document.createTextNode(' | '));
+		  this.buildAnchor( { 'AnchorText':'Add to Mafia',
+                            'URLSegment': 'xw_controller=war&'+
+                                          'xw_action=add&'+
+                                          'xw_city=' + (city + 1) + '&'+
+                                          tmpKey+
+                                          cbKey+
+                                          'friend_id=' + remoteuserid});
+          var isOnFightList = (getSavedList('fightList').indexOf(remotefbid) != -1);
+        }
+      }
+      if (rDisplay) makeElement('br', statsDiv,{});
+
+      if (removeElt){//Job Help
         this.buildAnchor( { 'AnchorText':'NY - Give help',
                             'URLSegment': 'xw_controller=job&'+
                                           'xw_action=give_help&'+
@@ -8138,7 +8174,7 @@ function customizeProfile() {
                                           'job_city=2'
                           });
         statsDiv.appendChild(document.createTextNode(' | '));
-        this.buildAnchor( { 'AnchorText':'Finish Episode ',
+        this.buildAnchor( { 'AnchorText':'Moscow - Finish Episode ',
                             'URLSegment': 'xw_controller=episode&'+
                                           'xw_action=give_help_moscow_boss&'+
                                           'xw_city=' + (city + 1) + '&'+
@@ -8147,8 +8183,8 @@ function customizeProfile() {
                                           'target_id='+remoteuserid+'&'+
                                           'job_city=3'
                           });
-        statsDiv.appendChild(document.createTextNode(') | Bangkok: ('));
-        this.buildAnchor( {'AnchorText':'Give help',
+        statsDiv.appendChild(document.createTextNode(' | '));
+        this.buildAnchor( {'AnchorText':'Bangkok - Give help',
                             'URLSegment': 'xw_controller=story&'+
                                           'xw_action=give_help_social&'+
                                           'xw_city=' + (city + 1) + '&'+
@@ -8157,13 +8193,14 @@ function customizeProfile() {
                                           'target_id='+remoteuserid+'&'+
                                           'job_city=4'
                           });
-        statsDiv.appendChild(document.createTextNode(')'));
         makeElement('br', statsDiv,{});
-        this.buildAnchor( { 'AnchorText':'Mafia Gift',
+	    if (remotefbid) {
+          this.buildAnchor( { 'AnchorText':'Mafia Gift',
                             'title':'Requires that you set the giftkey in advance, see documentation',
-                            'href':'http://www.spockholm.com/mafia/?id='+remoteuserid
+                            'href':'http://www.spockholm.com/mafia/?id='+remotefbid
                           });
-        statsDiv.appendChild(document.createTextNode(' | '));
+          statsDiv.appendChild(document.createTextNode(' | '));
+		}
         this.buildAnchor( { 'AnchorText':'Load ChuckACrap',
                             'title':'From spockholm.com',
                             'clickEvent':eventclick_chuckaCrap
@@ -9603,7 +9640,7 @@ function parsePlayerUpdates(messagebox) {
           clickElement(elt);
           DEBUG('Clicked to help with a job.');
         };
-        Autoplay.delay = 0;
+        Autoplay.delay = minDelay;
         Autoplay.start();
         return false;
       } else {
@@ -9627,7 +9664,7 @@ function parsePlayerUpdates(messagebox) {
           helpWar = true;
           DEBUG('Clicked to help war.');
         };
-        Autoplay.delay = 0;
+        Autoplay.delay = minDelay;
         Autoplay.start();
         return false;
       } else {
@@ -11514,7 +11551,7 @@ function logFightResponse(rootElt, resultElt, context) {
           DEBUG('Clicked to repeat the attack on ' + context.name +
                 ' (' + context.id + ').');
         }
-        Autoplay.delay = 0;
+        Autoplay.delay = minDelay;
         Autoplay.start();
         return true;
       }
@@ -11870,7 +11907,7 @@ function logResponse(rootElt, action, context) {
                     ' (' + clickContext.id + ').');
             }
             updateLogStats(STAMINA_HOW_HITMAN);
-            Autoplay.delay = 0;
+            Autoplay.delay = minDelay;
             Autoplay.start();
             return true;
           }
@@ -12009,7 +12046,7 @@ function logResponse(rootElt, action, context) {
           clickAction = 'help';
           clickContext = context;
         }
-        Autoplay.delay = 0;
+        Autoplay.delay = minDelay;
         Autoplay.start();
         return true;
       }
