@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       418
+// @build       419
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '418',
+  build: '419',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1389,10 +1389,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // BANGKOK EPISODE 6-Assassin
     ['Consolidate Political Power In Bangkok',56,134,8,BANGKOK,93],            // CHAPTER 1
     ['Take Over The Royal Bank Of Thailand',64,135,8,BANGKOK,97],              // CHAPTER 1
-    /* FIXME:
-              Don't know why Foil an attempt is not working properly..
     ['Foil An Attempt On Your Life',156,136,8,BANGKOK,222],                    // CHAPTER 1  HELP JOB
-    */
     ['Question The Surviving Assassin',74,138,8,BANGKOK,115],                  // CHAPTER 2
     ['Gather Information On The Shadow King',71,139,8,BANGKOK,115],            // CHAPTER 2
     ['Eliminate A Spy For The Shadow King',85,140,8,BANGKOK,133],              // CHAPTER 2
@@ -1402,7 +1399,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Battle Your Way Through The Temple',96,144,8,BANGKOK,159],               // FINALE
     ['Overthrow The Shadow King',1,145,8,BANGKOK,3]                            // BOSS JOB
   );
-
+  
   var missionTabs = new Array(
     // NEW YORK
     ['Street Thug (Levels 1-4)','Associate (Levels 5-8)','Soldier (Levels 9-12)',
@@ -2508,7 +2505,8 @@ function autoMission() {
   var jobno       = missions[jobid][2];
   var tabno       = missions[jobid][3];
   var cityno      = missions[jobid][4];
-
+  DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno);
+  
   if (SpendEnergy.floor &&
       isGMChecked('allowEnergyToLevelUp') &&
       GM_getValue('autoEnergyBurn') !== SpendEnergy.canBurn) {
@@ -10861,27 +10859,33 @@ function goJobTab(tabno) {
     return goJobsNav();
   }
   if (currentTab == tabno) {
-    DEBUG('Already on job tab ' + tabno + '.');
+    DEBUG('Already on job tab ' + tabno);
     return true;
   }
 
   // No job tab. Make sure we're on the correct job bar.
+  // For NY and BK we look for the 'more jobs' or 'more episodes' tab to move between job bars
+  // NY has jobs_bar0 and jobs_bar1 where as BK has only jobs_bar0, account for this later
   var barno = 0;
   if (city == NY) barno = (tabno < 6 ? 0 : 1);
-  if (city == BK) barno = (tabno < 5 ? 0 : 1);
+  if (city == BANGKOK) barno = (tabno < 5 ? 0 : 1);
   var currentBar = 0;
   if (city == NY) currentBar = (currentTab < 6 ? 0 : 1);
-  if (city == BK) currentBar = (currentTab < 5 ? 0 : 1);
+  if (city == BANGKOK) currentBar = (currentTab < 5 ? 0 : 1);
+  DEBUG('goJobTab: city=' + city + ' currentBar=' + currentBar + ' currentTab=' + currentTab + ' barno=' + barno + ' tabno=' + tabno);
   if (currentBar != barno) {
     var jobWord;
     if (city == NY) jobWord	= currentBar == 1 ? "Easy Jobs" : "More Jobs";
-    if (city == BK) jobWord	= currentBar == 1 ? "Previous Episodes" : "More Episodes";
+    if (city == BANGKOK) jobWord = currentBar == 1 ? "Previous Episodes" : "More Episodes";
     elt = xpathFirst('.//ul[contains(@id,"jobs_bar")]' +
                      '//a[contains(text(), "'+jobWord+'")]', innerPageElt);
-    clickElement(elt);
     DEBUG('Clicked to go to job bar ' + barno + '. ');
+    clickElement(elt);
     return true;
   }
+  
+  // Adjust the barno for BK because BK only has one bar number, jobs_bar0.
+  if (city == BANGKOK) barno = 0;
   
   // Handle old and new tab param names
   elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[' +
