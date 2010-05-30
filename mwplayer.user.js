@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       421
+// @build       422
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '421',
+  build: '422',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2561,6 +2561,7 @@ function autoMission() {
 
   // Buy requirements first, if any
   if (getJobRowItems(jobName)) {
+    //DEBUG('jobid='+jobid+' selectMission='+GM_getValue('selectMission', 1));
     if (jobid != GM_getValue('selectMission', 1))
       Autoplay.fx = autoMission;
     Autoplay.delay = noDelay;
@@ -3279,6 +3280,15 @@ function autoBankWithdraw(amount) {
     clickContext = amount;
     Autoplay.start();
     return true;
+  } else {
+    // Make sure the bank window is open!
+	if (document.getElementById("bank_popup").parentNode.style.display == 'none') {
+      Autoplay.fx = goBank;
+      clickAction = 'withdraw';
+      clickContext = amount;
+      Autoplay.start();
+	  return true;
+	}
   }
 
   // Set the amount (if provided).
@@ -5824,7 +5834,6 @@ function createEnergyTab() {
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Spend buff packs:'));
 
@@ -5834,8 +5843,12 @@ function createEnergyTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'checkMiniPack');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Mini packs '));
+  makeElement('br', item, {'class':'hide'});
 
   // Energy packs
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   title = 'Spend energy packs if it will not waste energy, as determined by the estimated job ratio setting and your stamina statistics.';
   id = 'autoEnergyPack';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'autoEnergyPack');
@@ -5846,6 +5859,9 @@ function createEnergyTab() {
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
 
   // Energy packs force
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
   title = 'Spend energy packs if you have less than the set amount of energy.';
   id = 'autoEnergyPackForce';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'autoEnergyPackForce');
@@ -9080,8 +9096,7 @@ function getJobRowItems(jobName) {
     // Withdraw the amount we need
     if (cashDiff > 0) {
       suspendBank = true;
-      autoBankWithdraw(cashDiff);
-      return true;
+      return (autoBankWithdraw(cashDiff));
     }
   }
 
@@ -9143,8 +9158,7 @@ function getJobRowItems(jobName) {
     // Withdraw the amount we need
     if (cashDiff > 0) {
       suspendBank = true;
-      autoBankWithdraw(cashDiff);
-      return true;
+      return (autoBankWithdraw(cashDiff));
     }
   }
   return false;
