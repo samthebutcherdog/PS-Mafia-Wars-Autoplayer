@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       420
+// @build       421
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '420',
+  build: '421',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -272,7 +272,6 @@ Player.prototype.update = function(player) {
 // Constructor for Player objects.
 function Player(name) {
 }
-
 
 //
 // Define PlayerList object and methods.
@@ -636,6 +635,7 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
                     'nQcICgsNDxEwhCYGnqutEBIUMoQnnwuitxQVFzSEKaEOrhMUFhgZNoQrrRG4FhcZHB44hC3A1dcd' +
                     'HyA6hC8TFcwaGx6PIzyEMd7YICEkJSY9hDPXHh8hIvaTgBCqcQNHDh07ePj4AQRIEEGBAAA7" />';
 
+const noDelay = 0;              // No delay on commands
 const minDelay = 1000;          // Minimum delay on commands
 var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
@@ -967,6 +967,15 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_CASH_SYMBOL = 10;
   const CITY_ALLIANCE    = 11;
 
+  // Constants for accessing mission array
+  const MISSION_NAME     = 0;
+  const MISSION_ENERGY   = 1;
+  const MISSION_NUMBER   = 2;
+  const MISSION_TAB      = 3;
+  const MISSION_CITY     = 4;
+  const MISSION_XP       = 5;
+  const MISSION_RATIO    = 6;
+  
   // Add city variables in this format
   // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
 
@@ -1385,7 +1394,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Route A Drug Shipment Through An Army Post',64,130,7,BANGKOK,102],       // Chapter 3  Triad
     ['Infiltrate The Parliament House',85,131,7,BANGKOK,137],                  // FINALE
     ['Depose Prime Minister Nongchai',1,132,7,BANGKOK,3],                      // BOSS JOB
-    // BANGKOK EPISODE 6-Assassin
+    // BANGKOK EPISODE 7-Assassin
     ['Consolidate Political Power In Bangkok',56,134,8,BANGKOK,93],            // CHAPTER 1
     ['Take Over The Royal Bank Of Thailand',64,135,8,BANGKOK,97],              // CHAPTER 1
     ['Foil An Attempt On Your Life',156,136,8,BANGKOK,222],                    // CHAPTER 1  HELP JOB
@@ -1677,6 +1686,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // For chrome
   sendSettings();
   copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
+  DEBUG('There are ' + missions.length + ' known missions.');
+  //for (var i =0; i < missions.length ; i++) DEBUG('M' + i + ': ' + missions[i]);
 }
 
 // Copy settings from background storage
@@ -1906,7 +1917,7 @@ function doAutoPlay () {
   if (energyCountdownElt) {
     if (energyCountdownElt.style.display == 'block') {
       energyPack = false;
-      DEBUG('Energy countdown timer > 0');
+      //DEBUG('Energy Pack forced to false since countdown timer exists.');
     }
   }
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
@@ -2069,7 +2080,7 @@ function autoAccept() {
 
 function autoHeal() {
   // NOTE: In the interest of time, delays are waived.
-  Autoplay.delay = minDelay;
+  Autoplay.delay = noDelay;
 
   // Make sure we're in the preferred city.
   var healLocation = parseInt(GM_getValue('healLocation', NY));
@@ -2120,7 +2131,7 @@ function autoHeal() {
 function buildItem(itemArray, itemIndex, buildType){
   if (city != NY) {
     Autoplay.fx = function() { goLocation(NY); };
-    Autoplay.delay = minDelay;
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
@@ -2333,14 +2344,14 @@ function autoStat() {
 
 // Get reward to cost ratio:
 function calcJobratio(job) {
-  var ratio = Math.round(missions[job][5] / missions[job][1] * 100) / 100;
+  var ratio = Math.round(missions[job][MISSION_XP] / missions[job][MISSION_ENERGY] * 100) / 100;
   return isNaN(ratio) ? 0 : ratio;
 }
 
 // Retreive if and how much energy can be salvaged for the next level (eg after spending an energy pack)
 function canSalvageEnergy(job) {
   if (energy <= maxEnergy) return false;
-  var amount = energy - (Math.ceil((lvlExp - curExp) / missions[job][5]) * missions[job][1]) - maxEnergy;
+  var amount = energy - (Math.ceil((lvlExp - curExp) / missions[job][MISSION_XP]) * missions[job][MISSION_ENERGY]) - maxEnergy;
   if (amount > 0) return amount;
   else return false;
 }
@@ -2382,25 +2393,25 @@ function canMission() {
       var singleJobLevelUpPossible = false;
 
       // Ignore jobs that are not yet available
-      if (availableJobs[mission[4]][mission[3]] != null &&
-         availableJobs[mission[4]][mission[3]].indexOf(parseInt(job)) == -1) {
+      if (availableJobs[mission[MISSION_CITY]][mission[MISSION_TAB]] != null &&
+         availableJobs[mission[MISSION_CITY]][mission[MISSION_TAB]].indexOf(parseInt(job)) == -1) {
         continue;
       }
 
       // Determine the job's experience-to-energy ratio.
-      if (isNaN(mission[6])) mission[6] = calcJobratio(job);
-      if (mission[1] <= energy) {
+      if (isNaN(mission[MISSION_RATIO])) mission[MISSION_RATIO] = calcJobratio(job);
+      if (mission[MISSION_ENERGY] <= energy) {
         enoughEnergy = true;
-        if (mission[5] >= expLeft) {
-          var levelJob = [job, mission[1], mission[5]];
+        if (mission[MISSION_XP] >= expLeft) {
+          var levelJob = [job, mission[MISSION_ENERGY], mission[MISSION_XP]];
           singleJobLevelUp.push(levelJob);
           singleJobLevelUpPossible = true;
         }
       }
 
       // Ignore mastered jobs unless it can do a single job level up
-      if (masteredJobs[mission[4]][mission[3]] != null &&
-          masteredJobs[mission[4]][mission[3]].indexOf(parseInt(job)) != -1 &&
+      if (masteredJobs[mission[MISSION_CITY]][mission[MISSION_TAB]] != null &&
+          masteredJobs[mission[MISSION_CITY]][mission[MISSION_TAB]].indexOf(parseInt(job)) != -1 &&
           singleJobLevelUpPossible == false) {
         continue;
       }
@@ -2413,7 +2424,7 @@ function canMission() {
     if (!enoughEnergy) return false;
 
     var doJob;
-    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][6] - missions[a][6]; });
+    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][MISSION_RATIO] - missions[a][MISSION_RATIO]; });
 
     // Don't do expBurners or biggest exp job if energy can be salvaged
     if (singleJobLevelUp.length > 0 && !canSalvage) {
@@ -2443,8 +2454,8 @@ function canMission() {
     } else {
       // Can't level up. Pick a job we can do whose ratio is high enough.
       for (i = 0; i < multiple_jobs_ratio_sorted.length; i++) {
-        if (energy >= missions[multiple_jobs_ratio_sorted[i]][1] &&
-            ratio <= missions[multiple_jobs_ratio_sorted[i]][6]) {
+        if (energy >= missions[multiple_jobs_ratio_sorted[i]][MISSION_ENERGY] &&
+            ratio <= missions[multiple_jobs_ratio_sorted[i]][MISSION_RATIO]) {
           jobs_selection.push(multiple_jobs_ratio_sorted[i]);
         }
       }
@@ -2467,19 +2478,19 @@ function canMission() {
         GM_setValue('autoMission', 0);
         return false;
       } else {
-        addToLog('info Icon', 'Switching job to ' + missions[doJob][0] + '.');
+        addToLog('info Icon', 'Switching job to ' + missions[doJob][MISSION_NAME] + '.');
         GM_setValue('selectMission', doJob);
       }
     }
   }
 
-  if (energy < missions[GM_getValue('selectMission', 1)][1]) {
-    DEBUG('Skipping jobs: energy=' + energy + ', cost=' + missions[GM_getValue('selectMission', 1)][1]);
+  if (energy < missions[GM_getValue('selectMission', 1)][MISSION_ENERGY]) {
+    DEBUG('Skipping jobs: energy=' + energy + ', cost=' + missions[GM_getValue('selectMission', 1)][MISSION_ENERGY]);
     return false;
   }
 
   // If spending energy will set energy below Energy floor, skip jobs
-  var nextJobEnergy =  missions[GM_getValue('selectMission', 1)][1];
+  var nextJobEnergy =  missions[GM_getValue('selectMission', 1)][MISSION_ENERGY];
   if (energy - nextJobEnergy < SpendEnergy.floor && !SpendEnergy.canBurn) {
     DEBUG('Not spending energy: energy=' + energy +
           ', floor=' + SpendEnergy.floor +
@@ -2500,10 +2511,10 @@ function canMission() {
 
 function autoMission() {
   var jobid       = GM_getValue('selectMission', 1);
-  var jobName     = missions[jobid][0];
-  var jobno       = missions[jobid][2];
-  var tabno       = missions[jobid][3];
-  var cityno      = missions[jobid][4];
+  var jobName     = missions[jobid][MISSION_NAME];
+  var jobno       = missions[jobid][MISSION_NUMBER];
+  var tabno       = missions[jobid][MISSION_TAB];
+  var cityno      = missions[jobid][MISSION_CITY];
   DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno);
   
   if (SpendEnergy.floor &&
@@ -2552,7 +2563,7 @@ function autoMission() {
   if (getJobRowItems(jobName)) {
     if (jobid != GM_getValue('selectMission', 1))
       Autoplay.fx = autoMission;
-    Autoplay.delay = minDelay;
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return;
   }
@@ -2657,7 +2668,7 @@ function autoHitlist() {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoHitlist.profileSearch && !autoHitlist.setBounty) {
     Autoplay.fx = goFightTab;
-    Autoplay.delay = minDelay;
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
@@ -2755,7 +2766,7 @@ function autoFight(how) {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoFight.profileSearch) {
     Autoplay.fx = goFightTab;
-    Autoplay.delay = minDelay;
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
@@ -2921,7 +2932,7 @@ function autoRob() {
   // Make sure we're on the fight tab.
   if (!onRobbingTab()) {
     Autoplay.fx = goRobbingTab;
-    Autoplay.delay = minDelay;
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
@@ -2930,7 +2941,7 @@ function autoRob() {
     DEBUG("Refreshing the rob grid.");
     // refresh the 3x3 grid.
     Autoplay.fx = refreshRobbingGrid;
-    Autoplay.delay = minDelay;
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   } else {
@@ -3155,7 +3166,7 @@ function autoHitman() {
     DEBUG('Clicked to hit ' + clickContext.name +
           ' (' + clickContext.id + ').');
   };
-  Autoplay.delay = minDelay;
+  Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
 }
@@ -3254,7 +3265,7 @@ function autoBankDeposit(bankCity, amount) {
     clickElement (submitElt);
     DEBUG('Clicked to deposit.');
   }
-  Autoplay.delay = minDelay;
+  Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
 }
@@ -3291,7 +3302,7 @@ function autoBankWithdraw(amount) {
     clickElement (submitElt);
     DEBUG('Clicked to withdraw.');
   }
-  Autoplay.delay = minDelay;
+  Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
 }
@@ -4149,11 +4160,11 @@ function saveSettings() {
   masteryCity = parseInt(selectedTierValue[0]);
   masteryTier = parseInt(selectedTierValue[1]);
   for (i = 0, iLength = missions.length; i < iLength; i++) {
-    if (document.getElementById(missions[i][0]).checked) {
+    if (document.getElementById(missions[i][MISSION_NAME]).checked) {
       multiple_jobs_list.push(i);
     }
-    if (masteryCity == missions[i][4] &&
-        masteryTier == missions[i][3]) {
+    if (masteryCity == missions[i][MISSION_CITY] &&
+        masteryTier == missions[i][MISSION_TAB]) {
       mastery_jobs_list.push(i);
     }
   }
@@ -5691,9 +5702,9 @@ function createEnergyTab() {
 
   for (var i = 0, iLength=missions.length; i < iLength; ++i) {
     var mission = missions[i];
-    if (mission[4] != cityno) {
+    if (mission[MISSION_CITY] != cityno) {
       // Add a row for the city.
-      cityno = mission[4];
+      cityno = mission[MISSION_CITY];
       choiceM = makeElement('div');
       choiceM.innerHTML = '=== ' + cities[cityno][CITY_NAME].toUpperCase() + ' MISSIONS ===';
       choiceM.className = 'ap_optgroup1';
@@ -5709,9 +5720,9 @@ function createEnergyTab() {
       choiceTier.className = 'ap_optgroup1';
       selectTier.appendChild(choiceTier);
     }
-    if (mission[3] != tabno) {
+    if (mission[MISSION_TAB] != tabno) {
       // Add a row for the tab.
-      tabno = mission[3];
+      tabno = mission[MISSION_TAB];
       choiceM = makeElement('div');
       choiceM.innerHTML = missionTabs[cityno][tabno - 1];
       choiceM.className = 'ap_optgroup2';
@@ -5732,11 +5743,11 @@ function createEnergyTab() {
     }
 
     // Determine the job's experience-to-energy ratio.
-    var ratio = isNaN(mission[6]) ? calcJobratio(i) : mission[6];
+    var ratio = isNaN(mission[MISSION_RATIO]) ? calcJobratio(i) : mission[MISSION_RATIO];
 
     // Add a row for the job.
-    id = missions[i][0];
-    title = mission[0] + ' (' + parseFloat(ratio) + ')';
+    id = missions[i][MISSION_NAME];
+    title = mission[MISSION_NAME] + ' (' + parseFloat(ratio) + ')';
 
     // Get the check state of the box
     var checkState = false;
@@ -5755,7 +5766,7 @@ function createEnergyTab() {
 
     // Single job choices
     choiceS = document.createElement('option');
-    choiceS.text = mission[0] + ' (' + parseFloat(ratio) + ')';
+    choiceS.text = mission[MISSION_NAME] + ' (' + parseFloat(ratio) + ')';
     choiceS.className = 'ap_option';
     selectMissionS.appendChild(choiceS);
   }
@@ -5767,7 +5778,7 @@ function createEnergyTab() {
     var eltChoiceImg;
     var eltId;
     for (var i = 0, iLength=missions.length; i < iLength; ++i) {
-      eltId = missions[i][0];
+      eltId = missions[i][MISSION_NAME];
       eltChoice = document.getElementById(eltId);
       eltChoiceImg = document.getElementById('img' + eltId);
       if (eltChoiceImg && eltChoice.checked) eltChoiceImg.src = stripURI(unCheckedIcon);
@@ -6500,7 +6511,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoymsd, Bushdaka';
+                 'nitr0genics, DTPN, nonoymsd';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -7159,8 +7170,8 @@ function chooseSides() {
     // Change the jobNo / jobName
     if (!isNaN(jobMatch)) {
       var sideIndex = GM_getValue(cities[job[CHOICE_CITY]][CITY_SIDE_NAME], 0);
-      missions[jobMatch][0] = job[CHOICE_JOBNAME][sideIndex];
-      missions[jobMatch][2] = job[CHOICE_JOBNO][sideIndex];
+      missions[jobMatch][MISSION_NAME] = job[CHOICE_JOBNAME][sideIndex];
+      missions[jobMatch][MISSION_NUMBER] = job[CHOICE_JOBNO][sideIndex];
     }
   });
 
@@ -8253,10 +8264,10 @@ function jobMastery(element, newJobs) {
   if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) return;
 
   var selectMission = parseInt(GM_getValue('selectMission', 1));
-  var currentJob = missions[selectMission][0];
-  var jobno      = missions[selectMission][2];
-  var tabno      = missions[selectMission][3];
-  var cityno     = missions[selectMission][4];
+  var currentJob = missions[selectMission][MISSION_NAME];
+  var jobno      = missions[selectMission][MISSION_NUMBER];
+  var tabno      = missions[selectMission][MISSION_TAB];
+  var cityno     = missions[selectMission][MISSION_CITY];
 
   if (city != cityno || !onJobTab(tabno)) return;
 
@@ -8283,8 +8294,8 @@ function jobMastery(element, newJobs) {
   var firstFound = false;
   for (var i = 0, iLength = missions.length; i < iLength; i++) {
     // Only get the jobs from this city tier
-    if (city == missions[i][4] && tabno == missions[i][3]) {
-      var thisJobRow = getJobRow(missions[i][0]);
+    if (city == missions[i][MISSION_CITY] && tabno == missions[i][MISSION_TAB]) {
+      var thisJobRow = getJobRow(missions[i][MISSION_NAME]);
       if (thisJobRow) {
         var masteryLevel = getJobMastery(thisJobRow, newJobs);
         tierPercent += masteryLevel;
@@ -8325,14 +8336,14 @@ function jobMastery(element, newJobs) {
         //       then by tier.
         var nextTierJob;
         for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
-          if (missions[i][4] != cityno) {
+          if (missions[i][MISSION_CITY] != cityno) {
             nextTierJob = i;
             addToLog('info Icon', 'You have mastered the final job tier in ' +
                      cities[cityno][CITY_NAME] + '! Moving to the next tier in ' +
-                     cities[missions[nextTierJob][4]][CITY_NAME] + '.');
+                     cities[missions[nextTierJob][MISSION_CITY]][CITY_NAME] + '.');
             break;
           }
-          if (missions[i][3] != tabno) {
+          if (missions[i][MISSION_TAB] != tabno) {
             nextTierJob = i;
             addToLog('info Icon', 'Current job tier is mastered. Moving to next tier in ' + cities[cityno][CITY_NAME] + '.');
             break;
@@ -8342,11 +8353,11 @@ function jobMastery(element, newJobs) {
           addToLog('info Icon', 'You have mastered all jobs!');
         } else {
           GM_setValue('selectMission', nextTierJob);
-          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
+          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '</span>.');
         }
       } else {
           GM_setValue('selectMission', firstUnmastered);
-          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][0] + '</span>.');
+          addToLog('info Icon', 'Job switched to <span class="job">' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '</span>.');
       }
     } else {
       DEBUG("There are jobs in the to-do list.");
@@ -8713,13 +8724,13 @@ function updateJobInfo (jobMatch, cost, reward, ratio) {
   var missionItem = missions[jobMatch];
   // If values are not in synch, update mission array
   if (!isNaN(jobMatch) &&
-      (missionItem[1] != cost ||
-       missionItem[5] != reward ||
-       missionItem[6] != ratio)) {
+      (missionItem[MISSION_ENERGY] != cost ||
+       missionItem[MISSION_XP] != reward ||
+       missionItem[MISSION_RATIO] != ratio)) {
 
-    missions[jobMatch][1] = cost;
-    missions[jobMatch][5] = reward;
-    missions[jobMatch][6] = ratio;
+    missions[jobMatch][MISSION_ENERGY] = cost;
+    missions[jobMatch][MISSION_XP] = reward;
+    missions[jobMatch][MISSION_RATIO] = ratio;
 
     // Save joblist
     GM_setValue('missions', JSON.stringify(missions));
@@ -8756,8 +8767,8 @@ function tierMastery(jobsFound, jobsMastered, currentTab) {
       if (GM_getValue('selectTier') != '0.0') {
         var mastery_jobs_list = [];
         for (i = 0, iLength = missions.length; i < iLength; i++) {
-          if (masteryCity == missions[i][4] &&
-              masteryTier == missions[i][3]) {
+          if (masteryCity == missions[i][MISSION_CITY] &&
+              masteryTier == missions[i][MISSION_TAB]) {
             mastery_jobs_list.push(i);
           }
         }
@@ -9008,7 +9019,7 @@ function getJobRow(jobName, contextNode) {
     // Retrieve by job number first
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (!isNaN(jobMatch)) {
-      var jobno = missions[jobMatch][2];
+      var jobno = missions[jobMatch][MISSION_NUMBER];
       rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', contextNode);
     }
 
@@ -9171,15 +9182,15 @@ function jobCombo(element) {
       var mission = missions[job];
       if(!mission) continue;
       // Put non-available jobs at the end of the queue
-      if (availableJobs[mission[4]][mission[3]] != null &&
-          availableJobs[mission[4]][mission[3]].indexOf(parseInt(job)) == -1) {
-        mission[6] = 0;
+      if (availableJobs[mission[MISSION_CITY]][mission[MISSION_TAB]] != null &&
+          availableJobs[mission[MISSION_CITY]][mission[MISSION_TAB]].indexOf(parseInt(job)) == -1) {
+        mission[MISSION_RATIO] = 0;
       }
 
-      if (cycle_jobs[mission[6]] == null) {
-        cycle_jobs[mission[6]] = [];
+      if (cycle_jobs[mission[MISSION_RATIO]] == null) {
+        cycle_jobs[mission[MISSION_RATIO]] = [];
       }
-      cycle_jobs[mission[6]].push(multiple_jobs_list[i]);
+      cycle_jobs[mission[MISSION_RATIO]].push(multiple_jobs_list[i]);
     }
 
     // Rebuild the job list array
@@ -9187,7 +9198,7 @@ function jobCombo(element) {
     for (i in cycle_jobs) {
       if (cycle_jobs[i].length > 1) {
         // Only cycle the current job's ratio group
-        if (missions[GM_getValue('selectMission', 1)][6] == i) {
+        if (missions[GM_getValue('selectMission', 1)][MISSION_RATIO] == i) {
           cycle_jobs[i].push(cycle_jobs[i].shift());
         }
         for (var n = 0, nLength=cycle_jobs[i].length; n < nLength; ++n) {
@@ -9252,7 +9263,7 @@ function debugDumpSettings() {
     var multiple_jobs_list = getSavedList(listName);
     var jobNames = [];
     for (var i=0, numJobs=multiple_jobs_list.length; i < numJobs; ++i) {
-      jobNames.push(missions[multiple_jobs_list[i]][0]);
+      jobNames.push(missions[multiple_jobs_list[i]][MISSION_NAME]);
     }
     return jobNames.join(', ');
   };
@@ -9398,7 +9409,7 @@ function debugDumpSettings() {
         'Enable auto-mission: <strong>' + showIfUnchecked(GM_getValue('autoMission')) + '</strong><br>' +
         'Enabled job bursts: <strong>' + showIfUnchecked(GM_getValue('burstJob')) + ' == Fire ' + GM_getValue('burstJobCount') + ' job attempts everytime</strong><br>' +
         '&nbsp;&nbsp;-Repeat Job: <strong>' + showIfUnchecked(GM_getValue('repeatJob')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Job selected: <strong>' + missions[GM_getValue('selectMission')][0] + '</strong><br>' +
+        '&nbsp;&nbsp;-Job selected: <strong>' + missions[GM_getValue('selectMission')][MISSION_NAME] + '</strong><br>' +
         '&nbsp;&nbsp;-Multiple Jobs: <strong>' + showIfUnchecked(GM_getValue('multipleJobs')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;&nbsp;-Jobs: <strong>' + ratioJobs + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;&nbsp;-Mastery Tier: <strong>' + selectTier + '</strong><br>' +
@@ -9639,7 +9650,7 @@ function parsePlayerUpdates(messagebox) {
           clickElement(elt);
           DEBUG('Clicked to help with a job.');
         };
-        Autoplay.delay = minDelay;
+        Autoplay.delay = noDelay;
         Autoplay.start();
         return false;
       } else {
@@ -9663,7 +9674,7 @@ function parsePlayerUpdates(messagebox) {
           helpWar = true;
           DEBUG('Clicked to help war.');
         };
-        Autoplay.delay = minDelay;
+        Autoplay.delay = noDelay;
         Autoplay.start();
         return false;
       } else {
@@ -10905,8 +10916,8 @@ function goJobTab(tabno) {
 function getJobClicks() {
   var numClicks = 1;
   if (isGMChecked('burstJob') && !jobOptimizeOn){
-    var nextJobXp = missions[GM_getValue('selectMission', 1)][5];
-    var nextJobCost = missions[GM_getValue('selectMission', 1)][1];
+    var nextJobXp = missions[GM_getValue('selectMission', 1)][MISSION_XP];
+    var nextJobCost = missions[GM_getValue('selectMission', 1)][MISSION_ENERGY];
     numClicks = GM_getValue('burstJobCount', 1);
     while (nextJobCost * numClicks >= energy - nextJobCost &&
            nextJobXp   * numClicks >= ptsToNextLevel - nextJobXp &&
@@ -10918,8 +10929,8 @@ function getJobClicks() {
 
 function goJob(jobno) {
   // Retrieve the jobRow
-  var jobName = missions[GM_getValue('selectMission')][0];
-  var jobNo = missions[GM_getValue('selectMission')][2];
+  var jobName = missions[GM_getValue('selectMission')][MISSION_NAME];
+  var jobNo = missions[GM_getValue('selectMission')][MISSION_NUMBER];
   var jobRow = getJobRow(jobName, innerPageElt);
 
   // Get the action element by job no first
@@ -11562,7 +11573,7 @@ function logFightResponse(rootElt, resultElt, context) {
           DEBUG('Clicked to repeat the attack on ' + context.name +
                 ' (' + context.id + ').');
         }
-        Autoplay.delay = minDelay;
+        Autoplay.delay = noDelay;
         Autoplay.start();
         return true;
       }
@@ -11836,7 +11847,7 @@ function logResponse(rootElt, action, context) {
         jobOptimizeOn = false;
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' +
-                 missions[GM_getValue('selectMission')][0] +
+                 missions[GM_getValue('selectMission')][MISSION_NAME] +
                  '</span> earning <span class="good">' +
                  xpGainElt.innerHTML.toLowerCase() + '</span>';
         var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
@@ -11864,7 +11875,7 @@ function logResponse(rootElt, action, context) {
           if (elt) {
             Autoplay.fx = function() {
               clickElement(elt);
-              addToLog('process Icon', 'Asked for help with <span class="job">' + missions[GM_getValue('selectMission')][0] + '</span>.');
+              addToLog('process Icon', 'Asked for help with <span class="job">' + missions[GM_getValue('selectMission')][MISSION_NAME] + '</span>.');
             }
             Autoplay.start();
             return true;
@@ -11873,7 +11884,7 @@ function logResponse(rootElt, action, context) {
 
         return false;
       } else if (innerNoTags.indexOf('You are not high enough level to do this job') != -1) {
-        addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][0] + '.');
+        addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
       } else if (innerNoTags.indexOf('Success') != -1) {
@@ -11918,7 +11929,7 @@ function logResponse(rootElt, action, context) {
                     ' (' + clickContext.id + ').');
             }
             updateLogStats(STAMINA_HOW_HITMAN);
-            Autoplay.delay = minDelay;
+            Autoplay.delay = noDelay;
             Autoplay.start();
             return true;
           }
@@ -12057,7 +12068,7 @@ function logResponse(rootElt, action, context) {
           clickAction = 'help';
           clickContext = context;
         }
-        Autoplay.delay = minDelay;
+        Autoplay.delay = noDelay;
         Autoplay.start();
         return true;
       }
