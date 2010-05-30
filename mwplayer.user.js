@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.40
-// @build       419
+// @build       420
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.40',
-  build: '419',
+  build: '420',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1269,7 +1269,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // CHOICE RESULT (Mafia)
     //['Hit A Vory Nightclub',128,81,6,MOSCOW,171],
     //['Break Into An Architect\'s Office',134,82,6,MOSCOW,185],
-    //
     ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
     ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
     ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
