@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.41
-// @build       424
+// @build       425
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.41',
-  build: '424',
+  build: '425',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1648,8 +1648,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Set the initial run state.
   if (typeof GM_getValue('isRunning') != 'boolean') {
-    // FIXME: Perhaps it should be false, and instead pop up an alert
-    //        asking the user to check the settings?
+    alert('MWAP: Inconsistent state found in settings, please check them!');
     GM_setValue('isRunning', false);
   }
   running = GM_getValue('isRunning');
@@ -3251,7 +3250,7 @@ function autoBankDeposit(bankCity, amount) {
     amountElt.value = amount;
   }
 
-  // Make the deposit.
+  // Grab the deposit button!
   var submitElt = xpathFirst('.//div[@id="bank_dep_button"]//a', bankElt);
   if (!submitElt) {
     addToLog('warning Icon', 'BUG DETECTED: No submit input at bank.');
@@ -3263,7 +3262,20 @@ function autoBankDeposit(bankCity, amount) {
     addToLog('warning Icon', 'Switching city too fast, not banking cash.');
     return false;
   }
+  
+  // One last check to make sure the city hasn't changed
+  var eltBankCity = xpathFirst('//a[@class="bank_deposit"]');
+  if (eltBankCity) {
+    if (eltBankCity.getAttribute('onclick').match(/xw_city=(\d+)/)) {
+	  var thisCity = RegExp.$1 - 1;
+	  if (thisCity != bankCity) {
+        addToLog('warning Icon', 'Banking Error: Current City: ' + cities[thisCity][CITY_NAME] + ' Expected City: ' + cities[bankCity][CITY_NAME]);
+        return false;
+	  }
+    }
+  }
 
+  // Make the deposit
   Autoplay.fx = function() {
     quickBankFail = false;
     clickContext = bankCity;
@@ -6951,10 +6963,25 @@ function handleModificationTimer() {
     // Handling for pop-ups
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
     if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
-      pageChanged = true;
-      justPlay = true;
-      DEBUG('Detected popup.');
-    }	
+      var popupElts = $x('.//div[contains(@style, "block")]', popupElt);
+      if (popupElts && popupElts.length > 0) {
+        for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
+          if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
+		    // Check for specific popups here
+            var foundPopup = true;
+			if (popupElts[i].innerHTML.indexOf('id="marketplace"')) foundPopup = false;
+            break;
+          }
+        }
+      }
+	  	  
+      if (foundPopup) {
+        pageChanged = true;
+        justPlay = true;
+        DEBUG('Detected popup: ' + popupElt.innerHTML.untag().slice(0,100));
+		handlePublishing();
+      }
+    }
   }
 	
   // Handle changes to the inner page.
@@ -6993,7 +7020,15 @@ function handlePublishing() {
       var skipElt = xpathFirst('.//input[@id="cancel"]');
       var pubElt = xpathFirst('.//input[@id="publish"]');
       var okElt = xpathFirst('.//input[@id="okay"]');
+	  
+	  DEBUG('Publish: Checking for items to publish!');
 
+	  // If none of these buttons are present, then we can't possibly click them!
+      if (!skipElt && !pubElt && !okElt) {
+	    DEBUG('Publish: No publishing buttons found!');
+	    return false;
+      }
+ 
       // If OK button is found, close the window by pressing it
       if (okElt) {
         clickElement(okElt);
@@ -7018,6 +7053,7 @@ function handlePublishing() {
 
             // Wait for 2 seconds before trying to close window manually
             window.setTimeout(handlePublishing, 2000);
+			DEBUG('Publish: Found ' + gmFlag);
             return true;
           }
           return false;
@@ -7065,8 +7101,8 @@ function handlePublishing() {
     }
   }
 
-  // Retry until window is closed
-  // FIXME - this causes an infinite loop if the window can never be closed
+  // If we get here, then at least one of the three buttons exists, so try again!
+  DEBUG('Publish: Try again in 2 seconds.');
   window.setTimeout(handlePublishing, 2000);
 }
 
@@ -7737,15 +7773,21 @@ function customizeMasthead() {
   helpMenu.style.width = "200px";
   helpMenu.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
                        '<div class="sexy_destination middle"><b>Downloads</b></div> ' +
-                       '<a href="http://userscripts.org/scripts/show/77953" target="_blank"> ' +
+                       '<a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
                        '</a> ' +
                        '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
                        '</a> ' + 
                        '<div class="sexy_destination middle"><b>Websites</b></div> ' +
+                       '<a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts Chat</div> ' +
+                       '</a>' +
                        '<a href="http://www.playerscripts.com/forum/" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts</div> ' +
+                       '</a>' +
+                       '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Zolli Forums</div> ' +
                        '</a>' +
                        '<div class="sexy_destination middle"><b>Bookmarklets</b></div> ' +
                        '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fuserscripts.org%2Fscripts%2Fsource%2F68186.user.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
@@ -7902,6 +7944,18 @@ function quickBank(bankCity, amount) {
   if (city != bankCity) {
     DEBUG('Switching city too fast, not quick-banking.');
     return;
+  }
+
+  // One last check to make sure the city hasn't changed
+  var eltBankCity = xpathFirst('//a[@class="bank_deposit"]');
+  if (eltBankCity) {
+    if (eltBankCity.getAttribute('onclick').match(/xw_city=(\d+)/)) {
+	  var thisCity = RegExp.$1 - 1;
+	  if (thisCity != bankCity) {
+        addToLog('warning Icon', 'Banking Error: Current City: ' + cities[thisCity][CITY_NAME] + ' Expected City: ' + cities[bankCity][CITY_NAME]);
+        return false;
+	  }
+    }
   }
 
   // Bank asynchronously
@@ -9647,7 +9701,7 @@ function parsePlayerUpdates(messagebox) {
     if (isGMChecked('autoHelp')) {
       // Help requested by a fellow mafia member.
       userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-      elt = xpathFirst('.//a[contains(@href, "give_help_social")]', messagebox);
+      elt = xpathFirst('.//a[contains(@href, "give_help")]', messagebox);
       if (elt) {
         // Help immediately.
         Autoplay.fx = function() {
@@ -11171,7 +11225,7 @@ function updateHourlyStats() {
       }
     }
 
-//Prep Arrays for hourly graphing
+    //Prep Arrays for hourly graphing
     var fightExpNY = prepStatsArray(hourlyFightExpNY, currentHour);
     var fightWinsNY = prepStatsArray(hourlyFightWinsNY, currentHour);
     var fightLossesNY = prepStatsArray(hourlyFightLossesNY, currentHour);
@@ -11181,7 +11235,7 @@ function updateHourlyStats() {
     var fightLossBGCHNY = prepStatsArray(hourlyLossBgCrHitNY, currentHour);
     var fightLossStrongNY = prepStatsArray(hourlyLossStrongNY, currentHour);
 
-//Add 25th hour data to beginning of graphing arrays
+    //Add 25th hour data to beginning of graphing arrays
     fightExpNY.unshift(fightExpNY25);
     fightWinsNY.unshift(fightWinsNY25);
     fightLossesNY.unshift(fightLossesNY25);
@@ -11191,7 +11245,7 @@ function updateHourlyStats() {
     fightLossBGCHNY.unshift(fightLossBgCrHitNY25);
     fightLossStrongNY.unshift(fightLossStrongNY25);
 
-//create hour labels based on current hour
+    //create hour labels based on current hour
     var hourLabels = "";
     for (i = 0; i < 24; i += 2) {
       var ind;
@@ -11205,7 +11259,7 @@ function updateHourlyStats() {
     }
     hourLabels = '|' + hourLabels.split('|')[12] + hourLabels;
 
-//lets make some graphs!
+    //lets make some graphs!
     //statSpecs Array Format: [0]Min, [1]Max. [2]Avg [3]Sum [4]Valid Data Count
     var statSpecsArrayA = [];
     var statSpecsArrayB = [];
@@ -11260,7 +11314,7 @@ function updateHourlyStats() {
     graphOutput = '<span style="color:#669999;">Stats as of: ' + currentTime.toLocaleString() + '</span><br>' + graphOutput;
     GM_setValue('graphBox', graphOutput);
 
-//re-pack hourly stats and save to GM variable
+    //re-pack hourly stats and save to GM variable
     hrDataPack = [];
     for (i = 0; i < 24; i++){
       hrDataPack[i]= i + '|' + hourlyFightExpNY[i] + '|' + hourlyFightWinsNY[i] + '|' + hourlyFightLossesNY[i] + '|' +
