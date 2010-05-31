@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.41
-// @build       423
+// @build       424
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.41',
-  build: '423',
+  build: '424',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6951,23 +6951,12 @@ function handleModificationTimer() {
     // Handling for pop-ups
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
     if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
-      var popupElts = $x('.//div[contains(@style, "block")]', popupElt);
-      if (popupElts && popupElts.length > 0) {
-        for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
-          if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
-            var foundPopup = true;
-            break;
-          }
-        }
-      }
-      if (foundPopup) {
-        pageChanged = true;
-        justPlay = true;
-        DEBUG('Detected pop-up.');
-      }
-    }
+      pageChanged = true;
+      justPlay = true;
+      DEBUG('Detected popup.');
+    }	
   }
-
+	
   // Handle changes to the inner page.
   if (pageChanged) {
     try {
@@ -7077,6 +7066,7 @@ function handlePublishing() {
   }
 
   // Retry until window is closed
+  // FIXME - this causes an infinite loop if the window can never be closed
   window.setTimeout(handlePublishing, 2000);
 }
 
@@ -8164,6 +8154,7 @@ function customizeProfile() {
         if (!removeElt) {// Not in mafia. Show options to add/remove from fight lists.
           if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
 		  rDisplay = true;
+          var isOnFightList = (getSavedList('fightList').indexOf(remotefbid) != -1);
           this.buildAnchor( { 'AnchorText':isOnFightList?'Remove from Fight List':'Add to AutoFight List',
                             'id':remotefbid,
                             'title':'In the settings box, under the stamina tab\nIf you have selected fight specific opponents\nFight these opponents:',
@@ -8177,8 +8168,7 @@ function customizeProfile() {
                                           'xw_city=' + (city + 1) + '&'+
                                           tmpKey+
                                           cbKey+
-                                          'friend_id=' + remoteuserid});
-          var isOnFightList = (getSavedList('fightList').indexOf(remotefbid) != -1);
+                                          'friend_id=' + remotefbid});
         }
       }
       if (rDisplay) makeElement('br', statsDiv,{});
@@ -10905,7 +10895,7 @@ function goJobTab(tabno) {
   if (currentBar != barno) {
     var jobWord;
     if (city == NY) jobWord	= currentBar == 1 ? "Easy Jobs" : "More Jobs";
-    if (city == BANGKOK) jobWord = currentBar == 1 ? "Previous Episodes" : "More Episodes";
+    if (city == BANGKOK) jobWord = currentBar == 1 ? "Previous" : "More Episodes";
     elt = xpathFirst('.//ul[contains(@id,"jobs_bar")]' +
                      '//a[contains(text(), "'+jobWord+'")]', innerPageElt);
     DEBUG('Clicked to go to job bar ' + barno + '. ');
@@ -11444,12 +11434,9 @@ function logFightResponse(rootElt, resultElt, context) {
     lastOpponent.attackAgain = attackAgainElt ? attackAgainElt : undefined;
 
     // Click the secret stash immediately
-    var eltStash = xpathFirst('.//span[contains(.,"Send") and contains(.,"Now")]', resultElt);
+    var eltStash = document.getElementById('fight_loot_feed_btn');
     if (eltStash && isGMChecked('autoSecretStash')) {
       clickElement(eltStash);
-      var stashFinder = xpathFirst('.//div[contains(.,"location of a secret stash")]/a', resultElt);
-      var stashUser = linkToString(stashFinder, 'stashUser');
-      addToLog('lootbag Icon','Clicked to send '+stashUser+' secret stash!');
       DEBUG('Clicked to publish the secret stash.');
     }
 
