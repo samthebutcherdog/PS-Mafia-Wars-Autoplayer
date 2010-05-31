@@ -38,20 +38,25 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.40
-// @build       422
+// @version     1.1.41
+// @build       423
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.40',
-  build: '422',
+  version: '1.1.41',
+  build: '423',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
   ajaxPage: 'inner2',
+/* Old USO, but may be changed back
   presentationurl: 'http://userscripts.org/scripts/show/64720',
   url: 'http://userscripts.org/scripts/source/64720.user.js',
   metadata: 'http://userscripts.org/scripts/source/64720.meta.js',
+*/
+  presentationurl: 'http://userscripts.org/scripts/show/77953',
+  url: 'http://userscripts.org/scripts/source/77953.user.js',
+  metadata: 'http://userscripts.org/scripts/source/77953.meta.js',
   controller: '/remote/html_server.php?&xw_controller=',
   action: '&xw_action=',
   city: '&xw_city=',
@@ -7723,7 +7728,7 @@ function customizeMasthead() {
   var linkElt = makeElement('div', mastheadElt,
     {'id':'ap_links', 'style':'position: absolute; top: 4px; right: 10px; text-align: left;' +
      'font-size: 12px; font-weight: bold;'});
-  makeElement('a', linkElt, {'href':'http://userscripts.org/scripts/show/64720','target':'_blank'})
+  makeElement('a', linkElt, {'href':'http://userscripts.org/scripts/show/77953','target':'_blank'})
     .appendChild(document.createTextNode('For Firefox'));
   linkElt.appendChild(document.createTextNode(' | '));
   makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk','target':'_blank'})
@@ -7742,10 +7747,10 @@ function customizeMasthead() {
   helpMenu.style.width = "200px";
   helpMenu.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
                        '<div class="sexy_destination middle"><b>Downloads</b></div> ' +
-                       '<a href="http://userscripts.org/scripts/show/64720" target="_blank"> ' +
+                       '<a href="http://userscripts.org/scripts/show/77953" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
                        '</a> ' +
-                       '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
+                       '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
                        '</a> ' + 
                        '<div class="sexy_destination middle"><b>Websites</b></div> ' +
@@ -8837,8 +8842,8 @@ function customizeProps() {
       GM_setValue('collectTakeBangkok', 0);
       addToLog('warning Icon', 'Property functions disabled.');
       addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to work on properties. <br>' +
-               'Visit <a href="http://userscripts.org/scripts/show/64720">MWAP for Firefox</a> or ' +
-               '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk">MWAP for Chrome</a> for instructions. ');
+               'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
+               '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions. ');
     }
     return true;
   }
