@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.41
-// @build       426
+// @build       427
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.41',
-  build: '426',
+  build: '427',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7102,7 +7102,7 @@ function handlePublishing() {
         if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
         // War back up request
-        if (checkPublish('.//div[contains(.,"needs help to win their War")]','autoWarResponsePublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"needs help to win his War")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
         // War rally for help
         if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
@@ -7640,7 +7640,7 @@ function doQuickClicks() {
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
 
     // Click the 'Call for Help!' button
-    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Call for Help")]', 'autoWarResponsePublish')) return;
+    if (doClick('.//div//a[@class="sexy_button" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
 
     // Click the 'Rally More Help!' button
     //if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
@@ -11510,7 +11510,7 @@ function logFightResponse(rootElt, resultElt, context) {
     }
 
     // Click the iced opponent bonus immediately
-    var eltIce = xpathFirst('.//a[contains(.,"Help Your Friends")]');
+    var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]');
     if (eltIce && isGMChecked('autoIcePublish')) {
       clickElement(eltIce);
       DEBUG('Clicked to publish iced opponent bonus.');
