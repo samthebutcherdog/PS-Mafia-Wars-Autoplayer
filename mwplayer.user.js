@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.41
-// @build       425
+// @build       426
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.41',
-  build: '425',
+  build: '426',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -64,10 +64,11 @@ var SCRIPT = {
   user: '&user_id='
 };
 
+/* tempfix for publishing
 // Only attach to the top window.
 if (window.top != window.self) {
   return;
-}
+}*/
 
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
@@ -841,7 +842,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var settingsOpen = false;
   var statsOpen = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', '?', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -2302,7 +2303,7 @@ function autoStat() {
 
     // Add stats to the attribute farthest from the goal
     // (or the nextStat if fallback kicked in)
-    var upgradeElt, upgradeKey;
+    var upgradeKey;
     switch (statIndex) {
       case ATTACK_STAT    : upgradeKey = 'attack';        break;
       case DEFENSE_STAT   : upgradeKey = 'defense';       break;
@@ -2317,8 +2318,8 @@ function autoStat() {
         return false;
     }
 
-    var upgrateAmt = (stats > 4 && (maxPtDiff > 4 || maxPtDiff <= 0))? 5 : 1;
-    var upgradeElt = xpathFirst('.//a[contains(@onclick,"upgrade_key='+upgradeKey+'") and contains(@onclick,"upgrade_amt='+upgrateAmt+'")]', innerPageElt);
+    var upgradeAmt = (stats > 4 && (maxPtDiff > 4 || maxPtDiff <= 0))? 5 : 1;
+    var upgradeElt = xpathFirst('.//a[contains(@onclick,"upgrade_key='+upgradeKey+'") and contains(@onclick,"upgrade_amt='+upgradeAmt+'")]', innerPageElt);
 
     // Try to fallback to 1 skill point button
     if (!upgradeElt){
@@ -2950,13 +2951,26 @@ function autoRob() {
     Autoplay.start();
     return true;
   } else {
-    clickAction = 'autoRob';
-    clickContext = getCurRobSlotId();
-    DEBUG("Context : " + clickContext);
-    Autoplay.fx = doRob;
-    Autoplay.delay = getAutoPlayDelay();
-    Autoplay.start();
-    return true;
+    // Check if burst is enabled for robbing
+    if (isGMChecked('burstStamina')) {
+      DEBUG("Stamina burst detected for robbing");
+      clickAction = 'autoRob';
+      clickContext = getCurRobSlotId();
+      DEBUG("Context : " + clickContext);
+      Autoplay.fx = doRob;
+      Autoplay.delay = 0;
+      Autoplay.start();
+      return true;
+    } else {
+      DEBUG("Stamina burst skipped for robbing");
+      clickAction = 'autoRob';
+      clickContext = getCurRobSlotId();
+      DEBUG("Context : " + clickContext);
+      Autoplay.fx = doRob;
+      Autoplay.delay = getAutoPlayDelay();
+      Autoplay.start();
+      return true;
+    }
   }
 }
 
@@ -3262,16 +3276,16 @@ function autoBankDeposit(bankCity, amount) {
     addToLog('warning Icon', 'Switching city too fast, not banking cash.');
     return false;
   }
-  
+
   // One last check to make sure the city hasn't changed
   var eltBankCity = xpathFirst('//a[@class="bank_deposit"]');
   if (eltBankCity) {
     if (eltBankCity.getAttribute('onclick').match(/xw_city=(\d+)/)) {
-	  var thisCity = RegExp.$1 - 1;
-	  if (thisCity != bankCity) {
-        addToLog('warning Icon', 'Banking Error: Current City: ' + cities[thisCity][CITY_NAME] + ' Expected City: ' + cities[bankCity][CITY_NAME]);
-        return false;
-	  }
+      var thisCity = RegExp.$1 - 1;
+      if (thisCity != bankCity) {
+          addToLog('warning Icon', 'Banking Error: Current City: ' + cities[thisCity][CITY_NAME] + ' Expected City: ' + cities[bankCity][CITY_NAME]);
+          return false;
+      }
     }
   }
 
@@ -3299,13 +3313,13 @@ function autoBankWithdraw(amount) {
     return true;
   } else {
     // Make sure the bank window is open!
-	if (document.getElementById("bank_popup").parentNode.style.display == 'none') {
+    if (document.getElementById("bank_popup").parentNode.style.display == 'none') {
       Autoplay.fx = goBank;
       clickAction = 'withdraw';
       clickContext = amount;
       Autoplay.start();
-	  return true;
-	}
+      return true;
+    }
   }
 
   // Set the amount (if provided).
@@ -6967,23 +6981,25 @@ function handleModificationTimer() {
       if (popupElts && popupElts.length > 0) {
         for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
           if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
-		    // Check for specific popups here
+            // Check for specific popups here
+            if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
+                || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1) 
+              continue;
             var foundPopup = true;
-			if (popupElts[i].innerHTML.indexOf('id="marketplace"')) foundPopup = false;
             break;
           }
         }
       }
-	  	  
+
       if (foundPopup) {
         pageChanged = true;
         justPlay = true;
         DEBUG('Detected popup: ' + popupElt.innerHTML.untag().slice(0,100));
-		handlePublishing();
+        //handlePublishing();
       }
     }
   }
-	
+
   // Handle changes to the inner page.
   if (pageChanged) {
     try {
@@ -7020,13 +7036,12 @@ function handlePublishing() {
       var skipElt = xpathFirst('.//input[@id="cancel"]');
       var pubElt = xpathFirst('.//input[@id="publish"]');
       var okElt = xpathFirst('.//input[@id="okay"]');
-	  
-	  DEBUG('Publish: Checking for items to publish!');
 
-	  // If none of these buttons are present, then we can't possibly click them!
+      DEBUG('Publish: Checking for items to publish!');
+      // If none of these buttons are present, then we can't possibly click them!
       if (!skipElt && !pubElt && !okElt) {
-	    DEBUG('Publish: No publishing buttons found!');
-	    return false;
+        DEBUG('Publish: No publishing buttons found!');
+        return false;
       }
  
       // If OK button is found, close the window by pressing it
@@ -7053,7 +7068,7 @@ function handlePublishing() {
 
             // Wait for 2 seconds before trying to close window manually
             window.setTimeout(handlePublishing, 2000);
-			DEBUG('Publish: Found ' + gmFlag);
+            DEBUG('Publish: Found ' + gmFlag);
             return true;
           }
           return false;
@@ -7950,11 +7965,11 @@ function quickBank(bankCity, amount) {
   var eltBankCity = xpathFirst('//a[@class="bank_deposit"]');
   if (eltBankCity) {
     if (eltBankCity.getAttribute('onclick').match(/xw_city=(\d+)/)) {
-	  var thisCity = RegExp.$1 - 1;
-	  if (thisCity != bankCity) {
+      var thisCity = RegExp.$1 - 1;
+      if (thisCity != bankCity) {
         addToLog('warning Icon', 'Banking Error: Current City: ' + cities[thisCity][CITY_NAME] + ' Expected City: ' + cities[bankCity][CITY_NAME]);
         return false;
-	  }
+      }
     }
   }
 
@@ -8094,7 +8109,7 @@ function customizeProfile() {
     var tabElt = xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(text(), "Profile")]', innerPageElt);
     if (tabElt){
       var remoteuserid;
-	  var remotefbid;
+      var remotefbid;
       var tmpKey;
       var cbKey;
       if (tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&cb=([\d,a-z]+)&user=p\|(\d+)/)) {
@@ -8106,13 +8121,13 @@ function customizeProfile() {
         remoteuserid = 'p|'+RegExp.$1;
       }
 
-	  // This code is to grab the facebook id for this profile
-	  if ((m=/xw_controller=robbing.*?target=([0-9]+)/.exec(document.getElementById('inner_page').innerHTML))) {
-	    remotefbid = m[1];
+      // This code is to grab the facebook id for this profile
+      if ((m=/xw_controller=robbing.*?target=([0-9]+)/.exec(document.getElementById('inner_page').innerHTML))) {
+        remotefbid = m[1];
       }
       if ((m=/xw_action=gift_wishlist.*?user=([0-9]+)/.exec(document.getElementById('inner_page').innerHTML))) {
-	    remotefbid = m[1];
-	  }
+        remotefbid = m[1];
+      }
 
       if (!tmpKey && tabElt.getAttribute('onclick').match(/tmp=([\d,a-z]+)&/)){
         tmpKey = 'tmp='+RegExp.$1+'&';
@@ -8121,8 +8136,8 @@ function customizeProfile() {
         cbKey = 'cb='+RegExp.$2+'&';
       }
 
-	  DEBUG('Profile: Mafia Wars ID: ' + remoteuserid + ' Facebook ID: ' + remotefbid);
-	  
+      DEBUG('Profile: Mafia Wars ID: ' + remoteuserid + ' Facebook ID: ' + remotefbid);
+
       // See if this player is in our mafia.
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
@@ -8144,17 +8159,17 @@ function customizeProfile() {
         loadUrl (getHitUrl(remoteuserid), urlLoaded);
       }
 
-	  var rDisplay = false;
+      var rDisplay = false;
 
-	  // Explain the buttons
+      // Explain the buttons
       makeElement('a', statsDiv, {'href':'javascript:alert("Due to the way Mafia Wars links to Facebook there are times where MWAP cannot find the Facebook profile ID. In those situations MWAP will not display buttons that require that ID. You can make the Facebook ID available by refreshing the profile page.");'}).appendChild(document.createTextNode('Where are my links?'));
 
-	  // This is a refresh page button
+      // This is a refresh page button
       statsDiv.appendChild(document.createTextNode(' | '));
       makeElement('a', statsDiv, {'href':'http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=stats&xw_action=view&xw_city=1&user=' + remoteuserid}).appendChild(document.createTextNode('Refresh this profile!'));;
-	  rDisplay = true;
+      rDisplay = true;
 
-	  if (remotefbid) {
+      if (remotefbid) {
         // Facebook profile
         if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
         makeElement('a', statsDiv, {'href':'http://www.facebook.com/profile.php?id=' + remotefbid,'target':'_blank'}).appendChild(document.createTextNode('Facebook Profile'));
@@ -8162,7 +8177,7 @@ function customizeProfile() {
 
         // Add as Facebook friend
         makeElement('a', statsDiv, {'href':'http://www.facebook.com/addfriend.php?id=' + remotefbid,'target':'_blank'}).appendChild(document.createTextNode('Add as Friend'));
-		rDisplay = true;
+        rDisplay = true;
       }
 
       if (removeElt) { // Promote
@@ -8180,7 +8195,7 @@ function customizeProfile() {
         rDisplay = true;
       }
       if (rDisplay) makeElement('br', statsDiv,{});
-	  rDisplay = false;
+      rDisplay = false;
 
       if (removeElt) {//Add or Remove from War List
         var warID = remoteuserid.replace('p|','');
@@ -8191,10 +8206,10 @@ function customizeProfile() {
                             'title':'In the settings box, under the mafia tab\nIf you have selected war friends from a list\nupdates the friends ids in the box',
                             'clickEvent':isOnWarList?clickWarListRemove:clickWarListAdd
                           });
-		rDisplay = true;
+        rDisplay = true;
       }
 
-      if (remotefbid) {	  
+      if (remotefbid) {
         // Add to AutoHitlist
         if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
         var isOnAutoHitList = (getSavedList('autoHitOpponentList').indexOf(remotefbid) != -1);
@@ -8207,7 +8222,7 @@ function customizeProfile() {
 
         if (!removeElt) {// Not in mafia. Show options to add/remove from fight lists.
           if (rDisplay) statsDiv.appendChild(document.createTextNode(' | '));
-		  rDisplay = true;
+          rDisplay = true;
           var isOnFightList = (getSavedList('fightList').indexOf(remotefbid) != -1);
           this.buildAnchor( { 'AnchorText':isOnFightList?'Remove from Fight List':'Add to AutoFight List',
                             'id':remotefbid,
@@ -8216,7 +8231,7 @@ function customizeProfile() {
                           });
 
           statsDiv.appendChild(document.createTextNode(' | '));
-		  this.buildAnchor( { 'AnchorText':'Add to Mafia',
+          this.buildAnchor( { 'AnchorText':'Add to Mafia',
                             'URLSegment': 'xw_controller=war&'+
                                           'xw_action=add&'+
                                           'xw_city=' + (city + 1) + '&'+
@@ -8269,13 +8284,13 @@ function customizeProfile() {
                                           'job_city=4'
                           });
         makeElement('br', statsDiv,{});
-	    if (remotefbid) {
+        if (remotefbid) {
           this.buildAnchor( { 'AnchorText':'Mafia Gift',
                             'title':'Requires that you set the giftkey in advance, see documentation',
                             'href':'http://www.spockholm.com/mafia/?id='+remotefbid
                           });
           statsDiv.appendChild(document.createTextNode(' | '));
-		}
+        }
         this.buildAnchor( { 'AnchorText':'Load ChuckACrap',
                             'title':'From spockholm.com',
                             'clickEvent':eventclick_chuckaCrap
@@ -10948,7 +10963,7 @@ function goJobTab(tabno) {
   DEBUG('goJobTab: city=' + city + ' currentBar=' + currentBar + ' currentTab=' + currentTab + ' barno=' + barno + ' tabno=' + tabno);
   if (currentBar != barno) {
     var jobWord;
-    if (city == NY) jobWord	= currentBar == 1 ? "Easy Jobs" : "More Jobs";
+    if (city == NY) jobWord = currentBar == 1 ? "Easy Jobs" : "More Jobs";
     if (city == BANGKOK) jobWord = currentBar == 1 ? "Previous" : "More Episodes";
     elt = xpathFirst('.//ul[contains(@id,"jobs_bar")]' +
                      '//a[contains(text(), "'+jobWord+'")]', innerPageElt);
@@ -11488,7 +11503,7 @@ function logFightResponse(rootElt, resultElt, context) {
     lastOpponent.attackAgain = attackAgainElt ? attackAgainElt : undefined;
 
     // Click the secret stash immediately
-    var eltStash = document.getElementById('fight_loot_feed_btn');
+    var eltStash = document.getElementById('fight_loot_feed_btn', resultElt);
     if (eltStash && isGMChecked('autoSecretStash')) {
       clickElement(eltStash);
       DEBUG('Clicked to publish the secret stash.');
