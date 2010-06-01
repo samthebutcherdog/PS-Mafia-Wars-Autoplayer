@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.41
-// @build       427
+// @build       428
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.41',
-  build: '427',
+  build: '428',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4654,7 +4654,7 @@ function minBankCheck() {
 function createLogBox() {
   var title;
 
-  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 30px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
+  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 30px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 10000; font-size: 12px;'});
 
   var logClrButton = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'style':'position: absolute; left: 5px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     logClrButton.appendChild(document.createTextNode('clear log'));
@@ -4727,7 +4727,7 @@ function createSettingsBox() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 540px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; left: 329px; top: 30px; width: 600px; height: 500px; font-size: 14px; z-index: 100; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; left: 329px; top: 30px; width: 600px; height: 500px; font-size: 14px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
   //End settings box
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
@@ -6804,7 +6804,7 @@ function createStatWindow() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'sWindowGenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 620px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var statsWindow = makeElement('div', elt, {'style':'position: fixed; left: 329px; top: 30px; z-index: 101; width: 600px; height: 540px; font-size: 14px; color: #BCD2EA; background: black no-repeat scroll 0 110px', 'id':'statsWindow'});
+  var statsWindow = makeElement('div', elt, {'style':'position: fixed; left: 329px; top: 30px; z-index: 10001; width: 600px; height: 540px; font-size: 14px; color: #BCD2EA; background: black no-repeat scroll 0 110px', 'id':'statsWindow'});
   //End settings box
 
   var statsWindowTopBG = makeElement('div', statsWindow, {'style':'background: black; height: 40px;'});
@@ -7456,9 +7456,16 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;}'   +
+    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;} #mw_masthead {z-index: 10000;}' +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
-                 ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -10px !important; left: 255px !important; width: 45px; z-index: 100;}' +
+                 // Elevate messagecenter and move its button:
+                 ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
+                 ' div[id="message_center_div"] {z-index: 10001 !important;}' +
+                 // Move gifticon and make it smaller:
+                 ' #gifticon_container {position: absolute; top: 15px; left: 305px; width: 25px; z-index: 10001;}' +
+                 ' img[src="http://mwfb.static.zynga.com/mwfb/graphics/icon_gift_33x40_01.png"] {width: 25px;}' +
+                 // Move London Countdown:
+                 ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust level/experience CSS
@@ -7470,9 +7477,14 @@ function refreshMWAPCSS() {
                  ' .player_updates {width: 728px !important} ' +
                  ' div[class$="tab_box_content"] {width: 738px !important} ' +
                  ' .playerupdate_box {width: 740px !important} ' : '' ) +
-                 // Move menus
-                 ' div[onmouseover="travelopen()"] {position: absolute !important; left: 300px !important;} ' +
-                 ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;} ' +
+                 // Move menus and make the travelmenu button smaller:
+                 ' div[onmouseover="travelopen()"] {position: absolute !important; left: 333px !important; width: 125px !important;}' +
+                  ' div[id="button_travel_locked"] {width: 125px !important;}' +
+                    ' a[class="sexy_button_new sexy_button_new_hover_state short_black sexy_lock_new"] {width: 120px !important;}' +
+                  ' div[id="travel_container"] {width: 125px !important;}' +
+                    ' a[class="sexy_button_new short_black_white_border sexy_travel_new"] {width: 120px !important;}' +
+                  ' div[id="travel_menu"] {width: 140px;}' +
+                 ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;}' +
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' .message_box_full, ' : '' ) +
                  (isGMChecked('hideActionBox') ? ' .menu_divider, ' : '' ) +
