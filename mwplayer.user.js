@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.41
-// @build       428
+// @build       429
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.41',
-  build: '428',
+  build: '429',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1841,6 +1841,12 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
+  // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
+  if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
+    DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
+    GM_setValue('autoHeal', 'checked');
+  }
+
   // Background mode hitlisting (limit to level 4 and above)
   if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
@@ -2953,16 +2959,16 @@ function autoRob() {
   } else {
     // Check if burst is enabled for robbing
     if (isGMChecked('burstStamina')) {
-      DEBUG("Stamina burst detected for robbing");
+      //DEBUG("Stamina burst detected for robbing");
       clickAction = 'autoRob';
       clickContext = getCurRobSlotId();
       DEBUG("Context : " + clickContext);
       Autoplay.fx = doRob;
-      Autoplay.delay = 0;
+      Autoplay.delay = noDelay;
       Autoplay.start();
       return true;
     } else {
-      DEBUG("Stamina burst skipped for robbing");
+      //DEBUG("Stamina burst skipped for robbing");
       clickAction = 'autoRob';
       clickContext = getCurRobSlotId();
       DEBUG("Context : " + clickContext);
@@ -3999,6 +4005,17 @@ function saveSettings() {
     alert('The maximum number of player updates must be between 0 and 75.');
     return;
   }
+  var hideAttacks = (document.getElementById('hideAttacks').checked === true);
+  var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
+  if (hideAttacks) {
+    if (isNaN(rideHitlistXP) || rideHitlistXP < 1 || rideHitlistXP > 50) {
+      alert('For the hitlistride XP please enter a number between 1 and 50 (default:10).');
+      return;
+    } else {
+      GM_setValue ('rideHitlistXP', rideHitlistXP);
+    }
+  }
+
   var autoBankOn      = (document.getElementById('autoBank').checked === true);
   var autoBankCubaOn  = (document.getElementById('autoBankCuba').checked === true);
   var autoBankMoscowOn  = (document.getElementById('autoBankMoscow').checked === true);
@@ -4654,7 +4671,7 @@ function minBankCheck() {
 function createLogBox() {
   var title;
 
-  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 30px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 10000; font-size: 12px;'});
+  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 30px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
 
   var logClrButton = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'style':'position: absolute; left: 5px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     logClrButton.appendChild(document.createTextNode('clear log'));
@@ -5168,15 +5185,20 @@ function createDisplayTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Align game to the left'));
 
-  // Summarize Attacks
+  // Hitlist riding
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hideAttacks';
-  title = 'Only Show Summary of Attacks';
+  title = 'Enable hitlist riding';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Summarize attacks from Player Updates'));
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
+  id = 'rideHitlistXP';
+  title = 'Enter the XP you want to gain before turning off autoHeal';
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '10'), 'title':title, 'id':id, 'style':'width: 25px'});
+  rhs.appendChild(document.createTextNode(' xp'));
+
 
   // Set Facebook account to window title
   item = makeElement('div', list);
@@ -6804,7 +6826,7 @@ function createStatWindow() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'sWindowGenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 620px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var statsWindow = makeElement('div', elt, {'style':'position: fixed; left: 329px; top: 30px; z-index: 10001; width: 600px; height: 540px; font-size: 14px; color: #BCD2EA; background: black no-repeat scroll 0 110px', 'id':'statsWindow'});
+  var statsWindow = makeElement('div', elt, {'style':'position: fixed; left: 329px; top: 30px; z-index: 101; width: 600px; height: 540px; font-size: 14px; color: #BCD2EA; background: black no-repeat scroll 0 110px', 'id':'statsWindow'});
   //End settings box
 
   var statsWindowTopBG = makeElement('div', statsWindow, {'style':'background: black; height: 40px;'});
@@ -6983,7 +7005,8 @@ function handleModificationTimer() {
           if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
             // Check for specific popups here
             if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
-                || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1) 
+                || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1
+                || popupElts[i].innerHTML.indexOf('xw_controller=challenge') != -1) 
               continue;
             var foundPopup = true;
             break;
@@ -7099,10 +7122,10 @@ function handlePublishing() {
         if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
 
         // War Reward
-        if (checkPublish('.//div[contains(.,"rewarded their friends with")]','autoWarRewardPublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"and friends overwhelmed the Mafia")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
         // War back up request
-        if (checkPublish('.//div[contains(.,"needs help to win his War")]','autoWarResponsePublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"needs help to win")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
         // War rally for help
         if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
@@ -7458,9 +7481,9 @@ function refreshMWAPCSS() {
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;} #mw_masthead {z-index: 10000;}' +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
-                 // Elevate messagecenter and move its button:
+                 // Move the messagecenter button:
                  ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
-                 ' div[id="message_center_div"] {z-index: 10001 !important;}' +
+                 //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
                  ' #gifticon_container {position: absolute; top: 15px; left: 305px; width: 25px; z-index: 10001;}' +
                  ' img[src="http://mwfb.static.zynga.com/mwfb/graphics/icon_gift_33x40_01.png"] {width: 25px;}' +
@@ -9620,8 +9643,9 @@ function parsePlayerUpdates(messagebox) {
         GM_setValue('currentHitXp', parseInt((GM_getValue('currentHitXp', 0)) + experience));
         GM_setValue('currentHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + cost));
         DEBUG(result);
-        if (experience == 0) {
-          DEBUG('Zero experience detected; turning off auto-heal.');
+        if (isGMChecked('autoHeal') && GM_getValue('currentHitXp', 0) >= GM_getValue('rideHitlistXP', 10)) {
+          //DEBUG('Zero experience detected; turning off auto-heal.');
+          DEBUG(GM_getValue('currentHitXp', 0) + ' experience detected; turning off auto-heal.');
           GM_setValue('autoHeal', 0);
         }
       } else {
@@ -10404,7 +10428,7 @@ function autoGiftWindowOpen() {
   // Setup to wait for the window to open!
   Autoplay.fx = function() { autoGiftAccept(); };
   Autoplay.delay = getAutoPlayDelay();
-  Autoplay.delay = 20000;
+  Autoplay.delay = 10000;
   Autoplay.start();
 
   return true;
@@ -12091,7 +12115,7 @@ function logResponse(rootElt, action, context) {
       else if (innerNoTags.indexOf('WON') != -1 ||
                innerNoTags.indexOf('LOST') != -1) {
         var logIcon = innerNoTags.indexOf('LOST') != -1 ? 'omg Icon' : 'yeah Icon';
-        addToLog(logIcon, inner.split('points.')[0] + 'points.</div>');
+        addToLog(logIcon, inner.split(' this war.')[0] + ' this war.</div>');
       }
       else {
         addToLog('info Icon', inner);
@@ -12165,7 +12189,7 @@ function logResponse(rootElt, action, context) {
       // Help attempt was processed. Increment the update count.
       GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
 
-      var user = linkToString(messagebox.getElementsByTagName('a')[0], 'user');
+      var user = linkToString(xpathFirst('.//a[contains(@onclick,"xw_controller=stats&xw_action=view")]', messagebox), 'user');
       if (context && !user) {
         user = context.user;
       }
