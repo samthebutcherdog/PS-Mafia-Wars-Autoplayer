@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       430
+// @build       432
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '430',
+  build: '432',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
