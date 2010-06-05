@@ -17,9 +17,9 @@
 * @package: Facebook Mafia Wars Autoplayer
 * @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
-            Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka, 
-            rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks, 
-            nonoymsd 
+            Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
+            rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks,
+            nonoymsd
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -38,12 +38,12 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.41
+// @version     1.1.42
 // @build       429
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.41',
+  version: '1.1.42',
   build: '429',
   name: 'inthemafia',
   appID: 'app10979261223',
@@ -981,7 +981,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const MISSION_CITY     = 4;
   const MISSION_XP       = 5;
   const MISSION_RATIO    = 6;
-  
+
   // Add city variables in this format
   // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
 
@@ -1413,7 +1413,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Battle Your Way Through The Temple',96,144,8,BANGKOK,159],               // FINALE
     ['Overthrow The Shadow King',1,145,8,BANGKOK,3]                            // BOSS JOB
   );
-  
+
   var missionTabs = new Array(
     // NEW YORK
     ['Street Thug (Levels 1-4)','Associate (Levels 5-8)','Soldier (Levels 9-12)',
@@ -1936,7 +1936,7 @@ function doAutoPlay () {
   var autoEnergyPackWaiting = running && energyPack &&
                               ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
                               isGMChecked('autoEnergyPack');
-  
+
   if ((autoEnergyPackWaiting && (energy <= 2)) || (energyPack && isGMChecked('autoEnergyPackForce') && (energy <= GM_getValue('autoEnergyPackForcePts',0)))) {
     DEBUG('energyPack='+energyPack+'  energy='+energy+ '  ptsToNextLevel=' + ptsToNextLevel +
           '  ptsToLevelProjStaminaUse=' + ptsToLevelProjStaminaUse);
@@ -2527,7 +2527,7 @@ function autoMission() {
   var tabno       = missions[jobid][MISSION_TAB];
   var cityno      = missions[jobid][MISSION_CITY];
   DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno);
-  
+
   if (SpendEnergy.floor &&
       isGMChecked('allowEnergyToLevelUp') &&
       GM_getValue('autoEnergyBurn') !== SpendEnergy.canBurn) {
@@ -3055,7 +3055,7 @@ function logRobResponse(rootElt, resultElt, context) {
 
     addToLog('yeah Icon', result);
 
-    if (eltRob) 
+    if (eltRob)
       // Look for any loot on rob slot
       if (m = /alt="(.*?)"/.exec(eltRob.innerHTML)) {
         addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[1] + ' in robbing.</span>');
@@ -3954,7 +3954,7 @@ function saveDefaultSettings() {
   // Energy tab.
   GM_setValue('estimateJobRatio', '1');
   GM_setValue('autoEnergyPackForce', 0);
-  GM_setValue('autoEnergyPackForcePts', 0);  
+  GM_setValue('autoEnergyPackForcePts', 0);
 
   // Stamina tab.
   GM_setValue('staminaSpendHow', STAMINA_HOW_FIGHT_RANDOM);
@@ -4098,7 +4098,7 @@ function saveSettings() {
     return;
   }
   GM_setValue('autoMainframeCode', autoMainframeCode);
- 
+
   // Validate the stamina tab.
   var staminaTabSettings = validateStaminaTab();
   if (!staminaTabSettings) return;
@@ -4144,7 +4144,7 @@ function saveSettings() {
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
-                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept', 
+                            'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', 'flashed',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce']);
@@ -7006,7 +7006,7 @@ function handleModificationTimer() {
             // Check for specific popups here
             if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
                 || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1
-                || popupElts[i].innerHTML.indexOf('xw_controller=challenge') != -1) 
+                || popupElts[i].innerHTML.indexOf('xw_controller=challenge') != -1)
               continue;
             var foundPopup = true;
             break;
@@ -7066,7 +7066,7 @@ function handlePublishing() {
         DEBUG('Publish: No publishing buttons found!');
         return false;
       }
- 
+
       // If OK button is found, close the window by pressing it
       if (okElt) {
         clickElement(okElt);
@@ -7828,7 +7828,7 @@ function customizeMasthead() {
                        '</a> ' +
                        '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
-                       '</a> ' + 
+                       '</a> ' +
                        '<div class="sexy_destination middle"><b>Websites</b></div> ' +
                        '<a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts Chat</div> ' +
@@ -10271,7 +10271,7 @@ function autoGiftWaiting() {
 
 function autoGiftPopups() {
   // This is a gift popup
-  var eltGiftSafehouseCongrats = xpathFirst('//div[contains(@id,"zy_popup_box") and (contains(@class,"safehouse_congrats_popup") or contains(@class,"safehouse_results_popup"))]', innerPageElt); 
+  var eltGiftSafehouseCongrats = xpathFirst('//div[contains(@id,"zy_popup_box") and (contains(@class,"safehouse_congrats_popup") or contains(@class,"safehouse_results_popup"))]', innerPageElt);
   if (eltGiftSafehouseCongrats) {
     eltGiftSafehouseCongrats.style.display = 'none';
     DEBUG('Gifts: Cleared safehouse congratulations popup: ' + eltGiftSafehouseCongrats.id);
@@ -10279,9 +10279,9 @@ function autoGiftPopups() {
   }
 
   // Check for a Gift Window popup for the safehouse style 3018
-  var eltGift3018 = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"safehouse") and contains(@style,"block")]', innerPageElt); 
+  var eltGift3018 = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"safehouse") and contains(@style,"block")]', innerPageElt);
   if (eltGift3018) {
-    // So there's a 3018 popup! Let's let Z do it for us! 
+    // So there's a 3018 popup! Let's let Z do it for us!
     // Ok, so JQuery should already exist!
     $ = unsafeWindow.jQuery;
 
@@ -10309,12 +10309,12 @@ function autoGiftPopups() {
               $('#cb_sta_gain').click();
               break;
       // just in case
-      default: 
+      default:
               $('#cb_xp_gain').click();
     }
 
 
-    Autoplay.fx = function() { 
+    Autoplay.fx = function() {
       // Ok, so JQuery should already exist!
       $ = unsafeWindow.jQuery;
       $('#gift_popup_send_gift').click();
@@ -10363,7 +10363,7 @@ function autoGiftQueue() {
 
 function autoGiftWindowClose() {
   // If there are queue entries, then we still need to process them
-  if (giftQueue.length) return false;  
+  if (giftQueue.length) return false;
 
   // Let's close the window!
   var iframeGiftWindow = document.getElementById('message_center_div_iframe');
@@ -10371,7 +10371,7 @@ function autoGiftWindowClose() {
   var eltCloseWindow = iframeGiftWindow.contentDocument.evaluate('//a[contains(@onclick,"closeMessageCenter")]', iframeGiftWindow.contentDocument, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null).singleNodeValue;
   if (!eltCloseWindow) return false;
 
-  // Ok, close the gift window! 
+  // Ok, close the gift window!
   // Simulate a mouse click on the element.
   Autoplay.fx = function() {
     var iframeGiftWindow = document.getElementById('message_center_div_iframe');
@@ -10435,13 +10435,13 @@ function autoGiftWindowOpen() {
 }
 
 function autoGiftAccept() {
-  // Damn these frames! 
+  // Damn these frames!
   if (!onHome()) return false;
   // Need to be enabled
   if (!GM_getValue('autoGiftAccept',0)) return false;
 
   // If there are queue entries, then we still need to process them
-  if (giftQueue.length) return true;  
+  if (giftQueue.length) return true;
 
   // We're only coming to this routine every few minutes because it opens a window
   if (timeLeftGM('autoGiftAcceptTimer')) return false;
@@ -10525,7 +10525,7 @@ function autoGiftAccept() {
     }
     // If we get here, there were 3018 gifts but couldn't get them
     //return false;
-  } 
+  }
 
   // If we are here, then open the gift window
   if (autoGiftWindowOpen()) return true;
@@ -11007,10 +11007,10 @@ function goJobTab(tabno) {
     clickElement(elt);
     return true;
   }
-  
+
   // Adjust the barno for BK because BK only has one bar number, jobs_bar0.
   if (city == BANGKOK) barno = 0;
-  
+
   // Handle old and new tab param names
   elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[' +
                    'contains(@onclick, "&story_tab=' + tabno + '") or ' +
