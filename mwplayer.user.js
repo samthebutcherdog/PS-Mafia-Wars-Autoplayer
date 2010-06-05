@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       429
+// @build       430
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '429',
+  build: '430',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -643,7 +643,6 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
 
 const noDelay = 0;              // No delay on commands
 const minDelay = 1000;          // Minimum delay on commands
-var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
 var appLayoutElt;               // The currently visible content page
 var cash;                       // Cash array of values by city
@@ -1652,8 +1651,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     alert('MWAP: Inconsistent state found in settings, please check them!');
     GM_setValue('isRunning', false);
   }
-  running = GM_getValue('isRunning');
-
+  
   var Reload = new Animate();
   Reload.desc = 'reload';
   var Autoplay = new Animate();
@@ -1737,7 +1735,7 @@ Animate.prototype.setTimeout = function(fx, delay) {
 }
 
 Animate.prototype.start = function() {
-  if (running && settingsOpen === false && this.fx) {
+  if (GM_getValue('isRunning') && settingsOpen === false && this.fx) {
     this.setTimeout(this.fx, this.delay);
   } else if (settingsOpen === true) {
     DEBUG('Settings box open. Not starting ' + this.desc + ' timer.');
@@ -1781,7 +1779,7 @@ function doAutoPlay () {
   idle = false;
 
   // Auto-heal
-  if (running &&
+  if (GM_getValue('isRunning') &&
       isGMChecked('autoHeal') &&
       health < GM_getValue('healthLevel', 0) &&
       health < maxHealth &&
@@ -1790,20 +1788,20 @@ function doAutoPlay () {
   }
 
   // Auto-GiftAccept
-  if (running && GM_getValue('autoGiftAccept') && hasHome) {
+  if (GM_getValue('isRunning') && GM_getValue('autoGiftAccept') && hasHome) {
     if (autoGiftPopups()) return;
     if (autoGiftQueue()) return;
     if (autoGiftAccept()) return;
   }
 
   // Auto-Safehouse
-  if (running && GM_getValue('autoSafehouse') && hasHome) {
+  if (GM_getValue('isRunning') && GM_getValue('autoSafehouse') && hasHome) {
     if (autoSafehouse()) return;
   }
 
   // Determine whether a job and/or fight/hit could be attempted.
-  var autoMissionif = running && !skipJobs && canMission();
-  var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight;
+  var autoMissionif = GM_getValue('isRunning') && !skipJobs && canMission();
+  var autoStaminaSpendif = GM_getValue('isRunning') && !skipStaminaSpend && canSpendStamina() && hasFight;
   var energyMaxed = (autoMissionif && energy >= maxEnergy);
   var staminaMaxed = (autoStaminaSpendif && stamina >= maxStamina);
   var maxed = energyMaxed || staminaMaxed;
@@ -1813,47 +1811,47 @@ function doAutoPlay () {
     var spendFirst = GM_getValue('burnOption');
 
     // Prioritize using energy
-    if (stamina < maxStamina && running && canMission() && spendFirst == BURN_ENERGY) {
+    if (stamina < maxStamina && GM_getValue('isRunning') && canMission() && spendFirst == BURN_ENERGY) {
       autoMissionif = true;
       autoStaminaSpendif = false;
     }
 
     // Prioritize using stamina
-    if (energy < maxEnergy && running && canSpendStamina() && hasFight && spendFirst == BURN_STAMINA) {
+    if (energy < maxEnergy && GM_getValue('isRunning') && canSpendStamina() && hasFight && spendFirst == BURN_STAMINA) {
       autoMissionif = false;
       autoStaminaSpendif = true;
     }
   }
 
   // Auto-accept
-  if (running && !maxed && invites > 0 &&
+  if (GM_getValue('isRunning') && !maxed && invites > 0 &&
       isGMChecked('acceptMafiaInvitations')) {
     if (autoAccept()) return;
   }
 
   // Click attack if on warNav
-  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
+  if (GM_getValue('isRunning') && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
   }
 
   // Player updates
-  if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
+  if (GM_getValue('isRunning') && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
   }
 
   // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
-  if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
+  if (GM_getValue('isRunning') && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
     DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
     GM_setValue('autoHeal', 'checked');
   }
 
   // Background mode hitlisting (limit to level 4 and above)
-  if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+  if (GM_getValue('isRunning') && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
   }
 
   // Auto-collect take (limit to level 4 and above)
-  if (running && !maxed && hasProps) {
+  if (GM_getValue('isRunning') && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
@@ -1866,49 +1864,49 @@ function doAutoPlay () {
   }
 
   // Build Cars
-  if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
+  if (GM_getValue('isRunning') && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
     if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
   }
 
   // Build Weapons
-  if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
+  if (GM_getValue('isRunning') && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
   }
 
   // Auto-bank
   var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-  if (running && !maxed && canBank) {
+  if (GM_getValue('isRunning') && !maxed && canBank) {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
 
   // Auto-stat
-  if (running && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
+  if (GM_getValue('isRunning') && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
   }
 
   // Auto-lotto (limit to level 7 and above)
-  if (running && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
+  if (GM_getValue('isRunning') && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
     if (autoLotto()) return;
   }
 
   // Auto-war (limit to level 4 and above)
-  if (running && !maxed && isGMChecked('autoWar') && hasFight) {
+  if (GM_getValue('isRunning') && !maxed && isGMChecked('autoWar') && hasFight) {
     if (autoWar()) return;
   }
 
   // Auto-giftwaiting (limit to level 6 and above)
-  if (running && !maxed && GM_getValue('autoGiftWaiting') && hasHome) {
+  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoGiftWaiting') && hasHome) {
     if (autoGiftWaiting()) return;
   }
 
   // Auto-dailychecklist
-  if (running && !maxed && GM_getValue('autoDailyChecklist') && hasHome) {
+  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoDailyChecklist') && hasHome) {
     if (autoDailyChecklist()) return;
   }
 
   // Auto-mainframe
-  if (running && !maxed && GM_getValue('autoMainframe') && hasHome) {
+  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoMainframe') && hasHome) {
     if (autoMainframe()) return;
   }
 
@@ -1916,7 +1914,7 @@ function doAutoPlay () {
   var xpPtsFromEnergy = (energy + 200) * getEnergyGainRate();
   var xpPtsFromStamina = (stamina + 200) * getStaminaGainRate();
   var canUseMiniPack = (xpPtsFromEnergy < ptsToNextLevel) && (xpPtsFromStamina < ptsToNextLevel);
-  if (running && !maxed && canUseMiniPack && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
+  if (GM_getValue('isRunning') && !maxed && canUseMiniPack && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
     if (miniPack()) return;
   }
 
@@ -1933,7 +1931,7 @@ function doAutoPlay () {
   }
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
   var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
-  var autoEnergyPackWaiting = running && energyPack &&
+  var autoEnergyPackWaiting = GM_getValue('isRunning') && energyPack &&
                               ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
                               isGMChecked('autoEnergyPack');
 
@@ -1986,7 +1984,7 @@ function doAutoPlay () {
   }
 
   // Auto-upgrade properties (limit to level 4 and above)
-  if (running && isGMChecked('autoBuy') && hasProps) {
+  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL]) {
 
@@ -1997,7 +1995,7 @@ function doAutoPlay () {
   }
 
   // Auto-upgrade properties (limit to level 4 and above)
-  if (running && isGMChecked('autoBuy') && hasProps) {
+  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps) {
 
   }
 
@@ -2006,7 +2004,7 @@ function doAutoPlay () {
   idle = true;
 
   // If not previously idle, check the home page.
-  if (running && !previouslyIdle) {
+  if (GM_getValue('isRunning') && !previouslyIdle) {
     DEBUG('Now idle. Checking the home page.');
     Autoplay.fx = goHome;
     Autoplay.start();
@@ -2014,7 +2012,7 @@ function doAutoPlay () {
   }
 
   // If fight/hit/jobs are being skipped, turn them back on and go to the home page
-  if (running && (skipStaminaSpend || skipJobs)) {
+  if (GM_getValue('isRunning') && (skipStaminaSpend || skipJobs)) {
     skipStaminaSpend = false;
     skipJobs = false;
     Autoplay.start();
@@ -2022,7 +2020,7 @@ function doAutoPlay () {
   }
 
   // Idle in preferred city
-  if (running && idle && isGMChecked('idleInCity') && city != GM_getValue('idleLocation', NY)) {
+  if (GM_getValue('isRunning') && idle && isGMChecked('idleInCity') && city != GM_getValue('idleLocation', NY)) {
     DEBUG('Idling. Moving to ' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '. ');
     Autoplay.fx = function(){goLocation(GM_getValue('idleLocation',NY))};
     Autoplay.start();
@@ -3391,7 +3389,7 @@ function getHitlist(element, forceRefresh) {
       opponent.bounty = RegExp.lastMatch;
     }
 
-    if (!running && isGMChecked('showLevel')) {
+    if (!GM_getValue('isRunning') && isGMChecked('showLevel')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
           var s = this.responseText;
@@ -3468,7 +3466,7 @@ function getDisplayedOpponents(element, forceRefresh) {
     if (!opponent.id) continue;
 
     // Do icecheck from fightlist
-    if (!running && isGMChecked('showPulse')) {
+    if (!GM_getValue('isRunning') && isGMChecked('showPulse')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
           var s = this.responseText;
@@ -4263,7 +4261,7 @@ function updateMastheadMenu() {
   if (!menuElt) return;
 
   var elt = document.getElementById('pauseButton');
-  if (running) {
+  if (GM_getValue('isRunning')) {
     if (elt) return;
     destroyByID('resumeButton');
     destroyByID('ap_pause_img');
@@ -4297,7 +4295,6 @@ function pause() {
 
   // Update the running state.
   GM_setValue('isRunning', false);
-  running = false;
   sendMWValues(['isRunning']);
 
   // Clear all timers.
@@ -4305,6 +4302,7 @@ function pause() {
   Reload.clearTimeout();
 
   addToLog('pause Icon', 'Autoplayer is paused. Log & stats do not track manual activity.');
+  mwapOnOffMenu();
   updateMastheadMenu();
 }
 
@@ -4320,10 +4318,10 @@ function unPause() {
 
   // Update the running state.
   GM_setValue('isRunning', true);
-  running = true;
   sendMWValues(['isRunning']);
 
   addToLog('play Icon', 'Autoplayer resuming...');
+  mwapOnOffMenu();
   updateMastheadMenu();
 
   // Set up auto-reload.
@@ -4333,6 +4331,34 @@ function unPause() {
   Autoplay.fx = goHome;
   Autoplay.delay = 150;
   Autoplay.start();
+}
+
+function mwapOnOffMenu() {
+  var mafiaLogBox = document.getElementById('mafiaLogBox');
+  var mwapElt = document.getElementById('ap_mwap_pause');
+  if (!mafiaLogBox || !mwapElt) return;
+  
+  if (GM_getValue('isRunning') === false) {
+    destroyByID('ap_mwap_pause');
+    title = 'Click to resume mwap';
+    var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
+    mwapElt.appendChild(document.createTextNode('resume'));
+    mwapElt.addEventListener('click', mwapOnOff, false);
+  } else {
+    destroyByID('ap_mwap_pause');
+    title = 'Click to pause mwap';
+    var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
+    mwapElt.appendChild(document.createTextNode('pause'));
+    mwapElt.addEventListener('click', mwapOnOff, false);
+  }
+}
+
+function mwapOnOff() {
+  if (GM_getValue('isRunning') === true) {
+    pause();
+  } else {
+    unPause();
+  }
 }
 
 function isFamily(username) {
@@ -4691,9 +4717,14 @@ function createLogBox() {
     filterElt.addEventListener('click', logFilterOnOff, false);
 
   title = 'Click to toggle debug log';
-  var debugElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_debug_log', 'style':'position: absolute; right: 80px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (debug ? '255' : '100') + ', 0, 0);'});
+  var debugElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_debug_log', 'style':'position: absolute; right: 120px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (debug ? '255' : '100') + ', 0, 0);'});
     debugElt.appendChild(document.createTextNode('debug'));
     debugElt.addEventListener('click', debugOnOff, false);
+
+  title = 'Click to ' + (GM_getValue('isRunning') ? 'pause' : 'resume') + ' mwap';
+  var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
+    mwapElt.appendChild(document.createTextNode(GM_getValue('isRunning') ? 'pause' : 'resume'));
+    mwapElt.addEventListener('click', mwapOnOff, false);
 
   var logBox = makeElement('div', mafiaLogBox, {'id':'logBox', 'style':'position: absolute; overflow: auto; right: 0px; top: 20px; bottom: 68px; width: 448px; background-color: #111111; font-size:11px; color: #BCD2EA; text-align: left; padding: 5px; border: 1px solid;'});
     logBox.innerHTML = GM_getValue('itemLog', '');
@@ -6967,7 +6998,7 @@ function handleModificationTimer() {
       setListenContent(true);
       DEBUG('Detected new-style job results.');
       pageChanged = true;
-      if (running) justPlay = true;
+      if (GM_getValue('isRunning')) justPlay = true;
     }
   }
 
@@ -6981,10 +7012,10 @@ function handleModificationTimer() {
       setListenContent(true);
       DEBUG('Detected new rob results.');
       pageChanged = true;
-      if (running) justPlay = true;
+      if (GM_getValue('isRunning')) justPlay = true;
     }
   }
-  if (running) {
+  if (GM_getValue('isRunning')) {
     // Paypal Popup
     var eltPopup = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"paypal") and contains(@style,"block")]',innerPageElt);
     if (eltPopup) {
@@ -7195,7 +7226,7 @@ function innerPageChanged(justPlay) {
 
   // Perform actions here not requiring response logging
   doParseMessages();
-  if (running) {
+  if (GM_getValue('isRunning')) {
     doQuickClicks();
     if(isGMChecked('autoShareWishlist') && !timeLeftGM('wishListTimer')){
       autoWishlist();
@@ -7286,7 +7317,7 @@ function refreshGlobalStats() {
 
   // Once we see a post pop-up, set the timer to close it
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
-  if (running && skipPostElt)
+  if (GM_getValue('isRunning') && skipPostElt)
     window.setTimeout(closePopUp, 10000);
 
   // Set all the element globals. They change.
@@ -7349,7 +7380,7 @@ function refreshGlobalStats() {
   }
 
   // Show congratulations if level has increased.
-  if (running && level > GM_getValue('currentLevel')) {
+  if (GM_getValue('isRunning') && level > GM_getValue('currentLevel')) {
     GM_setValue('currentLevel', level);
     addToLog('experience Icon', '<span style="color:#00FFCC;"> Congratulations on reaching level <strong>' + level + '</strong>!</span>');
     GM_setValue('restAutoStat', 0);
@@ -7379,7 +7410,7 @@ function refreshSettings() {
   SpendEnergy.refreshLimits (maxEnergy, canLevel);
 
   // Log and toggle burning
-  if (running) {
+  if (GM_getValue('isRunning')) {
     if (isGMChecked(SpendStamina.spendFlag)) SpendStamina.toggleSpending(maxStamina, stamina);
     if (isGMChecked(SpendEnergy.spendFlag)) SpendEnergy.toggleSpending(maxEnergy, energy);
   }
@@ -7393,7 +7424,7 @@ function refreshSettings() {
   }
 
   // Auto-pause logic
-  if (running && isGMChecked('autoPause')) {
+  if (GM_getValue('isRunning') && isGMChecked('autoPause')) {
     if (isGMChecked('autoPauseBefore') &&
         GM_getValue('autoPauseExp', '') >= lvlExp - curExp &&
         GM_getValue('autoPauseActivated', false) === false) {
@@ -7907,7 +7938,7 @@ function customizeStats() {
 
     // Substitute the "hide" icon if currently hiding in the hospital.
     var hideImgElt = healLinkElt.childNodes[1];
-    if (running && healImgElt && health < 20 &&
+    if (GM_getValue('isRunning') && healImgElt && health < 20 &&
         isGMChecked('hideInHospital')) {
       healImgElt.style.display = 'none';
       if (!hideImgElt) {
@@ -8177,7 +8208,7 @@ function customizeProfile() {
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
       // Show if Alive/Dead
-      if (!running && !removeElt) {
+      if (!GM_getValue('isRunning') && !removeElt) {
         var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
             var alive = !/You can't add/.test(this.responseText.untag());
@@ -8853,7 +8884,7 @@ function updateJobInfo (jobMatch, cost, reward, ratio) {
 }
 
 function tierMastery(jobsFound, jobsMastered, currentTab) {
-  if (running && isGMChecked('multipleJobs') &&
+  if (GM_getValue('isRunning') && isGMChecked('multipleJobs') &&
       GM_getValue('selectTier') != '0.0') {
     selectedTierValue = GM_getValue('selectTier').split('.');
     masteryCity = parseInt(selectedTierValue[0]);
@@ -8896,7 +8927,7 @@ function tierMastery(jobsFound, jobsMastered, currentTab) {
 
 function customizeFight() {
   // No need to do this when AP is running
-  if (running) return true;
+  if (GM_getValue('isRunning')) return true;
 
   var opponents = getDisplayedOpponents(innerPageElt, true);
   if (!opponents) return false;
@@ -9010,7 +9041,7 @@ function customizeProps() {
 
 function customizeHitlist() {
   // No need to do this when AP is running
-  if (running) return true;
+  if (GM_getValue('isRunning')) return true;
 
   // Extras for hitlist.
   if (!onHitlistTab()) return false;
