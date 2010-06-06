@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       432
+// @build       433
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '432',
+  build: '433',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2233,6 +2233,10 @@ function autoPlayerUpdates() {
 }
 
 // MiniPack!
+function miniPackForce() {
+  GM_setValue('miniPackTimer', 0);
+  miniPack();
+}
 function miniPack() {
   if (timeLeftGM('miniPackTimer')) return;
   setGMTime('miniPackTimer', '8 hours');
@@ -7918,7 +7922,7 @@ function customizeStats() {
     nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately.'})
     nrgImgElt.parentNode.insertBefore(nrgLinkElt, nrgImgElt);
     nrgLinkElt.appendChild(nrgImgElt);
-    nrgLinkElt.addEventListener('click', miniPack, false);
+    nrgLinkElt.addEventListener('click', miniPackForce, false);
   }
 
   // Make health icon clickable for instant healing.
