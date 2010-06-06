@@ -19,7 +19,7 @@
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
             rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks,
-            nonoymsd,MaxJ
+            nonoymsd, MaxJ
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -39,7 +39,7 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       434
+// @build       436
 // ==/UserScript==
 
 var SCRIPT = {
