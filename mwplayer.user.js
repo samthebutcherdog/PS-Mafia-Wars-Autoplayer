@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       436
+// @build       437
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '433',
+  build: '437',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -64,11 +64,10 @@ var SCRIPT = {
   user: '&user_id='
 };
 
-/* tempfix for publishing
 // Only attach to the top window.
 if (window.top != window.self) {
   return;
-}*/
+}
 
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
@@ -149,6 +148,16 @@ function fetchPubOptions() {
                 'autoIcePublish', 'autoLevelPublish', 'autoAchievementPublish',
                 'autoAskJobHelp', 'autoShareWishlist', 'autoWarRewardPublish',
                 'autoWarResponsePublish', 'autoWarRallyPublish', 'autoWarPublish']);
+}
+
+function managePopups() {
+  if (GM_getValue('isRunning')) {
+    // Refresh the publishing options
+    fetchPubOptions();
+    // Handle more popups that just show up out of nowhere
+    handlePopups();
+  }
+  window.setTimeout(managePopups, 2000);
 }
 
 // Load the iframe
@@ -1682,6 +1691,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Make sure the modification timer goes off at least once.
   setModificationTimer();
+  managePopups();
 
   var initialized = true;
   DEBUG('Completed initialize.');
@@ -1789,7 +1799,6 @@ function doAutoPlay () {
 
   // Auto-GiftAccept
   if (GM_getValue('isRunning') && GM_getValue('autoGiftAccept') && hasHome) {
-    if (autoGiftPopups()) return;
     if (autoGiftQueue()) return;
     if (autoGiftAccept()) return;
   }
@@ -4141,7 +4150,7 @@ function saveSettings() {
                             'autoGiftSkipOpt','autoBuy','autoEnergyPack','filterLog','autoHelp',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause', 'autoSafehouse',
-                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign',
+                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','mastheadOnTop',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
@@ -5196,7 +5205,7 @@ function createDisplayTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'filterPatterns';
-  var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
+  var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
   filterText.appendChild(document.createTextNode(''));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
@@ -5219,6 +5228,16 @@ function createDisplayTab() {
   title = 'Align game to the left';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Align game to the left'));
+
+  // mw_masthead always on top
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'mastheadOnTop';
+  title = 'Enable to elevate MWAP-Header (pause/resume/settings etc) so that it\'s always on top';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Elevate MWAP-Header'));
 
   // Hitlist riding
   item = makeElement('div', list);
@@ -7514,7 +7533,8 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;} #mw_masthead {z-index: 10000;}' +
+    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;}' +
+                 (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button:
                  ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
@@ -9485,11 +9505,13 @@ function debugDumpSettings() {
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
         '&nbsp;&nbsp;Filter fail: <strong>' + GM_getValue('filterFail') + '</strong><br>' +
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
+        'Elevate MWAP-Header: <strong>'+ showIfUnchecked(GM_getValue('mastheadOnTop')) + '</strong><br>' +
         'Hide Daily List: <strong>'+ showIfUnchecked(GM_getValue('hideActionBox')) + '</strong><br>' +
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Hide Friend Ladder: <strong>'+ showIfUnchecked(GM_getValue('hideFriendLadder')) + '</strong><br>' +
-        'Summarize attacks from Player Updates: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
+        'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
+        '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
@@ -10301,65 +10323,6 @@ function autoGiftWaiting() {
     }
   }
 
-  return false;
-}
-
-function autoGiftPopups() {
-  // This is a gift popup
-  var eltGiftSafehouseCongrats = xpathFirst('//div[contains(@id,"zy_popup_box") and (contains(@class,"safehouse_congrats_popup") or contains(@class,"safehouse_results_popup"))]', innerPageElt);
-  if (eltGiftSafehouseCongrats) {
-    eltGiftSafehouseCongrats.style.display = 'none';
-    DEBUG('Gifts: Cleared safehouse congratulations popup: ' + eltGiftSafehouseCongrats.id);
-    return false;
-  }
-
-  // Check for a Gift Window popup for the safehouse style 3018
-  var eltGift3018 = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"safehouse") and contains(@style,"block")]', innerPageElt);
-  if (eltGift3018) {
-    // So there's a 3018 popup! Let's let Z do it for us!
-    // Ok, so JQuery should already exist!
-    $ = unsafeWindow.jQuery;
-
-    var eltGag = document.getElementById('gag_item_id');
-    var eltValue = document.getElementById('value_item_id');
-
-    var eltRewardXP = document.getElementById('xp_gain_url');
-    var eltRewardNRG = document.getElementById('nrg_gain_url');
-    var eltRewardSTA = document.getElementById('sta_gain_url');
-
-    var eltLoyalty = document.getElementById('gift_popup_send_gift');
-
-    $('#cb_value_item').click();
-    switch (GM_getValue('autoGiftAcceptChoice')) {
-      // XP
-      case 0:
-              $('#cb_xp_gain').click();
-              break;
-      // ENERGY
-      case 1:
-              $('#cb_nrg_gain').click();
-              break;
-      // STAMINA
-      case 2:
-              $('#cb_sta_gain').click();
-              break;
-      // just in case
-      default:
-              $('#cb_xp_gain').click();
-    }
-
-
-    Autoplay.fx = function() {
-      // Ok, so JQuery should already exist!
-      $ = unsafeWindow.jQuery;
-      $('#gift_popup_send_gift').click();
-      DEBUG('Gifts 3018: Clicked to show loyalty!');
-      return;
-    };
-    Autoplay.delay = getAutoPlayDelay();
-    Autoplay.start();
-    return true;
-  }
   return false;
 }
 
@@ -12150,7 +12113,7 @@ function logResponse(rootElt, action, context) {
       else if (innerNoTags.indexOf('WON') != -1 ||
                innerNoTags.indexOf('LOST') != -1) {
         var logIcon = innerNoTags.indexOf('LOST') != -1 ? 'omg Icon' : 'yeah Icon';
-        addToLog(logIcon, inner.split(' this war.')[0] + ' this war.</div>');
+        addToLog(logIcon, inner);
       }
       else {
         addToLog('info Icon', inner);
@@ -12328,6 +12291,227 @@ function logResponse(rootElt, action, context) {
       DEBUG(inner);
   }
 
+  return false;
+}
+
+function closePopup(eltPopup, coolName) {
+  // This routine needs the handle of the popup! 
+  // Not a button in the popup, but the main element
+  // So if we figure out we have a button, then let's try
+  // to find the main element
+  //DEBUG('closePopup Processing');
+  //var eltPopup = xpathFirst(xpath);
+  if (!eltPopup) return false;
+
+  // Once we see a post pop-up, set the timer to close it
+  DEBUG('Got rid of ' + coolName + ' popup: ' + eltPopup.id);
+  var closeElt = xpathFirst('.//a[@class="pop_close"]',eltPopup);
+  if (closeElt) {
+    clickElement(closeElt);
+    return true;
+  }
+  var skipPostElt = document.getElementById('fb_dialog_cancel_button');
+  if (skipPostElt) {
+    clickElement (skipPostElt);
+    return true;
+  }
+
+  // Try to close it the old fashioned way
+  eltPopup.style.display = 'none';
+  var popupIDBG = eltPopup.id.replace('_box','_box_bg');
+  var eltPopupBG = document.getElementById(popupIDBG);
+  if (eltPopupBG) eltPopupBG.style.display = 'none';
+  popupIDBG = eltPopup.id.replace('_box','_bg');
+  eltPopupBG = document.getElementById(popupIDBG);
+  if (eltPopupBG) eltPopupBG.style.display = 'none';
+  return true;
+}
+
+// Handle various popups
+// This function is specifically for handling windows that popup
+// during gameplay and we want to either grab some info off the
+// window and log it, or we want to just close the window.
+// This routing is not for clicking buttons other than to close the window.
+function handlePopups()
+{
+  // If we're not on the main window,
+  // we're not doing any actions!
+  if (window.top != window.self) {
+    return;
+  }
+
+  try {
+    //DEBUG('Popups: Checking for popups');
+  
+    // Look for all popups that are showing
+    var popupElts = $x('//div[(contains(@id,"pop") or contains(@id,"bag_drop")) and not(@id="popup_fodder") and contains(@style, "block")]', innerPageElt);
+    if (popupElts && popupElts.length > 0) {
+      // Process each popup that is open
+      DEBUG('Popups Found: ' + popupElts.length);
+      for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
+        if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
+          // Skip these popups!
+          if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
+            || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1 
+            || popupElts[i].innerHTML.indexOf('id="popup_fodder"') != -1
+            || popupElts[i].innerHTML.indexOf('xw_action=heal') != -1
+            ) 
+            continue;
+            
+          var popupInner = popupElts[i].innerHTML.untag();
+          DEBUG('Popup Found: ' + popupElts[i].id + ' ' + popupInner);
+
+          // Get rid of Paypal
+          if (popupInner.indexOf('paypal') != -1) return(closePopup(popupElts[i], "Paypal"));
+
+          // Get rid of Safehouse Congratulations popup
+          if (popupInner.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i]), "Safehouse Congratulations");
+
+          // Get rid of Treasure Chest popup
+          if (popupInner.indexOf('Treasure Chest') != -1) return(closePopup(popupElts[i]), "Treasure Chest");
+
+          // Get rid of Keep Winning popup
+          if (popupInner.indexOf('Keep winning') != -1) return(closePopup(popupElts[i]), "Robbery Keep Winning");
+
+          // Get rid of Tired of Losing popup
+          if (popupInner.indexOf('Tired of losing') != -1) return(closePopup(popupElts[i]), "Robbery Tired of Losing");
+
+          // Get rid of 7-11 popup
+          if (popupInner.indexOf('seven_eleven') != -1) return(closePopup(popupElts[i]), "Seven Eleven");
+
+          // Get rid of Chop Shop/Weapon Depot popup
+          if (popupInner.match(/You have built (.+?)\./)) {
+            addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
+            return(closePopup(popupElts[i]), "Chop Shop/Weapon Depot");
+          }
+          
+          // Process Loyalty popup
+          if (popupInner.indexOf('Show Your Loyalty') != -1) {
+            // So there's a 3018 popup! Let's let Z do it for us! 
+            // Ok, so JQuery should already exist!
+            $ = unsafeWindow.jQuery;
+            var eltGag = document.getElementById('gag_item_id');
+            var eltValue = document.getElementById('value_item_id');
+            var eltRewardXP = document.getElementById('xp_gain_url');
+            var eltRewardNRG = document.getElementById('nrg_gain_url');
+            var eltRewardSTA = document.getElementById('sta_gain_url');
+            var eltLoyalty = document.getElementById('gift_popup_send_gift');
+            switch (GM_getValue('autoGiftAcceptChoice',0)) {
+              case 0: //HELP
+                if (eltValue) $('#cb_value_item').click();
+                break;
+              case 1: //SABOTAGE
+                if (eltGag) $('#cb_gag_item').click();
+                break;
+            }
+            switch (GM_getValue('autoGiftAcceptReward',0)) {
+              case 0: //XP
+                if (eltRewardXP) $('#cb_xp_gain').click();
+                break;
+              case 1: // ENERGY
+                if (eltRewardNRG) $('#cb_nrg_gain').click();
+                break;
+              case 2: // STAMINA
+                if (eltRewardSTA) $('#cb_sta_gain').click();
+                break;
+            }
+            // Click the loyalty button
+            $('#gift_popup_send_gift').click();
+            DEBUG('Popup Process: Show Your Loyalty Processed');
+            return true;
+          }
+          
+          // Process The Hospital
+          var eltPubButton = xpathFirst('.//a[contains(@onclick,"xw_action=heal")]',popupElts[i]);
+          if (eltPubButton) {
+            //DEBUG('Popup Process: The Hospital Processed');
+            //clickElement(eltPubButton);
+          }
+
+          // Process Sharing Secret Stash
+          var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
+          if (eltPubButton) {
+            DEBUG('Popup Process: Share Secret Stash Processed');
+            if (isGMChecked('autoSecretStash')) {
+              clickElement(eltPubButton);
+              return true
+            } else {
+              return(closePopup(popupElts[i]), 'Secret Stash');
+            }
+          }
+  
+          // Process Secret Stash
+          if (popupInner.indexOf('Get yours') != -1) {
+            DEBUG('Popup Process: Get Secret Stash Processed');
+            var eltButton = xpathFirst('.//button',popupElts[i]);
+            if (eltButton) {
+              eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
+              if (eltLoot) {
+                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a secret stash.</span>');
+              }
+              clickElement(eltButton);
+            }
+            return true;
+          }
+          
+          // Process Safehouse popup
+          var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
+          if (eltPubButton) {
+            if (popupInner.match(/and you got (.+?)/)) {
+              DEBUG('Popup Process: Safehouse Loot Processed');
+              addToLog('lootbag Icon', '<span class="loot">'+' Received '+ RegExp.$1 + ' from the safehouse.</span>');
+            }
+            if (isGMChecked('autoSafehousePublish')) {
+              clickElement(eltPubButton);
+              return true;
+            } else {
+              return(closePopup(popupElts[i]), "Safehouse Gifts");
+            }
+          }
+          
+          // Process Red Mystery Bag popup
+          if (popupInner.indexOf('Red Mystery Bag') != -1) {
+            DEBUG('Popup Process: Red Mystery Bag Processed');
+            eltLoot = xpathFirst('.//div[contains(@class,"good")]',popupElts[i]);
+            if (eltLoot) {
+              addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a red mystery bag.</span>');
+            }
+            return(closePopup(popupElts[i]), "Red Mystery Bag");
+          }
+    
+/*      
+          // Process Robbery Loot popup
+          if (popupInner.match(/You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)Y/)) {
+            DEBUG('Popup Process: Robbery Loot Processed');
+            addToLog('lootbag Icon', '<span class="loot">'+' Found '+ RegExp.$3 + ' on robbery board.</span>');
+            if (popupInner.match(/(\d+) Bonus Experience/)) {
+              var exp = RegExp.$1.replace(/[^0-9]/g, '');
+              updateRobStatistics(null,parseInt(exp));
+            }
+            return(closePopup(popupElts[i]), "Robbery Loot");
+          }
+
+          // Process Level Up popup
+          var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
+          if (eltPubButton) {
+            if (popupInner.match(/promoted to Level (.+?) C/)) {
+              DEBUG('Popup Process: Level Up Processed');
+              addToLog('lootbag Icon', '<span class="loot">'+' You were promoted to level '+ RegExp.$1);
+            }
+            if (isGMChecked('autoLevelPublish')) {
+              clickElement(eltPubButton);
+              return true;
+            } else {
+              return(closePopup(popupElts[i]), "Level Up");
+            }
+          }
+*/
+        }
+      }
+    }
+  } catch (ex) {
+    DEBUG('Error @handlePopups: ' + ex);
+  }
   return false;
 }
 
