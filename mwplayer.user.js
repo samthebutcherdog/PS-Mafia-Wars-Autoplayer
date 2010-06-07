@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       439
+// @build       440
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '439',
+  build: '440',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12347,7 +12347,7 @@ function handlePopups()
     //DEBUG('Popups: Checking for popups');
   
     // Look for all popups that are showing
-    var popupElts = $x('//div[(contains(@id,"pop") or contains(@id,"bag_drop")) and not(@id="popup_fodder") and contains(@style, "block")]', innerPageElt);
+    var popupElts = $x('//div[(contains(@id,"pop") or contains(@id,"mystery")) and not(@id="popup_fodder") and contains(@style, "block")]', innerPageElt);
     if (popupElts && popupElts.length > 0) {
       // Process each popup that is open
       DEBUG('Popups Found: ' + popupElts.length);
@@ -12370,24 +12370,24 @@ function handlePopups()
           if (popupInner.indexOf('paypal') != -1) return(closePopup(popupElts[i], "Paypal"));
 
           // Get rid of Safehouse Congratulations popup
-          if (popupInner.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i]), "Safehouse Congratulations");
+          if (popupInner.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i], "Safehouse Congratulations"));
 
           // Get rid of Treasure Chest popup
-          if (popupInner.indexOf('Treasure Chest') != -1) return(closePopup(popupElts[i]), "Treasure Chest");
+          if (popupInner.indexOf('Treasure Chest') != -1) return(closePopup(popupElts[i], "Treasure Chest"));
 
           // Get rid of Keep Winning popup
-          if (popupInner.indexOf('Keep winning') != -1) return(closePopup(popupElts[i]), "Robbery Keep Winning");
+          if (popupInner.indexOf('Keep winning') != -1) return(closePopup(popupElts[i], "Robbery Keep Winning"));
 
           // Get rid of Tired of Losing popup
-          if (popupInner.indexOf('Tired of losing') != -1) return(closePopup(popupElts[i]), "Robbery Tired of Losing");
+          if (popupInner.indexOf('Tired of losing') != -1) return(closePopup(popupElts[i], "Robbery Tired of Losing"));
 
           // Get rid of 7-11 popup
-          if (popupInner.indexOf('seven_eleven') != -1) return(closePopup(popupElts[i]), "Seven Eleven");
+          if (popupInner.indexOf('seven_eleven') != -1) return(closePopup(popupElts[i], "Seven Eleven"));
 
           // Get rid of Chop Shop/Weapon Depot popup
           if (popupInner.match(/You have built (.+?)\./)) {
             addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
-            return(closePopup(popupElts[i]), "Chop Shop/Weapon Depot");
+            return(closePopup(popupElts[i], "Chop Shop/Weapon Depot"));
           }
           
           // Process Loyalty popup
@@ -12441,7 +12441,7 @@ function handlePopups()
               clickElement(eltPubButton);
               return true
             } else {
-              return(closePopup(popupElts[i]), 'Secret Stash');
+              return(closePopup(popupElts[i], "Secret Stash"));
             }
           }
   
@@ -12470,7 +12470,7 @@ function handlePopups()
               clickElement(eltPubButton);
               return true;
             } else {
-              return(closePopup(popupElts[i]), "Safehouse Gifts");
+              return(closePopup(popupElts[i], "Safehouse Gifts"));
             }
           }
           
@@ -12481,7 +12481,7 @@ function handlePopups()
             if (eltLoot) {
               addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a red mystery bag.</span>');
             }
-            return(closePopup(popupElts[i]), "Red Mystery Bag");
+            return(closePopup(popupElts[i], "Red Mystery Bag"));
           }
     
 /*      
@@ -12493,7 +12493,7 @@ function handlePopups()
               var exp = RegExp.$1.replace(/[^0-9]/g, '');
               updateRobStatistics(null,parseInt(exp));
             }
-            return(closePopup(popupElts[i]), "Robbery Loot");
+            return(closePopup(popupElts[i], "Robbery Loot"));
           }
 
           // Process Level Up popup
@@ -12507,7 +12507,7 @@ function handlePopups()
               clickElement(eltPubButton);
               return true;
             } else {
-              return(closePopup(popupElts[i]), "Level Up");
+              return(closePopup(popupElts[i], "Level Up"));
             }
           }
 */
