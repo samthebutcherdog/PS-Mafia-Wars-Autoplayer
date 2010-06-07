@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       440
+// @build       441
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '440',
+  build: '441',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -64,10 +64,11 @@ var SCRIPT = {
   user: '&user_id='
 };
 
+/* temp fix for publishing fb popups
 // Only attach to the top window.
 if (window.top != window.self) {
   return;
-}
+}*/
 
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
@@ -2214,7 +2215,12 @@ function autoPlayerUpdates() {
     GM_setValue('logPlayerUpdatesCount', logPlayerUpdatesCount);
   }
 
-  if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) || pUpdatesLen == 0) {
+  if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) || 
+      (pUpdatesLen == 0 && logPlayerUpdatesCount > 0)) {
+    if (pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) {
+      // Last time checked there were more updates than now, perhaps mw deleted old updates?
+      DEBUG('Discrepancy in player updates: new count: ' + pUpdatesLen + ', old count: ' + logPlayerUpdatesCount);
+    }
     // Player updates have been cleared.
     DEBUG('Player updates were cleared.');
     logPlayerUpdatesCount = 0;
@@ -2593,6 +2599,7 @@ function autoMission() {
 
   // Do the job
   Autoplay.fx = function() { doJobFunction(goJob(jobno)); };
+  Autoplay.delay = (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) == 0) ? noDelay : getAutoPlayDelay();
   Autoplay.start();
 }
 
@@ -2907,7 +2914,7 @@ function autoFight(how) {
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   };
-  Autoplay.delay = getAutoPlayDelay();
+  Autoplay.delay = (isGMChecked('burstStamina') && GM_getValue('burstPoints', 0) == 0) ? noDelay : getAutoPlayDelay();
   Autoplay.start();
 
   return true;
@@ -2937,7 +2944,7 @@ function setNextFightCity(){
 
 function staminaBurst (burstMode, clickElt) {
   var numClicks = 1;
-  if (isGMChecked('burstStamina')) {
+  if (isGMChecked('burstStamina') && GM_getValue('burstPoints', 0) > 0) {
     numClicks = isGMEqual('burstMode',burstMode) ? GM_getValue('burstPoints', 1) : 1;
   }
   clickBurst (clickElt, parseInt(numClicks));
@@ -4012,8 +4019,8 @@ function saveSettings() {
   // Validate the settings and alert the user if the settings are invalid.
   var logPlayerUpdates = (document.getElementById('logPlayerUpdates').checked === true);
   var logPlayerUpdatesMax = parseInt(document.getElementById('logPlayerUpdatesMax').value);
-  if (logPlayerUpdates && (isNaN(logPlayerUpdatesMax) || logPlayerUpdatesMax < 0 || logPlayerUpdatesMax > 75)) {
-    alert('The maximum number of player updates must be between 0 and 75.');
+  if (logPlayerUpdates && (isNaN(logPlayerUpdatesMax) || logPlayerUpdatesMax < 0 || logPlayerUpdatesMax > 70)) {
+    alert('The maximum number of player updates must be between 0 and 70.');
     return;
   }
   var hideAttacks = (document.getElementById('hideAttacks').checked === true);
@@ -4584,6 +4591,9 @@ function DEBUG(line, level) {
   if (debug) {
     addToLog('info Icon', line);
     GM_log(line, level);
+  } else if (isGMChecked('enableDebug')) {
+    // debug==false and 'enableDebug'==true: not main document, logBox not accessible, output to errorconsole/info:
+    GM_log(line, level);
   }
 }
 
@@ -4710,7 +4720,7 @@ function minBankCheck() {
 function createLogBox() {
   var title;
 
-  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 30px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
+  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 10px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
 
   var logClrButton = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'style':'position: absolute; left: 5px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     logClrButton.appendChild(document.createTextNode('clear log'));
@@ -4725,7 +4735,7 @@ function createLogBox() {
     closeLogButton.addEventListener('click', hideMafiaLogBox, false);
 
   title = 'Click to toggle log filtering';
-  var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 160px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
+  var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 170px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
     filterElt.appendChild(document.createTextNode('filter'));
     filterElt.addEventListener('click', logFilterOnOff, false);
 
@@ -4788,7 +4798,7 @@ function createSettingsBox() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 540px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; left: 329px; top: 30px; width: 600px; height: 500px; font-size: 14px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top: 50px; width: 600px; height: 540px; font-size: 14px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
   //End settings box
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
@@ -5205,7 +5215,7 @@ function createDisplayTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'filterPatterns';
-  var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
+  var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
   filterText.appendChild(document.createTextNode(''));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
@@ -7123,6 +7133,7 @@ function handlePublishing() {
 
       // If OK button is found, close the window by pressing it
       if (okElt) {
+        DEBUG('Publish: Clicked Okay');
         clickElement(okElt);
 
       // If (1) Pub button is not found anymore; or
@@ -7138,6 +7149,7 @@ function handlePublishing() {
         var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
           var eltDiv = xpathFirst(xpathString);
           if (eltDiv) {
+            DEBUG(xpathString + ' found, ' + gmFlag + ' is checked: ' + isGMChecked(gmFlag));
             if (isGMChecked(gmFlag))
               clickElement(pubElt);
             else
@@ -7533,7 +7545,8 @@ function refreshMWAPCSS() {
     var cssElt = document.getElementById('mwapCSS');
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
-    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; } #mainDiv {position: absolute; top: 0px;}' +
+    var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; }' +
+                 ' #mainDiv {position: absolute; top: 0px;} div.app {padding:0; width:746px;}' +
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button:
@@ -11030,7 +11043,7 @@ function goJobTab(tabno) {
 // Get the number of job clicks to attempt
 function getJobClicks() {
   var numClicks = 1;
-  if (isGMChecked('burstJob') && !jobOptimizeOn){
+  if (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) > 0 && !jobOptimizeOn){
     var nextJobXp = missions[GM_getValue('selectMission', 1)][MISSION_XP];
     var nextJobCost = missions[GM_getValue('selectMission', 1)][MISSION_ENERGY];
     numClicks = GM_getValue('burstJobCount', 1);
