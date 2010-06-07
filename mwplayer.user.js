@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       437
+// @build       438
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '437',
+  build: '438',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7898,6 +7898,9 @@ function customizeMasthead() {
                        '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fuserscripts.org%2Fscripts%2Fsource%2F68186.user.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
                        '</a> ' +
+                       '<a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.08</div> ' +					   
+                       '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
   // Reset Timers (MWAP menu)
@@ -12694,7 +12697,7 @@ function attackXfromProfile() {
   remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
-// Load Chuck-A-Crap script by Spockholm
+// Load Chuck-A-Crap script by Arun
 function eventclick_chuckaCrap() {
   var src = 'http://userscripts.org/scripts/source/68186.user.js?' + Math.random();
   remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
