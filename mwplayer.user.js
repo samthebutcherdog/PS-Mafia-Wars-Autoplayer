@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       438
+// @build       439
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '438',
+  build: '439',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12354,13 +12354,15 @@ function handlePopups()
       for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
         if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
           // Skip these popups!
-          if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
-            || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1 
-            || popupElts[i].innerHTML.indexOf('id="popup_fodder"') != -1
-            || popupElts[i].innerHTML.indexOf('xw_action=heal') != -1
+          if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1 // The Marketplace
+            || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1  // The Marketplace
+            || popupElts[i].innerHTML.indexOf('id="popup_fodder"') != -1 // Empty popup
+            || popupElts[i].innerHTML.indexOf('Hospital') != -1 // The Hospital
+            || popupElts[i].innerHTML.indexOf('bank_popup') != -1 // The Bank
+            || popupElts[i].innerHTML.indexOf('If you lay low for a few hours') != -1 // London
             ) 
             continue;
-            
+
           var popupInner = popupElts[i].innerHTML.untag();
           DEBUG('Popup Found: ' + popupElts[i].id + ' ' + popupInner);
 
