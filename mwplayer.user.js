@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       447
+// @build       448
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '447',
+  build: '448',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7160,7 +7160,6 @@ function handlePublishing() {
         var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
           var eltDiv = xpathFirst(xpathString);
           if (eltDiv) {
-            DEBUG(xpathString + ' found, ' + gmFlag + ' is checked: ' + isGMChecked(gmFlag));
             if (isGMChecked(gmFlag))
               clickElement(pubElt);
             else
@@ -9008,15 +9007,16 @@ function customizeProps() {
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
     // Flash is enabled (we either found an <object> or flashblock is active)
-    /*if (isGMChecked('autoBuy') ||
-        isGMChecked('collectTakeNew York') ||
-        isGMChecked('collectTakeCuba') ||
-        isGMChecked('collectTakeMoscow') ||
-        isGMChecked('collectTakeBangkok')) {*/
-    DEBUG('Warning: Flash enabled. You must disable flash from your browser for MWAP to get exact collect times and show property ROIs.<br>' +
-          'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
-          '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions.');
-    //}
+    var flashLog = 'Warning: Flash is enabled. You must disable flash from your browser for MWAP to ' +
+                   'get exact collect times, show property ROIs and auto-upgrade properties.<br>' +
+                   'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
+                   '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions.';
+    if (isGMChecked('autoBuy')) {
+      GM_setValue('autoBuy', 0);
+      addToLog('updateBad Icon', flashLog);
+    } else {
+      DEBUG(flashLog);
+    }
     return true;
   }
 
