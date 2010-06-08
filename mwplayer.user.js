@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       449
+// @build       450
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '449',
+  build: '450',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1994,8 +1994,8 @@ function doAutoPlay () {
     return;
   }
 
-  // Auto-upgrade properties (limit to level 4 and above)
-  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps) {
+  // Auto-upgrade properties (limit to level 4 and above, skip if flash is enabled)
+  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps && !GM_getValue('flashed')) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL]) {
 
@@ -2004,7 +2004,6 @@ function doAutoPlay () {
       }
     }
   }
-
 
   // If we reach this point, the script is considered to be idle. Anything the
   // script might do when there is nothing else to do should go below here.
@@ -8996,25 +8995,27 @@ function customizeFight() {
 
 function customizeProps() {
   // Not on properties page (no <object> or <div> with @id="flash_content_propertiesV2" and no flashblock found)
-  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt) && !xpathFirst('.//div[contains(@bginactive, "flashblock")]', innerPageElt)) 
+  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt) &&
+      !(xpathFirst('.//div[contains(@bginactive, "flashblock")]', innerPageElt) && xpathFirst('.//div[@id="propertyV2Help"]', innerPageElt))) 
     return false;
 
   // Check flash
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
     // Flash is enabled (we either found an <object> or flashblock is active)
+    if (!GM_getValue('flashed')) GM_setValue('flashed', 1);
     var flashLog = 'Warning: Flash is enabled. You must disable flash from your browser for MWAP to ' +
                    'get exact collect times, show property ROIs and auto-upgrade properties.<br>' +
                    'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
                    '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions.';
-    if (isGMChecked('autoBuy')) {
-      GM_setValue('autoBuy', 0);
+    if (isGMChecked('autoBuy'))
       addToLog('updateBad Icon', flashLog);
-    } else {
+    else
       DEBUG(flashLog);
-    }
     return true;
   }
+  // Flash is disabled
+  if (GM_getValue('flashed')) GM_setValue('flashed', 0);
 
   GM_setValue('bestProp' + cities[city][CITY_NAME], 'skip');
 
@@ -10332,7 +10333,7 @@ function autoGiftWaiting() {
     GM_setValue('autoGiftWaitingPage', GM_getValue('autoGiftWaitingPage',0)?0:1);
     var page = (GM_getValue('autoGiftWaitingPage') ? 'collection' : 'loot');
     var pagehtml = '"remote/html_server.php?xw_controller=' + page + '&xw_action=view&xw_city=1"';
-    var elt = makeElement('a', null, {'onclick':'return do_ajax("app_layout",'+ pagehtml + ')'});
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+ pagehtml + ')'});
     if (elt) {
       Autoplay.fx = function() {
         clickElement(elt);
@@ -10798,7 +10799,7 @@ function onWarTab() {
 
 function onPropertyNav() {
   // Return true if we're on the property nav, false otherwise.
-  if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2" or contains(@bginactive, "flashblock")]', innerPageElt)) {
+  if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2" or @id="propertyV2Help"]', innerPageElt)) {
     return true;
   }
 
@@ -10876,7 +10877,7 @@ function goHome() {
 }
 
 function goSafehouseNav() {
-  var elt = makeElement('a', null, {'onclick':'do_ajax("app_layout","remote/html_server.php?xw_controller=safehouse&xw_action=view")'});
+  var elt = makeElement('a', null, {'onclick':'do_ajax("inner_page","remote/html_server.php?xw_controller=safehouse&xw_action=view")'});
   if (!elt) {
     addToLog('warning Icon', 'Can\'t make Safehouse nav link to click.');
     return;
@@ -12133,7 +12134,10 @@ function logResponse(rootElt, action, context) {
       else if (innerNoTags.indexOf('WON') != -1 ||
                innerNoTags.indexOf('LOST') != -1) {
         var logIcon = innerNoTags.indexOf('LOST') != -1 ? 'omg Icon' : 'yeah Icon';
-        addToLog(logIcon, inner);
+        if (innerNoTags.indexOf('to winning this war.') != -1) 
+          addToLog(logIcon, inner.split('to winning this war.')[0] + 'to winning this war.</div>');
+        else
+          addToLog(logIcon, inner);
       }
       else {
         addToLog('info Icon', inner);
