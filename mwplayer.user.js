@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       446
+// @build       447
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '446',
+  build: '447',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2151,7 +2151,7 @@ function autoHeal() {
 function buildItem(itemArray, itemIndex, buildType){
   if (city != NY) {
     Autoplay.fx = function() { goLocation(NY); };
-    Autoplay.delay = noDelay;
+    //Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
@@ -2198,9 +2198,7 @@ function autoCollectTake(takeCity) {
   }
 
   loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':city+1, 'requesttype':'json'}), urlLoaded);
-  if (isGMChecked('flashed')) {
-    setGMTime('takeHour' + cities[takeCity][CITY_NAME], "1 hour");
-  }
+  setGMTime('takeHour' + cities[takeCity][CITY_NAME], "1 hour");
 
   return false;
 }
@@ -3941,7 +3939,7 @@ function saveDefaultSettings() {
   GM_setValue('autoSafehouse', 0);
 
   // Display Tab
-  GM_setValue('flashed',0);
+  //GM_setValue('flashed',0);
 
   // Misc Tab
   GM_setValue('autoResetTimers', 0);
@@ -4165,7 +4163,7 @@ function saveSettings() {
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
-                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', 'flashed',
+                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', //'flashed',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce']);
 
@@ -4801,7 +4799,7 @@ function createSettingsBox() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 540px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top: 50px; width: 600px; height: 540px; font-size: 14px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top: 50px; width: 600px; height: 490px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
   //End settings box
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
@@ -4869,7 +4867,7 @@ function createSettingsBox() {
   // Create Update button
   if (gvar.isGreaseMonkey) {
     var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 10px; bottom: 10px;'});
-    makeElement('button', updateButton).appendChild(document.createTextNode('Check for Updates'));
+    makeElement('button', updateButton).appendChild(document.createTextNode('Update-Check'));
     updateButton.addEventListener('click', updateScript, false);
   }
 
@@ -5297,7 +5295,7 @@ function createDisplayTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show level on the hit list page'));
 
-  // Enable flash
+  /* Enable flash
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -5305,7 +5303,7 @@ function createDisplayTab() {
   id = 'flashed';
   title = 'Enable flash, disable ROI';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable flash, disable ROI'));
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable flash, disable ROI'));*/
 
   // Hiding
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
@@ -9002,27 +9000,23 @@ function customizeFight() {
 }
 
 function customizeProps() {
-  if (isGMChecked('flashed')) return false;
-  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) return false;
+  // Not on properties page (no <object> or <div> with @id="flash_content_propertiesV2" and no flashblock found)
+  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt) && !xpathFirst('.//div[contains(@bginactive, "flashblock")]', innerPageElt)) 
+    return false;
 
   // Check flash
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
-    if (isGMChecked('autoBuy') ||
+    // Flash is enabled (we either found an <object> or flashblock is active)
+    /*if (isGMChecked('autoBuy') ||
         isGMChecked('collectTakeNew York') ||
         isGMChecked('collectTakeCuba') ||
         isGMChecked('collectTakeMoscow') ||
-        isGMChecked('collectTakeBangkok')) {
-      //GM_setValue('autoBuy', 0);
-      //GM_setValue('collectTakeNew York', 0);
-      //GM_setValue('collectTakeCuba', 0);
-      //GM_setValue('collectTakeMoscow', 0);
-      //GM_setValue('collectTakeBangkok', 0);
-      addToLog('warning Icon', 'Warning: Flash enabled.');
-      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to buy properties and show their ROIs. <br>' +
-               'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
-               '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions. ');
-    }
+        isGMChecked('collectTakeBangkok')) {*/
+    DEBUG('Warning: Flash enabled. You must disable flash from your browser for MWAP to get exact collect times and show property ROIs.<br>' +
+          'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
+          '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions.');
+    //}
     return true;
   }
 
@@ -9544,7 +9538,7 @@ function debugDumpSettings() {
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
-        'Enable flash, but disable ROI: <strong>' + showIfUnchecked(GM_getValue('flashed')) + '</strong><br>' +
+        //'Enable flash, but disable ROI: <strong>' + showIfUnchecked(GM_getValue('flashed')) + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
@@ -10342,7 +10336,7 @@ function autoGiftWaiting() {
     GM_setValue('autoGiftWaitingPage', GM_getValue('autoGiftWaitingPage',0)?0:1);
     var page = (GM_getValue('autoGiftWaitingPage') ? 'collection' : 'loot');
     var pagehtml = '"remote/html_server.php?xw_controller=' + page + '&xw_action=view&xw_city=1"';
-    var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+ pagehtml + ')'});
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("app_layout",'+ pagehtml + ')'});
     if (elt) {
       Autoplay.fx = function() {
         clickElement(elt);
@@ -10808,7 +10802,7 @@ function onWarTab() {
 
 function onPropertyNav() {
   // Return true if we're on the property nav, false otherwise.
-  if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2"]', innerPageElt)) {
+  if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2" or contains(@bginactive, "flashblock")]', innerPageElt)) {
     return true;
   }
 
@@ -10886,7 +10880,7 @@ function goHome() {
 }
 
 function goSafehouseNav() {
-  var elt = makeElement('a', null, {'onclick':'do_ajax("inner_page","remote/html_server.php?xw_controller=safehouse&xw_action=view")'});
+  var elt = makeElement('a', null, {'onclick':'do_ajax("app_layout","remote/html_server.php?xw_controller=safehouse&xw_action=view")'});
   if (!elt) {
     addToLog('warning Icon', 'Can\'t make Safehouse nav link to click.');
     return;
