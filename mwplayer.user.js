@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       445
+// @build       446
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '445',
+  build: '446',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1862,7 +1862,7 @@ function doAutoPlay () {
   }
 
   // Auto-collect take (limit to level 4 and above)
-  if (GM_getValue('isRunning') && !maxed && hasProps && !GM_getValue('flashEnabled')) {
+  if (GM_getValue('isRunning') && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
@@ -9006,7 +9006,6 @@ function customizeProps() {
   if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) return false;
 
   // Check flash
-  
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
     if (isGMChecked('autoBuy') ||
@@ -9019,13 +9018,10 @@ function customizeProps() {
       //GM_setValue('collectTakeCuba', 0);
       //GM_setValue('collectTakeMoscow', 0);
       //GM_setValue('collectTakeBangkok', 0);
-      GM_setValue('flashEnabled', 1);
       addToLog('warning Icon', 'Warning: Flash enabled.');
       addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to buy properties and show their ROIs. <br>' +
                'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
                '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions. ');
-    } else {
-      GM_setValue('flashEnabled', 0);
     }
     return true;
   }
