@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       443
+// @build       444
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '443',
+  build: '444',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1043,8 +1043,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
 
-  // Gift Accept Choices
-  var giftAcceptChoices = ['XP', 'Energy', 'Stamina'];
+  // Gift Accept Choices/Rewards
+  var giftAcceptChoices = ['Help', 'Sabotage'];
+  var giftAcceptRewards = ['XP', 'Energy', 'Stamina'];
 
   // Spend objects
   var SpendStamina = new Spend ('Stamina', 'staminaSpend', 'useStaminaStarted',
@@ -1799,7 +1800,7 @@ function doAutoPlay () {
   }
 
   // Auto-GiftAccept
-  if (GM_getValue('isRunning') && GM_getValue('autoGiftAccept') && hasHome) {
+  if (GM_getValue('isRunning') && isGMChecked('autoGiftAccept') && hasHome) {
     if (autoGiftQueue()) return;
     if (autoGiftAccept()) return;
   }
@@ -3936,6 +3937,7 @@ function saveDefaultSettings() {
   GM_setValue('warMode', 0);
   GM_setValue('autoGiftAccept', 0);
   GM_setValue('autoGiftAcceptChoice', 0);
+  GM_setValue('autoGiftAcceptReward', 0);
   GM_setValue('autoSafehouse', 0);
 
   // Display Tab
@@ -4229,6 +4231,7 @@ function saveSettings() {
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   GM_setValue('warMode', document.getElementById('warMode').selectedIndex);
   GM_setValue('autoGiftAcceptChoice', document.getElementById('autoGiftAcceptChoice').selectedIndex);
+  GM_setValue('autoGiftAcceptReward', document.getElementById('autoGiftAcceptReward').selectedIndex);
 
   var multiple_jobs_list = [];
   var mastery_jobs_list = [];
@@ -5484,7 +5487,7 @@ function createMafiaTab() {
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically accept all gifts'));
   rhs.appendChild(document.createTextNode(' '));
   id = 'autoGiftAcceptChoice';
-  var autoGiftAcceptChoice = makeElement('select', rhs, {'id':id});
+  var autoGiftAcceptChoice = makeElement('select', rhs, {'id':id, 'style':'width: 4em;'});
   for (i = 0, iLength=giftAcceptChoices.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
@@ -5492,6 +5495,16 @@ function createMafiaTab() {
     autoGiftAcceptChoice.appendChild(choice);
   }
   autoGiftAcceptChoice.selectedIndex = GM_getValue('autoGiftAcceptChoice', 0);
+  rhs.appendChild(document.createTextNode(' '));
+  id = 'autoGiftAcceptReward';
+  var autoGiftAcceptReward = makeElement('select', rhs, {'id':id, 'style':'width: 5em;'});
+  for (i = 0, iLength=giftAcceptRewards.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(giftAcceptRewards[i]));
+    autoGiftAcceptReward.appendChild(choice);
+  }
+  autoGiftAcceptReward.selectedIndex = GM_getValue('autoGiftAcceptReward', 0);
 
   // Option for opening safehouse gifts
   item = makeElement('div', list);
@@ -9549,6 +9562,7 @@ function debugDumpSettings() {
         'Auto Gift Waiting: <strong>' + showIfUnchecked(GM_getValue('autoGiftWaiting'))  + '</strong><br>' +
         'Auto Gift Accept: <strong>' + showIfUnchecked(GM_getValue('autoGiftAccept'))  + '</strong><br>' +
         '&nbsp;&nbsp;Gift Choice: <strong>' + GM_getValue('autoGiftAcceptChoice', 'none')   + '</strong><br>' +
+        '&nbsp;&nbsp;Gift Reward: <strong>' + GM_getValue('autoGiftAcceptReward', 'none')   + '</strong><br>' +
         'Auto Safehouse: <strong>' + showIfUnchecked(GM_getValue('autoSafehouse'))  + '</strong><br>' +
         'Auto War: <strong>' + showIfUnchecked(GM_getValue('autoWar'))  + '</strong><br>' +
         '&nbsp;&nbsp;War Mode: <strong>' + warModeChoices[GM_getValue('warMode', 0)]  + '</strong><br>' +
@@ -10452,7 +10466,7 @@ function autoGiftAccept() {
   // Damn these frames!
   if (!onHome()) return false;
   // Need to be enabled
-  if (!GM_getValue('autoGiftAccept',0)) return false;
+  if (!isGMChecked('autoGiftAccept')) return false;
 
   // If there are queue entries, then we still need to process them
   if (giftQueue.length) return true;
