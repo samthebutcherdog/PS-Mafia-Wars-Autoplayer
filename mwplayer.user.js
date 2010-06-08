@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       442
+// @build       443
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '442',
+  build: '443',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1861,10 +1861,7 @@ function doAutoPlay () {
   }
 
   // Auto-collect take (limit to level 4 and above)
-  if (GM_getValue('flashed')) {
-    addToLog('warning Icon', 'Warning, flash enabled, properties not collected.');
-  }
-  if (GM_getValue('isRunning') && !maxed && hasProps && GM_getValue('flashed',0)) {
+  if (GM_getValue('isRunning') && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
@@ -2200,7 +2197,7 @@ function autoCollectTake(takeCity) {
   }
 
   loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':city+1, 'requesttype':'json'}), urlLoaded);
-  if (GM_getValue('flashed',0)) {
+  if (isGMChecked('flashed')) {
     setGMTime('takeHour' + cities[takeCity][CITY_NAME], "1 hour");
   }
 
@@ -8992,7 +8989,7 @@ function customizeFight() {
 }
 
 function customizeProps() {
-  if (GM_getValue('flashed',0)) return false;
+  if (isGMChecked('flashed')) return false;
   if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt)) return false;
 
   // Check flash
@@ -9003,13 +9000,13 @@ function customizeProps() {
         isGMChecked('collectTakeCuba') ||
         isGMChecked('collectTakeMoscow') ||
         isGMChecked('collectTakeBangkok')) {
-//      GM_setValue('autoBuy', 0);
-//      GM_setValue('collectTakeNew York', 0);
-//      GM_setValue('collectTakeCuba', 0);
-//      GM_setValue('collectTakeMoscow', 0);
-//      GM_setValue('collectTakeBangkok', 0);
+      //GM_setValue('autoBuy', 0);
+      //GM_setValue('collectTakeNew York', 0);
+      //GM_setValue('collectTakeCuba', 0);
+      //GM_setValue('collectTakeMoscow', 0);
+      //GM_setValue('collectTakeBangkok', 0);
       addToLog('warning Icon', 'Warning: Flash enabled.');
-      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to work on properties. <br>' +
+      addToLog('updateBad Icon', 'You must disable flash from your browser for MWAP to buy properties and show their ROIs. <br>' +
                'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
                '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions. ');
     }
