@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       450
+// @build       451
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '450',
+  build: '451',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2231,7 +2231,7 @@ function autoPlayerUpdates() {
   }
 
   // Clear the updates.
-  if (pUpdatesLen > GM_getValue('logPlayerUpdatesMax', 20) &&
+  if (pUpdatesLen > GM_getValue('logPlayerUpdatesMax', 25) &&
       logPlayerUpdatesCount == pUpdatesLen) {
     Autoplay.fx = goDeleteNews;
     Autoplay.start();
@@ -2692,7 +2692,7 @@ function autoHitlist() {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoHitlist.profileSearch && !autoHitlist.setBounty) {
     Autoplay.fx = goFightTab;
-    Autoplay.delay = noDelay;
+    //Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
@@ -3407,7 +3407,7 @@ function getHitlist(element, forceRefresh) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
           var s = this.responseText;
-          var id = decodeID(s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0]);
+          var id = s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0];
           var profElt = xpathFirst('.//table[@class="hit_list"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
           if (profElt) {
               var testManiac = /level\s([a-z,A-Z,0-9]+)\sManiac/.test(s.untag());
@@ -4015,7 +4015,8 @@ function saveSettings() {
   var logPlayerUpdates = (document.getElementById('logPlayerUpdates').checked === true);
   var logPlayerUpdatesMax = parseInt(document.getElementById('logPlayerUpdatesMax').value);
   if (logPlayerUpdates && (isNaN(logPlayerUpdatesMax) || logPlayerUpdatesMax < 0 || logPlayerUpdatesMax > 70)) {
-    alert('The maximum number of player updates must be between 0 and 70.');
+    alert('The maximum number of player updates must be between 0 and 70.\nDefaulting it to 25.');
+    document.getElementById('logPlayerUpdatesMax').value = 25;
     return;
   }
   var hideAttacks = (document.getElementById('hideAttacks').checked === true);
@@ -7555,7 +7556,7 @@ function refreshMWAPCSS() {
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button:
-                 ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
+                 ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
                  ' #gifticon_container {position: absolute; top: 15px; left: 305px; width: 25px; z-index: 10001;}' +
@@ -12412,7 +12413,7 @@ function handlePopups()
           }
           
           // Process Loyalty popup
-          if (popupInner.indexOf('Show Your Loyalty') != -1) {
+          if (isGMChecked('autoGiftAccept') && popupInner.indexOf('Show Your Loyalty') != -1) {
             // So there's a 3018 popup! Let's let Z do it for us! 
             // Ok, so JQuery should already exist!
             $ = unsafeWindow.jQuery;
