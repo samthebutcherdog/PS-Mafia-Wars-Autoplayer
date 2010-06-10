@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       452
+// @build       453
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '452',
+  build: '453',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3925,6 +3925,8 @@ function saveDefaultSettings() {
   GM_setValue('d2', '5');
   GM_setValue('idleLocation', NY);
   GM_setValue('autoHelp', 'checked');
+  GM_setValue('autoBurnerHelp', 'checked');
+  GM_setValue('autoPartsHelp', 'checked');
   GM_setValue('autoLottoBonusItem',3);
   GM_setValue('autoWarTargetList', '');
   GM_setValue('warMode', 0);
@@ -4161,7 +4163,8 @@ function saveSettings() {
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', //'flashed',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
-                            'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce']);
+                            'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
+                            'autoBurnerHelp','autoPartsHelp']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -5439,7 +5442,18 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' On Wars '));
-
+  // Auto-help on burners
+  title = 'Automatically supply burners.';
+  id = 'autoBurnerHelp';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' On Burners '));
+  // Auto-help on parts
+  title = 'Automatically supply parts.';
+  id = 'autoPartsHelp';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' On Parts '));
 
   // Betray friends in wars
   item = makeElement('div', list);
@@ -9551,6 +9565,8 @@ function debugDumpSettings() {
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
+        'Automatically Help on Burners: <strong>' + showIfUnchecked(GM_getValue('autoBurnerHelp')) + '</strong><br>' +
+        'Automatically Help on Parts: <strong>' + showIfUnchecked(GM_getValue('autoPartsHelp')) + '</strong><br>' +
         'Skip gift wall posts: <strong>' + showIfUnchecked(GM_getValue('autoGiftSkipOpt')) + '</strong><br>' +
         'Auto Gift Waiting: <strong>' + showIfUnchecked(GM_getValue('autoGiftWaiting'))  + '</strong><br>' +
         'Auto Gift Accept: <strong>' + showIfUnchecked(GM_getValue('autoGiftAccept'))  + '</strong><br>' +
@@ -9873,6 +9889,56 @@ function parsePlayerUpdates(messagebox) {
         return false;
       } else {
         addToLog('warning Icon', 'BUG DETECTED: Unable to find war help element.');
+      }
+    }
+
+  } else if (messageTextNoTags.indexOf('needs more Burners') != -1) {
+    if (isGMChecked('autoBurnerHelp')) {
+      // Help requested by a fellow mafia member.
+      userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+      elt = xpathFirst('.//a[contains(@href, "action=call_for_help_get_phone")]', messagebox);
+      if (elt) {
+        // Help immediately.
+        Autoplay.fx = function() {
+          clickAction = 'help burners';
+          clickContext = {
+            user: linkToString(userElt, 'user'),
+            help: linkToString(elt)
+          };
+          clickElement(elt);
+          DEBUG('Clicked to help with burners.');
+        };
+        Autoplay.delay = noDelay;
+        Autoplay.start();
+        return false;
+      } else {
+        addToLog('warning Icon', 'BUG DETECTED: Unable to find burner help element.');
+      }
+    }
+
+  } else if (messageTextNoTags.indexOf('but still needs a few more') != -1) {
+    if (isGMChecked('autoPartsHelp')) {
+      // Help requested by a fellow mafia member.
+      messageTextNoTags.match(/(.*) is close to completing a.*/i);
+      var userText = RegExp.$1;
+      //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+      elt = xpathFirst('.//a[contains(@href, "action=cs_help_item")]', messagebox);
+      if (elt) {
+        // Help immediately.
+        Autoplay.fx = function() {
+          clickAction = 'help parts';
+          clickContext = {
+            user: userText,
+            help: linkToString(elt)
+          };
+          clickElement(elt);
+          DEBUG('Clicked to help with parts.');
+        };
+        Autoplay.delay = noDelay;
+        Autoplay.start();
+        return false;
+      } else {
+        addToLog('warning Icon', 'BUG DETECTED: Unable to find parts help element.');
       }
     }
 
@@ -12250,6 +12316,56 @@ function logResponse(rootElt, action, context) {
                  (context? ' ' + context.help : '') +
                  ' Perhaps you interfered by clicking on something?');
       }
+      Autoplay.start();
+      return true;
+      break;
+
+    case 'help burners':
+      var helpElt = xpathFirst('.//a[contains(.,"Accept")]', messagebox);
+      // If help element is found, click it immediately
+      if (helpElt) {
+        Autoplay.fx = function() {
+          clickElement(helpElt);
+          clickAction = 'help burners';
+          clickContext = context;
+        }
+        Autoplay.delay = noDelay;
+        Autoplay.start();
+        return true;
+      }
+
+      DEBUG('Parsing burner help.');
+
+      // Help burners attempt was processed. Increment the update count.
+      GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
+
+      addToLog('info Icon', innerNoTags);
+
+      Autoplay.start();
+      return true;
+      break;
+
+    case 'help parts':
+      var helpElt = xpathFirst('.//a[contains(.,"Send Item")]', messagebox);
+      // If help element is found, click it immediately
+      if (helpElt) {
+        Autoplay.fx = function() {
+          clickElement(helpElt);
+          clickAction = 'help parts';
+          clickContext = context;
+        }
+        Autoplay.delay = noDelay;
+        Autoplay.start();
+        return true;
+      }
+
+      //DEBUG('Parsing parts help.');
+
+      // Help parts attempt was processed. Increment the update count.
+      GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
+
+      //addToLog('info Icon', innerNoTags);
+
       Autoplay.start();
       return true;
       break;
