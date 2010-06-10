@@ -7922,7 +7922,7 @@ function customizeMasthead() {
                        '<a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts Chat</div> ' +
                        '</a>' +
-                       '<a href="http://www.playerscripts.com/forum/" target="_blank"> ' +
+                       '<a href="http://www.playerscripts.com/" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts</div> ' +
                        '</a>' +
                        '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
