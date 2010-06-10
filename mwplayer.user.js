@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.42
-// @build       451
+// @build       452
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.42',
-  build: '451',
+  build: '452',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7555,8 +7555,9 @@ function refreshMWAPCSS() {
                  ' #mainDiv {position: absolute; top: 0px;} div.app {padding:0; width:746px;}' +
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
-                 // Move the messagecenter button:
+                 // Move the messagecenter button(s):
                  ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
+                 ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
                  ' #gifticon_container {position: absolute; top: 15px; left: 305px; width: 25px; z-index: 10001;}' +
@@ -8303,7 +8304,7 @@ function customizeProfile() {
                                           tmpKey+
                                           cbKey+
                                           'promote=yes&'+
-                                          'uid=' + remoteuserid});
+                                          'pid=' + remoteuserid});
         rDisplay = true;
       }
       if (rDisplay) makeElement('br', statsDiv,{});
@@ -12562,7 +12563,7 @@ function updateScript() {
           return;
         } else if (theOtherBuild > runningBuild ||
                    theOtherVersion != SCRIPT.version) {
-          if (window.confirm('Version ' + theOtherVersion + ' is available!\n\n' + 'Do you want to upgrade?' + '\n')) {
+          if (window.confirm('Version ' + theOtherVersion + ' (build ' + theOtherBuild + ') is available!\n\n' + 'Do you want to upgrade?' + '\n')) {
             window.location.href = SCRIPT.url;
           }
         } else {
