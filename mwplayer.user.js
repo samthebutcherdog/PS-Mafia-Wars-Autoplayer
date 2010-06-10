@@ -1,4 +1,4 @@
-/**
+﻿/**
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.43
-// @build       459
+// @build       460
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.42',
-  build: '453',
+  version: '1.1.43',
+  build: '460',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
