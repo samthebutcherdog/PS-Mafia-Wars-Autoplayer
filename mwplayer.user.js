@@ -38,8 +38,8 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.42
-// @build       453
+// @version     1.1.43
+// @build       459
 // ==/UserScript==
 
 var SCRIPT = {
