@@ -38,13 +38,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.43
-// @build       463
+// @version     1.1.47
+// @build       467
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.43',
-  build: '463',
+  version: '1.1.47',
+  build: '467',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7916,8 +7916,11 @@ function customizeMasthead() {
                        '<a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
                        '</a> ' +
-                       '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
+                       '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
+                       '</a> ' +
+                       '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Revert to Previous</div> ' +
                        '</a> ' +
                        '<div class="sexy_destination middle"><b>Websites</b></div> ' +
                        '<a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
