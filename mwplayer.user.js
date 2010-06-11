@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.43
-// @build       462
+// @build       463
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.43',
-  build: '462',
+  build: '463',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2243,8 +2243,10 @@ function autoPlayerUpdates() {
 
 // MiniPack!
 function miniPackForce() {
-  GM_setValue('miniPackTimer', 0);
-  miniPack();
+  //GM_setValue('miniPackTimer', 0);
+  //miniPack();
+  DEBUG('Redirecting to force mini Energy');
+  window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
 }
 function miniPack() {
   if (timeLeftGM('miniPackTimer')) return;
@@ -5255,11 +5257,11 @@ function createDisplayTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hideAttacks';
-  title = 'Enable hitlist riding';
+  title = 'Enable hitlist riding: MWAP disables autoHeal after you got n XP from attacks; it enables it again after parsing a snuffed message.';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
   id = 'rideHitlistXP';
-  title = 'Enter the XP you want to gain before turning off autoHeal';
+  title = 'Enter the XP you want to gain before MWAP turns off autoHeal.';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '10'), 'title':title, 'id':id, 'style':'width: 25px'});
   rhs.appendChild(document.createTextNode(' xp'));
 
@@ -7070,7 +7072,7 @@ function handleModificationTimer() {
     }
   }
   if (GM_getValue('isRunning')) {
-    // Paypal Popup
+    /* Paypal Popup
     var eltPopup = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"paypal") and contains(@style,"block")]',innerPageElt);
     if (eltPopup) {
       var popupIDBG = eltPopup.id.replace('_box','_box_bg');
@@ -7079,7 +7081,7 @@ function handleModificationTimer() {
       eltPopup.style.display = 'none';
       eltPopupBG.style.display = 'none';
       DEBUG('Got rid of Zynga Popup: ' + eltPopup.id);
-    }
+    }*/
 
     // Handling for pop-ups
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
@@ -7088,11 +7090,11 @@ function handleModificationTimer() {
       if (popupElts && popupElts.length > 0) {
         for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
           if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
-            // Check for specific popups here
+            /* Check for specific popups here
             if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
                 || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1
                 || popupElts[i].innerHTML.indexOf('xw_controller=challenge') != -1)
-              continue;
+              continue;*/
             var foundPopup = true;
             break;
           }
@@ -7103,7 +7105,6 @@ function handleModificationTimer() {
         pageChanged = true;
         justPlay = true;
         DEBUG('Detected popup: ' + popupElt.innerHTML.untag().slice(0,100));
-        //handlePublishing();
       }
     }
   }
@@ -7976,7 +7977,9 @@ function customizeStats() {
   var nrgLinkElt = document.getElementById('mwap_nrg');
   var nrgImgElt = xpathFirst('//img[@alt="Energy"]');
   if (nrgImgElt && !nrgLinkElt) {
-    nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately.'})
+    if (timeLeftGM('miniPackTimer') == 0) var miniPackTitle = 'Available now (or Timer not set).';
+    else var miniPackTitle = 'Available in ' + getHoursTime(timeLeftGM('miniPackTimer'));
+    nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle});
     nrgImgElt.parentNode.insertBefore(nrgLinkElt, nrgImgElt);
     nrgLinkElt.appendChild(nrgImgElt);
     nrgLinkElt.addEventListener('click', miniPackForce, false);
@@ -13189,6 +13192,24 @@ function getDecimalTime(decimalTime) {
     strTime += parseInt(num) + 's';
   }
   return strTime.replace('00','0');
+}
+
+// Convert seconds to ?h ?m ?s format
+function getHoursTime(seconds) {
+  var num = parseInt(seconds);
+  var strTime = '';
+  if (num) {
+    num /= 60;
+    if (num >= 60) {
+      num /= 60;
+      strTime = parseInt(num) + 'h ';
+      num -= parseInt(num); num *= 60;
+    }
+    strTime += parseInt(num) + 'm ';
+    num -= parseInt(num); num *= 60;
+    strTime += parseInt(num) + 's';
+  }
+  return strTime;
 }
 
 /******************************** Base64 Logic ********************************/
