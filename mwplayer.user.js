@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.472
+// @version     1.1.473
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.472',
+  version: '1.1.473',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1636,7 +1636,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   }
 
   // Check for a version change.
-  if (GM_getValue('version') != SCRIPT.version {
+  if (GM_getValue('version') != SCRIPT.version) {
     grabUpdateInfo(GM_getValue('version'));
     handleVersionChange();
   }
@@ -7905,7 +7905,7 @@ function customizeMasthead() {
     .appendChild(document.createTextNode('For Chrome'));
 
   // Make a container for the autoplayer menu.
-  var mwapTitle = 'MWAP ' + SCRIPT.version + ' (Build ' + SCRIPT.build + ')';
+  var mwapTitle = 'MWAP ' + SCRIPT.version;
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
   var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 34px; font-size: 11px; right: 10px; text-align: left;'});
 
