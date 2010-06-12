@@ -38,13 +38,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.68
-// @build       468
+// @version     1.1.69
+// @build       469
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.68',
-  build: '468',
+  version: '1.1.69',
+  build: '469',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
