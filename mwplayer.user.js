@@ -38,13 +38,13 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.69
-// @build       469
+// @version     1.1.70
+// @build       470
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.69',
-  build: '469',
+  version: '1.1.70',
+  build: '470',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7577,6 +7577,9 @@ function refreshMWAPCSS() {
                  // Move gifticon and make it smaller:
                  ' #gifticon_container {position: absolute; top: 15px; left: 305px; width: 25px; z-index: 10001;}' +
                  ' img[src="http://mwfb.static.zynga.com/mwfb/graphics/icon_gift_33x40_01.png"] {width: 25px;}' +
+                 // Move Poker Promo and make it smaller:
+                 ' #promoicon_container {position: absolute; top: 15px; left: 225px; width: 25px; z-index: 10001;}' +
+                 ' img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 25px;}' +				 
                  // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
