@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.473
+// @version     1.1.474
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.473',
+  version: '1.1.474',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12684,22 +12684,15 @@ function updateScript() {
       onload: function(resp) {
         if (resp.status != 200) return;
 
-        if (!resp.responseText.match(/@build\s+(\d+)/)) return;
-        var theOtherBuild = parseInt(RegExp.$1);
-        var runningBuild = parseInt(SCRIPT.build);
-        var theOtherVersion = resp.responseText.match(/@version\s+([\d.]+)/)? RegExp.$1 : '';
-        if (theOtherBuild < runningBuild) {
-          if (window.confirm('You have a beta version (build ' + runningBuild + ') installed.\n\nDo you want to DOWNGRADE to the most recent official release (version ' + theOtherVersion + ')?\n')) {
-            window.location.href = SCRIPT.url;
-          }
-          return;
-        } else if (theOtherBuild > runningBuild ||
-                   theOtherVersion != SCRIPT.version) {
-          if (window.confirm('Version ' + theOtherVersion + ' (build ' + theOtherBuild + ') is available!\n\n' + 'Do you want to upgrade?' + '\n')) {
+        if (!resp.responseText.match(/@version\s+(\d+).(\d+).(\d+)/)) return;
+        var googleVersion = RegExp.$1+'.'+RegExp.$2+'.'+RegExp.$3;
+        var runningVersion = SCRIPT.version;
+        if (googleVersion != runningVersion) {
+          if (window.confirm('Version ' + googleVersion + ' is available!\n\n' + 'Do you want to install this version?' + '\n')) {
             window.location.href = SCRIPT.url;
           }
         } else {
-          alert('You already have the latest version.');
+          alert('You already have the latest version: '+ googleVersion);
           return;
         }
       }
