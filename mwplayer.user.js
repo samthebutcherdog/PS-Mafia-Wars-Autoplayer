@@ -39,12 +39,12 @@
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @version     1.1.70
-// @build       470
+// @build       471
 // ==/UserScript==
 
 var SCRIPT = {
   version: '1.1.70',
-  build: '470',
+  build: '471',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4026,8 +4026,8 @@ function saveSettings() {
   var hideAttacks = (document.getElementById('hideAttacks').checked === true);
   var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
   if (hideAttacks) {
-    if (isNaN(rideHitlistXP) || rideHitlistXP < 1 || rideHitlistXP > 50) {
-      alert('For the hitlistride XP please enter a number between 1 and 50 (default:10).');
+    if (isNaN(rideHitlistXP) || rideHitlistXP < 0 || rideHitlistXP > 50) {
+      alert('For the hitlistride XP please enter a number between 0 and 50 (default: 10).');
       return;
     } else {
       GM_setValue ('rideHitlistXP', rideHitlistXP);
@@ -5261,7 +5261,7 @@ function createDisplayTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
   id = 'rideHitlistXP';
-  title = 'Enter the XP you want to gain before MWAP turns off autoHeal.';
+  title = 'Enter the XP you want to gain before MWAP turns off autoHeal. Enter \'0\' if you want MWAP to turn off autoHeal after it detected a 0 xp attack.';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '10'), 'title':title, 'id':id, 'style':'width: 25px'});
   rhs.appendChild(document.createTextNode(' xp'));
 
@@ -7809,6 +7809,7 @@ function doQuickClicks() {
     var actionElt = getActionBox('Daily Checklist Complete');
     if (actionElt) {
       var actionLink = getActionLink (actionElt, 'Collect Skill Point');
+      if (!actionLink) actionLink = getActionLink (actionElt, 'Collect Reward Point');
       if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         DEBUG('Clicked to collect checklist bonus.');
@@ -9748,10 +9749,14 @@ function parsePlayerUpdates(messagebox) {
         GM_setValue('currentHitXp', parseInt((GM_getValue('currentHitXp', 0)) + experience));
         GM_setValue('currentHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + cost));
         DEBUG(result);
-        if (isGMChecked('autoHeal') && GM_getValue('currentHitXp', 0) >= GM_getValue('rideHitlistXP', 10)) {
-          //DEBUG('Zero experience detected; turning off auto-heal.');
-          DEBUG(GM_getValue('currentHitXp', 0) + ' experience detected; turning off auto-heal.');
-          GM_setValue('autoHeal', 0);
+        if (isGMChecked('autoHeal')) {
+          if (GM_getValue('rideHitlistXP', 10) == 0 && experience == 0 && GM_getValue('currentHitXp', 0) > 6) {
+            addToLog('warning Icon', 'Zero experience detected and \'currentHitXp\' > 6 (' + GM_getValue('currentHitXp') + '); turning off auto-heal.');
+            GM_setValue('autoHeal', 0);
+          } else if (GM_getValue('rideHitlistXP', 10) > 0 && GM_getValue('currentHitXp', 0) >= GM_getValue('rideHitlistXP', 10)) {
+            DEBUG(GM_getValue('currentHitXp', 0) + ' experience accumulated; turning off auto-heal.');
+            GM_setValue('autoHeal', 0);
+          }
         }
       } else {
         addToLog('updateGood Icon', minutesAgo + result);
@@ -12368,12 +12373,14 @@ function logResponse(rootElt, action, context) {
         return true;
       }
 
-      //DEBUG('Parsing parts help.');
+      DEBUG('Parsing parts help.');
 
       // Help parts attempt was processed. Increment the update count.
       GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
 
-      //addToLog('info Icon', innerNoTags);
+      if (innerNoTags.indexOf('You sent ') != -1) {
+        addToLog('info Icon', 'You sent ' + inner.split('You sent ')[1].split('</div>')[0]);
+      }
 
       Autoplay.start();
       return true;
