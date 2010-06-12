@@ -38,13 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.70
-// @build       471
+// @version     1.1.472
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.70',
-  build: '471',
+  version: '1.1.472',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1638,11 +1636,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   }
 
   // Check for a version change.
-  if (GM_getValue('version') != SCRIPT.version ||
-      GM_getValue('build') != SCRIPT.build) {
-    GM_setValue('newbuild', SCRIPT.build);
-    sendMWValues(['version','build', 'newbuild']);
-    grabUpdateInfo(GM_getValue('build'));
+  if (GM_getValue('version') != SCRIPT.version {
+    grabUpdateInfo(GM_getValue('version'));
     handleVersionChange();
   }
 
@@ -3855,7 +3850,7 @@ function hideStatsWindow() {
 }
 
 function handleVersionChange() {
-  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' build ' + SCRIPT.build);
+  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version);
 
   // Check for invalid settings and upgrade them.
 
@@ -3895,7 +3890,7 @@ function handleVersionChange() {
 
   // Update saved script version
   GM_setValue('version', SCRIPT.version);
-  GM_setValue('build', SCRIPT.build);
+  addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version);
 }
 
 function saveDefaultSettings() {
@@ -6682,7 +6677,7 @@ function createAboutTab() {
   return aboutTab;
 }
 
-function grabUpdateInfo(oldBuild) {
+function grabUpdateInfo(oldVersion) {
   if (!gvar.isGreaseMonkey) return;
   GM_setValue('newRevList', '');
   GM_setValue('oldRevList', '');
@@ -6695,7 +6690,7 @@ function grabUpdateInfo(oldBuild) {
 
       s = (resp.responseText);
       var count = 0;
-      var changes = Math.min(parseInt(SCRIPT.build) - parseInt(isNaN(oldBuild) ? 5 : oldBuild), 10);
+      var changes = 5;
       var newRevList = '';
       var oldRevList = '';
       while (count < changes + 5) {
@@ -7810,6 +7805,11 @@ function doQuickClicks() {
     if (actionElt) {
       var actionLink = getActionLink (actionElt, 'Collect Skill Point');
       if (!actionLink) actionLink = getActionLink (actionElt, 'Collect Reward Point');
+      if (actionLink && actionLink.scrollWidth) {
+        clickElement(actionLink);
+        DEBUG('Clicked to collect checklist bonus.');
+      }
+      var actionLink = getActionLink (actionElt, 'Collect Reward Point');
       if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         DEBUG('Clicked to collect checklist bonus.');
