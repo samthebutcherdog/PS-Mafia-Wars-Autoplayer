@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.474
+// @version     1.1.475
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.474',
+  version: '1.1.475',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6652,7 +6652,7 @@ function createAboutTab() {
   });
 
   var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 10px; font-size: 18px; font-weight: bold;'});
-  versionInfo.appendChild(document.createTextNode('Version ' + SCRIPT.version + '  Build ' + SCRIPT.build));
+  versionInfo.appendChild(document.createTextNode('Version ' + SCRIPT.version));
 
   var devs = makeElement('div', aboutTab, {'style': 'top: 50px; width: 550px; left: 10px; font-size: 12px; font-weight: bold;'});
   devs.appendChild(document.createTextNode('Contributors:'));
