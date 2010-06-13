@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.477
+// @version     1.1.478
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.477',
+  version: '1.1.478',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3850,7 +3850,7 @@ function hideStatsWindow() {
 }
 
 function handleVersionChange() {
-  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version);
+  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' playerscripts.com');
 
   // Check for invalid settings and upgrade them.
 
@@ -3890,7 +3890,7 @@ function handleVersionChange() {
 
   // Update saved script version
   GM_setValue('version', SCRIPT.version);
-  addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version);
+  addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version + ' playerscripts.com');
 }
 
 function saveDefaultSettings() {
@@ -4337,7 +4337,7 @@ function unPause() {
   GM_setValue('isRunning', true);
   sendMWValues(['isRunning']);
 
-  addToLog('play Icon', 'Autoplayer resuming...');
+  addToLog('play Icon', 'Autoplayer resuming - playerscripts.com');
   mwapOnOffMenu();
   updateMastheadMenu();
 
