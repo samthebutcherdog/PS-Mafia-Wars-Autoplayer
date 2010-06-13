@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.478
+// @version     1.1.479
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.478',
+  version: '1.1.479',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2206,12 +2206,10 @@ function autoPlayerUpdates() {
 
   if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) || 
       (pUpdatesLen == 0 && logPlayerUpdatesCount > 0)) {
-    if (pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) {
-      // Last time checked there were more updates than now, perhaps mw deleted old updates?
-      DEBUG('Discrepancy in player updates: new count: ' + pUpdatesLen + ', old count: ' + logPlayerUpdatesCount);
-    }
-    // Player updates have been cleared.
-    DEBUG('Player updates were cleared.');
+    if (pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) // Last time checked there were more updates than now, perhaps mw deleted old updates?
+      DEBUG('Discrepancy in player updates; new count: ' + pUpdatesLen + ', old count: ' + logPlayerUpdatesCount);
+    else  // Player updates have been cleared.
+      DEBUG('Player updates were cleared.');
     logPlayerUpdatesCount = 0;
     GM_setValue('logPlayerUpdatesCount', 0);
   }
@@ -3023,6 +3021,14 @@ function refreshRobbingGrid() {
 };
 
 function doRob(){
+  var m;
+  var eltRobStam = xpathFirst('.//div[@class="rob_prop_stamina"]');
+  if (eltRobStam) {
+    if (m = /(.*)/.exec(eltRobStam.innerHTML)) {
+      var stam = m[1].replace(/[^0-9]/g, '');
+      GM_setValue('totalRobStamInt', parseInt(isNaN(parseInt(GM_getValue('totalRobStamInt', 1))) ? 0 : parseInt(GM_getValue('totalRobStamInt', 1))) + parseInt(stam));
+    }
+  }
   var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
   clickElement(eltRob);
   DEBUG('Clicked to rob.');
@@ -3038,6 +3044,7 @@ function getCurRobSlotId(){
 function logRobResponse(rootElt, resultElt, context) {
   var robSlotId = context;
   var m;
+  var needStatUpdate = false;
   var eltRob = xpathFirst('.//div[@id="'+ robSlotId +'" and @class="rob_slot"]');
   if (eltRob) {
     var success = false;
@@ -3074,6 +3081,14 @@ function logRobResponse(rootElt, resultElt, context) {
       if (m = /(\d+) Experience/.exec(expElt.innerHTML)) {
         var exp = m[1].replace(/[^0-9]/g, '');
         updateRobStatistics(success,parseInt(exp));
+        needStatUpdate = true;
+      }
+
+    if (cashElt)
+      if (m = /(.*)/.exec(cashElt.innerHTML)) {
+        var cash = m[1].replace(/[^0-9]/g, '');
+        GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseInt(cash)));
+        needStatUpdate = true;
       }
   }
 
@@ -3088,7 +3103,9 @@ function logRobResponse(rootElt, resultElt, context) {
 
     if (m = /(\d+) Bonus Experience/.exec(popUp.innerHTML)) {
       var exp = m[1].replace(/[^0-9]/g, '');
+      addToLog('yeah Icon', 'Robbing board cleared. <span class="good">Bonus: ' + exp + ' Experience</span>');
       updateRobStatistics(null,parseInt(exp));
+      needStatUpdate = true;
     }
 
     // close the popup button
@@ -3098,6 +3115,7 @@ function logRobResponse(rootElt, resultElt, context) {
       DEBUG('Clicked to close rob popup.');
     }
   }
+  if (needStatUpdate) updateLogStats();
 }
 
 function updateRobStatistics (success,exp) {
@@ -3106,8 +3124,10 @@ function updateRobStatistics (success,exp) {
   if(!success)
     GM_setValue('robFailedCountInt', GM_getValue('robFailedCountInt', 0) + 1);
 
-  if (exp)
+  if (exp) {
     GM_setValue('totalRobExpInt', GM_getValue('totalRobExpInt', 0) + parseInt(exp) );
+    GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(exp));
+  }
 
   // TODO : add/show on log statistics
   DEBUG("Rob total exp : " + GM_getValue('totalRobExpInt',0));
@@ -4161,7 +4181,7 @@ function saveSettings() {
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', //'flashed',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
-                            'autoBurnerHelp','autoPartsHelp']);
+                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4522,8 +4542,37 @@ function updateLogStats(newHow) {
   var hitmanLossPct = (GM_getValue('hitmanLossCountInt', 0)/(GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)) * 100).toFixed(1);
     document.getElementById('hitmanLossPct').firstChild.nodeValue =  (isNaN(hitmanLossPct)) ? '0.0%' : hitmanLossPct + '%';
 
-  document.getElementById('totalWinDollars').firstChild.nodeValue = '$' + makeCommaValue(parseInt(GM_getValue('totalWinDollarsInt', 0)));  //Accomodates up to $999,999,999,999
-  document.getElementById('totalLossDollars').firstChild.nodeValue = '$' + makeCommaValue(parseInt(GM_getValue('totalLossDollarsInt', 0)));
+  var robCount = document.getElementById('robCount');
+  if (robCount) {
+    document.getElementById('robCount').firstChild.nodeValue = makeCommaValue(parseInt(GM_getValue('robSuccessCountInt', 0)) + parseInt(GM_getValue('robFailedCountInt', 0)));
+    document.getElementById('robWinCount').firstChild.nodeValue = makeCommaValue(GM_getValue('robSuccessCountInt', 0));
+    var robWinPct = (GM_getValue('robSuccessCountInt', 0)/(GM_getValue('robSuccessCountInt', 0) + GM_getValue('robFailedCountInt', 0)) * 100).toFixed(1);
+      document.getElementById('robWinPct').firstChild.nodeValue =  (isNaN(robWinPct)) ? '0.0%' : robWinPct + '%';
+    document.getElementById('robLossCount').firstChild.nodeValue = makeCommaValue(GM_getValue('robFailedCountInt', 0));
+    var robLossPct = (GM_getValue('robFailedCountInt', 0)/(GM_getValue('robSuccessCountInt', 0) + GM_getValue('robFailedCountInt', 0)) * 100).toFixed(1);
+      document.getElementById('robLossPct').firstChild.nodeValue =  (isNaN(robLossPct)) ? '0.0%' : robLossPct + '%';
+
+    var units = ['', 'K', 'M', 'G', 'T'];
+
+    var winDollars = parseInt(GM_getValue('totalWinDollarsInt', 0));
+    var winDollarUnit = 0;
+    while (winDollars > 1000) {
+      winDollars = winDollars / 1000;
+      winDollarUnit++;
+    }
+
+    var lossDollars = parseInt(GM_getValue('totalLossDollarsInt', 0));
+    var lossDollarUnit = 0;
+    while (lossDollars > 1000) {
+      lossDollars = lossDollars / 1000;
+      lossDollarUnit++;
+    }
+    document.getElementById('totalWinDollars').firstChild.nodeValue = units[winDollarUnit] + '$' + winDollars.toFixed(3);
+    document.getElementById('totalLossDollars').firstChild.nodeValue = units[lossDollarUnit] + '$' + lossDollars.toFixed(3);
+  } else {
+    document.getElementById('totalWinDollars').firstChild.nodeValue = '$' + makeCommaValue(parseInt(GM_getValue('totalWinDollarsInt', 0)));  //Accomodates up to $999,999,999,999
+    document.getElementById('totalLossDollars').firstChild.nodeValue = '$' + makeCommaValue(parseInt(GM_getValue('totalLossDollarsInt', 0)));
+  }
   document.getElementById('totalExp').firstChild.nodeValue = makeCommaValue(GM_getValue('totalExpInt', 0));
 
   //FIXME: These values currently only get refreshed when stamina is spent,
@@ -4628,12 +4677,15 @@ function clearStats() {
   //reset log statistics
   GM_setValue('fightWinCountInt', 0);
   GM_setValue('fightLossCountInt', 0);
+  GM_setValue('robSuccessCountInt', 0);
+  GM_setValue('robFailedCountInt', 0);
   GM_setValue('hitmanWinCountInt',0);
   GM_setValue('hitmanWinDollarsInt','0');
   GM_setValue('hitmanLossCountInt',0);
   GM_setValue('hitmanLossDollarsInt','0');
 
   GM_setValue('totalExpInt', 0);
+  GM_setValue('totalRobStamInt', 0);
   GM_setValue('totalWinDollarsInt', '0');
   GM_setValue('totalLossDollarsInt', '0');
 
@@ -4752,29 +4804,69 @@ function createLogBox() {
   //Change Stats Displayed based on current stamina burner
   //fight Stats are currently default for leftmost portion of Stats
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fights:'));
-  makeElement('div', mafiaLogBox, {'id':'fightCount', 'style':'position: absolute; right: 340px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0))));
+  //makeElement('div', mafiaLogBox, {'id':'fightCount', 'style':'position: absolute; right: 340px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'id':'fightCount', 'style':'position: absolute; right: 360px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0))));
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Won:'));
-  makeElement('div', mafiaLogBox, {'id':'fightWinCount', 'style':'position: absolute; right: 340px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0))));
+  //makeElement('div', mafiaLogBox, {'id':'fightWinCount', 'style':'position: absolute; right: 340px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'id':'fightWinCount', 'style':'position: absolute; right: 360px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightWinCountInt', 0))));
   var fightWinPct = (GM_getValue('fightWinCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'fightWinPct', 'style':'position: absolute; right: 295px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(fightWinPct)) ? '0.0%' : fightWinPct + '%'));
+    //makeElement('div', mafiaLogBox, {'id':'fightWinPct', 'style':'position: absolute; right: 295px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(fightWinPct)) ? '0.0%' : fightWinPct + '%'));
+    makeElement('div', mafiaLogBox, {'id':'fightWinPct', 'style':'position: absolute; right: 325px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(fightWinPct)) ? '0.0%' : fightWinPct + '%'));
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Lost:'));
-  makeElement('div', mafiaLogBox, {'id':'fightLossCount', 'style':'position: absolute; right: 340px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightLossCountInt', 0))));
+  //makeElement('div', mafiaLogBox, {'id':'fightLossCount', 'style':'position: absolute; right: 340px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightLossCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'id':'fightLossCount', 'style':'position: absolute; right: 360px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('fightLossCountInt', 0))));
   var fightLossPct = (GM_getValue('fightLossCountInt', 0)/(GM_getValue('fightWinCountInt', 0) + GM_getValue('fightLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'fightLossPct', 'style':'position: absolute; right: 295px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%'));
+    //makeElement('div', mafiaLogBox, {'id':'fightLossPct', 'style':'position: absolute; right: 295px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%'));
+    makeElement('div', mafiaLogBox, {'id':'fightLossPct', 'style':'position: absolute; right: 325px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(fightLossPct)) ? '0.0%' : fightLossPct + '%'));
 
-  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Hits:'));
-  makeElement('div', mafiaLogBox, {'id':'hitmanCount', 'style':'position: absolute; right: 185px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue((GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)))));
-  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Succ:'));
-  makeElement('div', mafiaLogBox, {'id':'hitmanWinCount', 'style':'position: absolute; right: 185px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanWinCountInt', 0))));
+  //makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Hits:'));
+  //makeElement('div', mafiaLogBox, {'id':'hitmanCount', 'style':'position: absolute; right: 185px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue((GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)))));
+  //makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Succ:'));
+  //makeElement('div', mafiaLogBox, {'id':'hitmanWinCount', 'style':'position: absolute; right: 185px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanWinCountInt', 0))));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 140px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Hits:'));
+  makeElement('div', mafiaLogBox, {'id':'hitmanCount', 'style':'position: absolute; right: 250px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue((GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)))));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 140px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Succ:'));
+  makeElement('div', mafiaLogBox, {'id':'hitmanWinCount', 'style':'position: absolute; right: 250px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanWinCountInt', 0))));
   var hitmanWinPct = (GM_getValue('hitmanWinCountInt', 0)/(GM_getValue('hitmanWinCountInt', 0) + GM_getValue('hitmanLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'hitmanWinPct', 'style':'position: absolute; right: 140px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(hitmanWinPct)) ? '0.0%' : hitmanWinPct + '%'));
-  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fail:'));
-  makeElement('div', mafiaLogBox, {'id':'hitmanLossCount', 'style':'position: absolute; right: 185px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanLossCountInt', 0))));
+    //makeElement('div', mafiaLogBox, {'id':'hitmanWinPct', 'style':'position: absolute; right: 140px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(hitmanWinPct)) ? '0.0%' : hitmanWinPct + '%'));
+  //makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 175px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fail:'));
+  //makeElement('div', mafiaLogBox, {'id':'hitmanLossCount', 'style':'position: absolute; right: 185px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanLossCountInt', 0))));
+   makeElement('div', mafiaLogBox, {'id':'hitmanWinPct', 'style':'position: absolute; right: 215px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(hitmanWinPct)) ? '0.0%' : hitmanWinPct + '%'));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 140px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fail:'));
+  makeElement('div', mafiaLogBox, {'id':'hitmanLossCount', 'style':'position: absolute; right: 250px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('hitmanLossCountInt', 0))));
   var hitmanLossPct = (GM_getValue('hitmanLossCountInt', 0)/(GM_getValue('hitmanWinCountInt', 1) + GM_getValue('hitmanLossCountInt', 0)) * 100).toFixed(1);
-    makeElement('div', mafiaLogBox, {'id':'hitmanLossPct', 'style':'position: absolute; right: 140px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(hitmanLossPct)) ? '0.0%' : hitmanLossPct + '%'));
+    //makeElement('div', mafiaLogBox, {'id':'hitmanLossPct', 'style':'position: absolute; right: 140px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(hitmanLossPct)) ? '0.0%' : hitmanLossPct + '%'));
+    makeElement('div', mafiaLogBox, {'id':'hitmanLossPct', 'style':'position: absolute; right: 215px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(hitmanLossPct)) ? '0.0%' : hitmanLossPct + '%'));
 
-  makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode('$' + makeCommaValue(parseInt(GM_getValue('totalWinDollarsInt', 0)))));  //Accomodates up to $999,999,999,999
-  makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode('$' + makeCommaValue(parseInt(GM_getValue('totalLossDollarsInt', 0)))));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 250px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Robs:'));
+  makeElement('div', mafiaLogBox, {'id':'robCount', 'style':'position: absolute; right: 135px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue((GM_getValue('robSuccessCountInt', 0) + GM_getValue('robFailedCountInt', 0)))));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 250px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Succ:'));
+  makeElement('div', mafiaLogBox, {'id':'robWinCount', 'style':'position: absolute; right: 135px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('robSuccessCountInt', 0))));
+  var robWinPct = (GM_getValue('robSuccessCountInt', 0)/(GM_getValue('robSuccessCountInt', 0) + GM_getValue('robFailedCountInt', 0)) * 100).toFixed(1);
+    makeElement('div', mafiaLogBox, {'id':'robWinPct', 'style':'position: absolute; right: 100px; bottom: 18px; font-size: 10px; font-weight: 100;color: #52E259;'}).appendChild(document.createTextNode((isNaN(robWinPct)) ? '0.0%' : robWinPct + '%'));
+  makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 250px; bottom: 3px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fail:'));
+  makeElement('div', mafiaLogBox, {'id':'robLossCount', 'style':'position: absolute; right: 135px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('robFailedCountInt', 0))));
+  var robLossPct = (GM_getValue('robFailedCountInt', 0)/(GM_getValue('robSuccessCountInt', 1) + GM_getValue('robFailedCountInt', 0)) * 100).toFixed(1);
+    makeElement('div', mafiaLogBox, {'id':'robLossPct', 'style':'position: absolute; right: 100px; bottom: 3px; font-size: 10px; font-weight: 100;color: #EC2D2D;'}).appendChild(document.createTextNode((isNaN(robLossPct)) ? '0.0%' : robLossPct + '%'));
+
+  var units = ['', 'K', 'M', 'G', 'T'];
+  var winDollars = parseInt(GM_getValue('totalWinDollarsInt', 0));
+  var winDollarUnit = 0;
+  while (winDollars > 1000) {
+    winDollars = winDollars / 1000;
+    winDollarUnit++;
+  }
+  var lossDollars = parseInt(GM_getValue('totalLossDollarsInt', 0));
+  var lossDollarUnit = 0;
+  while (lossDollars > 1000) {
+    lossDollars = lossDollars / 1000;
+    lossDollarUnit++;
+  }
+
+  //makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode('$' + makeCommaValue(parseInt(GM_getValue('totalWinDollarsInt', 0)))));  //Accomodates up to $999,999,999,999
+  //makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode('$' + makeCommaValue(parseInt(GM_getValue('totalLossDollarsInt', 0)))));
+  makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode( units[winDollarUnit] + '$' + winDollars.toFixed(3)));  //Accomodates up to $999,999,999,999
+  makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode( units[lossDollarUnit] + '$' + lossDollars.toFixed(3)));
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Exp Gained:'));
   makeElement('div', mafiaLogBox, {'id':'totalExp', 'style':'position: absolute; right: 329px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('totalExpInt', 0))));
   makeElement('hr', mafiaLogBox, {'style':'position: absolute; left: 0; bottom: 42px; height: 1px; border: 0px; width: 90%; margin-left: 5%; color: #666666; background-color: #666666'});
@@ -5212,7 +5304,7 @@ function createDisplayTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'filterPatterns';
-  var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
+  var filterText = makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 7em;', 'id':id, 'title':'Enter each pattern on a separate line.'});
   filterText.appendChild(document.createTextNode(''));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
@@ -5329,6 +5421,25 @@ function createDisplayTab() {
   title = 'Hide friend ladder';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Friend Ladder '));
+
+  item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px;'});
+  // Hide Messagecenter Icon
+  id = 'hideMessageIcon';
+  title = 'Hide Messagecenter Icon';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Messagecenter '));
+
+  // Hide Gift Icon
+  id = 'hideGiftIcon';
+  title = 'Hide Gift Icon';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Gift Icon '));
+
+  // Hide Promo Icon (Poker atm)
+  id = 'hidePromoIcon';
+  title = 'Hide Promo Icon';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Promo Icon '));
 
   return displayTab;
 }
@@ -7496,7 +7607,8 @@ function getStaminaGainRate() {
   var staminaSpent = GM_getValue('fightWinCountInt', 0) +
                      GM_getValue('fightLossCountInt', 0) +
                      GM_getValue('hitmanWinCountInt',0) +
-                     GM_getValue('hitmanLossCountInt',0);
+                     GM_getValue('hitmanLossCountInt',0) +
+                     GM_getValue('totalRobStamInt',0);
   if (!expGained || !staminaSpent) return 0;
 
   return expGained / staminaSpent;
@@ -7566,15 +7678,18 @@ function refreshMWAPCSS() {
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button(s):
-                 ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
-                 ' div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 255px !important; width: 45px; z-index: 10001 !important;}' +
+                 (isGMChecked('hideMessageIcon') ?
+                  ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {display: none;} div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {display: none;}' :
+                  ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 285px !important; width: 45px; z-index: 10001 !important;} div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
-                 ' #gifticon_container {position: absolute; top: 15px; left: 305px; width: 25px; z-index: 10001;}' +
-                 ' img[src="http://mwfb.static.zynga.com/mwfb/graphics/icon_gift_33x40_01.png"] {width: 25px;}' +
+                 (isGMChecked('hideGiftIcon') ?
+                  ' #gifticon_container {display: none;}' :
+                  ' #gifticon_container {position: absolute; top: 3px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/icon_gift_33x40_01.png"] {width: 22px;}') +
                  // Move Poker Promo and make it smaller:
-                 ' #promoicon_container {position: absolute; top: 15px; left: 225px; width: 25px; z-index: 10001;}' +
-                 ' img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 25px;}' +				 
+                 (isGMChecked('hidePromoIcon') ?
+                 ' #promoicon_container {display: none;}' :
+                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;}') +				 
                  // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
@@ -7805,11 +7920,6 @@ function doQuickClicks() {
     if (actionElt) {
       var actionLink = getActionLink (actionElt, 'Collect Skill Point');
       if (!actionLink) actionLink = getActionLink (actionElt, 'Collect Reward Point');
-      if (actionLink && actionLink.scrollWidth) {
-        clickElement(actionLink);
-        DEBUG('Clicked to collect checklist bonus.');
-      }
-      var actionLink = getActionLink (actionElt, 'Collect Reward Point');
       if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         DEBUG('Clicked to collect checklist bonus.');
@@ -9556,6 +9666,9 @@ function debugDumpSettings() {
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
         'Hide Friend Ladder: <strong>'+ showIfUnchecked(GM_getValue('hideFriendLadder')) + '</strong><br>' +
+        'Hide Messagecenter Icon: <strong>'+ showIfUnchecked(GM_getValue('hideMessageIcon')) + '</strong><br>' +
+        'Hide Gift Icon: <strong>'+ showIfUnchecked(GM_getValue('hideGiftIcon')) + '</strong><br>' +
+        'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
@@ -9750,11 +9863,11 @@ function parsePlayerUpdates(messagebox) {
         GM_setValue('currentHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + cost));
         DEBUG(result);
         if (isGMChecked('autoHeal')) {
-          if (GM_getValue('rideHitlistXP', 10) == 0 && experience == 0 && GM_getValue('currentHitXp', 0) > 6) {
-            addToLog('warning Icon', 'Zero experience detected and \'currentHitXp\' > 6 (' + GM_getValue('currentHitXp') + '); turning off auto-heal.');
+          if (GM_getValue('rideHitlistXP', 10) == 0 && experience == 0 && GM_getValue('currentHitXp', 0) > 12) {
+            addToLog('info Icon', 'Zero experience detected; turning off auto-heal.<br>(currentHitXp = ' + GM_getValue('currentHitXp', 0) + ')');
             GM_setValue('autoHeal', 0);
           } else if (GM_getValue('rideHitlistXP', 10) > 0 && GM_getValue('currentHitXp', 0) >= GM_getValue('rideHitlistXP', 10)) {
-            DEBUG(GM_getValue('currentHitXp', 0) + ' experience accumulated; turning off auto-heal.');
+            addToLog('info Icon', GM_getValue('currentHitXp', 0) + ' experience accumulated; turning off auto-heal.');
             GM_setValue('autoHeal', 0);
           }
         }
@@ -11221,10 +11334,11 @@ function goPropertyNav() {
 function goDeleteNews() {
   var elt = xpathFirst('//a[contains(text(), "Clear Updates")]');
   if (!elt) {
-    DEBUG('Can\'t find delete news link to click. ');
+    DEBUG('Can\'t find Clear Updates link to click. ');
     return;
   }
   clickElement(elt);
+  GM_setValue('logPlayerUpdatesCount', 0);
   DEBUG('Clicked to delete news.');
 }
 
