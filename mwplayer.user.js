@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.485
+// @version     1.1.486
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.485',
+  version: '1.1.486',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1034,7 +1034,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Railgun', 23, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
     ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
-  
+
   // Flash Check
   const FLASH_UNDEFINED = -1;
   const FLASH_ENABLED = 1;
@@ -1657,7 +1657,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     alert('MWAP: Inconsistent state found in settings, please check them!');
     GM_setValue('isRunning', false);
   }
-  
+
   var Reload = new Animate();
   Reload.desc = 'reload';
   var Autoplay = new Animate();
@@ -2205,7 +2205,7 @@ function autoPlayerUpdates() {
     GM_setValue('logPlayerUpdatesCount', logPlayerUpdatesCount);
   }
 
-  if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) || 
+  if ((pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) ||
       (pUpdatesLen == 0 && logPlayerUpdatesCount > 0)) {
     if (pUpdatesLen > 0 && logPlayerUpdatesCount > pUpdatesLen) // Last time checked there were more updates than now, perhaps mw deleted old updates?
       DEBUG('Discrepancy in player updates; new count: ' + pUpdatesLen + ', old count: ' + logPlayerUpdatesCount);
@@ -4176,7 +4176,7 @@ function saveSettings() {
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
-                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', 
+                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
                             'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon']);
@@ -4372,7 +4372,7 @@ function mwapOnOffMenu() {
   var mafiaLogBox = document.getElementById('mafiaLogBox');
   var mwapElt = document.getElementById('ap_mwap_pause');
   if (!mafiaLogBox || !mwapElt) return;
-  
+
   if (GM_getValue('isRunning') === false) {
     destroyByID('ap_mwap_pause');
     title = 'Click to resume mwap';
@@ -7677,7 +7677,7 @@ function refreshMWAPCSS() {
                  // Move Poker Promo and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                  ' #promoicon_container {display: none;}' :
-                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;}') +				 
+                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;}') +
                  // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
@@ -8039,7 +8039,7 @@ function customizeMasthead() {
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
                        '</a> ' +
                        '<a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.08</div> ' +					   
+                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.08</div> ' +
                        '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
@@ -9120,7 +9120,7 @@ function customizeFight() {
 function customizeProps() {
   // Not on properties page (no <object> or <div> with @id="flash_content_propertiesV2" and no flashblock found)
   if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt) &&
-      !(xpathFirst('.//div[contains(@bginactive, "flashblock")]', innerPageElt) && xpathFirst('.//div[@id="propertyV2Help"]', innerPageElt))) 
+      !(xpathFirst('.//div[contains(@bginactive, "flashblock")]', innerPageElt) && xpathFirst('.//div[@id="propertyV2Help"]', innerPageElt)))
     return false;
 
   // Check flash
@@ -12319,7 +12319,7 @@ function logResponse(rootElt, action, context) {
       else if (innerNoTags.indexOf('WON') != -1 ||
                innerNoTags.indexOf('LOST') != -1) {
         var logIcon = innerNoTags.indexOf('LOST') != -1 ? 'omg Icon' : 'yeah Icon';
-        if (innerNoTags.indexOf('to winning this war.') != -1) 
+        if (innerNoTags.indexOf('to winning this war.') != -1)
           addToLog(logIcon, inner.split('to winning this war.')[0] + 'to winning this war.</div>');
         else
           addToLog(logIcon, inner);
@@ -12556,7 +12556,7 @@ function logResponse(rootElt, action, context) {
 }
 
 function closePopup(eltPopup, coolName) {
-  // This routine needs the handle of the popup! 
+  // This routine needs the handle of the popup!
   // Not a button in the popup, but the main element
   // So if we figure out we have a button, then let's try
   // to find the main element
@@ -12603,7 +12603,7 @@ function handlePopups()
 
   try {
     //DEBUG('Popups: Checking for popups');
-  
+
     // Look for all popups that are showing
     var popupElts = $x('//div[(contains(@id,"pop") or contains(@id,"mystery")) and not(@id="popup_fodder") and contains(@style, "block")]', innerPageElt);
     if (popupElts && popupElts.length > 0) {
@@ -12618,7 +12618,7 @@ function handlePopups()
             || popupElts[i].innerHTML.indexOf('Hospital') != -1 // The Hospital
             || popupElts[i].innerHTML.indexOf('bank_popup') != -1 // The Bank
             || popupElts[i].innerHTML.indexOf('If you lay low for a few hours') != -1 // London
-            ) 
+            )
             continue;
 
           var popupInner = popupElts[i].innerHTML.untag();
@@ -12647,10 +12647,10 @@ function handlePopups()
             addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
             return(closePopup(popupElts[i], "Chop Shop/Weapon Depot"));
           }
-          
+
           // Process Loyalty popup
           if (isGMChecked('autoGiftAccept') && popupInner.indexOf('Show Your Loyalty') != -1) {
-            // So there's a 3018 popup! Let's let Z do it for us! 
+            // So there's a 3018 popup! Let's let Z do it for us!
             // Ok, so JQuery should already exist!
             $ = unsafeWindow.jQuery;
             var valueIcon = $("#cb_value_item").attr("src");
@@ -12691,7 +12691,7 @@ function handlePopups()
             }
             return true;
           }
-          
+
           // Process The Hospital
           var eltPubButton = xpathFirst('.//a[contains(@onclick,"xw_action=heal")]',popupElts[i]);
           if (eltPubButton) {
@@ -12710,7 +12710,7 @@ function handlePopups()
               return(closePopup(popupElts[i], "Secret Stash"));
             }
           }
-  
+
           // Process Secret Stash
           if (popupInner.indexOf('Get yours') != -1) {
             DEBUG('Popup Process: Get Secret Stash Processed');
@@ -12724,7 +12724,7 @@ function handlePopups()
             }
             return true;
           }
-          
+
           // Process Safehouse popup
           var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
           if (eltPubButton) {
@@ -12739,7 +12739,7 @@ function handlePopups()
               return(closePopup(popupElts[i], "Safehouse Gifts"));
             }
           }
-          
+
           // Process Red Mystery Bag popup
           if (popupInner.indexOf('Red Mystery Bag') != -1) {
             DEBUG('Popup Process: Red Mystery Bag Processed');
@@ -12749,8 +12749,8 @@ function handlePopups()
             }
             return(closePopup(popupElts[i], "Red Mystery Bag"));
           }
-    
-/*      
+
+/*
           // Process Robbery Loot popup
           if (popupInner.match(/You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)Y/)) {
             DEBUG('Popup Process: Robbery Loot Processed');
