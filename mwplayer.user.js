@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.479
+// @version     1.1.480
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.479',
+  version: '1.1.480',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12664,34 +12664,42 @@ function handlePopups()
             // So there's a 3018 popup! Let's let Z do it for us! 
             // Ok, so JQuery should already exist!
             $ = unsafeWindow.jQuery;
-            var eltGag = document.getElementById('gag_item_id');
-            var eltValue = document.getElementById('value_item_id');
-            var eltRewardXP = document.getElementById('xp_gain_url');
-            var eltRewardNRG = document.getElementById('nrg_gain_url');
-            var eltRewardSTA = document.getElementById('sta_gain_url');
-            var eltLoyalty = document.getElementById('gift_popup_send_gift');
-            switch (GM_getValue('autoGiftAcceptChoice',0)) {
-              case 0: //HELP
-                if (eltValue) $('#cb_value_item').click();
-                break;
-              case 1: //SABOTAGE
-                if (eltGag) $('#cb_gag_item').click();
-                break;
+            var valueIcon = $("#cb_value_item").attr("src");
+            var gagIcon = $("#cb_gag_item").attr("src");
+            // If either Sabotage or Help is checked, skip this
+            if ((valueIcon.indexOf('mw_messagebox_checkbox1.gif') == -1) && (gagIcon.indexOf('mw_messagebox_checkbox1.gif') == -1)) {
+              var eltGag = document.getElementById('gag_item_id');
+              var eltValue = document.getElementById('value_item_id');
+              var eltRewardXP = document.getElementById('xp_gain_url');
+              var eltRewardNRG = document.getElementById('nrg_gain_url');
+              var eltRewardSTA = document.getElementById('sta_gain_url');
+              var eltLoyalty = document.getElementById('gift_popup_send_gift');
+              switch (GM_getValue('autoGiftAcceptChoice',0)) {
+                case 0: //HELP
+                  if (eltValue) $('#cb_value_item').click();
+                  break;
+                case 1: //SABOTAGE
+                  if (eltGag) $('#cb_gag_item').click();
+                  break;
+              }
+              switch (GM_getValue('autoGiftAcceptReward',0)) {
+                case 0: //XP
+                  if (eltRewardXP) $('#cb_xp_gain').click();
+                  break;
+                case 1: // ENERGY
+                  if (eltRewardNRG) $('#cb_nrg_gain').click();
+                  break;
+                case 2: // STAMINA
+                  if (eltRewardSTA) $('#cb_sta_gain').click();
+                  break;
+              }
+              // Click the loyalty button
+              if (eltLoyalty) {
+                $('#gift_popup_send_gift').click();
+                DEBUG('Popup Process: Show Your Loyalty Processed');
+              }
+              // At this point the button should force the screen to refresh
             }
-            switch (GM_getValue('autoGiftAcceptReward',0)) {
-              case 0: //XP
-                if (eltRewardXP) $('#cb_xp_gain').click();
-                break;
-              case 1: // ENERGY
-                if (eltRewardNRG) $('#cb_nrg_gain').click();
-                break;
-              case 2: // STAMINA
-                if (eltRewardSTA) $('#cb_sta_gain').click();
-                break;
-            }
-            // Click the loyalty button
-            $('#gift_popup_send_gift').click();
-            DEBUG('Popup Process: Show Your Loyalty Processed');
             return true;
           }
           
