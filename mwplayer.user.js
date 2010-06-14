@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.480
+// @version     1.1.481
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.480',
+  version: '1.1.481',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -61,12 +61,6 @@ var SCRIPT = {
   opponent: '&opponent_id=',
   user: '&user_id='
 };
-
-/* temp fix for publishing fb popups
-// Only attach to the top window.
-if (window.top != window.self) {
-  return;
-}*/
 
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
@@ -1040,6 +1034,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Railgun', 23, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
     ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
+  
+  // Flash Check
+  const FLASH_UNDEFINED = -1;
+  const FLASH_ENABLED = 1;
+  const FLASH_DISABLED = 0;
+  var isFlashed = FLASH_UNDEFINED;
 
   // Gift Accept Choices/Rewards
   var giftAcceptChoices = ['Help', 'Sabotage'];
@@ -1990,7 +1990,8 @@ function doAutoPlay () {
   }
 
   // Auto-upgrade properties (limit to level 4 and above, skip if flash is enabled)
-  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps && !GM_getValue('flashed')) {
+  // If isFlashed==FLASH_UNDEFINED it will enter the properties once, after that, isFlashed is either FLASHED_ENABLED or FLASHED_DISABLED
+  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps && (isFlashed!=FLASH_ENABLED)) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL]) {
 
@@ -3870,7 +3871,7 @@ function hideStatsWindow() {
 }
 
 function handleVersionChange() {
-  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' playerscripts.com');
+  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">playerscripts.com</a>');
 
   // Check for invalid settings and upgrade them.
 
@@ -3910,7 +3911,7 @@ function handleVersionChange() {
 
   // Update saved script version
   GM_setValue('version', SCRIPT.version);
-  addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version + ' playerscripts.com');
+  //addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">playerscripts.com</a>');
 }
 
 function saveDefaultSettings() {
@@ -3951,9 +3952,6 @@ function saveDefaultSettings() {
   GM_setValue('autoGiftAcceptChoice', 0);
   GM_setValue('autoGiftAcceptReward', 0);
   GM_setValue('autoSafehouse', 0);
-
-  // Display Tab
-  //GM_setValue('flashed',0);
 
   // Misc Tab
   GM_setValue('autoResetTimers', 0);
@@ -4178,7 +4176,7 @@ function saveSettings() {
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
-                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', //'flashed',
+                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse', 
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
                             'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon']);
@@ -5382,16 +5380,6 @@ function createDisplayTab() {
   title = 'Show player level on the hit list page';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Show level on the hit list page'));
-
-  /* Enable flash
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'flashed';
-  title = 'Enable flash, disable ROI';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable flash, disable ROI'));*/
 
   // Hiding
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px; padding-bottom: 5px;'});
@@ -9139,7 +9127,7 @@ function customizeProps() {
   var propsDiv = xpathFirst('.//div[@id="flash_content_propertiesV2"]', innerPageElt);
   if (!propsDiv) {
     // Flash is enabled (we either found an <object> or flashblock is active)
-    if (!GM_getValue('flashed')) GM_setValue('flashed', 1);
+    isFlashed = FLASH_ENABLED;
     var flashLog = 'Warning: Flash is enabled. You must disable flash from your browser for MWAP to ' +
                    'get exact collect times, show property ROIs and auto-upgrade properties.<br>' +
                    'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
@@ -9151,7 +9139,7 @@ function customizeProps() {
     return true;
   }
   // Flash is disabled
-  if (GM_getValue('flashed')) GM_setValue('flashed', 0);
+  isFlashed = FLASH_DISABLED;
 
   GM_setValue('bestProp' + cities[city][CITY_NAME], 'skip');
 
@@ -9605,8 +9593,10 @@ function debugDumpSettings() {
   }
 
   DEBUG('>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
-        'Script Version: <strong>' + SCRIPT.version + ' build ' + SCRIPT.build + '</strong><br>' +
+        'Script Version: <strong>' + SCRIPT.version + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
+        'isFlashed: <strong>' + isFlashed + '</strong><br>' +
+        'isRunning: <strong>' + GM_getValue('isRunning') + '</strong><br>' +
         'Player current level: <strong>' + level + '</strong><br>' +
         'Player points to next level: <strong>' + ptsToNextLevel + '</strong><br>' +
         'Player mafia size: <strong>' + mafia + '</strong><br>' +
@@ -9674,7 +9664,6 @@ function debugDumpSettings() {
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
-        //'Enable flash, but disable ROI: <strong>' + showIfUnchecked(GM_getValue('flashed')) + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
