@@ -7996,7 +7996,7 @@ function customizeMasthead() {
   var linkElt = makeElement('div', mastheadElt,
     {'id':'ap_links', 'style':'position: absolute; top: 4px; right: 10px; text-align: left;' +
      'font-size: 12px; font-weight: bold;'});
-  makeElement('a', linkElt, {'href':'http://userscripts.org/scripts/show/77953','target':'_blank'})
+  makeElement('a', linkElt, {'href':'http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64','target':'_blank'})
     .appendChild(document.createTextNode('For Firefox'));
   linkElt.appendChild(document.createTextNode(' | '));
   makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap','target':'_blank'})
@@ -9130,7 +9130,7 @@ function customizeProps() {
     isFlashed = FLASH_ENABLED;
     var flashLog = 'Warning: Flash is enabled. You must disable flash from your browser for MWAP to ' +
                    'get exact collect times, show property ROIs and auto-upgrade properties.<br>' +
-                   'Visit <a href="http://userscripts.org/scripts/show/77953">MWAP for Firefox</a> or ' +
+                   'Visit <a href="http://www.playerscripts.com">MWAP for Firefox</a> or ' +
                    '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions.';
     if (isGMChecked('autoBuy'))
       addToLog('updateBad Icon', flashLog);
