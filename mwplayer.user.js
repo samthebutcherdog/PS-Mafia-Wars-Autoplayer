@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.482
+// @version     1.1.483
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.482',
+  version: '1.1.483',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7999,7 +7999,7 @@ function customizeMasthead() {
   makeElement('a', linkElt, {'href':'http://userscripts.org/scripts/show/77953','target':'_blank'})
     .appendChild(document.createTextNode('For Firefox'));
   linkElt.appendChild(document.createTextNode(' | '));
-  makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk','target':'_blank'})
+  makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap','target':'_blank'})
     .appendChild(document.createTextNode('For Chrome'));
 
   // Make a container for the autoplayer menu.
@@ -8018,7 +8018,7 @@ function customizeMasthead() {
                        '<a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
                        '</a> ' +
-                       '<a href="https://chrome.google.com/extensions/detail/lhjpdnjpncpjppkmlhbdpjihmnmenafk" target="_blank"> ' +
+                       '<a href="https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap" target="_blank"> ' +
                        '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
                        '</a> ' +
                        '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
