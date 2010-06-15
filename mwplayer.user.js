@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.489
+// @version     1.1.490
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.489',
+  version: '1.1.490,
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1453,7 +1453,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     [[35, 38], ['Use The Guard\'s Keys To Access the Bank Armory', 'Steal The Bank President\'s Car Keys'], MOSCOW],
     [[36, 39], ['"Borrow" The Guard\'s Uniform After Releasing Him', 'Strip A Uniform Off The Corpse'], MOSCOW],
     [[47, 50], ['Fly To The Siberian Military District', 'Travel To The Volga Military District'], MOSCOW],
-    [[48, 51], ['Rob A Troop Convoy', 'Arrange The Sale Of Weapons-Grade Explosives'], MOSCOW],
+ //FIXME - Can the jobs be entered in the array as with 3 options, In case the job name change hasn't rolled out to all servers?
+ //OLD   [[48, 51], ['Rob A Troop Convoy', 'Arrange The Sale Of Weapons-Grade Explosives'], MOSCOW],
+ //NEW   [[48, 51], ['Rob A Troop Convoy', 'Arrange The Sale Of Weapons-Grade Uranium'], MOSCOW],
+    [[48, 51], ['Rob A Troop Convoy', 'Arrange The Sale Of Weapons-Grade Uranium', 'Arrange The Sale Of Weapons-Grade Explosives'], MOSCOW],
     [[49, 52], ['Intercept The Base\'s Pay Shipment', 'Capitalize On An Officer\'s Gambling Problem'], MOSCOW],
     [[64, 67], ['Infiltrate The ULF Cell', 'Discover The Location Of The Next ULF Attack'], MOSCOW],
     [[65, 68], ['Help "Plan" The Next Attack', 'Kill A Lookout'], MOSCOW],
