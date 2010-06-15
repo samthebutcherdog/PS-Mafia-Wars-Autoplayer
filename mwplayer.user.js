@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.487
+// @version     1.1.488
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.487',
+  version: '1.1.488',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2904,7 +2904,7 @@ function autoFight(how) {
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   };
-  Autoplay.delay = (isGMChecked('burstStamina') && GM_getValue('burstPoints', 0) == 0) ? noDelay : getAutoPlayDelay();
+  Autoplay.delay = isGMChecked('burstStamina') ? noDelay : getAutoPlayDelay();
   Autoplay.start();
 
   return true;
@@ -7648,8 +7648,8 @@ function refreshMWAPCSS() {
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button(s):
                  (isGMChecked('hideMessageIcon') ?
-                  ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {display: none;} div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {display: none;}' :
-                  ' div[style$="position: absolute; top: 30px; right: 140px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 285px !important; width: 45px; z-index: 10001 !important;} div[style$="position: absolute; top: 32px; right: 126px; width: 45px; z-index: 100;"] {position: relative !important; top: -5px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
                  (isGMChecked('hideGiftIcon') ?
@@ -8227,6 +8227,12 @@ function customizeNames() {
 
 function customizeHome() {
   if (!onHome()) return false;
+
+  // Destroy Friend Ladder
+  if (isGMChecked('hideFriendLadder')) {
+    var eltFriendLadder = xpathFirst('div[@class="friendladder_box"]', innerPageElt);
+    if (eltFriendLadder) eltFriendLadder.parentNode.removeChild(eltFriendLadder);
+  }
 
   // Is an energy pack waiting to be used?
   energyPackElt = xpathFirst('.//a[contains(@onclick, "xw_action=use_and_energy_all")]', innerPageElt);
@@ -12093,6 +12099,11 @@ function logResponse(rootElt, action, context) {
     messagebox = xpathFirst('.//div[@id="'+ context +'" and @class="rob_slot"]');
   }
 
+  // Build Car/Weapon success popup
+  if(!messagebox) {
+    messagebox = xpathFirst('.//div[@class="chop_pop_build_final"]', appLayoutElt);
+  }
+
   if (action=='withdraw' && context) {
     autoBankWithdraw(context);
     Autoplay.start();
@@ -12520,7 +12531,6 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'build item':
-      addToLog('info Icon', inner);
       var timerName = 'buildCarTimer';
       switch (context.buildType) {
         case 11: timerName = 'buildCarTimer'; break;
@@ -12531,8 +12541,11 @@ function logResponse(rootElt, action, context) {
           /You do not have/i.test(inner) ||
           /You need a higher/i.test(inner) ) {
         setGMTime(timerName, '1 hour');
+        addToLog('info Icon', inner);
       } else {
         setGMTime(timerName, '24 hours');
+        if (inner.match(/You have built (.+?)\./))
+          addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
       }
       break;
 
@@ -12632,11 +12645,12 @@ function handlePopups()
           // Get rid of 7-11 popup
           if (popupInner.indexOf('seven_eleven') != -1) return(closePopup(popupElts[i], "Seven Eleven"));
 
+          /* Disable Chop Shop/Weapon Depot popup detection for timers
           // Get rid of Chop Shop/Weapon Depot popup
           if (popupInner.match(/You have built (.+?)\./)) {
             addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
             return(closePopup(popupElts[i], "Chop Shop/Weapon Depot"));
-          }
+          }*/
 
           // Process Loyalty popup
           if (isGMChecked('autoGiftAccept') && popupInner.indexOf('Show Your Loyalty') != -1) {
