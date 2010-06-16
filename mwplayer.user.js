@@ -11268,7 +11268,7 @@ function goJob(jobno) {
 }
 
 function goFightNav() {
-  var elt = xpathFirst('//div[@id="nav_link_fight"]//a');
+  var elt = xpathFirst('//div[@id="nav_link_fight_unlock"]//a');
   if (!elt) {
     // Find the visible fight link
     var elts = $x('//div[@class="nav_link fight_link"]//a');
