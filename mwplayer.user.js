@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.496
+// @version     1.1.497
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.496',
+  version: '1.1.497',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7222,7 +7222,7 @@ function handlePublishing() {
       // Publishing/skipping posts
       var skipElt = xpathFirst('.//input[@id="cancel"]//a');
       var pubElt = xpathFirst('.//input[@id="publish"]//a');
-      var okElt = xpathFirst('.//input[@id="okay"]'//a');
+      var okElt = xpathFirst('.//input[@id="okay"]//a');
 
       DEBUG('Publish: Checking for items to publish!');
       // If none of these buttons are present, then we can't possibly click them!
