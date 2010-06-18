@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.49
+// @version     1.1.499
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.498',
+  version: '1.1.499',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4043,7 +4043,7 @@ function saveSettings() {
   var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
   if (hideAttacks) {
     if (isNaN(rideHitlistXP) || rideHitlistXP < 0 || rideHitlistXP > 50) {
-      alert('For the hitlistride XP please enter a number between 0 and 50 (default: 10).');
+      alert('For the hitlistride XP please enter a number between 0 and 50 (default: 0).');
       return;
     } else {
       GM_setValue ('rideHitlistXP', rideHitlistXP);
@@ -5331,7 +5331,7 @@ function createDisplayTab() {
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
   id = 'rideHitlistXP';
   title = 'Enter the XP you want to gain before MWAP turns off autoHeal. Enter \'0\' if you want MWAP to turn off autoHeal after it detected a 0 xp attack.';
-  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '10'), 'title':title, 'id':id, 'style':'width: 25px'});
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'style':'width: 25px'});
   rhs.appendChild(document.createTextNode(' xp'));
 
 
@@ -7150,29 +7150,13 @@ function handleModificationTimer() {
     }
   }
   if (GM_getValue('isRunning')) {
-    /* Paypal Popup
-    var eltPopup = xpathFirst('//div[contains(@id,"zy_popup_box") and contains(@class,"paypal") and contains(@style,"block")]',innerPageElt);
-    if (eltPopup) {
-      var popupIDBG = eltPopup.id.replace('_box','_box_bg');
-      var eltPopupBG = document.getElementById(popupIDBG);
-      // Get rid of this popup!
-      eltPopup.style.display = 'none';
-      eltPopupBG.style.display = 'none';
-      DEBUG('Got rid of Zynga Popup: ' + eltPopup.id);
-    }*/
-
-    // Handling for pop-ups
+    // Popups opened?
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
     if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
       var popupElts = $x('.//div[contains(@style, "block")]', popupElt);
       if (popupElts && popupElts.length > 0) {
         for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
           if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
-            /* Check for specific popups here
-            if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1
-                || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1
-                || popupElts[i].innerHTML.indexOf('xw_controller=challenge') != -1)
-              continue;*/
             var foundPopup = true;
             break;
           }
@@ -7182,7 +7166,7 @@ function handleModificationTimer() {
       if (foundPopup) {
         pageChanged = true;
         justPlay = true;
-        DEBUG('Detected popup: ' + popupElt.innerHTML.untag().slice(0,100));
+        //DEBUG('Detected popup: ' + popupElt.innerHTML.untag().slice(0,100));
       }
     }
   }
@@ -7224,12 +7208,12 @@ function handlePublishing() {
       var pubElt = xpathFirst('.//input[@id="publish"]');
       var okElt = xpathFirst('.//input[@id="okay"]');
 
-      DEBUG('Publish: Checking for items to publish!');
+      /*DEBUG('Publish: Checking for items to publish!');
       // If none of these buttons are present, then we can't possibly click them!
       if (!skipElt && !pubElt && !okElt) {
         DEBUG('Publish: No publishing buttons found!');
         return false;
-      }
+      }*/
 
       // If OK button is found, close the window by pressing it
       if (okElt) {
@@ -7273,6 +7257,7 @@ function handlePublishing() {
 
         // Iced Opponent
         if (checkPublish('.//div[contains(.,"just iced")]','autoIcePublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"is cold blooded!")]','autoIcePublish', pubElt, skipElt)) return;
 
         // Level up bonus
         if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
@@ -8233,7 +8218,7 @@ function customizeHome() {
 
   // Destroy Friend Ladder
   if (isGMChecked('hideFriendLadder')) {
-    var eltFriendLadder = xpathFirst('div[@class="friendladder_box"]', innerPageElt);
+    var eltFriendLadder = xpathFirst('.//div[@class="friendladder_box"]', innerPageElt);
     if (eltFriendLadder) eltFriendLadder.parentNode.removeChild(eltFriendLadder);
   }
 
@@ -9842,11 +9827,11 @@ function parsePlayerUpdates(messagebox) {
         GM_setValue('currentHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + cost));
         DEBUG(result);
         if (isGMChecked('autoHeal')) {
-          if (GM_getValue('rideHitlistXP', 10) == 0 && experience == 0 && GM_getValue('currentHitXp', 0) > 12) {
-            addToLog('info Icon', 'Zero experience detected; turning off auto-heal.<br>(currentHitXp = ' + GM_getValue('currentHitXp', 0) + ')');
+          if (GM_getValue('rideHitlistXP', 0) == 0 && experience == 0 && GM_getValue('currentHitXp', 0) > 12) {
+            DEBUG('Zero experience detected; turning off auto-heal.<br>(currentHitXp = ' + GM_getValue('currentHitXp', 0) + ')');
             GM_setValue('autoHeal', 0);
-          } else if (GM_getValue('rideHitlistXP', 10) > 0 && GM_getValue('currentHitXp', 0) >= GM_getValue('rideHitlistXP', 10)) {
-            addToLog('info Icon', GM_getValue('currentHitXp', 0) + ' experience accumulated; turning off auto-heal.');
+          } else if (GM_getValue('rideHitlistXP', 0) > 0 && GM_getValue('currentHitXp', 0) >= GM_getValue('rideHitlistXP', 0)) {
+            DEBUG(GM_getValue('currentHitXp', 0) + ' experience accumulated; turning off auto-heal.');
             GM_setValue('autoHeal', 0);
           }
         }
@@ -12755,6 +12740,18 @@ function handlePopups()
               addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a red mystery bag.</span>');
             }
             return(closePopup(popupElts[i], "Red Mystery Bag"));
+          }
+
+          // Process Iced popup
+          if (popupElts[i].innerHTML.indexOf('iced_pop') != -1) {
+            var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
+            if (eltIce && isGMChecked('autoIcePublish')) {
+              clickElement(eltIce);
+              DEBUG('Clicked to publish iced opponent bonus.');
+            } else {
+              // Get rid of Iced popup:
+              return(closePopup(popupElts[i], "Iced Popup"));
+            }
           }
 
 /*
