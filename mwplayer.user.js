@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.499
+// @version     1.1.500
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.499',
+  version: '1.1.500',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12596,7 +12596,7 @@ function handlePopups()
     //DEBUG('Popups: Checking for popups');
 
     // Look for all popups that are showing
-    var popupElts = $x('//div[(contains(@id,"pop") or contains(@id,"mystery")) and not(@id="popup_fodder") and contains(@style, "block")]', innerPageElt);
+    var popupElts = $x('//div[(contains(@id,"pop") and contains(@style, "block")) or contains(@id,"mystery") and not(@id="popup_fodder")]', innerPageElt);
     if (popupElts && popupElts.length > 0) {
       // Process each popup that is open
       DEBUG('Popups Found: ' + popupElts.length);
@@ -12733,7 +12733,7 @@ function handlePopups()
           }
 
           // Process Red Mystery Bag popup
-          if (popupInner.indexOf('Red Mystery Bag') != -1) {
+          if (popupElts[i].id.indexOf('mystery_bag_drop') != -1) {
             DEBUG('Popup Process: Red Mystery Bag Processed');
             eltLoot = xpathFirst('.//div[contains(@class,"good")]',popupElts[i]);
             if (eltLoot) {
