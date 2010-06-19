@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.500
+// @version     1.1.501
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.500',
+  version: '1.1.501',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12740,6 +12740,12 @@ function handlePopups()
               addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a red mystery bag.</span>');
             }
             return(closePopup(popupElts[i], "Red Mystery Bag"));
+          }
+          
+          // Process The Global Cup Collection popup
+          if (popupElts[i].innerHTML.indexOf('The Global Cup Collection') != -1) {
+            DEBUG('Popup Process: The Global Cup Collection Processed');
+            return(closePopup(popupElts[i], "The Global Cup Collection"));
           }
 
           // Process Iced popup
