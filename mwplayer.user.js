@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.504
+// @version     1.1.505
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.504',
+  version: '1.1.505',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -657,6 +657,8 @@ var maxStaminaElt, maxStamina;  // Maximum stamina DOM element and value
 var levelElt, level;            // Level DOM element and value
 var curAttack;                  // Current Attack stat value
 var curDefense;                 // Current Defense stat value
+var curAttackEquip;             // Current Attack equip value
+var curDefenseEquip;            // Current Defense equip value
 var curExpElt, curExp;          // Experience DOM element and value
 var lvlExpElt, lvlExp;          // Level up experience DOM element and value
 var energyPackElt, energyPack;  // Is an energy pack waiting?
@@ -2794,13 +2796,6 @@ function autoFight(how) {
     return true;
   }
 
-  var eltAttackStrength = xpathFirst('//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
-  if (eltAttackStrength) curAttack = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
-  var eltDefenseStrength = xpathFirst('//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
-  if (eltDefenseStrength) curDefense = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
-  DEBUG('Loot Stat: Current Attack: ' + curAttack + ' Current Defense: ' + curDefense);
-
-
   // Get an opponent.
   var opponent;
   if (autoFight.profileSearch && onProfileNav()) {
@@ -2880,7 +2875,7 @@ function autoFight(how) {
     return false;
   }
 
-  // Check for pulse
+  /* Check for pulse
   if (isGMChecked('iceCheck')) {
     var hitUrl = getHitUrl (opponent.id);
     if (/You can't add/.test(loadUrlWait (hitUrl))) {
@@ -2896,7 +2891,7 @@ function autoFight(how) {
     } else {
       setFightOpponentActive(opponent);
     }
-  }
+  }*/
 
   // Attack!
   Autoplay.fx = function() {
@@ -3524,6 +3519,10 @@ function getDisplayedOpponents(element, forceRefresh) {
     opponent.level   = parseInt(nameAndLevel.innerHTML.split('Level ')[1]);
     opponent.name    = opponent.profile.innerHTML;
     opponent.faction = '';
+    if (rowData[0].style.color == 'rgb(102, 102, 102)')
+      opponent.iced = true;
+    else
+      opponent.iced = false;
     var factionElt   = xpathFirst('.//img', rowData[2]);
     if (factionElt && factionElt.alt) opponent.faction = factionElt.alt;
     if (opponent.profile.previousSibling &&
@@ -3647,6 +3646,7 @@ function findFightOpponent(element) {
   var namesCount = 0;
   var factionCount = 0;
   var blacklistCount = 0;
+  var icedCount = 0;
   var countOpp = opponents.length;
   for(var i = 0; i < countOpp; ++i) {
     var opponent = opponents[i];
@@ -3675,6 +3675,12 @@ function findFightOpponent(element) {
       continue;
     }
     if (!opponent.id) continue;
+
+    // Check iced oponents
+    if (isGMChecked('iceCheck') && opponent.iced) {   
+      icedCount++;
+      continue;
+    }
 
     // Check against previous opponents.
     var idx = fightListAvoid.indexOf(opponent);
@@ -3708,13 +3714,15 @@ function findFightOpponent(element) {
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   }
 
-  if (countOpp <= levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + blacklistCount) {
+  //if (countOpp <= levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + blacklistCount) {
+  if (countOpp <= levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + icedCount + blacklistCount) {
     addToLog('updateBad Icon', 'Out of the ' + countOpp + ' opponents listed on the fight page: <br>' +
              levelMaxCount + ' disqualified on max level, <br>' +
              mafiaMaxCount + ' on max mafia, <br>' +
              mafiaMinCount + ' on min mafia, <br>' +
              namesCount + ' on name pattern, <br>' +
              factionCount + ' on faction, <br>' +
+             icedCount + ' already iced, <br>' +
              blacklistCount + ' by blacklisting (stronger opponents).<br><br>');
   }
 
@@ -7123,6 +7131,17 @@ function handleModificationTimer() {
     pageChanged = true;
   }
 
+  // Determine if popup_fodder has changed.
+  var popupFodderElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
+  if (popupFodderElt && !xpathFirst('.//div[@id="popup_flag"]', popupFodderElt)) {
+    setListenContent(false);
+    makeElement('div', popupFodderElt, {'id':'popup_flag', 'style':'display: none'});
+    setListenContent(true);
+    DEBUG('New popup_fodder content: ' + popupFodderElt.id);
+    pageChanged = true;
+    //if (GM_getValue('isRunning')) justPlay = true;
+  }
+
   // Added handling for the new-style job page changes
   var jobResult = xpathFirst('.//div[@id="new_user_jobs"]//div[@class="job_results"]', innerPageElt);
   if (jobResult) {
@@ -7367,6 +7386,7 @@ function innerPageChanged(justPlay) {
         !customizeHitlist()) {
       customizeFight();
     }
+    getPlayerEquip();
     setListenContent(true);
   }
 
@@ -7642,11 +7662,11 @@ function refreshMWAPCSS() {
                  // Move gifticon and make it smaller:
                  (isGMChecked('hideGiftIcon') ?
                   ' #gifticon_container {display: none;}' :
-                  ' #gifticon_container {position: absolute; top: 3px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/icon_gift_33x40_01.png"] {width: 22px;}') +
+                  ' #gifticon_container {position: absolute; top: 15px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/gift_con_gold.png"] {width: 30px;}') +
                  // Move Poker Promo and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                  ' #promoicon_container {display: none;}' :
-                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;}') +
+                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/farmIcon.png"] {width: 22px;}') +
                  // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
@@ -8270,6 +8290,24 @@ function getPlayerStats() {
       addToLog('info icon', 'Current status attributes cannot be detected, turning off auto-stat.');
       GM_setValue('autoStat', 0);
     }
+  }
+}
+
+function getPlayerEquip() {
+  // Make sure we're on the fight tab.
+  if (isUndefined(curAttackEquip) && !onFightTab()) {
+    Autoplay.fx = goFightTab;
+    Autoplay.start();
+    return;
+  }
+
+  var eltAttackStrength = xpathFirst('//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
+  if (eltAttackStrength) curAttackEquip = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+  var eltDefenseStrength = xpathFirst('//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
+  if (eltDefenseStrength) curDefenseEquip = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+
+  if (isUndefined(curAttackEquip)) {
+    DEBUG('Current equipment attributes cannot be detected.');
   }
 }
 
@@ -9575,8 +9613,10 @@ function debugDumpSettings() {
         'Player current level: <strong>' + level + '</strong><br>' +
         'Player points to next level: <strong>' + ptsToNextLevel + '</strong><br>' +
         'Player mafia size: <strong>' + mafia + '</strong><br>' +
-        'Player attack: <strong>' + curAttack + '</strong><br>' +
-        'Player defense: <strong>' + curDefense + '</strong><br>' +
+        'Player attack profile: <strong>' + curAttack + '</strong><br>' +
+        'Player defense profile: <strong>' + curDefense + '</strong><br>' +
+        'Player attack equip: <strong>' + curAttackEquip + '</strong><br>' +
+        'Player defense equip: <strong>' + curDefenseEquip + '</strong><br>' +
         'Player health: <strong>' + health + '/' + maxHealth + '</strong><br>' +
         'Player energy: <strong>' + energy + '/' + maxEnergy + '</strong><br>' +
         'Player stamina: <strong>' + stamina + '/' + maxStamina + '</strong><br>' +
@@ -11734,11 +11774,11 @@ function logFightResponse(rootElt, resultElt, context) {
     }
 
     // Click the iced opponent bonus immediately
-    var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]');
+    /*var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]');
     if (eltIce && isGMChecked('autoIcePublish')) {
       clickElement(eltIce);
-      DEBUG('Clicked to publish iced opponent bonus.');
-    }
+      DEBUG('logFightResponse(): Clicked to publish iced opponent bonus.');
+    }*/
 
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
       // Look for any new opponents in the displayed list.
@@ -11829,21 +11869,21 @@ function logFightResponse(rootElt, resultElt, context) {
     }
 
     // Look for any loot.
-    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
+    if (innerNoTags.match(/ found (an? .*)! /)) {
       var foundLoot = RegExp.$1
       var eltAttackStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
       var newattackStrength = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
-      var totalAttack =  Number(newattackStrength) - Number(curAttack);
+      var totalAttack =  Number(newattackStrength) - Number(curAttackEquip);
 
       var eltDefenseStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
       var newdefenseStrength = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
-      var totalDefense = Number(newdefenseStrength) - Number(curDefense);
+      var totalDefense = Number(newdefenseStrength) - Number(curDefenseEquip);
 
       var txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
       if(Number(totalAttack)>0)
-         var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + curAttack + ' New=' + newattackStrength;
+         var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + curAttackEquip + ' New=' + newattackStrength;
       if(Number(totalDefense)>0)
-         var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + curDefense + ' New=' + newdefenseStrength;
+         var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + curDefenseEquip + ' New=' + newdefenseStrength;
       addToLog('lootbag Icon', txtLog);
     }
 //    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
@@ -12596,52 +12636,52 @@ function handlePopups()
     //DEBUG('Popups: Checking for popups');
 
     // Look for all popups that are showing
-    var popupElts = $x('//div[(contains(@id,"pop") and contains(@style, "block")) or contains(@id,"mystery") and not(@id="popup_fodder")]', innerPageElt);
+    var popupElts = $x('.//div[((contains(@id,"pop") and contains(@style, "block")) or contains(@id,"mystery")) and not(@id="popup_fodder")]', appLayoutElt);
     if (popupElts && popupElts.length > 0) {
       // Process each popup that is open
       DEBUG('Popups Found: ' + popupElts.length);
       for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
         if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
+          var popupInner = popupElts[i].innerHTML;
+          var popupInnerNoTags = popupInner.untag();
           // Skip these popups!
-          if (popupElts[i].innerHTML.indexOf('id="marketplace"') != -1 // The Marketplace
-            || popupElts[i].innerHTML.indexOf('id="original_buyframe_popup"') != -1  // The Marketplace
-            || popupElts[i].innerHTML.indexOf('id="popup_fodder"') != -1 // Empty popup
-            || popupElts[i].innerHTML.indexOf('Hospital') != -1 // The Hospital
-            || popupElts[i].innerHTML.indexOf('bank_popup') != -1 // The Bank
-            || popupElts[i].innerHTML.indexOf('If you lay low for a few hours') != -1 // London
-            )
+          if (popupInner.indexOf('id="marketplace"') != -1 // The Marketplace
+            || popupInner.indexOf('buyframe_popup"') != -1  // The Marketplace
+            || popupInner.indexOf('xw_controller=hospital') != -1 // The Hospital
+            || popupInner.indexOf('bank_popup') != -1 // The Bank
+            || popupInner.indexOf('xw_controller=challenge') != -1 // London
+            ) {
             continue;
-
-          var popupInner = popupElts[i].innerHTML.untag();
-          DEBUG('Popup Found: ' + popupElts[i].id + ' ' + popupInner);
+          }
+          DEBUG('Popup Found: ' + popupElts[i].id + ' ' + popupInnerNoTags);
 
           // Get rid of Paypal
-          if (popupInner.indexOf('paypal') != -1) return(closePopup(popupElts[i], "Paypal"));
+          if (popupInnerNoTags.indexOf('paypal') != -1) return(closePopup(popupElts[i], "Paypal"));
 
           // Get rid of Safehouse Congratulations popup
-          if (popupInner.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i], "Safehouse Congratulations"));
+          if (popupInnerNoTags.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i], "Safehouse Congratulations"));
 
           // Get rid of Treasure Chest popup
-          if (popupInner.indexOf('Treasure Chest') != -1) return(closePopup(popupElts[i], "Treasure Chest"));
+          if (popupInnerNoTags.indexOf('Treasure Chest') != -1) return(closePopup(popupElts[i], "Treasure Chest"));
 
           // Get rid of Keep Winning popup
-          if (popupInner.indexOf('Keep winning') != -1) return(closePopup(popupElts[i], "Robbery Keep Winning"));
+          if (popupInnerNoTags.indexOf('Keep winning') != -1) return(closePopup(popupElts[i], "Robbery Keep Winning"));
 
           // Get rid of Tired of Losing popup
-          if (popupInner.indexOf('Tired of losing') != -1) return(closePopup(popupElts[i], "Robbery Tired of Losing"));
+          if (popupInnerNoTags.indexOf('Tired of losing') != -1) return(closePopup(popupElts[i], "Robbery Tired of Losing"));
 
           // Get rid of 7-11 popup
-          if (popupInner.indexOf('seven_eleven') != -1) return(closePopup(popupElts[i], "Seven Eleven"));
+          if (popupInnerNoTags.indexOf('seven_eleven') != -1) return(closePopup(popupElts[i], "Seven Eleven"));
 
           /* Disable Chop Shop/Weapon Depot popup detection for timers
           // Get rid of Chop Shop/Weapon Depot popup
-          if (popupInner.match(/You have built (.+?)\./)) {
+          if (popupInnerNoTags.match(/You have built (.+?)\./)) {
             addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
             return(closePopup(popupElts[i], "Chop Shop/Weapon Depot"));
           }*/
 
           // Process Loyalty popup
-          if (isGMChecked('autoGiftAccept') && popupInner.indexOf('Show Your Loyalty') != -1) {
+          if (isGMChecked('autoGiftAccept') && popupInnerNoTags.indexOf('Show Your Loyalty') != -1) {
             // So there's a 3018 popup! Let's let Z do it for us!
             // Ok, so JQuery should already exist!
             $ = unsafeWindow.jQuery;
@@ -12704,7 +12744,7 @@ function handlePopups()
           }
 
           // Process Secret Stash
-          if (popupInner.indexOf('Get yours') != -1) {
+          if (popupInnerNoTags.indexOf('Get yours') != -1) {
             DEBUG('Popup Process: Get Secret Stash Processed');
             var eltButton = xpathFirst('.//button',popupElts[i]);
             if (eltButton) {
@@ -12720,7 +12760,7 @@ function handlePopups()
           // Process Safehouse popup
           var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
           if (eltPubButton) {
-            if (popupInner.match(/and you got (.+?)/)) {
+            if (popupInnerNoTags.match(/and you got (.+?)/)) {
               DEBUG('Popup Process: Safehouse Loot Processed');
               addToLog('lootbag Icon', '<span class="loot">'+' Received '+ RegExp.$1 + ' from the safehouse.</span>');
             }
@@ -12743,17 +12783,17 @@ function handlePopups()
           }
           
           // Process The Global Cup Collection popup
-          if (popupElts[i].innerHTML.indexOf('The Global Cup Collection') != -1) {
+          if (popupInnerNoTags.indexOf('The Global Cup Collection') != -1) {
             DEBUG('Popup Process: The Global Cup Collection Processed');
             return(closePopup(popupElts[i], "The Global Cup Collection"));
           }
 
           // Process Iced popup
-          if (popupElts[i].innerHTML.indexOf('iced_pop') != -1) {
+          if (popupInner.indexOf('iced_pop') != -1) {
             var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
             if (eltIce && isGMChecked('autoIcePublish')) {
               clickElement(eltIce);
-              DEBUG('Clicked to publish iced opponent bonus.');
+              DEBUG('handlePopups(): Clicked to publish iced opponent bonus.');
             } else {
               // Get rid of Iced popup:
               return(closePopup(popupElts[i], "Iced Popup"));
@@ -12762,7 +12802,7 @@ function handlePopups()
 
 /*
           // Process Robbery Loot popup
-          if (popupInner.match(/You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)Y/)) {
+          if (popupInnerNoTags.match(/You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)Y/)) {
             DEBUG('Popup Process: Robbery Loot Processed');
             addToLog('lootbag Icon', '<span class="loot">'+' Found '+ RegExp.$3 + ' on robbery board.</span>');
             if (popupInner.match(/(\d+) Bonus Experience/)) {
@@ -12775,7 +12815,7 @@ function handlePopups()
           // Process Level Up popup
           var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
           if (eltPubButton) {
-            if (popupInner.match(/promoted to Level (.+?) C/)) {
+            if (popupInnerNoTags.match(/promoted to Level (.+?) C/)) {
               DEBUG('Popup Process: Level Up Processed');
               addToLog('lootbag Icon', '<span class="loot">'+' You were promoted to level '+ RegExp.$1);
             }
