@@ -29,9 +29,8 @@ function grabUpdateInfo() {
     onload: function (responseDetails) {
       s = (responseDetails.responseText);
       var count = 0;
-      var oldBuild = localStorage.getObject('build');
-      var newBuild = localStorage.getObject('newbuild');
-      var changes = Math.min(parseInt(newBuild) - parseInt(isNaN(oldBuild) ? 5 : oldBuild), 10);
+      var newVersion = localStorage.getObject('newversion');
+	  var changes = 5;
       var newRevList = '';
       var oldRevList = '';
       while (count < changes + 5) {
@@ -51,7 +50,7 @@ function grabUpdateInfo() {
       }
       localStorage.setObject('newRevList', newRevList);
       localStorage.setObject('oldRevList', oldRevList);
-      localStorage.setObject('build', newBuild);
+      localStorage.setObject('version', newVersion);
     }
   });
 }
@@ -72,7 +71,7 @@ chrome.extension.onRequest.addListener(
     }
 
     // Grab update info
-    if (request.newbuild && localStorage.getObject('build') != localStorage.getObject('newbuild')) {
+    if (request.newversion && localStorage.getObject('version') != localStorage.getObject('newversion')) {
       grabUpdateInfo ();
     }
 
