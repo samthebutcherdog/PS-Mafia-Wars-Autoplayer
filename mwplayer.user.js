@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.506
+// @version     1.1.507
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.506',
+  version: '1.1.507',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11110,14 +11110,24 @@ function goProfileNav(player) {
       newClick = newClick.replace('this.href=\'http://mwfb.zynga.com/mwfb/','return do_ajax(\'inner_page\', \'') + ', 1, 1, 0, 0); return false;';
 
     elt.setAttribute('onclick', newClick);
-  } else {
-    DEBUG("Couldnt find profile link");
-    goFightNav();
+    clickElement(elt);
+    DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + elt.getAttribute('onclick') + '). ');
     return;
-  }
-
-  clickElement(elt);
-  DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + elt.getAttribute('onclick') + '). ');
+  } 
+  
+  // Try to create the link, some fight pages do not contain any profile links
+  elt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@href, "xw_controller=fight")]', innerPageElt);
+  if (elt && elt.getAttribute('onclick').match(/opponent_id=(\w+)/)) {
+    var newClick = " return do_ajax('inner_page', 'remote/html_server.php?xw_controller=stats&xw_action=view&xw_city="+city+"&user="+player.id+"&ref=fight_list', 1, 1, 0, 0); return false; ";
+    elt.setAttribute('onclick', newClick);
+    clickElement(elt);
+    DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + elt.getAttribute('onclick') + '). ');
+    return;
+  } 
+    
+  DEBUG("Couldnt find profile link");
+  goFightNav();
+  return;
 }
 
 function goMyProfile() {
