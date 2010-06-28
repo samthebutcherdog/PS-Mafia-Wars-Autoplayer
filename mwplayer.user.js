@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.507
+// @version     1.1.508
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.507',
+  version: '1.1.508',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1642,7 +1642,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   if (GM_getValue('version') != SCRIPT.version) {
     GM_setValue('newversion', SCRIPT.version);
     sendMWValues(['version','newversion']);
-    grabUpdateInfo(GM_getValue('version'));
+    grabUpdateInfo();
     handleVersionChange();
   }
 
@@ -2193,7 +2193,7 @@ function autoCollectTake(takeCity) {
     }
   }
 
-  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':city+1, 'requesttype':'json'}), urlLoaded);
+  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':takeCity+1, 'requesttype':'json'}), urlLoaded);
   setGMTime('takeHour' + cities[takeCity][CITY_NAME], "1 hour");
 
   return false;
@@ -2802,7 +2802,7 @@ function autoFight(how) {
     opponent = autoFight.profileSearch;
     autoFight.profileSearch = undefined;
     lastOpponent = undefined;
-    opponent.profileAttack = xpathFirst('.//a[contains(., "Attack")]', innerPageElt);
+    opponent.profileAttack = xpathFirst('.//a[contains(@onclick,"xw_action=attack") and contains(., "Attack")]', innerPageElt);
     DEBUG('Attacking from profile');
   } else if (how == STAMINA_HOW_FIGHT_LIST) {
     var id = parseInt(GM_getValue('fightList', ''));
@@ -3516,7 +3516,7 @@ function getDisplayedOpponents(element, forceRefresh) {
 
     opponent.attack  = linkElt;
     opponent.mafia   = rowData[1] ? parseInt(rowData[1].innerHTML) : 0;
-    opponent.level   = parseInt(nameAndLevel.innerHTML.split('Level ')[1]);
+    opponent.level   = parseInt(nameAndLevel.innerHTML.split('</a>')[1].split('Level ')[1]);
     opponent.name    = opponent.profile.innerHTML;
     opponent.faction = '';
     if (rowData[0].style.color == 'rgb(102, 102, 102)')
@@ -6768,13 +6768,13 @@ function createAboutTab() {
   return aboutTab;
 }
 
-function grabUpdateInfo(oldVersion) {
+function grabUpdateInfo() {
   if (!gvar.isGreaseMonkey) return;
   GM_setValue('newRevList', '');
   GM_setValue('oldRevList', '');
   GM_xmlhttpRequest({
     method: 'GET',
-    url: 'http://code.google.com/p/mwplayer/updates/list',
+    url: 'http://code.google.com/p/mwplayer/source/list',
     headers: {'Accept': 'application/atom+xml'},
     onload: function (resp) {
       if (resp.status != 200) return;
@@ -6785,12 +6785,14 @@ function grabUpdateInfo(oldVersion) {
       var newRevList = '';
       var oldRevList = '';
       while (count < changes + 5) {
-        var a = s.indexOf('g-unit g-first');
+        var a = s.indexOf('<td class="id">');
         a = a + 10;
         s = s.substring(a);
-        var searchString = s.match(/href\x3D\x22\x2Fp\x2Fmwplayer\x2Fsource\x2Fdetail\x3Fr\x3D([0-9]+)\x22\x3E/);
+        //var searchString = s.match(/href\x3D\x22\x2Fp\x2Fmwplayer\x2Fsource\x2Fdetail\x3Fr\x3D([0-9]+)\x22\x3E/);
+        var searchString = s.match(/href\x3D\x22detail\x3Fr\x3D([0-9]+)\x22\x3E/);
         var revisionString = RegExp.$1;
-        var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x22,\x3F,\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
+        //var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x22,\x3F,\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
+        var searchString = s.match(/a\sonclick\x3D\x22cancelBubble\x3Dtrue\x22\shref\x3D\x22detail\x3Fr\x3D[0-9]+\x22\x3E([\x21,\x22,\x23,\x26,\x27,\x28,\x29,\x2B,\x2C,\x2D,\x2E,\x2F,\x3A,\x3B,\x3F,\x5B,\x5D,\x5F,\x60,A-Z,a-z,0-9,\s]+)\x3C\x2Fa\x3E/);
         var commentString = RegExp.$1;
         var revLine = 'r' + revisionString + '... ' + commentString.replace('- ', '') + '<br>';
         if (count < changes)
@@ -7371,6 +7373,7 @@ function innerPageChanged(justPlay) {
     }
   }
 
+  getPlayerEquip();
   // Customize the display.
   if (!justPlay) {
     setListenContent(false);
@@ -7386,7 +7389,6 @@ function innerPageChanged(justPlay) {
         !customizeHitlist()) {
       customizeFight();
     }
-    getPlayerEquip();
     setListenContent(true);
   }
 
@@ -7656,8 +7658,8 @@ function refreshMWAPCSS() {
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button(s):
                  (isGMChecked('hideMessageIcon') ?
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' :
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
                  (isGMChecked('hideGiftIcon') ?
@@ -7666,7 +7668,7 @@ function refreshMWAPCSS() {
                  // Move Poker Promo and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                  ' #promoicon_container {display: none;}' :
-                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/farmIcon.png"] {width: 22px;}') +
+                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/farmIcon.png"] {width: 22px;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/treasureIcon.png"] {width: 22px;}') +
                  // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
@@ -7871,25 +7873,38 @@ function doQuickClicks() {
 
     // Auto-send energy pack
     var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
-    if (actionElt && isGMChecked('sendEnergyPack')) {
+    if (isGMChecked('sendEnergyPack') && (actionElt ||
+        xpathFirst('.//div[@id="message_box_menu_checkmark_energy_packs" and @class="mbox_menu_unchecked"]', innerPageElt))) {
       // Ok, if we're here, then there is a number next to the Daily Checklist Energy Pack item
       // it might be for using the pack, not sending it, so click the menu item
       var eltPacksClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"energy_packs")]', innerPageElt);
       if (eltPacksClick) {
         clickElement(eltPacksClick);
       }
-      // Grab the container used for sending energy
+      /* Grab the container used for sending energy
       var checkElt = document.getElementById('mbox_energy_send_container');
       if (checkElt) {
         // If the 'send energy container' is visible, we can click it
         if (checkElt.style.display == 'block') {
-          var actionLink = makeElement('a', null, {'onclick':'do_ajax("inner_page","remote/html_server.php?xw_controller=index&xw_action=send_energy_pak&xw_city=1&activehustle=energy_packs&hustle_nrg_use=0&hustle_nrg_send=1")'});
-          //var actionLink = makeElement('a', null, {'onclick':'return do_ajax("inner_page","remote/html_server.php?xw_controller=index&xw_action=send_energy_pak&xw_city=1&activehustle=energy_packs&hustle_nrg_use=0&hustle_nrg_send=1", 1, 1, 0, 0); return false;'});
+          //var actionLink = makeElement('a', null, {'onclick':'do_ajax("inner_page","remote/html_server.php?xw_controller=index&xw_action=send_energy_pak&xw_city=1&activehustle=energy_packs&hustle_nrg_use=0&hustle_nrg_send=1")'});
+          var actionLink = makeElement('a', null, {'onclick':'return do_ajax("inner_page","remote/html_server.php?xw_controller=index&xw_action=send_energy_pak&xw_city=1&activehustle=energy_packs&hustle_nrg_use=0&hustle_nrg_send=1", 1, 1, 0, 0); return false;'});
           if (actionLink) {
             clickElement(actionLink);
             DEBUG('Daily Checklist: Clicked to send energy pack to my mafia.');
           }
         }
+      }*/
+      // Grab the container used for sending energy and click the first send energy link
+      var checkElt = xpathFirst('.//div[@id="mbox_energy_send_container" and contains(@style,"block")]//a[@class="sexy_button_new short_black"]', innerPageElt);
+      if (checkElt) {
+        clickElement(checkElt);
+        DEBUG('Daily Checklist: Clicked to prepare to send energy pack to my mafia.');
+      }
+      // Look for final send energy pack button
+      var sendElt = xpathFirst('.//div[@id="message_box_energy_packs_content" and contains(@style,"block")]//div[@id="mbox_energy_all_prompt_msg" and contains(@style,"block")]//a[@class="sexy_button_new short_black" and contains(@onclick,"send_energy_pak")]', innerPageElt);
+      if (sendElt) {
+        clickElement(sendElt);
+        DEBUG('Daily Checklist: Clicked to send energy pack to my mafia.');
       }
     }
 
@@ -11766,8 +11781,11 @@ function logFightResponse(rootElt, resultElt, context) {
 
   if (resultElt.className == "fight_results") {
     // A fight took place. Results are in the "VS" format.
-    var attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
-    lastOpponent.attackAgain = attackAgainElt ? attackAgainElt : undefined;
+    var attackAgainElt;
+    if (isGMChecked('staminaReattack')) 
+      attackAgainElt = xpathFirst('.//a[contains(.,"Power Attack")]', resultElt);
+    if (!attackAgainElt) attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
+    lastOpponent.attackAgain = undefined;
 
     // Click the secret stash immediately
     var eltStash = document.getElementById('fight_loot_feed_btn', resultElt);
@@ -11909,6 +11927,7 @@ function logFightResponse(rootElt, resultElt, context) {
                            cost.indexOf(cities[city][CITY_CASH_SYMBOL]) != -1)
                          );
       if (attackAgain && attackAgainElt) {
+        lastOpponent.attackAgain = attackAgainElt;
         // Attack again immediately.
         Autoplay.fx = function() {
           clickAction = 'fight';

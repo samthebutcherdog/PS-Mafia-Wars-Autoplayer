@@ -24,22 +24,22 @@ function grabUpdateInfo() {
   localStorage.setObject('oldRevList', '');
   GM_xmlhttpRequest({
     method: 'GET',
-    url: 'http://code.google.com/p/mwplayer/updates/list',
+    url: 'http://code.google.com/p/mwplayer/source/list',
     headers: {'Accept': 'application/atom+xml'},
     onload: function (responseDetails) {
       s = (responseDetails.responseText);
       var count = 0;
-      var newVersion = localStorage.getObject('newversion');
+      //var newVersion = localStorage.getObject('newversion');
 	  var changes = 5;
       var newRevList = '';
       var oldRevList = '';
       while (count < changes + 5) {
-        var a = s.indexOf('g-unit g-first');
+        var a = s.indexOf('<td class="id">');
         a = a + 10;
         s = s.substring(a);
-        var searchString = s.match(/href\x3D\x22\x2Fp\x2Fmwplayer\x2Fsource\x2Fdetail\x3Fr\x3D([0-9]+)\x22\x3E/);
+        var searchString = s.match(/href\x3D\x22detail\x3Fr\x3D([0-9]+)\x22\x3E/);
         var revisionString = RegExp.$1;
-        var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x22,\x3F,\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
+        var searchString = s.match(/a\sonclick\x3D\x22cancelBubble\x3Dtrue\x22\shref\x3D\x22detail\x3Fr\x3D[0-9]+\x22\x3E([\x21,\x22,\x23,\x26,\x27,\x28,\x29,\x2B,\x2C,\x2D,\x2E,\x2F,\x3A,\x3B,\x3F,\x5B,\x5D,\x5F,\x60,A-Z,a-z,0-9,\s]+)\x3C\x2Fa\x3E/);
         var commentString = RegExp.$1;
         var revLine = 'r' + revisionString + '... ' + commentString.replace('- ', '') + '<br>';
         if (count < changes)
@@ -50,7 +50,7 @@ function grabUpdateInfo() {
       }
       localStorage.setObject('newRevList', newRevList);
       localStorage.setObject('oldRevList', oldRevList);
-      localStorage.setObject('version', newVersion);
+      //localStorage.setObject('version', newVersion);
     }
   });
 }
@@ -71,8 +71,8 @@ chrome.extension.onRequest.addListener(
     }
 
     // Grab update info
-    if (request.newversion && localStorage.getObject('version') != localStorage.getObject('newversion')) {
-      grabUpdateInfo ();
+    if (localStorage.getObject('version') != localStorage.getObject('newversion')) {
+      grabUpdateInfo();
     }
 
     sendResponse(resp);
