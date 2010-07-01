@@ -22,6 +22,7 @@ var GM_xmlhttpRequest = function(obj) {
 function grabUpdateInfo() {
   localStorage.setObject('newRevList', '');
   localStorage.setObject('oldRevList', '');
+  return;
   GM_xmlhttpRequest({
     method: 'GET',
     url: 'http://code.google.com/p/mwplayer/source/list',

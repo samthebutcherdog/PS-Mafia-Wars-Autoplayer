@@ -38,11 +38,11 @@
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.509
+// @version     1.1.510
 // ==/UserScript==
 
 var SCRIPT = {
-  version: '1.1.509',
+  version: '1.1.510',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3795,7 +3795,7 @@ function findFightOpponent(element) {
     if (!opponent.id) continue;
 
     // Check iced oponents
-    if (isGMChecked('iceCheck') && opponent.iced) {   
+    if (isGMChecked('iceCheck') && opponent.iced) {
       icedCount++;
       continue;
     }
@@ -6882,6 +6882,7 @@ function createAboutTab() {
                                        'font-size: 10px;'});
   item.innerHTML = '<span class="good">Release changes:</span> <br><br>' + GM_getValue('newRevList') + '<br>' +
                    '<span class="bad">Previous changes:</span> <br><br>' + GM_getValue('oldRevList');
+  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>MWAP Team'
 
   return aboutTab;
 }
@@ -6890,6 +6891,7 @@ function grabUpdateInfo() {
   if (!gvar.isGreaseMonkey) return;
   GM_setValue('newRevList', '');
   GM_setValue('oldRevList', '');
+  return;
   GM_xmlhttpRequest({
     method: 'GET',
     url: 'http://code.google.com/p/mwplayer/source/list',
@@ -9744,7 +9746,7 @@ function debugDumpSettings() {
 		'Browser Name: <strong>' + BrowserDetect.browser + '</strong><br>' +
 		'Browser Version: <strong>' + BrowserDetect.version + '</strong><br>' +
 		'Operating System: <strong>' + BrowserDetect.OS + '</strong><br>' +
-          '------------------ MWAP Settings---------------------<br>' +		
+          '------------------ MWAP Settings---------------------<br>' +
         'Script Version: <strong>' + SCRIPT.version + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
         'isFlashed: <strong>' + isFlashed + '</strong><br>' +
@@ -10247,7 +10249,7 @@ function parsePlayerUpdates(messagebox) {
 
 function profileFix() {
   var lists = $x('.//ul[@class="nice_list items_list clearfix"]', innerPageElt);
-  if (!lists || lists.length < 4 || xpathFirst('./div[contains(@style,"border") and contains(@style,"padding")]/div[@class="title"]/span', innerPageElt)) 
+  if (!lists || lists.length < 4 || xpathFirst('./div[contains(@style,"border") and contains(@style,"padding")]/div[@class="title"]/span', innerPageElt))
     return;
 
   // Count the number of items in each item list.
@@ -11251,8 +11253,8 @@ function goProfileNav(player) {
     clickElement(elt);
     DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + elt.getAttribute('onclick') + '). ');
     return;
-  } 
-  
+  }
+
   // Try to create the link, some fight pages do not contain any profile links
   elt = xpathFirst('.//table[@class="main_table fight_table"]//a[contains(@href, "xw_controller=fight")]', innerPageElt);
   if (elt && elt.getAttribute('onclick').match(/opponent_id=(\w+)/)) {
@@ -11261,8 +11263,8 @@ function goProfileNav(player) {
     clickElement(elt);
     DEBUG('Clicked to load profile (id=' + player.id + ', onclick=' + elt.getAttribute('onclick') + '). ');
     return;
-  } 
-    
+  }
+
   DEBUG("Couldnt find profile link");
   goFightNav();
   return;
@@ -11905,7 +11907,7 @@ function logFightResponse(rootElt, resultElt, context) {
   if (resultElt.className == "fight_results") {
     // A fight took place. Results are in the "VS" format.
     var attackAgainElt;
-    if (isGMChecked('staminaReattack')) 
+    if (isGMChecked('staminaReattack'))
       attackAgainElt = xpathFirst('.//a[contains(.,"Power Attack")]', resultElt);
     if (!attackAgainElt) attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
     lastOpponent.attackAgain = undefined;
@@ -12893,7 +12895,7 @@ function handlePopups() {
               }
               return(closePopup(popupElts[i], "Red Mystery Bag"));
             }
-            
+
             // Process Iced popup
             if (popupInner.indexOf('iced_pop') != -1) {
               var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
