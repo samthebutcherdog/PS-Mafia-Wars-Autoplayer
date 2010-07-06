@@ -36,13 +36,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.512
+// @version     1.1.513
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.512',
+  version: '1.1.513',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -64,118 +64,118 @@ var SCRIPT = {
 
 // Browser Detection - FIXME: This may not be the best way to impliment this
 var BrowserDetect = {
-	init: function () {
-		this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
-		this.version = this.searchVersion(navigator.userAgent)
-			|| this.searchVersion(navigator.appVersion)
-			|| "an unknown version";
-		this.OS = this.searchString(this.dataOS) || "an unknown OS";
-	},
-	searchString: function (data) {
-		for (var i=0;i<data.length;i++)	{
-			var dataString = data[i].string;
-			var dataProp = data[i].prop;
-			this.versionSearchString = data[i].versionSearch || data[i].identity;
-			if (dataString) {
-				if (dataString.indexOf(data[i].subString) != -1)
-					return data[i].identity;
-			}
-			else if (dataProp)
-				return data[i].identity;
-		}
-	},
-	searchVersion: function (dataString) {
-		var index = dataString.indexOf(this.versionSearchString);
-		if (index == -1) return;
-		return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
-	},
-	dataBrowser: [
-		{
-			string: navigator.userAgent,
-			subString: "Chrome",
-			identity: "Chrome"
-		},
-		{ 	string: navigator.userAgent,
-			subString: "OmniWeb",
-			versionSearch: "OmniWeb/",
-			identity: "OmniWeb"
-		},
-		{
-			string: navigator.vendor,
-			subString: "Apple",
-			identity: "Safari",
-			versionSearch: "Version"
-		},
-		{
-			prop: window.opera,
-			identity: "Opera"
-		},
-		{
-			string: navigator.vendor,
-			subString: "iCab",
-			identity: "iCab"
-		},
-		{
-			string: navigator.vendor,
-			subString: "KDE",
-			identity: "Konqueror"
-		},
-		{
-			string: navigator.userAgent,
-			subString: "Firefox",
-			identity: "Firefox"
-		},
-		{
-			string: navigator.vendor,
-			subString: "Camino",
-			identity: "Camino"
-		},
-		{		// for newer Netscapes (6+)
-			string: navigator.userAgent,
-			subString: "Netscape",
-			identity: "Netscape"
-		},
-		{
-			string: navigator.userAgent,
-			subString: "MSIE",
-			identity: "Explorer",
-			versionSearch: "MSIE"
-		},
-		{
-			string: navigator.userAgent,
-			subString: "Gecko",
-			identity: "Mozilla",
-			versionSearch: "rv"
-		},
-		{ 		// for older Netscapes (4-)
-			string: navigator.userAgent,
-			subString: "Mozilla",
-			identity: "Netscape",
-			versionSearch: "Mozilla"
-		}
-	],
-	dataOS : [
-		{
-			string: navigator.platform,
-			subString: "Win",
-			identity: "Windows"
-		},
-		{
-			string: navigator.platform,
-			subString: "Mac",
-			identity: "Mac"
-		},
-		{
-			   string: navigator.userAgent,
-			   subString: "iPhone",
-			   identity: "iPhone/iPod"
-	    },
-		{
-			string: navigator.platform,
-			subString: "Linux",
-			identity: "Linux"
-		}
-	]
+  init: function () {
+    this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+    this.version = this.searchVersion(navigator.userAgent)
+      || this.searchVersion(navigator.appVersion)
+      || "an unknown version";
+    this.OS = this.searchString(this.dataOS) || "an unknown OS";
+  },
+  searchString: function (data) {
+    for (var i=0;i<data.length;i++)  {
+      var dataString = data[i].string;
+      var dataProp = data[i].prop;
+      this.versionSearchString = data[i].versionSearch || data[i].identity;
+      if (dataString) {
+        if (dataString.indexOf(data[i].subString) != -1)
+          return data[i].identity;
+      }
+      else if (dataProp)
+        return data[i].identity;
+    }
+  },
+  searchVersion: function (dataString) {
+    var index = dataString.indexOf(this.versionSearchString);
+    if (index == -1) return;
+    return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+  },
+  dataBrowser: [
+    {
+      string: navigator.userAgent,
+      subString: "Chrome",
+      identity: "Chrome"
+    },
+    {   string: navigator.userAgent,
+      subString: "OmniWeb",
+      versionSearch: "OmniWeb/",
+      identity: "OmniWeb"
+    },
+    {
+      string: navigator.vendor,
+      subString: "Apple",
+      identity: "Safari",
+      versionSearch: "Version"
+    },
+    {
+      prop: window.opera,
+      identity: "Opera"
+    },
+    {
+      string: navigator.vendor,
+      subString: "iCab",
+      identity: "iCab"
+    },
+    {
+      string: navigator.vendor,
+      subString: "KDE",
+      identity: "Konqueror"
+    },
+    {
+      string: navigator.userAgent,
+      subString: "Firefox",
+      identity: "Firefox"
+    },
+    {
+      string: navigator.vendor,
+      subString: "Camino",
+      identity: "Camino"
+    },
+    {    // for newer Netscapes (6+)
+      string: navigator.userAgent,
+      subString: "Netscape",
+      identity: "Netscape"
+    },
+    {
+      string: navigator.userAgent,
+      subString: "MSIE",
+      identity: "Explorer",
+      versionSearch: "MSIE"
+    },
+    {
+      string: navigator.userAgent,
+      subString: "Gecko",
+      identity: "Mozilla",
+      versionSearch: "rv"
+    },
+    {     // for older Netscapes (4-)
+      string: navigator.userAgent,
+      subString: "Mozilla",
+      identity: "Netscape",
+      versionSearch: "Mozilla"
+    }
+  ],
+  dataOS : [
+    {
+      string: navigator.platform,
+      subString: "Win",
+      identity: "Windows"
+    },
+    {
+      string: navigator.platform,
+      subString: "Mac",
+      identity: "Mac"
+    },
+    {
+         string: navigator.userAgent,
+         subString: "iPhone",
+         identity: "iPhone/iPod"
+      },
+    {
+      string: navigator.platform,
+      subString: "Linux",
+      identity: "Linux"
+    }
+  ]
 
 };
 BrowserDetect.init();
@@ -963,7 +963,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var settingsOpen = false;
   var statsOpen = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', ' ', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -1797,7 +1797,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   curDefense = GM_getValue('curDefense', undefined);
   curAttackEquip = GM_getValue('curAttackEquip', undefined);
   curDefenseEquip = GM_getValue('curDefenseEquip', undefined);
-  
+
   // Get player lists.
   var fightListInactive = new PlayerList('fightListInactive');
   var fightListActive   = new PlayerList('fightListActive');
@@ -3208,12 +3208,12 @@ function logRobResponse(rootElt, resultElt, context) {
       //if (m = /(.*)/.exec(cashElt.innerHTML)) {
         var cashInt = parseCash(RegExp.lastMatch); //m[1].replace(/[^0-9]/g, '');
         var cashLoc = parseCashLoc(RegExp.lastMatch);
-        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt);
+        GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt));
         switch (cashLoc) {
-          case NY: GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cashInt); break;
-          case CUBA: GM_setValue('fightWin$Cuba', parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt); break;
-          case MOSCOW: GM_setValue('fightWin$Moscow', parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt); break;
-          case BANGKOK: GM_setValue('fightWin$Bangkok', parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt); break;
+          case NY: GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cashInt)); break;
+          case CUBA: GM_setValue('fightWin$Cuba', String(parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt)); break;
+          case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt)); break;
+          case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
         }
         needStatUpdate = true;
       }
@@ -5004,7 +5004,7 @@ function createLogBox() {
   var titleLossDollars = '$' + makeCommaValue(GM_getValue('fightLoss$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightLoss$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightLoss$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightLoss$Bangkok', 0));
   makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'title':titleWinDollars, 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode( units[winDollarUnit] + '$' + winDollars.toFixed(3)));  //Accomodates up to $999,999,999,999
   makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'title':titleLossDollars, 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode( units[lossDollarUnit] + '$' + lossDollars.toFixed(3)));
-  
+
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Exp Gained:'));
   makeElement('div', mafiaLogBox, {'id':'totalExp', 'style':'position: absolute; right: 329px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('totalExpInt', 0))));
   makeElement('hr', mafiaLogBox, {'style':'position: absolute; left: 0; bottom: 42px; height: 1px; border: 0px; width: 90%; margin-left: 5%; color: #666666; background-color: #666666'});
@@ -5635,7 +5635,7 @@ function createMafiaTab() {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Level-up bonus '));
 
-// Auto-share wishlist
+  // Iced opponent bonus
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -5649,7 +5649,7 @@ function createMafiaTab() {
   id = 'autoIcePublishFrequency';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '1'), 'title':title, 'id':id, 'size':'2'});
   rhs.appendChild(document.createTextNode(' th time'));
-  
+
   // Achievement bonus
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -7836,13 +7836,13 @@ function refreshMWAPCSS() {
                  // Elevate freegift friendlist box:
                  ' #request_form_interstitial_exclude_type_3  {z-index: 1;}' +
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
-                 (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
+                 (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}') +
                  // Move the messagecenter button(s):
                  (isGMChecked('hideMessageIcon') ?
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' + 
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' + 
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
@@ -9811,9 +9811,9 @@ function debugDumpSettings() {
 
   DEBUG('>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
           '------------------ End-User System -------------------<br>' +
-		'Browser Name: <strong>' + BrowserDetect.browser + '</strong><br>' +
-		'Browser Version: <strong>' + BrowserDetect.version + '</strong><br>' +
-		'Operating System: <strong>' + BrowserDetect.OS + '</strong><br>' +
+        'Browser Name: <strong>' + BrowserDetect.browser + '</strong><br>' +
+        'Browser Version: <strong>' + BrowserDetect.version + '</strong><br>' +
+        'Operating System: <strong>' + BrowserDetect.OS + '</strong><br>' +
           '------------------ MWAP Settings---------------------<br>' +
         'Script Version: <strong>' + SCRIPT.version + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
@@ -9894,7 +9894,7 @@ function debugDumpSettings() {
         'Miscellaneous publishing: <br>' +
         '&nbsp;&nbsp;Secret stash: <strong>' + showIfUnchecked(GM_getValue('autoSecretStash')) + '</strong><br>' +
         '&nbsp;&nbsp;Ice bonus: <strong>' + showIfUnchecked(GM_getValue('autoIcePublish')) + '</strong><br>' +
-		'&nbsp;&nbsp;Ice bonus Frequency: <strong>' + GM_getValue('autoIcePublishFrequency') + '</strong><br>' +
+        '&nbsp;&nbsp;Ice bonus Frequency: <strong>' + GM_getValue('autoIcePublishFrequency') + '</strong><br>' +
         '&nbsp;&nbsp;Level-up bonus: <strong>' + showIfUnchecked(GM_getValue('autoLevelPublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Achievement bonus: <strong>' + showIfUnchecked(GM_getValue('autoAchievementPublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Automatically share wishlist: <strong>' + showIfUnchecked(GM_getValue('autoShareWishlist')) + '</strong><br>' +
@@ -10077,7 +10077,7 @@ function parsePlayerUpdates(messagebox) {
       if (isGMChecked('hideAttacks')) {
         DEBUG('Riding Hitlist fight won.');
         GM_setValue('currentHitXp', parseInt((GM_getValue('currentHitXp', 0)) + experience));
-        GM_setValue('currentHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + cost));
+        GM_setValue('currentHitDollars', String(parseInt(GM_getValue('currentHitDollars', 0)) + cost));
         DEBUG(result);
         if (isGMChecked('autoHeal')) {
           if (GM_getValue('rideHitlistXP', 0) == 0 && experience == 0 && GM_getValue('currentHitXp', 0) > 12) {
@@ -10101,12 +10101,12 @@ function parsePlayerUpdates(messagebox) {
 //      GM_setValue('fightWinCountInt', (GM_getValue('fightWinCountInt', 1) + 1));
 //      GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + experience);
       if (cost) {
-        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cost);
+        GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cost));
         switch (cashLoc) {
-          case NY: GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cost); break;
-          case CUBA: GM_setValue('fightWin$Cuba', parseInt(GM_getValue('fightWin$Cuba', 0)) + cost); break;
-          case MOSCOW: GM_setValue('fightWin$Moscow', parseInt(GM_getValue('fightWin$Moscow', 0)) + cost); break;
-          case BANGKOK: GM_setValue('fightWin$Bangkok', parseInt(GM_getValue('fightWin$Bangkok', 0)) + cost); break;
+          case NY: GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cost)); break;
+          case CUBA: GM_setValue('fightWin$Cuba', String(parseInt(GM_getValue('fightWin$Cuba', 0)) + cost)); break;
+          case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cost)); break;
+          case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cost)); break;
         }
         needStatUpdate = true;
       }
@@ -10119,7 +10119,7 @@ function parsePlayerUpdates(messagebox) {
 
       if (isGMChecked('hideAttacks')) {
         DEBUG('Ride Hitlist fight lost.');
-        GM_setValue('currentHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) - cost));
+        GM_setValue('currentHitDollars', String(parseInt(GM_getValue('currentHitDollars', 0)) - cost));
         DEBUG(result);
       } else {
         addToLog('updateBad Icon', minutesAgo + result);
@@ -10133,12 +10133,12 @@ function parsePlayerUpdates(messagebox) {
 //
 //      GM_setValue('fightLossCountInt', (GM_getValue('fightLossCountInt', 1) + 1));
       if (cost) {
-        GM_setValue('totalLossDollarsInt', parseInt(GM_getValue('totalLossDollarsInt', 0)) + cost);
+        GM_setValue('totalLossDollarsInt', String(parseInt(GM_getValue('totalLossDollarsInt', 0)) + cost));
         switch (cashLoc) {
-          case NY: GM_setValue('fightLoss$NY', parseInt(GM_getValue('fightLoss$NY', 0)) + cost); break;
-          case CUBA: GM_setValue('fightLoss$Cuba', parseInt(GM_getValue('fightLoss$Cuba', 0)) + cost); break;
-          case MOSCOW: GM_setValue('fightLoss$Moscow', parseInt(GM_getValue('fightLoss$Moscow', 0)) + cost); break;
-          case BANGKOK: GM_setValue('fightLoss$Bangkok', parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cost); break;
+          case NY: GM_setValue('fightLoss$NY', String(parseInt(GM_getValue('fightLoss$NY', 0)) + cost)); break;
+          case CUBA: GM_setValue('fightLoss$Cuba', String(parseInt(GM_getValue('fightLoss$Cuba', 0)) + cost)); break;
+          case MOSCOW: GM_setValue('fightLoss$Moscow', String(parseInt(GM_getValue('fightLoss$Moscow', 0)) + cost)); break;
+          case BANGKOK: GM_setValue('fightLoss$Bangkok', String(parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cost)); break;
         }
         needStatUpdate = true;
       }
@@ -10165,7 +10165,7 @@ function parsePlayerUpdates(messagebox) {
       GM_setValue('totalHits', parseInt(GM_getValue('totalHits', 0)) + 1);
       GM_setValue('totalXp', parseInt(GM_getValue('totalXp', 0)) + parseInt(GM_getValue('currentHitXp', 0)));
       GM_setValue('lastHitXp', parseInt(GM_getValue('currentHitXp', 0)));
-      GM_setValue('totalHitDollars', '' + (parseInt(GM_getValue('currentHitDollars', 0)) + parseInt(GM_getValue('totalHitDollars', 0))));
+      GM_setValue('totalHitDollars', String(parseInt(GM_getValue('currentHitDollars', 0)) + parseInt(GM_getValue('totalHitDollars', 0))));
       var currentHitXp, currentHitDollars;
       if (GM_getValue('currentHitXp', 0) < 0) {
         currentHitXp = '<span class="bad">LOST ' + GM_getValue('currentHitXp', 0) + '</span>';
@@ -11909,7 +11909,7 @@ function takeFightStatistics(experience, cashStr, resultType) {
     // WON the fight.
     GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + xp);
     GM_setValue('fightWinCountInt', GM_getValue('fightWinCountInt', 0) + 1);
-    GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt);
+    GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt));
 
     switch (loc) {
       case NY:
@@ -11937,15 +11937,15 @@ function takeFightStatistics(experience, cashStr, resultType) {
         //GM_setValue('fightWin$Bangkok', '' + (parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt));
     }
     switch (cashLoc) {
-      case NY: GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cashInt); break;
-      case CUBA: GM_setValue('fightWin$Cuba', parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt); break;
-      case MOSCOW: GM_setValue('fightWin$Moscow', parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt); break;
-      case BANGKOK: GM_setValue('fightWin$Bangkok', parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt); break;
+      case NY: GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cashInt)); break;
+      case CUBA: GM_setValue('fightWin$Cuba', String(parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt)); break;
+      case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt)); break;
+      case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
     }
   } else {
     // LOST the fight.
     GM_setValue('fightLossCountInt', GM_getValue('fightLossCountInt', 0) + 1);
-    GM_setValue('totalLossDollarsInt', parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashInt);
+    GM_setValue('totalLossDollarsInt', String(parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashInt));
 
     switch (loc) {
       case NY:
@@ -11954,13 +11954,13 @@ function takeFightStatistics(experience, cashStr, resultType) {
         //GM_setValue('fightLoss$NY', '' + (parseInt(GM_getValue('fightLoss$NY', 0)) + cashInt));
         if (resultType == 2) {
           GM_setValue('fightLossBGCHNY', GM_getValue('fightLossBGCHNY', 0) + 1);
-          GM_setValue('fightLossBGCH$NY', parseInt(GM_getValue('fightLossBGCH$NY', 0)) + cashInt);
+          GM_setValue('fightLossBGCH$NY', String(parseInt(GM_getValue('fightLossBGCH$NY', 0)) + cashInt));
         } else if (resultType == 1) {
           GM_setValue('fightLossCHNY', GM_getValue('fightLossCHNY', 0) + 1);
-          GM_setValue('fightLossCH$NY', parseInt(GM_getValue('fightLossCH$NY', 0)) + cashInt);
+          GM_setValue('fightLossCH$NY', String(parseInt(GM_getValue('fightLossCH$NY', 0)) + cashInt));
         } else {
           GM_setValue('fightLossStrongNY', GM_getValue('fightLossStrongNY', 0) + 1);
-          GM_setValue('fightLossStrong$NY', parseInt(GM_getValue('fightLossStrong$NY', 0)) + cashInt);
+          GM_setValue('fightLossStrong$NY', String(parseInt(GM_getValue('fightLossStrong$NY', 0)) + cashInt));
         }
         break;
       case CUBA:
@@ -11969,13 +11969,13 @@ function takeFightStatistics(experience, cashStr, resultType) {
         //GM_setValue('fightLoss$Cuba', '' + (parseInt(GM_getValue('fightLoss$Cuba', 0)) + cashInt));
         if (resultType == 2) {
           GM_setValue('fightLossBGCHCuba', GM_getValue('fightLossBGCHCuba', 0) + 1);
-          GM_setValue('fightLossBGCH$Cuba', parseInt(GM_getValue('fightLossBGCH$Cuba', 0)) + cashInt);
+          GM_setValue('fightLossBGCH$Cuba', String(parseInt(GM_getValue('fightLossBGCH$Cuba', 0)) + cashInt));
         } else if (resultType == 1) {
           GM_setValue('fightLossCHCuba', GM_getValue('fightLossCHCuba', 0) + 1);
-          GM_setValue('fightLossCH$Cuba', parseInt(GM_getValue('fightLossCH$Cuba', 0)) + cashInt);
+          GM_setValue('fightLossCH$Cuba', String(parseInt(GM_getValue('fightLossCH$Cuba', 0)) + cashInt));
         } else {
           GM_setValue('fightLossStrongCuba', GM_getValue('fightLossStrongCuba', 0) + 1);
-          GM_setValue('fightLossStrong$Cuba', parseInt(GM_getValue('fightLossStrong$Cuba', 0)) + cashInt);
+          GM_setValue('fightLossStrong$Cuba', String(parseInt(GM_getValue('fightLossStrong$Cuba', 0)) + cashInt));
         }
         break;
       case MOSCOW:
@@ -11984,13 +11984,13 @@ function takeFightStatistics(experience, cashStr, resultType) {
         //GM_setValue('fightLoss$Moscow', '' + (parseInt(GM_getValue('fightLoss$Moscow', 0)) + cashInt));
         if (resultType == 2) {
           GM_setValue('fightLossBGCHMoscow', GM_getValue('fightLossBGCHMoscow', 0) + 1);
-          GM_setValue('fightLossBGCH$Moscow', parseInt(GM_getValue('fightLossBGCH$Moscow', 0)) + cashInt);
+          GM_setValue('fightLossBGCH$Moscow', String(parseInt(GM_getValue('fightLossBGCH$Moscow', 0)) + cashInt));
         } else if (resultType == 1) {
           GM_setValue('fightLossCHMoscow', GM_getValue('fightLossCHMoscow', 0) + 1);
-          GM_setValue('fightLossCH$Moscow', parseInt(GM_getValue('fightLossCH$Moscow', 0)) + cashInt);
+          GM_setValue('fightLossCH$Moscow', String(parseInt(GM_getValue('fightLossCH$Moscow', 0)) + cashInt));
         } else {
           GM_setValue('fightLossStrongMoscow', GM_getValue('fightLossStrongMoscow', 0) + 1);
-          GM_setValue('fightLossStrong$Moscow', parseInt(GM_getValue('fightLossStrong$Moscow', 0)) + cashInt);
+          GM_setValue('fightLossStrong$Moscow', String(parseInt(GM_getValue('fightLossStrong$Moscow', 0)) + cashInt));
         }
         break;
       case BANGKOK:
@@ -11999,23 +11999,23 @@ function takeFightStatistics(experience, cashStr, resultType) {
         //GM_setValue('fightLoss$Bangkok', '' + (parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cashInt));
         if (resultType == 2) {
           GM_setValue('fightLossBGCHBangkok', GM_getValue('fightLossBGCHBangkok', 0) + 1);
-          GM_setValue('fightLossBGCH$Bangkok', parseInt(GM_getValue('fightLossBGCH$Bangkok', 0)) + cashInt);
+          GM_setValue('fightLossBGCH$Bangkok', String(parseInt(GM_getValue('fightLossBGCH$Bangkok', 0)) + cashInt));
         } else if (resultType == 1) {
           GM_setValue('fightLossCHBangkok', GM_getValue('fightLossCHBangkok', 0) + 1);
-          GM_setValue('fightLossCH$Bangkok', parseInt(GM_getValue('fightLossCH$Bangkok', 0)) + cashInt);
+          GM_setValue('fightLossCH$Bangkok', String(parseInt(GM_getValue('fightLossCH$Bangkok', 0)) + cashInt));
         } else {
           GM_setValue('fightLossStrongBangkok', GM_getValue('fightLossStrongBangkok', 0) + 1);
-          GM_setValue('fightLossStrong$Bangkok', parseInt(GM_getValue('fightLossStrong$Bangkok', 0)) + cashInt);
+          GM_setValue('fightLossStrong$Bangkok', String(parseInt(GM_getValue('fightLossStrong$Bangkok', 0)) + cashInt));
         }
         break;
       default:
         break;
     }
     switch (cashLoc) {
-      case NY: GM_setValue('fightLoss$NY', parseInt(GM_getValue('fightLoss$NY', 0)) + cashInt); break;
-      case CUBA: GM_setValue('fightLoss$Cuba', parseInt(GM_getValue('fightLoss$Cuba', 0)) + cashInt); break;
-      case MOSCOW: GM_setValue('fightLoss$Moscow', parseInt(GM_getValue('fightLoss$Moscow', 0)) + cashInt); break;
-      case BANGKOK: GM_setValue('fightLoss$Bangkok', parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cashInt); break;
+      case NY: GM_setValue('fightLoss$NY', String(parseInt(GM_getValue('fightLoss$NY', 0)) + cashInt)); break;
+      case CUBA: GM_setValue('fightLoss$Cuba', String(parseInt(GM_getValue('fightLoss$Cuba', 0)) + cashInt)); break;
+      case MOSCOW: GM_setValue('fightLoss$Moscow', String(parseInt(GM_getValue('fightLoss$Moscow', 0)) + cashInt)); break;
+      case BANGKOK: GM_setValue('fightLoss$Bangkok', String(parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cashInt)); break;
     }
   }
 }
@@ -12089,10 +12089,10 @@ function logFightResponse(rootElt, resultElt, context) {
         userBoost = elt.title;
       }
     }
-	
-	var powerAttack = xpathFirst('.//div[@class="fightres_hint"]', resultElt);
-	var powerAttackResult="";
-	if(powerAttack) powerAttackResult = powerAttack.innerHTML.untag().trim();
+
+    var powerAttack = xpathFirst('.//div[@class="fightres_hint"]', resultElt);
+    var powerAttackResult="";
+    if(powerAttack) powerAttackResult = powerAttack.innerHTML.untag().trim();
 
     // Did we win or lose?
     var resultType;
@@ -12138,7 +12138,7 @@ function logFightResponse(rootElt, resultElt, context) {
     // Check for any fatalities.
     if (innerNoTags.match(/body\s+count\s+to\s+(\d+)/i)) {
       //addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
-	  addToLog('info Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
+      addToLog('info Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
     }
     if (innerNoTags.indexOf('You were snuffed') != -1) {
       addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
@@ -12157,26 +12157,26 @@ function logFightResponse(rootElt, resultElt, context) {
     //    var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
     //  addToLog('lootbag Icon', txtLog);
     //}
-	
-	// Look for any loot.
-	//var lootRE = new RegExp("(earned|gained|found) (some|an?|\d) (.+?)[\.!]","gi");
-	var lootRE = /(earned|gained|found) (some|an?|\d) (.+?)[\.!]/gi;
-	var match;
-	var foundLoot;
+
+    // Look for any loot.
+    //var lootRE = new RegExp("(earned|gained|found) (some|an?|\d) (.+?)[\.!]","gi");
+    var lootRE = /(earned|gained|found) (some|an?|\d) (.+?)[\.!]/gi;
+    var match;
+    var foundLoot;
     var totalAttack;
     var totalDefense;
     var txtLog="";
 
-	while(match = lootRE.exec(innerNoTags)){
-		foundLoot = match[2] + ' ' + match[3];
-		totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
-		totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;    
-		txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
-		if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
-		if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
-		addToLog('lootbag Icon', txtLog);
-	}
-    
+    while(match = lootRE.exec(innerNoTags)){
+      foundLoot = match[2] + ' ' + match[3];
+      totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
+      totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
+      txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+      if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
+      if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
+      addToLog('lootbag Icon', txtLog);
+    }
+
 //    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
 //      addToLog('lootbag Icon', '<span class="loot">'+' Found '+
 //               RegExp.$1 + ' in the fight.</span>');
@@ -12550,10 +12550,10 @@ function logResponse(rootElt, action, context) {
                  '<span class="good">' + experience + '</span>.');
         cashWon = parseCash(cashWon);
         GM_setValue('hitmanWinCountInt',GM_getValue('hitmanWinCountInt',0)+1);
-        GM_setValue('hitmanWinDollarsInt', parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + cashWon);
+        GM_setValue('hitmanWinDollarsInt', String(parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + cashWon));
         GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
-        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashWon);
-        GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cashWon);
+        GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashWon));
+        GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cashWon));
 
         if (!targetKilled && canSpendStamina() && ptsToNextLevel > 6) {
           var eltAtk = xpathFirst('.//a[contains(.,"Attack Again")]', messagebox);
@@ -12579,9 +12579,9 @@ function logResponse(rootElt, action, context) {
                      ' <span class="bad">LOST ' + cashLoss + '.</span>';
         cashLoss = parseCash(cashLoss);
         GM_setValue('hitmanLossCountInt',GM_getValue('hitmanLossCountInt',0)+1);
-        GM_setValue('hitmanLossDollarsInt', parseInt(GM_getValue('hitmanLossDollarsInt', 0)) + cashLoss);
-        GM_setValue('totalLossDollarsInt', parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashLoss);
-        GM_setValue('fightLoss$NY', parseInt(GM_getValue('fightLoss$NY', 0)) + cashLoss);
+        GM_setValue('hitmanLossDollarsInt', String(parseInt(GM_getValue('hitmanLossDollarsInt', 0)) + cashLoss));
+        GM_setValue('totalLossDollarsInt', String(parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashLoss));
+        GM_setValue('fightLoss$NY', String(parseInt(GM_getValue('fightLoss$NY', 0)) + cashLoss));
         if (context.id) {
           // Add the opponent to the avoid list.
           setHitmanOpponentAvoid(context.id);
@@ -12610,10 +12610,10 @@ function logResponse(rootElt, action, context) {
                  linkToString(context.payer, 'user') + '.');
 
         GM_setValue('hitmanWinCountInt',GM_getValue('hitmanWinCountInt',0)+1);
-        GM_setValue('hitmanWinDollarsInt', parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + parseCash(context.bounty));
+        GM_setValue('hitmanWinDollarsInt', String(parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + parseCash(context.bounty)));
         //GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
-        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + parseCash(context.bounty));
-        GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + parseCash(context.bounty));
+        GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + parseCash(context.bounty)));
+        GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + parseCash(context.bounty)));
       }
       updateLogStats(STAMINA_HOW_HITMAN);
       randomizeStamina();
@@ -13060,42 +13060,36 @@ function handlePopups() {
                 return(closePopup(popupElts[i], "Iced Popup"));
               }
             }
-			
-*/			
+*/
             // Process Iced popup
             if (popupInner.indexOf('iced_pop') != -1) {
-                var icedCountTextElt = xpathFirst('.//div[@class="iced_pop_body_count_text"]');
-                var icedCountElt = xpathFirst('.//div[@class="iced_pop_body_count_number"]');
-                var opponentElt = xpathFirst('.//div[@class="fightres_opponent"]');
-                var opponentNameElt = xpathFirst('.//div[@class="fightres_name"]/a', opponentElt);            
+              var icedCountTextElt = xpathFirst('.//div[@class="iced_pop_body_count_text"]');
+              var icedCountElt = xpathFirst('.//div[@class="iced_pop_body_count_number"]');
+              var opponentElt = xpathFirst('.//div[@class="fightres_opponent"]');
+              var opponentNameElt = xpathFirst('.//div[@class="fightres_name"]/a', opponentElt);
 
-                if (icedCountElt && icedCountTextElt && opponentElt) {
-                        
-                    var bodyCount = parseInt(icedCountElt.innerHTML.replace(',', ''));
-                    var publishFrequency = GM_getValue('autoIcePublishFrequency');
-					
-                    var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
-                    if (eltIce && isGMChecked('autoIcePublish') && (bodyCount % publishFrequency == 0)) {                           					
-						addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
-                            linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + 
-                            icedCountElt.innerHTML + '</span> and published Iced Bonus');
-                    
-                        clickElement(eltIce);
-                        DEBUG('handlePopups(): Clicked to publish iced opponent bonus.');
-                    } else {
-                        // Get rid of Iced popup:
-						addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
-                            linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + 
-                            icedCountElt.innerHTML + '</span> without publishing Iced bonus (Frequency:only every '+publishFrequency+'th time)');                    
-                        return(closePopup(popupElts[i], "Iced Popup"));
-                    }
+              if (icedCountElt && icedCountTextElt && opponentElt) {
+                var bodyCount = parseInt(icedCountElt.innerHTML.replace(',', ''));
+                var publishFrequency = GM_getValue('autoIcePublishFrequency');
+                var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
+                if (eltIce && isGMChecked('autoIcePublish') && (bodyCount % publishFrequency == 0)) {
+                  addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
+                    linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' +
+                    icedCountElt.innerHTML + '</span> and published Iced Bonus');
+                  clickElement(eltIce);
+                  DEBUG('handlePopups(): Clicked to publish iced opponent bonus.');
                 } else {
-                    // missing info, just go away
-                    return(closePopup(popupElts[i], "Iced Popup"));
+                  // Get rid of Iced popup:
+                  addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
+                    linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' +
+                    icedCountElt.innerHTML + '</span> without publishing Iced bonus (Frequency:only every '+publishFrequency+'th time)');
+                  return(closePopup(popupElts[i], "Iced Popup"));
                 }
+              } else {
+                // missing info, just go away
+                return(closePopup(popupElts[i], "Iced Popup"));
+              }
             }
-		
-
   /*
             // Process Robbery Loot popup
             if (popupInnerNoTags.match(/You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)Y/)) {
