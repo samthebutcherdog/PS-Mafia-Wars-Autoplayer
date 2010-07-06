@@ -30,8 +30,7 @@ function grabUpdateInfo() {
     onload: function (responseDetails) {
       s = (responseDetails.responseText);
       var count = 0;
-      //var newVersion = localStorage.getObject('newversion');
-	  var changes = 5;
+      var changes = 5;
       var newRevList = '';
       var oldRevList = '';
       while (count < changes + 5) {
@@ -51,7 +50,6 @@ function grabUpdateInfo() {
       }
       localStorage.setObject('newRevList', newRevList);
       localStorage.setObject('oldRevList', oldRevList);
-      //localStorage.setObject('version', newVersion);
     }
   });
 }
@@ -72,7 +70,7 @@ chrome.extension.onRequest.addListener(
     }
 
     // Grab update info
-    if (localStorage.getObject('version') != localStorage.getObject('newversion')) {
+    if (request.newversion && localStorage.getObject('version') != localStorage.getObject('newversion')) {
       grabUpdateInfo();
     }
 

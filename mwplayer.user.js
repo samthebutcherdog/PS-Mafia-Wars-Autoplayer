@@ -35,14 +35,14 @@
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
-// @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @version     1.1.510
+// @version     1.1.511
 // ==/UserScript==
+// @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
+// @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.510',
+  version: '1.1.511',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -183,12 +183,12 @@ BrowserDetect.init();
 // Set the storage path
 var GMSTORAGE_PATH = 'GM_' + SCRIPT.appID + '_';
 if (/facebook.com/.test(window.location.href)) {
-  var profElt = xpathFirst('.//ul[@id="pageNav"]//a[@accesskey="6"]');
+  var profElt = xpathFirst('//ul[@id="pageNav"]//a[@accesskey="6"]');
   if (profElt && profElt.getAttribute('href').match(/id=(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
   }
 
-  var profLink = xpathFirst('.//div[contains(@id,"div_story_") and contains(@data-ft,"actrs")]');
+  var profLink = xpathFirst('//div[contains(@id,"div_story_") and contains(@data-ft,"actrs")]');
   if (profLink && profLink.getAttribute('data-ft').match(/"actrs":"(\w+)/)) {
     GMSTORAGE_PATH = GMSTORAGE_PATH + RegExp.$1;
   }
@@ -245,7 +245,7 @@ GM_ApiBrowserCheck();
 
 // Handle Publishing
 function checkInPublishPopup() {
-  if (xpathFirst('.//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
+  if (xpathFirst('//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
       /prompt_feed/.test(window.location.href))  {
     setGMTime('postTimer', '00:10');
     window.setTimeout(handlePublishing, 2000);
@@ -775,6 +775,8 @@ var curAttack;                  // Current Attack stat value
 var curDefense;                 // Current Defense stat value
 var curAttackEquip;             // Current Attack equip value
 var curDefenseEquip;            // Current Defense equip value
+var prevAttackEquip;
+var prevDefenseEquip;
 var curExpElt, curExp;          // Experience DOM element and value
 var lvlExpElt, lvlExp;          // Level up experience DOM element and value
 var energyPackElt, energyPack;  // Is an energy pack waiting?
@@ -1038,7 +1040,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Stamina Burst constants
   const BURST_WIN    = 0;
   const BURST_ALWAYS = 1;
-  var burstModes = ['ONLY if I won','ALWAYS... I\'m invincible'];
+  var burstModes = ['ONLY if won','ALWAYS'];
 
   // Burn constants
   const BURN_ENERGY = 0;
@@ -1126,17 +1128,20 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Random Common Car', 1, 'Requires 10 car parts'],
     ['Random Rare Car', 2, 'Requires 25 car parts'],
     ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
-    ['CM Santiago R10', 4, 'Requires 30 car parts, 2 Cuban car parts | 42 attack, 30 defense'],
-    ['Rebel 2', 5, 'Requires 45 car parts and 2 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
+    ['CM Santiago R10', 4, 'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
+    ['Rebel 2', 5, 'Requires 45 car parts, 2 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
     ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
-    ['Russian Dazatz 45', 6, 'Requires 50 car parts and 2 Russian car parts | 18 attack, 46 defense'],
+    ['Russian Dazatz 45', 6, 'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
     ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
-    ['Solar Flare', 7, 'Requires 65 car parts and 1 solar panel | 34 attack, 34 defense, +5 energy'],
-    ['Thai XS Max', 8, 'Requires 75 car parts and 2x Thai car parts | 45 attack, 35 defense'],
+    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +5 energy'],
+    ['Thai XS Max', 8, 'Requires 75 car parts, 2 Thai car parts | 45 attack, 35 defense'],
     ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
     ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
-    ['Mugati Sport', 13, 'Requires 135 car parts, 1 High Tech car part | 35 attack, 51 defense, +3 defense'],
-    ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 High Tech car parts | 52 attack, 29 defense, +3 attack']
+    ['Mugati Sport', 13, 'Requires 135 car parts, 1 high tech car part | 35 attack, 51 defense, +3 defense'],
+    ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 high tech car parts | 52 attack, 29 defense, +3 attack'],
+    ['Sonic Five', 25, 'Requires 12 car parts | 32 attack, 30 defense'],
+    ['General Ulysses', 26, 'Requires 28 car parts| 38 attack, 28 defense'],
+    ['Day Rider 2K', 27, 'Requires 175 car parts, 1 suspension coil | 45 attack, 50 defense, +1 attack, +1 defense']
   );
 
   // Weapons build
@@ -1787,6 +1792,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   Autoplay.desc = 'auto-play';
   Autoplay.fx = loadHome;
 
+  // get saved attack/defense stats
+  curAttack = GM_getValue('curAttack', undefined);
+  curDefense = GM_getValue('curDefense', undefined);
+  curAttackEquip = GM_getValue('curAttackEquip', undefined);
+  curDefenseEquip = GM_getValue('curDefenseEquip', undefined);
+  
   // Get player lists.
   var fightListInactive = new PlayerList('fightListInactive');
   var fightListActive   = new PlayerList('fightListActive');
@@ -1917,17 +1928,6 @@ function doAutoPlay () {
     if (autoHeal()) return;
   }
 
-  // Auto-GiftAccept
-  if (GM_getValue('isRunning') && isGMChecked('autoGiftAccept') && hasHome) {
-    if (autoGiftQueue()) return;
-    if (autoGiftAccept()) return;
-  }
-
-  // Auto-Safehouse
-  if (GM_getValue('isRunning') && GM_getValue('autoSafehouse') && hasHome) {
-    if (autoSafehouse()) return;
-  }
-
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = GM_getValue('isRunning') && !skipJobs && canMission();
   var autoStaminaSpendif = GM_getValue('isRunning') && !skipStaminaSpend && canSpendStamina() && hasFight;
@@ -1963,6 +1963,26 @@ function doAutoPlay () {
     if (autoWarAttack()) return;
   }
 
+  // Auto-bank
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
+                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
+  //if (GM_getValue('isRunning') && !maxed && canBank) {
+  if (GM_getValue('isRunning') && canBank) {
+    if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
+  }
+  // Auto-collect take (limit to level 4 and above)
+  if (GM_getValue('isRunning') && !maxed && hasProps) {
+    for (var i = 0, iLength = cities.length; i < iLength; ++i) {
+      if (level >= cities[i][CITY_LEVEL] &&
+          isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
+          !timeLeftGM('takeHour' + cities[i][CITY_NAME])) {
+
+        // Collect take
+        if (autoCollectTake(i)) return;
+      }
+    }
+  }
+
   // Player updates
   if (GM_getValue('isRunning') && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
@@ -1979,19 +1999,6 @@ function doAutoPlay () {
     if(autoHitlist()) return;
   }
 
-  // Auto-collect take (limit to level 4 and above)
-  if (GM_getValue('isRunning') && !maxed && hasProps) {
-    for (var i = 0, iLength = cities.length; i < iLength; ++i) {
-      if (level >= cities[i][CITY_LEVEL] &&
-          isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
-          !timeLeftGM('takeHour' + cities[i][CITY_NAME])) {
-
-        // Collect take
-        if (autoCollectTake(i)) return;
-      }
-    }
-  }
-
   // Build Cars
   if (GM_getValue('isRunning') && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
     if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
@@ -2000,13 +2007,6 @@ function doAutoPlay () {
   // Build Weapons
   if (GM_getValue('isRunning') && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
-  }
-
-  // Auto-bank
-  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
-                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-  if (GM_getValue('isRunning') && !maxed && canBank) {
-    if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
 
   // Auto-stat
@@ -2037,6 +2037,17 @@ function doAutoPlay () {
   // Auto-mainframe
   if (GM_getValue('isRunning') && !maxed && GM_getValue('autoMainframe') && hasHome) {
     if (autoMainframe()) return;
+  }
+
+  // Auto-GiftAccept
+  if (GM_getValue('isRunning') && !maxed && isGMChecked('autoGiftAccept') && hasHome) {
+    if (autoGiftQueue()) return;
+    if (autoGiftAccept()) return;
+  }
+
+  // Auto-Safehouse
+  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoSafehouse') && hasHome) {
+    if (autoSafehouse()) return;
   }
 
   // Mini-pack check
@@ -2193,7 +2204,7 @@ function autoAccept() {
     return true;
   } else {
     // Get the ajax link from the profile element
-    var eltProfile = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
+    var eltProfile = xpathFirst('//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
     if (eltProfile) {
       elt.setAttribute('onclick',eltProfile.getAttribute('onclick')
         .replace(/xw_controller=stats/i,'xw_controller=recruit')
@@ -2226,7 +2237,7 @@ function autoHeal() {
   }
 
   // Use our custom instant-heal element (if present).
-  var healElt = xpathFirst('.//div[@id="popup_fodder"]//div[@class="hospital_pop" and not(@style="display: none; ")]//div[@class="pop_box" and contains(@style,"block")]//a[contains(@onclick,"xw_action=heal")]');
+  var healElt = xpathFirst('.//div[@id="popup_fodder"]/div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and contains(@style,"block")]//a[contains(@onclick,"xw_action=heal")]', appLayoutElt);
   if (healElt) {
     // FIXME: Should make quick healing optional
     if (false) {
@@ -2237,7 +2248,7 @@ function autoHeal() {
   // If not, go to hospital manually
   } else  {
     // Go to the hospital.
-    var hospitalElt = xpathFirst('.//a[@class="heal_link"]', appLayoutElt);
+    var hospitalElt = xpathFirst('.//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
     if (hospitalElt) {
       Autoplay.fx = function() {
         clickElement(hospitalElt);
@@ -2909,7 +2920,7 @@ function autoFight(how) {
   // Make sure we're on the fight tab.
   if (!onFightTab() && !autoFight.profileSearch) {
     Autoplay.fx = goFightTab;
-    Autoplay.delay = noDelay;
+    Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
     Autoplay.start();
     return true;
   }
@@ -2920,7 +2931,10 @@ function autoFight(how) {
     opponent = autoFight.profileSearch;
     autoFight.profileSearch = undefined;
     lastOpponent = undefined;
-    opponent.profileAttack = xpathFirst('.//a[contains(@onclick,"xw_action=attack") and contains(., "Attack")]', innerPageElt);
+    if (isGMChecked('staminaPowerattack') && GM_getValue('burstMode', 0) == BURST_ALWAYS)
+      opponent.profileAttack = xpathFirst('.//a[contains(@onclick,"xw_action=power_attack") and contains(., "Power Attack")]', innerPageElt);
+    if (!opponent.profileAttack)
+      opponent.profileAttack = xpathFirst('.//a[contains(@onclick,"xw_action=attack") and contains(., "Attack")]', innerPageElt);
     DEBUG('Attacking from profile');
   } else if (how == STAMINA_HOW_FIGHT_LIST) {
     var id = parseInt(GM_getValue('fightList', ''));
@@ -2986,6 +3000,7 @@ function autoFight(how) {
       // Go to the opponent's profile.
       autoFight.profileSearch = opponent;
       Autoplay.fx = function(){goProfileNav(opponent)};
+      Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
       Autoplay.start();
       return true;
     }
@@ -3020,7 +3035,7 @@ function autoFight(how) {
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   };
-  Autoplay.delay = isGMChecked('burstStamina') ? noDelay : getAutoPlayDelay();
+  Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
   Autoplay.start();
 
   return true;
@@ -3068,7 +3083,7 @@ function autoRob() {
   // Make sure we're on the fight tab.
   if (!onRobbingTab()) {
     Autoplay.fx = goRobbingTab;
-    Autoplay.delay = noDelay;
+    Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
     Autoplay.start();
     return true;
   }
@@ -3077,43 +3092,30 @@ function autoRob() {
     DEBUG("Refreshing the rob grid.");
     // refresh the 3x3 grid.
     Autoplay.fx = refreshRobbingGrid;
-    Autoplay.delay = noDelay;
+    Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
     Autoplay.start();
     return true;
   } else {
-    // Check if burst is enabled for robbing
-    if (isGMChecked('burstStamina')) {
-      //DEBUG("Stamina burst detected for robbing");
-      clickAction = 'autoRob';
-      clickContext = getCurRobSlotId();
-      DEBUG("Context : " + clickContext);
-      Autoplay.fx = doRob;
-      Autoplay.delay = noDelay;
-      Autoplay.start();
-      return true;
-    } else {
-      //DEBUG("Stamina burst skipped for robbing");
-      clickAction = 'autoRob';
-      clickContext = getCurRobSlotId();
-      DEBUG("Context : " + clickContext);
-      Autoplay.fx = doRob;
-      Autoplay.delay = getAutoPlayDelay();
-      Autoplay.start();
-      return true;
-    }
+    clickAction = 'autoRob';
+    clickContext = getCurRobSlotId();
+    DEBUG("Context : " + clickContext);
+    Autoplay.fx = doRob;
+    Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
+    Autoplay.start();
+    return true;
   }
 }
 
 function onRobbingTab() {
   // Return true if we're on the robbing tab, false otherwise.
-  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Robbing")]')) {
+  if (xpathFirst('//li[contains(@class, "tab_on")]//a[contains(., "Robbing")]')) {
     return true;
   }
   return false;
 }
 
 function goRobbingTab() {
-  var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Robbing")]');
+  var elt = xpathFirst('//div[@class="tab_content"]//a[contains(., "Robbing")]');
   if (!elt) {
     goFightNav();
     return;
@@ -3124,7 +3126,7 @@ function goRobbingTab() {
 
 function needToRefresh()
 {
-  var eltRefreshLink = xpathFirst('.//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]');
+  var eltRefreshLink = xpathFirst('//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]');
   if(eltRefreshLink)
     return true;
 
@@ -3132,27 +3134,27 @@ function needToRefresh()
 }
 
 function refreshRobbingGrid() {
-  var elt = xpathFirst('.//a[@id="rob_refresh_cost"]');
+  var elt = xpathFirst('//a[@id="rob_refresh_cost"]');
   clickElement(elt);
   DEBUG('Clicked to refresh robbing grid.');
 };
 
 function doRob(){
   var m;
-  var eltRobStam = xpathFirst('.//div[@class="rob_prop_stamina"]');
+  var eltRobStam = xpathFirst('//div[@class="rob_prop_stamina"]');
   if (eltRobStam) {
     if (m = /(.*)/.exec(eltRobStam.innerHTML)) {
       var stam = m[1].replace(/[^0-9]/g, '');
       GM_setValue('totalRobStamInt', (isNaN(parseInt(GM_getValue('totalRobStamInt', 0))) ? 0 : parseInt(GM_getValue('totalRobStamInt', 0))) + parseInt(stam));
     }
   }
-  var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+  var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
   clickElement(eltRob);
   DEBUG('Clicked to rob.');
 }
 
 function getCurRobSlotId(){
-  var eltRob = xpathFirst('.//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+  var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
   if(eltRob) // rob btn, rob target, rob slot
     return eltRob.parentNode.parentNode.parentNode.id;
   return null;
@@ -3162,7 +3164,7 @@ function logRobResponse(rootElt, resultElt, context) {
   var robSlotId = context;
   var m;
   var needStatUpdate = false;
-  var eltRob = xpathFirst('.//div[@id="'+ robSlotId +'" and @class="rob_slot"]');
+  var eltRob = xpathFirst('//div[@id="'+ robSlotId +'" and @class="rob_slot"]');
   if (eltRob) {
     var success = false;
     var targetElt = xpathFirst('.//div[@class="rob_res_target_name"]/a',eltRob);
@@ -3202,16 +3204,24 @@ function logRobResponse(rootElt, resultElt, context) {
       }
 
     if (cashElt)
-      if (m = /(.*)/.exec(cashElt.innerHTML)) {
-        var cash = m[1].replace(/[^0-9]/g, '');
-        GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 0)) + parseInt(cash)));
+      if (cashElt.innerHTML.match(REGEX_CASH)) {
+      //if (m = /(.*)/.exec(cashElt.innerHTML)) {
+        var cashInt = parseCash(RegExp.lastMatch); //m[1].replace(/[^0-9]/g, '');
+        var cashLoc = parseCashLoc(RegExp.lastMatch);
+        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt);
+        switch (cashLoc) {
+          case NY: GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cashInt); break;
+          case CUBA: GM_setValue('fightWin$Cuba', parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt); break;
+          case MOSCOW: GM_setValue('fightWin$Moscow', parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt); break;
+          case BANGKOK: GM_setValue('fightWin$Bangkok', parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt); break;
+        }
         needStatUpdate = true;
       }
   }
 
   randomizeStamina();
 
-  var popUp = xpathFirst('.//div[contains(@class, "pop_box") and contains(@style, "block")]');
+  var popUp = xpathFirst('//div[contains(@class, "pop_box") and contains(@style, "block")]');
   if (popUp) {
     // Look for any loot on popup
     if (m = /You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)<\/div>/.exec(popUp.innerHTML)) {
@@ -3226,7 +3236,7 @@ function logRobResponse(rootElt, resultElt, context) {
     }
 
     // close the popup button
-    var closeElt = xpathFirst('.//a[@class="pop_close"]',popUp);
+    var closeElt = xpathFirst('//a[@class="pop_close"]',popUp);
     if (closeElt) {
       clickElement(closeElt);
       DEBUG('Clicked to close rob popup.');
@@ -3264,6 +3274,7 @@ function autoHitman() {
   // Make sure we're on the hitlist tab.
   if (!onHitlistTab()) {
     Autoplay.fx = goHitlistTab;
+    Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
     Autoplay.start();
     return true;
   }
@@ -3337,7 +3348,7 @@ function autoHitman() {
     DEBUG('Clicked to hit ' + clickContext.name +
           ' (' + clickContext.id + ').');
   };
-  Autoplay.delay = noDelay;
+  Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();;
   Autoplay.start();
   return true;
 }
@@ -4299,7 +4310,7 @@ function saveSettings() {
                             'autoGiftSkipOpt','autoBuy','autoEnergyPack','filterLog','autoHelp',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
                             'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause', 'autoSafehouse',
-                            'acceptMafiaInvitations','autoLottoOpt', 'multipleJobs','leftAlign','mastheadOnTop',
+                            'acceptMafiaInvitations','autoLottoOpt', 'masterAllJobs', 'multipleJobs','leftAlign','mastheadOnTop',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
@@ -4308,7 +4319,7 @@ function saveSettings() {
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
-                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon']);
+                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4698,6 +4709,11 @@ function updateLogStats(newHow) {
   document.getElementById('totalLossDollars').firstChild.nodeValue = units[lossDollarUnit] + '$' + lossDollars.toFixed(3);
   document.getElementById('totalExp').firstChild.nodeValue = makeCommaValue(GM_getValue('totalExpInt', 0));
 
+  var titleWinDollars = '$' + makeCommaValue(GM_getValue('fightWin$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightWin$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightWin$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightWin$Bangkok', 0));
+  var titleLossDollars = '$' + makeCommaValue(GM_getValue('fightLoss$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightLoss$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightLoss$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightLoss$Bangkok', 0));
+  document.getElementById('totalWinDollars').setAttribute('title', titleWinDollars);
+  document.getElementById('totalLossDollars').setAttribute('title', titleLossDollars);
+
   //FIXME: These values currently only get refreshed when stamina is spent,
   //       which isn't often enough. Perhaps other stats that only need to
   //       be refreshed after stamina is spent would be more useful anyway?
@@ -4818,8 +4834,6 @@ function clearStats() {
   GM_setValue('currentHitXp', 0);
   GM_setValue('currentHitDollars','0');
 
-
-
   //ATK
   //New tracking stats for NY
   GM_setValue('hourlyStats', '0');
@@ -4858,6 +4872,18 @@ function clearStats() {
   GM_setValue('fightLossCH$Moscow', '0');  //$ lost from Critical Hit in Moscow fights
   GM_setValue('fightLossStrongMoscow', 0); //Too Strong loss type count from Moscow fights
   GM_setValue('fightLossStrong$Moscow', '0');//$ lost from Too Strong in Moscow fights
+  //New tracking stats for Bangkok
+  GM_setValue('fightExpBangkok', 0);        //Number of exper. points earned from fights in Bangkok
+  GM_setValue('fightWinsBangkok', 0);       //Count of fights won in Bangkok
+  GM_setValue('fightWin$Bangkok', '0');     //Bangkok pesos won from fights
+  GM_setValue('fightLossesBangkok', 0);     //Count of fights lost in Bangkok
+  GM_setValue('fightLoss$Bangkok', '0');    //Bangkok pesos lost from fights
+  GM_setValue('fightLossBGCHBangkok', 0);   //Bodyguard Critical Hit loss type count from Bangkok fights
+  GM_setValue('fightLossBGCH$Bangkok', '0');//$ lost from Bodyguard Critical Hit in Bangkok fights
+  GM_setValue('fightLossCHBangkok', 0);     //Critical Hit loss type count from Bangkok fights
+  GM_setValue('fightLossCH$Bangkok', '0');  //$ lost from Critical Hit in Bangkok fights
+  GM_setValue('fightLossStrongBangkok', 0); //Too Strong loss type count from Bangkok fights
+  GM_setValue('fightLossStrong$Bangkok', '0');//$ lost from Too Strong in Bangkok fights
   updateLogStats();
 }
 
@@ -4973,8 +4999,11 @@ function createLogBox() {
     lossDollarUnit++;
   }
 
-  makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode( units[winDollarUnit] + '$' + winDollars.toFixed(3)));  //Accomodates up to $999,999,999,999
-  makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode( units[lossDollarUnit] + '$' + lossDollars.toFixed(3)));
+  var titleWinDollars = '$' + makeCommaValue(GM_getValue('fightWin$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightWin$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightWin$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightWin$Bangkok', 0));
+  var titleLossDollars = '$' + makeCommaValue(GM_getValue('fightLoss$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightLoss$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightLoss$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightLoss$Bangkok', 0));
+  makeElement('div', mafiaLogBox, {'id':'totalWinDollars', 'title':titleWinDollars, 'style':'position: absolute; right: 5px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode( units[winDollarUnit] + '$' + winDollars.toFixed(3)));  //Accomodates up to $999,999,999,999
+  makeElement('div', mafiaLogBox, {'id':'totalLossDollars', 'title':titleLossDollars, 'style':'position: absolute; right: 5px; bottom: 3px; font-weight: 600;color: #EC2D2D;'}).appendChild(document.createTextNode( units[lossDollarUnit] + '$' + lossDollars.toFixed(3)));
+  
   makeElement('div', mafiaLogBox, {'style':'position: absolute; left: 5px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Exp Gained:'));
   makeElement('div', mafiaLogBox, {'id':'totalExp', 'style':'position: absolute; right: 329px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('totalExpInt', 0))));
   makeElement('hr', mafiaLogBox, {'style':'position: absolute; left: 0; bottom: 42px; height: 1px; border: 0px; width: 90%; margin-left: 5%; color: #666666; background-color: #666666'});
@@ -5961,8 +5990,8 @@ function createEnergyTab() {
   title = ' Master jobs one at a time';
   id = 'masterAllJobs';
   label = makeElement('label', rhs, {'for':id, 'title':title});
-  var masterAllJobs = makeElement('input', label, {'type':'radio', 'name':'r5', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'});
-  masterAllJobs.defaultChecked = true;
+  var masterAllJobs = makeElement('input', label, {'type':'radio', 'name':'r5', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, id);
+  //masterAllJobs.defaultChecked = true;
   label.appendChild(document.createTextNode(title));
   makeElement('br', rhs);
   title = ' Perform any combination of jobs';
@@ -6200,7 +6229,7 @@ function createEnergyTab() {
   title = 'Estimate the average experience-to-energy ratio of the jobs you will be performing. For example, a job that paid 10 experience points and required 5 energy would have a ratio of 2. Enter 0 if you prefer to have energy packs fire regardless of waste.';
   id = 'estimateJobRatio';
   label.appendChild(document.createTextNode(' Full packs @ ratio '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351;', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
 
   // Energy packs force
   item = makeElement('div', list);
@@ -6213,7 +6242,7 @@ function createEnergyTab() {
   title = 'Amount of energy remaining to trigger the firing of the energy pack.';
   id = 'autoEnergyPackForcePts';
   label.appendChild(document.createTextNode(' Full packs @ points '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351', 'value':GM_getValue('autoEnergyPackForcePts', '0'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351;', 'value':GM_getValue('autoEnergyPackForcePts', '0'), 'size':'1'});
 
   // Maniac character type?
   item = makeElement('div', list);
@@ -6346,13 +6375,13 @@ function createStaminaTab() {
   id = 'burstStamina';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable stamina bursts:'));
+  label.appendChild(document.createTextNode(' Enable bursts:'));
 
   title = 'How many points to burst';
   id = 'burstPoints';
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '3')});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' points '));
 
@@ -6365,6 +6394,12 @@ function createStaminaTab() {
     burstMode.appendChild(choice);
   }
   burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
+  // Stamina noDelay
+  title = 'No delay interval between actions';
+  id = 'staminaNoDelay';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'staminaNoDelay');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' No delay'));
 
   // Bordered container for varying settings content.
   var staminaTabSub = makeElement('div', list, {'id':'staminaTabSub', 'style':'position: static; border: 1px inset #FFD927; margin-left: auto; margin-right: auto; margin-top: 5px; margin-bottom: 5px;'});
@@ -6425,9 +6460,9 @@ function createStaminaTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  makeElement('label', lhs).appendChild(document.createTextNode('Fight in:'));
+  makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
   id = 'fightRandomLoc';
-  var fightRandomLoc = makeElement('select', rhs, {'id':id});
+  var fightRandomLoc = makeElement('select', lhs, {'id':id});
   for (i = 0, iLength=fightLocations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
@@ -6441,12 +6476,18 @@ function createStaminaTab() {
   id = 'staminaReattack';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('While gaining '));
+  label.appendChild(document.createTextNode('While gaining $ '));
   title = 'Reattack if this amount is gained';
   id = 'reattackThreshold';
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351', 'value':GM_getValue(id, '65000'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351;', 'value':GM_getValue(id, '65000'), 'size':'1'});
   label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('bucks'));
+  //label.appendChild(document.createTextNode('bucks'));
+  // Powerattack
+  title = 'Power Attack';
+  id = 'staminaPowerattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('Powerattack'));
 
   // Maximum level.
   item = makeElement('div', list);
@@ -6457,7 +6498,7 @@ function createStaminaTab() {
   id = 'fightLevelMax';
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Maximum level:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':5, 'style':'width: 30px; border: 1px solid #781351', 'value':GM_getValue('fightLevelMax', '100'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':5, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightLevelMax', '100'), 'size':'1'});
 
   // Maximum level relative?
   title = 'Make the maximum level be relative to your own. For example, if your level is 10, and maximum level is set to 5, opponents higher than level 15 will be avoided.';
@@ -6475,7 +6516,7 @@ function createStaminaTab() {
   title = 'Avoid opponents with mafia sizes larger than this.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Maximum mafia:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351', 'value':GM_getValue('fightMafiaMax', '501'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMax', '501'), 'size':'1'});
 
   // Maximum mafia relative?
   title = 'Make the maximum mafia size be relative to your own. For example, if you have 300 mafia members, and maximum mafia is set to 50, opponents with more than 350 mafia members will be avoided.';
@@ -6493,7 +6534,7 @@ function createStaminaTab() {
   title = 'Avoid opponents with mafia sizes smaller than this.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Minimum mafia:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351', 'value':GM_getValue('fightMafiaMin', '1'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMin', '1'), 'size':'1'});
 
   // Maximum mafia relative?
   title = 'Make the minimum mafia size be relative to your own. For example, if you have 300 mafia members, and minimum mafia is set to 50, opponents with less than 250 mafia members will be avoided.';
@@ -6568,7 +6609,7 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode('While gaining '));
   title = 'Reattack if this amount is gained';
   id = 'reattackThresholdList';
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351', 'value':GM_getValue('reattackThreshold', '65000'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351;', 'value':GM_getValue('reattackThreshold', '65000'), 'size':'1'});
   label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('bucks'));
 
@@ -6627,7 +6668,7 @@ function createStaminaTab() {
   title = 'Ignore targets with bounties below this measly amount.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Minimum bounty:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351', 'value':GM_getValue('hitmanBountyMin', '0')});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351;', 'value':GM_getValue('hitmanBountyMin', '0')});
 
   // Bounty selection
   item = makeElement('div', list);
@@ -6722,7 +6763,7 @@ function createStaminaTab() {
   title = 'Place a fixed bounty or check random',
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Bounty:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351', 'value':GM_getValue('autoHitListBounty', '0')});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351;', 'value':GM_getValue('autoHitListBounty', '0')});
 
   title = 'Place Random Bounties';
   id = 'autoHitListRandom';
@@ -6801,7 +6842,8 @@ function createCashTab () {
     choice.appendChild(document.createTextNode(cityCars[i][0]));
     carType.appendChild(choice);
   }
-  carType.selectedIndex = GM_getValue(id, 9);
+  carType.selectedIndex = GM_getValue(id, 8);
+  carType.setAttribute('title', cityCars[carType.selectedIndex][2]);
 
   // Option to build a weapon
   xTop += 25;
@@ -6820,7 +6862,8 @@ function createCashTab () {
     choice.appendChild(document.createTextNode(cityWeapons[i][0]));
     weaponType.appendChild(choice);
   }
-  weaponType.selectedIndex = GM_getValue(id, 9);
+  weaponType.selectedIndex = GM_getValue(id, 7);
+  weaponType.setAttribute('title', cityWeapons[weaponType.selectedIndex][2]);
 
   var xTop = 50;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -6911,7 +6954,7 @@ function grabUpdateInfo() {
         //var searchString = s.match(/href\x3D\x22\x2Fp\x2Fmwplayer\x2Fsource\x2Fdetail\x3Fr\x3D([0-9]+)\x22\x3E/);
         var searchString = s.match(/href\x3D\x22detail\x3Fr\x3D([0-9]+)\x22\x3E/);
         var revisionString = RegExp.$1;
-        //var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x22,\x3F,\x2C,\x21,\x23,\x2D,\x26,\x28,\x2F,\x29,\x2E,\x5B,\x3A,\x3B,\x5D,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
+        //var searchString = s.match(/span\sclass\x3D\x22ot\x2Dlogmessage\x22\x3E([\x21,\x22,\x23,\x26,\x27,\x28,\x29,\x2B,\x2C,\x2D,\x2E,\x2F,\x3A,\x3B,\x3F,\x5B,\x5D,\x5F,\x60,A-Z,a-z,0-9,\s]+)\x3C\x2Fspan/);
         var searchString = s.match(/a\sonclick\x3D\x22cancelBubble\x3Dtrue\x22\shref\x3D\x22detail\x3Fr\x3D[0-9]+\x22\x3E([\x21,\x22,\x23,\x26,\x27,\x28,\x29,\x2B,\x2C,\x2D,\x2E,\x2F,\x3A,\x3B,\x3F,\x5B,\x5D,\x5F,\x60,A-Z,a-z,0-9,\s]+)\x3C\x2Fa\x3E/);
         var commentString = RegExp.$1;
         var revLine = 'r' + revisionString + '... ' + commentString.replace('- ', '') + '<br>';
@@ -7230,7 +7273,7 @@ function handleModificationTimer() {
   var justPlay = false;
   var prevPageElt = innerPageElt;
   appLayoutElt = document.getElementById('app_layout');
-  innerPageElt = xpathFirst('.//div[@id="inner_page"]');
+  innerPageElt = xpathFirst('//div[@id="inner_page"]');
 
   if (!innerPageElt) return;
 
@@ -7253,7 +7296,7 @@ function handleModificationTimer() {
     pageChanged = true;
   }
 
-  // Determine if popup_fodder has changed.
+  /* Determine if popup_fodder has changed.
   var popupFodderElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
   if (popupFodderElt && !xpathFirst('.//div[@id="popup_flag"]', popupFodderElt)) {
     setListenContent(false);
@@ -7262,7 +7305,7 @@ function handleModificationTimer() {
     DEBUG('New popup_fodder content: ' + popupFodderElt.id);
     pageChanged = true;
     //if (GM_getValue('isRunning')) justPlay = true;
-  }
+  }*/
 
   // Added handling for the new-style job page changes
   var jobResult = xpathFirst('.//div[@id="new_user_jobs"]//div[@class="job_results"]', innerPageElt);
@@ -7345,9 +7388,9 @@ function handlePublishing() {
     try {
 
       // Publishing/skipping posts
-      var skipElt = xpathFirst('.//input[@id="cancel"]');
-      var pubElt = xpathFirst('.//input[@id="publish"]');
-      var okElt = xpathFirst('.//input[@id="okay"]');
+      var skipElt = xpathFirst('//input[@id="cancel"]');
+      var pubElt = xpathFirst('//input[@id="publish"]');
+      var okElt = xpathFirst('//input[@id="okay"]');
 
       /*DEBUG('Publish: Checking for items to publish!');
       // If none of these buttons are present, then we can't possibly click them!
@@ -7608,7 +7651,7 @@ function refreshGlobalStats() {
   ptsToNextLevel = lvlExp - curExp;
 
   // Get the mafia size and pending invites.
-  mafia = xpathFirst('.//span[@id="user_group_size"]');
+  mafia = xpathFirst('//span[@id="user_group_size"]');
   if (mafia) {
     mafia = parseInt(mafia.innerHTML.untag());
   }
@@ -7616,7 +7659,7 @@ function refreshGlobalStats() {
     addToLog('warning Icon', 'BUG DETECTED: Unable to read mafia size.');
   }
 
-  invites = xpathFirst('.//span[@id="user_request"]');
+  invites = xpathFirst('//span[@id="user_request"]');
   if (invites) {
     invites = parseInt(invites.innerHTML.untag());
   } else {
@@ -7774,12 +7817,18 @@ function refreshMWAPCSS() {
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; }' +
                  ' #mainDiv {position: absolute; top: 0px;} div.app {padding:0; width:746px;}' +
+                 // Elevate freegift friendlist box:
+                 ' #request_form_interstitial_exclude_type_3  {z-index: 1;}' +
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}')   +
                  // Move the messagecenter button(s):
                  (isGMChecked('hideMessageIcon') ?
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' :
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;} div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' + 
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' +
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' + 
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' +
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move gifticon and make it smaller:
                  (isGMChecked('hideGiftIcon') ?
@@ -8245,7 +8294,7 @@ function customizeStats() {
     }
 
     // Substitute AJAX navigation if code is available.
-    var hospitalElt = xpathFirst('//a[@class="heal_link"]');
+    var hospitalElt = xpathFirst('.//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
     if (hospitalElt) {
       // Make instant heal work without switching pages.
       healLinkElt.setAttribute('onclick', hospitalElt.getAttribute('onclick').replace('view', 'heal').replace('popup_fodder', SCRIPT.ajaxPage));
@@ -8413,13 +8462,17 @@ function getPlayerStats() {
 
     // Attack
     var curAttackRow  = xpathFirst('.//tr[contains(.,"Attack:")]', statTable);
-    if (curAttackRow && curAttackRow.innerHTML.match(/>\s*(\d+)/))
+    if (curAttackRow && curAttackRow.innerHTML.match(/>\s*(\d+)/)) {
       curAttack = parseInt(RegExp.$1);
+      GM_setValue('curAttack', curAttack);
+    }
 
     // Defense
     var curDefenseRow  = xpathFirst('.//tr[contains(.,"Defense:")]', statTable);
-    if (curDefenseRow && curDefenseRow.innerHTML.match(/>\s*(\d+)/))
+    if (curDefenseRow && curDefenseRow.innerHTML.match(/>\s*(\d+)/)) {
       curDefense = parseInt(RegExp.$1);
+      GM_setValue('curDefense', curDefense);
+    }
 
     //
     if (isUndefined(curAttack)) {
@@ -8438,11 +8491,11 @@ function getPlayerEquip() {
   }
 
   var eltAttackStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
-  if (eltAttackStrength) curAttackEquip = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+  if (eltAttackStrength) { prevAttackEquip = curAttackEquip; curAttackEquip = parseInt(eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '')); GM_setValue('curAttackEquip', curAttackEquip); }
   var eltDefenseStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
-  if (eltDefenseStrength) curDefenseEquip = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
+  if (eltDefenseStrength) { prevDefenseEquip = curDefenseEquip; curDefenseEquip = parseInt(eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '')); GM_setValue('curDefenseEquip', curDefenseEquip); }
 
-  if (isUndefined(curAttackEquip)) {
+  if (isUndefined(curAttackEquip) || isUndefined(curDefenseEquip)) {
     DEBUG('Current equipment attributes cannot be detected.');
   }
 }
@@ -9268,8 +9321,7 @@ function customizeFight() {
 
 function customizeProps() {
   // Not on properties page (no <object> or <div> with @id="flash_content_propertiesV2" and no flashblock found)
-  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt) &&
-      !(xpathFirst('.//div[contains(@bginactive, "flashblock")]', innerPageElt) && xpathFirst('.//div[@id="propertyV2Help"]', innerPageElt)))
+  if (!xpathFirst('.//*[@id="flash_content_propertiesV2"]', innerPageElt) && !xpathFirst('.//div[@id="propertyV2Help"]', innerPageElt))
     return false;
 
   // Check flash
@@ -9993,6 +10045,8 @@ function parsePlayerUpdates(messagebox) {
       result += ' ' + RegExp.lastMatch;
     }
     result += ' by ' + user;
+
+    var needStatUpdate = false;
     if (messageTextNoTags.match(/you won.*you gained .*?(\d+) experience points?.*?([A-Z]?\$[\d,]*\d)/i)) {
       // The fight was won.
       cost = RegExp.$2;
@@ -10000,6 +10054,7 @@ function parsePlayerUpdates(messagebox) {
       result += '<span class="good">' + ' WON ' + cost + '</span>' + ' and ' +
                 '<span class="good">' + experience +' experience.</span>';
       cost = parseCash(cost);
+      var cashLoc = parseCashLoc(RegExp.$2);
       experience = parseInt(experience);
 
       if (isGMChecked('hideAttacks')) {
@@ -10028,12 +10083,22 @@ function parsePlayerUpdates(messagebox) {
 //
 //      GM_setValue('fightWinCountInt', (GM_getValue('fightWinCountInt', 1) + 1));
 //      GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + experience);
-//      GM_setValue('totalWinDollarsInt', (parseInt(GM_getValue('totalWinDollarsInt', 1)) + cost));
+      if (cost) {
+        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cost);
+        switch (cashLoc) {
+          case NY: GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cost); break;
+          case CUBA: GM_setValue('fightWin$Cuba', parseInt(GM_getValue('fightWin$Cuba', 0)) + cost); break;
+          case MOSCOW: GM_setValue('fightWin$Moscow', parseInt(GM_getValue('fightWin$Moscow', 0)) + cost); break;
+          case BANGKOK: GM_setValue('fightWin$Bangkok', parseInt(GM_getValue('fightWin$Bangkok', 0)) + cost); break;
+        }
+        needStatUpdate = true;
+      }
     } else if (messageTextNoTags.match(/you lost.*and losing .*?([A-Z]?\$[\d,]*\d)/i)) {
       // The fight was lost.
       cost   = RegExp.$1;
       result += '<span class="bad">' + ' LOST ' + cost + '.</span>';
       cost = parseCash(cost);
+      var cashLoc = parseCashLoc(RegExp.$1);
 
       if (isGMChecked('hideAttacks')) {
         DEBUG('Ride Hitlist fight lost.');
@@ -10050,11 +10115,20 @@ function parsePlayerUpdates(messagebox) {
 //      Leaving in as placeholders. --AK17710N
 //
 //      GM_setValue('fightLossCountInt', (GM_getValue('fightLossCountInt', 1) + 1));
-//      GM_setValue('totalLossDollarsInt', '' + (parseInt(GM_getValue('totalLossDollarsInt', 1)) + cost));
+      if (cost) {
+        GM_setValue('totalLossDollarsInt', parseInt(GM_getValue('totalLossDollarsInt', 0)) + cost);
+        switch (cashLoc) {
+          case NY: GM_setValue('fightLoss$NY', parseInt(GM_getValue('fightLoss$NY', 0)) + cost); break;
+          case CUBA: GM_setValue('fightLoss$Cuba', parseInt(GM_getValue('fightLoss$Cuba', 0)) + cost); break;
+          case MOSCOW: GM_setValue('fightLoss$Moscow', parseInt(GM_getValue('fightLoss$Moscow', 0)) + cost); break;
+          case BANGKOK: GM_setValue('fightLoss$Bangkok', parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cost); break;
+        }
+        needStatUpdate = true;
+      }
     } else {
       addToLog('warning Icon', 'BUG DETECTED: Unable to read update win/loss.');
     }
-
+    if (needStatUpdate) updateLogStats();
   } else if (messageTextNoTags.indexOf('You were snuffed') != -1) {
     // Death. Ouch.
     addToLog('updateBad Icon', minutesAgo + 'You <span class="bad">' + 'DIED' + '</span>.');
@@ -10350,8 +10424,8 @@ function autoLotto() {
 
   var i, j;
   // Go to the daily chance menu
-  var eltDailyChance = xpathFirst('.//a[contains(.,"Daily Chance")]');
-  if (!xpathFirst('.//div[@class="minitab_content" and contains(.,"Play")]')) {
+  var eltDailyChance = xpathFirst('//a[contains(.,"Daily Chance")]');
+  if (!xpathFirst('//div[@class="minitab_content" and contains(.,"Play")]')) {
     Autoplay.fx = function(){
       if(eltDailyChance){
         clickElement(eltDailyChance);
@@ -10486,8 +10560,8 @@ function autoWishlist() {
   var shareWishlist = GM_getValue('autoShareWishlistTime');
 
   // Go to the wishlist.
-  elt = xpathFirst('.//div[@class="nav_link profile_link"]//a');
-  eltWishlist = xpathFirst('.//a[contains(.,"Share Wishlist with Your Friends")]');
+  elt = xpathFirst('//div[@class="nav_link profile_link"]//a');
+  eltWishlist = xpathFirst('//a[contains(.,"Share Wishlist with Your Friends")]');
   if (elt) {
     clickElement(elt);
     DEBUG('Redirecting to post wishlist');
@@ -10546,8 +10620,8 @@ function autoWarAttack() {
   };
 
   // Retrieve attack button
-  var attackElt = getWarAttackElt(xpathFirst('.//div[contains(@style,"700px") and contains(.,"vs")]'));
-  if (!attackElt) attackElt = getWarAttackElt(xpathFirst('.//div[contains(@style,"700px") and contains(.,"Top Mafia")]'));
+  var attackElt = getWarAttackElt(xpathFirst('//div[contains(@style,"700px") and contains(.,"vs")]'));
+  if (!attackElt) attackElt = getWarAttackElt(xpathFirst('//div[contains(@style,"700px") and contains(.,"Top Mafia")]'));
 
   if (attackElt) {
     Autoplay.fx = function() {
@@ -10926,14 +11000,14 @@ function autoSafehouse() {
   //DEBUG('eltSafehouseGift = ' + eltSafehouseGift);
   if (!eltSafehouseGift) {
     addToLog('info Icon','Safehouse: No gifts available');
-    setGMTime('autoSafehouseTimer', "00:05:00");
+    setGMTime('autoSafehouseTimer', "00:10:00");
     return false;
   }
   var cntSafehouseGiftReady = eltSafehouseGift.innerHTML.indexOf('door_open');
   if (cntSafehouseGiftReady < 0) {
     // No gift ready to be open
     addToLog('info Icon','Safehouse: No gifts available');
-    setGMTime('autoSafehouseTimer', "00:05:00");
+    setGMTime('autoSafehouseTimer', "00:10:00");
     return false;
   }
 
@@ -10956,7 +11030,7 @@ function autoDailyChecklist() {
 
   // Let's do this code once in a while.
   if (timeLeftGM('dailyChecklistTimer')) return false;
-  setGMTime('dailyChecklistTimer', "00:15:00");
+  setGMTime('dailyChecklistTimer', "00:30:00");
 
   // This routines goal is to click the daily checklist to grab the daily skill point
   // To get the skill point we can 'skip' through the checklist, we just have actually do the skip
@@ -11271,7 +11345,7 @@ function goProfileNav(player) {
 }
 
 function goMyProfile() {
-  var elt = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
+  var elt = xpathFirst('//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find Profile nav link to click.');
     return;
@@ -11281,12 +11355,12 @@ function goMyProfile() {
 }
 
 function goMyMafiaNav() {
-  var elt = xpathFirst('.//div[@class="nav_link mafia_link"]//a[contains(.,"My Mafia")]');
+  var elt = xpathFirst('//div[@class="nav_link mafia_link"]//a[contains(.,"My Mafia")]');
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find My Mafia nav link to click.');
     return;
   } else {
-    var eltProfile = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
+    var eltProfile = xpathFirst('//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
     if (eltProfile) {
       elt.setAttribute('onclick',eltProfile.getAttribute('onclick').replace(/xw_controller=stats/i,'xw_controller=recruit'));
     }
@@ -11477,7 +11551,7 @@ function goHitlistTab() {
 }
 
 function goPropertyNav() {
-  var elt = xpathFirst('.//span[@id="nav_link_properties"]//a')
+  var elt = xpathFirst('//span[@id="nav_link_properties"]//a')
 
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find properties nav link to click.');
@@ -11812,85 +11886,119 @@ function takeFightStatistics(experience, cashStr, resultType) {
   var loc = city;
   var xp = parseInt(experience);
   var cashInt = parseCash(cashStr);
+  var cashLoc = parseCashLoc(cashStr);
 
   if (xp) {
     // WON the fight.
     GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + xp);
     GM_setValue('fightWinCountInt', GM_getValue('fightWinCountInt', 0) + 1);
-    GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt));
+    GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt);
 
-    switch(loc) {
-      case CUBA:
-        // Fight Win Cuba Stats
-        GM_setValue('fightWinsCuba', GM_getValue('fightWinsCuba', 0) + 1);
-        GM_setValue('fightExpCuba', GM_getValue('fightExpCuba', 0) + xp);
-        GM_setValue('fightWin$Cuba', '' + (parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt));
-        break;
+    switch (loc) {
       case NY:
         // Fight Win NY Stats
         GM_setValue('fightWinsNY', GM_getValue('fightWinsNY', 0) + 1);
         GM_setValue('fightExpNY', GM_getValue('fightExpNY', 0) + xp);
-        GM_setValue('fightWin$NY', '' + (parseInt(GM_getValue('fightWin$NY', 0)) + cashInt));
+        //GM_setValue('fightWin$NY', '' + (parseInt(GM_getValue('fightWin$NY', 0)) + cashInt));
+        break;
+      case CUBA:
+        // Fight Win Cuba Stats
+        GM_setValue('fightWinsCuba', GM_getValue('fightWinsCuba', 0) + 1);
+        GM_setValue('fightExpCuba', GM_getValue('fightExpCuba', 0) + xp);
+        //GM_setValue('fightWin$Cuba', '' + (parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt));
         break;
       case MOSCOW:
         // Fight Win Moscow Stats
-        GM_setValue('fightWinsMOSCOW', GM_getValue('fightWinsMOSCOW', 0) + 1);
-        GM_setValue('fightExpMOSCOW', GM_getValue('fightExpMOSCOW', 0) + xp);
-        GM_setValue('fightWin$MOSCOW', '' + (parseInt(GM_getValue('fightWin$MOSCOW', 0)) + cashInt));
+        GM_setValue('fightWinsMoscow', GM_getValue('fightWinsMoscow', 0) + 1);
+        GM_setValue('fightExpMoscow', GM_getValue('fightExpMoscow', 0) + xp);
+        //GM_setValue('fightWin$Moscow', '' + (parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt));
+        break;
+      case BANGKOK:
+        // Fight Win Moscow Stats
+        GM_setValue('fightWinsBangkok', GM_getValue('fightWinsBangkok', 0) + 1);
+        GM_setValue('fightExpBangkok', GM_getValue('fightExpBangkok', 0) + xp);
+        //GM_setValue('fightWin$Bangkok', '' + (parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt));
+    }
+    switch (cashLoc) {
+      case NY: GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cashInt); break;
+      case CUBA: GM_setValue('fightWin$Cuba', parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt); break;
+      case MOSCOW: GM_setValue('fightWin$Moscow', parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt); break;
+      case BANGKOK: GM_setValue('fightWin$Bangkok', parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt); break;
     }
   } else {
     // LOST the fight.
     GM_setValue('fightLossCountInt', GM_getValue('fightLossCountInt', 0) + 1);
-    GM_setValue('totalLossDollarsInt', '' + (parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashInt));
+    GM_setValue('totalLossDollarsInt', parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashInt);
 
     switch (loc) {
-      case CUBA:
-        //Fight Loss Cuba Stats
-        GM_setValue('fightLossesCuba', GM_getValue('fightLossesCuba', 0) + 1);
-        GM_setValue('fightLoss$Cuba', '' + (parseInt(GM_getValue('fightLoss$Cuba', 0)) + cashInt));
-        if (resultType == 2) {
-          GM_setValue('fightLossBGCHCuba', GM_getValue('fightLossBGCHCuba', 0) + 1);
-          GM_setValue('fightLossBGCH$Cuba', '' + (parseInt(GM_getValue('fightLossBGCH$Cuba', 0)) + cashInt));
-        } else if (resultType == 1) {
-          GM_setValue('fightLossCHCuba', GM_getValue('fightLossCHCuba', 0) + 1);
-          GM_setValue('fightLossCH$Cuba', '' + (parseInt(GM_getValue('fightLossCH$Cuba', 0)) + cashInt));
-        } else {
-          GM_setValue('fightLossStrongCuba', GM_getValue('fightLossStrongCuba', 0) + 1);
-          GM_setValue('fightLossStrong$Cuba', '' + (parseInt(GM_getValue('fightLossStrong$Cuba', 0)) + cashInt));
-        }
-        break;
       case NY:
         //Fight Loss NY Stats
         GM_setValue('fightLossesNY', (GM_getValue('fightLossesNY', 0) + 1));
-        GM_setValue('fightLoss$NY', '' + (parseInt(GM_getValue('fightLoss$NY', 0)) + cashInt));
+        //GM_setValue('fightLoss$NY', '' + (parseInt(GM_getValue('fightLoss$NY', 0)) + cashInt));
         if (resultType == 2) {
           GM_setValue('fightLossBGCHNY', GM_getValue('fightLossBGCHNY', 0) + 1);
-          GM_setValue('fightLossBGCH$NY', '' + (parseInt(GM_getValue('fightLossBGCH$NY', 0)) + cashInt));
+          GM_setValue('fightLossBGCH$NY', parseInt(GM_getValue('fightLossBGCH$NY', 0)) + cashInt);
         } else if (resultType == 1) {
           GM_setValue('fightLossCHNY', GM_getValue('fightLossCHNY', 0) + 1);
-          GM_setValue('fightLossCH$NY', '' + (parseInt(GM_getValue('fightLossCH$NY', 0)) + cashInt));
+          GM_setValue('fightLossCH$NY', parseInt(GM_getValue('fightLossCH$NY', 0)) + cashInt);
         } else {
           GM_setValue('fightLossStrongNY', GM_getValue('fightLossStrongNY', 0) + 1);
-          GM_setValue('fightLossStrong$NY', '' + (parseInt(GM_getValue('fightLossStrong$NY', 0)) + cashInt));
+          GM_setValue('fightLossStrong$NY', parseInt(GM_getValue('fightLossStrong$NY', 0)) + cashInt);
+        }
+        break;
+      case CUBA:
+        //Fight Loss Cuba Stats
+        GM_setValue('fightLossesCuba', GM_getValue('fightLossesCuba', 0) + 1);
+        //GM_setValue('fightLoss$Cuba', '' + (parseInt(GM_getValue('fightLoss$Cuba', 0)) + cashInt));
+        if (resultType == 2) {
+          GM_setValue('fightLossBGCHCuba', GM_getValue('fightLossBGCHCuba', 0) + 1);
+          GM_setValue('fightLossBGCH$Cuba', parseInt(GM_getValue('fightLossBGCH$Cuba', 0)) + cashInt);
+        } else if (resultType == 1) {
+          GM_setValue('fightLossCHCuba', GM_getValue('fightLossCHCuba', 0) + 1);
+          GM_setValue('fightLossCH$Cuba', parseInt(GM_getValue('fightLossCH$Cuba', 0)) + cashInt);
+        } else {
+          GM_setValue('fightLossStrongCuba', GM_getValue('fightLossStrongCuba', 0) + 1);
+          GM_setValue('fightLossStrong$Cuba', parseInt(GM_getValue('fightLossStrong$Cuba', 0)) + cashInt);
         }
         break;
       case MOSCOW:
         //Fight Loss MOSCOW Stats
-        GM_setValue('fightLossesMOSCOW', (GM_getValue('fightLossesMOSCOW', 0) + 1));
-        GM_setValue('fightLoss$MOSCOW', '' + (parseInt(GM_getValue('fightLoss$MOSCOW', 0)) + cashInt));
+        GM_setValue('fightLossesMoscow', (GM_getValue('fightLossesMoscow', 0) + 1));
+        //GM_setValue('fightLoss$Moscow', '' + (parseInt(GM_getValue('fightLoss$Moscow', 0)) + cashInt));
         if (resultType == 2) {
-          GM_setValue('fightLossBGCHMOSCOW', GM_getValue('fightLossBGCHMOSCOW', 0) + 1);
-          GM_setValue('fightLossBGCH$MOSCOW', '' + (parseInt(GM_getValue('fightLossBGCH$MOSCOW', 0)) + cashInt));
+          GM_setValue('fightLossBGCHMoscow', GM_getValue('fightLossBGCHMoscow', 0) + 1);
+          GM_setValue('fightLossBGCH$Moscow', parseInt(GM_getValue('fightLossBGCH$Moscow', 0)) + cashInt);
         } else if (resultType == 1) {
-          GM_setValue('fightLossCHMOSCOW', GM_getValue('fightLossCHMOSCOW', 0) + 1);
-          GM_setValue('fightLossCH$MOSCOW', '' + (parseInt(GM_getValue('fightLossCH$MOSCOW', 0)) + cashInt));
+          GM_setValue('fightLossCHMoscow', GM_getValue('fightLossCHMoscow', 0) + 1);
+          GM_setValue('fightLossCH$Moscow', parseInt(GM_getValue('fightLossCH$Moscow', 0)) + cashInt);
         } else {
-          GM_setValue('fightLossStrongMOSCOW', GM_getValue('fightLossStrongMOSCOW', 0) + 1);
-          GM_setValue('fightLossStrong$MOSCOW', '' + (parseInt(GM_getValue('fightLossStrong$MOSCOW', 0)) + cashInt));
+          GM_setValue('fightLossStrongMoscow', GM_getValue('fightLossStrongMoscow', 0) + 1);
+          GM_setValue('fightLossStrong$Moscow', parseInt(GM_getValue('fightLossStrong$Moscow', 0)) + cashInt);
+        }
+        break;
+      case BANGKOK:
+        //Fight Loss BANGKOK Stats
+        GM_setValue('fightLossesBangkok', (GM_getValue('fightLossesBangkok', 0) + 1));
+        //GM_setValue('fightLoss$Bangkok', '' + (parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cashInt));
+        if (resultType == 2) {
+          GM_setValue('fightLossBGCHBangkok', GM_getValue('fightLossBGCHBangkok', 0) + 1);
+          GM_setValue('fightLossBGCH$Bangkok', parseInt(GM_getValue('fightLossBGCH$Bangkok', 0)) + cashInt);
+        } else if (resultType == 1) {
+          GM_setValue('fightLossCHBangkok', GM_getValue('fightLossCHBangkok', 0) + 1);
+          GM_setValue('fightLossCH$Bangkok', parseInt(GM_getValue('fightLossCH$Bangkok', 0)) + cashInt);
+        } else {
+          GM_setValue('fightLossStrongBangkok', GM_getValue('fightLossStrongBangkok', 0) + 1);
+          GM_setValue('fightLossStrong$Bangkok', parseInt(GM_getValue('fightLossStrong$Bangkok', 0)) + cashInt);
         }
         break;
       default:
         break;
+    }
+    switch (cashLoc) {
+      case NY: GM_setValue('fightLoss$NY', parseInt(GM_getValue('fightLoss$NY', 0)) + cashInt); break;
+      case CUBA: GM_setValue('fightLoss$Cuba', parseInt(GM_getValue('fightLoss$Cuba', 0)) + cashInt); break;
+      case MOSCOW: GM_setValue('fightLoss$Moscow', parseInt(GM_getValue('fightLoss$Moscow', 0)) + cashInt); break;
+      case BANGKOK: GM_setValue('fightLoss$Bangkok', parseInt(GM_getValue('fightLoss$Bangkok', 0)) + cashInt); break;
     }
   }
 }
@@ -11907,7 +12015,7 @@ function logFightResponse(rootElt, resultElt, context) {
   if (resultElt.className == "fight_results") {
     // A fight took place. Results are in the "VS" format.
     var attackAgainElt;
-    if (isGMChecked('staminaReattack'))
+    if (isGMChecked('staminaPowerattack'))
       attackAgainElt = xpathFirst('.//a[contains(.,"Power Attack")]', resultElt);
     if (!attackAgainElt) attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
     lastOpponent.attackAgain = undefined;
@@ -11920,7 +12028,7 @@ function logFightResponse(rootElt, resultElt, context) {
     }
 
     // Click the iced opponent bonus immediately
-    /*var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]');
+    /*var eltIce = xpathFirst('//a[contains(.,"Share with Friends")]');
     if (eltIce && isGMChecked('autoIcePublish')) {
       clickElement(eltIce);
       DEBUG('logFightResponse(): Clicked to publish iced opponent bonus.');
@@ -12017,22 +12125,15 @@ function logFightResponse(rootElt, resultElt, context) {
     // Look for any loot.
     if (innerNoTags.match(/(earned|gained|found) (some|an?|\d) (.+?)[\.!]/i)) {
       var foundLoot = RegExp.$2 + ' ' + RegExp.$3;
-      var eltAttackStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
-      var newattackStrength = eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
-      var totalAttack =  Number(newattackStrength) - Number(curAttackEquip);
-
-      var eltDefenseStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Defense Strength")]', innerPageElt);
-      var newdefenseStrength = eltDefenseStrength.parentNode.childNodes[1].nodeValue.replace(',', '');
-      var totalDefense = Number(newdefenseStrength) - Number(curDefenseEquip);
+      var totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
+      var totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
 
       var txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
-      if(Number(totalAttack)>0)
-         var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + curAttackEquip + ' New=' + newattackStrength;
-      if(Number(totalDefense)>0)
-         var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + curDefenseEquip + ' New=' + newdefenseStrength;
+      if(totalAttack>0)
+        var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
+      if(totalDefense>0)
+        var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
       addToLog('lootbag Icon', txtLog);
-      curAttackEquip = newattackStrength;
-      curDefenseEquip = newdefenseStrength;
     }
 //    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
 //      addToLog('lootbag Icon', '<span class="loot">'+' Found '+
@@ -12185,7 +12286,7 @@ function logJSONResponse(responseText, action, context) {
 
           // Attempt to correct the displayed cash value
           var cashLeft = 0;
-          var cityCashElt = xpathFirst('.//strong[@id="user_cash_' + cities[city][CITY_ALIAS] + '"]');
+          var cityCashElt = xpathFirst('//strong[@id="user_cash_' + cities[city][CITY_ALIAS] + '"]');
           if (cityCashElt && !isNaN(RegExp.$1)) {
             cashLeft = parseCash(cityCashElt.innerHTML) - parseCash(RegExp.$1);
             cityCashElt.innerHTML = cities[city][CITY_CASH_SYMBOL] + (isNaN(cashLeft) ? '0' : Math.max(cashLeft, 0));
@@ -12273,12 +12374,12 @@ function logResponse(rootElt, action, context) {
 
   // Rob message
   if (!messagebox) {
-    messagebox = xpathFirst('.//div[@id="'+ context +'" and @class="rob_slot"]');
+    messagebox = xpathFirst('//div[@id="'+ context +'" and @class="rob_slot"]');
   }
 
   // Build Car/Weapon success popup
   if(!messagebox) {
-    messagebox = xpathFirst('.//div[@class="chop_pop_build_final"]', appLayoutElt);
+    messagebox = xpathFirst('.//div[@class="chop_build_final"]', appLayoutElt);
   }
 
   if (action=='withdraw' && context) {
@@ -12400,15 +12501,17 @@ function logResponse(rootElt, action, context) {
       var targetKilled = (innerNoTags.indexOf('You knocked out') != -1);
       if (innerNoTags.indexOf('You WON') != -1) {
         var cashGain = innerNoTags.match(/gained.*?([A-Z]?\$[\d,]*\d)/i);
-        var cashWon = RegExp.$1
+        var cashWon = RegExp.$1;
         experience = innerNoTags.match(/\d+\s+experience\s+points?/i);
         addToLog('yeah Icon', 'Hit ' + linkToString(context.profile, 'user') +
                  ', <span class="good">WON ' + cashWon + '</span> and ' +
                  '<span class="good">' + experience + '</span>.');
+        cashWon = parseCash(cashWon);
         GM_setValue('hitmanWinCountInt',GM_getValue('hitmanWinCountInt',0)+1);
-        GM_setValue('hitmanWinDollarsInt', '' + (parseInt(GM_getValue('hitmanWinDollarsInt', 1)) + parseCash(cashWon.split('$')[1])));
+        GM_setValue('hitmanWinDollarsInt', parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + cashWon);
         GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
-        GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseCash(cashWon.split('$')[1])));
+        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashWon);
+        GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + cashWon);
 
         if (!targetKilled && canSpendStamina() && ptsToNextLevel > 6) {
           var eltAtk = xpathFirst('.//a[contains(.,"Attack Again")]', messagebox);
@@ -12432,9 +12535,11 @@ function logResponse(rootElt, action, context) {
         var cashLoss = RegExp.$1;
         result = 'Hit ' + linkToString(context.profile, 'user') +
                      ' <span class="bad">LOST ' + cashLoss + '.</span>';
+        cashLoss = parseCash(cashLoss);
         GM_setValue('hitmanLossCountInt',GM_getValue('hitmanLossCountInt',0)+1);
-        GM_setValue('hitmanLossDollarsInt', '' + (parseInt(GM_getValue('hitmanLossDollarsInt', 0)) + parseCash(cashLoss.split('$')[1])));
-        GM_setValue('totalLossDollarsInt', '' + (parseInt(GM_getValue('totalLossDollarsInt', 0)) + parseCash(cashLoss.split('$')[1])));
+        GM_setValue('hitmanLossDollarsInt', parseInt(GM_getValue('hitmanLossDollarsInt', 0)) + cashLoss);
+        GM_setValue('totalLossDollarsInt', parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashLoss);
+        GM_setValue('fightLoss$NY', parseInt(GM_getValue('fightLoss$NY', 0)) + cashLoss);
         if (context.id) {
           // Add the opponent to the avoid list.
           setHitmanOpponentAvoid(context.id);
@@ -12463,9 +12568,10 @@ function logResponse(rootElt, action, context) {
                  linkToString(context.payer, 'user') + '.');
 
         GM_setValue('hitmanWinCountInt',GM_getValue('hitmanWinCountInt',0)+1);
-        GM_setValue('hitmanWinDollarsInt', '' + (parseInt(GM_getValue('hitmanWinDollarsInt', 1) + parseCash(context.bounty))));
-        GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
-        GM_setValue('totalWinDollarsInt', '' + (parseInt(GM_getValue('totalWinDollarsInt', 1)) + parseCash(context.bounty)));
+        GM_setValue('hitmanWinDollarsInt', parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + parseCash(context.bounty));
+        //GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(experience));
+        GM_setValue('totalWinDollarsInt', parseInt(GM_getValue('totalWinDollarsInt', 0)) + parseCash(context.bounty));
+        GM_setValue('fightWin$NY', parseInt(GM_getValue('fightWin$NY', 0)) + parseCash(context.bounty));
       }
       updateLogStats(STAMINA_HOW_HITMAN);
       randomizeStamina();
@@ -12683,7 +12789,7 @@ function logResponse(rootElt, action, context) {
       }
 
       // Close banking
-      var closePopElt = xpathFirst('.//div[@class="pop_box"]//a[@class="pop_close"]')
+      var closePopElt = xpathFirst('//div[@class="pop_box"]//a[@class="pop_close"]')
       clickElement(closePopElt);
       break;
 
@@ -12695,7 +12801,7 @@ function logResponse(rootElt, action, context) {
       }
 
       // Close banking
-      var closePopElt = xpathFirst('.//div[@class="pop_box"]//a[@class="pop_close"]')
+      var closePopElt = xpathFirst('//div[@class="pop_box"]//a[@class="pop_close"]')
       clickElement(closePopElt);
       break;
 
@@ -12721,8 +12827,13 @@ function logResponse(rootElt, action, context) {
         addToLog('info Icon', inner);
       } else {
         setGMTime(timerName, '24 hours');
-        if (inner.match(/You have built (.+?)\./))
-          addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
+        if (inner.match(/You built (.+?)\./)) {
+          var log = '<span class="loot">'+' You built '+ RegExp.$1;
+          //if (inner.match(/You gained (.+?)\./))
+            //log = log + '. ' + RegExp.$1;
+          log = log + '.</span>';
+          addToLog('lootbag Icon', log);
+        }
       }
       break;
 
@@ -13419,8 +13530,27 @@ function parseCash(cash) {
   }
   return parseInt(c);
 }
+// Parse a monetary value such as "C$50,000" and return the city (const NY/CUBA/MOSCOW/BANGKOK).
+function parseCashLoc(cash) {
+  if (typeof(cash) == 'string') {
+    if (cash.match(/([A-Z])\$[\d,]*\d/)) {
+      switch (RegExp.$1) {
+        case 'C': return CUBA;
+        case 'M': return MOSCOW;
+        case 'B': return BANGKOK;
+      }
+    }
+  }
+  return NY;
+}
 
 function makeCommaValue(nStr) {
+  nStr = String(nStr);
+  var rgx = /^(.*\s)?(\d+)(\d{3}\b)/;
+  return nStr == (nStr = nStr.replace(rgx, "$1$2,$3")) ? nStr : makeCommaValue(nStr);
+}
+
+/*function makeCommaValue(nStr) {
   nStr += '';
   x = nStr.split('.');
   x1 = x[0];
@@ -13429,7 +13559,7 @@ function makeCommaValue(nStr) {
     x1 = x1.replace(rgx, '$1' + ',' + '$2');
   }
   return x1;
-}
+}*/
 
 /******************************** DATE/TIME ********************************/
 
