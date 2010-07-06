@@ -19,7 +19,7 @@
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
             rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks,
-            nonoymsd, MaxJ
+            nonoymsd, MaxJ, donnaB
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
@@ -36,13 +36,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.511
+// @version     1.1.512
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.511',
+  version: '1.1.512',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -963,7 +963,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var settingsOpen = false;
   var statsOpen = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', ' ', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -4314,7 +4314,7 @@ function saveSettings() {
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
-                            'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','burstJob',
+                            'autoWarBetray','hideGifts','autoSecretStash','autoIcePublish','autoIcePublishFrequency','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
@@ -4379,6 +4379,7 @@ function saveSettings() {
   GM_setValue('minCashBangkok', document.getElementById('minCashBangkok').value);
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
   GM_setValue('autoShareWishlistTime', document.getElementById('autoShareWishlistTime').value);
+  GM_setValue('autoIcePublishFrequency', document.getElementById('autoIcePublishFrequency').value);
   GM_setValue('autoLottoBonusItem', document.getElementById('autoLottoList').selectedIndex);
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   GM_setValue('warMode', document.getElementById('warMode').selectedIndex);
@@ -5621,11 +5622,11 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Secret stash '));
 
   // Iced opponent bonus
-  title = 'Automatically post iced opponent bonus.';
-  id = 'autoIcePublish';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Ice bonus '));
+  //title = 'Automatically post iced opponent bonus.';
+  //id = 'autoIcePublish';
+  //makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
+  //label = makeElement('label', rhs, {'for':id, 'title':title});
+  //label.appendChild(document.createTextNode(' Ice bonus '));
 
   // Level up bonus
   title = 'Automatically post level up bonus.';
@@ -5634,6 +5635,21 @@ function createMafiaTab() {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Level-up bonus '));
 
+// Auto-share wishlist
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Automatically post iced opponent bonus.';
+  id = 'autoIcePublish';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Ice bonus, every '));
+  title = 'Enter the publishing Frequency';
+  id = 'autoIcePublishFrequency';
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '1'), 'title':title, 'id':id, 'size':'2'});
+  rhs.appendChild(document.createTextNode(' th time'));
+  
   // Achievement bonus
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -9878,6 +9894,7 @@ function debugDumpSettings() {
         'Miscellaneous publishing: <br>' +
         '&nbsp;&nbsp;Secret stash: <strong>' + showIfUnchecked(GM_getValue('autoSecretStash')) + '</strong><br>' +
         '&nbsp;&nbsp;Ice bonus: <strong>' + showIfUnchecked(GM_getValue('autoIcePublish')) + '</strong><br>' +
+		'&nbsp;&nbsp;Ice bonus Frequency: <strong>' + GM_getValue('autoIcePublishFrequency') + '</strong><br>' +
         '&nbsp;&nbsp;Level-up bonus: <strong>' + showIfUnchecked(GM_getValue('autoLevelPublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Achievement bonus: <strong>' + showIfUnchecked(GM_getValue('autoAchievementPublish')) + '</strong><br>' +
         '&nbsp;&nbsp;Automatically share wishlist: <strong>' + showIfUnchecked(GM_getValue('autoShareWishlist')) + '</strong><br>' +
@@ -12072,13 +12089,17 @@ function logFightResponse(rootElt, resultElt, context) {
         userBoost = elt.title;
       }
     }
+	
+	var powerAttack = xpathFirst('.//div[@class="fightres_hint"]', resultElt);
+	var powerAttackResult="";
+	if(powerAttack) powerAttackResult = powerAttack.innerHTML.untag().trim();
 
     // Did we win or lose?
     var resultType;
     var result = 'Fought ' + user + '\'s mafia of ' + userSize;
     if (experience) {
       result += ' <span class="good">' + 'WON ' + cost + '</span>' + ' and ' +
-                '<span class="good">' + experience + ' experience</span>.';
+                '<span class="good">' + experience + ' experience</span> '+ ' '+powerAttackResult;
       addToLog('yeah Icon', result);
     } else {
       result += ' <span class="bad">' +
@@ -12116,25 +12137,46 @@ function logFightResponse(rootElt, resultElt, context) {
 
     // Check for any fatalities.
     if (innerNoTags.match(/body\s+count\s+to\s+(\d+)/i)) {
-      addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
+      //addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
+	  addToLog('info Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
     }
     if (innerNoTags.indexOf('You were snuffed') != -1) {
       addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
     }
 
     // Look for any loot.
-    if (innerNoTags.match(/(earned|gained|found) (some|an?|\d) (.+?)[\.!]/i)) {
-      var foundLoot = RegExp.$2 + ' ' + RegExp.$3;
-      var totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
-      var totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
+    //if (innerNoTags.match(/(earned|gained|found) (some|an?|\d) (.+?)[\.!]/i)) {
+    //  var foundLoot = RegExp.$2 + ' ' + RegExp.$3;
+    //  var totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
+    //  var totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
 
-      var txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
-      if(totalAttack>0)
-        var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
-      if(totalDefense>0)
-        var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
-      addToLog('lootbag Icon', txtLog);
-    }
+    // var txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+    //  if(totalAttack>0)
+    //    var txtLog = txtLog + '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
+    //  if(totalDefense>0)
+    //    var txtLog = txtLog + '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
+    //  addToLog('lootbag Icon', txtLog);
+    //}
+	
+	// Look for any loot.
+	//var lootRE = new RegExp("(earned|gained|found) (some|an?|\d) (.+?)[\.!]","gi");
+	var lootRE = /(earned|gained|found) (some|an?|\d) (.+?)[\.!]/gi;
+	var match;
+	var foundLoot;
+    var totalAttack;
+    var totalDefense;
+    var txtLog="";
+
+	while(match = lootRE.exec(innerNoTags)){
+		foundLoot = match[2] + ' ' + match[3];
+		totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
+		totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;    
+		txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+		if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
+		if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
+		addToLog('lootbag Icon', txtLog);
+	}
+    
 //    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
 //      addToLog('lootbag Icon', '<span class="loot">'+' Found '+
 //               RegExp.$1 + ' in the fight.</span>');
@@ -13007,7 +13049,7 @@ function handlePopups() {
               return(closePopup(popupElts[i], "Red Mystery Bag"));
             }
 
-            // Process Iced popup
+/*            // Process Iced popup
             if (popupInner.indexOf('iced_pop') != -1) {
               var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
               if (eltIce && isGMChecked('autoIcePublish')) {
@@ -13018,6 +13060,41 @@ function handlePopups() {
                 return(closePopup(popupElts[i], "Iced Popup"));
               }
             }
+			
+*/			
+            // Process Iced popup
+            if (popupInner.indexOf('iced_pop') != -1) {
+                var icedCountTextElt = xpathFirst('.//div[@class="iced_pop_body_count_text"]');
+                var icedCountElt = xpathFirst('.//div[@class="iced_pop_body_count_number"]');
+                var opponentElt = xpathFirst('.//div[@class="fightres_opponent"]');
+                var opponentNameElt = xpathFirst('.//div[@class="fightres_name"]/a', opponentElt);            
+
+                if (icedCountElt && icedCountTextElt && opponentElt) {
+                        
+                    var bodyCount = parseInt(icedCountElt.innerHTML.replace(',', ''));
+                    var publishFrequency = GM_getValue('autoIcePublishFrequency');
+					
+                    var eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
+                    if (eltIce && isGMChecked('autoIcePublish') && (bodyCount % publishFrequency == 0)) {                           					
+						addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
+                            linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + 
+                            icedCountElt.innerHTML + '</span> and published Iced Bonus');
+                    
+                        clickElement(eltIce);
+                        DEBUG('handlePopups(): Clicked to publish iced opponent bonus.');
+                    } else {
+                        // Get rid of Iced popup:
+						addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
+                            linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + 
+                            icedCountElt.innerHTML + '</span> without publishing Iced bonus (Frequency:only every '+publishFrequency+'th time)');                    
+                        return(closePopup(popupElts[i], "Iced Popup"));
+                    }
+                } else {
+                    // missing info, just go away
+                    return(closePopup(popupElts[i], "Iced Popup"));
+                }
+            }
+		
 
   /*
             // Process Robbery Loot popup
