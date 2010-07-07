@@ -36,13 +36,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.516
+// @version     1.1.517
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.516',
+  version: '1.1.517',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3085,45 +3085,23 @@ function logRobResponse(rootElt, resultElt, context) {
         needStatUpdate = true;
       }
 
-    if (cashElt)
-      if (cashElt.innerHTML.match(REGEX_CASH)) {
+    if (cashElt && cashElt.innerHTML) {
       //if (m = /(.*)/.exec(cashElt.innerHTML)) {
-        var cashInt = parseCash(RegExp.lastMatch); //m[1].replace(/[^0-9]/g, '');
-        var cashLoc = parseCashLoc(RegExp.lastMatch);
-        GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt));
-        switch (cashLoc) {
-          case NY: GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cashInt)); break;
-          case CUBA: GM_setValue('fightWin$Cuba', String(parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt)); break;
-          case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt)); break;
-          case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
-        }
-        needStatUpdate = true;
+      var cashInt = parseCash(cashElt.innerHTML);
+      var cashLoc = parseCashLoc(cashElt.innerHTML);
+      GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt));
+      switch (cashLoc) {
+        case NY: GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cashInt)); break;
+        case CUBA: GM_setValue('fightWin$Cuba', String(parseInt(GM_getValue('fightWin$Cuba', 0)) + cashInt)); break;
+        case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt)); break;
+        case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
       }
+      needStatUpdate = true;
+    }
   }
 
   randomizeStamina();
 
-  var popUp = xpathFirst('//div[contains(@class, "pop_box") and contains(@style, "block")]');
-  if (popUp) {
-    // Look for any loot on popup
-    if (m = /You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)<\/div>/.exec(popUp.innerHTML)) {
-      addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[3] + ' on board.</span>');
-    }
-
-    if (m = /(\d+) Bonus Experience/.exec(popUp.innerHTML)) {
-      var exp = m[1].replace(/[^0-9]/g, '');
-      addToLog('yeah Icon', 'Robbing board cleared. <span class="good">Bonus: ' + exp + ' Experience</span>');
-      updateRobStatistics(null,parseInt(exp));
-      needStatUpdate = true;
-    }
-
-    // close the popup button
-    var closeElt = xpathFirst('.//a[@class="pop_close"]',popUp);
-    if (closeElt) {
-      clickElement(closeElt);
-      DEBUG('Clicked to close rob popup.');
-    }
-  }
   if (needStatUpdate) updateLogStats();
 }
 
@@ -3310,7 +3288,7 @@ function autoBankDeposit(bankCity, amount) {
   }
 
   // Grab the deposit button!
-  var submitElt = xpathFirst('.//div[@id="bank_dep_button"]//a', bankElt);
+  var submitElt = xpathFirst('.//div[@id="bank_dep_button"]/a[contains(@onclick,"deposit(")]', bankElt);
   if (!submitElt) {
     addToLog('warning Icon', 'BUG DETECTED: No submit input at bank.');
     return false;
@@ -3344,6 +3322,7 @@ function autoBankDeposit(bankCity, amount) {
   }
   Autoplay.delay = noDelay;
   Autoplay.start();
+  closePopup(bankElt.parentNode, "Bank Popup");
   return true;
 }
 
@@ -13142,18 +13121,24 @@ function handlePopups() {
                 return(closePopup(popupElts[i], "Iced Popup"));
               }
             }
-  /*
-            // Process Robbery Loot popup
-            if (popupInnerNoTags.match(/You\s+(earned|gained|received|collected)\s+(some|a|an)\s+bonus\s+(.+?)Y/)) {
-              DEBUG('Popup Process: Robbery Loot Processed');
-              addToLog('lootbag Icon', '<span class="loot">'+' Found '+ RegExp.$3 + ' on robbery board.</span>');
-              if (popupInner.match(/(\d+) Bonus Experience/)) {
-                var exp = RegExp.$1.replace(/[^0-9]/g, '');
-                updateRobStatistics(null,parseInt(exp));
-              }
-              return(closePopup(popupElts[i], "Robbery Loot"));
-            }
 
+            // Process Robbery Loot popup
+            if (popupInnerNoTags.indexOf('You cleared the full board') != -1) {
+              // Look for any loot on popup
+              addToLog('warning Icon', 'Popup Process: Processing robbing board');
+              if (popupInner.match(/You\s+(earned|gained|received|collected)\s+(some|an?)\s+bonus\s+(.+?)<\/div>/i)) {
+                addToLog('lootbag Icon', '<span class="loot">'+' Found '+ RegExp.$3 + ' on robbing board.</span>');
+              }
+              if (popupInnerNoTags.match(/(\d+) Bonus Experience/i)) {
+                //var exp = m[1].replace(/[^0-9]/g, '');
+                var exp = RegExp.$1.replace(/[^0-9]/g, '');
+                addToLog('yeah Icon', 'Robbing board cleared. <span class="good">Bonus: ' + exp + ' Experience</span>');
+                updateRobStatistics(null,parseInt(exp));
+                updateLogStats();
+              }
+              return(closePopup(popupElts[i], "Robbing Board Popup"));
+            }
+  /*
             // Process Level Up popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
             if (eltPubButton) {
