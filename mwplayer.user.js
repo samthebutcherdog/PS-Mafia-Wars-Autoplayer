@@ -36,13 +36,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.513
+// @version     1.1.514
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.513',
+  version: '1.1.514',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3236,7 +3236,7 @@ function logRobResponse(rootElt, resultElt, context) {
     }
 
     // close the popup button
-    var closeElt = xpathFirst('//a[@class="pop_close"]',popUp);
+    var closeElt = xpathFirst('.//a[@class="pop_close"]',popUp);
     if (closeElt) {
       clickElement(closeElt);
       DEBUG('Clicked to close rob popup.');
