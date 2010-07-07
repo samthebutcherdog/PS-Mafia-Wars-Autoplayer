@@ -36,13 +36,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.515
+// @version     1.1.516
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.515',
+  version: '1.1.516',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6812,7 +6812,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoymsd';
+                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -8161,6 +8161,18 @@ function customizeStats() {
     nrgLinkElt.appendChild(nrgImgElt);
     nrgLinkElt.addEventListener('click', miniPackForce, false);
   }
+  
+  // Make energy text clickable for mini pack.
+  var nrgLinkEltTxt = document.getElementById('mwap_nrgTxt');
+  var nrgTxtElt = xpathFirst('//span[@class="stat_title" and contains(text(), "Energy")]');
+  if (nrgTxtElt && !nrgLinkEltTxt) {
+    if (timeLeftGM('miniPackTimer') == 0 || isNaN(timeLeftGM('miniPackTimer'))) var miniPackTitle = 'Available now (or Timer not set).';
+    else var miniPackTitle = 'Available in ' + getHoursTime(timeLeftGM('miniPackTimer'));
+    nrgLinkEltTxt = makeElement('a', null, {'id':'mwap_nrgTxt', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle});
+    nrgTxtElt.parentNode.insertBefore(nrgLinkEltTxt, nrgTxtElt);
+    nrgLinkEltTxt.appendChild(nrgTxtElt);
+    nrgLinkEltTxt.addEventListener('click', miniPackForce, false);
+  }
 
   // Make health icon clickable for instant healing.
   var healLinkElt = document.getElementById('mwap_heal');
@@ -8198,6 +8210,44 @@ function customizeStats() {
       healLinkElt.setAttribute('onclick', hospitalElt.getAttribute('onclick').replace('view', 'heal').replace('popup_fodder', SCRIPT.ajaxPage));
     }
   }
+  
+	// Make health text clickable for instant healing.
+  var healLinkEltTxt = document.getElementById('mwap_healTxt');
+  var healTxtElt = xpathFirst('//span[@class="stat_title" and contains(text(), "Health")]');
+  if (healTxtElt && !healLinkEltTxt) {
+    healLinkEltTxt = makeElement('a', null, {'id':'mwap_healTxt', 'title':'Click to heal immediately.'})
+    healTxtElt.parentNode.insertBefore(healLinkEltTxt, healTxtElt);
+    healLinkEltTxt.appendChild(healTxtElt);
+  }
+
+  if (healLinkEltTxt) {
+    healLinkEltTxt.href = 'http://mwfb.zynga.com/mwfb' +
+                       SCRIPT.controller + 'hospital' +
+                       SCRIPT.action + 'heal' +
+                       SCRIPT.city + (city + 1);
+
+    // Substitute the "hide" icon if currently hiding in the hospital.
+    var hideTxtElt = healLinkEltTxt.childNodes[1];
+    if (GM_getValue('isRunning') && healTxtElt && health < 20 &&
+        isGMChecked('hideInHospital')) {
+      healTxtElt.style.display = 'none';
+      if (!hideTxtElt) {
+        hideTxtElt = makeElement('a', null, {'id':'mwap_healTxt', 'title':'Currently hiding in the hospital. Click to heal immediately.'});		
+      }
+      hideTxtElt.style.display = '';
+    } else if (hideTxtElt) {
+      hideTxtElt.style.display = 'none';
+      healTxtElt.style.display = '';
+    }
+
+    // Substitute AJAX navigation if code is available.
+    var hospitalEltTxt = xpathFirst('.//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
+    if (hospitalEltTxt) {
+      // Make instant heal work without switching pages.
+      healLinkEltTxt.setAttribute('onclick', hospitalEltTxt.getAttribute('onclick').replace('view', 'heal').replace('popup_fodder', SCRIPT.ajaxPage));
+    }
+  }
+   
 
   // Show points until next level.
   var elt = xpathFirst('//span[@class="stat_title" and contains(text(), "Experience")]');
