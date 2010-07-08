@@ -36,13 +36,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.518
+// @version     1.1.519
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.518',
+  version: '1.1.519',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1804,6 +1804,7 @@ function doAutoPlay () {
 
   // Auto-heal
   if (GM_getValue('isRunning') &&
+	  (stamina >= GM_getValue('stamina_min_heal')) && 
       isGMChecked('autoHeal') &&
       health < GM_getValue('healthLevel', 0) &&
       health < maxHealth &&
@@ -3601,7 +3602,9 @@ function findFightOpponent(element) {
   var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
   var opponentMafiaMax = parseInt(GM_getValue('fightMafiaMax', 501));
   var opponentMafiaMin = parseInt(GM_getValue('fightMafiaMin', 1));
+  var fightNames = isGMChecked('fightNames');
   var avoidNames = isGMChecked('fightAvoidNames');
+  var onlyNames = isGMChecked('fightOnlyNames');  
 
   // Make any relative adjustments (if enabled).
   if (GM_getValue('fightLevelMaxRelative', false)) {
@@ -3661,10 +3664,21 @@ function findFightOpponent(element) {
       mafiaMinCount++;
       continue;
     }
-    if (avoidNames && isFamily(decodeHTMLEntities(opponent.name))) {
+    //if (avoidNames && isFamily(decodeHTMLEntities(opponent.name))) {
+    //  namesCount++;
+    //  continue;
+    //}
+	
+	if (fightNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name))) {
       namesCount++;
       continue;
     }
+	
+	if (fightNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name))) {
+      namesCount++;
+      continue;
+    }
+	
     if (!opponent.id) continue;
 
     // Check iced oponents
@@ -3674,6 +3688,16 @@ function findFightOpponent(element) {
     }
 
     // Check against previous opponents.
+    //var idx = fightListAvoid.indexOf(opponent);
+    //if (idx != -1) {
+      // We can't fight them, but update their info.
+    //  fightListAvoid.get()[idx].update(opponent);
+    //  blacklistCount++;
+    //  continue;
+    //}
+	
+	if(fightNames && avoidNames){
+    // Check against previous opponents.
     var idx = fightListAvoid.indexOf(opponent);
     if (idx != -1) {
       // We can't fight them, but update their info.
@@ -3681,6 +3705,20 @@ function findFightOpponent(element) {
       blacklistCount++;
       continue;
     }
+	}
+	
+	if(fightNames && onlyNames){
+    // Check against previous opponents.
+    var idx = fightListOnly.indexOf(opponent);
+    if (idx != -1) {
+      // We can't fight them, but update their info.
+      fightListOnly.get()[idx].update(opponent);
+      blacklistCount++;
+      continue;
+    }
+	}	
+	
+
     if (avoidLosers) {
       idx = fightListInactive.indexOf(opponent);
       if (idx != -1) {
@@ -3939,6 +3977,7 @@ function saveDefaultSettings() {
   GM_setValue('logPlayerUpdatesMax', '25');
   GM_setValue('d1', '3');
   GM_setValue('d2', '5');
+  GM_setValue('stamina_min_heal', '0');
   GM_setValue('idleLocation', NY);
   GM_setValue('autoHelp', 'checked');
   GM_setValue('autoBurnerHelp', 'checked');
@@ -3990,7 +4029,12 @@ function saveDefaultSettings() {
   GM_setValue('fightLevelMax', 100);
   GM_setValue('fightMafiaMax', 501);
   GM_setValue('fightMafiaMin', 1);
+  //GM_setValue('fightAvoidNames', 'checked');
+  
+  GM_setValue('fightNames', 'checked');
   GM_setValue('fightAvoidNames', 'checked');
+  GM_setValue('fightOnlyNames', '');  
+  
   GM_setValue('fightRemoveStronger', 'checked');
   GM_setValue('hitmanLocation', NY);
   GM_setValue('hitmanAvoidNames', 'checked');
@@ -4177,7 +4221,7 @@ function saveSettings() {
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
-                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack']);
+                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4226,6 +4270,7 @@ function saveSettings() {
   GM_setValue('r2', document.getElementById('r2').value);
   GM_setValue('d1', document.getElementById('d1').value);
   GM_setValue('d2', document.getElementById('d2').value);
+  GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value); 
   GM_setValue('propertyId', '12');
   GM_setValue('healthLevel', healthLevel);
   GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
@@ -4884,7 +4929,7 @@ function createSettingsBox() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 540px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top: 50px; width: 600px; height: 490px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 600px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
   //End settings box
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
@@ -5117,6 +5162,17 @@ function createGeneralTab() {
   }
   hideInHosp.addEventListener('click', hideHandler, false);
 
+  // stamina minimum to allow healing
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Set the minimum Stamina Points Needed for Auto-Heal.';
+  label = makeElement('label', lhs, {'title':title});
+  label.appendChild(document.createTextNode('Disable Auto-Heal when Stamina falls below:'));
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue('stamina_min_heal', '22'), 'id':'stamina_min_heal', 'size':'3', 'style':'text-align: center'});
+  rhs.appendChild(document.createTextNode(' points'));  
+  
   // Idle-in location
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6406,7 +6462,7 @@ function createStaminaTab() {
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  makeElement('br', item, {'class':'hide'});  
   id = 'fightMafiaMin';
   title = 'Avoid opponents with mafia sizes smaller than this.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -6440,20 +6496,45 @@ function createStaminaTab() {
   label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
 
   // Family names
+  //item = makeElement('div', list);
+  //lhs = makeElement('div', item, {'class':'lhs'});
+  //rhs = makeElement('div', item, {'class':'rhs'});
+  //makeElement('br', item, {'class':'hide'});
+  //title = 'Avoid random opponents whose names contain specific patterns.';
+  //id = 'fightAvoidNames';
+  //makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightAvoidNames', 0);
+  //label = makeElement('label', lhs, {'for':id, 'title':title});
+  //label.appendChild(document.createTextNode(' Avoid mafia families:'));
+
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});  
+  rhs2 = makeElement('div', item, {'class':'rhs'});  
   makeElement('br', item, {'class':'hide'});
-  title = 'Avoid random opponents whose names contain specific patterns.';
+  
+  title = ' Use Mafia Family Patterns when fighting';
+  id = 'fightNames';
+  var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  //makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when fighting:'));
+  UseFightNames.addEventListener('click', clickUseFightNames, false);
+  makeElement('br', lhs);
   id = 'fightAvoidNames';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightAvoidNames', 0);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Avoid mafia families:'));
+  title = ' Avoid mafia families';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('br', lhs);
+  id = 'fightOnlyNames';
+  title = ' Only Fight Mafia Families ';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));      
+  
   makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
-  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
+  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));    
+  
+  
   // End of options specific to random fighting
-
 
   //
   // Settings for list fighting
@@ -6900,6 +6981,8 @@ function validateStaminaTab() {
       s.fightStealth = checked('fightStealth');
       s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
       s.fightAvoidNames = checked('fightAvoidNames');
+	  s.fightNames = checked('fightNames');
+	  s.fightOnlyNames = checked('fightOnlyNames');
       s.clanName = document.getElementById('fightClanName').value;
       s.reattackThreshold = parseInt(document.getElementById('reattackThreshold').value);
       s.staminaReattack = checked('staminaReattack');
@@ -7080,6 +7163,17 @@ function clickAutoPause() {
     if (document.getElementById('autoPauseBefore').checked === false &&
         document.getElementById('autoPauseAfter').checked === false) {
       document.getElementById('autoPauseBefore').checked = true;
+    }
+  }
+}
+
+function clickUseFightNames() {
+  if (this.checked) {
+    // check to ensure at least one radio box is checked
+    // enable Before level up by default
+    if (document.getElementById('fightAvoidNames').checked === false &&
+        document.getElementById('fightOnlyNames').checked === false) {
+      document.getElementById('fightAvoidNames').checked = true;
     }
   }
 }
@@ -7972,7 +8066,8 @@ function doQuickClicks() {
     }
 
     // Click mystery gift elements
-    var mysteryElts = xpath('.//div[@class="msg_box_div_contents" and contains(.,"Mystery Bag")]', innerPageElt);
+    //var mysteryElts = xpath('.//div[@class="msg_box_div_contents" and contains(.,"Mystery Bag")]', innerPageElt);
+	var mysteryElts = xpath('.//div[@class="msg_box_div_contents" and contains(.,"Mystery")]', innerPageElt);
     for (var i = 0, iLength = mysteryElts.snapshotLength; i < iLength; ++i) {
       if (mysteryElts.snapshotItem(i) && !/display: none/.test(mysteryElts.snapshotItem(i).innerHTML)) {
         var linkElt = getActionLink (mysteryElts.snapshotItem(i), 'Open It!');
@@ -8135,7 +8230,8 @@ function customizeStats() {
   if (nrgImgElt && !nrgLinkElt) {
     if (timeLeftGM('miniPackTimer') == 0 || isNaN(timeLeftGM('miniPackTimer'))) var miniPackTitle = 'Available now (or Timer not set).';
     else var miniPackTitle = 'Available in ' + getHoursTime(timeLeftGM('miniPackTimer'));
-    nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle});
+    //nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle});
+	nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle + '<br>Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ 'points.' });
     nrgImgElt.parentNode.insertBefore(nrgLinkElt, nrgImgElt);
     nrgLinkElt.appendChild(nrgImgElt);
     nrgLinkElt.addEventListener('click', miniPackForce, false);
@@ -8147,7 +8243,7 @@ function customizeStats() {
   if (nrgTxtElt && !nrgLinkEltTxt) {
     if (timeLeftGM('miniPackTimer') == 0 || isNaN(timeLeftGM('miniPackTimer'))) var miniPackTitle = 'Available now (or Timer not set).';
     else var miniPackTitle = 'Available in ' + getHoursTime(timeLeftGM('miniPackTimer'));
-    nrgLinkEltTxt = makeElement('a', null, {'id':'mwap_nrgTxt', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle});
+    nrgLinkEltTxt =  makeElement('a', null, {'id':'mwap_nrg', 'title':'Click to fire mini-pack immediately. ' + miniPackTitle + '<br>Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ 'points.' });
     nrgTxtElt.parentNode.insertBefore(nrgLinkEltTxt, nrgTxtElt);
     nrgLinkEltTxt.appendChild(nrgTxtElt);
     nrgLinkEltTxt.addEventListener('click', miniPackForce, false);
@@ -9885,6 +9981,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
+		'&nbsp;&nbsp;&nbsp;-Minimum Stamina Allowing auto-Heal: <strong>' + GM_getValue('stamina_min_heal') + '</strong><br>' +
         'Idle in City: <strong>' + showIfUnchecked(GM_getValue('idleInCity')) + '</strong><br>' +
         '&nbsp;&nbsp;Selected city: <strong>' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '</strong><br>' +
         'Enable auto-lotto: <strong>' + showIfUnchecked(GM_getValue('autoLottoOpt')) + '</strong><br>' +
