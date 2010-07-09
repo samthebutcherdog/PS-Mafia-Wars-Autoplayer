@@ -11,11 +11,14 @@
 
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
+* All images copyright PlayerScripts.com. All rights reserved. 2010
 */
 
 /**
 * @package: Facebook Mafia Wars Autoplayer
-* @authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
+* @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Dex, SamTheButcher, MaxJ, donnaB,
+			billy_bob, Cam, janmillsjr, nonoymsd  
+* @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
             rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks,
@@ -26,7 +29,7 @@
 */
 
 // ==UserScript==
-// @name        Facebook Mafia Wars Autoplayer
+// @name        PS Facebook Mafia Wars Autoplayer (MWAP)
 // @namespace   mafiawars
 // @description Autoplayer for the facebook application - Mafia Wars
 // @include     http://facebook.mafiawars.com/mwfb/remote/html_server.php*
@@ -36,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.519
+// @version     1.1.520
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.519',
+  version: '1.1.520',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7797,20 +7800,32 @@ function refreshMWAPCSS() {
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' +
-                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}' +
-                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 285px !important; width: 45px; z-index: 10001 !important;}') +
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 765px !important; width: 45px; z-index: 10001 !important;}' +
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 765px !important; width: 45px; z-index: 10001 !important;}' +
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 765px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
-                 // Move gifticon and make it smaller:
-                 (isGMChecked('hideGiftIcon') ?
-                  ' #gifticon_container {display: none;}' :
-                  ' #gifticon_container {position: absolute; top: 15px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/gift_con_gold.png"] {width: 30px;}') +
-                 // Move Poker Promo and make it smaller:
+				// Move Zynga selling Promo icon and click box and make it smaller:
+         			(isGMChecked('hidePromoIcon') ?
+         			' #buyframe_link_container_anim  {display: none;}' +
+         			' #buyframe_link_cover_anim      {display: none;}' :
+         			' #buyframe_link_container_anim  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
+           			' #buyframe_link_cover_anim      {position: absolute; top: 50px; left: 765px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
+
+				// Move Promo and make it smaller:
+                (isGMChecked('hidePromoIcon') ?
+         			' #promoicon_container {display: none;}' :
+         			' #promoicon_container {position: absolute; top:  100px;  left: 765px; width: 12px; z-index: 10001;} {width: 22px;} ') +
+
+				// Move World Cup Promo icon and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
-                 ' #promoicon_container {display: none;}' :
-                 ' #promoicon_container {position: absolute; top: 33px; left: 255px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/pokerIcon.png"] {width: 22px;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/farmIcon.png"] {width: 22px;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/PromoIcons/treasureIcon.png"] {width: 22px;}') +
-                 // Move London Countdown:
-                 ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
+                  	' #gc_collectible_container {display: none;}' :
+                  	' #gc_collectible_container {position: absolute; top: 145px; left: 765px; width: 22px; z-index: 10001;} ') +
+
+				// Move gift icon and make it smaller:
+         		(isGMChecked('hideGiftIcon') ?
+         			' #gifticon_container {display: none;}' :
+         			' #gifticon_container {position: absolute; top: 190px; left: 765px; width: 12px; z-index: 10001;}  ') +
+				// Move London Countdown:                 ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust level/experience CSS
