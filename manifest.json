@@ -11,13 +11,13 @@
                    "http://www.facebook.com/connect/prompt_feed*" ],
       "all_frames":true
    } ],
-   "description": "Mafia Wars Autoplayer for Google Chrome",
+   "description": "PS Facebook Mafia Wars Autoplayer (MWAP)",
    "icons": {
       "128": "mwap128.png",
       "48": "mwap48.png"
    },
    "permissions": [ "http://code.google.com/p/mwplayer/*" ],
    "name": "Autoplayer for Mafia Wars (Facebook)",
-   "version": "1.1.523",
+   "version": "1.1.524",
    "minimum_chrome_version": "4.0"
 }
