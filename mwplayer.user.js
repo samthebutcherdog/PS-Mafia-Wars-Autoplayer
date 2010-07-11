@@ -16,7 +16,7 @@
 
 /**
 * @package: Facebook Mafia Wars Autoplayer
-* @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Dex, SamTheButcher, MaxJ, donnaB,
+* @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Lister, SamTheButcher, MaxJ, donnaB,
 			billy_bob, Cam, janmillsjr, nonoymsd  
 * @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.522
+// @version     1.1.523
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.522',
+  version: '1.1.523',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6986,7 +6986,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger';
+                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger, Lister';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -8179,6 +8179,7 @@ function doQuickClicks() {
     if (actionElt) {
       var actionLink = getActionLink (actionElt, 'Collect Skill Point');
       if (!actionLink) actionLink = getActionLink (actionElt, 'Collect Reward Point');
+      if (!actionLink) actionLink = getActionLink (actionElt, 'Claim Mystery Reward');	  
       if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         DEBUG('Clicked to collect checklist bonus.');
