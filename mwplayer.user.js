@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.521
+// @version     1.1.522
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.521',
+  version: '1.1.522',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4645,23 +4645,27 @@ function updateLogStats(newHow) {
     lossDollarUnit++;
   }
   
-  document.getElementById('totalWinDollars').firstChild.nodeValue = units[winDollarUnit] + '$' + winDollars.toFixed(3);
-  document.getElementById('totalLossDollars').firstChild.nodeValue = units[lossDollarUnit] + '$' + lossDollars.toFixed(3);
-  document.getElementById('totalExp').firstChild.nodeValue = makeCommaValue(GM_getValue('totalExpInt', 0));
+  var totalWinDollars = document.getElementById('totalWinDollars');
+  // if one is there, they all should be there
+  if (totalWinDollars) {
+  	totalWinDollars.firstChild.nodeValue = units[winDollarUnit] + '$' + winDollars.toFixed(3);
+  	document.getElementById('totalLossDollars').firstChild.nodeValue = units[lossDollarUnit] + '$' + lossDollars.toFixed(3);
+  	document.getElementById('totalExp').firstChild.nodeValue = makeCommaValue(GM_getValue('totalExpInt', 0));
 
-  var titleWinDollars = '$' + makeCommaValue(GM_getValue('fightWin$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightWin$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightWin$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightWin$Bangkok', 0));
-  var titleLossDollars = '$' + makeCommaValue(GM_getValue('fightLoss$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightLoss$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightLoss$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightLoss$Bangkok', 0));
-  document.getElementById('totalWinDollars').setAttribute('title', titleWinDollars);
-  document.getElementById('totalLossDollars').setAttribute('title', titleLossDollars);
+  	var titleWinDollars = '$' + makeCommaValue(GM_getValue('fightWin$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightWin$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightWin$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightWin$Bangkok', 0));
+  	var titleLossDollars = '$' + makeCommaValue(GM_getValue('fightLoss$NY', 0)) + ' | C$' + makeCommaValue(GM_getValue('fightLoss$Cuba', 0)) + ' | M$' + makeCommaValue(GM_getValue('fightLoss$Moscow', 0)) + ' | B$' + makeCommaValue(GM_getValue('fightLoss$Bangkok', 0));
+  	document.getElementById('totalWinDollars').setAttribute('title', titleWinDollars);
+  	document.getElementById('totalLossDollars').setAttribute('title', titleLossDollars);
 
-  //FIXME: These values currently only get refreshed when stamina is spent,
-  //       which isn't often enough. Perhaps other stats that only need to
-  //       be refreshed after stamina is spent would be more useful anyway?
-  //       And the xps to next level stat already appears in the main window.
-  var rate = getStaminaGainRate();
-  document.getElementById('expRate').firstChild.nodeValue = rate.toFixed(2);
-  document.getElementById('expToNext').firstChild.nodeValue = makeCommaValue(ptsToNextLevel);
-  document.getElementById('stamToNext').firstChild.nodeValue = rate? (ptsToNextLevel / rate).toFixed(0): 'n/a';
+	  //FIXME: These values currently only get refreshed when stamina is spent,
+	  //       which isn't often enough. Perhaps other stats that only need to
+	  //       be refreshed after stamina is spent would be more useful anyway?
+	  //       And the xps to next level stat already appears in the main window.
+	  var rate = getStaminaGainRate();
+	  document.getElementById('expRate').firstChild.nodeValue = rate.toFixed(2);
+	  document.getElementById('expToNext').firstChild.nodeValue = makeCommaValue(ptsToNextLevel);
+	  document.getElementById('stamToNext').firstChild.nodeValue = rate? (ptsToNextLevel / rate).toFixed(0): 'n/a';
+  }
 }
 
 function logFilterOnOff() {
