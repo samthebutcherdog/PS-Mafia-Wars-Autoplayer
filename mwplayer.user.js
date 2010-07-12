@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.524
+// @version     1.1.525
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.524',
+  version: '1.1.525',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1892,6 +1892,18 @@ function doAutoPlay () {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
   }
 
+  // Ask for Help on Moscow Tier
+  if (GM_getValue('isRunning') && !maxed && parseInt(GM_getValue('selectMoscowTier'))  && !timeLeftGM('AskforHelpMoscowTimer')) {
+	DEBUG('going to Moscow for Ask for Help-job');
+    if (AskforHelp('2')) return;
+  }  
+  
+  // Ask for Help on Bangkok Tier
+  if (GM_getValue('isRunning') && !maxed && parseInt(GM_getValue('selectBangkokTier')) && !timeLeftGM('AskforHelpBangkokTimer')) {
+	DEBUG('going to Bangkok for Ask for Help-job');
+    if (AskforHelp('3')) return;
+  }   
+   
   // Auto-stat
   if (GM_getValue('isRunning') && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
@@ -1976,6 +1988,8 @@ function doAutoPlay () {
       return;
     }
   }
+
+  
 
   // Do jobs or fight/hit. Give priority to spending stamina if it needs
   // to be burned and using one won't level up. Give priority to jobs if
@@ -2153,6 +2167,64 @@ function autoHeal() {
   };
   Autoplay.start();
   return true;
+}
+
+
+function AskforHelp(hlpCity){
+ 
+ helpCity = parseInt(hlpCity);
+ if(helpCity==2) DEBUG('Clicking to go to Moscow to look for Ask for Help-job');
+ if(helpCity==3) DEBUG('Clicking to go to Bangkok to look for Ask for Help-job');
+
+ // Go to the correct city.
+ if (city != helpCity) {
+    Autoplay.fx = function() { goLocation(helpCity); };
+    //Autoplay.delay = noDelay;
+    Autoplay.start();
+    return true;
+  }
+ 
+ DEBUG('Going to Jobs Page');
+ goJobsNav();
+ 
+ if(helpCity==2) tabno = parseInt(GM_getValue('selectMoscowTier'));
+ if(helpCity==3) tabno = parseInt(GM_getValue('selectBangkokTier'));
+ 
+ if(helpCity==2) DEBUG('Clicking to go to Moscow-tier '+tabno);
+ if(helpCity==3) DEBUG('Clicking to go to Bangkok-tier '+tabno);
+  
+   // Go to the correct job tab.
+  if (!onJobTab(tabno)) {
+    Autoplay.fx = function() { goJobTab(tabno); };
+    Autoplay.start();
+    return true;
+  }
+ 
+ DEBUG('Right City. Right Tab. Looking for the Ask for Help-job');
+ 
+ var timerName;
+ if(helpCity==2) timerName='AskforHelpMoscowTimer';
+ if(helpCity==3) timerName='AskforHelpBangkokTimer';
+  
+ var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
+ 
+ if (askHelpFriends) {
+	addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
+	//Autoplay.fx = function() {
+    //  clickAction = 'Ask for Help';
+    //  clickContext = {'helpCity':helpCity};
+      clickElement(askHelpFriends);
+      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
+    //};
+	DEBUG(' Resetting Timer for 24 hours on ' + helpCity +'.'+ tabno);
+    setGMTime(timerName, '24 hours');
+ } else { 
+	setGMTime(timerName, '1 hour');
+    addToLog('info Icon', ' You cannot Ask for Help yet on ' + helpCity +'.'+ tabno);
+	DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);
+ } 
+ 
+ return true;
 }
 
 // Pass the item array, item id, and building type
@@ -4224,7 +4296,8 @@ function saveSettings() {
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
-                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames']);
+                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack',
+							'fightNames','fightAvoidNames','fightOnlyNames']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -4311,6 +4384,8 @@ function saveSettings() {
   setSavedList('masteryJobsList', mastery_jobs_list);
   GM_setValue('selectMission', document.getElementById('selectMissionS').selectedIndex);
   GM_setValue('selectTier', document.getElementById('selectTier').value);
+  GM_setValue('selectMoscowTier', (document.getElementById('selectMoscowTier').value)?document.getElementById('selectMoscowTier').value:0);  
+  GM_setValue('selectBangkokTier', (document.getElementById('selectBangkokTier').value)?document.getElementById('selectBangkokTier').value:0);
 
   // Save the stamina tab settings.
   for (var key in staminaTabSettings) {
@@ -6250,6 +6325,110 @@ function createEnergyTab() {
   masterAllJobs.addEventListener('change', handler, false);
   multipleJobs.addEventListener('change', handler, false);
 
+
+  //Automatically Ask for Moscow / Bangkok Help
+  var selectMoscowTierDiv = makeElement('div', list);
+  lhs = makeElement('div', selectMoscowTierDiv, {'class':'lhs'});
+  rhs = makeElement('div', selectMoscowTierDiv, {'class':'rhs'});
+  makeElement('br', selectMoscowTierDiv, {'class':'hide'});
+  title = 'Ask for Help on Moscow Tiers - Be carefull to only choose available Tiers !';
+  id = 'selectMoscowTier';
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Moscow help  on :'));
+  var selectMoscowTier = makeElement('select', rhs, {'id':id, 'title':title});
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'no Help in Moscow';
+  choiceMoscowTier.value = '0';
+  if (GM_getValue('selectMoscowTier') == '0') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Baklany';
+  choiceMoscowTier.value = '1';
+  if (GM_getValue('selectMoscowTier') == '1') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Boets';
+  choiceMoscowTier.value = '2';
+  if (GM_getValue('selectMoscowTier') == '2') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Brigadir';
+  choiceMoscowTier.value = '3';
+  if (GM_getValue('selectMoscowTier') == '3') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Avtoritet';
+  choiceMoscowTier.value = '4';
+  if (GM_getValue('selectMoscowTier') == '4') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Vor';
+  choiceMoscowTier.value = '5';
+  if (GM_getValue('selectMoscowTier') == '5') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Pakhan';
+  choiceMoscowTier.value = '6';
+  if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  
+  var selectBangkokTierDiv = makeElement('div', list);
+  lhs = makeElement('div', selectBangkokTierDiv, {'class':'lhs'});
+  rhs = makeElement('div', selectBangkokTierDiv, {'class':'rhs'});
+  makeElement('br', selectBangkokTierDiv, {'class':'hide'});
+  title = 'Ask for Help on Bangkok Tiers - Be carefull to only choose available Tiers !';  
+  id = 'selectBangkokTier';
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Bangkok help  on :'));
+  
+  var selectBangkokTier = makeElement('select', rhs, {'id':id, 'title':title});
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'no Help in Bangkok';
+  choiceBangkokTier.value = '0';
+  if (GM_getValue('selectBangkokTier') == '0') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Brawler';
+  choiceBangkokTier.value = '1';
+  if (GM_getValue('selectBangkokTier') == '1') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Criminal';
+  choiceBangkokTier.value = '2';
+  if (GM_getValue('selectBangkokTier') == '2') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Pirate';
+  choiceBangkokTier.value = '3';
+  if (GM_getValue('selectBangkokTier') == '3') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Commandant';
+  choiceBangkokTier.value = '4';
+  if (GM_getValue('selectBangkokTier') == '4') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Oyabun';
+  choiceBangkokTier.value = '5';
+  if (GM_getValue('selectBangkokTier') == '5') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Dragon Head';
+  choiceBangkokTier.value = '6';
+  if (GM_getValue('selectBangkokTier') == '6') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Saboteur';
+  choiceBangkokTier.value = '7';
+  if (GM_getValue('selectBangkokTier') == '7') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Assassin';
+  choiceBangkokTier.value = '8';
+  if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+ 
+ 
   // Spend buff packs?
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -8085,9 +8264,13 @@ function resetTimers(popup) {
   GM_setValue('takeHourCuba', 0);
   GM_setValue('takeHourMoscow', 0);
   GM_setValue('takeHourNew York', 0);
+  GM_setValue('AskforHelpMoscow', 0);
+  GM_setValue('AskforHelpBangkok', 0);  
   GM_setValue('dailyChecklistTimer', 0);
   GM_setValue('autoGiftAcceptTimer', 0);
   GM_setValue('autoSafehouseTimer', 0);
+  GM_setValue('AskforHelpMoscowTimer', 0);
+  GM_setValue('AskforHelpBangkokTimer', 0);
   if (popup) {
     alert('All active timers have been reset.');
 
@@ -11417,6 +11600,7 @@ function autoMainframe() {
   return false;
 }
 
+
 function goProperties(propCity) {
   // Make sure we're in the correct city
   if (city != propCity) {
@@ -12346,25 +12530,30 @@ function logFightResponse(rootElt, resultElt, context) {
     if (!attackAgainElt) attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
     lastOpponent.attackAgain = undefined;
 
-    // Click the secret stash immediately on specified interval base
-    var eltStash = document.getElementById('fight_loot_feed_btn_0', resultElt);	
-    if (eltStash && isGMChecked('autoSecretStash')){
-		DEBUG('Secret Stash Found.');
-		var SecretStashFightingCount = parseInt(GM_getValue('SecretStashFightingCount')) ? parseInt(GM_getValue('SecretStashFightingCount')) : 0;
-		var publishFrequency =  parseInt(GM_getValue('autoSecretStashFrequency')) ? parseInt(GM_getValue('autoSecretStashFrequency')) : 1;
-		var logFrequency = parseInt(SecretStashFightingCount % publishFrequency);
+    // Click the 'multiple' secret stash immediately on specified interval base
+    var eltStash;
+	var eltStashID;	
+	for(i=0;i<5;i++){
+		eltStashID = 'fight_loot_feed_btn_'+i;
+		eltStash = document.getElementById(eltStashID, resultElt);	
+		if (eltStash && isGMChecked('autoSecretStash')){
+			DEBUG('Secret Stash Found.');
+			var SecretStashFightingCount = parseInt(GM_getValue('SecretStashFightingCount')) ? parseInt(GM_getValue('SecretStashFightingCount')) : 0;
+			var publishFrequency =  parseInt(GM_getValue('autoSecretStashFrequency')) ? parseInt(GM_getValue('autoSecretStashFrequency')) : 1;
+			var logFrequency = parseInt(SecretStashFightingCount % publishFrequency);
 		
-		if(SecretStashFightingCount % publishFrequency == 0) {   
-			clickElement(eltStash);
-			DEBUG('Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
-			addToLog('info Icon','Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
-		}
-		else {
-			DEBUG('Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
-			addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
-		}
-		SecretStashFightingCount+=1;
-		GM_setValue('SecretStashFightingCount',SecretStashFightingCount);
+			if(SecretStashFightingCount % publishFrequency == 0) {   
+				clickElement(eltStash);
+				DEBUG('Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
+				addToLog('info Icon','Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
+			}
+			else {
+				DEBUG('Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
+				addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
+			}
+			SecretStashFightingCount+=1;
+			GM_setValue('SecretStashFightingCount',SecretStashFightingCount);
+		}	
     }
 
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
@@ -12490,6 +12679,8 @@ function logFightResponse(rootElt, resultElt, context) {
       if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
       if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
       addToLog('lootbag Icon', txtLog);
+	  prevAttackEquip = curAttackEquip;
+	  prevDefenseEquip = curDefenseEquip;	  
     }
 
 //    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
@@ -13194,6 +13385,25 @@ function logResponse(rootElt, action, context) {
           addToLog('lootbag Icon', log);
         }
       }
+      break;
+	  	  
+	  case 'Ask for Help':
+/*      var timerName = 'AskforMoscowHelp';
+      switch (context.helpCity) {
+        case 2: timerName = 'AskforMoscowHelp'; break;
+        case 3: timerName = 'AskforBankok'; break;
+      }
+      // Visit again after 1 hour if you cannot craft yet
+      if (!/Ask for Help and/i.test(inner) ) {
+        setGMTime(timerName, '1 hour');
+        addToLog('info Icon', inner);
+      } else {
+        setGMTime(timerName, '24 hours');
+        if (inner.match(/Ask for Help and/i)) {
+          addToLog('info Icon', 'Asked for Help');
+        }
+      }
+*/	  
       break;
 
     default:
