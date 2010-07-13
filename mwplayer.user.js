@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.525
+// @version     1.1.526
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.525',
+  version: '1.1.526',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3055,10 +3055,12 @@ function autoRob() {
     Autoplay.start();
     return true;
   } else {
-    clickAction = 'autoRob';
-    clickContext = getCurRobSlotId();
-    DEBUG("Context : " + clickContext);
-    Autoplay.fx = doRob;
+    Autoplay.fx = function(){
+      clickAction = 'autoRob';
+      clickContext = getCurRobSlotId();
+      DEBUG("Context : " + clickContext);
+	    doRob();
+	  }
     Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
     Autoplay.start();
     return true;
@@ -3098,6 +3100,12 @@ function refreshRobbingGrid() {
   DEBUG('Clicked to refresh robbing grid.');
 };
 
+function sleepRob(ms){
+  var dt = new Date();
+  dt.setTime(dt.getTime() + ms);
+  while (new Date().getTime() < dt.getTime());
+}
+
 function doRob(){
   var m;
   var eltRobStam = xpathFirst('//div[@class="rob_prop_stamina"]');
@@ -3107,9 +3115,18 @@ function doRob(){
       GM_setValue('totalRobStamInt', (isNaN(parseInt(GM_getValue('totalRobStamInt', 0))) ? 0 : parseInt(GM_getValue('totalRobStamInt', 0))) + parseInt(stam));
     }
   }
-  var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
-  clickElement(eltRob);
-  DEBUG('Clicked to rob.');
+  if(isGMChecked('fastRob')){
+    var eltRob = $x('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+    for(var i=0, iLength = eltRob.length; i < iLength; i++){
+  	  clickElement(eltRob[i]);
+	    sleepRob(500);
+    }
+  }
+  else{
+    var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+    clickElement(eltRob);
+    DEBUG('Clicked to rob.');
+  }
 }
 
 function getCurRobSlotId(){
@@ -3192,11 +3209,12 @@ function updateRobStatistics(success, exp) {
     GM_setValue('totalRobExpInt', GM_getValue('totalRobExpInt', 0) + parseInt(exp) );
     GM_setValue('totalExpInt', GM_getValue('totalExpInt', 0) + parseInt(exp));
   }
-
+/*
   // TODO : add/show on log statistics
   DEBUG("Rob total exp : " + GM_getValue('totalRobExpInt',0));
   DEBUG("Rob success : " + GM_getValue('robSuccessCountInt',0));
   DEBUG("Rob failed : " + GM_getValue('robFailedCountInt',0));
+  */
 }
 
 function autoHitman() {
@@ -4297,7 +4315,7 @@ function saveSettings() {
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
                             'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack',
-							'fightNames','fightAvoidNames','fightOnlyNames']);
+                            'fightNames','fightAvoidNames','fightOnlyNames','fastRob']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -6592,6 +6610,14 @@ function createStaminaTab() {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Skip iced targets'));
 
+  // Fast Rob
+  makeElement('br', rhs, {'class':'hide'});
+  title = 'Fast rob, does not log';
+  id = 'fastRob';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Fast Rob?'));
+  
   // Stamina bursts
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
