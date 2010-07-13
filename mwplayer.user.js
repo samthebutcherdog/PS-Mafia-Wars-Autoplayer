@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.527
+// @version     1.1.528
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.527',
+  version: '1.1.528',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4310,8 +4310,9 @@ function saveSettings() {
                             'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
                             'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
-                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon','staminaNoDelay','staminaPowerattack',
-                            'fightNames','fightAvoidNames','fightOnlyNames','fastRob']);
+                            'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon',
+                            'staminaNoDelay','staminaPowerattack','LiveUpdatesIcon','fightNames','fightAvoidNames',
+                            'fightOnlyNames','fastRob']);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -5692,6 +5693,12 @@ function createDisplayTab() {
   title = 'Hide Promo Icon';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Promo Icon '));
+
+  // Hide Live Updates Icon 
+  id = 'LiveUpdatesIcon';
+  title = 'Hide Live Updates Icon';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Live Updates Icon '));
 
   return displayTab;
 }
@@ -8123,10 +8130,10 @@ function refreshMWAPCSS() {
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
                  // Move Zynga selling Promo icon and click box and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
-                  ' #buyframe_link_container_anim  {display: none;}' +
-                  ' #buyframe_link_cover_anim      {display: none;}' :
-                  ' #buyframe_link_container_anim  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
-                  ' #buyframe_link_cover_anim      {position: absolute; top: 50px; left: 765px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
+                  ' #buyframe_link_container  {display: none;}' +
+                  ' #buyframe_link_cover      {display: none;}' :
+                  ' #buyframe_link_container  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
+                  ' #buyframe_link_cover      {position: absolute; top: 50px; left: 765px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
 
                 // Move Promo and make it smaller:
                 (isGMChecked('hidePromoIcon') ?
@@ -8138,11 +8145,19 @@ function refreshMWAPCSS() {
                     ' #gc_collectible_container {display: none;}' :
                     ' #gc_collectible_container {position: absolute; top: 145px; left: 765px; width: 22px; z-index: 10001;} ') +
 
+                // Move zstream  icon and make it smaller:
+                 (isGMChecked('LiveUpdatesIcon') ?
+                   ' #zstream_icon {display: none;}' :
+                   ' #zstream_icon {position: absolute; top: 10px; left: 305px; width: 22px; z-index: 10001;} ') +
+
                 // Move gift icon and make it smaller:
-                 (isGMChecked('hideGiftIcon') ?
-                  ' #gifticon_container {display: none;}' :
-                  ' #gifticon_container {position: absolute; top: 190px; left: 765px; width: 12px; z-index: 10001;}  ') +
-                 // Move London Countdown:                 ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
+         		     (isGMChecked('hideGiftIcon') ?
+         			     ' #gifticon_container {display: none;}' :
+         			     ' #gifticon_container {position: absolute; top: 220px; left: 765px; width: 12px; z-index: 10001;}  ') +
+
+                 // Move London Countdown:                 
+                 ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
+
                  // Show hidden jobs for new job layout
                  ' div[@id="new_user_jobs"] > div {display: block !important} ' +
                  // Adjust level/experience CSS
@@ -10344,6 +10359,7 @@ BrowserDetect.init();
         'Hide Messagecenter Icon: <strong>'+ showIfUnchecked(GM_getValue('hideMessageIcon')) + '</strong><br>' +
         'Hide Gift Icon: <strong>'+ showIfUnchecked(GM_getValue('hideGiftIcon')) + '</strong><br>' +
         'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
+        'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('LiveUpdatesIcon')) + '</strong><br>' +
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
