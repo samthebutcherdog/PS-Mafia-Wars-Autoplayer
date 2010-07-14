@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.531
+// @version     1.1.532
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.531',
+  version: '1.1.532',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2968,20 +2968,22 @@ function autoFight(how) {
     var startId = opponent.id;
     var id;
 
-    while (/You can't add/.test(loadUrlWait (hitUrl))) {
+    if (/You can't add/.test(loadUrlWait (hitUrl))) {
       addToLog('info Icon','Target is iced/dead, skipping opponent, id=' + opponent.id);
       setFightOpponentInactive(opponent);
 
       // Cycle fight list
       cycleSavedList('fightList');
       // get new opponent
-      id = parseInt(GM_getValue('fightList', ''));
-      if (id == startId)
-          return false;
+      //id = parseInt(GM_getValue('fightList', ''));
+      //if (id == startId) {
+      //  return false;
+      //}
 
-      opponent.id = String(id);
+      //opponent.id = String(id);
       // try again.
-      hitUrl = getHitUrl (opponent.id);
+      //hitUrl = getHitUrl (opponent.id);
+      return false;
     }
   }
 
