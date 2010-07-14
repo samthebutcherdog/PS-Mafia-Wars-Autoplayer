@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.528
+// @version     1.1.529
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.528',
+  version: '1.1.529',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2181,9 +2181,6 @@ function AskforHelp(hlpCity) {
     return true;
   }
 
-  DEBUG('Going to Jobs Page');
-  goJobsNav();
-
   if(helpCity==2) tabno = parseInt(GM_getValue('selectMoscowTier'));
   if(helpCity==3) tabno = parseInt(GM_getValue('selectBangkokTier'));
 
@@ -2202,26 +2199,29 @@ function AskforHelp(hlpCity) {
   var timerName;
   if(helpCity==2) timerName='AskforHelpMoscowTimer';
   if(helpCity==3) timerName='AskforHelpBangkokTimer';
-
-  var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
-
-  if (askHelpFriends) {
-    addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
-    //Autoplay.fx = function() {
-    //  clickAction = 'Ask for Help';
-    //  clickContext = {'helpCity':helpCity};
-    clickElement(askHelpFriends);
-    DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
-    //};
-    DEBUG(' Resetting Timer for 24 hours on ' + helpCity +'.'+ tabno);
-    setGMTime(timerName, '24 hours');
-  } else { 
-    setGMTime(timerName, '1 hour');
-    addToLog('info Icon', ' You cannot Ask for Help yet on ' + helpCity +'.'+ tabno);
-    DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);
-  }
-
-  return true;
+  
+  if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {  
+    setGMTime(timerName, '2 hour');
+    addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
+    DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
+  } else {
+    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
+    DEBUG(askHelpFriends);
+  
+    if (askHelpFriends) {
+      addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
+      clickElement(askHelpFriends);
+      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);    
+      DEBUG(' Resetting Timer for 12 hours on ' + helpCity +'.'+ tabno);
+      setGMTime(timerName, '12 hours');	
+	  return true;	
+    } else { 
+      setGMTime(timerName, '1 hour');
+      addToLog('info Icon', ' You cannot Ask for Help yet on ' + helpCity +'.'+ tabno);
+      DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);		  
+	}  
+  }	  
+  return;
 }
 
 // Pass the item array, item id, and building type
@@ -4400,8 +4400,9 @@ function saveSettings() {
   GM_setValue('selectMission', document.getElementById('selectMissionS').selectedIndex);
   GM_setValue('selectTier', document.getElementById('selectTier').value);
   GM_setValue('selectMoscowTier', (document.getElementById('selectMoscowTier').value)?document.getElementById('selectMoscowTier').value:0);  
+  GM_setValue('selectMoscowTiercheck', (document.getElementById('selectMoscowTier').value)?'checked':'');  
   GM_setValue('selectBangkokTier', (document.getElementById('selectBangkokTier').value)?document.getElementById('selectBangkokTier').value:0);
-
+  GM_setValue('selectBangkokTiercheck', (document.getElementById('selectBangkokTier').value)?'checked':'');  
   // Save the stamina tab settings.
   for (var key in staminaTabSettings) {
     //GM_log('Setting GM value \'' + key + '\'=' + staminaTabSettings[key]);
@@ -5726,6 +5727,108 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'size':'2'});
   rhs.appendChild(document.createTextNode(' minimum experience'));
 
+//Automatically Ask for Moscow / Bangkok Help
+  var selectMoscowTierDiv = makeElement('div', list);
+  lhs = makeElement('div', selectMoscowTierDiv, {'class':'lhs'});
+  rhs = makeElement('div', selectMoscowTierDiv, {'class':'rhs'});
+  makeElement('br', selectMoscowTierDiv, {'class':'hide'});
+  title = 'Ask for Help on Moscow Tiers - Be carefull to only choose available Tiers !';
+  id = 'selectMoscowTier';
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Moscow help  on :'));
+  var selectMoscowTier = makeElement('select', rhs, {'id':id, 'title':title});
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'no Help in Moscow';
+  choiceMoscowTier.value = '0';
+  if (GM_getValue('selectMoscowTier') == '0') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Baklany';
+  choiceMoscowTier.value = '1';
+  if (GM_getValue('selectMoscowTier') == '1') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Boets';
+  choiceMoscowTier.value = '2';
+  if (GM_getValue('selectMoscowTier') == '2') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Brigadir';
+  choiceMoscowTier.value = '3';
+  if (GM_getValue('selectMoscowTier') == '3') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Avtoritet';
+  choiceMoscowTier.value = '4';
+  if (GM_getValue('selectMoscowTier') == '4') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Vor';
+  choiceMoscowTier.value = '5';
+  if (GM_getValue('selectMoscowTier') == '5') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+  choiceMoscowTier = document.createElement('option');
+  choiceMoscowTier.text = 'Pakhan';
+  choiceMoscowTier.value = '6';
+  if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;  
+  selectMoscowTier.appendChild(choiceMoscowTier);
+
+  var selectBangkokTierDiv = makeElement('div', list);
+  lhs = makeElement('div', selectBangkokTierDiv, {'class':'lhs'});
+  rhs = makeElement('div', selectBangkokTierDiv, {'class':'rhs'});
+  makeElement('br', selectBangkokTierDiv, {'class':'hide'});
+  title = 'Ask for Help on Bangkok Tiers - Be carefull to only choose available Tiers !';  
+  id = 'selectBangkokTier';
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Bangkok help  on :'));
+
+  var selectBangkokTier = makeElement('select', rhs, {'id':id, 'title':title});
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'no Help in Bangkok';
+  choiceBangkokTier.value = '0';
+  if (GM_getValue('selectBangkokTier') == '0') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Brawler';
+  choiceBangkokTier.value = '1';
+  if (GM_getValue('selectBangkokTier') == '1') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Criminal';
+  choiceBangkokTier.value = '2';
+  if (GM_getValue('selectBangkokTier') == '2') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Pirate';
+  choiceBangkokTier.value = '3';
+  if (GM_getValue('selectBangkokTier') == '3') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Commandant';
+  choiceBangkokTier.value = '4';
+  if (GM_getValue('selectBangkokTier') == '4') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Oyabun';
+  choiceBangkokTier.value = '5';
+  if (GM_getValue('selectBangkokTier') == '5') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Dragon Head';
+  choiceBangkokTier.value = '6';
+  if (GM_getValue('selectBangkokTier') == '6') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Saboteur';
+  choiceBangkokTier.value = '7';
+  if (GM_getValue('selectBangkokTier') == '7') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  choiceBangkokTier = document.createElement('option');
+  choiceBangkokTier.text = 'Assassin';
+  choiceBangkokTier.value = '8';
+  if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;  
+  selectBangkokTier.appendChild(choiceBangkokTier);
+  
   // Auto-accept mafia invitations
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6350,110 +6453,7 @@ function createEnergyTab() {
   handler();
 
   masterAllJobs.addEventListener('change', handler, false);
-  multipleJobs.addEventListener('change', handler, false);
-
-
-  //Automatically Ask for Moscow / Bangkok Help
-  var selectMoscowTierDiv = makeElement('div', list);
-  lhs = makeElement('div', selectMoscowTierDiv, {'class':'lhs'});
-  rhs = makeElement('div', selectMoscowTierDiv, {'class':'rhs'});
-  makeElement('br', selectMoscowTierDiv, {'class':'hide'});
-  title = 'Ask for Help on Moscow Tiers - Be carefull to only choose available Tiers !';
-  id = 'selectMoscowTier';
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Moscow help  on :'));
-  var selectMoscowTier = makeElement('select', rhs, {'id':id, 'title':title});
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'no Help in Moscow';
-  choiceMoscowTier.value = '0';
-  if (GM_getValue('selectMoscowTier') == '0') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'Baklany';
-  choiceMoscowTier.value = '1';
-  if (GM_getValue('selectMoscowTier') == '1') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'Boets';
-  choiceMoscowTier.value = '2';
-  if (GM_getValue('selectMoscowTier') == '2') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'Brigadir';
-  choiceMoscowTier.value = '3';
-  if (GM_getValue('selectMoscowTier') == '3') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'Avtoritet';
-  choiceMoscowTier.value = '4';
-  if (GM_getValue('selectMoscowTier') == '4') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'Vor';
-  choiceMoscowTier.value = '5';
-  if (GM_getValue('selectMoscowTier') == '5') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-  choiceMoscowTier = document.createElement('option');
-  choiceMoscowTier.text = 'Pakhan';
-  choiceMoscowTier.value = '6';
-  if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;  
-  selectMoscowTier.appendChild(choiceMoscowTier);
-
-  var selectBangkokTierDiv = makeElement('div', list);
-  lhs = makeElement('div', selectBangkokTierDiv, {'class':'lhs'});
-  rhs = makeElement('div', selectBangkokTierDiv, {'class':'rhs'});
-  makeElement('br', selectBangkokTierDiv, {'class':'hide'});
-  title = 'Ask for Help on Bangkok Tiers - Be carefull to only choose available Tiers !';  
-  id = 'selectBangkokTier';
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Bangkok help  on :'));
-
-  var selectBangkokTier = makeElement('select', rhs, {'id':id, 'title':title});
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'no Help in Bangkok';
-  choiceBangkokTier.value = '0';
-  if (GM_getValue('selectBangkokTier') == '0') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Brawler';
-  choiceBangkokTier.value = '1';
-  if (GM_getValue('selectBangkokTier') == '1') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Criminal';
-  choiceBangkokTier.value = '2';
-  if (GM_getValue('selectBangkokTier') == '2') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Pirate';
-  choiceBangkokTier.value = '3';
-  if (GM_getValue('selectBangkokTier') == '3') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Commandant';
-  choiceBangkokTier.value = '4';
-  if (GM_getValue('selectBangkokTier') == '4') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Oyabun';
-  choiceBangkokTier.value = '5';
-  if (GM_getValue('selectBangkokTier') == '5') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Dragon Head';
-  choiceBangkokTier.value = '6';
-  if (GM_getValue('selectBangkokTier') == '6') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Saboteur';
-  choiceBangkokTier.value = '7';
-  if (GM_getValue('selectBangkokTier') == '7') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
-  choiceBangkokTier = document.createElement('option');
-  choiceBangkokTier.text = 'Assassin';
-  choiceBangkokTier.value = '8';
-  if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;  
-  selectBangkokTier.appendChild(choiceBangkokTier);
+  multipleJobs.addEventListener('change', handler, false);  
 
   // Spend buff packs?
   item = makeElement('div', list);
@@ -7750,6 +7750,12 @@ function handlePublishing() {
         // Job Help
         if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
+        // Moscow Job Help
+        if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectMoscowTiercheck', pubElt, skipElt)) return;
+		
+		// Bangkok Job Help
+        if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectBangkokTiercheck', pubElt, skipElt)) return;		
+		
         // Share wishlist
         if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
 
@@ -8325,8 +8331,6 @@ function resetTimers(popup) {
   GM_setValue('takeHourCuba', 0);
   GM_setValue('takeHourMoscow', 0);
   GM_setValue('takeHourNew York', 0);
-  //GM_setValue('AskforHelpMoscow', 0);
-  //GM_setValue('AskforHelpBangkok', 0);  
   GM_setValue('dailyChecklistTimer', 0);
   GM_setValue('autoGiftAcceptTimer', 0);
   GM_setValue('autoSafehouseTimer', 0);
