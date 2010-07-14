@@ -17,7 +17,7 @@
 /**
 * @package: Facebook Mafia Wars Autoplayer
 * @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Lister, SamTheButcher, MaxJ, donnaB,
-            billy_bob, Cam, janmillsjr, nonoymsd  
+            billy_bob, Cam, janmillsjr, nonoymsd
 * @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.529
+// @version     1.1.530
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.529',
+  version: '1.1.530',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -641,6 +641,7 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
 
 const noDelay = 0;              // No delay on commands
 const minDelay = 1000;          // Minimum delay on commands
+var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
 var appLayoutElt;               // The currently visible content page
 var cash;                       // Cash array of values by city
@@ -844,7 +845,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var settingsOpen = false;
   var statsOpen = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '?', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -1666,6 +1667,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     alert('MWAP: Inconsistent state found in settings, please check them!');
     GM_setValue('isRunning', false);
   }
+  running = GM_getValue('isRunning');
 
   var Reload = new Animate();
   Reload.desc = 'reload';
@@ -1758,7 +1760,7 @@ Animate.prototype.setTimeout = function(fx, delay) {
 }
 
 Animate.prototype.start = function() {
-  if (GM_getValue('isRunning') && settingsOpen === false && this.fx) {
+  if (running && settingsOpen === false && this.fx) {
     this.setTimeout(this.fx, this.delay);
   } else if (settingsOpen === true) {
     DEBUG('Settings box open. Not starting ' + this.desc + ' timer.');
@@ -1802,8 +1804,8 @@ function doAutoPlay () {
   idle = false;
 
   // Auto-heal
-  if (GM_getValue('isRunning') &&
-     (stamina >= GM_getValue('stamina_min_heal')) && 
+  if (running &&
+     (stamina >= GM_getValue('stamina_min_heal')) &&
       isGMChecked('autoHeal') &&
       health < GM_getValue('healthLevel', 0) &&
       health < maxHealth &&
@@ -1812,8 +1814,8 @@ function doAutoPlay () {
   }
 
   // Determine whether a job and/or fight/hit could be attempted.
-  var autoMissionif = GM_getValue('isRunning') && !skipJobs && canMission();
-  var autoStaminaSpendif = GM_getValue('isRunning') && !skipStaminaSpend && canSpendStamina() && hasFight;
+  var autoMissionif = running && !skipJobs && canMission();
+  var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight;
   var energyMaxed = (autoMissionif && energy >= maxEnergy);
   var staminaMaxed = (autoStaminaSpendif && stamina >= maxStamina);
   var maxed = energyMaxed || staminaMaxed;
@@ -1823,38 +1825,38 @@ function doAutoPlay () {
     var spendFirst = GM_getValue('burnOption');
 
     // Prioritize using energy
-    if (stamina < maxStamina && GM_getValue('isRunning') && canMission() && spendFirst == BURN_ENERGY) {
+    if (stamina < maxStamina && running && canMission() && spendFirst == BURN_ENERGY) {
       autoMissionif = true;
       autoStaminaSpendif = false;
     }
 
     // Prioritize using stamina
-    if (energy < maxEnergy && GM_getValue('isRunning') && canSpendStamina() && hasFight && spendFirst == BURN_STAMINA) {
+    if (energy < maxEnergy && running && canSpendStamina() && hasFight && spendFirst == BURN_STAMINA) {
       autoMissionif = false;
       autoStaminaSpendif = true;
     }
   }
 
   // Auto-accept
-  if (GM_getValue('isRunning') && !maxed && invites > 0 &&
+  if (running && !maxed && invites > 0 &&
       isGMChecked('acceptMafiaInvitations')) {
     if (autoAccept()) return;
   }
 
   // Click attack if on warNav
-  if (GM_getValue('isRunning') && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
+  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
   }
 
   // Auto-bank
   var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-  //if (GM_getValue('isRunning') && !maxed && canBank) {
-  if (GM_getValue('isRunning') && canBank) {
+  //if (running && !maxed && canBank) {
+  if (running && canBank) {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
   // Auto-collect take (limit to level 4 and above)
-  if (GM_getValue('isRunning') && !maxed && hasProps) {
+  if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
@@ -1867,81 +1869,81 @@ function doAutoPlay () {
   }
 
   // Player updates
-  if (GM_getValue('isRunning') && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
+  if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
   }
 
   // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
-  if (GM_getValue('isRunning') && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
+  if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
     DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
     GM_setValue('autoHeal', 'checked');
   }
 
   // Background mode hitlisting (limit to level 4 and above)
-  if (GM_getValue('isRunning') && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+  if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
     if(autoHitlist()) return;
   }
 
   // Build Cars
-  if (GM_getValue('isRunning') && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
+  if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
     if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
   }
 
   // Build Weapons
-  if (GM_getValue('isRunning') && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
+  if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
   }
 
   // Ask for Help on Moscow Tier
-  if (GM_getValue('isRunning') && !maxed && parseInt(GM_getValue('selectMoscowTier'))  && !timeLeftGM('AskforHelpMoscowTimer')) {
+  if (running && !maxed && parseInt(GM_getValue('selectMoscowTier'))  && !timeLeftGM('AskforHelpMoscowTimer')) {
     DEBUG('going to Moscow for Ask for Help-job');
     if (AskforHelp('2')) return;
   }
 
   // Ask for Help on Bangkok Tier
-  if (GM_getValue('isRunning') && !maxed && parseInt(GM_getValue('selectBangkokTier')) && !timeLeftGM('AskforHelpBangkokTimer')) {
+  if (running && !maxed && parseInt(GM_getValue('selectBangkokTier')) && !timeLeftGM('AskforHelpBangkokTimer')) {
     DEBUG('going to Bangkok for Ask for Help-job');
     if (AskforHelp('3')) return;
   }
 
   // Auto-stat
-  if (GM_getValue('isRunning') && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
+  if (running && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
   }
 
   // Auto-lotto (limit to level 7 and above)
-  if (GM_getValue('isRunning') && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
+  if (running && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
     if (autoLotto()) return;
   }
 
   // Auto-war (limit to level 4 and above)
-  if (GM_getValue('isRunning') && !maxed && isGMChecked('autoWar') && hasFight) {
+  if (running && !maxed && isGMChecked('autoWar') && hasFight) {
     if (autoWar()) return;
   }
 
   // Auto-giftwaiting (limit to level 6 and above)
-  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoGiftWaiting') && hasHome) {
+  if (running && !maxed && GM_getValue('autoGiftWaiting') && hasHome) {
     if (autoGiftWaiting()) return;
   }
 
   // Auto-dailychecklist
-  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoDailyChecklist') && hasHome) {
+  if (running && !maxed && GM_getValue('autoDailyChecklist') && hasHome) {
     if (autoDailyChecklist()) return;
   }
 
   // Auto-mainframe
-  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoMainframe') && hasHome) {
+  if (running && !maxed && GM_getValue('autoMainframe') && hasHome) {
     if (autoMainframe()) return;
   }
 
   // Auto-GiftAccept
-  if (GM_getValue('isRunning') && !maxed && isGMChecked('autoGiftAccept') && hasHome) {
+  if (running && !maxed && isGMChecked('autoGiftAccept') && hasHome) {
     if (autoGiftQueue()) return;
     if (autoGiftAccept()) return;
   }
 
   // Auto-Safehouse
-  if (GM_getValue('isRunning') && !maxed && GM_getValue('autoSafehouse') && hasHome) {
+  if (running && !maxed && GM_getValue('autoSafehouse') && hasHome) {
     if (autoSafehouse()) return;
   }
 
@@ -1949,7 +1951,7 @@ function doAutoPlay () {
   var xpPtsFromEnergy = (energy + 200) * getEnergyGainRate();
   var xpPtsFromStamina = (stamina + 200) * getStaminaGainRate();
   var canUseMiniPack = (xpPtsFromEnergy < ptsToNextLevel) && (xpPtsFromStamina < ptsToNextLevel);
-  if (GM_getValue('isRunning') && !maxed && canUseMiniPack && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
+  if (running && !maxed && canUseMiniPack && isGMChecked('checkMiniPack') && !timeLeftGM('miniPackTimer')) {
     if (miniPack()) return;
   }
 
@@ -1966,7 +1968,7 @@ function doAutoPlay () {
   }
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
   var ptsToLevelProjStaminaUse = ptsToNextLevel - stamina*getStaminaGainRate();
-  var autoEnergyPackWaiting = GM_getValue('isRunning') && energyPack &&
+  var autoEnergyPackWaiting = running && energyPack &&
                               ptsFromEnergyPack <= ptsToLevelProjStaminaUse &&
                               isGMChecked('autoEnergyPack');
 
@@ -2020,7 +2022,7 @@ function doAutoPlay () {
 
   // Auto-upgrade properties (limit to level 4 and above, skip if flash is enabled)
   // If isFlashed==FLASH_UNDEFINED it will enter the properties once, after that, isFlashed is either FLASHED_ENABLED or FLASHED_DISABLED
-  if (GM_getValue('isRunning') && isGMChecked('autoBuy') && hasProps && (isFlashed!=FLASH_ENABLED)) {
+  if (running && isGMChecked('autoBuy') && hasProps && (isFlashed!=FLASH_ENABLED)) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       if (level >= cities[i][CITY_LEVEL]) {
 
@@ -2035,7 +2037,7 @@ function doAutoPlay () {
   idle = true;
 
   // If not previously idle, check the home page.
-  if (GM_getValue('isRunning') && !previouslyIdle) {
+  if (running && !previouslyIdle) {
     DEBUG('Now idle. Checking the home page.');
     Autoplay.fx = goHome;
     Autoplay.start();
@@ -2043,7 +2045,7 @@ function doAutoPlay () {
   }
 
   // If fight/hit/jobs are being skipped, turn them back on and go to the home page
-  if (GM_getValue('isRunning') && (skipStaminaSpend || skipJobs)) {
+  if (running && (skipStaminaSpend || skipJobs)) {
     skipStaminaSpend = false;
     skipJobs = false;
     Autoplay.start();
@@ -2051,7 +2053,7 @@ function doAutoPlay () {
   }
 
   // Idle in preferred city
-  if (GM_getValue('isRunning') && idle && isGMChecked('idleInCity') && city != GM_getValue('idleLocation', NY)) {
+  if (running && idle && isGMChecked('idleInCity') && city != GM_getValue('idleLocation', NY)) {
     DEBUG('Idling. Moving to ' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '. ');
     Autoplay.fx = function(){goLocation(GM_getValue('idleLocation',NY))};
     Autoplay.start();
@@ -2199,28 +2201,28 @@ function AskforHelp(hlpCity) {
   var timerName;
   if(helpCity==2) timerName='AskforHelpMoscowTimer';
   if(helpCity==3) timerName='AskforHelpBangkokTimer';
-  
-  if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {  
+
+  if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
     setGMTime(timerName, '2 hour');
     addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
     DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
   } else {
     var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
     DEBUG(askHelpFriends);
-  
+
     if (askHelpFriends) {
       addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
       clickElement(askHelpFriends);
-      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);    
+      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
       DEBUG(' Resetting Timer for 12 hours on ' + helpCity +'.'+ tabno);
-      setGMTime(timerName, '12 hours');	
-	  return true;	
-    } else { 
+      setGMTime(timerName, '12 hours');
+    return true;
+    } else {
       setGMTime(timerName, '1 hour');
       addToLog('info Icon', ' You cannot Ask for Help yet on ' + helpCity +'.'+ tabno);
-      DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);		  
-	}  
-  }	  
+      DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);
+  }
+  }
   return;
 }
 
@@ -2965,7 +2967,7 @@ function autoFight(how) {
     var hitUrl = getHitUrl (opponent.id);
     var startId = opponent.id;
     var id;
-    
+
     while (/You can't add/.test(loadUrlWait (hitUrl))) {
       addToLog('info Icon','Target is iced/dead, skipping opponent, id=' + opponent.id);
       setFightOpponentInactive(opponent);
@@ -3501,7 +3503,7 @@ function getHitlist(element, forceRefresh) {
       opponent.bounty = RegExp.lastMatch;
     }
 
-    if (!GM_getValue('isRunning') && isGMChecked('showLevel')) {
+    if (!running && isGMChecked('showLevel')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
           var s = this.responseText;
@@ -3578,7 +3580,7 @@ function getDisplayedOpponents(element, forceRefresh) {
     if (!opponent.id) continue;
 
     // Do icecheck from fightlist
-    if (!GM_getValue('isRunning') && isGMChecked('showPulse')) {
+    if (!running && isGMChecked('showPulse')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
           var s = this.responseText;
@@ -3694,7 +3696,7 @@ function findFightOpponent(element) {
   var opponentMafiaMin = parseInt(GM_getValue('fightMafiaMin', 1));
   var fightNames = isGMChecked('fightNames');
   var avoidNames = isGMChecked('fightAvoidNames');
-  var onlyNames = isGMChecked('fightOnlyNames');  
+  var onlyNames = isGMChecked('fightOnlyNames');
 
   // Make any relative adjustments (if enabled).
   if (GM_getValue('fightLevelMaxRelative', false)) {
@@ -3831,7 +3833,7 @@ function findFightOpponent(element) {
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   }
-  
+
   var disqualifiedCount = levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + icedCount + blacklistCount;
   if (countOpp <= disqualifiedCount) {
     addToLog('updateBad Icon', 'Out of the ' + countOpp + ' opponent(s) listed on the fight page '+disqualifiedCount+' disqualified.<br>' +
@@ -4122,7 +4124,7 @@ function saveDefaultSettings() {
 
   GM_setValue('fightNames', 'checked');
   GM_setValue('fightAvoidNames', 'checked');
-  GM_setValue('fightOnlyNames', '');  
+  GM_setValue('fightOnlyNames', '');
 
   GM_setValue('fightRemoveStronger', 'checked');
   GM_setValue('hitmanLocation', NY);
@@ -4361,7 +4363,7 @@ function saveSettings() {
   GM_setValue('r2', document.getElementById('r2').value);
   GM_setValue('d1', document.getElementById('d1').value);
   GM_setValue('d2', document.getElementById('d2').value);
-  GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value); 
+  GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value);
   GM_setValue('propertyId', '12');
   GM_setValue('healthLevel', healthLevel);
   GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
@@ -4374,7 +4376,7 @@ function saveSettings() {
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
   GM_setValue('autoShareWishlistTime', document.getElementById('autoShareWishlistTime').value);
   GM_setValue('autoIcePublishFrequency', document.getElementById('autoIcePublishFrequency').value);
-  GM_setValue('autoSecretStashFrequency', document.getElementById('autoSecretStashFrequency').value);  
+  GM_setValue('autoSecretStashFrequency', document.getElementById('autoSecretStashFrequency').value);
   GM_setValue('autoLottoBonusItem', document.getElementById('autoLottoList').selectedIndex);
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   GM_setValue('warMode', document.getElementById('warMode').selectedIndex);
@@ -4399,10 +4401,10 @@ function saveSettings() {
   setSavedList('masteryJobsList', mastery_jobs_list);
   GM_setValue('selectMission', document.getElementById('selectMissionS').selectedIndex);
   GM_setValue('selectTier', document.getElementById('selectTier').value);
-  GM_setValue('selectMoscowTier', (document.getElementById('selectMoscowTier').value)?document.getElementById('selectMoscowTier').value:0);  
-  GM_setValue('selectMoscowTiercheck', (document.getElementById('selectMoscowTier').value)?'checked':'');  
+  GM_setValue('selectMoscowTier', (document.getElementById('selectMoscowTier').value)?document.getElementById('selectMoscowTier').value:0);
+  GM_setValue('selectMoscowTiercheck', (document.getElementById('selectMoscowTier').value)?'checked':'');
   GM_setValue('selectBangkokTier', (document.getElementById('selectBangkokTier').value)?document.getElementById('selectBangkokTier').value:0);
-  GM_setValue('selectBangkokTiercheck', (document.getElementById('selectBangkokTier').value)?'checked':'');  
+  GM_setValue('selectBangkokTiercheck', (document.getElementById('selectBangkokTier').value)?'checked':'');
   // Save the stamina tab settings.
   for (var key in staminaTabSettings) {
     //GM_log('Setting GM value \'' + key + '\'=' + staminaTabSettings[key]);
@@ -4435,7 +4437,7 @@ function updateMastheadMenu() {
   if (!menuElt) return;
 
   var elt = document.getElementById('pauseButton');
-  if (GM_getValue('isRunning')) {
+  if (running) {
     if (elt) return;
     destroyByID('resumeButton');
     destroyByID('ap_pause_img');
@@ -4469,6 +4471,7 @@ function pause() {
 
   // Update the running state.
   GM_setValue('isRunning', false);
+  running = false;
   sendMWValues(['isRunning']);
 
   // Clear all timers.
@@ -4492,9 +4495,10 @@ function unPause() {
 
   // Update the running state.
   GM_setValue('isRunning', true);
+  running = true;
   sendMWValues(['isRunning']);
 
-  addToLog('play Icon', 'Autoplayer resuming - <a href="http://www.playerscripts.com/" target="_blank">playerscripts.com</a>');
+  addToLog('play Icon', 'Autoplayer resuming...');
   mwapOnOffMenu();
   updateMastheadMenu();
 
@@ -5014,9 +5018,9 @@ function createLogBox() {
     debugElt.appendChild(document.createTextNode('debug'));
     debugElt.addEventListener('click', debugOnOff, false);
 
-  title = 'Click to ' + (GM_getValue('isRunning') ? 'pause' : 'resume') + ' mwap';
+  title = 'Click to ' + (running ? 'pause' : 'resume') + ' mwap';
   var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
-    mwapElt.appendChild(document.createTextNode(GM_getValue('isRunning') ? 'pause' : 'resume'));
+    mwapElt.appendChild(document.createTextNode(running ? 'pause' : 'resume'));
     mwapElt.addEventListener('click', mwapOnOff, false);
 
   var logBox = makeElement('div', mafiaLogBox, {'id':'logBox', 'style':'position: absolute; overflow: auto; right: 0px; top: 20px; bottom: 75px; width: 448px; background-color: #111111; font-size:11px; color: #BCD2EA; text-align: left; padding: 5px; border: 1px solid;'});
@@ -5025,7 +5029,7 @@ function createLogBox() {
   // stat tabs....
   var statPrimaryElt = makeElement('div', mafiaLogBox, {'id': 'statPrimary', 'style':'display: block' });
   var statPassiveElt = makeElement('div', mafiaLogBox, {'id': 'statPassive', 'style':'display: none' });
-  
+
   // tab buttons
   var statPrimaryButton = makeElement('div', mafiaLogBox, {'id': 'btnPrimaryStat', 'class':'mouseunderline', 'style':'position: absolute; left: 5px; bottom: 63px; font-weight: 600; cursor: pointer; color: rgb(0, 255, 0);'});
   statPrimaryButton.appendChild(document.createTextNode('primary'));
@@ -5034,11 +5038,11 @@ function createLogBox() {
   var statPassiveButton = makeElement('div', mafiaLogBox, {'id': 'btnPassiveStat', 'class':'mouseunderline', 'style':'position: absolute; left: 85px; bottom: 63px; font-weight: 600; cursor: pointer; color: rgb(0, 128, 0);'});
   statPassiveButton.appendChild(document.createTextNode('passive'));
   statPassiveButton.addEventListener('click', showPassiveStats, false);
- 
+
   makeElement('div', statPassiveElt, {'style':'position: absolute;  left: 5px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Exp Gained:'));
   makeElement('div', statPassiveElt, {'id':'passivetotalExp', 'style':'position: absolute; right: 329px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('passivetotalFightExpInt', 0) + GM_getValue('passivetotalJobExpInt', 0))));
   makeElement('div', statPassiveElt, {'style':'position: absolute; right: 267px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Fights:'));
-  makeElement('div', statPassiveElt, {'id':'passivetotalFightExp', 'style':'position: absolute; right: 240px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('passivetotalFightExpInt', 0)))); 
+  makeElement('div', statPassiveElt, {'id':'passivetotalFightExp', 'style':'position: absolute; right: 240px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('passivetotalFightExpInt', 0))));
   makeElement('div', statPassiveElt, {'style':'position: absolute; right: 175px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Jobs:'));
   makeElement('div', statPassiveElt, {'id':'passivetotalJobExp', 'style':'position: absolute; right: 141px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('passivetotalJobExpInt', 0))));
 
@@ -5046,7 +5050,7 @@ function createLogBox() {
 
   makeElement('div', statPassiveElt, {'style':'position: absolute; left: 5px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Attacks:'));
   makeElement('div', statPassiveElt, {'id':'passivefightCount', 'style':'position: absolute; right: 360px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('passivefightWinCountInt', 0) + GM_getValue('passivefightLossCountInt', 0))));
-  
+
   makeElement('div', statPassiveElt, {'style':'position: absolute; left: 5px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Won:'));
   makeElement('div', statPassiveElt, {'id':'passivefightWinCount', 'style':'position: absolute; right: 360px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('passivefightWinCountInt', 0))));
   var passivefightWinPct = (GM_getValue('passivefightWinCountInt', 0)/(GM_getValue('passivefightWinCountInt', 0) + GM_getValue('passivefightLossCountInt', 0)) * 100).toFixed(1);
@@ -5060,7 +5064,7 @@ function createLogBox() {
   makeElement('div', statPassiveElt, {'id':'whackedCount', 'style':'position: absolute; right: 250px; bottom: 33px; font-weight: 600;color: #BCD2EA;'}).appendChild(document.createTextNode(GM_getValue('whackedCount', 0)));
   makeElement('div', statPassiveElt, {'style':'position: absolute; left: 140px; bottom: 18px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Snuffed:'));
   makeElement('div', statPassiveElt, {'id':'snuffCount', 'style':'position: absolute; right: 250px; bottom: 18px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(GM_getValue('snuffCount', 0)));
-    
+
   makeElement('div', statPassiveElt, {'style':'position: absolute; right: 5px; bottom: 33px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Total $ Won/Lost'));
   var winDollars = parseInt(GM_getValue('passivefightWin$NY', 0)) + parseInt(GM_getValue('passivefightWin$Cuba', 0)) + parseInt(GM_getValue('passivefightWin$Moscow', 0)) + parseInt(GM_getValue('passivefightWin$Bangkok', 0));
   var lossDollars = parseInt(GM_getValue('passivefightLoss$NY', 0)) + parseInt(GM_getValue('passivefightLoss$Cuba', 0)) + parseInt(GM_getValue('passivefightLoss$Moscow', 0)) + parseInt(GM_getValue('passivefightLoss$Bangkok', 0));
@@ -5113,7 +5117,7 @@ function createLogBox() {
   makeElement('div', statPrimaryElt, {'style':'position: absolute; left: 5px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Exp Gained:'));
   makeElement('div', statPrimaryElt, {'id':'totalExp', 'style':'position: absolute; right: 329px; bottom: 50px; font-size: 10px; font-weight: 600;color: #52E259;'}).appendChild(document.createTextNode(makeCommaValue(GM_getValue('totalExpInt', 0))));
   makeElement('hr', statPrimaryElt, {'style':'position: absolute; left: 0; bottom: 42px; height: 1px; border: 0px; width: 90%; margin-left: 5%; color: #666666; background-color: #666666'});
-  
+
   makeElement('div', statPrimaryElt, {'style':'position: absolute; right: 267px; bottom: 50px; font-size: 10px; font-weight: 100;color: #666666;'}).appendChild(document.createTextNode('Gain Rate:'));
   var rate = getStaminaGainRate();
   makeElement('div', statPrimaryElt, {'id':'expRate', 'style':'position: absolute; right: 240px; bottom: 50px; font-size: 10px; font-weight: 600;color: #04B4AE;'}).appendChild(document.createTextNode(rate.toFixed(2)));
@@ -5382,8 +5386,8 @@ function createGeneralTab() {
   label = makeElement('label', lhs, {'title':title});
   label.appendChild(document.createTextNode('Disable Auto-Heal when Stamina falls below:'));
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue('stamina_min_heal', '22'), 'id':'stamina_min_heal', 'size':'3', 'style':'text-align: center'});
-  rhs.appendChild(document.createTextNode(' points'));  
-  
+  rhs.appendChild(document.createTextNode(' points'));
+
   // Idle-in location
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -5695,7 +5699,7 @@ function createDisplayTab() {
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Promo Icon '));
 
-  // Hide Live Updates Icon 
+  // Hide Live Updates Icon
   id = 'LiveUpdatesIcon';
   title = 'Hide Live Updates Icon';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
@@ -5740,44 +5744,44 @@ function createMafiaTab() {
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'no Help in Moscow';
   choiceMoscowTier.value = '0';
-  if (GM_getValue('selectMoscowTier') == '0') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '0') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'Baklany';
   choiceMoscowTier.value = '1';
-  if (GM_getValue('selectMoscowTier') == '1') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '1') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'Boets';
   choiceMoscowTier.value = '2';
-  if (GM_getValue('selectMoscowTier') == '2') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '2') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'Brigadir';
   choiceMoscowTier.value = '3';
-  if (GM_getValue('selectMoscowTier') == '3') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '3') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'Avtoritet';
   choiceMoscowTier.value = '4';
-  if (GM_getValue('selectMoscowTier') == '4') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '4') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'Vor';
   choiceMoscowTier.value = '5';
-  if (GM_getValue('selectMoscowTier') == '5') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '5') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'Pakhan';
   choiceMoscowTier.value = '6';
-  if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;  
+  if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
 
   var selectBangkokTierDiv = makeElement('div', list);
   lhs = makeElement('div', selectBangkokTierDiv, {'class':'lhs'});
   rhs = makeElement('div', selectBangkokTierDiv, {'class':'rhs'});
   makeElement('br', selectBangkokTierDiv, {'class':'hide'});
-  title = 'Ask for Help on Bangkok Tiers - Be carefull to only choose available Tiers !';  
+  title = 'Ask for Help on Bangkok Tiers - Be carefull to only choose available Tiers !';
   id = 'selectBangkokTier';
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Bangkok help  on :'));
@@ -5786,49 +5790,49 @@ function createMafiaTab() {
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'no Help in Bangkok';
   choiceBangkokTier.value = '0';
-  if (GM_getValue('selectBangkokTier') == '0') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '0') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Brawler';
   choiceBangkokTier.value = '1';
-  if (GM_getValue('selectBangkokTier') == '1') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '1') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Criminal';
   choiceBangkokTier.value = '2';
-  if (GM_getValue('selectBangkokTier') == '2') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '2') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Pirate';
   choiceBangkokTier.value = '3';
-  if (GM_getValue('selectBangkokTier') == '3') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '3') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Commandant';
   choiceBangkokTier.value = '4';
-  if (GM_getValue('selectBangkokTier') == '4') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '4') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Oyabun';
   choiceBangkokTier.value = '5';
-  if (GM_getValue('selectBangkokTier') == '5') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '5') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Dragon Head';
   choiceBangkokTier.value = '6';
-  if (GM_getValue('selectBangkokTier') == '6') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '6') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Saboteur';
   choiceBangkokTier.value = '7';
-  if (GM_getValue('selectBangkokTier') == '7') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '7') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'Assassin';
   choiceBangkokTier.value = '8';
-  if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;  
+  if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
-  
+
   // Auto-accept mafia invitations
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -5854,7 +5858,7 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Level-up bonus '));
-  
+
   // Achievement bonus
   //item = makeElement('div', list);
   //lhs = makeElement('div', item, {'class':'lhs'});
@@ -5896,7 +5900,7 @@ function createMafiaTab() {
   id = 'autoSecretStashFrequency';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '1'), 'title':title, 'id':id, 'size':'1'});
   rhs.appendChild(document.createTextNode(' th time'));
-  
+
   // Auto-share wishlist
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6453,7 +6457,7 @@ function createEnergyTab() {
   handler();
 
   masterAllJobs.addEventListener('change', handler, false);
-  multipleJobs.addEventListener('change', handler, false);  
+  multipleJobs.addEventListener('change', handler, false);
 
   // Spend buff packs?
   item = makeElement('div', list);
@@ -6625,7 +6629,7 @@ function createStaminaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Fast Rob?'));
-  
+
   // Stamina bursts
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6838,7 +6842,7 @@ function createStaminaTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   rhs2 = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  
+
   title = ' Use Mafia Family Patterns when fighting';
   id = 'fightNames';
   var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
@@ -6854,13 +6858,13 @@ function createStaminaTab() {
   id = 'fightOnlyNames';
   title = ' Only Fight Mafia Families ';
   makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));      
-  
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+
   makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
-  
-  
+
+
   // End of options specific to random fighting
 
   //
@@ -7602,7 +7606,7 @@ function handleModificationTimer() {
     setListenContent(true);
     DEBUG('New popup_fodder content: ' + popupFodderElt.id);
     pageChanged = true;
-    //if (GM_getValue('isRunning')) justPlay = true;
+    //if (running) justPlay = true;
   }*/
 
   // Added handling for the new-style job page changes
@@ -7614,7 +7618,7 @@ function handleModificationTimer() {
       setListenContent(true);
       DEBUG('Detected new-style job results.');
       pageChanged = true;
-      if (GM_getValue('isRunning')) justPlay = true;
+      if (running) justPlay = true;
     }
   }
 
@@ -7628,10 +7632,10 @@ function handleModificationTimer() {
       setListenContent(true);
       DEBUG('Detected new rob results.');
       pageChanged = true;
-      if (GM_getValue('isRunning')) justPlay = true;
+      if (running) justPlay = true;
     }
   }
-  if (GM_getValue('isRunning')) {
+  if (running) {
     // Popups opened?
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
     if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
@@ -7752,10 +7756,10 @@ function handlePublishing() {
 
         // Moscow Job Help
         if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectMoscowTiercheck', pubElt, skipElt)) return;
-		
-		// Bangkok Job Help
-        if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectBangkokTiercheck', pubElt, skipElt)) return;		
-		
+
+    // Bangkok Job Help
+        if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectBangkokTiercheck', pubElt, skipElt)) return;
+
         // Share wishlist
         if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
 
@@ -7833,7 +7837,7 @@ function innerPageChanged(justPlay) {
 
   // Perform actions here not requiring response logging
   doParseMessages();
-  if (GM_getValue('isRunning')) {
+  if (running) {
     doQuickClicks();
     if(isGMChecked('autoShareWishlist') && !timeLeftGM('wishListTimer')){
       autoWishlist();
@@ -7925,7 +7929,7 @@ function refreshGlobalStats() {
 
   // Once we see a post pop-up, set the timer to close it
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
-  if (GM_getValue('isRunning') && skipPostElt)
+  if (running && skipPostElt)
     window.setTimeout(closePopUp, 10000);
 
   // Set all the element globals. They change.
@@ -7988,7 +7992,7 @@ function refreshGlobalStats() {
   }
 
   // Show congratulations if level has increased.
-  if (GM_getValue('isRunning') && level > GM_getValue('currentLevel')) {
+  if (running && level > GM_getValue('currentLevel')) {
     GM_setValue('currentLevel', level);
     addToLog('experience Icon', '<span style="color:#00FFCC;"> Congratulations on reaching level <strong>' + level + '</strong>!</span>');
     GM_setValue('restAutoStat', 0);
@@ -8018,7 +8022,7 @@ function refreshSettings() {
   SpendEnergy.refreshLimits (maxEnergy, canLevel);
 
   // Log and toggle burning
-  if (GM_getValue('isRunning')) {
+  if (running) {
     if (isGMChecked(SpendStamina.spendFlag)) SpendStamina.toggleSpending(maxStamina, stamina);
     if (isGMChecked(SpendEnergy.spendFlag)) SpendEnergy.toggleSpending(maxEnergy, energy);
   }
@@ -8032,7 +8036,7 @@ function refreshSettings() {
   }
 
   // Auto-pause logic
-  if (GM_getValue('isRunning') && isGMChecked('autoPause')) {
+  if (running && isGMChecked('autoPause')) {
     if (isGMChecked('autoPauseBefore') &&
         GM_getValue('autoPauseExp', '') >= lvlExp - curExp &&
         GM_getValue('autoPauseActivated', false) === false) {
@@ -8157,11 +8161,11 @@ function refreshMWAPCSS() {
                    ' #zstream_icon {position: absolute; top: 10px; left: 305px; width: 22px; z-index: 10001;} ') +
 
                 // Move gift icon and make it smaller:
-         		     (isGMChecked('hideGiftIcon') ?
-         			     ' #gifticon_container {display: none;}' :
-         			     ' #gifticon_container {position: absolute; top: 220px; left: 765px; width: 12px; z-index: 10001;}  ') +
+                 (isGMChecked('hideGiftIcon') ?
+                   ' #gifticon_container {display: none;}' :
+                   ' #gifticon_container {position: absolute; top: 220px; left: 765px; width: 12px; z-index: 10001;}  ') +
 
-                 // Move London Countdown:                 
+                 // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
 
                  // Show hidden jobs for new job layout
@@ -8647,7 +8651,7 @@ function customizeStats() {
     healLinkElt.href = healLinkHref;
     // Substitute the "hide" icon if currently hiding in the hospital.
     var hideImgElt = healLinkElt.childNodes[1];
-    if (GM_getValue('isRunning') && healImgElt && health < 20 &&
+    if (running && healImgElt && health < 20 &&
         isGMChecked('hideInHospital')) {
       healImgElt.style.display = 'none';
       if (!hideImgElt)
@@ -8953,7 +8957,7 @@ function customizeProfile() {
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
       // Show if Alive/Dead
-      if (!GM_getValue('isRunning') && !removeElt) {
+      if (!running && !removeElt) {
         var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
             var alive = !/You can't add/.test(this.responseText.untag());
@@ -9629,7 +9633,7 @@ function updateJobInfo (jobMatch, cost, reward, ratio) {
 }
 
 function tierMastery(jobsFound, jobsMastered, currentTab) {
-  if (GM_getValue('isRunning') && isGMChecked('multipleJobs') &&
+  if (running && isGMChecked('multipleJobs') &&
       GM_getValue('selectTier') != '0.0') {
     selectedTierValue = GM_getValue('selectTier').split('.');
     masteryCity = parseInt(selectedTierValue[0]);
@@ -9672,7 +9676,7 @@ function tierMastery(jobsFound, jobsMastered, currentTab) {
 
 function customizeFight() {
   // No need to do this when AP is running
-  if (GM_getValue('isRunning')) return true;
+  if (running) return true;
 
   var opponents = getDisplayedOpponents(innerPageElt, true);
   if (!opponents) return false;
@@ -9784,7 +9788,7 @@ function customizeProps() {
 
 function customizeHitlist() {
   // No need to do this when AP is running
-  if (GM_getValue('isRunning')) return true;
+  if (running) return true;
 
   // Extras for hitlist.
   if (!onHitlistTab()) return false;
@@ -10167,8 +10171,8 @@ function debugDumpSettings() {
     DEBUG('Language is "' + GM_getValue('language') + '".');
     addToLog('warning Icon', 'Unfortunately, only the English version of the game is fully supported. If you experience problems, set your Facebook language to English and try again.');
   }
-  
-  
+
+
 // KCMCL Moved here, other wise this is getting executed every load and refresh, only need it for debug. Browser Detection - FIXME: This may not be the best way to impliment this
 
 var BrowserDetect = {
@@ -10297,7 +10301,7 @@ BrowserDetect.init();
         'Script Version: <strong>' + SCRIPT.version + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
         'isFlashed: <strong>' + isFlashed + '</strong><br>' +
-        'isRunning: <strong>' + GM_getValue('isRunning') + '</strong><br>' +
+        'isRunning: <strong>' + running + '</strong><br>' +
         'Player current level: <strong>' + level + '</strong><br>' +
         'Player points to next level: <strong>' + ptsToNextLevel + '</strong><br>' +
         'Player mafia size: <strong>' + mafia + '</strong><br>' +
@@ -10536,7 +10540,7 @@ function parsePlayerUpdates(messagebox) {
   DEBUG(messageTextNoTags);
 
   if (messageTextNoTags.indexOf('attacked by') != -1) {
-     var attackCount = 1; 
+     var attackCount = 1;
     // Attacked by some fool with a death wish.
     user = linkToString(links[0], 'user');
     result = 'Attacked';
@@ -12399,7 +12403,7 @@ function takeFightStatistics(experience, winCount, lossCount, cashStr, resultTyp
   var xp = parseInt(experience);
   var cashInt = parseCash(cashStr);
   var cashLoc = parseCashLoc(cashStr);
-  
+
   DEBUG('Attack Stat Results : '+winCount+' / '+lossCount+' / '+cashStr);
 
   if (winCount > 0) {
@@ -12435,8 +12439,8 @@ function takeFightStatistics(experience, winCount, lossCount, cashStr, resultTyp
       case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt)); break;
       case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
     }
-  } 
-  
+  }
+
   // we lost at least 1 fight
   if (lossCount > 0) {
     GM_setValue('fightLossCountInt', GM_getValue('fightLossCountInt', 0) + lossCount);
@@ -12491,7 +12495,7 @@ function takeFightStatistics(experience, winCount, lossCount, cashStr, resultTyp
         break;
     }
   }
-  
+
   // we lost all fights, money is 'Loss $'
   if (winCount == 0) {
     GM_setValue('totalLossDollarsInt', String(parseInt(GM_getValue('totalLossDollarsInt', 0)) + cashInt));
@@ -12634,13 +12638,13 @@ function logFightResponse(rootElt, resultElt, context) {
     // non-power attack results
     var winCount = experience > 0 ? 1 : 0;
     var lossCount = experience == 0 ? 1 : 0;
-    
+
     // do we have power attack results?
     var fightHintElt = xpathFirst('.//div[@class="fightres_hint"]')
     if (fightHintElt && innerNoTags.match('Power attack')) {
-      if (innerNoTags.match(/win:\s*(\d+)/i)) 
+      if (innerNoTags.match(/win:\s*(\d+)/i))
         winCount = parseInt(RegExp.$1);
-      if (innerNoTags.match(/loss:\s*(\d+)/i)) 
+      if (innerNoTags.match(/loss:\s*(\d+)/i))
         lossCount = parseInt(RegExp.$1);
       DEBUG('Power Attack Results : '+winCount+'/'+lossCount);
     }
@@ -12698,7 +12702,7 @@ function logFightResponse(rootElt, resultElt, context) {
       addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
     }
 
-    // Look for any loot.    
+    // Look for any loot.
     var lootRE = /(earned|gained|found) (some|an?|\d) (.+?)[\.!]/gi;
     var match;
     var foundLoot;
@@ -13288,7 +13292,7 @@ function logResponse(rootElt, action, context) {
                  cost + '</span>' + ' and ' +
                  '<span class="good">' + experience + ' experience</span>' +
                  ' for helping ' + user + ' complete the job.';
-        GM_setValue('passivetotalJobExpInt', parseInt(GM_getValue('passivetotalJobExpInt',0)) + experience); 
+        GM_setValue('passivetotalJobExpInt', parseInt(GM_getValue('passivetotalJobExpInt',0)) + experience);
         addToLog('updateGood Icon', result);
         updateLogStats();
       } else if (innerNoTags.indexOf('25 friends') != -1) {
@@ -13409,7 +13413,7 @@ function logResponse(rootElt, action, context) {
         addToLog('info Icon', inner);
       } else {
         setGMTime(timerName, '24 hours');
-        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) { 
+        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) {
           var log = '<span class="loot"> You built '+ RegExp.$1;
           if (RegExp.$2.match(/You gained.+&nbsp;(.+?\.)/))
             log += ' You gained ' + RegExp.$1;
@@ -13545,7 +13549,7 @@ function handlePopups() {
           }
 
           /* THESE POPUPS get processed only when MWAP is running: */
-          if (GM_getValue('isRunning')) {
+          if (running) {
 
             /* Disable Chop Shop/Weapon Depot popup detection for timers
             // Get rid of Chop Shop/Weapon Depot popup
