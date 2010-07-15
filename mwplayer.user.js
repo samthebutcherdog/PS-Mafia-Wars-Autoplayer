@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.532
+// @version     1.1.533
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.532',
+  version: '1.1.533',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2171,10 +2171,31 @@ function autoHeal() {
 
 
 function AskforHelp(hlpCity) {
-  helpCity = parseInt(hlpCity);
-  if(helpCity==2) DEBUG('Clicking to go to Moscow to look for Ask for Help-job');
-  if(helpCity==3) DEBUG('Clicking to go to Bangkok to look for Ask for Help-job');
 
+  // Common function if job has failed
+  var doAskFunction = function (askResult) {
+    if (!askResult) {
+      addToLog('warning Icon', 'Unable to Ask for Help on ' + helpCity +'.'+ tabno+'. Please Check your \'Ask for Help\'-settings on MWAP\'s Mafia tab.');
+      if(helpCity==2) GM_setValue('selectMoscowTier', 0);
+      if(helpCity==3) GM_setValue('selectBangkokTier', 0);
+    }
+  }
+
+  var helpCity = parseInt(hlpCity);
+  var tabno=0;
+  var timerName='';
+  
+  if(helpCity==2) {
+    DEBUG('Clicking to go to Moscow to look for Ask for Help-job');
+	tabno = parseInt(GM_getValue('selectMoscowTier'));
+	timerName='AskforHelpMoscowTimer';
+  }	
+  if(helpCity==3) {
+    DEBUG('Clicking to go to Bangkok to look for Ask for Help-job');
+	tabno = parseInt(GM_getValue('selectBangkokTier'));
+	timerName='AskforHelpBangkokTimer';
+  }
+  
   // Go to the correct city.
   if (city != helpCity) {
     Autoplay.fx = function() { goLocation(helpCity); };
@@ -2183,24 +2204,14 @@ function AskforHelp(hlpCity) {
     return true;
   }
 
-  if(helpCity==2) tabno = parseInt(GM_getValue('selectMoscowTier'));
-  if(helpCity==3) tabno = parseInt(GM_getValue('selectBangkokTier'));
-
-  if(helpCity==2) DEBUG('Clicking to go to Moscow-tier '+tabno);
-  if(helpCity==3) DEBUG('Clicking to go to Bangkok-tier '+tabno);
-
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
-    Autoplay.fx = function() { goJobTab(tabno); };
+    Autoplay.fx = function() { doAskFunction(goJobTab(tabno)); };
     Autoplay.start();
     return true;
   }
 
   DEBUG('Right City. Right Tab. Looking for the Ask for Help-job');
-
-  var timerName;
-  if(helpCity==2) timerName='AskforHelpMoscowTimer';
-  if(helpCity==3) timerName='AskforHelpBangkokTimer';
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
     setGMTime(timerName, '2 hour');
@@ -2642,6 +2653,9 @@ function autoMission() {
       if (jobs.length == 0) {
         // Skip jobs temporarily, and check the home page
         skipJobs = true;
+        addToLog('warning Icon', 'Spend energy to do jobs automatically is turned off - Please check your \'Master tier:\'-settings on MWAP\'s Energy tab.');
+		DEBUG('autoMissin turned off - jobsToDo is Empty - Skipping Jobs atm');
+		GM_setValue('autoMission', 0);
         goHome();
       } else {
         // Else Get the next job to perform
@@ -6828,17 +6842,6 @@ function createStaminaTab() {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
 
-  // Family names
-  //item = makeElement('div', list);
-  //lhs = makeElement('div', item, {'class':'lhs'});
-  //rhs = makeElement('div', item, {'class':'rhs'});
-  //makeElement('br', item, {'class':'hide'});
-  //title = 'Avoid random opponents whose names contain specific patterns.';
-  //id = 'fightAvoidNames';
-  //makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightAvoidNames', 0);
-  //label = makeElement('label', lhs, {'for':id, 'title':title});
-  //label.appendChild(document.createTextNode(' Avoid mafia families:'));
-
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -9952,6 +9955,24 @@ function getJobRowItems(jobName) {
   var currentJobRow = getJobRow(currentJob, innerPageElt);
   if (!currentJobRow) return false;
 
+  var inner = innerPageElt? innerPageElt.innerHTML : '';
+  var innerNoTags = inner.untag();
+    
+  if (innerNoTags.match(/You do not have enough cash to buy/i)) {
+    addToLog('warning Icon', 'You don\'t have enough cash to buy necessary equipment.');	
+	var jobs = getSavedList('jobsToDo', '');
+    if (jobs.indexOf(currentJob) == -1) {
+      jobs.push(currentJob);
+      DEBUG('Saving ' + currentJob + ' for later. Need to farm cash first.');
+      setSavedList('jobsToDo', jobs);
+	  return true;
+    } else {
+		GM_setValue('autoMission', 0);
+		addToLog('warning Icon', 'No more available jobs in jobsToDo list, so turning off autoMission.');	
+		return false;
+	}    
+  }
+  
   var buyItemElts = $x('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
   // Click to buy items
   if (buyItemElts.length > 0){
@@ -9985,7 +10006,6 @@ function getJobRowItems(jobName) {
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
   if (necessaryItems.length > 0) {
-
     // Save the current job for later. The current job should not already
     // exist in the list, so check first.
     var items = getSavedList('itemList');
@@ -10377,6 +10397,8 @@ BrowserDetect.init();
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
+        'Ask for Moscow help: <strong>' + GM_getValue('selectMoscowTier') + '</strong><br>' +
+		'Ask for Bangkok help: <strong>' + GM_getValue('selectBangkokTier') + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
         'Miscellaneous publishing: <br>' +
         '&nbsp;&nbsp;Secret stash: <strong>' + showIfUnchecked(GM_getValue('autoSecretStash')) + '</strong><br>' +
@@ -12704,27 +12726,24 @@ function logFightResponse(rootElt, resultElt, context) {
       addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
     }
 
-    // Look for any loot.
+    // Look for any loot.    
     var lootRE = /(earned|gained|found) (some|an?|\d) (.+?)[\.!]/gi;
     var match;
     var foundLoot;
     var totalAttack;
     var totalDefense;
+	var txtLog="";
 
     while(match = lootRE.exec(innerNoTags)){
       foundLoot = match[2] + ' ' + match[3];
       totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
       totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
-      var txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
-      if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
-      if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
-      addToLog('lootbag Icon', txtLog);
-    }
-
-//    if (innerNoTags.match(/found (an? .*) while fighting/i)) {
-//      addToLog('lootbag Icon', '<span class="loot">'+' Found '+
-//               RegExp.$1 + ' in the fight.</span>');
-//    }
+      if(txtLog) txtLog += '<br/><span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';      
+	  else txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';      
+    }    
+	if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
+    if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
+    if(txtLog) addToLog('lootbag Icon', txtLog);
 
     // Update the statistics.
     takeFightStatistics(experience, winCount, lossCount, cost, resultType);
@@ -12845,6 +12864,7 @@ function logJSONResponse(responseText, action, context) {
         var respData = eval ('(' + respJSON['data'] + ')');
         for (var i in respData) {
           if (/collected/i.test(respData[i])) {
+            var collectString = respData[i].replace(/\$/i, cities[city][CITY_CASH_SYMBOL]);		  
             addToLog(cities[city][CITY_CASH_CSS], respData[i]);
             break;
           }
@@ -13407,6 +13427,10 @@ function logResponse(rootElt, action, context) {
         case 11: timerName = 'buildCarTimer'; break;
         case 12: timerName = 'buildWeaponTimer'; break;
       }
+	  if (/You cannot craft/i.test(inner)) {
+	    if(context.buildType==11) inner = "Chop Shop : " + inner;
+		if(context.buildType==12) inner = "Weapons Depot : " + inner;
+	  }		  
       // Visit again after 1 hour if you cannot craft yet
       if (/You cannot craft/i.test(inner) ||
           /You do not have/i.test(inner) ||
@@ -13415,7 +13439,7 @@ function logResponse(rootElt, action, context) {
         addToLog('info Icon', inner);
       } else {
         setGMTime(timerName, '24 hours');
-        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) {
+        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) { 
           var log = '<span class="loot"> You built '+ RegExp.$1;
           if (RegExp.$2.match(/You gained.+&nbsp;(.+?\.)/))
             log += ' You gained ' + RegExp.$1;
@@ -13425,31 +13449,11 @@ function logResponse(rootElt, action, context) {
       }
       break;
 
-    case 'Ask for Help':
-/*      var timerName = 'AskforMoscowHelp';
-      switch (context.helpCity) {
-        case 2: timerName = 'AskforMoscowHelp'; break;
-        case 3: timerName = 'AskforBankok'; break;
-      }
-      // Visit again after 1 hour if you cannot craft yet
-      if (!/Ask for Help and/i.test(inner) ) {
-        setGMTime(timerName, '1 hour');
-        addToLog('info Icon', inner);
-      } else {
-        setGMTime(timerName, '24 hours');
-        if (inner.match(/Ask for Help and/i)) {
-          addToLog('info Icon', 'Asked for Help');
-        }
-      }
-*/
-      break;
-
     default:
       addToLog('warning Icon', 'BUG DETECTED: Unrecognized action "' +
                action + '".');
       DEBUG(inner);
   }
-
   return false;
 }
 
