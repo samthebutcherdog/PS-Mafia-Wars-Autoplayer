@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.533
+// @version     1.1.534
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.533',
+  version: '1.1.534',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8143,13 +8143,19 @@ function refreshMWAPCSS() {
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 765px !important; width: 45px; z-index: 10001 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 765px !important; width: 45px; z-index: 10001 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
-                 // Move Zynga selling Promo icon and click box and make it smaller:
+         // Move Zynga selling Promo icon and click box and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                   ' #buyframe_link_container  {display: none;}' +
                   ' #buyframe_link_cover      {display: none;}' :
                   ' #buyframe_link_container  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
                   ' #buyframe_link_cover      {position: absolute; top: 50px; left: 765px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
 
+         // Move other Zynga selling Promo icon and click box and make it smaller:
+                 (isGMChecked('hidePromoIcon') ?
+                  ' #buyframe_link_container_anim  {display: none;}' +
+                  ' #buyframe_link_cover_anim      {display: none;}' :
+                  ' #buyframe_link_container_anim  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
+                  ' #buyframe_link_cover_anim      {position: absolute; top: 50px; left: 765px; width: 22px; z-index: 10001;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
                 // Move Promo and make it smaller:
                 (isGMChecked('hidePromoIcon') ?
                   ' #promoicon_container {display: none;}' :
@@ -8620,26 +8626,42 @@ function customizeStats() {
   var nrgImgElt = xpathFirst('./div[@id="stats_row"]//img[@alt="Energy"]', appLayoutElt);
   var nrgTxtElt = xpathFirst('./div[@id="stats_row"]//span[@class="stat_title" and contains(text(), "Energy")]', appLayoutElt);
   if ((nrgImgElt && !nrgLinkElt) || (nrgTxtElt && !nrgLinkEltTxt)) {
-    var miniPackTitle = 'Click to fire mini-pack immediately.';
     var timeLeftPack = getHoursTime('miniPackTimer');
-    if (timeLeftPack == 0) miniPackTitle += ' Available now.';
-    else if (timeLeftPack == undefined) miniPackTitle += ' Timer not set.';
-    else miniPackTitle += ' Available in ' + timeLeftPack + '.';
+    if (timeLeftPack == 0) var miniPackTitle = ' Mini-Pack Available now.';
+    else if (timeLeftPack == undefined) { 
+        var miniPackTitle = ' Mini-Pack Timer was not set.';
+        setGMTime('miniPackTimer', '8 hours');    }
+    else var miniPackTitle = timeLeftPack + ' Until Mini-Pack Available.';
+    miniPackTitle += ' Click to Attempt To fire Immediately.';
     if (nrgImgElt && !nrgLinkElt) {
       nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':miniPackTitle});
-      /* Is showing stamina_min_heal really necessary here, in the title of the energy icon/text? ;) perhaps we can place it on the health or stamina icon/text.. */
-      //nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':miniPackTitle + ' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.'});
       nrgImgElt.parentNode.insertBefore(nrgLinkElt, nrgImgElt);
       nrgLinkElt.appendChild(nrgImgElt);
       nrgLinkElt.addEventListener('click', miniPackForce, false);
     }
     if (nrgTxtElt && !nrgLinkEltTxt) {
       nrgLinkEltTxt = makeElement('a', null, {'id':'mwap_nrgTxt', 'title':miniPackTitle});
-      //nrgLinkEltTxt =  makeElement('a', null, {'id':'mwap_nrgTxt', 'title':miniPackTitle + ' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.'});
       nrgTxtElt.parentNode.insertBefore(nrgLinkEltTxt, nrgTxtElt);
       nrgLinkEltTxt.appendChild(nrgTxtElt);
       nrgLinkEltTxt.addEventListener('click', miniPackForce, false);
     }
+  }
+
+// Make stamina icon pointable for showing.
+  var stamLinkElt = document.getElementById('mwap_stam');
+  var stamImgElt = xpathFirst('//img[@alt="Stamina"]');
+  if (stamImgElt && !stamLinkElt) {
+    stamLinkElt =  makeElement('a', null, {'id':'mwap_stam', 'title':' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.' });
+    stamImgElt.parentNode.insertBefore(stamLinkElt, stamImgElt);
+    stamLinkElt.appendChild(stamImgElt);
+  }
+// Make Stamina text Pointable for Value Display.
+  var stamLinkEltTxt = document.getElementById('mwap_stamTxt');
+  var stamTxtElt = xpathFirst('//span[@class="stat_title" and contains(text(), "Stamina")]');
+  if (stamTxtElt && !stamLinkEltTxt) {
+    stamLinkEltTxt =  makeElement('a', null, {'id':'mwap_stamTxt', 'title':' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.' });
+    stamTxtElt.parentNode.insertBefore(stamLinkEltTxt, stamTxtElt);
+    stamLinkEltTxt.appendChild(stamTxtElt);
   }
 
   // Make health icon clickable for instant healing.
