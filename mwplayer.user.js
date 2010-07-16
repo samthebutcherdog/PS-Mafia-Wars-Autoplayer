@@ -39,13 +39,13 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.534
+// @version     1.1.535
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 var SCRIPT = {
-  version: '1.1.534',
+  version: '1.1.535',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -930,7 +930,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var burnModes = ['Energy','Stamina'];
 
   // Array of lottery bonus items
-  var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', '1 skill point', '+20 energy points', '1-5 Godfather points'];
+    var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', '1 Godfather point', '+20 energy points', '1-5 Godfather points'];
 
   // Prop Income
   var propsData = new Array (
