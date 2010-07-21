@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.540
+// @version     1.1.541
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.540',
+  version: '1.1.541',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -577,6 +577,8 @@ var cashCubaIcon    = '<img src="data:image/gif;base64,R0lGODlhEAALANU/AMa6tcCbk
 
 var cashMoscowIcon  = '<img src="data:image/gif;base64,R0lGODlhEAAQANU6ACkFBt4aIvFCSdoaIaITGV8LDvNhZq8VG/mtsPbbAChtEekbI8AXHfFITvvIyu8oL/JRV7kWHNwaIfXkAca/E/AwOOcbI8fFJvA4P5iiGfJNU/A0O/NZX/aBhX0PE/V2e9W8Be8tNPFGTL0WHcrDBPLPAPNbYeAaIt7bAoMPFIgQFeQbIveanUV5E/JYXmJbD7MVG+zMA22NC9XDD+8kLM0YH4EPE5IRFvA5QJ6rQQAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADoALAAAAAAQABAAAAaMQJ1wSCwaj8hkERAZDABKT4Dl0GwIKZsxEvg4DKaGQjFZeQpDQmBDw+RaCtSloQmJbgUGg0DIgGQkc14ILhEETgMMFBMJGRIQCAgGEg8nBwsLNRQJEwcjARIYAQEdBzoABTAzJQkWFRUDAQ8dBlBDLyAxDwK8AgYcaEYAKgsCEBAcFkqnBwI4tsvRSUEAOw==" width="16" height="11" />';
 
+var cashVegasIcon   = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAADUBpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDQuMi4yLWMwNjMgNTMuMzUyNjI0LCAyMDA4LzA3LzMwLTE4OjA1OjQxICAgICAgICAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6eG1wUmlnaHRzPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvcmlnaHRzLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOklwdGM0eG1wQ29yZT0iaHR0cDovL2lwdGMub3JnL3N0ZC9JcHRjNHhtcENvcmUvMS4wL3htbG5zLyIKICAgeG1wUmlnaHRzOk1hcmtlZD0iRmFsc2UiCiAgIHhtcFJpZ2h0czpXZWJTdGF0ZW1lbnQ9IiIKICAgcGhvdG9zaG9wOkF1dGhvcnNQb3NpdGlvbj0iIj4KICAgPGRjOnJpZ2h0cz4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCIvPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnJpZ2h0cz4KICAgPGRjOmNyZWF0b3I+CiAgICA8cmRmOlNlcT4KICAgICA8cmRmOmxpLz4KICAgIDwvcmRmOlNlcT4KICAgPC9kYzpjcmVhdG9yPgogICA8ZGM6dGl0bGU+CiAgICA8cmRmOkFsdD4KICAgICA8cmRmOmxpIHhtbDpsYW5nPSJ4LWRlZmF1bHQiLz4KICAgIDwvcmRmOkFsdD4KICAgPC9kYzp0aXRsZT4KICAgPHhtcFJpZ2h0czpVc2FnZVRlcm1zPgogICAgPHJkZjpBbHQ+CiAgICAgPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ii8+CiAgICA8L3JkZjpBbHQ+CiAgIDwveG1wUmlnaHRzOlVzYWdlVGVybXM+CiAgIDxJcHRjNHhtcENvcmU6Q3JlYXRvckNvbnRhY3RJbmZvCiAgICBJcHRjNHhtcENvcmU6Q2lBZHJFeHRhZHI9IiIKICAgIElwdGM0eG1wQ29yZTpDaUFkckNpdHk9IiIKICAgIElwdGM0eG1wQ29yZTpDaUFkclJlZ2lvbj0iIgogICAgSXB0YzR4bXBDb3JlOkNpQWRyUGNvZGU9IiIKICAgIElwdGM0eG1wQ29yZTpDaUFkckN0cnk9IiIKICAgIElwdGM0eG1wQ29yZTpDaVRlbFdvcms9IiIKICAgIElwdGM0eG1wQ29yZTpDaUVtYWlsV29yaz0iIgogICAgSXB0YzR4bXBDb3JlOkNpVXJsV29yaz0iIi8+CiAgPC9yZGY6RGVzY3JpcHRpb24+CiA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgCjw/eHBhY2tldCBlbmQ9InciPz6E0RvlAAADvElEQVR42jSTW0xcVRSG/33OnjMcDswAnamF4dIZpJkphSkgpoQaSKVRlFINpV76YFJjShqJjdXENkajaVAfTOqlYrXVh76YmIa0RQNai7ZgE6q02ipguVMoF4cZ5sxhLuey3W3ielnJzlo7//r/fESxA94iJ7ZV1uDSlQn4fTG83F7RnJebtb/Em77ZninQ557vn+n9abbLRPxUU52kVT0sYSWqYqDPgIB7RYCkoSNLUUobHq8dbGzdcY52L+5Wzy+VpBz5XibIdV7PA8crNnv+2VLhbgmrOsDY/VWRioBACPJd3ka/z3d5dELLr6sj0GSKG3Mx6L+OYTllIMKVtr+2KfPAwS17I0uz4h+3on2hJf6BYQLb6zeWtjQHf+npm6YbK2UovWNAPAHqlVBshCG7KXzROBqb1uN2913MnZupy9kuzg1c1odoVTA779ChbR07Gzy0SF7A7I0EfE+74a/nd8kKF5mODdYyrKsRvP/mX3AGHWht98MWtI79duXaBdL1TfMR2rvYkV/t5GcJyJI0dIl2DHRPgiQB93qK8ak4HnlCxu6AjsGv49j7mR8nOpdx8uTIK0QPHehRf59/7NpwAjdvr+LwuxTPHIxiZJTAWFtDPG7C4B4wUcDs9RT6v7Rw7CzDxVsWqJX6WRifiWTQnW64MoBasghkqwjfjaKA96pACv4SCa1NFlxuHli6A46AgGxqIlsmPDkSoC1PDSFNIQgWpmMflwmEkUoaiGncAj6Y0AjCKzpUlXuSiIINa2j2i+i86ED/typoKJKMhe4Q2CSC0GgKUGNYMyVoURscio5oJIlpPYHpSa5ADePHcRmG0w5jLIpcnz4iegtsRU82KDs++modpgfWEBrXUFitwyWZKCs2UJBrIlBsYmuNAU/MQGiZYlMFwaXjMQzMso/x6uu5ntHRwIXY9QA79UExa6v3sKnTaYypEmMJ3lOUsVXK5r6zsTceVdgXRxXGmMLCE8JSbRk20B+u2ufS3PqRBycXGxOqIH54xoWTbTIyBhlK7RqmbRIiKwwrwxaWCiV88qmI728mUV1mvSUaWEBBoAh7XvBjdcG/i7Ecq6cnj5WX57JdtW52Zn8m6zycxT5/x8liEwp7qDKHA5DFRCK9lyYBLif3vDhYiH0vlvDMt4KtessryxxDPEuWLq5jEzMu9vd5mR2tIVy2xDreti8AtmdFgeD/ovdh5A8iMTE/lfbn/IJYyUHY43AIL0l3kl5Pvkla2vBv74nU2fkRdHL0NGYJfMe8BzH+E2AAy3yaRq5vsOQAAAAASUVORK5CYII%3D" width="16" height="11" />';
+
 var healthIcon = '<img src="' +
                     'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH1wUIFAADTJ17vgAAAJlJREFUOMvFk7ERwjAMRb84L2ENkhmgyh5pWYAFmIExoPQUHiDF9xiiCkeMgu+cIr+z/P30ZZ8FG3rdL/a9Pl+f4vlCSgk5ZwzD9Cmq0h63cWUkaaoqLgAA5nllBwCpAV4C+bfZUoxRQNJ6RdLCJl6qcc0PecJOhWbnul4l2Z3geMDvHSwzHvcKjY4eQEop1hlAlr/QdVpV8QYMB23AfeHdZQAAAABJRU5ErkJggg==" />';
 
@@ -949,8 +951,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Office Park', 150000],
     ['Uptown Hotel', 200000],
     ['Mega Casino', 300000]
-// close above and open below to trick script into buying casino's    
-//    ['Mega Casino',   300000000] 
+// close above and open below to trick script into buying casino's
+//    ['Mega Casino',   300000000]
   );
 
   // Stat Ordinal constants
@@ -965,8 +967,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CUBA    = 1;
   const MOSCOW  = 2;
   const BANGKOK = 3;
-  const ACTIVE_CITY = 4;
-  const RANDOM_CITY = 5;
+  const LV      = 4;
+  const ACTIVE_CITY = 5;
+  const RANDOM_CITY = 6;
 
   // Constants to access city attributes
   const CITY_NAME        = 0;
@@ -999,11 +1002,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['New York', 'nyc', [], 'sideNY', undefined, 0, cashIcon, 'cash Icon', 'autoBank', 'bankConfig', '$', 0],
     ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'C$', 0],
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'R$', 0],
-    ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50]
+    ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50],
+    ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 0, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0]
   );
 
-  var locations = ['New York','Cuba','Moscow','Bangkok','Active City'];
-  var fightLocations = ['New York','Cuba','Moscow','Bangkok','Active City', 'Random City'];
+  var locations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Active City'];
+  var fightLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Active City', 'Random City'];
 
   // Featured job locations
   var featJobNames = ['Left Job', 'Middle Job', 'Right Job'];
@@ -1430,8 +1434,34 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Fight Off A Hill Tribe Loyal To The Shadow King',89,142,8,BANGKOK,142],  // CHAPTER 3
     ['Silence A Shadow Kingdom Patrol',81,143,8,BANGKOK,133],                  // CHAPTER 3
     ['Battle Your Way Through The Temple',96,144,8,BANGKOK,159],               // FINALE
-    ['Overthrow The Shadow King',1,145,8,BANGKOK,3]                            // BOSS JOB
+    ['Overthrow The Shadow King',1,145,8,BANGKOK,3],                           // BOSS JOB
+  // Las Vegas North Las Vegas
+  // ENERGY PATH
+  ['Move Your Crew Into a Safe House',9,1,1,LV,7],
+  ['Blackmail A Car Dealer',8,2,1,LV,11],
+  ['Steal A Truckload Of Slots',24,3,1,LV,18],
+  ['Secure Some Wheels',18,4,1,LV,25],
+  ['Break into a gun shop',12,6,1,LV,16],
+  ['Scout out alphabet city',15,7,1,LV,20],
+  // FIGHT PATH
+    //['Roll a bingo parlour',6,5,1,LV,9],
+  ['Open fire on Victor\'s crew',23,8,1,LV,27],                              // SOCIAL JOB
+  //['Defeat Victor Lil\' Loco Alves',5,9,1,LV,6],                             // BOSS JOB USES STAMINA
+  // LAS VEGAS PARADISE CITY
+  // ENERGY PATH
+  ['Help a Rookie Out Of A Jam',15,10,2,LV,9],
+  ['Fix a Boxing Match',11,13,2,LV,15],
+  ['Clean Up At A Rigged Table',10,14,2,LV,14],
+  ['Recruit A Table Game Dealer',9,15,2,LV,12],
+  ['Strong-Arm A Limo Company',14,16,2,LV,18],
+  ['Shut Down an Uncooperative Club',15,17,2,LV,20],
+  ['Hit Up a Nightclub',7,18,2,LV,9]
+  //['Defeat Jimmy \'Big Time\' Mancus',5,19,2,LV,70],                         // BOSS JOB USES STAMINA
+  // FIGHT PATH
+  //['Win an Underground Fight',11,11,2,LV,18],
+  //['Clip a Petty Thug',10,12,2,LV,16]
   );
+
 
   var missionTabs = new Array(
     // NEW YORK
@@ -1444,7 +1474,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // MOSCOW
     ['Baklany','Boets','Brigadir','Avtoritet','Vor','Pakhan'],
     // BANGKOK
-    ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head','Saboteur','Assassin']
+    ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head','Saboteur','Assassin'],
+  // LAS VEGAS
+  ['North Las Vegas','Paradise City']
   );
 
   const CHOICE_JOBNO   = 0;
@@ -1817,12 +1849,12 @@ function doAutoPlay () {
      isGMChecked('autoHeal') &&
      health < GM_getValue('healthLevel', 0) &&
      health < maxHealth &&
-     (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) 
+     (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal()))
      {
        if (autoHeal()) return;
-     } 
+     }
      else { DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) ); }
-   
+
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && !skipJobs && canMission();
   var autoStaminaSpendif = running && !skipStaminaSpend && canSpendStamina() && hasFight;
@@ -2159,7 +2191,7 @@ function autoHeal() {
       var hospitalElt = xpathFirst('//div[@id="clock_health"]/a');
     } else {
       var hospitalElt = xpathFirst('.//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
-    } 
+    }
     if (hospitalElt && xpathFirst('//div[@id="clock_health"]').style.display == 'block') {
       Autoplay.fx = function() {
         clickElement(hospitalElt);
@@ -2198,18 +2230,18 @@ function AskforHelp(hlpCity) {
   var helpCity = parseInt(hlpCity);
   var tabno=0;
   var timerName='';
-  
+
   if(helpCity==2) {
     DEBUG('Clicking to go to Moscow to look for Ask for Help-job');
-	tabno = parseInt(GM_getValue('selectMoscowTier'));
-	timerName='AskforHelpMoscowTimer';
-  }	
+  tabno = parseInt(GM_getValue('selectMoscowTier'));
+  timerName='AskforHelpMoscowTimer';
+  }
   if(helpCity==3) {
     DEBUG('Clicking to go to Bangkok to look for Ask for Help-job');
-	tabno = parseInt(GM_getValue('selectBangkokTier'));
-	timerName='AskforHelpBangkokTimer';
+  tabno = parseInt(GM_getValue('selectBangkokTier'));
+  timerName='AskforHelpBangkokTimer';
   }
-  
+
   // Go to the correct city.
   if (city != helpCity) {
     Autoplay.fx = function() { goLocation(helpCity); };
@@ -2495,8 +2527,8 @@ function canMission() {
   if (isGMChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
 
-    var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{}})') + ')');
-    var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{}})') + ')');
+    var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})') + ')');
+    var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})') + ')');
     var expLeft = lvlExp - curExp;
     var ratio = Math.ceil(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
@@ -2669,8 +2701,8 @@ function autoMission() {
         // Skip jobs temporarily, and check the home page
         skipJobs = true;
 //        addToLog('warning Icon', 'Spend energy to do jobs automatically is turned off - Please check your \'Master tier:\'-settings on MWAP\'s Energy tab.');
-//		DEBUG('autoMissin turned off - jobsToDo is Empty - Skipping Jobs atm');
-//		GM_setValue('autoMission', 0);
+//    DEBUG('autoMissin turned off - jobsToDo is Empty - Skipping Jobs atm');
+//    GM_setValue('autoMission', 0);
         goHome();
       } else {
         // Else Get the next job to perform
@@ -2757,12 +2789,12 @@ function canSpendStamina(minHealth) {
       case STAMINA_HOW_AUTOHITLIST:
       case STAMINA_HOW_ROBBING:
         minHealth = 0;
-      //mychangestamina 
+      //mychangestamina
       case STAMINA_HOW_FIGHT_RANDOM:
         if((isGMChecked('fightrob')) && ( stamina > 25) ) {
-	        DEBUG(' -- fight rob checked in fight random , going robbing-- ');
-		      minHealth = 0; } 
-		    else  DEBUG(' -- fight rob shows UNchecked OR stamina less than 26 in fight random -- ');
+          DEBUG(' -- fight rob checked in fight random , going robbing-- ');
+          minHealth = 0; }
+        else  DEBUG(' -- fight rob shows UNchecked OR stamina less than 26 in fight random -- ');
     }
   }
 
@@ -3377,15 +3409,15 @@ function autoStaminaSpend() {
   var how = getStaminaMode();
   switch (how) {
     case STAMINA_HOW_FIGHT_LIST:
-		      return autoFight(how);  
+          return autoFight(how);
 
     case STAMINA_HOW_FIGHT_RANDOM:
       if (  (isGMChecked('fightrob')) && ((health < 21)  && (stamina > 25 )  )  )  {
-	      DEBUG(' -- going to autorob -- ');
-        return autoRob();	
-	    } else {
-  	    DEBUG(' -- going to autofight -- ');
-        return autoFight(how);  
+        DEBUG(' -- going to autorob -- ');
+        return autoRob();
+      } else {
+        DEBUG(' -- going to autofight -- ');
+        return autoFight(how);
       }
 
     case STAMINA_HOW_ROBBING:
@@ -4461,8 +4493,8 @@ function saveSettings() {
   setSavedList('itemList', []);
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{}})');
-  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{}})');
+  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})');
+  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})');
 
   // Clear the fight/hit state.
   fightListNew.set([]);
@@ -4539,8 +4571,8 @@ function unPause() {
   }
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{}})');
-  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{}})');
+  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})');
+  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})');
 
   // Update the running state.
   GM_setValue('isRunning', true);
@@ -5759,7 +5791,7 @@ function createDisplayTab() {
   title = 'Hide Icon Row';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Icon Row In New Header'));
-  
+
   return displayTab;
 }
 
@@ -7626,10 +7658,10 @@ function handleModificationTimer() {
   modificationTimer = undefined;
 
   if(new_header){
-	var mastheadElt =  xpathFirst('//div[@class="header_top_row"]');
-	var elt = mastheadElt;
+  var mastheadElt =  xpathFirst('//div[@class="header_top_row"]');
+  var elt = mastheadElt;
   } else {
-	var elt, mastheadElt = document.getElementById('mw_masthead');
+  var elt, mastheadElt = document.getElementById('mw_masthead');
   }
   if (!mastheadElt || !mastheadElt.scrollWidth || !refreshGlobalStats()) {
     handleUnexpectedPage();
@@ -7679,6 +7711,7 @@ function handleModificationTimer() {
 
   // Added handling for the new-style job page changes
   var jobResult = xpathFirst('.//div[@id="new_user_jobs"]//div[@class="job_results"]', innerPageElt);
+  jobResult = jobResult ? jobResult : xpathFirst('.//div[@class="job_results"]', innerPageElt);
   if (jobResult) {
     if (!xpathFirst('.//div[@id="job_flag"]', jobResult)) {
       setListenContent(false);
@@ -8011,11 +8044,11 @@ function refreshGlobalStats() {
   levelElt = document.getElementById('user_level');
   curExpElt = document.getElementById('user_experience');
   if(new_header) {
-	ptsToNextLevelElt = document.getElementById('user_xp_to_next_level'); 
+  ptsToNextLevelElt = document.getElementById('user_xp_to_next_level');
   } else {
     lvlExpElt = document.getElementById('exp_for_next_level')
   };
-  
+
   // Update basic player information.
   cities[city][CITY_CASH] = parseCash(cashElt.innerHTML);
   health = parseInt(healthElt.innerHTML);
@@ -8029,12 +8062,12 @@ function refreshGlobalStats() {
   curExp = parseInt(curExpElt.innerHTML);
   if(new_header){
     ptsToNextLevel = parseInt(ptsToNextLevelElt.innerHTML);
-	lvlExp = curExp + ptsToNextLevel;
+  lvlExp = curExp + ptsToNextLevel;
   } else {
-	lvlExp = parseInt(lvlExpElt.innerHTML);
-	 ptsToNextLevel = lvlExp - curExp;
+  lvlExp = parseInt(lvlExpElt.innerHTML);
+   ptsToNextLevel = lvlExp - curExp;
   }
-	
+
   // Get the mafia size and pending invites.
   mafia = xpathFirst('//span[@id="user_group_size"]');
   if (mafia) {
@@ -8043,7 +8076,7 @@ function refreshGlobalStats() {
   if (!mafia || mafia < 1) {
     addToLog('warning Icon', 'BUG DETECTED: Unable to read mafia size.');
   }
-  
+
   invites = xpathFirst('//span[@id="user_request"]');
   if (invites) {
     invites = parseInt(invites.innerHTML.untag());
@@ -8604,12 +8637,12 @@ function customizeMasthead() {
 
   // Get the masthead.
   if(new_header){
-	var mastheadElt = xpathFirst('//div[@class="header_top_row"]');
+  var mastheadElt = xpathFirst('//div[@class="header_top_row"]');
   } else {
-	var mastheadElt = document.getElementById('mw_masthead');
+  var mastheadElt = document.getElementById('mw_masthead');
   }
   if (!mastheadElt) return;
-  
+
   // Links
   var linkElt = makeElement('div', mastheadElt,
     {'id':'ap_links', 'style':'position: absolute; top: 4px; right: 10px; text-align: left;' +
@@ -8620,31 +8653,31 @@ function customizeMasthead() {
   linkElt.appendChild(document.createTextNode(' | '));
   makeElement('a', linkElt, {'href':'https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap','target':'_blank'})
     .appendChild(document.createTextNode('For Chrome'));
-	
+
   // Make a container for the autoplayer menu. //mychange
   var mwapTitle = 'MWAP ' + SCRIPT.version ;
   if (new_header)     mwapTitle += ' (nH)' ;  // mark header a new header
-  
+
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
   var menuElt = makeElement('div', mastheadElt, {'id':'ap_menu', 'style':'position: absolute; top: 34px; font-size: 11px; right: 10px; text-align: left;'});
 
   // Change help instructions
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
- 
+
   if(new_header){
-    allHelpMenus = document.evaluate("//li[@class='dropdown divider']",document,null,XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,null);	
+    allHelpMenus = document.evaluate("//li[@class='dropdown divider']",document,null,XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,null);
     helpMenu = allHelpMenus.snapshotItem(2);
-	helpMenu.innerHTML = 
-	'<div class="help" >' +
-	  '<a href="http://apps.facebook.com/inthemafia" onclick="return false;" class="dropdown">MWAP</a>' +
-	'</div>' +
-	'<ul id="linklist">' +
-	  '<li><b style="padding-left:5px;">Downloads</b></li>' +
-	  '<li><a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank">' +
-	    '&nbsp;&nbsp;For Firefox' +
-	  '</a></li>' +
-	  '<li><a href="https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap" target="_blank"> ' +
-		  '&nbsp;&nbsp;For Chrome' +
+  helpMenu.innerHTML =
+  '<div class="help" >' +
+    '<a href="http://apps.facebook.com/inthemafia" onclick="return false;" class="dropdown">MWAP</a>' +
+  '</div>' +
+  '<ul id="linklist">' +
+    '<li><b style="padding-left:5px;">Downloads</b></li>' +
+    '<li><a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank">' +
+      '&nbsp;&nbsp;For Firefox' +
+    '</a></li>' +
+    '<li><a href="https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap" target="_blank"> ' +
+      '&nbsp;&nbsp;For Chrome' +
       '</a></li>' +
       '<li><a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
           '&nbsp;&nbsp;Revert to Previous' +
@@ -8666,16 +8699,16 @@ function customizeMasthead() {
        '<li><a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
          '&nbsp;&nbsp;Spock&#39;s Robber v1.08' +
        '</a></li>' +
-       '<li><a></a></li>';	
+       '<li><a></a></li>';
     linklist = document.getElementById('linklist');
     linklist.style.width = "200px";
-			      
+
     // Reset Timers (MWAP menu)
     var lobjresetTimers = makeElement('li', null, {'id':'resetTimers'});
     lobjresetTimers.innerHTML = '<a id="resetTimers">Reset Timers</a>';
     lobjresetTimers.addEventListener('click', resetTimers, false);
-    linklist.insertBefore(lobjresetTimers, linklist.firstChild); 
-  
+    linklist.insertBefore(lobjresetTimers, linklist.firstChild);
+
     // Show Timers (MWAP menu)
     var lobjshowTimers = makeElement('li', null, {'id':'showTimers'});
     lobjshowTimers.innerHTML = '<a id="showTimers">Show Timers</a>';
@@ -8776,7 +8809,7 @@ function customizeStats() {
   if ((nrgImgElt && !nrgLinkElt) || (nrgTxtElt && !nrgLinkEltTxt)) {
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0) var miniPackTitle = ' Mini-Pack Available now.';
-    else if (timeLeftPack == undefined) { 
+    else if (timeLeftPack == undefined) {
         var miniPackTitle = ' Mini-Pack Timer Has Been reset.';
         setGMTime('miniPackTimer', '8 hours');    }
     else var miniPackTitle = timeLeftPack + ' Until Mini-Pack Available.';
@@ -9467,8 +9500,8 @@ function customizeNewJobs() {
 
   DEBUG('Found ' + newJobs.length + ' new jobs.');
 
-  var availableJobs = eval('({0:{},1:{},2:{},3:{}})');
-  var masteredJobs = eval('({0:{},1:{},2:{},3:{}})');
+  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
+  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
   try {
     availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
     masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
@@ -9647,8 +9680,8 @@ function customizeJobs() {
 
   if (!jobTables || jobTables.length == 0) return false;
 
-  var availableJobs = eval('({0:{},1:{},2:{},3:{}})');
-  var masteredJobs = eval('({0:{},1:{},2:{},3:{}})');
+  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
+  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
   try {
     availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
     masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
@@ -10145,22 +10178,22 @@ function getJobRowItems(jobName) {
 
   var inner = innerPageElt? innerPageElt.innerHTML : '';
   var innerNoTags = inner.untag();
-    
+
   if (innerNoTags.match(/You do not have enough cash to buy/i)) {
-    addToLog('warning Icon', 'You don\'t have enough cash to buy necessary equipment.');	
-	var jobs = getSavedList('jobsToDo', '');
+    addToLog('warning Icon', 'You don\'t have enough cash to buy necessary equipment.');
+  var jobs = getSavedList('jobsToDo', '');
     if (jobs.indexOf(currentJob) == -1) {
       jobs.push(currentJob);
       DEBUG('Saving ' + currentJob + ' for later. Need to farm cash first.');
       setSavedList('jobsToDo', jobs);
-	  return true;
+    return true;
     } else {
-		GM_setValue('autoMission', 0);
-		addToLog('warning Icon', 'No more available jobs in jobsToDo list, so turning off autoMission.');	
-		return false;
-	}    
+    GM_setValue('autoMission', 0);
+    addToLog('warning Icon', 'No more available jobs in jobsToDo list, so turning off autoMission.');
+    return false;
   }
-  
+  }
+
   var buyItemElts = $x('.//a[contains(@onclick, "xw_action=buy_item")]',currentJobRow);
   // Click to buy items
   if (buyItemElts.length > 0){
@@ -10273,7 +10306,7 @@ function jobCombo(element) {
   var i;
   if (isGMChecked('multipleJobs')) {
     // Cycle jobs with the same ratio
-    var availableJobs = eval('(' + GM_getValue('availableJobs', "{0:{},1:{},2:{},3:{}}") + ')');
+    var availableJobs = eval('(' + GM_getValue('availableJobs', "{0:{},1:{},2:{},3:{},4:{}}") + ')');
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var cycle_jobs = new Object();
 
@@ -10588,7 +10621,7 @@ BrowserDetect.init();
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Ask for Moscow help: <strong>' + GM_getValue('selectMoscowTier') + '</strong><br>' +
-		'Ask for Bangkok help: <strong>' + GM_getValue('selectBangkokTier') + '</strong><br>' +
+    'Ask for Bangkok help: <strong>' + GM_getValue('selectBangkokTier') + '</strong><br>' +
         'Minimum experience for job help: <strong>' + GM_getValue('autoAskJobHelpMinExp') + '</strong><br>' +
         'Miscellaneous publishing: <br>' +
         '&nbsp;&nbsp;Secret stash: <strong>' + showIfUnchecked(GM_getValue('autoSecretStash')) + '</strong><br>' +
@@ -12078,7 +12111,7 @@ function goMyProfile() {
   if(new_header){
     var elt = xpathFirst('//a[@class="dropdown_narrow"]');
   } else {
-    var elt = xpathFirst('//div[@class="nav_link// profile_link"]//a[contains(.,"Profile")]');
+    var elt = xpathFirst('//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]');
   }
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find Profile nav link to click.');
@@ -12146,16 +12179,16 @@ function goJobsNav() {
 //  if(new_header){
 //    var elt = xpathFirst('//a[@class="header_job_button"]');
 //  } else {
-//    var elt = xpathFirst('//a[@class="nav_link jobs_link"]/a'); //typo note 
+//    var elt = xpathFirst('//a[@class="nav_link jobs_link"]/a'); //typo note
 //  }
 //  if (!elt) {
 //    addToLog('warning Icon', 'Can\'t find jobs nav link to click.');
 //    return false;
 //  }
   var elt = xpathFirst('//div[@class="nav_link jobs_link"]/a');
-    if (!elt) 
+    if (!elt)
         {
-        var elt = xpathFirst('.//a[@class="header_job_button"]', appLayoutElt);  
+        var elt = xpathFirst('.//a[@class="header_job_button"]', appLayoutElt);
         if (!elt) {
             addToLog('warning Icon', 'Can\'t find jobs nav link to click.');
             return false;
@@ -12208,6 +12241,12 @@ function goJobTab(tabno) {
                    'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
 
+  if(!elt) elt = xpathFirst('.//li[@id="tab_' + barno + '"]//a[' +
+                   'contains(@onclick, "&story_tab=' + tabno + '") or ' +
+                   'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
+                   'contains(@onclick, "&tab=' + tabno + '")]');
+  else
+
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
     return false;
@@ -12241,9 +12280,8 @@ function goJob(jobno) {
   // Get the action element by job no first
   var elt;
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
-
-  // If retrieving by job no fails, simply retrieve the job link
-  if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow);
+  else // If retrieving by job no fails, simply retrieve the job link
+  if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
 
   if (elt) {
     clickAction = 'job';
@@ -12301,7 +12339,7 @@ function goPropertyNav() {
   if(new_header){
     var elt = xpathFirst('//a[@class="header_properties_button"]')
   } else {
-    var elt = xpathFirst('//span[@id="nav_link_properties"]//a'); 
+    var elt = xpathFirst('//span[@id="nav_link_properties"]//a');
   }
 
   if (!elt) {
@@ -12937,22 +12975,22 @@ function logFightResponse(rootElt, resultElt, context) {
       addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
     }
 
-    // Look for any loot.    
+    // Look for any loot.
     var lootRE = /(earned|gained|found) (some|an?|\d) (.+?)[\.!]/gi;
     var match;
     var foundLoot;
     var totalAttack;
     var totalDefense;
-	var txtLog="";
+  var txtLog="";
 
     while(match = lootRE.exec(innerNoTags)){
       foundLoot = match[2] + ' ' + match[3];
       totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
       totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
-      if(txtLog) txtLog += '<br/><span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';      
-	  else txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';      
-    }    
-	if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
+      if(txtLog) txtLog += '<br/><span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+    else txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+    }
+  if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
     if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
     if(txtLog) addToLog('lootbag Icon', txtLog);
 
@@ -13075,7 +13113,7 @@ function logJSONResponse(responseText, action, context) {
         var respData = eval ('(' + respJSON['data'] + ')');
         for (var i in respData) {
           if (/collected/i.test(respData[i])) {
-            var collectString = respData[i].replace(/\$/i, cities[city][CITY_CASH_SYMBOL]);		  
+            var collectString = respData[i].replace(/\$/i, cities[city][CITY_CASH_SYMBOL]);
             addToLog(cities[city][CITY_CASH_CSS], respData[i]);
             break;
           }
@@ -13254,6 +13292,7 @@ function logResponse(rootElt, action, context) {
 
     case 'job':
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
+    xpGainElt = xpGainElt ? xpGainElt : xpathFirst('.//dd[@class="experience"]', messagebox);
       if (xpGainElt) {
         jobOptimizeOn = false;
         // Job completed successfully.
@@ -13262,7 +13301,8 @@ function logResponse(rootElt, action, context) {
                  '</span> earning <span class="good">' +
                  xpGainElt.innerHTML.toLowerCase() + '</span>';
         var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
-        if (cashGainElt) {
+        cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
+    if (cashGainElt) {
           result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
         }
         result += '.';
@@ -13638,10 +13678,10 @@ function logResponse(rootElt, action, context) {
         case 11: timerName = 'buildCarTimer'; break;
         case 12: timerName = 'buildWeaponTimer'; break;
       }
-	  if (/You cannot craft/i.test(inner)) {
-	    if(context.buildType==11) inner = "Chop Shop : " + inner;
-		if(context.buildType==12) inner = "Weapons Depot : " + inner;
-	  }		  
+    if (/You cannot craft/i.test(inner)) {
+      if(context.buildType==11) inner = "Chop Shop : " + inner;
+    if(context.buildType==12) inner = "Weapons Depot : " + inner;
+    }
       // Visit again after 1 hour if you cannot craft yet
       if (/You cannot craft/i.test(inner) ||
           /You do not have/i.test(inner) ||
@@ -13650,7 +13690,7 @@ function logResponse(rootElt, action, context) {
         addToLog('info Icon', inner);
       } else {
         setGMTime(timerName, '24 hours');
-        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) { 
+        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) {
           var log = '<span class="loot"> You built '+ RegExp.$1;
           if (RegExp.$2.match(/You gained.+&nbsp;(.+?\.)/))
             log += ' You gained ' + RegExp.$1;
