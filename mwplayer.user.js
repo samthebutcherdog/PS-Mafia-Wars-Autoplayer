@@ -1,4 +1,4 @@
-﻿/**
+/**
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
@@ -677,7 +677,7 @@ var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
-var new_layout = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new layout
+var new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new layout
 
 
 if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
@@ -3931,14 +3931,14 @@ function setHitmanOpponentAvoid(opponent) {
   addSavedListItem('hitmanListAvoid', opponent, 100);
 }
 
-function toggleSettings() {
-  if (settingsOpen === false) {
+function toggletings() {
+  if (settingsOpenSet === false) {
     // Stop any running timers so the settings box won't disappear.
     Autoplay.clearTimeout();
     Reload.clearTimeout();
 
     settingsOpen = true;
-    if(new_layout) {
+    if(new_header) {
 	  createNewSettingsBox();	  
 	  showSettingsBox();
 	}
@@ -7281,7 +7281,7 @@ function createAboutTab() {
   item = makeElement('div', aboutTab, {'style': 'border:1px solid #999999; padding: 5px; overflow: ' +
                                        'auto; width: 530px; height: 250px; bottom: 15px; left: 30px;' +
                                        'font-size: 12px;'});  
-  if(new_layout){
+  if(new_header){
     item.innerHTML = 'Thanks for installing PS MWAP.<br><br>Unfortunatly your version of MW is not yet supported by PS MWAP.<br><br>Our dev-team is working hard to integrate the new MW layout into PS MWAP.<br><br>So please bear with us and check for updates regularly.';
   } else {
   // Recent updates
@@ -7636,7 +7636,7 @@ function handleModificationTimer() {
   //GM_log('Changes finished.');
   modificationTimer = undefined;
 
-  if(new_layout){
+  if(new_header){
 	var mastheadElt =  xpathFirst('//div[@class="header_top_row"]');
 	var elt = mastheadElt;
   } else {
@@ -8634,14 +8634,14 @@ function customizeMasthead() {
   if (document.getElementById('ap_menu')) return;
   
   // Get the masthead.
-  if(new_layout){
+  if(new_header){
 	var mastheadElt = xpathFirst('//div[@class="header_top_row"]');
   } else {
 	var mastheadElt = document.getElementById('mw_masthead');
   }
   if (!mastheadElt) return;
 
-  if(new_layout){
+  if(new_header){
   
     // Make a container for the autoplayer menu.
     var mwapTitle = 'MWAP ' + SCRIPT.version;
