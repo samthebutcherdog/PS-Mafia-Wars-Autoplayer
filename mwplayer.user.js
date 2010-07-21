@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.539
+// @version     1.1.540
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.539',
+  version: '1.1.540',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10507,6 +10507,7 @@ BrowserDetect.init();
         'Browser Name: <strong>' + BrowserDetect.browser + '</strong><br>' +
         'Browser Version: <strong>' + BrowserDetect.version + '</strong><br>' +
         'Operating System: <strong>' + BrowserDetect.OS + '</strong><br>' +
+        'New Layout: <strong>' + new_header + '</strong><br>' +
           '------------------ MWAP Settings---------------------<br>' +
         'Script Version: <strong>' + SCRIPT.version + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
