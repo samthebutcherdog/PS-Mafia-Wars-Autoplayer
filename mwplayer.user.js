@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.542
+// @version     1.1.543
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.542',
+  version: '1.1.543',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1620,7 +1620,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Stick of Dynamite','Stop The ULF Attack',MOSCOW],
     ['Mansion Details','Break Into An Architect\'s Office',MOSCOW],
     ['Mansion Details','Threaten A Mafiya Moneyman\'s Family',MOSCOW],
-    ['Satellite Phone','Hijack A Boat Load Of Electronics',BANGKOK],
+    ['Satellite Phone','Hijack A Boat Load Of Electronics',BANGKOK]
 //    ['Car Key Copy','Secure Some Wheels',VEGAS],
 //    ['Hot Tip','Clean Up At A Rigged Table',VEGAS],
 //    ['Alarm Code','Do Some Late Night Shopping',VEGAS],
