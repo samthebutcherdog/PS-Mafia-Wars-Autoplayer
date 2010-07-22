@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.548
+// @version     1.1.549
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.548',
+  version: '1.1.549',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3475,6 +3475,9 @@ function autoStaminaSpend() {
 function autoBankDeposit(bankCity, amount) {
   if (!quickBankFail) return false;
 
+  // Don't bank in Vegas for now, since the vault is only available in flash.
+  if (bankCity == LV) return false;
+
   // Make sure we're at the bank.
   var bankElt = xpathFirst('.//div[@id="bank_popup"]', appLayoutElt);
   if (!bankElt) {
@@ -4171,6 +4174,7 @@ function saveDefaultSettings() {
   GM_setValue('bankConfigCuba', '50000');
   GM_setValue('bankConfigMoscow', '50000');
   GM_setValue('bankConfigBangkok', '50000');
+  GM_setValue('bankConfigVegas', '50000');
   GM_setValue('autoPauseBefore', 'checked');
   GM_setValue('autoPauseAfter', 0);
   GM_setValue('autoPauseExp', '50');
@@ -4296,14 +4300,17 @@ function saveSettings() {
   var autoBankCubaOn  = (document.getElementById('autoBankCuba').checked === true);
   var autoBankMoscowOn  = (document.getElementById('autoBankMoscow').checked === true);
   var autoBankBangkokOn  = (document.getElementById('autoBankBangkok').checked === true);
+  var autoBankVegasOn  = (document.getElementById('autoBankVegas').checked === true);
   var bankConfig      = document.getElementById('bankConfig').value;
   var bankConfigCuba      = document.getElementById('bankConfigCuba').value;
   var bankConfigMoscow      = document.getElementById('bankConfigMoscow').value;
   var bankConfigBangkok      = document.getElementById('bankConfigBangkok').value;
+  var bankConfigVegas      = document.getElementById('bankConfigVegas').value;
   var bankConfigInt   = parseInt(bankConfig);
   var bankConfigCubaInt   = parseInt(bankConfigCuba);
   var bankConfigMoscowInt   = parseInt(bankConfigMoscow);
   var bankConfigBangkokInt   = parseInt(bankConfigBangkok);
+  var bankConfigVegasInt   = parseInt(bankConfigVegas);
 
   if (autoBankOn && (isNaN(bankConfigInt) || bankConfigInt < 10)) {
     alert('Minimum auto-bank amount must be 10 or higher.');
@@ -4322,6 +4329,11 @@ function saveSettings() {
 
   if (autoBankBangkokOn && (isNaN(bankConfigBangkokInt) || bankConfigBangkokInt < 10)) {
     alert('Minimum Bangkok auto-bank amount must be 10 or higher.');
+    return;
+  }
+
+  if (autoBankVegasOn && (isNaN(bankConfigVegasInt) || bankConfigVegasInt < 1)) {
+    alert('Minimum Las Vegas auto-bank amount must be 1 or higher.');
     return;
   }
 
@@ -4421,9 +4433,9 @@ function saveSettings() {
                             'autoGiftWaiting','burnFirst','autoLottoBonus','autoWarHelp','fbwindowtitle',
                             'autoWarBetray','hideGifts','autoSecretStash','autoSecretStashFrequency','autoIcePublish','autoIcePublishFrequency','burstJob',
                             'autoLevelPublish','autoAchievementPublish','autoShareWishlist', 'autoGiftAccept',
-                            'autoShareWishlistTime','autoBankBangkok','hideActionBox','showPulse',
+                            'autoShareWishlistTime','autoBankBangkok','autoBankVegas','hideActionBox','showPulse',
                             'collectTakeNew York', 'collectTakeCuba', 'collectTakeMoscow', 'autoDailyChecklist',
-                            'collectTakeBangkok', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
+                            'collectTakeBangkok', 'collectTakeLas Vegas', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
                             'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon',
                             'staminaNoDelay','staminaPowerattack','LiveUpdatesIcon','fightNames','fightAvoidNames',
                             'fightOnlyNames','fastRob','fightrob', 'hideIconRow']);
@@ -4471,6 +4483,7 @@ function saveSettings() {
   GM_setValue('bankConfigCuba', bankConfigCuba);
   GM_setValue('bankConfigMoscow', bankConfigMoscow);
   GM_setValue('bankConfigBangkok', bankConfigBangkok);
+  GM_setValue('bankConfigVegas', bankConfigVegas);
   GM_setValue('r1', document.getElementById('r1').value);
   GM_setValue('r2', document.getElementById('r2').value);
   GM_setValue('d1', document.getElementById('d1').value);
@@ -8985,8 +8998,8 @@ function quickBank(bankCity, amount) {
     amount = cities[bankCity][CITY_CASH];
   }
 
-  // Don't quickbank in Vegas for now, since it's flash:
-  if (city == LV) return false;
+  // Don't bank in Vegas for now, since the vault is only available in flash.
+  if (bankCity == LV) return false;
 
   // Get the URL
   var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
@@ -10968,6 +10981,8 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Minimum deposit: R$<strong>' + GM_getValue('bankConfigMoscow') + '</strong><br>' +
         'Enable auto-bank in Bangkok: <strong>' + showIfUnchecked(GM_getValue('autoBankBangkok')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: B$<strong>' + GM_getValue('bankConfigBangkok') + '</strong><br>' +
+        'Enable auto-bank in Vegas: <strong>' + showIfUnchecked(GM_getValue('autoBankVegas')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Minimum deposit: V$<strong>' + GM_getValue('bankConfigVegas') + '</strong><br>' +
         '>  >  >  >  >  END SETTINGS DUMP  <  <  <  <  <');
 }
 
