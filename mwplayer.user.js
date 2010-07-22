@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.546
+// @version     1.1.547
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.546',
+  version: '1.1.547',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9527,7 +9527,7 @@ function jobMastery(element, newJobs) {
 
 function customizeVegasJobs() {
   // Handle Las Vegas job layout
-  var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info") and not(contains(@style, "block"))]', innerPageElt);
+  var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info") and not(contains(@style, "none"))]', innerPageElt);
 
   if (!vegasJobs || vegasJobs.length == 0) return false;
   DEBUG('Found ' + vegasJobs.length + ' new jobs.');
