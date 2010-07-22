@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.541
+// @version     1.1.542
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.541',
+  version: '1.1.542',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1435,31 +1435,61 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Silence A Shadow Kingdom Patrol',81,143,8,BANGKOK,133],                  // CHAPTER 3
     ['Battle Your Way Through The Temple',96,144,8,BANGKOK,159],               // FINALE
     ['Overthrow The Shadow King',1,145,8,BANGKOK,3],                           // BOSS JOB
-  // Las Vegas North Las Vegas
-  // ENERGY PATH
-  ['Move Your Crew Into a Safe House',9,1,1,LV,7],
-  ['Blackmail A Car Dealer',8,2,1,LV,11],
-  ['Steal A Truckload Of Slots',24,3,1,LV,18],
-  ['Secure Some Wheels',18,4,1,LV,25],
-  ['Break into a gun shop',12,6,1,LV,16],
-  ['Scout out alphabet city',15,7,1,LV,20],
-  // FIGHT PATH
-    //['Roll a bingo parlour',6,5,1,LV,9],
-  ['Open fire on Victor\'s crew',23,8,1,LV,27],                              // SOCIAL JOB
+  // LAS VEGAS NORTH LAS VEGAS
+  ['Move Your Crew Into a Safe House',9,1,1,LV,7],                             // DISTRICT 1 ENERGY PATH
+  ['Blackmail A Car Dealer',8,2,1,LV,11],                                      // DISTRICT 1 ENERGY PATH
+  ['Steal A Truckload Of Slots',24,3,1,LV,18],                                 // DISTRICT 1 ENERGY PATH
+  ['Secure Some Wheels',18,4,1,LV,25],                                         // DISTRICT 1 ENERGY PATH
+  ['Break into a gun shop',12,6,1,LV,16],                                      // DISTRICT 1 ENERGY PATH
+  ['Scout out alphabet city',15,7,1,LV,20],                                    // DISTRICT 1 ENERGY PATH
+    //['Roll a bingo parlour',6,5,1,LV,9],                                     // DISTRICT 1 FIGHT PATH
+  ['Open fire on Victor\'s crew',23,8,1,LV,27],                                // DISTRICT 1 SOCIAL JOB
   //['Defeat Victor Lil\' Loco Alves',5,9,1,LV,6],                             // BOSS JOB USES STAMINA
   // LAS VEGAS PARADISE CITY
-  // ENERGY PATH
-  ['Help a Rookie Out Of A Jam',15,10,2,LV,9],
-  ['Fix a Boxing Match',11,13,2,LV,15],
-  ['Clean Up At A Rigged Table',10,14,2,LV,14],
-  ['Recruit A Table Game Dealer',9,15,2,LV,12],
-  ['Strong-Arm A Limo Company',14,16,2,LV,18],
-  ['Shut Down an Uncooperative Club',15,17,2,LV,20],
-  ['Hit Up a Nightclub',7,18,2,LV,9]
+  ['Help a Rookie Out Of A Jam',15,10,2,LV,9],                                 // DISTRICT 2 ENERGY PATH
+  ['Fix a Boxing Match',11,13,2,LV,15],                                        // DISTRICT 2 ENERGY PATH
+  ['Clean Up At A Rigged Table',10,14,2,LV,14],                                // DISTRICT 2 ENERGY PATH
+  ['Recruit A Table Game Dealer',9,15,2,LV,12],                                // DISTRICT 2 ENERGY PATH (PROPERTY)
+  ['Strong-Arm A Limo Company',14,16,2,LV,18],                                 // DISTRICT 2 ENERGY PATH
+  ['Shut Down an Uncooperative Club',15,17,2,LV,20],                           // DISTRICT 2 ENERGY PATH
+  ['Hit Up a Nightclub',7,18,2,LV,9]                                           // DISTRICT 2 ENERGY PATH
+  //['Win an Underground Fight',11,11,2,LV,18],                                // DISTRICT 2 FIGHT PATH
+  //['Clip a Petty Thug',10,12,2,LV,16],                                       // DISTRICT 2 FIGHT PATH  
   //['Defeat Jimmy \'Big Time\' Mancus',5,19,2,LV,70],                         // BOSS JOB USES STAMINA
-  // FIGHT PATH
-  //['Win an Underground Fight',11,11,2,LV,18],
-  //['Clip a Petty Thug',10,12,2,LV,16]
+  // LAS VEGAS THE LOWER STRIP
+  //['Buy Some Black-Market Info',9,20,3,LV,15]                                 // DISTRICT 3 ENERGY PATH
+  //['Do Some Late-Night Shopping',10,21,3,LV,17]                               // DISTRICT 3 ENERGY PATH
+  //['Convince A Resturateur To Leave Town',17,22,3,LV,24]                      // DISTRICT 3 ENERGY PATH (PROPERTY)
+  //['Arrange A Hardware Delivery',15,23,3,LV,23]                               // DISTRICT 3 ENERGY PATH 
+  //['Break Into A Luxery Suite',17,24,3,LV,26]                                 // DISTRICT 3 ENERGY PATH 
+  //['Open Fire On A Rival Outfit',14,25,3,LV,23]                               // DISTRICT 3 FIGHT PATH
+  //['Run A Visiting Gang Boss Out',17,26,3,LV,28]                              // DISTRICT 3 FIGHT PATH
+  //['Steal An SUV',12,27,3,LV,19]                                              // DISTRICT 3 SOCIAL PATH
+  //['Rob A Gem Broker',23,28,3,LV,36]                                          // DISTRICT 3 SOCIAL PATH  
+  //['Defeat Juliana \'Black Widow\' Trieste',6,29,3,LV,200]                    // BOSS JOB USES STAMINA 
+  // LAS VEGAS SHOGUN CASINO
+  //['Bribe A Casino Pit Boss',5,30,4,LV,8]                                    // DISTRICT 4 ENERGY PATH
+  //['Steal A Valet\'s Uniform',12,31,4,LV,20]                                 // DISTRICT 4 ENERGY PATH 
+  //['Hijack A Poker Table Delivery',18,38,4,LV,27]                            // DISTRICT 4 ENERGY PATH (PROPERTY)  
+  //['Swipe A Security Keycard',10,32,4,LV,16]                                 // DISTRICT 4 ENERGY PATH
+  //['Take Out An Aermed Casino Guard',13,33,4,LV,21]                          // DISTRICT 4 ENERGY PATH 
+  //['Create A Distraction On The Floor',10,34,4,LV,17]                        // DISTRICT 4 ENERGY PATH  
+  //['Hack The Casino Security System',12,35,4,LV,21]                          // DISTRICT 4 ENERGY PATH
+  //['Break Into The Vault',17,36,4,LV,26]                                     // DISTRICT 4 ENERGY PATH
+  //['Get To An Exit',22,37,4,LV,35]                                           // DISTRICT 4 ENERGY PATH
+  //['Defeat Roger Bidwell\, Chief of Security',6,39,4,LV,400]                 // BOSS JOB USES STAMINA 
+  // LAS VEGAS MOJAVE DESERT
+  //['Move The Take Out Of Town',13,40,5,LV,21]                                // DISTRICT 5 ENERGY PATH
+  //['Buy Off A Crooked Border Agent',15,43,5,LV,24]                           // DISTRICT 5 ENERGY PATH
+  //['Rescue A Hotelier',10,50,5,LV,17]                                        // DISTRICT 5 ENERGY PATH (PROPERTY)
+  //['Arrange A Cartel Sale',9,45,5,LV,16]                                     // DISTRICT 5 ENERGY PATH
+  //['Create A Diversion',11,47,5,LV,18]                                       // DISTRICT 5 ENERGY PATH
+  //['Dispose Of The Evidence',14,48,5,LV,23]                                  // DISTRICT 5 ENERGY PATH  
+  //['Fight Off A Hijack Crew',14,41,5,LV,23]                                  // DISTRICT 5 FIGHT PATH
+  //['Stash The Take',20,44,5,LV,33]                                           // DISTRICT 5 FIGHT PATH
+  //['Clean Out A Biker Bar',11,46,5,LV,19]                                    // DISTRICT 5 FIGHT PATH  
+  //['Run A Highway Patrol Blockade',23,42,5,LV,37]                            // DISTRICT 5 SOCIAL PATH 
+  //['Defeat \'Red\' Jackson',7,49,5,LV,600]                                   // BOSS JOB USES STAMINA
   );
 
 
@@ -1476,7 +1506,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // BANGKOK
     ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head','Saboteur','Assassin'],
   // LAS VEGAS
-  ['North Las Vegas','Paradise City']
+  ['North Las Vegas','Paradise City','The Lower Strip','Shogun Casino','Mojave Desert']
   );
 
   const CHOICE_JOBNO   = 0;
@@ -1589,8 +1619,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Stick of Dynamite', 'Sabotage The Plan From The Inside',MOSCOW],
     ['Stick of Dynamite','Stop The ULF Attack',MOSCOW],
     ['Mansion Details','Break Into An Architect\'s Office',MOSCOW],
-    ['Mansion Details', 'Threaten A Mafiya Moneyman\'s Family',MOSCOW],
-    ['Satellite Phone', 'Hijack A Boat Load Of Electronics',BANGKOK]
+    ['Mansion Details','Threaten A Mafiya Moneyman\'s Family',MOSCOW],
+    ['Satellite Phone','Hijack A Boat Load Of Electronics',BANGKOK],
+//    ['Car Key Copy','Secure Some Wheels',VEGAS],
+//    ['Hot Tip','Clean Up At A Rigged Table',VEGAS],
+//    ['Alarm Code','Do Some Late Night Shopping',VEGAS],
+//    ['Hotel Security Key Card','Take Out An Armed Casino Guard',VEGAS],  // Not sure if this job is right
+//    ['Unwanted Evidence','Dispose Of The Evidence',VEGAS],  
+    
   );
 
   // Sort requirement jobs by level requirement, ascending
