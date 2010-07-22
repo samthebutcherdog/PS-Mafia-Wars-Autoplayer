@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.547
+// @version     1.1.548
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.547',
+  version: '1.1.548',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8985,6 +8985,9 @@ function quickBank(bankCity, amount) {
     amount = cities[bankCity][CITY_CASH];
   }
 
+  // Don't quickbank in Vegas for now, since it's flash:
+  if (city == LV) return false;
+
   // Get the URL
   var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
 
@@ -9527,7 +9530,7 @@ function jobMastery(element, newJobs) {
 
 function customizeVegasJobs() {
   // Handle Las Vegas job layout
-  var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info") and not(contains(@style, "none"))]', innerPageElt);
+  var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info")]', innerPageElt);
 
   if (!vegasJobs || vegasJobs.length == 0) return false;
   DEBUG('Found ' + vegasJobs.length + ' new jobs.');
@@ -9573,7 +9576,7 @@ function customizeVegasJobs() {
     }*/
 
     jobsFound++;
-    var jobPercentage = getJobMastery(currentJob, true);
+    //var jobPercentage = getJobMastery(currentJob, true);
     //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
 
     /* Determine available jobs
@@ -9618,7 +9621,7 @@ function customizeVegasJobs() {
     var moneyTxt = '';
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
-      var currency = cities[city][CITY_CASH_SYMBOL];
+      //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
 
       moneyTxt = ' (' + mratio + ')';
@@ -9632,10 +9635,12 @@ function customizeVegasJobs() {
     var timeTxt = ' Time: 0 min';
     if (cost > energy) timeTxt = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);*/
 
-    makeElement('span', expElt, {'style':'color:red; font-size: 10px'})
-      .appendChild(document.createTextNode(xpTxt));
-    makeElement('span', moneyElt, {'style':'color:red; font-size: 10px'})
-      .appendChild(document.createTextNode(moneyTxt));
+    if (!xpathFirst('.//span[@id="ratio_xp"]', expElt))
+      makeElement('span', expElt, {'id':'ratio_xp', 'style':'color:red; font-size: 10px'})
+        .appendChild(document.createTextNode(xpTxt));
+    if (!xpathFirst('.//span[@id="ratio_money"]', moneyElt))
+      makeElement('span', moneyElt, {'id':'ratio_money', 'style':'color:red; font-size: 10px'})
+        .appendChild(document.createTextNode(moneyTxt));
     //makeElement('span', costElt, {'style':'color:green; font-size: 10px'})
       //.appendChild(document.createTextNode(timeTxt));
 
