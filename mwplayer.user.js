@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.549
+// @version     1.1.550
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.549',
+  version: '1.1.550',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3476,7 +3476,10 @@ function autoBankDeposit(bankCity, amount) {
   if (!quickBankFail) return false;
 
   // Don't bank in Vegas for now, since the vault is only available in flash.
-  if (bankCity == LV) return false;
+  if (bankCity == LV) {
+    quickBankFail = false;
+    return false;
+  }
 
   // Make sure we're at the bank.
   var bankElt = xpathFirst('.//div[@id="bank_popup"]', appLayoutElt);
@@ -8998,15 +9001,15 @@ function quickBank(bankCity, amount) {
     amount = cities[bankCity][CITY_CASH];
   }
 
-  // Don't bank in Vegas for now, since the vault is only available in flash.
-  if (bankCity == LV) return false;
-
   // Get the URL
-  var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
+  if (bankCity == LV)
+    var depositUrl = getMWUrlLV ('html_server', {'xw_controller':'propertyV2','xw_action':'doaction','xw_city':'5','doaction':'ActionBankDeposit','building_type':'6','city':'5','amount':amount});
+  else
+    var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
 
   // Form the post data
   var postData = 'ajax=1';
-  postData += '&amount=' + amount;
+  if (bankCity != LV) postData += '&amount=' + amount;
 
   // If cash being deposited is greater than 1 billion, do NOT quick-bank!
   if (amount > 1000000000) {
@@ -13365,7 +13368,6 @@ function logJSONResponse(responseText, action, context) {
         break;
 
       case 'deposit':
-        var respTxt = respJSON['deposit_message'];
         var bankCity = context;
         // Log if city has changed after banking
         if (city != bankCity) {
@@ -13375,8 +13377,12 @@ function logJSONResponse(responseText, action, context) {
                    ' while banking. Check your money.');
         }
 
+        if (bankCity == LV)
+          var respTxt = respJSON['data'];
+        else 
+          var respTxt = respJSON['deposit_message'];
         // Money deposited
-        if (/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) {
+        if ((/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) || (/you deposited/i.test(respTxt) && respTxt.match(/\$([0-9,,]+) into your vault/i))) {
           addToLog(cities[city][CITY_CASH_CSS],
                    '<span class="money">' + cities[city][CITY_CASH_SYMBOL] +
                    RegExp.$1 +
@@ -14408,6 +14414,22 @@ function attackXfromProfile() {
 function eventclick_chuckaCrap() {
   var src = 'http://userscripts.org/scripts/source/68186.user.js?' + Math.random();
   remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
+}
+
+function getMWUrlLV (server, params) {
+  var mwURL = document.location.href;
+  mwURL = mwURL.replace(/html_server/, server);
+  mwURL = mwURL.replace('#','');
+
+  // Create or Replace params
+  for (var i in params) {
+    if (new RegExp('[&?]' + i + '=\\w*').test(mwURL))
+      mwURL = mwURL.replace(new RegExp(i + '=\\w*'), i + '=' + params[i]);
+    else
+      mwURL += '&' + i + '=' + params[i];
+  }
+
+  return mwURL;
 }
 
 function getMWUrl (server, params) {
