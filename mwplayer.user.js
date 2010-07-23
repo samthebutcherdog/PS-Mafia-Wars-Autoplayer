@@ -39,14 +39,14 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.550
+// @version     1.1.551
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 var SCRIPT = {
-  version: '1.1.550',
+  version: '1.1.551',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1876,18 +1876,45 @@ function doAutoPlay () {
   var previouslyIdle = idle;
   idle = false;
 
-  // Auto-heal
-  if (running &&
-     (stamina >= GM_getValue('stamina_min_heal')) &&
-     ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM) || ((isGMChecked('fightrob') && (stamina < 26) ))) &&
+  //QUICKFIX fightrob
+  if(isGMChecked('fightrob')){
+    if (running &&
+     (stamina >= GM_getValue('stamina_min_heal') && stamina < 26) &&   
      isGMChecked('autoHeal') &&
      health < GM_getValue('healthLevel', 0) &&
      health < maxHealth &&
      (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal()))
-     {
-       if (autoHeal()) return;
-     }
-     else { DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) ); }
+    {
+      if (autoHeal()) return;
+    }    
+  }
+  else {
+    if (running &&
+     (stamina >= GM_getValue('stamina_min_heal')) &&   
+     isGMChecked('autoHeal') &&
+     health < GM_getValue('healthLevel', 0) &&
+     health < maxHealth &&
+     (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal()))
+    {
+      if (autoHeal()) return;
+    }    
+  }  
+  
+  // Auto-heal
+  if (running &&
+     (stamina >= GM_getValue('stamina_min_heal')) &&
+     (GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM || ((isGMChecked('fightrob') && stamina < 26 ))) &&
+     isGMChecked('autoHeal') &&
+     health < GM_getValue('healthLevel', 0) &&
+     health < maxHealth &&
+     (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal()))
+  {
+    if (autoHeal()) return;
+  }
+  else { 
+    DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) ); 
+	DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
+  }
 
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && !skipJobs && canMission();
@@ -4429,7 +4456,7 @@ function saveSettings() {
                             'autoStatStaminaFallback','hourlyStatsOpt','buildCar','featJob','buildWeapon',
                             'autoGiftSkipOpt','autoBuy','autoEnergyPack','filterLog','autoHelp',
                             'hasHelicopter','hasGoldenThrone','isManiac','idleInCity','hideOffer',
-                            'sendEnergyPack','checkMiniPack','autoAskJobHelp','autoPause', 'autoSafehouse',
+                            'sendEnergyPack','askEnergyPack','rewardEnergyPack','checkMiniPack','autoAskJobHelp','autoPause', 'autoSafehouse',
                             'acceptMafiaInvitations','autoLottoOpt', 'masterAllJobs', 'multipleJobs','leftAlign','mastheadOnTop',
                             'endLevelOptimize','showLevel','hideFriendLadder', 'autoWarRallyPublish',
                             'autoWar','autoWarPublish','autoWarResponsePublish','autoWarRewardPublish',
@@ -6648,6 +6675,32 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(' Full packs @ points '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: 1px solid #781351;', 'value':GM_getValue('autoEnergyPackForcePts', '0'), 'size':'1'});
 
+  // Energy pack settings?
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  label = makeElement('label', lhs);
+  label.appendChild(document.createTextNode('Energy Pack Settings:'));
+  
+  title = 'Periodically send energy packs to your fellow mafia members.';
+  id = 'sendEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Send Packs '));  
+  
+  title = 'Periodically ask for energy packs from your fellow mafia members.';
+  id = 'askEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Ask for Packs '));
+  
+  title = 'Reward fellow mafia members for sending energy packs.';
+  id = 'rewardEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Reward Mafia'));
+
   // Maniac character type?
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6658,13 +6711,6 @@ function createEnergyTab() {
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, id);
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Character type is Maniac'));
-
-  // Periodically send energy packs?
-  title = 'Periodically send energy packs to your fellow mafia members.';
-  id = 'sendEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Send energy packs to my mafia'));
 
   // Mastery items owned.
   item = makeElement('div', list);
@@ -8495,6 +8541,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
       '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
       '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
+	  '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
       '<br>&nbsp;&nbsp;AskforHelpBangkokTimer: ' + getHoursTime('AskforHelpBangkokTimer') +
       '<br>&nbsp;&nbsp;wishListTimer: ' + getHoursTime('wishListTimer') +
@@ -8514,7 +8561,7 @@ function resetTimers(popup) {
   GM_setValue('buildCarTimer', 0);
   GM_setValue('buildWeaponTimer', 0);
   GM_setValue('takeHourBangkok', 0);
-  GM_setValue('takeHourCuba', 0);
+  GM_setValue('takeHourCuba', 0);  
   GM_setValue('takeHourMoscow', 0);
   GM_setValue('takeHourNew York', 0);
   GM_setValue('dailyChecklistTimer', 0);
@@ -8522,6 +8569,7 @@ function resetTimers(popup) {
   GM_setValue('autoSafehouseTimer', 0);
   GM_setValue('AskforHelpMoscowTimer', 0);
   GM_setValue('AskforHelpBangkokTimer', 0);
+  GM_setValue('rewardEnergyTimer', 0);
   if (popup) {
     alert('All active timers have been reset.');
 
@@ -8620,6 +8668,35 @@ function doQuickClicks() {
       }
     }
 
+	// Ask your mafia to send you energy Packs
+	var actionElt = getActionBox('Ask your mafia for energy');
+    if (actionElt && isGMChecked('askEnergyPack')) {
+      var actionLink = getActionLink (actionElt, 'Ask your mafia for energy');
+      if (actionLink && actionLink.scrollWidth) {
+        clickElement(actionLink);
+		addToLog('info Icon','Clicked to ask your mafia for Energy Packs.');
+        DEBUG('Clicked to ask for Energy.');
+      }
+    }	
+	
+	// Reward your mafia for sending you energy Packs
+	
+    var actionElt = xpathFirst('.//div[@id="mbox_energy_timer_container"]', innerPageElt);		
+    if (actionElt && isGMChecked('rewardEnergyPack')) {
+	  DEBUG('Show More link to reward your mafia for Energy Packs found.');
+	  var actionLink = xpathFirst('//a[contains(text(), "Show more")]', innerPageElt);
+      if (actionLink && !timeLeftGM('rewardEnergyTimer')) {
+        clickElement(actionLink);
+		addToLog('info Icon','Clicked to reward your mafia for Energy Packs.');
+        DEBUG('Clicked to reward your mafia for Energy Packs.');		
+      }
+	  else {
+	    DEBUG('Link to reward your mafia for Energy Packs not found.');		
+	  }
+	  DEBUG(' Resetting rewardEnergyTimer for 4 hours');
+      setGMTime('rewardEnergyTimer', '4 hours');
+    }
+	
     // Click hide action box elements
     var hideElts = xpath('.//a[contains(@onclick,"xw_action=dismiss_message")]', innerPageElt);
     for (var i = 0, iLength = hideElts.snapshotLength; i < iLength; ++i) {
@@ -10920,6 +10997,8 @@ BrowserDetect.init();
         'Has golden throne: <strong>' + showIfUnchecked(GM_getValue('hasGoldenThrone')) + '</strong><br>' +
         'Is Maniac: <strong>' + showIfUnchecked(GM_getValue('isManiac')) + '</strong><br>' +
         'Auto send energy pack: <strong>' + showIfUnchecked(GM_getValue('sendEnergyPack')) + '</strong><br>' +
+        'Auto ask energy pack: <strong>' + showIfUnchecked(GM_getValue('askEnergyPack')) + '</strong><br>' +
+		'Reward for energy pack: <strong>' + showIfUnchecked(GM_getValue('rewardEnergyPack')) + '</strong><br>' +
         'Check for mini Energy Packs: <strong>' + showIfUnchecked(GM_getValue('checkMiniPack')) + '</strong><br>' +
         'Energy threshold: <strong>' + GM_getValue('selectEnergyUse') + ' ' + numberSchemes[GM_getValue('selectEnergyUseMode', 0)] + ' (refill to ' + SpendEnergy.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
@@ -13361,7 +13440,7 @@ function logJSONResponse(responseText, action, context) {
         for (var i in respData) {
           if (/collected/i.test(respData[i])) {
             var collectString = respData[i].replace(/\$/i, cities[city][CITY_CASH_SYMBOL]);
-            addToLog(cities[city][CITY_CASH_CSS], respData[i]);
+            addToLog(cities[city][CITY_CASH_CSS], collectString);
             break;
           }
         }
@@ -14153,6 +14232,28 @@ function handlePopups() {
               }
             }
 
+			//Process Reward for Energy Packs
+			if (popupInner.indexOf('Thank') != -1 && isGMChecked('rewardEnergyPack')) {
+			  var energyReward;
+              var energyRewardID;
+			  var i=1;
+			  energyRewardID = 'energy_thnx_btn_'+i;
+			  while(energyReward = document.getElementById(energyRewardID, popupElts[i])){
+                DEBUG('Energy Reward button Found.');
+				var eltThanx = xpathFirst('.//a[contains(.,"Thank")]', energyReward);
+				if(eltThanx){
+                  clickElement(eltThanx);
+                  DEBUG('Clicked to reward Helper : '+i);
+                  addToLog('info Icon','You sent a gift to reward Helper : '+i);
+                }
+				else {
+				  DEBUG('Gift already sent to Helper : '+i);
+				}
+				i++;
+				energyRewardID = 'energy_thnx_btn_'+i;
+			  }   			
+			 return(closePopup(popupElts[i], "Energy Reward"));
+			} 
             // Process Robbery Loot popup
             if (popupInnerNoTags.indexOf('You cleared the full board') != -1) {
               // Look for any loot on popup
