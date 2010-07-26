@@ -39,14 +39,20 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.562
+// @version     1.1.563
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
-// search for new_header   for changes
+// search for new_header   for changes    
+//
+// TestChanges    <- new questionable changes can have the option to disable using this ( check box on bottom of display tab)
+// if (TestChanges){ code }; 
+// else { original code };    <- optional
+// once code is proven ok, take it out of testing
+//
 var SCRIPT = {
-  version: '1.1.562',
+  version: '1.1.563',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1876,19 +1882,9 @@ function doAutoPlay () {
   var previouslyIdle = idle;
   idle = false;
 
+
   //QUICKFIX fightrob
-  if(isGMChecked('fightrob')){
-    if (running &&
-     (stamina >= GM_getValue('stamina_min_heal') && stamina < 26) &&
-     isGMChecked('autoHeal') &&
-     health < GM_getValue('healthLevel', 0) &&
-     health < maxHealth &&
-     (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal()))
-    {
-      if (autoHeal()) return;
-    }
-  }
-  else {
+    DEBUG(' - - entering auto-heal  - - 0 ') ;
     if (running &&
      (stamina >= GM_getValue('stamina_min_heal')) &&
      isGMChecked('autoHeal') &&
@@ -1896,23 +1892,26 @@ function doAutoPlay () {
      health < maxHealth &&
      (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal()))
     {
+    DEBUG('auto-heal ok so far - - 1 ') ;
+    if(isGMChecked('fightrob'))
+      {
+      if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM) || (isGMChecked('fightrob') && stamina < 26 )) 
+        {
+        DEBUG('auto-heal healing fightrob CHECKED - -  2') ;
+        if (autoHeal()) return;
+        } else {   
+        DEBUG('auto-heal skipped fightrob checked - - 3 ') ;  
+//        DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
+//        DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
+        }
+      } else {
+      DEBUG('auto-heal healing fightrob NOT checked - - 4 ') ;
       if (autoHeal()) return;
+      }
+    } else {
+    DEBUG('auto-heal skipped in first block  - - 5 ') ;
     }
-  }
 
-  // Auto-heal
-  if (running &&
-      (stamina >= GM_getValue('stamina_min_heal')) &&
-      (GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM || ((isGMChecked('fightrob') && stamina < 26 ))) &&
-      isGMChecked('autoHeal') &&
-      health < GM_getValue('healthLevel', 0) &&
-      health < maxHealth &&
-      (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
-    if (autoHeal()) return;
-  } else {
-    DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
-    DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
-  }
 
   // Determine whether a job and/or fight/hit could be attempted.
   var autoMissionif = running && !skipJobs && canMission();
@@ -2851,7 +2850,7 @@ function canSpendStamina(minHealth) {
       //mychangestamina
       case STAMINA_HOW_FIGHT_RANDOM:
         if((isGMChecked('fightrob')) && ( stamina > 25) ) {
-          DEBUG(' -- fight rob checked in fight random , going robbing-- ');
+          DEBUG(' -- fight rob checked in fight random -- ');
           minHealth = 0;
         } else DEBUG(' -- fight rob shows UNchecked OR stamina less than 26 in fight random -- ');
     }
@@ -3472,7 +3471,7 @@ function autoStaminaSpend() {
       return autoFight(how);
 
     case STAMINA_HOW_FIGHT_RANDOM:
-      if (  (isGMChecked('fightrob')) && ((health < 21)  && (stamina > 25 )  )  )  {
+      if (  (isGMChecked('fightrob')) && ((health < 22)  && (stamina > 25 )  )  )  {
         DEBUG(' -- going to autorob -- ');
         return autoRob();
       } else {
@@ -4466,7 +4465,7 @@ function saveSettings() {
                             'collectTakeBangkok', 'collectTakeLas Vegas', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
                             'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon',
                             'staminaNoDelay','staminaPowerattack','LiveUpdatesIcon','fightNames','fightAvoidNames',
-                            'fightOnlyNames','fastRob','fightrob', 'hideIconRow']);
+                            'fightOnlyNames','fastRob','fightrob', 'hideIconRow', 'TestChanges', 'HideSlotMachine' ]);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -5829,6 +5828,12 @@ function createDisplayTab() {
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Gifting '));
 
+  // Hide Gift Icon
+  id = 'hideGiftIcon';
+  title = 'Hide Gift Icon';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Gift Icon '));
+
   // Hide Action Box
   id = 'hideActionBox';
   title = 'Hide daily list on homepage';
@@ -5854,12 +5859,6 @@ function createDisplayTab() {
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Messagecenter '));
 
-  // Hide Gift Icon
-  id = 'hideGiftIcon';
-  title = 'Hide Gift Icon';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Gift Icon '));
-
   // Hide Promo Icon (Poker atm)
   id = 'hidePromoIcon';
   title = 'Hide Promo Icon';
@@ -5877,6 +5876,21 @@ function createDisplayTab() {
   title = 'Hide Icon Row';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Icon Row In New Header'));
+
+// start a new line
+  item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px;'});
+
+ // hide slot machine
+  id = 'HideSlotMachine';
+  title = 'Hide Slot Machine';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide Slot Machine '));
+
+ // Test New Changes
+  id = 'TestChanges';
+  title = 'Enable Script Modifications In Testing Phase ';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Modifications'));
 
   return displayTab;
 }
@@ -6952,15 +6966,6 @@ function createStaminaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('Powerattack'));
-
-////mychange fight then trob
-//  // Fight till health is gone then Rob
-//  makeElement('br', rhs, {'class':'hide'});
-//  title = 'Fight Till Health Is Critical Then Rob ( DISABLES AUTO-HEAL if stamina is above 25 )';
-//  id = 'fightrob';
-//  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'fightrob');
-//  label = makeElement('label', rhs, {'for':id, 'title':title});
-//  label.appendChild(document.createTextNode(' Fight Then Rob? (DISABLES AUTO-HEAL)'));
 
   // Maximum level.
   item = makeElement('div', list);
@@ -8364,8 +8369,11 @@ function refreshMWAPCSS() {
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
 
                  // Move Slot Machine and click box:
+                 (isGMChecked('HideSlotMachine') ?
+                  ' #slots_icon_container  {display: none;}' +
+                  ' #slots_icon_cover      {display: none;}' :
                   ' #slots_icon_container  {position: absolute; top: 265px; left: 755px; width: 22px; z-index: 10001;} ' +
-                  ' #slots_icon_cover      {position: absolute; top: 265px; left: 755px; width: 22px; z-index: 10002;} ' +
+                  ' #slots_icon_cover      {position: absolute; top: 265px; left: 755px; width: 22px; z-index: 10002;} ') +
 
                  // Move Zynga selling Promo icon and click box and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
@@ -8396,7 +8404,7 @@ function refreshMWAPCSS() {
                    ' #zstream_icon {display: none;}' :
                    ' #zstream_icon {position: absolute; top: 10px; left: 305px; width: 22px; z-index: 10001;} ') +
 
-            // Hide Icon Row (header_mid_row) - This is the part containing all the icons (messege center, promo, live updates):
+                // Hide Icon Row (header_mid_row) - This is the part containing all the icons (messege center, promo, live updates):
                 (isGMChecked('hideIconRow') ?
                   ' .header_mid_row div.header_various {display: none;}' :
                   ' .header_mid_row div.header_various {position: absolute; top:  1px;  left: 825px; width: 12px; z-index: 10001;} {width: 22px;} ') +
@@ -10938,6 +10946,10 @@ BrowserDetect.init();
         'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
         'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('LiveUpdatesIcon')) + '</strong><br>' +
         'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideIconRow')) + '</strong><br>' +
+        'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
+
+
+
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
