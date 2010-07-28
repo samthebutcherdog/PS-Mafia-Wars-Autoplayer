@@ -1,4 +1,4 @@
-﻿/**
+/**
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
@@ -39,20 +39,20 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.563
+// @version     1.1.564
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
-// search for new_header   for changes    
+// search for new_header   for changes
 //
 // TestChanges    <- new questionable changes can have the option to disable using this ( check box on bottom of display tab)
-// if (TestChanges){ code }; 
+// if (TestChanges){ code };
 // else { original code };    <- optional
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.563',
+  version: '1.1.564',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1895,12 +1895,12 @@ function doAutoPlay () {
     DEBUG('auto-heal ok so far - - 1 ') ;
     if(isGMChecked('fightrob'))
       {
-      if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM) || (isGMChecked('fightrob') && stamina < 26 )) 
+      if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM) || (isGMChecked('fightrob') && stamina < 26 ))
         {
         DEBUG('auto-heal healing fightrob CHECKED - -  2') ;
         if (autoHeal()) return;
-        } else {   
-        DEBUG('auto-heal skipped fightrob checked - - 3 ') ;  
+        } else {
+        DEBUG('auto-heal skipped fightrob checked - - 3 ') ;
 //        DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
 //        DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
         }
@@ -7855,6 +7855,53 @@ function handleModificationTimer() {
       if (running) justPlay = true;
     }
   }
+/* noted out for pending approval
+  if (!running) { // Only run when not running
+    if (onLootTab()) {
+	  // Holder for future code for cleanup of the Loot page.
+    }
+    if (onCollectionsTab()) {
+      //  Find and remove special event collections from collections page
+      //  Will need to add a toggle setting in the settings.
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "One-Armed Bandit") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Injury Time") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "22LR") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Koenigsberg S10") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Military Spy") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Fox Hunter") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Metsubushi") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Irish Wolfhound") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Firecrackers") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Cupid\'s Arrow") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "20% more cash") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+
+      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Improve odds of successful robberies by 10%") and contains(.,"Bonus Received:")]', innerPageElt);
+	  if (eltCollection) removeCollection(eltCollection);
+    }
+  }
+*/
+
   if (running) {
     // Popups opened?
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
@@ -7886,6 +7933,30 @@ function handleModificationTimer() {
     }
   }
 }
+
+/* Clean up routine.
+function removeCollection(eltCollection) {
+  var eltSibling = eltCollection.previousSibling;
+  var eltSibling2 = eltSibling.previousSibling;
+  var eltSibling3 = eltSibling2.previousSibling;
+  var eltSibling4 = eltSibling3.previousSibling;
+  var eltSibling5 = eltSibling4.previousSibling;
+  var eltSibling6 = eltSibling5.previousSibling;
+  var eltSibling7 = eltSibling6.previousSibling;
+  var eltSibling8 = eltSibling7.previousSibling;
+  eltCollection.parentNode.removeChild(eltCollection);
+  eltSibling.parentNode.removeChild(eltSibling);
+  eltSibling2.parentNode.removeChild(eltSibling2);
+  eltSibling3.parentNode.removeChild(eltSibling3);
+  eltSibling4.parentNode.removeChild(eltSibling4);
+  eltSibling5.parentNode.removeChild(eltSibling5);
+  eltSibling6.parentNode.removeChild(eltSibling6);
+  eltSibling7.parentNode.removeChild(eltSibling7);
+  eltSibling8.parentNode.removeChild(eltSibling8);
+
+}
+*/
+
 
 function setModificationTimer() {
   if (modificationTimer) window.clearTimeout(modificationTimer);
@@ -12368,6 +12439,20 @@ function onHitlistTab() {
 
   return false;
 }
+
+//function onLootTab() {
+//  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Loot")]', innerPageElt)) {
+//    return true;
+//  }
+//  return false;
+//}
+
+//function onCollectionsTab() {
+//  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Collections")]', innerPageElt)) {
+//    return true;
+//  }
+//  return false;
+//}
 
 function loadHome() {
   document.location = 'http://apps.facebook.com/inthemafia/index.php';
