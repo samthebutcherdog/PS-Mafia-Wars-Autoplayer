@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.565
+// @version     1.1.566
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.565',
+  version: '1.1.566',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4465,7 +4465,7 @@ function saveSettings() {
                             'collectTakeBangkok', 'collectTakeLas Vegas', 'autoMainframe', 'autoResetTimers', 'autoEnergyPackForce',
                             'autoBurnerHelp','autoPartsHelp', 'hideMessageIcon', 'hideGiftIcon', 'hidePromoIcon',
                             'staminaNoDelay','staminaPowerattack','LiveUpdatesIcon','fightNames','fightAvoidNames',
-                            'fightOnlyNames','fastRob','fightrob', 'hideIconRow', 'TestChanges', 'HideSlotMachine' ]);
+                            'fightOnlyNames','fastRob','fightrob', 'hideIconRow', 'TestChanges', 'HideSlotMachine', 'HideCollections' ]);
 
   // Validate burstJobCount
   var burstJobCount = document.getElementById('burstJobCount').value;
@@ -5884,7 +5884,13 @@ function createDisplayTab() {
   id = 'HideSlotMachine';
   title = 'Hide Slot Machine';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Hide Slot Machine '));
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Slot Machine '));
+
+ // hide collected collections
+  id = 'HideCollections';
+  title = ' Hide Finished Collection Sets ';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Finished Collections '));
 
  // Test New Changes
   id = 'TestChanges';
@@ -7855,12 +7861,13 @@ function handleModificationTimer() {
       if (running) justPlay = true;
     }
   }
-/* noted out for pending approval
-  if (!running) { // Only run when not running
+
+// Only Process when not running
+  if (!running) { 
     if (onLootTab()) {
 	  // Holder for future code for cleanup of the Loot page.
     }
-    if (onCollectionsTab()) {
+    if (onCollectionsTab() && isGMChecked('HideCollections') ) {
       //  Find and remove special event collections from collections page
       //  Will need to add a toggle setting in the settings.
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "One-Armed Bandit") and contains(.,"Bonus Received:")]', innerPageElt);
@@ -7900,7 +7907,7 @@ function handleModificationTimer() {
 	  if (eltCollection) removeCollection(eltCollection);
     }
   }
-*/
+
 
   if (running) {
     // Popups opened?
@@ -7934,7 +7941,7 @@ function handleModificationTimer() {
   }
 }
 
-/* Clean up routine.
+// Clean up routine.
 function removeCollection(eltCollection) {
   var eltSibling = eltCollection.previousSibling;
   var eltSibling2 = eltSibling.previousSibling;
@@ -7955,7 +7962,7 @@ function removeCollection(eltCollection) {
   eltSibling8.parentNode.removeChild(eltSibling8);
 
 }
-*/
+
 
 
 function setModificationTimer() {
@@ -8425,10 +8432,12 @@ function refreshMWAPCSS() {
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; }' +
                  ' #mainDiv {position: absolute; top: 0px;} div.app {padding:0; width:746px;}' +
+
                  // Elevate freegift friendlist box:
                  ' #request_form_interstitial_exclude_type_3  {z-index: 10000;}' +
                  (isGMChecked('mastheadOnTop') ? ' #mw_masthead {z-index: 10000;}' : '') +
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}') +
+
                  // Move the messagecenter button(s):
                  (isGMChecked('hideMessageIcon') ?
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' +
@@ -11119,6 +11128,7 @@ BrowserDetect.init();
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
         'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
+        'Hide Finished Collection Items: <strong>' + showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
         '&nbsp;&nbsp;-Fight in: <strong>' + fightLocations[GM_getValue('fightLocation', 0)] + '</strong><br>' +
@@ -12440,19 +12450,19 @@ function onHitlistTab() {
   return false;
 }
 
-//function onLootTab() {
-//  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Loot")]', innerPageElt)) {
-//    return true;
-//  }
-//  return false;
-//}
+function onLootTab() {
+  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Loot")]', innerPageElt)) {
+    return true;
+  }
+  return false;
+}
 
-//function onCollectionsTab() {
-//  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Collections")]', innerPageElt)) {
-//    return true;
-//  }
-//  return false;
-//}
+function onCollectionsTab() {
+  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Collections")]', innerPageElt)) {
+    return true;
+  }
+  return false;
+}
 
 function loadHome() {
   document.location = 'http://apps.facebook.com/inthemafia/index.php';
