@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.566
+// @version     1.1.567
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.566',
+  version: '1.1.567',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1520,7 +1520,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CHOICE_CITY    = 2;
 
   var choiceJobs = new Array (
-    // Job no and Job names array must corresponding with each cities CITY_SIDES array
+    // Job no and Job names array must correspond with each city's CITY_SIDES array
     // MOSCOW
     [[4,7], ['Kidnap A Local Gang Leader for the Vory', 'Kill A Local Gang Leader for the Mafiya'], MOSCOW],
     [[5, 8], ['Collect The Ransom', 'Collect the Hit Payoff'], MOSCOW],
@@ -7863,48 +7863,48 @@ function handleModificationTimer() {
   }
 
 // Only Process when not running
-  if (!running) { 
+  if (!running) {
     if (onLootTab()) {
-	  // Holder for future code for cleanup of the Loot page.
+    // Holder for future code for cleanup of the Loot page.
     }
     if (onCollectionsTab() && isGMChecked('HideCollections') ) {
       //  Find and remove special event collections from collections page
       //  Will need to add a toggle setting in the settings.
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "One-Armed Bandit") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Injury Time") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "22LR") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Koenigsberg S10") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Military Spy") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Fox Hunter") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Metsubushi") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Irish Wolfhound") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Firecrackers") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Cupid\'s Arrow") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "20% more cash") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
 
       var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Improve odds of successful robberies by 10%") and contains(.,"Bonus Received:")]', innerPageElt);
-	  if (eltCollection) removeCollection(eltCollection);
+    if (eltCollection) removeCollection(eltCollection);
     }
   }
 
@@ -8201,8 +8201,6 @@ function chooseSides() {
       missions[jobMatch][MISSION_NUMBER] = job[CHOICE_JOBNO][sideIndex];
     }
   });
-
-  // FIXME: Moscow Side-Handling
 }
 
 function closePopUp() {
@@ -10945,6 +10943,7 @@ var BrowserDetect = {
   ]
 
 };
+
 BrowserDetect.init();
 
   DEBUG('>  >  >  >  >  BEGIN SETTINGS DUMP  <  <  <  <  <<br>' +
