@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.567
+// @version     1.1.568
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.567',
+  version: '1.1.568',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9040,6 +9040,12 @@ function customizeStats() {
     var nrgImgElt = xpathFirst('./div[@id="stats_row"]//img[@alt="Energy"]', appLayoutElt);
     var nrgTxtElt = xpathFirst('./div[@id="stats_row"]//span[@class="stat_title" and contains(text(), "Energy")]', appLayoutElt);
   }
+  
+  if(!nrgTxtElt){
+    nrgTxtElt = xpathFirst('./div[@id="stats_row"]//h4[@class="energy" and contains(text(), "Energy")]', appLayoutElt);           
+    nrgTxtElt.style.color="#FF0000";
+    nrgTxtElt.style.textDecoration="underline";
+  }
   if ((nrgImgElt && !nrgLinkElt) || (nrgTxtElt && !nrgLinkEltTxt)) {
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0) var miniPackTitle = ' Mini-Pack available now.';
@@ -9120,6 +9126,11 @@ function customizeStats() {
   } else {
     var healTxtElt = xpathFirst('./div[@id="stats_row"]//span[@class="stat_title" and contains(text(), "Health")]', appLayoutElt);
   }
+  if(!healTxtElt){
+    healTxtElt = xpathFirst('./div[@id="stats_row"]//h4[@class="health" and contains(text(), "Health")]', appLayoutElt);
+    healTxtElt.style.color="#FF0000";
+    healTxtElt.style.textDecoration="underline";
+  }  
   if (healTxtElt && !healLinkEltTxt) {
     healLinkEltTxt = makeElement('a', null, {'id':'mwap_healTxt', 'title':'Click to heal immediately.'});
     healTxtElt.parentNode.insertBefore(healLinkEltTxt, healTxtElt);
@@ -9136,6 +9147,7 @@ function customizeStats() {
 
   // Show points until next level.
   var elt = xpathFirst('./div[@id="stats_row"]//span[@class="stat_title" and contains(text(), "Experience")]', appLayoutElt);
+  if(!elt) elt = xpathFirst('./div[@id="stats_row"]//h4[@class="experience" and contains(text(), "Experience")]', appLayoutElt);
   if (elt) {
     elt.innerHTML = 'Experience (' + (ptsToNextLevel > 0? '-' : '+') +
                     Math.abs(ptsToNextLevel) + ')';
