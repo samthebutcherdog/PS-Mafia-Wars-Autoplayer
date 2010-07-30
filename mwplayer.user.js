@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.572
+// @version     1.1.573
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.572',
+  version: '1.1.573',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8760,13 +8760,13 @@ function handleModificationTimer() {
     //}
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
       //  Find and remove special event collections from collections page
-	  var arrCollection=new Array("One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
-	                 "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%");
-	  for (item in arrCollection)
-	  {
+      var arrCollection=new Array("One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
+                    "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%");
+      for (item in arrCollection)
+      {
         var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "' + arrCollection[item] + '") and contains(.,"Bonus Received:")]', innerPageElt);
         if (eltCollection) removeCollection(eltCollection);
-	  }
+      }
     }
   }
 
