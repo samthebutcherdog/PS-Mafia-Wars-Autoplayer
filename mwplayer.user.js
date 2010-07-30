@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.570
+// @version     1.1.571
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.570',
+  version: '1.1.571',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8746,46 +8746,54 @@ function handleModificationTimer() {
 
 // Only Process when not running
   if (!running) {
-    //if (onLootTab()) {
-    // Holder for future code for cleanup of the Loot page.
+	/* // Holder for future code for cleanup of the Loot page.
+    if (onLootTab()) {
+      // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
+	  // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
+      cleanLoot(47,44,"Weapons","Armor");
+      cleanLoot(47,44,"Armor","Vehicles");
+      cleanLoot(47,44,"Vehicles","Animals");
+      cleanLoot(47,44,"Animals","Special Loot");
+    }
+*/
+
     //}
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
       //  Find and remove special event collections from collections page
-      //  Will need to add a toggle setting in the settings.
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "One-Armed Bandit") and contains(.,"Bonus Received:")]', innerPageElt);
+    var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "One-Armed Bandit") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Injury Time") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Injury Time") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "22LR") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "22LR") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Koenigsberg S10") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Koenigsberg S10") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Military Spy") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Military Spy") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Fox Hunter") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Fox Hunter") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Metsubushi") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Metsubushi") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Irish Wolfhound") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Irish Wolfhound") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Firecrackers") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Firecrackers") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Cupid\'s Arrow") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Cupid\'s Arrow") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "20% more cash") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "20% more cash") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
 
-      var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Improve odds of successful robberies by 10%") and contains(.,"Bonus Received:")]', innerPageElt);
+    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Improve odds of successful robberies by 10%") and contains(.,"Bonus Received:")]', innerPageElt);
     if (eltCollection) removeCollection(eltCollection);
     }
   }
@@ -8821,26 +8829,45 @@ function handleModificationTimer() {
     }
   }
 }
+function cleanLoot(intMinAttack, intMinDefense, strType, strTerminus) {
+  // Find respective section (Weapons/Armor/Vehicle/Animal)
+  var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
+  var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
+  do
+  {
+    // Get Attack/Defense values
+    var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
+    var eltDefense = eltAttack.nextSibling.nextSibling;
+    var splitVal = eltAttack.innerHTML.split(" ");
+    var intAttack = parseInt(splitVal[2]);
+    splitVal = eltDefense.innerHTML.split(" ");
+    var intDefense = parseInt(splitVal[2]);
+	
+	// Prep elements for possible removal
+    var eltSibling = eltRow.nextSibling.nextSibling;
+    var nextItem = eltSibling.nextSibling.nextSibling;
+    if (intAttack < intMinAttack && intDefense < intMinDefense){
+	  //Removal
+      eltRow.parentNode.removeChild(eltRow);
+      eltSibling.parentNode.removeChild(eltSibling);
+    }
+    eltRow = nextItem;
+    var txtData = eltRow.innerHTML.clean().trim();
+  }
+  while (txtData != strTerminus);
+}
 
 // Clean up routine.
 function removeCollection(eltCollection) {
-  var eltSibling = eltCollection.previousSibling;
-  var eltSibling2 = eltSibling.previousSibling;
-  var eltSibling3 = eltSibling2.previousSibling;
-  var eltSibling4 = eltSibling3.previousSibling;
-  var eltSibling5 = eltSibling4.previousSibling;
-  var eltSibling6 = eltSibling5.previousSibling;
-  var eltSibling7 = eltSibling6.previousSibling;
-  var eltSibling8 = eltSibling7.previousSibling;
+  var eltSibling = eltCollection.previousSibling.previousSibling;
+  var eltSibling2 = eltSibling.previousSibling.previousSibling;
+  var eltSibling3 = eltSibling2.previousSibling.previousSibling;
+  var eltSibling4 = eltSibling3.previousSibling.previousSibling;
   eltCollection.parentNode.removeChild(eltCollection);
   eltSibling.parentNode.removeChild(eltSibling);
   eltSibling2.parentNode.removeChild(eltSibling2);
   eltSibling3.parentNode.removeChild(eltSibling3);
   eltSibling4.parentNode.removeChild(eltSibling4);
-  eltSibling5.parentNode.removeChild(eltSibling5);
-  eltSibling6.parentNode.removeChild(eltSibling6);
-  eltSibling7.parentNode.removeChild(eltSibling7);
-  eltSibling8.parentNode.removeChild(eltSibling8);
 }
 
 function setModificationTimer() {
