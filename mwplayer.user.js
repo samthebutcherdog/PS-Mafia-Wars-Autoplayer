@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.571
+// @version     1.1.572
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.571',
+  version: '1.1.572',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8760,41 +8760,13 @@ function handleModificationTimer() {
     //}
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
       //  Find and remove special event collections from collections page
-    var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "One-Armed Bandit") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Injury Time") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "22LR") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Koenigsberg S10") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Military Spy") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Fox Hunter") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Metsubushi") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Irish Wolfhound") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Firecrackers") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Cupid\'s Arrow") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "20% more cash") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
-
-    eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "Improve odds of successful robberies by 10%") and contains(.,"Bonus Received:")]', innerPageElt);
-    if (eltCollection) removeCollection(eltCollection);
+	  var arrCollection=new Array("One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
+	                 "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%");
+	  for (item in arrCollection)
+	  {
+        var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "' + arrCollection[item] + '") and contains(.,"Bonus Received:")]', innerPageElt);
+        if (eltCollection) removeCollection(eltCollection);
+	  }
     }
   }
 
