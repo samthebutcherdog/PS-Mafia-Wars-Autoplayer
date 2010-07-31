@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.573
+// @version     1.1.575
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.573',
+  version: '1.1.575',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9593,9 +9593,12 @@ function doQuickClicks() {
                   cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
     // Do quick banking
+    /*
     if (canBank && !isNaN(city) && !isNaN(cities[city][CITY_CASH])) {
       quickBank(city, cities[city][CITY_CASH]);
     }
+    */
+    quickBankFail= true; // temporary disable of quickbank
 
     // Auto-send energy pack
     var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
