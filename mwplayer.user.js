@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.576
+// @version     1.1.577
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,11 +52,12 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.576',
+  version: '1.1.577',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
   ajaxPage: 'inner2',
+  ajaxResult: 'ajax_result',
    presentationurl: 'http://userscripts.org/scripts/show/77953',
   url: 'http://www.playerscripts.com/rokdownloads/ps_facebook_mafia_wars_a.user.js',
   metadata: 'http://userscripts.org/scripts/source/77953.meta.js',
@@ -2377,16 +2378,17 @@ function buildItem(itemArray, itemIndex, buildType){
 
 function checkVaultStatus(byUser) {
   if (byUser == false && timeLeftGM('checkVaultTimer')) return;
-  if (byUser) addToLog('info Icon', 'Your vault appears to be full, rechecking...');
   DEBUG('Checking vault status..')
   // Handle JSON response
-  var urlLoaded = function () {
+  /*var urlLoaded = function () {
     if (this.readyState == 4 && this.status == 200) {
       logJSONResponse(this.responseText, 'check vault')
     }
   };
-  loadUrl(getMWUrlLV('html_server', {'xw_controller':'propertyV2', 'xw_action':'createData', 'xw_city':'5', 'city':'5'}), urlLoaded);
-  setGMTime('checkVaultTimer', '00:05:00');
+  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'createData', 'xw_city':'5', 'city':'5'}), urlLoaded);*/
+  var jsonElt = getJSONPage(true, 'check vault');
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?xw_controller=propertyV2&xw_action=createData&xw_city=5&city=5", 1, 1, 0, 0); return false;'});
+  clickElement(elt);
   return;
 }
 
@@ -2405,15 +2407,16 @@ function autoCollectTake(takeCity) {
     return true;
   }
 
-  // Handle JSON response
+  /* Handle JSON response
   var urlLoaded = function () {
     if (this.readyState == 4 && this.status == 200) {
       logJSONResponse(this.responseText, 'collect take', takeCity);
     }
   };
-
-  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':takeCity+1, 'requesttype':'json'}), urlLoaded);
-
+  loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':takeCity+1, 'requesttype':'json'}), urlLoaded);*/
+  var jsonElt = getJSONPage(true, 'collect take', takeCity);
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?xw_controller=propertyV2&xw_action=collectall&xw_city=' + takeCity+1 + '&requesttype=json", 1, 1, 0, 0); return false;'});
+  clickElement(elt);
   return false;
 }
 
@@ -3106,11 +3109,12 @@ function autoFight(how) {
     return false;
   }
 
-  /* Check for pulse, skipped iced opponents on the fight list */
+  /* Disabled for now as we don't have a synchronous iceCheck!
+  // Check for pulse, skipped iced opponents on the fight list
   if (isGMChecked('iceCheck') && (how == STAMINA_HOW_FIGHT_LIST)) {
     var hitUrl = getHitUrl (opponent.id);
-    var startId = opponent.id;
-    var id;
+    //var startId = opponent.id;
+    //var id;
 
     if (/You can't add/.test(loadUrlWait (hitUrl))) {
       addToLog('info Icon','Target is iced/dead, skipping opponent, id=' + opponent.id);
@@ -3129,7 +3133,7 @@ function autoFight(how) {
       //hitUrl = getHitUrl (opponent.id);
       return false;
     }
-  }
+  }*/
 
   // Attack!
   Autoplay.fx = function() {
@@ -3656,6 +3660,7 @@ function getHitlist(element, forceRefresh) {
       opponent.bounty = RegExp.lastMatch;
     }
 
+    /* Disabled for now as we don't have a synchronous level check!
     if (!running && isGMChecked('showLevel')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -3682,7 +3687,7 @@ function getHitlist(element, forceRefresh) {
         }
       };
       loadUrl (getProfileUrl(opponent.id), urlLoaded);
-    }
+    }*/
 
     getHitlist.opponents.push(opponent);
   }
@@ -3732,6 +3737,7 @@ function getDisplayedOpponents(element, forceRefresh) {
     opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split(oppParamName)[1].split('\'')[0].split('&')[0]);
     if (!opponent.id) continue;
 
+    /* Skip icecheck here, not really necessary!
     // Do icecheck from fightlist
     if (!running && isGMChecked('showPulse')) {
       var urlLoaded = function () {
@@ -3749,7 +3755,7 @@ function getDisplayedOpponents(element, forceRefresh) {
         };
       }
       loadUrl (getHitUrl(opponent.id), urlLoaded);
-    }
+    }*/
 
     opponent.attack  = linkElt;
     opponent.mafia   = rowData[1] ? parseInt(rowData[1].innerHTML) : 0;
@@ -8669,7 +8675,7 @@ function handleModificationTimer() {
   var justPlay = false;
   var prevPageElt = innerPageElt;
   appLayoutElt = document.getElementById('app_layout');
-  innerPageElt = xpathFirst('//div[@id="inner_page"]');
+  innerPageElt = document.getElementById('inner_page');
 
   if (!innerPageElt) return;
 
@@ -8678,6 +8684,11 @@ function handleModificationTimer() {
   elt = xpathFirst('//div[@id="' + ajaxID + '"]');
   if (!elt) {
     elt = makeElement('div', innerPageElt.parentNode, {'id':ajaxID, 'style':'display: none;'});
+  }
+  // Check for results on our private JSON page
+  elt = getJSONPage(false);
+  if (elt && elt.innerHTML.length>0 && ( ( gvar.isGreaseMonkey && /block/.test(elt.getAttribute('style')) ) || !gvar.isGreaseMonkey ) ) {
+    logJSONResponse(elt);
   }
 
   // Determine if the displayed page has changed.
@@ -8746,20 +8757,17 @@ function handleModificationTimer() {
 
 // Only Process when not running
   if (!running) {
-	/* // Holder for future code for cleanup of the Loot page.
+    /* Holder for future code for cleanup of the Loot page.
     if (onLootTab()) {
       // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
-	  // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
+      // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
       cleanLoot(47,44,"Weapons","Armor");
       cleanLoot(47,44,"Armor","Vehicles");
       cleanLoot(47,44,"Vehicles","Animals");
       cleanLoot(47,44,"Animals","Special Loot");
-    }
-*/
-
-    //}
+    }*/
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
-      //  Find and remove special event collections from collections page
+      // Find and remove special event collections from collections page
       var arrCollection=new Array("One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
                     "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%");
       for (item in arrCollection)
@@ -8805,8 +8813,7 @@ function cleanLoot(intMinAttack, intMinDefense, strType, strTerminus) {
   // Find respective section (Weapons/Armor/Vehicle/Animal)
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
-  do
-  {
+  do {
     // Get Attack/Defense values
     var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
     var eltDefense = eltAttack.nextSibling.nextSibling;
@@ -8814,19 +8821,17 @@ function cleanLoot(intMinAttack, intMinDefense, strType, strTerminus) {
     var intAttack = parseInt(splitVal[2]);
     splitVal = eltDefense.innerHTML.split(" ");
     var intDefense = parseInt(splitVal[2]);
-	
-	// Prep elements for possible removal
+    // Prep elements for possible removal
     var eltSibling = eltRow.nextSibling.nextSibling;
     var nextItem = eltSibling.nextSibling.nextSibling;
     if (intAttack < intMinAttack && intDefense < intMinDefense){
-	  //Removal
+      //Removal
       eltRow.parentNode.removeChild(eltRow);
       eltSibling.parentNode.removeChild(eltSibling);
     }
     eltRow = nextItem;
     var txtData = eltRow.innerHTML.clean().trim();
-  }
-  while (txtData != strTerminus);
+  } while (txtData != strTerminus);
 }
 
 // Clean up routine.
@@ -9404,7 +9409,7 @@ function refreshMWAPCSS() {
                  (isGMChecked('hideFriendLadder') ? ' .friendladder_box, ' : '' ) +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
-                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #inner2 '  +
+                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #inner2, #ajax_result '  +
                  ' {position: absolute !important; margin:0 !important; ' +
                  '  height:0 !important; width: 0 !important; display: none !important;}' +
                  // ********************** Stats Tab CSS **********************
@@ -9593,12 +9598,9 @@ function doQuickClicks() {
                   cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
 
     // Do quick banking
-    /*
     if (canBank && !isNaN(city) && !isNaN(cities[city][CITY_CASH])) {
       quickBank(city, cities[city][CITY_CASH]);
     }
-    */
-    quickBankFail= true; // temporary disable of quickbank
 
     // Auto-send energy pack
     var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
@@ -9953,23 +9955,20 @@ function customizeStats() {
    var stamTxtElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text stamina_text_bg" and contains(text(), "STAMINA")]', appLayoutElt);
     if(!stamTxtElt) { var stamTxtElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Stamina")]', appLayoutElt); }
       if(!stamTxtElt){  var stamTxtElt = xpathFirst('.//div[@id="game_stats"]//h4[contains(text(), "Stamina")]', appLayoutElt);  }
-  var stamImgElt = xpathFirst('.//div[@id="game_stats"]//img[@alt="Stamina"]', appLayoutElt); 
+  var stamImgElt = xpathFirst('.//div[@id="game_stats"]//img[@alt="Stamina"]', appLayoutElt);
   stamTxtElt.style.color="#FF0000";
   stamTxtElt.style.textDecoration="underline";
   var StamTitle = (' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.');
-
-    if (stamImgElt && !stamLinkElt) {
-      stamLinkElt = makeElement('a', null, {'id':'mwap_stam', 'title':StamTitle});
-      stamImgElt.parentNode.insertBefore(stamLinkElt, stamImgElt);
-      stamLinkElt.appendChild(stamImgElt);
-//      stamLinkElt.addEventListener('click', nada, false);  // leave off
-    }
+  if (stamImgElt && !stamLinkElt) {
+    stamLinkElt = makeElement('a', null, {'id':'mwap_stam', 'title':StamTitle});
+    stamImgElt.parentNode.insertBefore(stamLinkElt, stamImgElt);
+    stamLinkElt.appendChild(stamImgElt);
+  }
   if (stamTxtElt && !stamLinkEltTxt) {
     stamLinkEltTxt = makeElement('a', null, {'id':'mwap_stamTxt', 'title':StamTitle});
     stamTxtElt.parentNode.insertBefore(stamLinkEltTxt, stamTxtElt);
     stamLinkEltTxt.appendChild(stamTxtElt);
-//    stamLinkEltTxt.addEventListener('click', nada, false);  // no click needed!!
-    }
+  }
 
   // Make health icon clickable for instant healing.
   var healLinkElt = document.getElementById('mwap_heal');
@@ -10082,18 +10081,21 @@ function quickBank(bankCity, amount) {
     if (GM_getValue('vaultHandling',0)) {
       var vaultSpace = parseInt(GM_getValue('vaultSpace','0'));
       if (vaultSpace <= 0) {
+        if (byUser) addToLog('info Icon', 'Your vault appears to be full, rechecking...');
         checkVaultStatus(byUser);
         return;
       }
       amount = (amount > vaultSpace) ? vaultSpace : amount;
     }
-    var depositUrl = getMWUrlLV ('html_server', {'xw_controller':'propertyV2','xw_action':'doaction','xw_city':'5','doaction':'ActionBankDeposit','building_type':'6','city':'5','amount':amount});
+    var depositUrl = "xw_controller=propertyV2&xw_action=doaction&xw_city=5&doaction=ActionBankDeposit&building_type=6&city=5&amount=" + amount;
+    //var depositUrl = getMWUrl ('html_server', {'xw_controller':'propertyV2','xw_action':'doaction','xw_city':'5','doaction':'ActionBankDeposit','building_type':'6','city':'5','amount':amount});
   } else
-    var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
+    var depositUrl = "xw_controller=bank&xw_action=deposit_all&xw_city=" + (bankCity + 1);
+    //var depositUrl = getMWUrl ('html_server', {'xw_controller':'bank','xw_action':'deposit_all','xw_city':(bankCity + 1)});
 
-  // Form the post data
+  /* Form the post data
   var postData = 'ajax=1';
-  //if (bankCity != LV) postData += '&amount=' + amount;
+  postData += '&amount=' + amount;*/
 
   // If cash being deposited is greater than 1 billion, do NOT quick-bank!
   if (amount > 1000000000) {
@@ -10122,7 +10124,11 @@ function quickBank(bankCity, amount) {
     }
   }
 
-  // Bank asynchronously
+  var jsonElt = getJSONPage(true, 'deposit', bankCity);
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + depositUrl + '", 1, 1, 0, 0); return false;'});
+  clickElement(elt);
+
+  /* Bank asynchronously
   GM_xmlhttpRequest({
     method: "POST",
     url: depositUrl,
@@ -10133,7 +10139,7 @@ function quickBank(bankCity, amount) {
     onload: function (xml) {
       logJSONResponse(xml.responseText, 'deposit', bankCity);
     }
-  });
+  });*/
 }
 
 function customizeNames() {
@@ -10315,7 +10321,7 @@ function customizeProfile() {
 
       // Show if Alive/Dead, insert AttackX button
       if (!running && !removeElt) {
-        var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
+        var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
         if (titleElt) {
           titleElt.setAttribute('style', 'background: black;');
           if (!document.getElementById('profile_attackx')) {
@@ -10324,10 +10330,10 @@ function customizeProfile() {
             titleElt.parentNode.insertBefore(attackXElt, titleElt.nextSibling);
           }
         }
-        var urlLoaded = function () {
+        /*var urlLoaded = function () {
           if (this.readyState == 4 && this.status == 200) {
             var alive = !/You can't add/.test(this.responseText.untag());
-            var titleElt = xpathFirst('.//div[@class="title"]', innerPageElt);
+            var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
             if (titleElt) {
               titleElt.setAttribute('style', 'background: ' + (alive ? 'green;' : 'red;'));
               titleElt.setAttribute('title', (alive ? 'Target is alive' : 'Target is iced') + ', click to refresh.');
@@ -10335,7 +10341,10 @@ function customizeProfile() {
             }
           }
         };
-        loadUrl (getHitUrl(remoteuserid), urlLoaded);
+        loadUrl (getHitUrl(remoteuserid), urlLoaded);*/
+        var jsonElt = getJSONPage(true, 'ice check');
+        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + getHitUrl(remoteuserid) + '", 1, 1, 0, 0); return false;'});
+        clickElement(elt);
       }
       // Don't continue if buttons already there
       if (document.getElementById('where_are_my_links')) return true;
@@ -14483,36 +14492,71 @@ function randomizeStamina() {
   }
 }
 
-// Interpret the JSON response from a request
-function logJSONResponse(responseText, action, context) {
-  try {
-    // URL variables have expired
-    if (/top\.location\.href/.test(responseText)) {
-      addToLog('info Icon', 'JSON response is invalid: URL variables may have expired, re-loading...');
-      loadHome();
-      return;
-    }
-    DEBUG(responseText);
-    var respJSON = eval ('(' + responseText + ')');
-    if (context)
-      var cityCashElt = document.getElementById('user_cash_' + cities[context][CITY_ALIAS]);
+// Handle our private JSON response page.
+function getJSONPage(create, action, context) {
+  var elt = document.getElementById(SCRIPT.ajaxResult);
+  if (!elt && create) {
+    elt = makeElement('div', null, {'id':SCRIPT.ajaxResult, 'style':'display: none;'});
+    if (action != null)
+      elt.setAttribute('action', action);
+    if (context != null)
+      elt.setAttribute('context', context);
+    //elt.addEventListener('DOMSubtreeModified', logJSONResponse, false);
+    document.getElementById('inner_page').parentNode.appendChild(elt);
+  }
+  return !elt ? null : elt;
+}
 
+// Interpret the JSON response from a request
+function logJSONResponse(jsonElt) {
+  /* Check if do_ajax changed our private JSON response page.
+  var jsonElt = getJSONPage(false);
+  if ( !jsonElt || ( gvar.isGreaseMonkey && !/block/.test(jsonElt.getAttribute('style')) ) )
+    return;*/
+  var responseText = jsonElt.innerHTML.untag();
+  var action = jsonElt.getAttribute('action');
+  var context = jsonElt.getAttribute('context');
+  context = (context == null) ? null : parseInt(context);
+
+  // Remove event listener and JSON response
+  //jsonElt.removeEventListener('DOMSubtreeModified', logJSONResponse, false);
+  jsonElt.parentNode.removeChild(jsonElt);
+
+  // URL variables have expired
+  if (/top\.location\.href/.test(responseText)) {
+    addToLog('info Icon', 'JSON response is invalid: URL variables may have expired.');
+    //loadHome();
+    return;
+  }
+  if (action != "ice check") DEBUG(responseText);
+
+  var cityCashElt = null;
+  if (context != null)
+    cityCashElt = document.getElementById('user_cash_' + cities[context][CITY_ALIAS]);
+
+  try {
     switch (action) {
+      // Log Ice Check response.
+      case 'ice check':
+        var alive = !/You can't add/.test(responseText);
+        var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
+        if (titleElt) {
+          titleElt.setAttribute('style', 'background: ' + (alive ? 'green;' : 'red;'));
+          titleElt.setAttribute('title', (alive ? 'Target is alive' : 'Target is iced') + ', click to refresh.');
+          titleElt.addEventListener('click', customizeProfile, false);
+        }
+        break;
+
       // Log any message from collecting property take.
       case 'collect take':
-        var respData = eval ('(' + respJSON['data'] + ')');
-        //setGMTime('takeHour' + cities[context][CITY_NAME], '15:00');  // collect every 15 min
-        setGMTime('takeHour' + cities[context][CITY_NAME], "1 hour");
-        for (var i in respData) {
-          if (/collected/i.test(respData[i])) {
-            var collectString = respData[i].replace(/\$/i, cities[context][CITY_CASH_SYMBOL]);
-            addToLog(cities[context][CITY_CASH_CSS], collectString);
-            break;
-          }
-        }
-        // Attempt to correct the displayed cash value
-        if (/[0-9]+/.test(respData['cash'])) {
-          var cashLeft = parseInt(respData['cash']);
+        var respJSON = eval ('(' + responseText + ')');
+        var respTxt = respJSON['data'];
+        setGMTime('takeHour' + cities[context][CITY_NAME], '00:30:00');  // collect every 30 min
+        if (respTxt.match(/collected (.+?) from.+,"cash":([0-9]+),/i)) {
+          var collectString = RegExp.$1.replace(/\$/i, cities[context][CITY_CASH_SYMBOL]);
+          addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
+          // Attempt to correct the displayed cash value
+          var cashLeft = parseInt(RegExp.$2);
           if (cityCashElt)
             cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
           cities[context][CITY_CASH] = cashLeft;
@@ -14521,13 +14565,15 @@ function logJSONResponse(responseText, action, context) {
 
       // Check Las Vegas vault data
       case 'check vault':
+        var respJSON = eval ('(' + responseText + ')');
         var respTxt = respJSON['data'];
-        if (respTxt.match(/"name":"Vault","level":([0-9]+),.+,"acct_balance":([0-9]+),/)) {
+        setGMTime('checkVaultTimer', '00:10:00');
+        if (respTxt.match(/,"name":"vault","level":"?([0-9]+)"?,.+,"acct_balance":([0-9]+),/i)) {
           var vaultLevel = parseInt(RegExp.$1);
           var vaultCapacity = vaultLevels[vaultLevel][1];
           var acctBalance = parseInt(RegExp.$2);
           var vaultSpace = vaultCapacity - acctBalance;
-          //if (vaultLevel != GM_getValue('vaultHandling', 0))
+          if (vaultLevel != GM_getValue('vaultHandling', 0))
             addToLog(cities[LV][CITY_CASH_CSS], 'Parsed new vault status: Level ' + vaultLevel + ', free vault space: V$' + makeCommaValue(vaultSpace));
           GM_setValue('vaultHandling', vaultLevel);
           GM_setValue('vaultSpace', String(vaultSpace));
@@ -14536,6 +14582,7 @@ function logJSONResponse(responseText, action, context) {
 
       // Log any message from depositing money.
       case 'deposit':
+        var respJSON = eval ('(' + responseText + ')');
         // Log if city has changed after banking
         if (city != context) {
           addToLog('warning Icon', 'Warning! You have traveled from ' +
@@ -14561,8 +14608,8 @@ function logJSONResponse(responseText, action, context) {
         }
         cashLeft = isNaN(cashLeft) ? 0 : parseInt(cashLeft);
 
-        // Money deposited
-        if ((/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)<\/span/)) || (/you deposited/i.test(respTxt) && respTxt.match(/\$([0-9,,]+) into your vault/i))) {
+        // Money deposited (all cities)
+        if ((/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)&lt;\/span/)) || (/you deposited/i.test(respTxt) && respTxt.match(/\$([0-9,,]+) into your vault/i))) {
           quickBankFail = false;
           var cashDeposit = RegExp.$1;
           addToLog(cities[context][CITY_CASH_CSS],
@@ -14590,17 +14637,6 @@ function logJSONResponse(responseText, action, context) {
             if (cityCashElt)
               cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
             cities[context][CITY_CASH] = cashLeft;
-            /* Try again
-            if (isGMChecked('autoBankVegasMax')) {
-              if (!isNaN(acctBalance) && acctBalance < vaultCapacity) {
-                // Vault the max possible amount
-                if (acctBalance + cashLeft > vaultCapacity)
-                  quickBank(context, vaultCapacity - acctBalance);
-                else
-                  quickBank(context, cashLeft);
-                break;
-              }
-            }*/
           }
         // Las Vegas: vault full
         } else if (/cannot deposit anymore/i.test(respTxt)) {
@@ -14618,11 +14654,6 @@ function logJSONResponse(responseText, action, context) {
         // Las Vegas: invalid amount
         } else if (/invalid amount/i.test(respTxt)) {
           quickBankFail = false;
-        // Las Vegas: no vault?
-        } else if (/,"result":null,/.test(respTxt)) {
-          quickBankFail = false;
-          addToLog(cities[context][CITY_CASH_CSS], 'Depositing failed with a "null" response; if you are in Las Vegas, perhaps you don\'t have a vault yet?');
-          if (GM_getValue('vaultHandling', 0)) GM_setValue('vaultSpace', '0');
 
         // Not enough money
         } else if (/have enough money/.test(respTxt)) {
@@ -14634,6 +14665,12 @@ function logJSONResponse(responseText, action, context) {
                    'You need to deposit at least <span class="money">' + cities[context][CITY_CASH_SYMBOL] +
                    RegExp.$1);
 
+        // Las Vegas: no vault?
+        } else if (/,"result":null,/.test(respTxt) || /"rp":0,.+,"acct_balance":0,/.test(respTxt)) {
+          quickBankFail = false;
+          addToLog(cities[context][CITY_CASH_CSS], 'Depositing failed without a response; if you are in Las Vegas, perhaps you don\'t have a vault yet?');
+          if (GM_getValue('vaultHandling', 0)) GM_setValue('vaultSpace', '0');
+
         // Unknown JSON response
         } else {
           quickBankFail = true;
@@ -14642,12 +14679,11 @@ function logJSONResponse(responseText, action, context) {
         break;
 
       default:
-        addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' +
-                 action + '".');
+        addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' + action + '".');
     }
   } catch (ex) {
-    DEBUG('Exception (logJSONResponse): ' + ex + ', action: ' + action + ', context: ' + context + ', response: ' + responseText + '.');
-    loadHome();
+    DEBUG('Exception (logJSONResponse): ' + ex + ', action: ' + action + ', context: ' + context + ', response: <br>' + responseText);
+    //loadHome();
   }
 }
 
@@ -15675,22 +15711,6 @@ function eventclick_chuckaCrap() {
   remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
-function getMWUrlLV (server, params) {
-  var mwURL = document.location.href;
-  mwURL = mwURL.replace(/html_server/, server);
-  mwURL = mwURL.replace('#','');
-
-  // Create or Replace params
-  for (var i in params) {
-    if (new RegExp('[&?]' + i + '=\\w*').test(mwURL))
-      mwURL = mwURL.replace(new RegExp(i + '=\\w*'), i + '=' + params[i]);
-    else
-      mwURL += '&' + i + '=' + params[i];
-  }
-
-  return mwURL;
-}
-
 function getMWUrl (server, params) {
   var mwURL = document.location.href;
   mwURL = mwURL.replace(/html_server/, server);
@@ -15708,7 +15728,8 @@ function getMWUrl (server, params) {
 }
 
 function getHitUrl (targetId) {
-  return getMWUrl ('html_server', {'xw_controller':'hitlist', 'xw_action':'set', 'target_id':targetId});
+  return "xw_controller=hitlist&xw_action=set&target_id=" + targetId;
+  //return getMWUrl ('html_server', {'xw_controller':'hitlist', 'xw_action':'set', 'target_id':targetId});
 }
 
 function getProfileUrl (userId) {
