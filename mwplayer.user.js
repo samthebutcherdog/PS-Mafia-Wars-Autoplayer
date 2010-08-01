@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.575
+// @version     1.1.576
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.575',
+  version: '1.1.576',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9947,33 +9947,29 @@ function customizeStats() {
     }
   }
 
-// Make stamina icon pointable for showing.
+// Make stamina text & icon pointable for showing.
   var stamLinkElt = document.getElementById('mwap_stam');
-  var stamImgElt = xpathFirst('.//div[@id="game_stats"]//img[@alt="Stamina"]', appLayoutElt);
-  if (stamImgElt && !stamLinkElt) {
-    stamLinkElt =  makeElement('a', null, {'id':'mwap_stam', 'title':' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.' });
-    stamImgElt.parentNode.insertBefore(stamLinkElt, stamImgElt);
-    stamLinkElt.appendChild(stamImgElt);
-  }
-// Make Stamina text Pointable for Value Display.
   var stamLinkEltTxt = document.getElementById('mwap_stamTxt');
-  if(new_header){
-    var stamTxtElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text stamina_text_bg" and contains(text(), "STAMINA")]', appLayoutElt);
-  } else {
-    var stamTxtElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and text()="Stamina"]', appLayoutElt);
-  }
-  if(!stamTxtElt){
-    //stamTxtElt = xpathFirst('./div[@id="stats_row"]//h4[contains(@url, "stamina_icon") and contains(text(), "Stamina")]', appLayoutElt);
-    var stamTxtElt = xpathFirst('.//div[@id="game_stats"]//h4[contains(@style, "background") and contains(text(), "Stamina")]', appLayoutElt);
-    stamTxtElt.style.color="#FF0000";
-    stamTxtElt.style.textDecoration="underline";
-  }
+   var stamTxtElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text stamina_text_bg" and contains(text(), "STAMINA")]', appLayoutElt);
+    if(!stamTxtElt) { var stamTxtElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Stamina")]', appLayoutElt); }
+      if(!stamTxtElt){  var stamTxtElt = xpathFirst('.//div[@id="game_stats"]//h4[contains(text(), "Stamina")]', appLayoutElt);  }
+  var stamImgElt = xpathFirst('.//div[@id="game_stats"]//img[@alt="Stamina"]', appLayoutElt); 
+  stamTxtElt.style.color="#FF0000";
+  stamTxtElt.style.textDecoration="underline";
+  var StamTitle = (' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.');
+
+    if (stamImgElt && !stamLinkElt) {
+      stamLinkElt = makeElement('a', null, {'id':'mwap_stam', 'title':StamTitle});
+      stamImgElt.parentNode.insertBefore(stamLinkElt, stamImgElt);
+      stamLinkElt.appendChild(stamImgElt);
+//      stamLinkElt.addEventListener('click', nada, false);  // leave off
+    }
   if (stamTxtElt && !stamLinkEltTxt) {
-    stamLinkEltTxt =  makeElement('a', null, {'id':'mwap_stamTxt', 'title':' Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal')+ ' points.' });
+    stamLinkEltTxt = makeElement('a', null, {'id':'mwap_stamTxt', 'title':StamTitle});
     stamTxtElt.parentNode.insertBefore(stamLinkEltTxt, stamTxtElt);
     stamLinkEltTxt.appendChild(stamTxtElt);
-    stamLinkEltTxt.addEventListener('click', checkVaultStatus, false);
-  }
+//    stamLinkEltTxt.addEventListener('click', nada, false);  // no click needed!!
+    }
 
   // Make health icon clickable for instant healing.
   var healLinkElt = document.getElementById('mwap_heal');

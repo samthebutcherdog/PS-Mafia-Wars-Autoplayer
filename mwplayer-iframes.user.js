@@ -122,14 +122,16 @@ var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 //Detect what URL the script was opened from
 if (self.location.href.indexOf('http://apps.facebook.com/inthemafia/') != -1) {
 	strFrameID = 'FaceBook'
-	alert('frame id = '+strFrameID);	
+//	alert('frame id = '+strFrameID);	
 } else if (self.location.href.indexOf('http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller') != -1) {
 	strFrameID = 'MafiaWars'
 } else {
-	alert('frame id = '+strFrameID);
+//	alert('frame id = '+strFrameID);
 	strFrameID = 'Unknown';
 	GM_log(self.location.href);
 }
+
+//DEBUG(' frame id = '+strFrameID);
 
 if (strFrameID == 'FaceBook'){
 	FaceBook();
