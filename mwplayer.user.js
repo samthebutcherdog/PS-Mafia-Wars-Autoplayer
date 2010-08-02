@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.577
+// @version     1.1.578
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.577',
+  version: '1.1.578',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2417,7 +2417,7 @@ function autoCollectTake(takeCity) {
   var jsonElt = getJSONPage(true, 'collect take', takeCity);
   var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?xw_controller=propertyV2&xw_action=collectall&xw_city=' + takeCity+1 + '&requesttype=json", 1, 1, 0, 0); return false;'});
   clickElement(elt);
-  return false;
+  return true;
 }
 
 function autoPlayerUpdates() {
@@ -9523,6 +9523,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
       '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
       '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
+      '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
       '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
       '<br>&nbsp;&nbsp;AskforHelpBangkokTimer: ' + getHoursTime('AskforHelpBangkokTimer') +
@@ -9543,6 +9544,7 @@ function resetTimers(popup) {
   GM_setValue('warTimer', 0);
   GM_setValue('buildCarTimer', 0);
   GM_setValue('buildWeaponTimer', 0);
+  GM_setValue('takeHourLas Vegas', 0);
   GM_setValue('takeHourBangkok', 0);
   GM_setValue('takeHourCuba', 0);
   GM_setValue('takeHourMoscow', 0);
@@ -9553,6 +9555,7 @@ function resetTimers(popup) {
   GM_setValue('AskforHelpMoscowTimer', 0);
   GM_setValue('AskforHelpBangkokTimer', 0);
   GM_setValue('rewardEnergyTimer', 0);
+  GM_setValue('checkVaultTimer', 0);
   if (popup) {
     alert('All active timers have been reset.');
 
@@ -14552,11 +14555,11 @@ function logJSONResponse(jsonElt) {
         var respJSON = eval ('(' + responseText + ')');
         var respTxt = respJSON['data'];
         setGMTime('takeHour' + cities[context][CITY_NAME], '00:30:00');  // collect every 30 min
-        if (respTxt.match(/collected (.+?) from.+,"cash":([0-9]+),/i)) {
-          var collectString = RegExp.$1.replace(/\$/i, cities[context][CITY_CASH_SYMBOL]);
+        if (respTxt.match(/collected (.+?) from your properties.","cash":([0-9]+),/i)) {
+          var cashLeft = parseInt(RegExp.$2);
+          var collectString = RegExp.$1.replace('$', cities[context][CITY_CASH_SYMBOL]);
           addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
           // Attempt to correct the displayed cash value
-          var cashLeft = parseInt(RegExp.$2);
           if (cityCashElt)
             cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
           cities[context][CITY_CASH] = cashLeft;
