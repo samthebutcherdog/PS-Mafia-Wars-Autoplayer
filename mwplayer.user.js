@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.582
+// @version     1.1.583a
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.582',
+  version: '1.1.583a',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -876,6 +876,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_ROBBING      = 3;  // Robbing
   const STAMINA_HOW_AUTOHITLIST  = 4;  // Place bounties.
   const STAMINA_HOW_RANDOM       = 5;  // Random spending of stamina in random cities.
+  const STAMINA_HOW_FIGHTROB     = 6;  // Fight than Rob random opponents.
 
 
   var staminaSpendChoices = [];
@@ -885,6 +886,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random opponents';
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
+  staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight than Rob';
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
@@ -3384,7 +3386,9 @@ function autoHitman() {
   DEBUG('Applying criteria to displayed targets.');
   var blacklist = getSavedList('hitmanListAvoid').concat(getSavedList('fightListAvoid'));
   var bountyMin = parseCash(GM_getValue('hitmanBountyMin', 0));
+  var hitmanNames = isGMChecked('hitmanNames');
   var avoidNames = isGMChecked('hitmanAvoidNames');
+  var avoidNames = isGMChecked('hitmanOnlyNames');
   var blacklistCount = 0;
   var bountyCount = 0;
   var namesCount = 0;
@@ -3401,10 +3405,17 @@ function autoHitman() {
       bountyCount++;
       continue;
     }
-    if (avoidNames && isFamily(decodeHTMLEntities(opponent.name))) {
+    
+    if (hitmanNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_HITMAN) {
       namesCount++;
       continue;
     }
+
+    if (hitmanNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_HITMAN) {
+      namesCount++;
+      continue;
+    }
+    
     opponentsQualified.push(opponent);
   }
   DEBUG(bountyCount + ' disqualified on bounty, ' +
@@ -3915,17 +3926,13 @@ function findFightOpponent(element) {
       mafiaMinCount++;
       continue;
     }
-    //if (avoidNames && isFamily(decodeHTMLEntities(opponent.name))) {
-    //  namesCount++;
-    //  continue;
-    //}
 
-    if (fightNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name))) {
+    if (fightNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_FIGHT_RANDOM) {
       namesCount++;
       continue;
     }
 
-    if (fightNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name))) {
+    if (fightNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_FIGHT_RANDOM) {
       namesCount++;
       continue;
     }
@@ -4279,18 +4286,23 @@ function saveDefaultSettings() {
   GM_setValue('fightLocation', NY);
   GM_setValue('fightLevelMax', 100);
   GM_setValue('fightMafiaMax', 501);
-  GM_setValue('fightMafiaMin', 1);
-  //GM_setValue('fightAvoidNames', 'checked');
+  GM_setValue('fightMafiaMin', 1);  
 
   GM_setValue('fightNames', 'checked');
   GM_setValue('fightAvoidNames', 'checked');
   GM_setValue('fightOnlyNames', 0);
 
-  GM_setValue('fightRemoveStronger', 'checked');
   GM_setValue('hitmanLocation', NY);
-  GM_setValue('hitmanAvoidNames', 'checked');
+  GM_setValue('hitmanNames', 'checked');
+  GM_setValue('hitmanAvoidNames', 'checked');  
+  GM_setValue('fightOnlyNames', 0);
+  
+  GM_setValue('fightRemoveStronger', 'checked');
+  
+  GM_setValue('fightClanName', defaultClans.join('\n'));
+  GM_setValue('hitmanClanName', defaultClans.join('\n'));
+  
   GM_setValue('robLocation', NY);
-  GM_setValue('clanName', defaultClans.join('\n'));
   GM_setValue('selectStaminaKeep', 0);
   GM_setValue('selectStaminaUse', 0);
   GM_setValue('selectStaminaKeepMode', 0);
@@ -4843,7 +4855,7 @@ function saveSettings() {
                             'collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
                             'autoMainframe','autoResetTimers','autoEnergyPackForce','autoBurnerHelp','autoPartsHelp',
                             'hideMessageIcon','hideGiftIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
-                            'staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames','fastRob','fightrob','TestChanges',
+                            'staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames','hitmanNames','hitmanAvoidNames','hitmanOnlyNames','fastRob','fightrob','TestChanges',
     ]);
   } else {
     saveCheckBoxElement('TestChanges');
@@ -5078,14 +5090,28 @@ function mwapOnOff() {
   }
 }
 
-function isFamily(username) {
-  var patterns = getSavedList('clanName');
-  for (var i = 0, iLength=patterns.length; i < iLength; ++i) {
-    var pattern = patterns[i];
-    if (pattern && username.indexOf(pattern) != -1) {
-      return true;
+function isFamily(username, how) {
+  if(how == STAMINA_HOW_FIGHT_RANDOM ){
+    var patterns = getSavedList('fightClanName');
+    for (var i = 0, iLength=patterns.length; i < iLength; ++i) {
+      var pattern = patterns[i];
+      if (pattern && username.indexOf(pattern) != -1) {
+        return true;
+      }
+    }  
+    return false;
+  } else 
+  {    
+    var patterns = getSavedList('hitmanClanName');
+    for (var i = 0, iLength=patterns.length; i < iLength; ++i) {
+      var pattern = patterns[i];
+      if (pattern && username.indexOf(pattern) != -1) {
+        return true;
+      }
     }
+  return false;
   }
+  
   return false;
 }
 
@@ -5789,7 +5815,7 @@ function createGeneralTab() {
   var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Refresh option
   item = makeElement('div', list);
@@ -6060,7 +6086,7 @@ function createDisplayTab() {
   var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Logging option
   item = makeElement('div', list);
@@ -6279,7 +6305,7 @@ function createMafiaTab() {
   var mafiaTab = makeElement('div', null, {'id':'mafiaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Auto-ask for job help
   item = makeElement('div', list);
@@ -6796,7 +6822,7 @@ function createEnergyTab() {
   var energyTab = makeElement('div', null, {'id':'energyTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', energyTab, {'style':'position: relative; top: 0px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', energyTab, {'style':'position: relative; top: 0px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // How to spend energy
   item = makeElement('div', list);
@@ -7169,7 +7195,7 @@ function createEnergyTab() {
   return energyTab;
 }
 function createNewStaminaSubTab_FightRandom(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight Random'));
 
   // Location setting
@@ -7328,8 +7354,7 @@ function createNewStaminaSubTab_FightRandom(staminaTabSub) {
   title = ' Only Fight Mafia Families ';
   makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
-
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
 
@@ -7353,7 +7378,7 @@ function createNewStaminaSubTab_FightRandom(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight Specific'));
   
   // Location setting
@@ -7449,7 +7474,7 @@ function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_FightRob(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight than Rob'));
 
   // Location setting
@@ -7476,10 +7501,190 @@ function createNewStaminaSubTab_FightRob(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Fast Rob?'));
 
+  makeElement('hr', staminaTabSub);  
+  
+  // Location setting
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
+  id = 'fightRandomLoc';
+  var fightRandomLoc = makeElement('select', lhs, {'id':id});
+  for (i = 0, iLength=fightLocations.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(fightLocations[i]));
+    fightRandomLoc.appendChild(choice);
+  }
+  fightRandomLoc.selectedIndex = GM_getValue('fightLocation', NY);
+
+  //rehit on money gain
+  title = 'Reattack until iced if money gained';
+  id = 'staminaReattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('While gaining $ '));
+  //Money gain treshold
+  title = 'Reattack if this amount is gained';
+  id = 'reattackThreshold';
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351;', 'value':GM_getValue(id, '65000'), 'size':'1'});
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+
+  // IceCheck
+  title = 'Attack ONLY live targets';
+  id = 'iceCheck';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'iceCheck');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Skip iced targets'));
+
+  // Enable Stamina bursts
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Spend bursts of stamina.';
+  id = 'burstStamina';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Enable bursts:'));
+  // Burst Points
+  title = 'How many points to burst';
+  id = 'burstPoints';
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Burn '));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' points '));
+  // Burstmode
+  id = 'burstMode';
+  var burstMode = makeElement('select', rhs, {'id':id});
+  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(burstModes[i]));
+    burstMode.appendChild(choice);
+  }
+  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
+  // Powerattack
+  title = 'Power Attack';
+  id = 'staminaPowerattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('Powerattack'));
+
+  // Maximum level.
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Avoid opponents higher than this level.';
+  id = 'fightLevelMax';
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Maximum level:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':5, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightLevelMax', '100'), 'size':'1'});
+
+  // Maximum level relative?
+  title = 'Make the maximum level be relative to your own. For example, if your level is 10, and maximum level is set to 5, opponents higher than level 15 will be avoided.';
+  id = 'fightLevelMaxRelative';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxRelative');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Add my level'));
+
+  // Maximum mafia size.
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'fightMafiaMax';
+  title = 'Avoid opponents with mafia sizes larger than this.',
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Maximum mafia:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMax', '501'), 'size':'1'});
+
+  // Maximum mafia relative?
+  title = 'Make the maximum mafia size be relative to your own. For example, if you have 300 mafia members, and maximum mafia is set to 50, opponents with more than 350 mafia members will be avoided.';
+  id = 'fightMafiaMaxRelative';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMaxRelative');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Add my mafia size'));
+
+  // Minimum mafia size.
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'fightMafiaMin';
+  title = 'Avoid opponents with mafia sizes smaller than this.',
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Minimum mafia:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMin', '1'), 'size':'1'});
+
+  // Minimum mafia relative?
+  title = 'Make the minimum mafia size be relative to your own. For example, if you have 300 mafia members, and minimum mafia is set to 50, opponents with less than 250 mafia members will be avoided.';
+  id = 'fightMafiaMinRelative';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Subtract from my mafia size'));
+
+  // Remove stronger opponents?
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Remove stronger opponents from the list automatically.';
+  id = 'fightRemoveStronger';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Remove stronger opponents'));
+
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  rhs2 = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  // Pattern Fighting ?
+  title = ' Use Mafia Family Patterns when fighting';
+  id = 'fightNames';
+  var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when fighting:'));
+  UseFightNames.addEventListener('click', clickUseFightNames, false);
+  makeElement('br', lhs);
+  id = 'fightAvoidNames';
+  title = ' Avoid mafia families';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('br', lhs);
+  id = 'fightOnlyNames';
+  title = ' Only Fight Mafia Families ';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
+  makeElement('br', rhs);
+  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
+
+  // Use stealth fighting?
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Prefer opponents who won\'t be notified of your attacks.';
+  id = 'fightStealth';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth');
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Use fight stealth'));
+  // Avoid Top Mafia bodyguards?
+  title = 'Avoid opponents known to be Top Mafia bodyguards. This may ' +
+          'decrease the frequency of losses due to critical hits.';
+  id = 'fightAvoidBodyguards';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightAvoidBodyguards', 'checked');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
+
 }
 
 function createNewStaminaSubTab_Rob(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Robbing'));
 
   // Location setting
@@ -7509,7 +7714,7 @@ function createNewStaminaSubTab_Rob(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Collect Hitlist Bounties'));
 
   // Location setting
@@ -7598,22 +7803,22 @@ function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
   makeElement('br', item, {'class':'hide'});
   // Pattern Fighting ?
   title = ' Use Mafia Family Patterns for collecting bounties';
-  id = 'fightNames';
-  var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  id = 'hitmanNames';
+  var UseHitmanNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when collecting:'));
-  UseFightNames.addEventListener('click', clickUseFightNames, false);
+  UseHitmanNames.addEventListener('click', clickUseHitmanNames, false);
   makeElement('br', lhs);
-  id = 'fightAvoidNames';
+  id = 'hitmanAvoidNames';
   title = ' Avoid mafia families';
   makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
   makeElement('br', lhs);
-  id = 'fightOnlyNames';
+  id = 'hitmanOnlyNames';
   title = ' Only Fight Mafia Families ';
   makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
 
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('hitmanClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
 
@@ -7630,7 +7835,7 @@ function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_SetBounties(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Set Hitlist Bounties'));
 
   // Location setting
@@ -7684,7 +7889,7 @@ function createNewStaminaSubTab_SetBounties(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_Random(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
+  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Random'));
 }
 
@@ -7695,7 +7900,7 @@ function createNewStaminaTab() {
   var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', staminaTab, {'style':'position: relative; top: 5px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   //
   // How to spend stamina (fight/hitlist).
@@ -7820,7 +8025,7 @@ function createStaminaTab() {
   var staminaTab = makeElement('div', null, {'id':'staminaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:125%;'});
+  var list = makeElement('div', staminaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   //
   // How to spend stamina (fight/hitlist).
@@ -7955,7 +8160,7 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  list = makeElement('div', staminaTabSub, {'id':'fightRandomSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none;'});
+  list = makeElement('div', staminaTabSub, {'id':'fightRandomSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:120%; display: none;'});
 
   // Location setting
   item = makeElement('div', list);
@@ -8087,7 +8292,7 @@ function createStaminaTab() {
   makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
 
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
 
@@ -8099,7 +8304,7 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  list = makeElement('div', staminaTabSub, {'id':'fightListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+  list = makeElement('div', staminaTabSub, {'id':'fightListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:120%; display: none'});
 
   // Location setting
   item = makeElement('div', list);
@@ -8157,7 +8362,7 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  list = makeElement('div', staminaTabSub, {'id':'hitmanSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+  list = makeElement('div', staminaTabSub, {'id':'hitmanSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:120%; display: none'});
 
   // Location setting
   item = makeElement('div', list);
@@ -8206,13 +8411,25 @@ function createStaminaTab() {
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
+  rhs2 = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = 'Avoid random opponents whose names contain specific patterns.';
+  // Pattern Fighting ?
+  title = ' Use Mafia Family Patterns for collecting bounties';
+  id = 'hitmanNames';
+  var UseHitmanNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when collecting:'));
+  UseHitmanNames.addEventListener('click', clickUseHitmanNames, false);
+  makeElement('br', lhs);
   id = 'hitmanAvoidNames';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'hitmanAvoidNames', 0);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Avoid mafia families:'));
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 8em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('clanName', defaultClans.join('\n'))));
+  title = ' Avoid mafia families';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('br', lhs);
+  id = 'hitmanOnlyNames';
+  title = ' Only Fight Mafia Families ';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('hitmanClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
   // End of options specific to hitman
@@ -8222,7 +8439,7 @@ function createStaminaTab() {
   //
 
   // Container for a list of rob settings
-  list = makeElement('div', staminaTabSub, {'id':'autoRobSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+  list = makeElement('div', staminaTabSub, {'id':'autoRobSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:120%; display: none'});
 
   // Location setting
   item = makeElement('div', list);
@@ -8246,7 +8463,7 @@ function createStaminaTab() {
   //
 
   // Container for a list of settings.
-  list = makeElement('div', staminaTabSub, {'id':'autoHitListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:125%; display: none'});
+  list = makeElement('div', staminaTabSub, {'id':'autoHitListSub', 'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; line-height:120%; display: none'});
 
   // Location setting
   item = makeElement('div', list);
@@ -8581,7 +8798,7 @@ function validateNewStaminaTab() {
       s.fightNames = checked('fightNames');
       s.fightAvoidNames = checked('fightAvoidNames');
       s.fightOnlyNames = checked('fightOnlyNames');
-      s.clanName = document.getElementById('fightClanName').value;
+      s.fightClanName = document.getElementById('fightClanName').value;
       s.fightRemoveStronger = checked('fightRemoveStronger');
 
       s.fightStealth = checked('fightStealth');
@@ -8639,6 +8856,16 @@ function validateNewStaminaTab() {
         alert('Please enter a smaller relative mafia size for fighting.');
         return false;;
       }
+      
+      if(s.fightNames == 'checked'){
+        // Validate the fight list.
+        var list = s.fightClanName.split('\n');
+        if (!list[0]) {
+          alert('Enter at least one clan name/symbol in the list');
+          return false;;
+        } 
+      } 
+      
       break;
 
     case STAMINA_HOW_FIGHT_LIST: // List fighting
@@ -8678,13 +8905,33 @@ function validateNewStaminaTab() {
         return false;;
       }
       break;
+      
     case STAMINA_HOW_HITMAN: // Hitlist bounty collection ("auto-hitman")
       // Get the settings.
       s.hitmanLocation = document.getElementById('hitmanLocation').selectedIndex;
-      s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;
+      
+      s.burstStamina = checked('burstStamina');
+      s.burstMode = document.getElementById('burstMode').selectedIndex;
+      s.burstPoints = document.getElementById('burstPoints').value;
+      s.staminaPowerattack = checked('staminaPowerattack');
+
+      // Validate burstPoints settngs
+      if (isNaN(s.burstPoints)) {
+        alert('Please enter numeric values for burstPoints.');
+        return false;
+      } else if (parseInt(s.burstPoints) > maxStamina) {
+        alert('Stamina bursts cannot exceed the max stamina.');
+        return false;
+      }
+            
+      s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;      
       s.bountySelection = document.getElementById('bountySelection').selectedIndex;
+
+      s.hitmanNames = checked('hitmanNames');
       s.hitmanAvoidNames = checked('hitmanAvoidNames');
-      s.clanName = document.getElementById('hitmanClanName').value;
+      s.hitmanOnlyNames = checked('hitmanOnlyNames');
+      s.hitmanClanName = document.getElementById('hitmanClanName').value;
+      s.fightRemoveStronger = checked('fightRemoveStronger');   
 
       // Validate the minimum bounty.
       var min = parseCash(s.hitmanBountyMin);
@@ -8692,10 +8939,21 @@ function validateNewStaminaTab() {
         alert('Please enter a minimum bounty amount.');
         return false;;
       }
+
+      if(s.hitmanNames == 'checked'){
+        // Validate the fight list.
+        var list = s.hitmanClanName.split('\n');
+        if (!list[0]) {
+          alert('Enter at least one clan name/symbol in the list');
+          return false;;
+        } 
+      } 
+      
       break;
 
     case STAMINA_HOW_ROBBING: // Robbing
       s.robLocation = document.getElementById('robLocation').selectedIndex;
+      s.fastRob = checked('fastRob');   
       break;
 
     case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
@@ -8719,8 +8977,15 @@ function validateNewStaminaTab() {
         return false;;
       }
       break;
+      
+    case STAMINA_HOW_FIGHTROB: // Fight than Rob
+      s.robLocation = document.getElementById('robLocation').selectedIndex;
+      s.fastRob = checked('fastRob');   
+      break;
+      
     case STAMINA_HOW_RANDOM: // Random stamina spending
       break;
+      
 
     default :
       addToLog('warning Icon', 'BUG DETECTED: Unrecognized stamina setting: ' + 'staminaSpendHow=' + s.staminaSpendHow);
@@ -8782,10 +9047,12 @@ function validateStaminaTab() {
       s.fightMafiaMinRelative = checked('fightMafiaMinRelative');
       s.fightStealth = checked('fightStealth');
       s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
-      s.fightAvoidNames = checked('fightAvoidNames');
+      
       s.fightNames = checked('fightNames');
+      s.fightAvoidNames = checked('fightAvoidNames');
       s.fightOnlyNames = checked('fightOnlyNames');
-      s.clanName = document.getElementById('fightClanName').value;
+      s.fightClanName = document.getElementById('fightClanName').value;
+      
       s.reattackThreshold = parseInt(document.getElementById('reattackThreshold').value);
       s.staminaReattack = checked('staminaReattack');
 
@@ -8870,8 +9137,11 @@ function validateStaminaTab() {
       s.hitmanLocation = document.getElementById('hitmanLocation').selectedIndex;
       s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;
       s.bountySelection = document.getElementById('bountySelection').selectedIndex;
+    
+      s.hitmanNames = checked('hitmanNames');
       s.hitmanAvoidNames = checked('hitmanAvoidNames');
-      s.clanName = document.getElementById('hitmanClanName').value;
+      s.hitmanOnlyNames = checked('hitmanOnlyNames');
+      s.hitmanClanName = document.getElementById('hitmanClanName').value;
 
       // Validate the minimum bounty.
       var min = parseCash(s.hitmanBountyMin);
@@ -8908,7 +9178,10 @@ function validateStaminaTab() {
       break;
     case STAMINA_HOW_RANDOM: // Random stamina spending
       break;
-
+    
+    case STAMINA_HOW_FIGHTROB: // Fight than Rob stamina spending
+      break;  
+      
     default:
       addToLog('warning Icon', 'BUG DETECTED: Unrecognized stamina setting: ' +
                'staminaSpendHow=' + s.staminaSpendHow);
@@ -8976,6 +9249,17 @@ function clickUseFightNames() {
     if (document.getElementById('fightAvoidNames').checked === false &&
         document.getElementById('fightOnlyNames').checked === false) {
       document.getElementById('fightAvoidNames').checked = true;
+    }
+  }
+}
+
+function clickUseHitmanNames() {
+  if (this.checked) {
+    // check to ensure at least one radio box is checked
+    // enable Before level up by default
+    if (document.getElementById('hitmanAvoidNames').checked === false &&
+        document.getElementById('hitmanOnlyNames').checked === false) {
+      document.getElementById('hitmanAvoidNames').checked = true;
     }
   }
 }
@@ -12452,14 +12736,19 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Random fight min mafia: <strong>' + GM_getValue('fightMafiaMin') + ' (' + showIfRelative('fightMafiaMinRelative') + ')</strong><br>' +
         '&nbsp;&nbsp;-Random fight stealth: <strong>' + showIfUnchecked(GM_getValue('fightStealth')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight avoid bodyguards: <strong>' + showIfUnchecked(GM_getValue('fightAvoidBodyguards')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Random fight use Patterns: <strong>' + showIfUnchecked(GM_getValue('fightNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight avoid names: <strong>' + showIfUnchecked(GM_getValue('fightAvoidNames')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Random fight specific names: <strong>' + showIfUnchecked(GM_getValue('fightOnlyNames')) + '</strong><br>' +
+        'Families list: <strong>' + GM_getValue('fightClanName') + '</strong><br>' +
         '&nbsp;&nbsp;-List fight opponents: <strong>' + GM_getValue('fightList') + '</strong><br>' +
         '&nbsp;&nbsp;-List fight remove stronger: <strong>' + showIfUnchecked(GM_getValue('fightRemoveStronger')) + '</strong><br>' +
         '&nbsp;&nbsp;-Collect hitman bounties in: <strong>' + locations[GM_getValue('hitmanLocation', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman min bounty: <strong>' + parseCash(GM_getValue('hitmanBountyMin')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman bounty selection: <strong>' + bountySelectionChoices[(GM_getValue('bountySelection'))] + '</strong><br>' +
+        '&nbsp;&nbsp;-Hitman use Patterns: <strong>' + showIfUnchecked(GM_getValue('hitmanNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hitman avoid names: <strong>' + showIfUnchecked(GM_getValue('hitmanAvoidNames')) + '</strong><br>' +
-        'Families list: <strong>' + GM_getValue('clanName') + '</strong><br>' +
+        '&nbsp;&nbsp;-Hitman specific names: <strong>' + showIfUnchecked(GM_getValue('hitmanOnlyNames')) + '</strong><br>' +
+        'Families list: <strong>' + GM_getValue('hitmanClanName') + '</strong><br>' +
         '&nbsp;&nbsp;-Rob in: <strong>' + locations[GM_getValue('robLocation', NY)] + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit bounty: <strong>' + parseCash(GM_getValue('autoHitListBounty')) + '</strong><br>' +
         '&nbsp;&nbsp;-Set Bounties in: <strong>' + locations[GM_getValue('autoHitListLoc', 0)] + '</strong><br>' +
@@ -15198,8 +15487,7 @@ function logResponse(rootElt, action, context) {
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
       xpGainElt = xpGainElt ? xpGainElt : xpathFirst('.//dd[@class="experience"]', messagebox);
       var jobContainer = "job"+missions[GM_getValue('selectMission')][MISSION_NUMBER];
-
-      jobMastery = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
+      var masteryGainElt = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
 
       if (xpGainElt) {
         jobOptimizeOn = false;
@@ -15211,7 +15499,10 @@ function logResponse(rootElt, action, context) {
         var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
         cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
         if (cashGainElt) {
-          result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>. Job ' + jobMastery.innerHTML;
+          result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
+        }
+        if(masteryGainElt){
+         result += '. Job ' + masteryGainElt.innerHTML;
         }
         result += '.';
         if (innerNoTags.indexOf('you spent no energy') != -1) {
