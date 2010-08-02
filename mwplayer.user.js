@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.583a
+// @version     1.1.584a
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.583a',
+  version: '1.1.584a',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8758,7 +8758,7 @@ function validateNewStaminaTab() {
   s.selectStaminaKeepMode = document.getElementById('selectStaminaKeepMode').selectedIndex;
   s.allowStaminaToLevelUp = checked('allowStaminaToLevelUp');
 
-  // Validate comman settings
+  // Validate common settings
   if (isNaN(s.selectStaminaUse) || isNaN(s.selectStaminaKeep)) {
     alert('Please enter numeric values for Stamina reserve and Stamina threshold.');
     return false;
@@ -9418,15 +9418,19 @@ function handleModificationTimer() {
 
 // Only Process when not running
   if (!running) {
-    /* Holder for future code for cleanup of the Loot page.
     if (onLootTab()) {
       // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
       // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
-      cleanLoot(47,44,"Weapons","Armor");
-      cleanLoot(47,44,"Armor","Vehicles");
-      cleanLoot(47,44,"Vehicles","Animals");
-      cleanLoot(47,44,"Animals","Special Loot");
-    }*/
+      // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
+      var sortLootType = 0; //Replace with GM value, preferably a combobox setting
+      if (sortLootType != 0) {
+        cleanLoot("Weapons","Armor", sortLootType);
+        cleanLoot("Armor","Vehicles", sortLootType);
+        cleanLoot("Vehicles","Animals", sortLootType);
+        cleanLoot("Animals","Special Loot", sortLootType);
+      }
+    }
+
 
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
       // Find and remove special event collections from collections page
@@ -9471,13 +9475,59 @@ function handleModificationTimer() {
     }
   }
 }
-function cleanLoot(intMinAttack, intMinDefense, strType, strTerminus) {
+function cleanLoot(strType, strTerminus, sortLootType) {
+  // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
+  var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
+  var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
+  var colLoot = [];
+  do {
+    // Get Attack/Defense, and Total values
+    var eltPicture = xpathFirst('.//td', eltRow);
+    var eltAttackDef = eltPicture.nextSibling.nextSibling;
+    var eltAttack = xpathFirst('.//td', eltAttackDef);
+    var eltDefense = eltAttack.nextSibling.nextSibling;
+    var eltQuantity = eltAttackDef.nextSibling.nextSibling;  
+    // eltQuantity should be formated "Owned:"/#/<Add> so if it has "Add" then the item is giftable.
+    var splitAttack = eltAttack.innerHTML.clean().trim().split(" ");
+    var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
+    var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
+    var objLoot = new objLootItem();
+    objLoot.Attack = splitAttack[0];
+    objLoot.Defense = splitDefense[0];
+    objLoot.Quantity = parseInt(splitQuantity[1]);
+    objLoot.Element = eltRow;
+	// Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
+    // hence the loot item is giftable.
+    if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
+    colLoot.push(objLoot); // add item to collection
+    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
+    var txtData = eltRow.innerHTML.clean().trim();
+  } while (txtData != strTerminus);
+  // Okay, main collection array, colLoot should be built at this point.
+  var minAttack = 0;
+  var minDefense = 0;
+  switch(sortLootType)
+  {
+    case 0: // No filter
+      break;
+    case 1: // Attack only
+      minAttack = sortAttack(colLoot);
+      break;
+    case 2: // Defense Only
+      minDefense = sortDefense(colLoot);
+      break;
+    case 3: // Attack/Defense Combo
+      minAttack = sortAttack(colLoot);
+      minDefense = sortDefense(colLoot);
+      break;
+    case 4:  // Giftable only (not programmed yet obviously...  ^_^)
+      break;
+  }
+
+
   // Find respective section (Weapons/Armor/Vehicle/Animal)
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
-
-
-
   do {
     // Get Attack/Defense values
     var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
@@ -9486,18 +9536,58 @@ function cleanLoot(intMinAttack, intMinDefense, strType, strTerminus) {
     var intAttack = parseInt(splitVal[2]);
     splitVal = eltDefense.innerHTML.split(" ");
     var intDefense = parseInt(splitVal[2]);
-
-    // Prep elements for possible removal
+	// Prep elements for possible removal
     var eltSibling = eltRow.nextSibling.nextSibling;
     var nextItem = eltSibling.nextSibling.nextSibling;
-    if (intAttack < intMinAttack && intDefense < intMinDefense){
-      //Removal
-      eltRow.parentNode.removeChild(eltRow);
-      eltSibling.parentNode.removeChild(eltSibling);
-    }
+    if (sortLootType == 3) {
+      if(intAttack < minAttack && intDefense < minDefense){
+        //Removal
+        eltRow.parentNode.removeChild(eltRow);
+        eltSibling.parentNode.removeChild(eltSibling);
+    };
+    } else {
+	  if(intAttack < minAttack || intDefense < minDefense){
+	  //Removal
+        eltRow.parentNode.removeChild(eltRow);
+        eltSibling.parentNode.removeChild(eltSibling);
+	  };
+	} 
     eltRow = nextItem;
     var txtData = eltRow.innerHTML.clean().trim();
   } while (txtData != strTerminus);
+}
+
+function sortAttack(colLoot) {
+  var minimum=0;
+  colLoot.sort(function(a,b) {
+    return b.Attack-a.Attack;
+  });
+  // Find top 501+ Attack
+  var totalItems = 0;
+  for (var x in colLoot)
+  {
+    totalItems += colLoot[x].Quantity;
+    minimum = colLoot[x].Attack;
+    if (totalItems > 500) break;			  
+  }
+  return minimum;
+}
+
+function sortDefense(colLoot) {
+  var minimum=0;
+  colLoot.sort(function(a,b) {
+    return b.Defense-a.Defense;
+  });
+  // Find top 501+ Defense
+
+  var totalItems = 0;
+  for (var x in colLoot)
+  {
+    totalItems += colLoot[x].Quantity;
+    minimum = colLoot[x].Defense;
+    if (totalItems > 500) break;			  
+  }
+  return minimum;
 }
 
 // Clean up routine.
