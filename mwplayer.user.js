@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.584a
+// @version     1.1.585a
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.584a',
+  version: '1.1.585a',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9474,6 +9474,13 @@ function handleModificationTimer() {
       addToLog('warning Icon', 'BUG DETECTED (pageChanged): ' + ex);
     }
   }
+}
+function objLootItem() {
+  this.Attack = 0;
+  this.Defense = 0;
+  this.Quantity = 0;
+  this.Element = null;
+  this.Giftable = false;
 }
 function cleanLoot(strType, strTerminus, sortLootType) {
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
