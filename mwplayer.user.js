@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.579
+// @version     1.1.580
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,13 +52,13 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.579',
+  version: '1.1.580',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
   ajaxPage: 'inner2',
   ajaxResult: 'ajax_result',
-  presentationurl: 'http://userscripts.org/scripts/show/77953',
+   presentationurl: 'http://userscripts.org/scripts/show/77953',
   url: 'http://www.playerscripts.com/rokdownloads/ps_facebook_mafia_wars_a.user.js',
   metadata: 'http://userscripts.org/scripts/source/77953.meta.js',
   controller: '/remote/html_server.php?&xw_controller=',
@@ -858,7 +858,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var settingsOpen = false;
   var statsOpen = false;
   var scratchpad = document.createElement('textarea');
-  var defaultClans = ['{', '[', '(', '<', '\u25C4', '?', '\u2122', '\u03A8', '\u039E'];
+  var defaultClans = ['{', '[', '(', '<', '\u25C4', '�', '\u2122', '\u03A8', '\u039E'];
   var defaultPassPatterns = ['LOST', 'punched', 'Whacked', 'you were robbed', 'ticket'];
   var defaultFailPatterns = ['WON','heal','help','properties','upgraded'];
   var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -3660,7 +3660,7 @@ function getHitlist(element, forceRefresh) {
       opponent.bounty = RegExp.lastMatch;
     }
 
-  /* Disabled for now as we don't have a synchronous level check!
+    /* Disabled for now as we don't have a synchronous level check!
     if (!running && isGMChecked('showLevel')) {
       var urlLoaded = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -3737,7 +3737,7 @@ function getDisplayedOpponents(element, forceRefresh) {
     opponent.id      = decodeID(opponent.profile.getAttribute('onclick').split(oppParamName)[1].split('\'')[0].split('&')[0]);
     if (!opponent.id) continue;
 
-  /* Skip icecheck here, not really necessary!
+    /* Skip icecheck here, not really necessary!
     // Do icecheck from fightlist
     if (!running && isGMChecked('showPulse')) {
       var urlLoaded = function () {
@@ -4842,7 +4842,7 @@ function saveSettings() {
                             'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas',
                             'collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
                             'autoMainframe','autoResetTimers','autoEnergyPackForce','autoBurnerHelp','autoPartsHelp',
-                            'hideMessageIcon','hideGiftIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
+                            'hideMessageIcon','hideGiftIcon','hidePromoIcon','LiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
                             'staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames','fastRob','fightrob','TestChanges',
     ]);
   } else {
@@ -4938,15 +4938,17 @@ function saveSettings() {
   GM_setValue('selectMoscowTiercheck', (document.getElementById('selectMoscowTier').value)?'checked':0);
   GM_setValue('selectBangkokTier', (document.getElementById('selectBangkokTier').value)?document.getElementById('selectBangkokTier').value:0);
   GM_setValue('selectBangkokTiercheck', (document.getElementById('selectBangkokTier').value)?'checked':0);
-  
+
   // Save the stamina tab settings.
-  
 
-  for (var key in staminaTabSettings) {
-    //GM_log('Setting GM value \'' + key + '\'=' + staminaTabSettings[key]);
-    GM_setValue(key, staminaTabSettings[key]);
-  }  
 
+  //if(!isGMChecked('TestChanges')){
+    for (var key in staminaTabSettings) {
+      //GM_log('Setting GM value \'' + key + '\'=' + staminaTabSettings[key]);
+      GM_setValue(key, staminaTabSettings[key]);
+    }
+
+  //}
 
   // Clear the job state.
   setSavedList('jobsToDo', []);
@@ -6240,8 +6242,9 @@ function createDisplayTab() {
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Promo Icon '));
 
   // Hide Live Updates Icon
-  id = 'hideLiveUpdatesIcon';
 
+
+  id = 'LiveUpdatesIcon';
   title = 'Hide Live Updates Icon';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Live Updates Icon '));
@@ -6272,6 +6275,11 @@ function createDisplayTab() {
 
 
 
+ // Test New Changes
+  id = 'TestChanges';
+  title = 'Enable Script Modifications In Testing Phase ';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Modifications'));
 
   return displayTab;
 }
@@ -8439,13 +8447,17 @@ function createCashTab () {
 // Create About tab
 function createAboutTab() {
   var elt, title, id, label;
-  
 
 
 
-  var aboutTab = makeElement('div', null, {'id': 'aboutTab', 'class': 'tabcontent', 'style': 'background-image:url(' + stripURI(bgTabImage) + ')' });
 
-  
+  var aboutTab = makeElement('div', null, {
+    'id': 'aboutTab',
+    'class': 'tabcontent',
+    'style': 'background-image:url(' + stripURI(bgTabImage) + ')'
+
+  });
+
   var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 10px; font-size: 18px; font-weight: bold;'});
   versionInfo.appendChild(document.createTextNode('Version ' + SCRIPT.version));
 
@@ -8464,19 +8476,19 @@ function createAboutTab() {
 
   // Recent updates
   item = makeElement('div', aboutTab, {'style': 'border:1px solid #999999; padding: 2px 2px 2px 2px; overflow: ' +
-                                       'auto; width: 530px; height: 120px; top: 160px; left: 30px; ' +
+                                       'auto; width: 530px; height: 250px; bottom: 15px; left: 30px; ' +
                                        'font-size: 10px;'});
   item.innerHTML = '<span class="good">Release changes:</span> <br><br>' + GM_getValue('newRevList') + '<br>' +
                    '<span class="bad">Previous changes:</span> <br><br>' + GM_getValue('oldRevList');
-  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>MWAP Team';
+  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>MWAP Team'
 
-   // Test New Changes 
-  var devTools = makeElement('div', aboutTab, {'style': 'top: 350px; left: 10px; font-size: 12px;'});
-  id = 'TestChanges';
-  title = 'Enable Script Modifications In Testing Phase ';
-  makeElement('input', devTools, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', devTools, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Modifications'));
-  
+
+
+
+
+
+
+
   return aboutTab;
 }
 
@@ -9053,7 +9065,7 @@ function handleModificationTimer() {
   var prevPageElt = innerPageElt;
   appLayoutElt = document.getElementById('app_layout');
   innerPageElt = document.getElementById('inner_page');
-  if (!innerPageElt) innerPageElt = xpathFirst('//div[@id="inner_page"]');
+
 
   if (!innerPageElt) return;
 
@@ -9156,7 +9168,7 @@ function handleModificationTimer() {
       }
     }
   }
-  
+
   if (running) {
     // Popups opened?
     var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
@@ -9192,9 +9204,10 @@ function cleanLoot(intMinAttack, intMinDefense, strType, strTerminus) {
   // Find respective section (Weapons/Armor/Vehicle/Animal)
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
-  do
-  {
 
+
+
+  do {
     // Get Attack/Defense values
     var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
     var eltDefense = eltAttack.nextSibling.nextSibling;
@@ -9742,8 +9755,9 @@ function refreshMWAPCSS() {
                     ' #gc_collectible_container {position: absolute; top: 145px; left: 755px; width: 22px; z-index: 100;} ') +
 
                 // Move zstream  icon and make it smaller:
-                 (isGMChecked('hideLiveUpdatesIcon') ?
 
+
+                 (isGMChecked('LiveUpdatesIcon') ?
                    ' #zstream_icon {display: none;}' :
                    ' #zstream_icon {position: absolute; top: 10px; left: 305px; width: 22px; z-index: 100;} ') +
 
@@ -9927,24 +9941,25 @@ function resetTimers(popup) {
   // 300  : if 5 minutes have passed
   addToLog('warning Icon', 'All active timers have been reset.');
   if (timeLeftGM('miniPackTimer')<3600) GM_setValue('miniPackTimer', 0);
-  if (timeLeftGM('wishListTimer')<3600) (GM_setValue('wishListTimer', 0);
-  if (timeLeftGM('warTimer')<900) (GM_setValue('warTimer', 0);
-  if (timeLeftGM('buildCarTimer')<900) (GM_setValue('buildCarTimer', 0);
-  if (timeLeftGM('buildWeaponTimer')<900) (GM_setValue('buildWeaponTimer', 0);
-  if (timeLeftGM('takeHourLas Vegas')<300) (GM_setValue('takeHourLas Vegas', 0);
-  if (timeLeftGM('takeHourBangkok')<300) (GM_setValue('takeHourBangkok', 0);
-  if (timeLeftGM('takeHourCuba')<300) (GM_setValue('takeHourCuba', 0);
-  if (timeLeftGM('takeHourMoscow')<300) (GM_setValue('takeHourMoscow', 0);
-  if (timeLeftGM('takeHourNew York')<300) (GM_setValue('takeHourNew York', 0);
-  if (timeLeftGM('dailyChecklistTimer')<3600) (GM_setValue('dailyChecklistTimer', 0);
-  if (timeLeftGM('autoGiftAcceptTimer')<3600) (GM_setValue('autoGiftAcceptTimer', 0);
-  if (timeLeftGM('autoSafehouseTimer')<3600) (GM_setValue('autoSafehouseTimer', 0);
-  if (timeLeftGM('AskforHelpMoscowTimer')<3600) (GM_setValue('AskforHelpMoscowTimer', 0);
-  if (timeLeftGM('AskforHelpBangkokTimer')<3600) (GM_setValue('AskforHelpBangkokTimer', 0);
-  if (timeLeftGM('rewardEnergyTimer')<1800) (GM_setValue('rewardEnergyTimer', 0);
-  if (timeLeftGM('checkVaultTimer')<1800) (GM_setValue('checkVaultTimer', 0);
+  if (timeLeftGM('wishListTimer')<3600) GM_setValue('wishListTimer', 0);
+  if (timeLeftGM('warTimer')<900) GM_setValue('warTimer', 0);
+  if (timeLeftGM('buildCarTimer')<900) GM_setValue('buildCarTimer', 0);
+  if (timeLeftGM('buildWeaponTimer')<900) GM_setValue('buildWeaponTimer', 0);
+  if (timeLeftGM('takeHourLas Vegas')<300) GM_setValue('takeHourLas Vegas', 0);
+  if (timeLeftGM('takeHourBangkok')<300) GM_setValue('takeHourBangkok', 0);
+  if (timeLeftGM('takeHourCuba')<300) GM_setValue('takeHourCuba', 0);
+  if (timeLeftGM('takeHourMoscow')<300) GM_setValue('takeHourMoscow', 0);
+  if (timeLeftGM('takeHourNew York')<300) GM_setValue('takeHourNew York', 0);
+  if (timeLeftGM('dailyChecklistTimer')<3600) GM_setValue('dailyChecklistTimer', 0);
+  if (timeLeftGM('autoGiftAcceptTimer')<3600) GM_setValue('autoGiftAcceptTimer', 0);
+  if (timeLeftGM('autoSafehouseTimer')<3600) GM_setValue('autoSafehouseTimer', 0);
+  if (timeLeftGM('AskforHelpMoscowTimer')<3600) GM_setValue('AskforHelpMoscowTimer', 0);
+  if (timeLeftGM('AskforHelpBangkokTimer')<3600) GM_setValue('AskforHelpBangkokTimer', 0);
+  if (timeLeftGM('rewardEnergyTimer')<1800) GM_setValue('rewardEnergyTimer', 0);
+  if (timeLeftGM('checkVaultTimer')<1800) GM_setValue('checkVaultTimer', 0);
   if (popup) {
     alert('All active timers have been reset.');
+
     // Restart the timers.
     Autoplay.delay = 150;
     Autoplay.start();
@@ -10356,7 +10371,7 @@ function customizeStats() {
   if (stamTxtElt && !stamLinkEltTxt) {
     stamLinkEltTxt = makeElement('a', null, {'id':'mwap_stamTxt', 'title':StamTitle});
     stamTxtElt.parentNode.insertBefore(stamLinkEltTxt, stamTxtElt);
-    stamLinkEltTxt.appendChild(stamTxtElt);    
+    stamLinkEltTxt.appendChild(stamTxtElt);
   }
 
   // Make health icon clickable for instant healing.
@@ -12334,7 +12349,7 @@ BrowserDetect.init();
         'Hide Messagecenter Icon: <strong>'+ showIfUnchecked(GM_getValue('hideMessageIcon')) + '</strong><br>' +
         'Hide Gift Icon: <strong>'+ showIfUnchecked(GM_getValue('hideGiftIcon')) + '</strong><br>' +
         'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
-        'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('hideLiveUpdatesIcon')) + '</strong><br>' +
+        'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('LiveUpdatesIcon')) + '</strong><br>' +
         'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideIconRow')) + '</strong><br>' +
         'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
 
@@ -13994,7 +14009,7 @@ function goJobTab(tabno) {
                    'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
 
-  if(!elt) elt = xpathFirst('.//li[@id="tab_' + tabno + '"]//a[' +
+  if(!elt) elt = xpathFirst('.//li[@id="tab_' + barno + '"]//a[' +
                    'contains(@onclick, "&story_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&tab=' + tabno + '")]');
@@ -14881,6 +14896,7 @@ function randomizeStamina() {
     }
   }
 
+}
 
 // Handle our private JSON response page.
 function getJSONPage(create, action, context) {
@@ -14954,7 +14970,7 @@ function logJSONResponse(jsonElt) {
         }
         break;
 
-        // Check Las Vegas vault data
+      // Check Las Vegas vault data
       case 'check vault':
         var respJSON = eval ('(' + responseText + ')');
         var respTxt = respJSON['data'];
@@ -15027,8 +15043,8 @@ function logJSONResponse(jsonElt) {
             // Attempt to correct the displayed cash value
             if (cityCashElt)
               cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
-            cities[context][CITY_CASH] = cashLeft;  
-          }  
+            cities[context][CITY_CASH] = cashLeft;
+          }
         // Las Vegas: vault full
         } else if (/cannot deposit anymore/i.test(respTxt)) {
           quickBankFail = false;
@@ -15193,11 +15209,10 @@ function logResponse(rootElt, action, context) {
 
     case 'job':
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
-      xpGainElt = xpGainElt ? xpGainElt : xpathFirst('.//dd[@class="experience"]', messagebox);      
+      xpGainElt = xpGainElt ? xpGainElt : xpathFirst('.//dd[@class="experience"]', messagebox);
       var jobContainer = "job"+missions[GM_getValue('selectMission')][MISSION_NUMBER];
-            
       jobMastery = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
-      
+
       if (xpGainElt) {
         jobOptimizeOn = false;
         // Job completed successfully.
@@ -15209,7 +15224,7 @@ function logResponse(rootElt, action, context) {
         cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
         if (cashGainElt) {
           result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>. Job ' + jobMastery.innerHTML;
-        }          
+        }
         result += '.';
         if (innerNoTags.indexOf('you spent no energy') != -1) {
           result += ' You spent 0 energy on this job.';
