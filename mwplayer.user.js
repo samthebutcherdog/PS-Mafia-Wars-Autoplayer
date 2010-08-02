@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.580
+// @version     1.1.582
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.580',
+  version: '1.1.582',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4842,7 +4842,7 @@ function saveSettings() {
                             'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas',
                             'collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
                             'autoMainframe','autoResetTimers','autoEnergyPackForce','autoBurnerHelp','autoPartsHelp',
-                            'hideMessageIcon','hideGiftIcon','hidePromoIcon','LiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
+                            'hideMessageIcon','hideGiftIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
                             'staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames','fastRob','fightrob','TestChanges',
     ]);
   } else {
@@ -6244,7 +6244,7 @@ function createDisplayTab() {
   // Hide Live Updates Icon
 
 
-  id = 'LiveUpdatesIcon';
+  id = 'hideLiveUpdatesIcon';
   title = 'Hide Live Updates Icon';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Live Updates Icon '));
@@ -6269,17 +6269,6 @@ function createDisplayTab() {
   title = ' Hide Finished Collection Sets ';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Finished Collections '));
-
-
-
-
-
-
- // Test New Changes
-  id = 'TestChanges';
-  title = 'Enable Script Modifications In Testing Phase ';
-  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Modifications'));
 
   return displayTab;
 }
@@ -7366,7 +7355,7 @@ function createNewStaminaSubTab_FightRandom(staminaTabSub) {
 function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:10px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight Specific'));
-
+  
   // Location setting
   item = makeElement('div', staminaTabSub);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -7374,24 +7363,24 @@ function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
   makeElement('br', item, {'class':'hide'});
   makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
   id = 'fightListLoc';
-  var fightListLoc = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=locations.length; i < iLength; ++i) {
+  var fightListLoc = makeElement('select', lhs, {'id':id});
+  for (i = 0, iLength=fightLocations.length; i < iLength; ++i) {
     choice = document.createElement('option');
     choice.value = i;
-    choice.appendChild(document.createTextNode(locations[i]));
+    choice.appendChild(document.createTextNode(fightLocations[i]));
     fightListLoc.appendChild(choice);
   }
   fightListLoc.selectedIndex = GM_getValue('fightLocation', NY);
 
   //rehit on money gain
   title = 'Reattack until iced if money gained';
-  id = 'staminaReattack';
+  id = 'staminaReattackList';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
   label.appendChild(document.createTextNode('While gaining $ '));
   //Money gain treshold
   title = 'Reattack if this amount is gained';
-  id = 'reattackThreshold';
+  id = 'reattackThresholdList';
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351;', 'value':GM_getValue(id, '65000'), 'size':'1'});
   label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
 
@@ -8447,17 +8436,17 @@ function createCashTab () {
 // Create About tab
 function createAboutTab() {
   var elt, title, id, label;
+  
 
 
 
 
-  var aboutTab = makeElement('div', null, {
-    'id': 'aboutTab',
-    'class': 'tabcontent',
-    'style': 'background-image:url(' + stripURI(bgTabImage) + ')'
 
-  });
 
+  var aboutTab = makeElement('div', null, {'id': 'aboutTab', 'class': 'tabcontent', 'style': 'background-image:url(' + stripURI(bgTabImage) + ')' });
+
+
+  
   var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 10px; font-size: 18px; font-weight: bold;'});
   versionInfo.appendChild(document.createTextNode('Version ' + SCRIPT.version));
 
@@ -8476,19 +8465,19 @@ function createAboutTab() {
 
   // Recent updates
   item = makeElement('div', aboutTab, {'style': 'border:1px solid #999999; padding: 2px 2px 2px 2px; overflow: ' +
-                                       'auto; width: 530px; height: 250px; bottom: 15px; left: 30px; ' +
+                                       'auto; width: 530px; height: 120px; top: 160px; left: 30px; ' +
                                        'font-size: 10px;'});
   item.innerHTML = '<span class="good">Release changes:</span> <br><br>' + GM_getValue('newRevList') + '<br>' +
                    '<span class="bad">Previous changes:</span> <br><br>' + GM_getValue('oldRevList');
-  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>MWAP Team'
+  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>MWAP Team';
 
-
-
-
-
-
-
-
+   // Test New Changes 
+  var devTools = makeElement('div', aboutTab, {'style': 'top: 350px; left: 10px; font-size: 12px;'});
+  id = 'TestChanges';
+  title = 'Enable Script Modifications In Testing Phase ';
+  makeElement('input', devTools, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', devTools, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Modifications'));
+  
   return aboutTab;
 }
 
@@ -8655,8 +8644,8 @@ function validateNewStaminaTab() {
     case STAMINA_HOW_FIGHT_LIST: // List fighting
       // Get the settings.
       s.fightLocation = document.getElementById('fightListLoc').selectedIndex;
-      s.reattackThreshold = parseInt(document.getElementById('reattackThreshold').value);
-      s.staminaReattack = checked('staminaReattack');
+      s.reattackThresholdList = parseInt(document.getElementById('reattackThresholdList').value);
+      s.staminaReattackList = checked('staminaReattackList');
       s.iceCheck = checked('iceCheck');
 
       s.burstStamina = checked('burstStamina');
@@ -8674,13 +8663,11 @@ function validateNewStaminaTab() {
 
       s.fightList = document.getElementById('fightList').value;
       s.fightRemoveStronger = document.getElementById('fightRemoveStronger').checked === true? 'checked' : 0;
-      s.reattackThreshold = parseInt(document.getElementById('reattackThresholdList').value);
-      s.staminaReattack = checked('staminaReattackList');
-
+      
       // Validate reattack settings.
-      if (isNaN(s.reattackThreshold)) {
+      if (isNaN(s.reattackThresholdList)) {
         alert('Please enter the threshold for reattacking opponents.');
-      } else if (s.reattackThreshold < 0) {
+      } else if (s.reattackThresholdList < 0) {
         alert('Please enter a reattack threshold of zero or more.');
       }
 
@@ -9757,7 +9744,7 @@ function refreshMWAPCSS() {
                 // Move zstream  icon and make it smaller:
 
 
-                 (isGMChecked('LiveUpdatesIcon') ?
+                 (isGMChecked('hideLiveUpdatesIcon') ?
                    ' #zstream_icon {display: none;}' :
                    ' #zstream_icon {position: absolute; top: 10px; left: 305px; width: 22px; z-index: 100;} ') +
 
@@ -12349,7 +12336,7 @@ BrowserDetect.init();
         'Hide Messagecenter Icon: <strong>'+ showIfUnchecked(GM_getValue('hideMessageIcon')) + '</strong><br>' +
         'Hide Gift Icon: <strong>'+ showIfUnchecked(GM_getValue('hideGiftIcon')) + '</strong><br>' +
         'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
-        'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('LiveUpdatesIcon')) + '</strong><br>' +
+        'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('hideLiveUpdatesIcon')) + '</strong><br>' +
         'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideIconRow')) + '</strong><br>' +
         'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
 
@@ -15211,6 +15198,7 @@ function logResponse(rootElt, action, context) {
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
       xpGainElt = xpGainElt ? xpGainElt : xpathFirst('.//dd[@class="experience"]', messagebox);
       var jobContainer = "job"+missions[GM_getValue('selectMission')][MISSION_NUMBER];
+
       jobMastery = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
 
       if (xpGainElt) {
