@@ -21,7 +21,7 @@
 * @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
-            rdmcgraw, moe, scooy78, crazydude, SamTheButcher, dwightwilbanks,
+            rdmcgraw, moe, crazydude, SamTheButcher, dwightwilbanks,
             nonoymsd, MaxJ, donnaB
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.596
+// @version     1.1.597
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.596',
+  version: '1.1.597',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8701,8 +8701,8 @@ function createAboutTab() {
   var devNames = 'CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, Fragger, <x51>, ' +
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
-                 'KCMCL, scooy78, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger, Lister';
+                 'KCMCL, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
+                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger, Lister, MaxJ';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
