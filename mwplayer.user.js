@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.587
+// @version     1.1.588
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.587',
+  version: '1.1.588',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -876,7 +876,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_ROBBING      = 3;  // Robbing
   const STAMINA_HOW_AUTOHITLIST  = 4;  // Place bounties.
   const STAMINA_HOW_RANDOM       = 5;  // Random spending of stamina in random cities.
-//  const STAMINA_HOW_FIGHTROB     = 6;  // Fight then Rob random opponents.
+  const STAMINA_HOW_FIGHTROB     = 6;  // Fight then Rob random opponents.
 
 
   var staminaSpendChoices = [];
@@ -886,7 +886,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random opponents';
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
-//  staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
+  staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
@@ -1962,7 +1962,7 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
-  //QUICKFIX fightrob
+  //auto-heal area
   DEBUG(' - - entering auto-heal  - - 0 ') ;
   if (running &&
    (stamina >= GM_getValue('stamina_min_heal')) &&
@@ -2874,9 +2874,10 @@ function canSpendStamina(minHealth) {
       //mychangestamina
       case STAMINA_HOW_FIGHT_RANDOM:
         if((isGMChecked('fightrob')) && ( stamina > 25) ) {
-          DEBUG(' -- fight rob checked in fight random -- ');
+//          DEBUG(' -- fight rob checked in fight random -- ');
           minHealth = 0;
-        } else DEBUG(' -- fight rob shows UNchecked OR stamina less than 26 in fight random -- ');
+        }
+//        else DEBUG(' -- fight rob shows UNchecked OR stamina less than 26 in fight random -- ');
     }
   }
 
@@ -3498,10 +3499,10 @@ function autoStaminaSpend() {
 
     case STAMINA_HOW_FIGHT_RANDOM:
       if (  (isGMChecked('fightrob')) && ((health < 22)  && (stamina > 25 )  )  )  {
-        DEBUG(' -- going to autorob -- ');
+//        DEBUG(' -- going to autorob -- ');
         return autoRob();
       } else {
-        DEBUG(' -- going to autofight -- ');
+//        DEBUG(' -- going to autofight -- ');
         return autoFight(how);
       }
 
@@ -4855,7 +4856,8 @@ function saveSettings() {
                             'collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
                             'autoMainframe','autoResetTimers','autoEnergyPackForce','autoBurnerHelp','autoPartsHelp',
                             'hideMessageIcon','hideGiftIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
-                            'staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames','hitmanNames','hitmanAvoidNames','hitmanOnlyNames','fastRob','fightrob','TestChanges',
+                            'staminaNoDelay','staminaPowerattack','fightNames','fightAvoidNames','fightOnlyNames','hitmanNames',
+                            'hitmanAvoidNames','hitmanOnlyNames','fastRob','fightrob','TestChanges',
     ]);
   } else {
     saveCheckBoxElement('TestChanges');
@@ -7997,9 +7999,9 @@ function createNewStaminaTab() {
       case STAMINA_HOW_RANDOM :
         createNewStaminaSubTab_Random(staminaTabSub);
         break;
-//      case STAMINA_HOW_FIGHTROB :
-//        createNewStaminaSubTab_FightRob(staminaTabSub);
-//        break;
+      case STAMINA_HOW_FIGHTROB :
+        createNewStaminaSubTab_FightRob(staminaTabSub);
+        break;
       default :
         createNewStaminaSubTab_Random(staminaTabSub);
         break;
