@@ -1962,6 +1962,10 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
+
+// if (GM_getValue('staminaSpendHow') = STAMINA_HOW_FIGHTROB) {  GM_setValue('fightrob', 'checked') } ;
+
+ 
   //auto-heal area
   DEBUG(' - - entering auto-heal  - - 0 ') ;
   if (running &&
@@ -3494,15 +3498,14 @@ function autoStaminaSpend() {
 
   var how = getStaminaMode();
   switch (how) {
+    case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:
       return autoFight(how);
 
-    case STAMINA_HOW_FIGHT_RANDOM:
-      if (  (isGMChecked('fightrob')) && ((health < 22)  && (stamina > 25 )  )  )  {
-//        DEBUG(' -- going to autorob -- ');
+    case STAMINA_HOW_FIGHTROB:
+      if ( (health < 22)  && (stamina > 25 ) )  {
         return autoRob();
       } else {
-//        DEBUG(' -- going to autofight -- ');
         return autoFight(how);
       }
 
@@ -7193,6 +7196,7 @@ function createEnergyTab() {
 function createNewStaminaSubTab_FightRandom(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight Random'));
+  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7376,6 +7380,7 @@ function createNewStaminaSubTab_FightRandom(staminaTabSub) {
 function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight Specific'));
+  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7472,6 +7477,7 @@ function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
 function createNewStaminaSubTab_FightRob(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Fight then Rob'));
+  GM_setValue('fightrob', 'checked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7682,6 +7688,7 @@ function createNewStaminaSubTab_FightRob(staminaTabSub) {
 function createNewStaminaSubTab_Rob(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Robbing'));
+  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7712,6 +7719,7 @@ function createNewStaminaSubTab_Rob(staminaTabSub) {
 function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Collect Hitlist Bounties'));
+  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7833,6 +7841,7 @@ function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
 function createNewStaminaSubTab_SetBounties(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Set Hitlist Bounties'));
+  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7887,6 +7896,7 @@ function createNewStaminaSubTab_SetBounties(staminaTabSub) {
 function createNewStaminaSubTab_Random(staminaTabSub) {
   var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
   SubTabTitle.appendChild(document.createTextNode('Random'));
+  GM_setValue('fightrob', 'unchecked')  ;
 }
 
 
