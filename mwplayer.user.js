@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.591
+// @version     1.1.592
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.591',
+  version: '1.1.592',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7194,8 +7194,6 @@ function createEnergyTab() {
   return energyTab;
 }
 function createNewStaminaSubTab_FightRandom(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Fight Random'));
   GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
@@ -7378,8 +7376,6 @@ function createNewStaminaSubTab_FightRandom(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Fight Specific'));
   GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
@@ -7475,8 +7471,6 @@ function createNewStaminaSubTab_FightSpecific(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_FightRob(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Fight then Rob'));
   GM_setValue('fightrob', 'checked')  ;
 
   // Location setting
@@ -7686,8 +7680,6 @@ function createNewStaminaSubTab_FightRob(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_Rob(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Robbing'));
   GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
@@ -7717,8 +7709,6 @@ function createNewStaminaSubTab_Rob(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Collect Hitlist Bounties'));
   GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
@@ -7839,8 +7829,6 @@ function createNewStaminaSubTab_CollectBounties(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_SetBounties(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Set Hitlist Bounties'));
   GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
@@ -7894,8 +7882,6 @@ function createNewStaminaSubTab_SetBounties(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_Random(staminaTabSub) {
-  var SubTabTitle = makeElement('div', staminaTabSub, {'style': 'padding:5px; font-weight: bold;'});
-  SubTabTitle.appendChild(document.createTextNode('Random'));
   GM_setValue('fightrob', 'unchecked')  ;
 }
 
@@ -8949,11 +8935,13 @@ function validateNewStaminaTab() {
       break;
 
     case STAMINA_HOW_ROBBING: // Robbing
+      // Get the settings.
       s.robLocation = document.getElementById('robLocation').selectedIndex;
       s.fastRob = checked('fastRob');
       break;
 
     case STAMINA_HOW_AUTOHITLIST: // Place hitlist bounties
+      // Get the settings.
       s.autoHitListLoc = document.getElementById('autoHitListLoc').selectedIndex;
       s.autoHitListBounty = document.getElementById('autoHitListBounty').value;
       s.autoHitListRandom = checked('autoHitListRandom');
@@ -8976,8 +8964,107 @@ function validateNewStaminaTab() {
       break;
 
     case STAMINA_HOW_FIGHTROB: // Fight then Rob
+      // Get the settings for Robbing.
       s.robLocation = document.getElementById('robLocation').selectedIndex;
       s.fastRob = checked('fastRob');
+      // Get the settings for Fighting.
+      s.fightLocation = document.getElementById('fightRandomLoc').selectedIndex;
+      s.reattackThreshold = parseInt(document.getElementById('reattackThreshold').value);
+      s.staminaReattack = checked('staminaReattack');
+      s.iceCheck = checked('iceCheck');
+
+      s.burstStamina = checked('burstStamina');
+      s.burstMode = document.getElementById('burstMode').selectedIndex;
+      s.burstPoints = document.getElementById('burstPoints').value;
+      s.staminaPowerattack = checked('staminaPowerattack');
+
+      // Validate burstPoints settngs
+      if (isNaN(s.burstPoints)) {
+        alert('Please enter numeric values for burstPoints.');
+        return false;
+      } else if (parseInt(s.burstPoints) > maxStamina) {
+        alert('Stamina bursts cannot exceed the max stamina.');
+        return false;
+      }
+
+      s.fightLevelMax = parseInt(document.getElementById('fightLevelMax').value);
+      s.fightLevelMaxRelative = checked('fightLevelMaxRelative');
+      s.fightMafiaMax = parseInt(document.getElementById('fightMafiaMax').value);
+      s.fightMafiaMaxRelative = checked('fightMafiaMaxRelative');
+      s.fightMafiaMin = parseInt(document.getElementById('fightMafiaMin').value);
+      s.fightMafiaMinRelative = checked('fightMafiaMinRelative');
+
+      s.fightNames = checked('fightNames');
+      s.fightAvoidNames = checked('fightAvoidNames');
+      s.fightOnlyNames = checked('fightOnlyNames');
+      s.fightClanName = document.getElementById('fightClanName').value;
+      s.fightRemoveStronger = checked('fightRemoveStronger');
+
+      s.fightStealth = checked('fightStealth');
+      s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
+
+      // Validate reattack settings.
+      if (isNaN(s.reattackThreshold)) {
+        alert('Please enter the threshold for reattacking opponents.');
+        return false;
+      } else if (s.reattackThreshold < 0) {
+        alert('Please enter a reattack threshold of zero or more.');
+        return false;
+      }
+
+      // Validate the maximum level settings.
+      if (isNaN(s.fightLevelMax)) {
+        alert('Please enter a maximum level for fighting.');
+        return false;
+      } else if (s.fightLevelMaxRelative && s.fightLevelMax < 0) {
+        alert('Please enter a maximum relative level of zero or more.');
+        return false;
+      } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level) {
+        addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
+        s.fightLevelMax = level;
+      } else if (!s.fightLevelMaxRelative && level >= 180 &&
+                 s.fightLevelMax < 200) {
+        alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a maximum fight level of 200 at the very least. If necessary, lower the maximum mafia size to compensate.');
+        return false;
+      } else if (s.fightLevelMaxRelative && level >= 180 &&
+                level + s.fightLevelMax < 200) {
+        alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a relative fight level of at least ' + (200 - s.fightLevelMax) + '. If necessary, lower the maximum mafia size to compensate.');
+        return false;
+      }
+
+      // Validate the maximum mafia size settings.
+      if (isNaN(s.fightMafiaMax)) {
+        alert('Please enter a maximum mafia size for fighting.');
+        return false;
+      } else if (!s.fightMafiaMaxRelative && (s.fightMafiaMax < 1)) {
+        alert('Please enter a maximum mafia size of one or more for fighting.');
+        return false;
+      } else if (s.fightMafiaMaxRelative && (s.fightMafiaMax + mafia < 1)) {
+        alert('Please enter a larger relative mafia size for fighting.');
+        return false;
+      }
+
+      // Validate the minimum mafia size settings.
+      if (isNaN(s.fightMafiaMin)) {
+        alert('Please enter a minimum mafia size for fighting.');
+        return false;
+      } else if (!s.fightMafiaMinRelative && (s.fightMafiaMin < 1)) {
+        alert('Please enter a minimum mafia size of one or more for fighting.');
+        return false;
+      } else if (s.fightMafiaMinRelative && (mafia - s.fightMafiaMin < 1)) {
+        alert('Please enter a smaller relative mafia size for fighting.');
+        return false;
+      }
+
+      if(s.fightNames == 'checked'){
+        // Validate the fight list.
+        var list = s.fightClanName.split('\n');
+        if (!list[0]) {
+          alert('Enter at least one clan name/symbol in the list');
+          return false;
+        }
+      }
+      
       break;
 
     case STAMINA_HOW_RANDOM: // Random stamina spending
