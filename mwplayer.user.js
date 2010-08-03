@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.597
+// @version     1.1.598
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.597',
+  version: '1.1.598',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1963,34 +1963,24 @@ function doAutoPlay () {
   }
 
 
-// if (GM_getValue('staminaSpendHow') = STAMINA_HOW_FIGHTROB) {  GM_setValue('fightrob', 'checked') } ;
 
- 
+
   //auto-heal area
-  DEBUG(' - - entering auto-heal  - - 0 ') ;
+  DEBUG('  entering auto-heal  - 0 ') ;
   if (running &&
-   (stamina >= GM_getValue('stamina_min_heal')) &&
+   health < maxHealth &&
    isGMChecked('autoHeal') &&
    health < GM_getValue('healthLevel', 0) &&
-   health < maxHealth &&
+   (stamina >= GM_getValue('stamina_min_heal')) &&
    (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
-    DEBUG('auto-heal ok so far - - 1 ');
-    if(isGMChecked('fightrob')) {
-      if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM && GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHTROB) || (isGMChecked('fightrob') && stamina < 26 )) {
-        DEBUG('auto-heal healing fightrob CHECKED - -  2');
-        if (autoHeal()) return;
-      } else {
-        DEBUG('auto-heal skipped fightrob checked - - 3 ');
-        DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
-        DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
-      }
-    } else {
-      DEBUG('auto-heal healing fightrob NOT checked - - 4 ');
-      if (autoHeal()) return;
-    }
-//  } else {
-//    DEBUG('auto-heal skipped in first block  - - 5 ') ;
-  }
+     DEBUG('auto-heal passed main block check, checking can auto heal - - 1 ');
+     if(canautoheal()) {
+//       DEBUG('auto-healing - - 7 ');
+       autoHeal();
+       }
+   }
+
+  DEBUG('after auto-heal  - - X ');
 
   // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
   if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
@@ -2176,7 +2166,25 @@ function doAutoPlay () {
   // Use the reload animate obj to kick off autoplay again
   autoReload(true);
 }
-
+//
+function canautoheal() {
+//                DEBUG('in can auto heal - - 2 ');
+                if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) {
+               DEBUG('in can auto heal return false - STAMINA_HOW_FIGHTROB - 3 ');
+                return false;
+            }
+             if(GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) {
+               DEBUG('in can auto heal return false - STAMINA_HOW_ROBBING - 4 ');
+               return false;
+            }
+             if((GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_RANDOM) && (isGMChecked('fightrob'))) {
+               DEBUG('in can auto heal return false - STAMINA_HOW_FIGHT_RANDOM and fightrob - 5 ');
+               return false;
+            }
+             DEBUG('in can auto heal returning true - - 6 ');
+             return true;
+}
+//
 function getAutoPlayDelay() {
   return Math.floor(parseFloat(GM_getValue('d1', '3')) +
          parseFloat((GM_getValue('d2', '5')) -
@@ -3502,7 +3510,7 @@ function autoStaminaSpend() {
   switch (how) {
     case STAMINA_HOW_FIGHT_LIST:
       return autoFight(how);
-    
+
     case STAMINA_HOW_FIGHTROB:
     case STAMINA_HOW_FIGHT_RANDOM:
       if (  (isGMChecked('fightrob')) && ((health < 22)  && (stamina > 25 )  )  )  {
@@ -3527,7 +3535,7 @@ function autoStaminaSpend() {
                'staminaSpendHow=' + how);
   }
 
-  
+
   return false;
 }
 
@@ -7915,18 +7923,18 @@ function createNewStaminaSubTab_SetBounties(staminaTabSub) {
 function createNewStaminaSubTab_Random(staminaTabSub) {
 
   GM_setValue('fightrob', 'unchecked')  ;
-  
-  // Location setting for Robbing
-  item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});  
 
-  item.appendChild(document.createTextNode('Rob in:'));  
+  // Location setting for Robbing
+  item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
+
+  item.appendChild(document.createTextNode('Rob in:'));
   title ="Rob cities selection";
-  name = 'randomRobLocations[]';  
-  for (i = 0, iLength=locations.length; i < iLength; ++i) {    
+  name = 'randomRobLocations[]';
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
     makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
     label = makeElement('label', item, {'for':name, 'title':title});
-    label.appendChild(document.createTextNode(locations[i]));    
-  }  
+    label.appendChild(document.createTextNode(locations[i]));
+  }
 }
 
 
@@ -9108,12 +9116,12 @@ function validateNewStaminaTab() {
           return false;
         }
       }
-      
+
       break;
 
     case STAMINA_HOW_RANDOM: // Random stamina spending
       var randomCities="";
-      var randomCitiesChecked=document.getElementsByName("randomRobLocations[]");      
+      var randomCitiesChecked=document.getElementsByName("randomRobLocations[]");
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
           randomCities+=randomCitiesChecked[i].value;
@@ -9556,7 +9564,7 @@ function handleModificationTimer() {
       // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
       // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
       // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
-      var sortLootType = parseInt(GM_getValue('filterLootOpt')); 
+      var sortLootType = parseInt(GM_getValue('filterLootOpt'));
       if (sortLootType != 0) {
         cleanLoot("Weapons","Armor", sortLootType);
         cleanLoot("Armor","Vehicles", sortLootType);
@@ -10878,7 +10886,7 @@ function customizeStats() {
   var healLinkHref = 'http://mwfb.zynga.com/mwfb' + SCRIPT.controller + 'hospital' + SCRIPT.action + 'heal' + SCRIPT.city + (city + 1);
   var healLinkElt = document.getElementById('mwap_heal');
   var healElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text health_text_bg" and contains(text(), "HEALTH")]', appLayoutElt);
-  if (!healElt) 
+  if (!healElt)
     healElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Health")]', appLayoutElt);
   if (!healElt)
     healElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="health" and contains(text(), "Health")]', appLayoutElt);
