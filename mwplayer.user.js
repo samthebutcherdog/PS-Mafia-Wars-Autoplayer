@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.594
+// @version     1.1.595
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.594',
+  version: '1.1.595',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4284,6 +4284,7 @@ function saveDefaultSettings() {
   GM_setValue('filterOpt', 0);
   GM_setValue('filterPass', defaultPassPatterns.join('\n'));
   GM_setValue('filterFail', defaultFailPatterns.join('\n'));
+  GM_setValue('filterLootOpt', 0);
 
   // Energy tab.
   GM_setValue('estimateJobRatio', '1');
@@ -4400,6 +4401,8 @@ function saveNewSettings() {
   var filterOpt = document.getElementById('filterOpt').value;
   GM_setValue(filterOpt == 0 ? 'filterPass' : 'filterFail', document.getElementById('filterPatterns').value);
   GM_setValue('filterOpt', filterOpt);
+  var filterLootOpt = document.getElementById('filterLootOpt').value;
+  GM_setValue('filterLootOpt', filterLootOpt);
 
   var logPlayerUpdates = (document.getElementById('logPlayerUpdates').checked === true);
   var logPlayerUpdatesMax = parseInt(document.getElementById('logPlayerUpdatesMax').value);
@@ -4833,6 +4836,9 @@ function saveSettings() {
   var filterOpt = document.getElementById('filterOpt').value;
   GM_setValue(filterOpt == 0 ? 'filterPass' : 'filterFail', document.getElementById('filterPatterns').value);
   GM_setValue('filterOpt', filterOpt);
+  var filterLootOpt = document.getElementById('filterLootOpt').value;
+  GM_setValue('filterLootOpt', filterLootOpt);
+
 
   GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
   GM_setValue('featJobIndex', document.getElementById('featJobIndex').selectedIndex);
@@ -6299,6 +6305,26 @@ function createDisplayTab() {
   title = ' Hide Finished Collection Sets ';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Finished Collections '));
+
+  // Loot filtering
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Check this to enable log filtering';
+  id = 'filterLoot';
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode('Loot filtering:'));
+
+  id = 'filterLootOpt';
+  var filterLootOpt = makeElement('select', rhs, {'id':id});
+  var filterOptions = ['Disabled','Attack','Defense','Combined'];
+  for (i = 0, iLength=filterOptions.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(filterOptions[i]));
+    filterLootOpt.appendChild(choice);
+  }
+  filterLootOpt.selectedIndex = GM_getValue(id, 0);
 
   return displayTab;
 }
@@ -9530,7 +9556,7 @@ function handleModificationTimer() {
       // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
       // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
       // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
-      var sortLootType = 0; //Replace with GM value, preferably a combobox setting
+      var sortLootType = parseInt(GM_getValue('filterLootOpt')); 
       if (sortLootType != 0) {
         cleanLoot("Weapons","Armor", sortLootType);
         cleanLoot("Armor","Vehicles", sortLootType);
@@ -12784,6 +12810,7 @@ BrowserDetect.init();
         'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
         'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('hideLiveUpdatesIcon')) + '</strong><br>' +
         'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideIconRow')) + '</strong><br>' +
+        'Hide Collections: <strong>'+ showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
 
 
@@ -12793,6 +12820,7 @@ BrowserDetect.init();
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
+		'Loot filter: <strong>' + GM_getValue('filterLootOpt') + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Ask for Moscow help: <strong>' + GM_getValue('selectMoscowTier') + '</strong><br>' +
