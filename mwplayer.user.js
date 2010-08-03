@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.595
+// @version     1.1.596
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.595',
+  version: '1.1.596',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6311,9 +6311,9 @@ function createDisplayTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = 'Check this to enable log filtering';
+  title = 'Select type of loot you want to see.  For instance Attack will display your top Attack items';
   id = 'filterLoot';
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode('Loot filtering:'));
+  makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode('Loot filtering:'));
 
   id = 'filterLootOpt';
   var filterLootOpt = makeElement('select', rhs, {'id':id});
