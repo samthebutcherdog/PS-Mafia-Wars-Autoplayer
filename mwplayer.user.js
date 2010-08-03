@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.593
+// @version     1.1.594
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.593',
+  version: '1.1.594',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1974,18 +1974,18 @@ function doAutoPlay () {
    health < GM_getValue('healthLevel', 0) &&
    health < maxHealth &&
    (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
-//    DEBUG('auto-heal ok so far - - 1 ');
+    DEBUG('auto-heal ok so far - - 1 ');
     if(isGMChecked('fightrob')) {
-      if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM) || (isGMChecked('fightrob') && stamina < 26 )) {
-//        DEBUG('auto-heal healing fightrob CHECKED - -  2');
+      if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM && GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHTROB) || (isGMChecked('fightrob') && stamina < 26 )) {
+        DEBUG('auto-heal healing fightrob CHECKED - -  2');
         if (autoHeal()) return;
       } else {
-//        DEBUG('auto-heal skipped fightrob checked - - 3 ');
-//        DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
-//        DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
+        DEBUG('auto-heal skipped fightrob checked - - 3 ');
+        DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
+        DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
       }
     } else {
-//      DEBUG('auto-heal healing fightrob NOT checked - - 4 ');
+      DEBUG('auto-heal healing fightrob NOT checked - - 4 ');
       if (autoHeal()) return;
     }
 //  } else {
@@ -2877,6 +2877,7 @@ function canSpendStamina(minHealth) {
         minHealth = 0;
       //mychangestamina
       case STAMINA_HOW_FIGHT_RANDOM:
+      case STAMINA_HOW_FIGHTROB:
         if((isGMChecked('fightrob')) && ( stamina > 25) ) {
 //          DEBUG(' -- fight rob checked in fight random -- ');
           minHealth = 0;
@@ -3499,14 +3500,16 @@ function autoStaminaSpend() {
 
   var how = getStaminaMode();
   switch (how) {
-    case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:
       return autoFight(how);
-
+    
     case STAMINA_HOW_FIGHTROB:
-      if ( (health < 22)  && (stamina > 25 ) )  {
+    case STAMINA_HOW_FIGHT_RANDOM:
+      if (  (isGMChecked('fightrob')) && ((health < 22)  && (stamina > 25 )  )  )  {
+        DEBUG(' -- going to autorob -- ');
         return autoRob();
       } else {
+        DEBUG(' -- going to autofight -- ');
         return autoFight(how);
       }
 
@@ -3524,6 +3527,7 @@ function autoStaminaSpend() {
                'staminaSpendHow=' + how);
   }
 
+  
   return false;
 }
 
