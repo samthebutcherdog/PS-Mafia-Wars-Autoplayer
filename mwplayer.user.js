@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.592
+// @version     1.1.593
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.592',
+  version: '1.1.593',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3393,7 +3393,8 @@ function autoHitman() {
   var bountyMin = parseCash(GM_getValue('hitmanBountyMin', 0));
   var hitmanNames = isGMChecked('hitmanNames');
   var avoidNames = isGMChecked('hitmanAvoidNames');
-  var avoidNames = isGMChecked('hitmanOnlyNames');
+  var onlyNames = isGMChecked('hitmanOnlyNames');
+  DEBUG('Settings '+hitmanNames+avoidNames+onlyNames);
   var blacklistCount = 0;
   var bountyCount = 0;
   var namesCount = 0;
@@ -3410,13 +3411,13 @@ function autoHitman() {
       bountyCount++;
       continue;
     }
-
-    if (hitmanNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_HITMAN) {
+    DEBUG(decodeHTMLEntities(opponent.name)+' ' +isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_HITMAN);
+    if (hitmanNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_HITMAN)) {
       namesCount++;
       continue;
     }
 
-    if (hitmanNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_HITMAN) {
+    if (hitmanNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_HITMAN)) {
       namesCount++;
       continue;
     }
@@ -3931,12 +3932,12 @@ function findFightOpponent(element) {
       continue;
     }
 
-    if (fightNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_FIGHT_RANDOM) {
+    if (fightNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_FIGHT_RANDOM)) {
       namesCount++;
       continue;
     }
 
-    if (fightNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name)),STAMINA_HOW_FIGHT_RANDOM) {
+    if (fightNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_FIGHT_RANDOM)) {
       namesCount++;
       continue;
     }
@@ -7882,7 +7883,20 @@ function createNewStaminaSubTab_SetBounties(staminaTabSub) {
 }
 
 function createNewStaminaSubTab_Random(staminaTabSub) {
+
   GM_setValue('fightrob', 'unchecked')  ;
+  
+  // Location setting for Robbing
+  item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});  
+
+  item.appendChild(document.createTextNode('Rob in:'));  
+  title ="Rob cities selection";
+  name = 'randomRobLocations[]';  
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {    
+    makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
+    label = makeElement('label', item, {'for':name, 'title':title});
+    label.appendChild(document.createTextNode(locations[i]));    
+  }  
 }
 
 
@@ -9068,6 +9082,14 @@ function validateNewStaminaTab() {
       break;
 
     case STAMINA_HOW_RANDOM: // Random stamina spending
+      var randomCities="";
+      var randomCitiesChecked=document.getElementsByName("randomRobLocations[]");      
+      for (var i=0;i<randomCitiesChecked.length;++i){
+        if(randomCitiesChecked[i].checked) {
+          randomCities+=randomCitiesChecked[i].value;
+        }
+      }
+      alert(randomCities);
       break;
 
     default :
