@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.586
+// @version     1.1.587
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.586',
+  version: '1.1.587',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -876,7 +876,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_ROBBING      = 3;  // Robbing
   const STAMINA_HOW_AUTOHITLIST  = 4;  // Place bounties.
   const STAMINA_HOW_RANDOM       = 5;  // Random spending of stamina in random cities.
-  const STAMINA_HOW_FIGHTROB     = 6;  // Fight then Rob random opponents.
+//  const STAMINA_HOW_FIGHTROB     = 6;  // Fight then Rob random opponents.
 
 
   var staminaSpendChoices = [];
@@ -886,7 +886,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random opponents';
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
-  staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
+//  staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
@@ -1970,22 +1970,22 @@ function doAutoPlay () {
    health < GM_getValue('healthLevel', 0) &&
    health < maxHealth &&
    (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
-    DEBUG('auto-heal ok so far - - 1 ');
+//    DEBUG('auto-heal ok so far - - 1 ');
     if(isGMChecked('fightrob')) {
       if ((GM_getValue('staminaSpendHow') != STAMINA_HOW_FIGHT_RANDOM) || (isGMChecked('fightrob') && stamina < 26 )) {
-        DEBUG('auto-heal healing fightrob CHECKED - -  2');
+//        DEBUG('auto-heal healing fightrob CHECKED - -  2');
         if (autoHeal()) return;
       } else {
-        DEBUG('auto-heal skipped fightrob checked - - 3 ');
+//        DEBUG('auto-heal skipped fightrob checked - - 3 ');
 //        DEBUG('Auto-Heal SKIPPED settings were Stamina ' + stamina + ' Stamina Minimum Heal ' + GM_getValue('stamina_min_heal' ) );
 //        DEBUG('StaminaspendHow : '+ GM_getValue('staminaSpendHow'));
       }
     } else {
-      DEBUG('auto-heal healing fightrob NOT checked - - 4 ');
+//      DEBUG('auto-heal healing fightrob NOT checked - - 4 ');
       if (autoHeal()) return;
     }
-  } else {
-    DEBUG('auto-heal skipped in first block  - - 5 ') ;
+//  } else {
+//    DEBUG('auto-heal skipped in first block  - - 5 ') ;
   }
 
   // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
@@ -7997,9 +7997,9 @@ function createNewStaminaTab() {
       case STAMINA_HOW_RANDOM :
         createNewStaminaSubTab_Random(staminaTabSub);
         break;
-      case STAMINA_HOW_FIGHTROB :
-        createNewStaminaSubTab_FightRob(staminaTabSub);
-        break;
+//      case STAMINA_HOW_FIGHTROB :
+//        createNewStaminaSubTab_FightRob(staminaTabSub);
+//        break;
       default :
         createNewStaminaSubTab_Random(staminaTabSub);
         break;
