@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.608
+// @version     1.1.609
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.608',
+  version: '1.1.609',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -888,13 +888,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
   staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
 
-  
+
   var randomSpendChoices = [];
   randomSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random';
   randomSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific';
   randomSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect bounties';
   randomSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random';
-  
+
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
   const BOUNTY_LONGEST_TIME   = 1;  // Select qualified bounties with longest time on the hitlist.
@@ -1980,12 +1980,18 @@ function doAutoPlay () {
    isGMChecked('autoHeal') &&
    health < GM_getValue('healthLevel', 0) &&
    (stamina >= GM_getValue('stamina_min_heal')) &&
-   (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
+//   (health > 19 || (SpendStamina.canBurn &&  stamina > 0)    || canForceHeal() )
+ ( ((health > 19) && (SpendStamina.canBurn && (stamina > 0) ) )|| canForceHeal() )
+   ) {
+
      DEBUG('auto-heal passed main block check, checking can auto heal - - 1 ');
      if(canautoheal()) {
        DEBUG('auto-healing - - 7 ');
        if(autoHeal()) return;
        }
+   } else {
+   DEBUG (' autoheal skipped in main loop ')
+   DEBUG(' hi ' + health + ' ' + SpendStamina.canBurn + ' ' + stamina + ' ' + canForceHeal() );
    }
 
   DEBUG('after auto-heal  - - X ');
@@ -4325,7 +4331,7 @@ function saveDefaultSettings() {
 
   GM_setValue('fightClanName', defaultClans.join('\n'));
   GM_setValue('hitmanClanName', defaultClans.join('\n'));
-  
+
   GM_setValue(randomFightLocations,'00000');
   GM_setValue(randomRobLocations,'00000');
   GM_setValue(randomHitmanLocations,'00000');
@@ -4595,7 +4601,7 @@ function saveSettings() {
   // Validate stamina tab.
   var staminaTabSettings = validateStaminaTab();
   if (!staminaTabSettings) return;
-  
+
   for (var key in staminaTabSettings) {
       GM_setValue(key, staminaTabSettings[key]);
   }
@@ -4606,7 +4612,7 @@ function saveSettings() {
   //Start Save Heal Tab Settings
   //Heal Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','hideAttacks'  
+    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','hideAttacks'
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -4619,7 +4625,7 @@ function saveSettings() {
   GM_setValue('healLocation', document.getElementById('healLocation').value);
 
   GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value);
-  
+
   var hideAttacks = (document.getElementById('hideAttacks').checked === true);
   var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
   if (hideAttacks) {
@@ -4630,8 +4636,8 @@ function saveSettings() {
       GM_setValue ('rideHitlistXP', rideHitlistXP);
     }
   }
-  
-  //End Save Heal Tab Settings  
+
+  //End Save Heal Tab Settings
 
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
@@ -5507,11 +5513,11 @@ function createSettingsBox() {
   // Create stamina tab.
   var staminaTab = createStaminaTab();
   settingsBox.appendChild(staminaTab);
-  
+
   // Create Healing tab.
   var healTab = createHealTab();
   settingsBox.appendChild(healTab);
-  
+
   // Create cash tab.
   var cashTab = createCashTab();
   settingsBox.appendChild(cashTab);
@@ -5624,7 +5630,7 @@ function createGeneralTab() {
   id = 'autoPauseExp';
   lhs.appendChild(document.createTextNode('Experience left to pause at:'));
   makeElement('input', rhs, {'style':'text-align: right;','type':'text', 'value':GM_getValue(id, '50'), 'id':id, 'size':'2'});
- 
+
 
 
 
@@ -6370,7 +6376,7 @@ function createMafiaTab() {
   id = 'autoSafehouse';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically open safehouse gifts'));
-  
+
   // Energy pack settings?
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6396,7 +6402,7 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Reward Mafia'));
- 
+
   // War - Automatically declare a war
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6456,17 +6462,17 @@ function createMafiaTab() {
   makeElement('br', rhs, {'class':'hide'});
   var warList = makeElement('textarea', rhs, {'style':'width: 12em; height: 6em;', 'id':id, 'title':'Enter each Mafia Wars ID on a separate line. This will not work with the Facebook ID.'});
   warList.appendChild(document.createTextNode(GM_getValue('autoWarTargetList', '')));
-  makeElement('br', rhs, {'class':'hide'});  
+  makeElement('br', rhs, {'class':'hide'});
 
 
 
 
 
-  
+
   // Hide list if war mode is random
   var warModeHandler = function () {
     warList.style.display = warModes.selectedIndex == 0 ? 'none' : '';
-    warListLabel.style.display = warModes.selectedIndex == 0 ? 'none' : '';    
+    warListLabel.style.display = warModes.selectedIndex == 0 ? 'none' : '';
   };
   warModeHandler();
   warModes.addEventListener('change', warModeHandler, false);
@@ -7686,18 +7692,18 @@ function createStaminaSubTab_Random(staminaTabSub) {
   GM_setValue('fightrob', 'unchecked')  ;
 
 
-  
 
-  // Stamina Spend choice setting 
+
+  // Stamina Spend choice setting
   var SpendModes = GM_getValue('randomSpendModes');
   if(!SpendModes) SpendModes="0000";
   var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
   item.appendChild(document.createTextNode('Stamina Spend Modes :'));
-  makeElement('br', item);  
+  makeElement('br', item);
 
   title ="Stamina Spend Choice selection";
-  name = 'randomSpendModes[]';    
-  for (i = 0, iLength=randomSpendChoices.length; i < iLength; ++i) {      
+  name = 'randomSpendModes[]';
+  for (i = 0, iLength=randomSpendChoices.length; i < iLength; ++i) {
     if(SpendModes[i]=='1')
       makeElement('input', item, {'type':'checkbox', 'name':name, 'title':randomSpendChoices[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':randomSpendChoices[i], 'checked':'checked'});
     else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':randomSpendChoices[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':randomSpendChoices[i]});
@@ -7705,18 +7711,18 @@ function createStaminaSubTab_Random(staminaTabSub) {
     label.appendChild(document.createTextNode(randomSpendChoices[i]));
   }
   makeElement('br', item);
-  
+
   // Location setting for Fighting
   var fightCities = GM_getValue('randomFightLocations');
   if(!fightCities) fightCities="00000";
   var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;margin-top:1em;'});
   item.appendChild(document.createTextNode('Location Settings :'));
-  makeElement('br', item);    
+  makeElement('br', item);
   item.appendChild(document.createTextNode('Fight in:'));
   makeElement('br', item);
   title ="Fighting cities selection";
-  name = 'randomFightLocations[]';    
-  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {      
+  name = 'randomFightLocations[]';
+  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {
     if(fightCities[i]=='1')
       makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i], 'checked':'checked'});
     else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
@@ -7724,16 +7730,16 @@ function createStaminaSubTab_Random(staminaTabSub) {
     label.appendChild(document.createTextNode(locations[i]));
   }
   makeElement('br', item);
-  
+
   // Location setting for Robbing
   var robCities = GM_getValue('randomRobLocations');
   if(!robCities) robCities="00000";
-  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});  
+  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
   item.appendChild(document.createTextNode('Rob in:'));
   makeElement('br', item);
   title ="Robbing cities selection";
-  name = 'randomRobLocations[]';    
-  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {      
+  name = 'randomRobLocations[]';
+  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {
     if(robCities[i]=='1')
       makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i], 'checked':'checked'});
     else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
@@ -7742,16 +7748,16 @@ function createStaminaSubTab_Random(staminaTabSub) {
   }
   makeElement('br', item);
 
-  
+
   // Location setting for Bounty Collection
   var hitCities = GM_getValue('randomHitmanLocations');
   if(!hitCities) hitCities="00000";
-  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});  
+  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
   item.appendChild(document.createTextNode('Collect Bounties in:'));
   makeElement('br', item);
   title ="Hitman cities selection";
-  name = 'randomHitmanLocations[]';    
-  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {      
+  name = 'randomHitmanLocations[]';
+  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {
     if(hitCities[i]=='1')
       makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i], 'checked':'checked'});
     else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
@@ -7759,7 +7765,7 @@ function createStaminaSubTab_Random(staminaTabSub) {
     label.appendChild(document.createTextNode(locations[i]));
   }
   makeElement('br', item,{'style':'margin-bottom:0.5em;'});
- 
+
 }
 
 // Create New Stamina Tab
@@ -7894,7 +7900,7 @@ function createHealTab() {
 
   // Container for a list of settings.
   var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
-    
+
   // Healing options
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -7987,7 +7993,7 @@ function createHealTab() {
   title = 'Enter the XP you want to gain before MWAP turns off autoHeal. Enter \'0\' if you want MWAP to turn off autoHeal after it detected a 0 xp attack.';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'style':'width: 25px'});
   rhs.appendChild(document.createTextNode(' xp'));
-   
+
   return healTab;
 }
 
@@ -8532,56 +8538,56 @@ function validateStaminaTab() {
     case STAMINA_HOW_RANDOM: // Random stamina spending
 
 
-    
-      var spendModes="";        
+
+      var spendModes="";
       var spendModesChecked=document.getElementsByName("randomSpendModes[]");
       for (var i=0;i<spendModesChecked.length;++i){
         if(spendModesChecked[i].checked) {
           spendModes+='1';
-        }  
+        }
         else {
           spendModes+='0';
         }
-      }        
+      }
       s.randomSpendModes=spendModes;
-      
-      var randomCities="";        
+
+      var randomCities="";
       var randomCitiesChecked=document.getElementsByName("randomFightLocations[]");
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
 
           randomCities+='1';
-        }  
+        }
         else {
           randomCities+='0';
         }
-      }        
+      }
       s.randomFightLocations=randomCities;
-      
+
       randomCities="";
       randomCitiesChecked=document.getElementsByName("randomRobLocations[]");
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
           randomCities+='1';
-        }  
+        }
         else {
           randomCities+='0';
         }
-      }  
+      }
       s.randomRobLocations=randomCities;
-        
+
       randomCities="";
       randomCitiesChecked=document.getElementsByName("randomHitmanLocations[]");
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
           randomCities+='1';
-        }  
+        }
         else {
           randomCities+='0';
         }
-      }  
+      }
       s.randomHitmanLocations=randomCities;
-        
+
       break;
 
     default :
@@ -9625,7 +9631,7 @@ function refreshMWAPCSS() {
 
 
                  '#settingsBox img,#settingsBox span,#settingsBox label {position: static;}' +
-                 '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, #energyTab div, #healTab div {position: static;}' +                 
+                 '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, #energyTab div, #healTab div {position: static;}' +
                  '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, #energyTab select, #healTab select {position: static;}' +
                  '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, #energyTab textarea, #healTab textarea {position: static;}' +
 
@@ -12239,10 +12245,10 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit opponents: <strong>' + GM_getValue('autoHitOpponentList') + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit background: <strong>' + showIfUnchecked(GM_getValue('bgAutoHitCheck')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Random Stam Spend - Stamina Spend Modes: <strong>' + GM_getValue('randomSpendModes') + '</strong><br>' +        
+        //'&nbsp;&nbsp;-Random Stam Spend - Stamina Spend Modes: <strong>' + GM_getValue('randomSpendModes') + '</strong><br>' +
         '&nbsp;&nbsp;-Random Stam Spend - Fight in: <strong>' + GM_getValue('randomFightLocations') + '</strong><br>' +
         '&nbsp;&nbsp;-Random Stam Spend - Rob in: <strong>' + GM_getValue('randomRobLocations') + '</strong><br>' +
-        '&nbsp;&nbsp;-Random Stam Spend - Hit in: <strong>' + GM_getValue('randomHitmanLocations') + '</strong><br>' +                
+        '&nbsp;&nbsp;-Random Stam Spend - Hit in: <strong>' + GM_getValue('randomHitmanLocations') + '</strong><br>' +
         'Stamina threshold: <strong>' + GM_getValue('selectStaminaUse') + ' ' + numberSchemes[GM_getValue('selectStaminaUseMode', 0)] + ' (refill to ' + SpendStamina.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Stamina use started: <strong>' + GM_getValue('useStaminaStarted') + '</strong><br>' +
         'Stamina reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
@@ -14636,7 +14642,7 @@ function randomizeStamina() {
     }
 
     var randomCities = GM_getValue('randomFightLocations');
-    
+
     // Randomize fight location
     while (spendMode == STAMINA_HOW_FIGHT_RANDOM || spendMode == STAMINA_HOW_FIGHT_LIST) {
       var stamLoc = Math.floor(Math.random()*(cities.length));
@@ -14660,7 +14666,7 @@ function randomizeStamina() {
         DEBUG('Fight location did not qualify');
       }
     }
-    
+
     // Randomize robbing location
     randomCities = GM_getValue('randomRobLocations');
     while (spendMode == STAMINA_HOW_ROBBING) {
@@ -14676,7 +14682,7 @@ function randomizeStamina() {
         DEBUG('Rob location did not qualify');
       }
     }
-    
+
     // Randomize hitman location
     randomCities = GM_getValue('randomHitmanLocations');
     while (spendMode == STAMINA_HOW_HITMAN) {
