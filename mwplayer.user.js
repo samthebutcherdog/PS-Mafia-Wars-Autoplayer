@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.607
+// @version     1.1.608
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.607',
+  version: '1.1.608',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8936,7 +8936,7 @@ function cleanLoot(strType, strTerminus, sortLootType) {
     colLoot.push(objLoot); // add item to collection
     eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
     var txtData = eltRow.innerHTML.clean().trim();
-  } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot"));
+  } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
     DEBUG ('Main Clean Loot Loop End');
 
   // Okay, main collection array, colLoot should be built at this point.
