@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.605
+// @version     1.1.606
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.605',
+  version: '1.1.606',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -888,6 +888,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
   staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
 
+  
+  var randomSpendChoices = [];
+  randomSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random';
+  randomSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific';
+  randomSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect bounties';
+  randomSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random';
+  
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0;  // Select qualified bounties with shortest time.
   const BOUNTY_LONGEST_TIME   = 1;  // Select qualified bounties with longest time on the hitlist.
@@ -1017,6 +1024,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   var locations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Active City'];
   var fightLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Active City', 'Random City'];
+  var randomLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas'];
 
   // Featured job locations
   var featJobNames = ['Left Job', 'Middle Job', 'Right Job'];
@@ -3511,7 +3519,7 @@ function autoStaminaSpend() {
 
     case STAMINA_HOW_FIGHTROB:
     case STAMINA_HOW_FIGHT_RANDOM:
-      if (  (isGMChecked('fightrob')) && ((health < 22)  && (stamina > 25 )  )  )  {
+      if (  (isGMChecked('fightrob')) && ((health < 21)  && (stamina > 25 )  )  )  {
         DEBUG(' -- going to autorob -- ');
         return autoRob();
       } else {
@@ -4317,6 +4325,11 @@ function saveDefaultSettings() {
 
   GM_setValue('fightClanName', defaultClans.join('\n'));
   GM_setValue('hitmanClanName', defaultClans.join('\n'));
+  
+  GM_setValue(randomFightLocations,'00000');
+  GM_setValue(randomRobLocations,'00000');
+  GM_setValue(randomHitmanLocations,'00000');
+  GM_setValue(randomSpendModes,'0000');
 
   GM_setValue('robLocation', NY);
   GM_setValue('selectStaminaKeep', 0);
@@ -4340,15 +4353,15 @@ function saveDefaultSettings() {
   addToLog('process Icon', 'Options reset to defaults.');
 }
 
-function saveNewSettings() {
+function saveSettings() {
   //NOTE : TODO Validation for all numeric fields
 
   var i;
   //Start Save General Tab Settings
   //General Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoClick','autoPause','autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','idleInCity',
-    'autoLottoOpt','autoLottoBonus','hourlyStatsOpt','burnFirst','featJob',
+
+    'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','hourlyStatsOpt','burnFirst','featJob'
   ]);
   //General Tab Settings
   GM_setValue('r1', document.getElementById('r1').value);
@@ -4365,16 +4378,16 @@ function saveNewSettings() {
   }
   GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
 
-  var autoHealOn  = (document.getElementById('autoHeal').checked === true);
-  var healthLevel = parseInt(document.getElementById('healthLevel').value);
-  if (autoHealOn && (!healthLevel || healthLevel < 1)) {
-    alert('Health level for automatic healing must be 1 or more.');
-    return;
-  }
-  GM_setValue('healthLevel', healthLevel);
-  GM_setValue('healLocation', document.getElementById('healLocation').value);
 
-  GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value);
+
+
+
+
+
+
+
+
+
 
   GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
 
@@ -4397,7 +4410,7 @@ function saveNewSettings() {
   //Start Save Display Tab Settings
   //Display Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoLog','logPlayerUpdates','filterLog','leftAlign','mastheadOnTop','hideAttacks','fbwindowtitle','showPulse','showLevel',
+    'autoLog','logPlayerUpdates','filterLog','leftAlign','mastheadOnTop','fbwindowtitle','showPulse','showLevel',
     'hideGifts','hideGiftIcon','hideActionBox','hideOffer','hideFriendLadder', 'hideMessageIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
   ]);
 
@@ -4418,25 +4431,26 @@ function saveNewSettings() {
     return;
   }
 
-  var hideAttacks = (document.getElementById('hideAttacks').checked === true);
-  var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
-  if (hideAttacks) {
-    if (isNaN(rideHitlistXP) || rideHitlistXP < 0 || rideHitlistXP > 50) {
-      alert('For the hitlistride XP please enter a number between 0 and 50 (default: 0).');
-      return;
-    } else {
-      GM_setValue ('rideHitlistXP', rideHitlistXP);
-    }
-  }
+
+
+
+
+
+
+
+
+
+
 
   //End Save Display Tab Settings
 
   //Start Save Mafia Tab Settings
   //Mafia Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoAskJobHelp','acceptMafiaInvitations','autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash',
-    'autoShareWishlist','autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoWarBetray','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept',
-    'autoSafehouse','autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
+    'autoAskJobHelp','acceptMafiaInvitations','autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareWishlist',
+    'autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoWarBetray','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept','autoSafehouse',
+    'sendEnergyPack','askEnergyPack','rewardEnergyPack',
+    'autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
   ]);
   //MafiaTab Settings and Validation
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
@@ -4508,7 +4522,7 @@ function saveNewSettings() {
   //Energy Tab Checkboxes
   saveCheckBoxElementArray([
     'autoMission','masterAllJobs','multipleJobs','burstJob','endLevelOptimize','checkMiniPack','autoEnergyPack','autoEnergyPackForce',
-    'sendEnergyPack','askEnergyPack','rewardEnergyPack','hasHelicopter','hasGoldenThrone','isManiac','allowEnergyToLevelUp'
+    'hasHelicopter','hasGoldenThrone','isManiac','allowEnergyToLevelUp'
   ]);
   //Energy Settings and Validation
   //Validate burstJobCount
@@ -4588,6 +4602,36 @@ function saveNewSettings() {
 
   //End Save Stamina Tab Settings
 
+
+  //Start Save Heal Tab Settings
+  //Heal Tab Checkboxes
+  saveCheckBoxElementArray([
+    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','hideAttacks'  
+  ]);
+  //Heal Settings and Validation
+  var autoHealOn  = (document.getElementById('autoHeal').checked === true);
+  var healthLevel = parseInt(document.getElementById('healthLevel').value);
+  if (autoHealOn && (!healthLevel || healthLevel < 1)) {
+    alert('Health level for automatic healing must be 1 or more.');
+    return;
+  }
+  GM_setValue('healthLevel', healthLevel);
+  GM_setValue('healLocation', document.getElementById('healLocation').value);
+
+  GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value);
+  
+  var hideAttacks = (document.getElementById('hideAttacks').checked === true);
+  var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
+  if (hideAttacks) {
+    if (isNaN(rideHitlistXP) || rideHitlistXP < 0 || rideHitlistXP > 50) {
+      alert('For the hitlistride XP please enter a number between 0 and 50 (default: 0).');
+      return;
+    } else {
+      GM_setValue ('rideHitlistXP', rideHitlistXP);
+    }
+  }
+  
+  //End Save Heal Tab Settings  
 
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
@@ -5433,6 +5477,8 @@ function createSettingsBox() {
       makeElement('a', energyTabLink, {'href':'#', 'rel':'energyTab'}).appendChild(document.createTextNode('Energy'));
     var staminaTabLink = makeElement('div', tabNav, {'id':'Stamina_Tab'});
       makeElement('a', staminaTabLink, {'href':'#', 'rel':'staminaTab'}).appendChild(document.createTextNode('Stamina'));
+    var healTabLink = makeElement('div', tabNav, {'id':'Heal_Tab'});
+      makeElement('a', healTabLink, {'href':'#', 'rel':'healTab'}).appendChild(document.createTextNode('Healing'));
     var cashTabLink = makeElement('div', tabNav, {'id':'Cash_Tab'});
       makeElement('a', cashTabLink, {'href':'#', 'rel':'cashTab'}).appendChild(document.createTextNode('Cash'));
     var aboutTabLink = makeElement('div', tabNav, {'id':'About_Tab'});
@@ -5462,6 +5508,10 @@ function createSettingsBox() {
   var staminaTab = createStaminaTab();
   settingsBox.appendChild(staminaTab);
   
+  // Create Healing tab.
+  var healTab = createHealTab();
+  settingsBox.appendChild(healTab);
+  
   // Create cash tab.
   var cashTab = createCashTab();
   settingsBox.appendChild(cashTab);
@@ -5473,7 +5523,7 @@ function createSettingsBox() {
   // Create save button
   var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 10px; bottom: 10px;'});
   makeElement('button', saveButton).appendChild(document.createTextNode('Save Settings'));
-  saveButton.addEventListener('click', saveNewSettings, false);
+  saveButton.addEventListener('click', saveSettings, false);
 
   // Create Update button
   if (gvar.isGreaseMonkey) {
@@ -5574,85 +5624,85 @@ function createGeneralTab() {
   id = 'autoPauseExp';
   lhs.appendChild(document.createTextNode('Experience left to pause at:'));
   makeElement('input', rhs, {'style':'text-align: right;','type':'text', 'value':GM_getValue(id, '50'), 'id':id, 'size':'2'});
+ 
 
-  // Healing options
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Heal when health lands below indicated health.';
-  id = 'autoHeal';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
-  makeElement('img', lhs, {'style':'padding-left: 5px;','src':stripURI(healthIcon)});
-  makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Heal in:'));
-  id = 'healLocation';
-  var healLocation = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=locations.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(locations[i]));
-    healLocation.appendChild(choice);
-  }
 
-  healLocation.selectedIndex = GM_getValue('healLocation', NY);
-  makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' when health falls below '));
-  makeElement('input', rhs, {'style':'text-align: center','type':'text', 'value':GM_getValue('healthLevel', '50'), 'id':'healthLevel', 'size':'1'});
-  makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' points'));
 
-  // Hide in hospital
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Check to attack even when at critical health (20-28 health points) ';
-  id = 'attackCritical';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(attackIcon)});
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Attack at critical health'));
-  makeElement('br', rhs, {'class':'hide'});
-  title = 'Hide in hospital while health is below 20';
-  id = 'hideInHospital';
-  var hideInHosp = makeElement('input', rhs, {'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
-  makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(hideIcon)});
-  title = hideInHosp.checked ? ' Hide in hospital but...' : ' Hide in hospital';
-  makeElement('label', rhs, {'id':'hideLabel', 'for':id, 'title':title}).appendChild(document.createTextNode(title));
 
-  elt = makeElement('div', rhs, {'style':'position: relative; line-height: 150%; left: 17px;','id':'hideOpts'});
-  for (i = 0, iLength=healOptions.length; i < iLength; i++) {
-    id = healOptions[i][0];
-    title = healOptions[i][1];
-    var optElt = makeElement('div', elt);
-    makeElement('input', optElt, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-    label = makeElement('label', optElt, {'for':id, 'title':title});
-    label.appendChild(document.createTextNode(' ' + title));
-  }
-  elt.style.display = hideInHosp.checked ? '' : 'none';
 
-  var hideHandler = function() {
-    var hideOpts = document.getElementById('hideOpts');
-    var hideLabel = document.getElementById('hideLabel');
-    if (!hideOpts) return false;
-    if (this.checked) {
-      hideOpts.style.display = '';
-      hideLabel.firstChild.nodeValue = ' Hide in hospital but...';
-    } else {
-      hideOpts.style.display = 'none';
-      hideLabel.firstChild.nodeValue = ' Hide in hospital';
-    }
-    return true;
-  };
-  hideInHosp.addEventListener('click', hideHandler, false);
 
-  // stamina minimum to allow healing
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Set the minimum Stamina Points Needed for Auto-Heal.';
-  label = makeElement('label', lhs, {'title':title});
-  label.appendChild(document.createTextNode('Disable Auto-Heal when Stamina falls below:'));
-  makeElement('input', rhs, {'type':'text', 'value':GM_getValue('stamina_min_heal', '22'), 'id':'stamina_min_heal', 'size':'3', 'style':'text-align: center'});
-  rhs.appendChild(document.createTextNode(' points'));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Idle-in location
   item = makeElement('div', list);
@@ -5872,19 +5922,19 @@ function createDisplayTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Elevate MWAP-Header'));
 
-  // Hitlist riding
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'hideAttacks';
-  title = 'Enable hitlist riding: MWAP disables autoHeal after you got n XP from attacks; it enables it again after parsing a snuffed message.';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
-  id = 'rideHitlistXP';
-  title = 'Enter the XP you want to gain before MWAP turns off autoHeal. Enter \'0\' if you want MWAP to turn off autoHeal after it detected a 0 xp attack.';
-  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'style':'width: 25px'});
-  rhs.appendChild(document.createTextNode(' xp'));
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   // Set Facebook account to window title
@@ -6046,7 +6096,7 @@ function createMafiaTab() {
   title = 'Ask for Help on Moscow Tiers - Be carefull to only choose available Tiers !';
   id = 'selectMoscowTier';
   label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Moscow help  on :'));
+  label.appendChild(document.createTextNode('Ask for Moscow/Bangkok help :'));
   var selectMoscowTier = makeElement('select', rhs, {'id':id, 'title':title});
   choiceMoscowTier = document.createElement('option');
   choiceMoscowTier.text = 'no Help in Moscow';
@@ -6084,16 +6134,16 @@ function createMafiaTab() {
   if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
 
-  var selectBangkokTierDiv = makeElement('div', list);
-  lhs = makeElement('div', selectBangkokTierDiv, {'class':'lhs'});
-  rhs = makeElement('div', selectBangkokTierDiv, {'class':'rhs'});
-  makeElement('br', selectBangkokTierDiv, {'class':'hide'});
-  title = 'Ask for Help on Bangkok Tiers - Be carefull to only choose available Tiers !';
-  id = 'selectBangkokTier';
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Bangkok help  on :'));
 
-  var selectBangkokTier = makeElement('select', rhs, {'id':id, 'title':title});
+
+
+
+
+  id = 'selectBangkokTier';
+
+
+
+  var selectBangkokTier = makeElement('select', rhs, {'id':id, 'title':title, 'style':'margin-left:0.5em;'});
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'no Help in Bangkok';
   choiceBangkokTier.value = '0';
@@ -6167,10 +6217,10 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Level-up bonus '));
 
   // Achievement bonus
-  //item = makeElement('div', list);
-  //lhs = makeElement('div', item, {'class':'lhs'});
-  //rhs = makeElement('div', item, {'class':'rhs'});
-  //makeElement('br', item, {'class':'hide'});
+
+
+
+
   title = 'Automatically post achievement bonus.';
   id = 'autoAchievementPublish';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
@@ -6320,7 +6370,33 @@ function createMafiaTab() {
   id = 'autoSafehouse';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically open safehouse gifts'));
+  
+  // Energy pack settings?
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  label = makeElement('label', lhs);
+  label.appendChild(document.createTextNode('Energy Pack Settings:'));
 
+  title = 'Periodically send energy packs to your fellow mafia members.';
+  id = 'sendEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Send Packs '));
+
+  title = 'Periodically ask for energy packs from your fellow mafia members.';
+  id = 'askEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Ask for Packs '));
+
+  title = 'Reward fellow mafia members for sending energy packs.';
+  id = 'rewardEnergyPack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Reward Mafia'));
+ 
   // War - Automatically declare a war
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6374,19 +6450,23 @@ function createMafiaTab() {
   // War - autowar targets
   title = 'Enter opponents Mafia Wars ID';
   id = 'autoWarTargetList';
+
+  var warListLabel = makeElement('font', rhs, {'style':'font-size: 10px;'});
+  warListLabel.appendChild(document.createTextNode('Enter each target on a separate line. Add the userid part of the p|userid.'));
+  makeElement('br', rhs, {'class':'hide'});
   var warList = makeElement('textarea', rhs, {'style':'width: 12em; height: 6em;', 'id':id, 'title':'Enter each Mafia Wars ID on a separate line. This will not work with the Facebook ID.'});
   warList.appendChild(document.createTextNode(GM_getValue('autoWarTargetList', '')));
-  makeElement('br', rhs, {'class':'hide'});
-  var warListLabel = makeElement('font', rhs, {'style':'font-size: 10px;'});
-  warListLabel.appendChild(document.createTextNode('Enter each target on a separate line.'));
-  makeElement('br', rhs, {'class':'hide'});
-  var warListLabel = makeElement('font', rhs, {'style':'font-size: 10px;'});
-  warListLabel.appendChild(document.createTextNode('Add the userid part of the p|userid.'));
+  makeElement('br', rhs, {'class':'hide'});  
 
+
+
+
+
+  
   // Hide list if war mode is random
   var warModeHandler = function () {
     warList.style.display = warModes.selectedIndex == 0 ? 'none' : '';
-    warListLabel.style.display = warList.style.display;
+    warListLabel.style.display = warModes.selectedIndex == 0 ? 'none' : '';    
   };
   warModeHandler();
   warModes.addEventListener('change', warModeHandler, false);
@@ -6808,31 +6888,31 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(' Full packs @ points '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: #781351;', 'value':GM_getValue('autoEnergyPackForcePts', '0'), 'size':'1'});
 
-  // Energy pack settings?
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  label = makeElement('label', lhs);
-  label.appendChild(document.createTextNode('Energy Pack Settings:'));
 
-  title = 'Periodically send energy packs to your fellow mafia members.';
-  id = 'sendEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Send Packs '));
 
-  title = 'Periodically ask for energy packs from your fellow mafia members.';
-  id = 'askEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Ask for Packs '));
 
-  title = 'Reward fellow mafia members for sending energy packs.';
-  id = 'rewardEnergyPack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Reward Mafia'));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Maniac character type?
   item = makeElement('div', list);
@@ -6841,8 +6921,8 @@ function createEnergyTab() {
   makeElement('br', item, {'class':'hide'});
   title = 'Check this box if your character type is Maniac (as opposed to Fearless or Mogul).';
   id = 'isManiac';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Character type is Maniac'));
 
   // Mastery items owned.
@@ -6910,6 +6990,9 @@ function createEnergyTab() {
 
   return energyTab;
 }
+
+// Create Stamina Tab
+// Create Stamina Sub Tabs
 function createStaminaSubTab_FightRandom(staminaTabSub) {
   GM_setValue('fightrob', 'unchecked')  ;
 
@@ -7601,21 +7684,83 @@ function createStaminaSubTab_SetBounties(staminaTabSub) {
 function createStaminaSubTab_Random(staminaTabSub) {
 
   GM_setValue('fightrob', 'unchecked')  ;
-  if(isGMChecked('TestChanges')){
-    // Location setting for Robbing
-    item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
 
-    item.appendChild(document.createTextNode('Rob in:'));
-    title ="Rob cities selection";
-    name = 'randomRobLocations[]';
-    for (i = 0, iLength=locations.length; i < iLength; ++i) {
-      makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
-      label = makeElement('label', item, {'for':name, 'title':title});
-      label.appendChild(document.createTextNode(locations[i]));
-    }
-  }  
+
+  
+
+  // Stamina Spend choice setting 
+  var SpendModes = GM_getValue('randomSpendModes');
+  if(!SpendModes) SpendModes="0000";
+  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
+  item.appendChild(document.createTextNode('Stamina Spend Modes :'));
+  makeElement('br', item);  
+
+  title ="Stamina Spend Choice selection";
+  name = 'randomSpendModes[]';    
+  for (i = 0, iLength=randomSpendChoices.length; i < iLength; ++i) {      
+    if(SpendModes[i]=='1')
+      makeElement('input', item, {'type':'checkbox', 'name':name, 'title':randomSpendChoices[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':randomSpendChoices[i], 'checked':'checked'});
+    else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':randomSpendChoices[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':randomSpendChoices[i]});
+    label = makeElement('label', item, {'for':name, 'title':title});
+    label.appendChild(document.createTextNode(randomSpendChoices[i]));
+  }
+  makeElement('br', item);
+  
+  // Location setting for Fighting
+  var fightCities = GM_getValue('randomFightLocations');
+  if(!fightCities) fightCities="00000";
+  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;margin-top:1em;'});
+  item.appendChild(document.createTextNode('Location Settings :'));
+  makeElement('br', item);    
+  item.appendChild(document.createTextNode('Fight in:'));
+  makeElement('br', item);
+  title ="Fighting cities selection";
+  name = 'randomFightLocations[]';    
+  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {      
+    if(fightCities[i]=='1')
+      makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i], 'checked':'checked'});
+    else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
+    label = makeElement('label', item, {'for':name, 'title':title});
+    label.appendChild(document.createTextNode(locations[i]));
+  }
+  makeElement('br', item);
+  
+  // Location setting for Robbing
+  var robCities = GM_getValue('randomRobLocations');
+  if(!robCities) robCities="00000";
+  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});  
+  item.appendChild(document.createTextNode('Rob in:'));
+  makeElement('br', item);
+  title ="Robbing cities selection";
+  name = 'randomRobLocations[]';    
+  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {      
+    if(robCities[i]=='1')
+      makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i], 'checked':'checked'});
+    else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
+    label = makeElement('label', item, {'for':name, 'title':title});
+    label.appendChild(document.createTextNode(locations[i]));
+  }
+  makeElement('br', item);
+
+  
+  // Location setting for Bounty Collection
+  var hitCities = GM_getValue('randomHitmanLocations');
+  if(!hitCities) hitCities="00000";
+  var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});  
+  item.appendChild(document.createTextNode('Collect Bounties in:'));
+  makeElement('br', item);
+  title ="Hitman cities selection";
+  name = 'randomHitmanLocations[]';    
+  for (i = 0, iLength=randomLocations.length; i < iLength; ++i) {      
+    if(hitCities[i]=='1')
+      makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i], 'checked':'checked'});
+    else makeElement('input', item, {'type':'checkbox', 'name':name, 'title':locations[i], 'style':'margin-left: 0.5em;margin-right: 0.5em;', 'value':locations[i]});
+    label = makeElement('label', item, {'for':name, 'title':title});
+    label.appendChild(document.createTextNode(locations[i]));
+  }
+  makeElement('br', item,{'style':'margin-bottom:0.5em;'});
+ 
 }
-
 
 // Create New Stamina Tab
 function createStaminaTab() {
@@ -7740,6 +7885,110 @@ function createStaminaTab() {
   staminaSpendHow.addEventListener('change', handleSpendChanged, false);
 
   return staminaTab;
+}
+
+// Create Heal Tab
+function createHealTab() {
+  var elt, title, id, label, item, lhs, rhs, i, choice;
+  var healTab = makeElement('div', null, {'id':'healTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+
+  // Container for a list of settings.
+  var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
+    
+  // Healing options
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Heal when health lands below indicated health.';
+  id = 'autoHeal';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id, 'checked');
+  makeElement('img', lhs, {'style':'padding-left: 5px;','src':stripURI(healthIcon)});
+  makeElement('label', lhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Heal in:'));
+  id = 'healLocation';
+  var healLocation = makeElement('select', rhs, {'id':id});
+  for (i = 0, iLength=locations.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(locations[i]));
+    healLocation.appendChild(choice);
+  }
+
+  healLocation.selectedIndex = GM_getValue('healLocation', NY);
+  makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' when health falls below '));
+  makeElement('input', rhs, {'style':'text-align: center','type':'text', 'value':GM_getValue('healthLevel', '50'), 'id':'healthLevel', 'size':'1'});
+  makeElement('label', rhs, {'title':title}).appendChild(document.createTextNode(' points'));
+
+  // Hide in hospital
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Check to attack even when at critical health (20-28 health points) ';
+  id = 'attackCritical';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(attackIcon)});
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Attack at critical health'));
+  makeElement('br', rhs, {'class':'hide'});
+  title = 'Hide in hospital while health is below 20';
+  id = 'hideInHospital';
+  var hideInHosp = makeElement('input', rhs, {'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
+  makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(hideIcon)});
+  title = hideInHosp.checked ? ' Hide in hospital but...' : ' Hide in hospital';
+  makeElement('label', rhs, {'id':'hideLabel', 'for':id, 'title':title}).appendChild(document.createTextNode(title));
+
+  elt = makeElement('div', rhs, {'style':'position: relative; line-height: 150%; left: 17px;','id':'hideOpts'});
+  for (i = 0, iLength=healOptions.length; i < iLength; i++) {
+    id = healOptions[i][0];
+    title = healOptions[i][1];
+    var optElt = makeElement('div', elt);
+    makeElement('input', optElt, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+    label = makeElement('label', optElt, {'for':id, 'title':title});
+    label.appendChild(document.createTextNode(' ' + title));
+  }
+  elt.style.display = hideInHosp.checked ? '' : 'none';
+
+  var hideHandler = function() {
+    var hideOpts = document.getElementById('hideOpts');
+    var hideLabel = document.getElementById('hideLabel');
+    if (!hideOpts) return false;
+    if (this.checked) {
+      hideOpts.style.display = '';
+      hideLabel.firstChild.nodeValue = ' Hide in hospital but...';
+    } else {
+      hideOpts.style.display = 'none';
+      hideLabel.firstChild.nodeValue = ' Hide in hospital';
+    }
+    return true;
+  };
+  hideInHosp.addEventListener('click', hideHandler, false);
+
+  // stamina minimum to allow healing
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Set the minimum Stamina Points Needed for Auto-Heal.';
+  label = makeElement('label', lhs, {'title':title});
+  label.appendChild(document.createTextNode('Disable Auto-Heal when Stamina falls below:'));
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue('stamina_min_heal', '22'), 'id':'stamina_min_heal', 'size':'3', 'style':'text-align: center'});
+  rhs.appendChild(document.createTextNode(' points'));
+
+  // Hitlist riding
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'hideAttacks';
+  title = 'Enable hitlist riding: MWAP disables autoHeal after you got n XP from attacks; it enables it again after parsing a snuffed message.';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
+  id = 'rideHitlistXP';
+  title = 'Enter the XP you want to gain before MWAP turns off autoHeal. Enter \'0\' if you want MWAP to turn off autoHeal after it detected a 0 xp attack.';
+  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'style':'width: 25px'});
+  rhs.appendChild(document.createTextNode(' xp'));
+   
+  return healTab;
 }
 
 // Create Cash tab
@@ -8281,16 +8530,58 @@ function validateStaminaTab() {
       break;
 
     case STAMINA_HOW_RANDOM: // Random stamina spending
-      if(isGMChecked('TestChanges')){
-        var randomCities="Random rob cities : ";
-        var randomCitiesChecked=document.getElementsByName("randomRobLocations[]");
-        for (var i=0;i<randomCitiesChecked.length;++i){
-          if(randomCitiesChecked[i].checked) {
-            randomCities+=randomCitiesChecked[i].value;
-          }
+
+
+    
+      var spendModes="";        
+      var spendModesChecked=document.getElementsByName("randomSpendModes[]");
+      for (var i=0;i<spendModesChecked.length;++i){
+        if(spendModesChecked[i].checked) {
+          spendModes+='1';
+        }  
+        else {
+          spendModes+='0';
         }
-        alert(randomCities);
-      }
+      }        
+      s.randomSpendModes=spendModes;
+      
+      var randomCities="";        
+      var randomCitiesChecked=document.getElementsByName("randomFightLocations[]");
+      for (var i=0;i<randomCitiesChecked.length;++i){
+        if(randomCitiesChecked[i].checked) {
+
+          randomCities+='1';
+        }  
+        else {
+          randomCities+='0';
+        }
+      }        
+      s.randomFightLocations=randomCities;
+      
+      randomCities="";
+      randomCitiesChecked=document.getElementsByName("randomRobLocations[]");
+      for (var i=0;i<randomCitiesChecked.length;++i){
+        if(randomCitiesChecked[i].checked) {
+          randomCities+='1';
+        }  
+        else {
+          randomCities+='0';
+        }
+      }  
+      s.randomRobLocations=randomCities;
+        
+      randomCities="";
+      randomCitiesChecked=document.getElementsByName("randomHitmanLocations[]");
+      for (var i=0;i<randomCitiesChecked.length;++i){
+        if(randomCitiesChecked[i].checked) {
+          randomCities+='1';
+        }  
+        else {
+          randomCities+='0';
+        }
+      }  
+      s.randomHitmanLocations=randomCities;
+        
       break;
 
     default :
@@ -9332,23 +9623,23 @@ function refreshMWAPCSS() {
                  '#settingsBox select,#settingsBox input{border:1px solid;} #settingsBox textarea{border:2px solid;}' +
                  '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
                  '#settingsBox img,#settingsBox label,#settingsBox span,#settingsBox input,#settingsBox select {vertical-align: middle;}' +
-                 '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, ' +
-                 '#settingsBox #energyTab div {position: static;}' +
+
+
                  '#settingsBox img,#settingsBox span,#settingsBox label {position: static;}' +
-                 '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, ' +
-                 '#settingsBox #energyTab select {position: static;}' +
-                 '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, ' +
-                 '#settingsBox #energyTab textarea {position: static;}' +
-                 '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, ' +
-                 '#settingsBox #energyTab input {position: static; margin: 0;}' +
-                 '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, ' +
-                 '#settingsBox #energyTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
-                 '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, ' +
-                 '#settingsBox #energyTab .rhs {position: static; float: left; padding: 3px;}' +
-                 '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, ' +
-                 '#settingsBox #energyTab .single {position: static; text-align: center}' +
-                 '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, ' +
-                 '#settingsBox #energyTab .hide {clear: both; visibility: hidden;}' +
+                 '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, #energyTab div, #healTab div {position: static;}' +                 
+                 '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, #energyTab select, #healTab select {position: static;}' +
+                 '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, #energyTab textarea, #healTab textarea {position: static;}' +
+
+                 '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, #energyTab input, #healTab input {position: static; margin: 0;}' +
+
+                 '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, #energyTab .lhs, #healTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
+
+                 '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, #energyTab .rhs, #healTab  .rhs {position: static; float: left; padding: 3px;}' +
+
+                 '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, #energyTab .single, #healTab .single {position: static; text-align: center}' +
+
+                 '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, #energyTab .hide, #healTab .hide {clear: both; visibility: hidden;}' +
+
                  '#settingsBox #staminaTab div {position: static;}' +
                  '#settingsBox #staminaTab img, span, label {position: static;}' +
                  '#settingsBox #staminaTab select {position: static;}' +
@@ -11949,6 +12240,10 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit opponents: <strong>' + GM_getValue('autoHitOpponentList') + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit background: <strong>' + showIfUnchecked(GM_getValue('bgAutoHitCheck')) + '</strong><br>' +
+        //'&nbsp;&nbsp;-Random Stam Spend - Stamina Spend Modes: <strong>' + GM_getValue('randomSpendModes') + '</strong><br>' +        
+        '&nbsp;&nbsp;-Random Stam Spend - Fight in: <strong>' + GM_getValue('randomFightLocations') + '</strong><br>' +
+        '&nbsp;&nbsp;-Random Stam Spend - Rob in: <strong>' + GM_getValue('randomRobLocations') + '</strong><br>' +
+        '&nbsp;&nbsp;-Random Stam Spend - Hit in: <strong>' + GM_getValue('randomHitmanLocations') + '</strong><br>' +                
         'Stamina threshold: <strong>' + GM_getValue('selectStaminaUse') + ' ' + numberSchemes[GM_getValue('selectStaminaUseMode', 0)] + ' (refill to ' + SpendStamina.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Stamina use started: <strong>' + GM_getValue('useStaminaStarted') + '</strong><br>' +
         'Stamina reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
@@ -14326,42 +14621,76 @@ function logFightResponse(rootElt, resultElt, context) {
 function randomizeStamina() {
   if (isGMEqual('staminaSpendHow', STAMINA_HOW_RANDOM)) {
 
+    var randomModes = GM_getValue('randomSpendModes');
     // Do not include autohit list
     var spendMode = Math.floor(Math.random() * STAMINA_HOW_AUTOHITLIST);
 
+    DEBUG('Stamina Spend Mode Randomize set to : '+ spendMode + ' was ' +newStaminaMode);
     // Randomize stamina spend mode
-    if (spendMode != newStaminaMode) {
+    if (randomModes[spendMode]=='1') {
+    //if (spendMode != newStaminaMode) {
       newStaminaMode = spendMode;
-      DEBUG('Stamina spending set to : ' + staminaSpendChoices[spendMode]);
+      DEBUG('Stamina Spend Mode : ' + staminaSpendChoices[spendMode]);
+    }
+    else {
+      DEBUG('Stamina Spend Mode did not qualify');
     }
 
+    var randomCities = GM_getValue('randomFightLocations');
+    
     // Randomize fight location
     while (spendMode == STAMINA_HOW_FIGHT_RANDOM || spendMode == STAMINA_HOW_FIGHT_LIST) {
       var stamLoc = Math.floor(Math.random()*(cities.length));
-      if (!isGMEqual('fightLocation', stamLoc)) {
+      DEBUG('Fight City Randomize set to : '+ stamLoc + ' was ' +GM_getValue('fightLocation'));
+      //if (!isGMEqual('fightLocation', stamLoc) && randomCities[stamLoc]=='1') {
+      if (randomCities[stamLoc]=='1') {
         GM_setValue('fightLocation', stamLoc);
         DEBUG('Fight location set to : ' + cities[stamLoc][CITY_NAME]);
         break;
       }
-    }
 
+
+
+
+
+
+
+
+
+      else {
+        DEBUG('Fight location did not qualify');
+      }
+    }
+    
+    // Randomize robbing location
+    randomCities = GM_getValue('randomRobLocations');
+    while (spendMode == STAMINA_HOW_ROBBING) {
+      var stamLoc = Math.floor(Math.random()*(cities.length));
+      DEBUG('Rbo City Randomize set to : '+ stamLoc + ' was ' +GM_getValue('robLocation'));
+      //if (!isGMEqual('robLocation', stamLoc) && randomCities[stamLoc]=='1') {
+      if (randomCities[stamLoc]=='1') {
+        GM_setValue('robLocation', stamLoc);
+        DEBUG('Robbing location set to : ' + cities[stamLoc][CITY_NAME]);
+        break;
+      }
+      else {
+        DEBUG('Rob location did not qualify');
+      }
+    }
+    
     // Randomize hitman location
+    randomCities = GM_getValue('randomHitmanLocations');
     while (spendMode == STAMINA_HOW_HITMAN) {
       var stamLoc = Math.floor(Math.random()*(cities.length));
-      if (!isGMEqual('hitmanLocation', stamLoc)) {
+      DEBUG('Hitman City Randomize set to : '+ stamLoc + ' was ' +GM_getValue('hitmanLocation'));
+      //if (!isGMEqual('hitmanLocation', stamLoc) && randomCities[stamLoc]=='1') {
+      if (randomCities[stamLoc]=='1') {
         GM_setValue('hitmanLocation', stamLoc);
         DEBUG('Hitman location set to : ' + cities[stamLoc][CITY_NAME]);
         break;
       }
-    }
-
-    // Randomize robbing location
-    while (spendMode == STAMINA_HOW_ROBBING) {
-      var stamLoc = Math.floor(Math.random()*(cities.length));
-      if (!isGMEqual('robLocation', stamLoc)) {
-        GM_setValue('robLocation', stamLoc);
-        DEBUG('Robbing location set to : ' + cities[stamLoc][CITY_NAME]);
-        break;
+      else {
+        DEBUG('Hitman location did not qualify');
       }
     }
   }
