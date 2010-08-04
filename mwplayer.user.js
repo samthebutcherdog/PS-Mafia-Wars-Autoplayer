@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.600
+// @version     1.1.601
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.600',
+  version: '1.1.601',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9640,8 +9640,8 @@ function cleanLoot(strType, strTerminus, sortLootType) {
     var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
     var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
     var objLoot = new objLootItem();
-    objLoot.Attack = splitAttack[0];
-    objLoot.Defense = splitDefense[0];
+    objLoot.Attack = parseInt(splitAttack[0]);
+    objLoot.Defense = parseInt(splitDefense[0]);
     objLoot.Quantity = parseInt(splitQuantity[1]);
     objLoot.Element = eltRow;
     // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
@@ -9712,8 +9712,8 @@ function sortAttack(colLoot) {
   var totalItems = 0;
   for (var x in colLoot)
   {
-    totalItems += colLoot[x].Quantity;
-    minimum = colLoot[x].Attack;
+    totalItems += parseInt(colLoot[x].Quantity);
+    minimum = parseInt(colLoot[x].Attack);
     if (totalItems > 500) break;
   }
   return minimum;
