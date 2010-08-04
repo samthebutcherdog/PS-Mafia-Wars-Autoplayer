@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.598
+// @version     1.1.599
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.598',
+  version: '1.1.599',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1975,11 +1975,11 @@ function doAutoPlay () {
    (health > 19 || (SpendStamina.canBurn && stamina > 0) || canForceHeal())) {
      DEBUG('auto-heal passed main block check, checking can auto heal - - 1 ');
      if(canautoheal()) {
-//       DEBUG('auto-healing - - 7 ');
-       autoHeal();
+       DEBUG('auto-healing - - 7 ');
+       if(autoHeal()) return;
        }
    }
-
+// function autoheal
   DEBUG('after auto-heal  - - X ');
 
   // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
@@ -2245,6 +2245,8 @@ function autoHeal() {
   // NOTE: In the interest of time, delays are waived.
   Autoplay.delay = noDelay;
 
+DEBUG( ' in autoheal routine -1 ');
+
   // Make sure we're in the preferred city.
   var healLocation = parseInt(GM_getValue('healLocation', NY));
 
@@ -2253,10 +2255,12 @@ function autoHeal() {
     Autoplay.start();
     return true;
   }
+DEBUG( ' in autoheal routine -2 ');
 
   // Use our custom instant-heal element (if present).
   var healElt = xpathFirst('.//div[@id="popup_fodder"]/div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and contains(@style,"block")]//a[contains(@onclick,"xw_action=heal")]', appLayoutElt);
   if (healElt) {
+DEBUG( ' in autoheal routine -2 A');
     // FIXME: Should make quick healing optional
     if (false) {
       healElt.setAttribute("onclick", healElt.getAttribute("onclick").replace('inner_page', SCRIPT.ajaxPage));
@@ -2265,17 +2269,26 @@ function autoHeal() {
     }
   // If not, go to hospital manually
   } else  {
+//DEBUG( ' in autoheal routine -2 B ');
     // Go to the hospital.
     if(new_header){
       var hospitalElt = xpathFirst('//div[@id="clock_health"]/a');
+//DEBUG( ' in autoheal routine -3 A ');
     } else {
       var hospitalElt = xpathFirst('.//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
+//DEBUG( ' in autoheal routine -3 B ' + hospitalElt);
     }
-    if (hospitalElt && xpathFirst('//div[@id="clock_health"]').style.display == 'block') {
-      Autoplay.fx = function() {
+
+//http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=hospital&xw_action=view&xw_city=4&tmp=fab208e23c85b643d625668229d927c9&cb=fc0f3eb09f6911df944c7f4a1028d3f8
+DEBUG( ' bottom of routine -4 A ' + hospitalElt);
+DEBUG( ' bottom of routine -4 B ' + xpathFirst);
+
+    if (hospitalElt  && xpathFirst('//div[@id="clock_health"]').style.display == 'block') {
+//    if (hospitalElt ) {
+//      Autoplay.fx = function() {
         clickElement(hospitalElt);
         DEBUG('Clicked to go to hospital.');
-      };
+//      };
       Autoplay.start();
       return true;
     } else {
@@ -2283,6 +2296,7 @@ function autoHeal() {
       return false;
     }
   }
+DEBUG( ' in autoheal routine -3 ');
 
   // Found a heal link. Click it.
   Autoplay.fx = function() {
