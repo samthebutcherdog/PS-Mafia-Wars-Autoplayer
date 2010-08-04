@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.606
+// @version     1.1.607
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.606',
+  version: '1.1.607',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8904,32 +8904,31 @@ function cleanLoot(strType, strTerminus, sortLootType) {
   DEBUG ('Main Clean Loot Loop Start');
   do {
     // Get Attack/Defense, and Total values
-  DEBUG ('eltPicture');
+  //DEBUG ('eltPicture');
     var eltPicture = xpathFirst('.//td', eltRow);
-  DEBUG ('eltAttackDef');
+  //DEBUG ('eltAttackDef');
     var eltAttackDef = eltPicture.nextSibling.nextSibling;
-  DEBUG ('eltAttack');
+  //DEBUG ('eltAttack');
 
     var eltAttack = xpathFirst('.//td', eltAttackDef);
-  DEBUG ('eltDefense, eltQuantity');
-  DEBUG ('eltDefense');
+  //DEBUG ('eltDefense');
 
     var eltDefense = eltAttack.nextSibling.nextSibling;
-  DEBUG ('eltQuantity');
+  //DEBUG ('eltQuantity');
 
     var eltQuantity = eltAttackDef.nextSibling.nextSibling;
     // eltQuantity should be formated "Owned:"/#/<Add> so if it has "Add" then the item is giftable.
-  DEBUG ('splitA');
+  //DEBUG ('splitA');
     var splitAttack = eltAttack.innerHTML.clean().trim().split(" ");
-  DEBUG ('splitD');
+  //DEBUG ('splitD');
     var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
-  DEBUG ('splitQ');
+  //DEBUG ('splitQ');
     var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
     var objLoot = new objLootItem();
     objLoot.Attack = parseInt(splitAttack[0]);
     objLoot.Defense = parseInt(splitDefense[0]);
     objLoot.Quantity = parseInt(splitQuantity[1]);
-  DEBUG ('Element');
+  //DEBUG ('Element');
     objLoot.Element = eltRow;
     // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
     // hence the loot item is giftable.
@@ -8937,7 +8936,7 @@ function cleanLoot(strType, strTerminus, sortLootType) {
     colLoot.push(objLoot); // add item to collection
     eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
     var txtData = eltRow.innerHTML.clean().trim();
-  } while (txtData != strTerminus);
+  } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot"));
     DEBUG ('Main Clean Loot Loop End');
 
   // Okay, main collection array, colLoot should be built at this point.
