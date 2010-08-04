@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.610
+// @version     1.1.611
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.610',
+  version: '1.1.611',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8658,14 +8658,10 @@ function handleModificationTimer() {
       // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
       var sortLootType = parseInt(GM_getValue('filterLootOpt'));
       if (sortLootType != 0) {
-        DEBUG('Start Weapons Loot Filter');
-        cleanLoot("Weapons","Armor", sortLootType);
-        DEBUG('Start Armor Loot Filter');
-        cleanLoot("Armor","Vehicles", sortLootType);
-        DEBUG('Start Vehicles Loot Filter');
-        cleanLoot("Vehicles","Animals", sortLootType);
-        DEBUG('Start Animals Loot Filter');
-        cleanLoot("Animals","Special Loot", sortLootType);
+        cleanLoot("Weapons",sortLootType);
+        cleanLoot("Armor",sortLootType);
+        cleanLoot("Vehicles",sortLootType);
+        cleanLoot("Animals", sortLootType);
       }
     }
 
@@ -8721,46 +8717,31 @@ function objLootItem() {
   this.Giftable = false;
 }
 
-function cleanLoot(strType, strTerminus, sortLootType) {
-  DEBUG ('Clean Loot');
+function cleanLoot(strType, sortLootType) {
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   if (eltLoot.title == "MWAP modified") {
-    DEBUG ('Modified flag encountered, not continuing');
     return;
   }
   eltLoot.title = "MWAP modified";
 
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   var colLoot = [];
-  DEBUG ('Main Clean Loot Loop Start');
   do {
     // Get Attack/Defense, and Total values
-  //DEBUG ('eltPicture');
     var eltPicture = xpathFirst('.//td', eltRow);
-  //DEBUG ('eltAttackDef');
     var eltAttackDef = eltPicture.nextSibling.nextSibling;
-  //DEBUG ('eltAttack');
-
     var eltAttack = xpathFirst('.//td', eltAttackDef);
-  //DEBUG ('eltDefense');
-
     var eltDefense = eltAttack.nextSibling.nextSibling;
-  //DEBUG ('eltQuantity');
-
     var eltQuantity = eltAttackDef.nextSibling.nextSibling;
     // eltQuantity should be formated "Owned:"/#/<Add> so if it has "Add" then the item is giftable.
-  //DEBUG ('splitA');
     var splitAttack = eltAttack.innerHTML.clean().trim().split(" ");
-  //DEBUG ('splitD');
     var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
-  //DEBUG ('splitQ');
     var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
     var objLoot = new objLootItem();
     objLoot.Attack = parseInt(splitAttack[0]);
     objLoot.Defense = parseInt(splitDefense[0]);
     objLoot.Quantity = parseInt(splitQuantity[1]);
-  //DEBUG ('Element');
     objLoot.Element = eltRow;
     // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
     // hence the loot item is giftable.
@@ -8769,7 +8750,6 @@ function cleanLoot(strType, strTerminus, sortLootType) {
     eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
     var txtData = eltRow.innerHTML.clean().trim();
   } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
-    DEBUG ('Main Clean Loot Loop End');
 
   // Okay, main collection array, colLoot should be built at this point.
   var minAttack = 0;
