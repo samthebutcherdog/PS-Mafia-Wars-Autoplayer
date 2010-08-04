@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/prompt_feed*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.601
+// @version     1.1.602
 // ==/UserScript==
 // @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 // @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
@@ -52,7 +52,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.601',
+  version: '1.1.602',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9564,9 +9564,13 @@ function handleModificationTimer() {
       // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
       var sortLootType = parseInt(GM_getValue('filterLootOpt'));
       if (sortLootType != 0) {
+        DEBUG('Start Weapons Loot Filter');
         cleanLoot("Weapons","Armor", sortLootType);
+        DEBUG('Start Armor Loot Filter');
         cleanLoot("Armor","Vehicles", sortLootType);
+        DEBUG('Start Vehicles Loot Filter');
         cleanLoot("Vehicles","Animals", sortLootType);
+        DEBUG('Start Animals Loot Filter');
         cleanLoot("Animals","Special Loot", sortLootType);
       }
     }
@@ -9624,10 +9628,12 @@ function objLootItem() {
 }
 
 function cleanLoot(strType, strTerminus, sortLootType) {
+  DEBUG ('Clean Loot');
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   var colLoot = [];
+  DEBUG ('Main Clean Loot Loop Start');
   do {
     // Get Attack/Defense, and Total values
     var eltPicture = xpathFirst('.//td', eltRow);
@@ -9651,6 +9657,8 @@ function cleanLoot(strType, strTerminus, sortLootType) {
     eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
     var txtData = eltRow.innerHTML.clean().trim();
   } while (txtData != strTerminus);
+    DEBUG ('Main Clean Loot Loop End');
+
   // Okay, main collection array, colLoot should be built at this point.
   var minAttack = 0;
   var minDefense = 0;
@@ -9658,19 +9666,19 @@ function cleanLoot(strType, strTerminus, sortLootType) {
     case 0: // No filter
       break;
     case 1: // Attack only
-      minAttack = sortAttack(colLoot);
+      minAttack = parseInt(sortAttack(colLoot));
       break;
     case 2: // Defense Only
-      minDefense = sortDefense(colLoot);
+      minDefense = parseInt(sortDefense(colLoot));
       break;
     case 3: // Attack/Defense Combo
-      minAttack = sortAttack(colLoot);
-      minDefense = sortDefense(colLoot);
+      minAttack = parseInt(sortAttack(colLoot));
+      minDefense = parseInt(sortDefense(colLoot));
       break;
     case 4:  // Giftable only (not programmed yet obviously...  ^_^)
       break;
   }
-
+  DEBUG ('minAttack = ' + minAttack + '   minDefense = ' + minDefense);
   // Find respective section (Weapons/Armor/Vehicle/Animal)
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
