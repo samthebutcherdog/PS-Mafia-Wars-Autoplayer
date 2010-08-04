@@ -36,13 +36,11 @@
 // @include     http://mwfb.zynga.com/mwfb/remote/html_server.php*
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
-// @include     http://www.facebook.com/connect/prompt_feed*
+// @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.609
+// @version     1.1.610
 // ==/UserScript==
-// @exclude     http://mwfb.zynga.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
-// @exclude     http://facebook.mafiawars.com/mwfb/remote/html_server.php?*xw_controller=freegifts*
 
 // search for new_header   for changes
 //
@@ -52,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.609',
+  version: '1.1.610',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -61,7 +59,7 @@ var SCRIPT = {
    presentationurl: 'http://userscripts.org/scripts/show/77953',
   url: 'http://www.playerscripts.com/rokdownloads/ps_facebook_mafia_wars_a.user.js',
   metadata: 'http://userscripts.org/scripts/source/77953.meta.js',
-  controller: '/remote/html_server.php?&xw_controller=',
+  controller: 'remote/html_server.php?xw_controller=',
   action: '&xw_action=',
   city: '&xw_city=',
   opponent: '&opponent_id=',
@@ -131,10 +129,10 @@ function GM_ApiBrowserCheck() {
 }
 GM_ApiBrowserCheck();
 
-// Handle Publishing
+// Handle Publishing (check for FB publishing iframe)
 function checkInPublishPopup() {
   if (xpathFirst('//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
-      /prompt_feed/.test(window.location.href))  {
+      /connect\/uiserver/.test(window.location.href)) {
     setGMTime('postTimer', '00:10');
     window.setTimeout(handlePublishing, 2000);
     return true;
@@ -887,7 +885,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
   staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
-
 
   var randomSpendChoices = [];
   randomSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random';
@@ -1970,29 +1967,25 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
-
-
-
   //auto-heal area
   DEBUG('  entering auto-heal  - 0 ') ;
   if (running &&
-   health < maxHealth &&
-   isGMChecked('autoHeal') &&
-   health < GM_getValue('healthLevel', 0) &&
-   (stamina >= GM_getValue('stamina_min_heal')) &&
-//   (health > 19 || (SpendStamina.canBurn &&  stamina > 0)    || canForceHeal() )
- ( ((health > 19) && (SpendStamina.canBurn && (stamina > 0) ) )|| canForceHeal() )
-   ) {
-
-     DEBUG('auto-heal passed main block check, checking can auto heal - - 1 ');
-     if(canautoheal()) {
-       DEBUG('auto-healing - - 7 ');
-       if(autoHeal()) return;
-       }
-   } else {
-   DEBUG (' autoheal skipped in main loop ')
-   DEBUG(' hi ' + health + ' ' + SpendStamina.canBurn + ' ' + stamina + ' ' + canForceHeal() );
-   }
+      health < maxHealth &&
+      isGMChecked('autoHeal') &&
+      health < GM_getValue('healthLevel', 0) &&
+      (stamina >= GM_getValue('stamina_min_heal')) &&
+//      (health > 19 || (SpendStamina.canBurn &&  stamina > 0)    || canForceHeal() )
+      ( ((health > 19) && (SpendStamina.canBurn && (stamina > 0) ) )|| canForceHeal() )
+  ) {
+    DEBUG('auto-heal passed main block check, checking can auto heal - - 1 ');
+    if(canautoheal()) {
+      DEBUG('auto-healing - - 7 ');
+      if(autoHeal()) return;
+    }
+  } else {
+    DEBUG (' autoheal skipped in main loop ')
+    DEBUG(' hi ' + health + ' ' + SpendStamina.canBurn + ' ' + stamina + ' ' + canForceHeal() );
+  }
 
   DEBUG('after auto-heal  - - X ');
 
@@ -2182,23 +2175,23 @@ function doAutoPlay () {
 }
 //
 function canautoheal() {
-//    DEBUG('in can auto heal - - 2 ');
-      if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) {
-        DEBUG('in can auto heal return false - STAMINA_HOW_FIGHTROB - 3 ');
-        return false;
-      }
-      if(GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) {
-        DEBUG('in can auto heal return false - STAMINA_HOW_ROBBING - 4 ');
-        return false;
-      }
-      if((GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_RANDOM) && (isGMChecked('fightrob'))) {
-        DEBUG('in can auto heal return false - STAMINA_HOW_FIGHT_RANDOM and fightrob - 5 ');
-        return false;
-      }
-      DEBUG('in can auto heal returning true - - 6 ');
-      return true;
+// DEBUG('in can auto heal - - 2 ');
+  if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) {
+    DEBUG('in can auto heal return false - STAMINA_HOW_FIGHTROB - 3 ');
+    return false;
+  }
+  if(GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) {
+    DEBUG('in can auto heal return false - STAMINA_HOW_ROBBING - 4 ');
+    return false;
+  }
+  if((GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_RANDOM) && (isGMChecked('fightrob'))) {
+    DEBUG('in can auto heal return false - STAMINA_HOW_FIGHT_RANDOM and fightrob - 5 ');
+    return false;
+  }
+  DEBUG('in can auto heal returning true - - 6 ');
+  return true;
 }
-//
+
 function getAutoPlayDelay() {
   return Math.floor(parseFloat(GM_getValue('d1', '3')) +
          parseFloat((GM_getValue('d2', '5')) -
@@ -2254,7 +2247,7 @@ function autoAccept() {
   Autoplay.start();
   return true;
 }
-////
+
 function autoHeal() {
   // NOTE: In the interest of time, delays are waived.
   Autoplay.delay = noDelay;
@@ -2282,7 +2275,7 @@ function autoHeal() {
     } else {
       var hospitalElt = xpathFirst('.//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
     }
-    if (hospitalElt  && xpathFirst('//div[@id="clock_health"]').style.display == 'block') {
+    if (hospitalElt && xpathFirst('//div[@id="clock_health"]').style.display == 'block') {
       Autoplay.fx = function() {
         clickElement(hospitalElt);
         DEBUG('Clicked to go to hospital.');
@@ -2294,7 +2287,7 @@ function autoHeal() {
       return false;
     }
   }
-DEBUG( ' in autoheal routine -3 ');
+  DEBUG(' in autoheal routine -3 ');
 
   // Found a heal link. Click it.
   Autoplay.fx = function() {
@@ -2413,7 +2406,7 @@ function checkVaultStatus(byUser) {
   };
   loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'createData', 'xw_city':'5', 'city':'5'}), urlLoaded);*/
   var jsonElt = getJSONPage(true, 'check vault');
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?xw_controller=propertyV2&xw_action=createData&xw_city=5&city=5", 1, 1, 0, 0); return false;'});
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
   clickElement(elt);
   return;
 }
@@ -2441,7 +2434,7 @@ function autoCollectTake(takeCity) {
   };
   loadUrl(getMWUrl('html_server', {'xw_controller':'propertyV2', 'xw_action':'collectall', 'xw_city':takeCity+1, 'requesttype':'json'}), urlLoaded);*/
   var jsonElt = getJSONPage(true, 'collect take', takeCity);
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?xw_controller=propertyV2&xw_action=collectall&xw_city=' + takeCity+1 + '&requesttype=json", 1, 1, 0, 0); return false;'});
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'collectall' + SCRIPT.city + (takeCity+1) + '&requesttype=json", 1, 1, 0, 0); return false;'});
   clickElement(elt);
   return true;
 }
@@ -3547,7 +3540,6 @@ function autoStaminaSpend() {
                'staminaSpendHow=' + how);
   }
 
-
   return false;
 }
 
@@ -4366,7 +4358,6 @@ function saveSettings() {
   //Start Save General Tab Settings
   //General Tab Checkboxes
   saveCheckBoxElementArray([
-
     'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','hourlyStatsOpt','burnFirst','featJob'
   ]);
   //General Tab Settings
@@ -4383,17 +4374,6 @@ function saveSettings() {
     GM_setValue('autoPauselvlExp', lvlExp);
   }
   GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
-
-
-
-
-
-
-
-
-
-
-
 
   GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
 
@@ -4417,7 +4397,7 @@ function saveSettings() {
   //Display Tab Checkboxes
   saveCheckBoxElementArray([
     'autoLog','logPlayerUpdates','filterLog','leftAlign','mastheadOnTop','fbwindowtitle','showPulse','showLevel',
-    'hideGifts','hideGiftIcon','hideActionBox','hideOffer','hideFriendLadder', 'hideMessageIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections',
+    'hideGifts','hideGiftIcon','hideActionBox','hideOffer','hideFriendLadder', 'hideMessageIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections'
   ]);
 
   //Display Tab Settings and Validation
@@ -4437,17 +4417,13 @@ function saveSettings() {
     return;
   }
 
-
-
-
-
-
-
-
-
-
-
-
+  // Examine share wishlist time
+  var shareWishlistTime = document.getElementById('autoShareWishlistTime').value;
+  if (isNaN(shareWishlistTime) || parseFloat(shareWishlistTime) < 1) {
+    alert('The share wishlist timer has to be at least 1 hour. For decimal numbers please use ".", e.g. 1.5.\nDefaulting it to 1 hour.');
+    document.getElementById('autoShareWishlistTime').value = 1;
+    return;
+  }
   //End Save Display Tab Settings
 
   //Start Save Mafia Tab Settings
@@ -4739,7 +4715,7 @@ function saveSettings() {
   toggleSettings();
   updateLogStats();
   refreshMWAPCSS();
-  //sendSettings();
+  sendSettings();
 }
 
 function updateMastheadMenu() {
@@ -5631,85 +5607,6 @@ function createGeneralTab() {
   lhs.appendChild(document.createTextNode('Experience left to pause at:'));
   makeElement('input', rhs, {'style':'text-align: right;','type':'text', 'value':GM_getValue(id, '50'), 'id':id, 'size':'2'});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Idle-in location
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -5928,21 +5825,6 @@ function createDisplayTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Elevate MWAP-Header'));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Set Facebook account to window title
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6140,15 +6022,7 @@ function createMafiaTab() {
   if (GM_getValue('selectMoscowTier') == '6') choiceMoscowTier.selected = true;
   selectMoscowTier.appendChild(choiceMoscowTier);
 
-
-
-
-
-
   id = 'selectBangkokTier';
-
-
-
   var selectBangkokTier = makeElement('select', rhs, {'id':id, 'title':title, 'style':'margin-left:0.5em;'});
   choiceBangkokTier = document.createElement('option');
   choiceBangkokTier.text = 'no Help in Bangkok';
@@ -6223,10 +6097,6 @@ function createMafiaTab() {
   label.appendChild(document.createTextNode(' Level-up bonus '));
 
   // Achievement bonus
-
-
-
-
   title = 'Automatically post achievement bonus.';
   id = 'autoAchievementPublish';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
@@ -6274,7 +6144,7 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Wishlist every: '));
-  title = 'Enter the number of hours to wait before sharing wishlist again.';
+  title = 'Enter the number of hours to wait before sharing wishlist again. Has to be at least 1 hour, and can be decimal (e.g. 1.5).';
   id = 'autoShareWishlistTime';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '1'), 'title':title, 'id':id, 'size':'2'});
   rhs.appendChild(document.createTextNode(' hour(s)'));
@@ -6463,11 +6333,6 @@ function createMafiaTab() {
   var warList = makeElement('textarea', rhs, {'style':'width: 12em; height: 6em;', 'id':id, 'title':'Enter each Mafia Wars ID on a separate line. This will not work with the Facebook ID.'});
   warList.appendChild(document.createTextNode(GM_getValue('autoWarTargetList', '')));
   makeElement('br', rhs, {'class':'hide'});
-
-
-
-
-
 
   // Hide list if war mode is random
   var warModeHandler = function () {
@@ -6893,32 +6758,6 @@ function createEnergyTab() {
   id = 'autoEnergyPackForcePts';
   label.appendChild(document.createTextNode(' Full packs @ points '));
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: #781351;', 'value':GM_getValue('autoEnergyPackForcePts', '0'), 'size':'1'});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // Maniac character type?
   item = makeElement('div', list);
@@ -7688,11 +7527,7 @@ function createStaminaSubTab_SetBounties(staminaTabSub) {
 }
 
 function createStaminaSubTab_Random(staminaTabSub) {
-
   GM_setValue('fightrob', 'unchecked')  ;
-
-
-
 
   // Stamina Spend choice setting
   var SpendModes = GM_getValue('randomSpendModes');
@@ -8536,16 +8371,12 @@ function validateStaminaTab() {
       break;
 
     case STAMINA_HOW_RANDOM: // Random stamina spending
-
-
-
       var spendModes="";
       var spendModesChecked=document.getElementsByName("randomSpendModes[]");
       for (var i=0;i<spendModesChecked.length;++i){
         if(spendModesChecked[i].checked) {
           spendModes+='1';
-        }
-        else {
+        } else {
           spendModes+='0';
         }
       }
@@ -8555,10 +8386,8 @@ function validateStaminaTab() {
       var randomCitiesChecked=document.getElementsByName("randomFightLocations[]");
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
-
           randomCities+='1';
-        }
-        else {
+        } else {
           randomCities+='0';
         }
       }
@@ -8569,8 +8398,7 @@ function validateStaminaTab() {
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
           randomCities+='1';
-        }
-        else {
+        } else {
           randomCities+='0';
         }
       }
@@ -8581,8 +8409,7 @@ function validateStaminaTab() {
       for (var i=0;i<randomCitiesChecked.length;++i){
         if(randomCitiesChecked[i].checked) {
           randomCities+='1';
-        }
-        else {
+        } else {
           randomCities+='0';
         }
       }
@@ -8597,7 +8424,6 @@ function validateStaminaTab() {
 
   return s;
 }
-
 
 function createStatWindow() {
   if (settingsOpen === true) {
@@ -9063,18 +8889,10 @@ function handlePublishing() {
   fetchPubOptions();
   if (GM_getValue('isRunning')) {
     try {
-
       // Publishing/skipping posts
-      var skipElt = xpathFirst('//input[@id="cancel"]');
-      var pubElt = xpathFirst('//input[@id="publish"]');
-      var okElt = xpathFirst('//input[@id="okay"]');
-
-      /*DEBUG('Publish: Checking for items to publish!');
-      // If none of these buttons are present, then we can't possibly click them!
-      if (!skipElt && !pubElt && !okElt) {
-        DEBUG('Publish: No publishing buttons found!');
-        return false;
-      }*/
+      var skipElt = xpathFirst('//input[@type="submit" and @name="cancel"]');
+      var pubElt = xpathFirst('//input[@type="submit" and @name="publish"]');
+      var okElt = xpathFirst('//input[@type="submit" and @name="error_ok"]');
 
       // If OK button is found, close the window by pressing it
       if (okElt) {
@@ -9085,7 +8903,8 @@ function handlePublishing() {
       //    (2) It's been 10 seconds since the post window loaded
       // Then close the window
       } else if (!pubElt || !timeLeftGM('postTimer')) {
-        clickElement(skipElt);
+        if (skipElt) { DEBUG('Publish: Clicked Skip'); clickElement(skipElt); }
+        else DEBUG('Publish: Found no skip button');
       }
 
       // Perform publishing logic once posting buttons have loaded
@@ -9506,7 +9325,7 @@ function refreshMWAPCSS() {
     var mwapCSS = '';
     if (cssElt) mwapCSS = cssElt.innerHTML;
     var newCSS = 'html { overflow-y: auto !important } body { background: black; text-align: left; }' +
-                 ' #mainDiv {position: absolute; top: 0px; width:755px;} div.app {padding:0; width:746px;}' +
+                 ' #mainDiv {position: absolute; top: 0px; width:758px;} div.app {padding:0; width:746px;}' +
 
                  // Elevate freegift friendlist box:
                  ' #request_form_interstitial_exclude_type_3  {z-index: 10000;}' +
@@ -9518,56 +9337,56 @@ function refreshMWAPCSS() {
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
-                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 10px !important; left: 755px !important; width: 45px; z-index: 100 !important;}' +
-                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; width: 45px; z-index: 100 !important;}' +
-                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; width: 45px; z-index: 100 !important;}') +
+                  ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
+                    ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
 
                  // Move Slot Machine and click box:
                  (isGMChecked('HideSlotMachine') ?
                   ' #slots_icon_container  {display: none;}' +
                   ' #slots_icon_cover      {display: none;}' :
-                  ' #slots_icon_container  {position: absolute; top: 265px; left: 755px; width: 22px; z-index: 99;} ' +
-                  ' #slots_icon_cover      {position: absolute; top: 265px; left: 755px; width: 22px; z-index: 100;} ') +
+                  ' #slots_icon_container  {position: absolute; top: 265px; left: 755px; z-index: 99;} ' +
+                  ' #slots_icon_cover      {position: absolute; top: 265px; left: 755px; z-index: 100;} ') +
 
                  // Move Zynga selling Promo icon and click box and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                   ' #buyframe_link_container  {display: none;}' +
                   ' #buyframe_link_cover      {display: none;}' :
-                  ' #buyframe_link_container  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 100;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
-                  ' #buyframe_link_cover      {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 100;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
+                  ' #buyframe_link_container  {position: absolute; top: 50px; left: 755px; z-index: 100;} '  +
+                  ' #buyframe_link_cover      {position: absolute; top: 50px; left: 755px; z-index: 100;} ') +
 
                  // Move other Zynga selling Promo icon and click box and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                   ' #buyframe_link_container_anim  {display: none;}' +
                   ' #buyframe_link_cover_anim      {display: none;}' :
-                  ' #buyframe_link_container_anim  {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 100;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} '  +
-                  ' #buyframe_link_cover_anim      {position: absolute; top: 50px; left: 755px; width: 22px; z-index: 100;} img[src="http://mwfb.static.zynga.com/mwfb/graphics/rp_icon_old.png"] {width: 22px;} ') +
+                  ' #buyframe_link_container_anim  {position: absolute; top: 50px; left: 755px; z-index: 100;} '  +
+                  ' #buyframe_link_cover_anim      {position: absolute; top: 50px; left: 755px; z-index: 100;} ') +
 
                 // Move Promo and make it smaller:
                 (isGMChecked('hidePromoIcon') ?
                   ' #promoicon_container {display: none;}' :
-                  ' #promoicon_container {position: absolute; top:  100px;  left: 755px; width: 12px; z-index: 100;} {width: 22px;} ') +
+                  ' #promoicon_container {position: absolute; top: 100px; left: 755px; z-index: 100;} ') +
 
                 // Move World Cup Promo icon and make it smaller:
                  (isGMChecked('hidePromoIcon') ?
                     ' #gc_collectible_container {display: none;}' :
-                    ' #gc_collectible_container {position: absolute; top: 145px; left: 755px; width: 22px; z-index: 100;} ') +
+                    ' #gc_collectible_container {position: absolute; top: 145px; left: 755px; z-index: 100;} ') +
 
                 // Move zstream  icon and make it smaller:
                  (isGMChecked('hideLiveUpdatesIcon') ?
                    ' #zstream_icon {display: none;}' :
-                   ' #zstream_icon {position: absolute; top: 10px; left: 305px; width: 22px; z-index: 100;} ') +
+                   ' #zstream_icon {position: absolute; top: 10px; left: 305px; z-index: 100;} ') +
 
                 // Hide Icon Row (header_mid_row) - This is the part containing all the icons (messege center, promo, live updates):
                 (isGMChecked('hideIconRow') ?
                   ' .header_mid_row div.header_various {display: none;}' :
-                  ' .header_mid_row div.header_various {position: absolute; top:  1px;  left: 825px; width: 12px; z-index: 100;} {width: 22px;} ') +
+                  ' .header_mid_row div.header_various {position: absolute; top: 1px; left: 825px; width: 12px; z-index: 100;} ') +
 
                 // Move gift icon and make it smaller:
                  (isGMChecked('hideGiftIcon') ?
                    ' #gifticon_container {display: none;}' :
-                   ' #gifticon_container {position: absolute; top: 220px; left: 755px; width: 12px; z-index: 100;}  ') +
+                   ' #gifticon_container {position: absolute; top: 220px; left: 755px; z-index: 100;}  ') +
 
                  // Move London Countdown:
                  ' div[style$="position: absolute; left: 30px; top: 180px; font-size: 10px; color: rgb(255, 204, 0);"] {top:163px !important;}' +
@@ -9628,23 +9447,15 @@ function refreshMWAPCSS() {
                  '#settingsBox select,#settingsBox input{border:1px solid;} #settingsBox textarea{border:2px solid;}' +
                  '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
                  '#settingsBox img,#settingsBox label,#settingsBox span,#settingsBox input,#settingsBox select {vertical-align: middle;}' +
-
-
                  '#settingsBox img,#settingsBox span,#settingsBox label {position: static;}' +
                  '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, #energyTab div, #healTab div {position: static;}' +
                  '#settingsBox #generalTab select, #mafiaTab select, #displayTab select, #energyTab select, #healTab select {position: static;}' +
                  '#settingsBox #generalTab textarea, #mafiaTab textarea, #displayTab textarea, #energyTab textarea, #healTab textarea {position: static;}' +
-
                  '#settingsBox #generalTab input, #mafiaTab input, #displayTab input, #energyTab input, #healTab input {position: static; margin: 0;}' +
-
                  '#settingsBox #generalTab .lhs, #mafiaTab .lhs, #displayTab .lhs, #energyTab .lhs, #healTab .lhs {position: static; width: 35%; float: left; text-align: right; padding: 3px;}' +
-
                  '#settingsBox #generalTab .rhs, #mafiaTab .rhs, #displayTab .rhs, #energyTab .rhs, #healTab  .rhs {position: static; float: left; padding: 3px;}' +
-
                  '#settingsBox #generalTab .single, #mafiaTab .single, #displayTab .single, #energyTab .single, #healTab .single {position: static; text-align: center}' +
-
                  '#settingsBox #generalTab .hide, #mafiaTab .hide, #displayTab .hide, #energyTab .hide, #healTab .hide {clear: both; visibility: hidden;}' +
-
                  '#settingsBox #staminaTab div {position: static;}' +
                  '#settingsBox #staminaTab img, span, label {position: static;}' +
                  '#settingsBox #staminaTab select {position: static;}' +
@@ -10022,12 +9833,17 @@ function customizeMasthead() {
     linklist = document.getElementById('linklist');
     linklist.style.width = "200px";
 
+    // Check Las Vegas Vault (MWAP menu)
+    var lobjcheckVault = makeElement('li', null, {'id':'checkVault'});
+    lobjcheckVault.innerHTML = '<a id="checkVault">Check Las Vegas Vault</a>';
+    lobjcheckVault.addEventListener('click', checkVaultStatus, false);
+    linklist.insertBefore(lobjcheckVault, linklist.firstChild);
+
     // Reset Timers (MWAP menu)
     var lobjresetTimers = makeElement('li', null, {'id':'resetTimers'});
     lobjresetTimers.innerHTML = '<a id="resetTimers">Reset Timers</a>';
     lobjresetTimers.addEventListener('click', resetTimers, false);
     linklist.insertBefore(lobjresetTimers, linklist.firstChild);
-
     // Show Timers (MWAP menu)
     var lobjshowTimers = makeElement('li', null, {'id':'showTimers'});
     lobjshowTimers.innerHTML = '<a id="showTimers">Show Timers</a>';
@@ -10074,6 +9890,12 @@ function customizeMasthead() {
                        '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
+    // Check Las Vegas Vault (MWAP menu)
+    var lobjcheckVault = makeElement('a', null, {'id':'checkVault'});
+    lobjcheckVault.innerHTML = '<div class="sexy_destination middle"><span id="checkVault">Check Las Vegas Vault</span></div>';
+    lobjcheckVault.addEventListener('click', checkVaultStatus, false);
+    helpMenu.insertBefore(lobjcheckVault, helpMenu.firstChild);
+
     // Reset Timers (MWAP menu)
     var lobjresetTimers = makeElement('a', null, {'id':'resetTimers'});
     lobjresetTimers.innerHTML = '<div class="sexy_destination middle"> ' +
@@ -10117,8 +9939,8 @@ function customizeStats() {
   setListenStats(false);
 
   // Show points until next level.
-  var elt = xpathFirst('.//div[@id="user_stats"]//span[@class="stat_title" and contains(text(),"Experience")]', appLayoutElt);
-  if (!elt) elt = xpathFirst('.//div[@id="user_stats"]//h4[@class="experience" and contains(text(), "Experience")]', appLayoutElt);
+  var elt = xpathFirst('.//div[@id="user_stats"]//h4[@class="experience" and contains(text(), "Experience")]', appLayoutElt);
+  if (!elt) elt = xpathFirst('.//div[@id="user_stats"]//span[@class="stat_title" and contains(text(),"Experience")]', appLayoutElt);
   if (elt) {
     elt.innerHTML = 'Experience (' + (ptsToNextLevel > 0? '-' : '+') + Math.abs(ptsToNextLevel) + ')';
   }
@@ -10137,9 +9959,9 @@ function customizeStats() {
   var nrgLinkElt = document.getElementById('mwap_nrg');
   var nrgElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text energy_text_bg" and contains(text(), "ENERGY")]', appLayoutElt);
   if (!nrgElt)
-    nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', appLayoutElt);
-  if (!nrgElt)
     nrgElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="energy" and contains(text(), "Energy")]', appLayoutElt);
+  if (!nrgElt)
+    nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', appLayoutElt);
   if (nrgElt && !nrgLinkElt) {
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0) var miniPackTitle = 'Mini-Pack available now.';
@@ -10160,9 +9982,9 @@ function customizeStats() {
   var stamLinkElt = document.getElementById('mwap_stam');
   var stamElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text stamina_text_bg" and contains(text(), "STAMINA")]', appLayoutElt);
   if (!stamElt)
-    stamElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Stamina")]', appLayoutElt);
-  if (!stamElt)
     stamElt = xpathFirst('.//div[@id="game_stats"]//h4[contains(text(), "Stamina")]', appLayoutElt);
+  if (!stamElt)
+    stamElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Stamina")]', appLayoutElt);
   if (stamElt && !stamLinkElt) {
     var stamTitle = 'Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal') + ' points.';
     stamElt.style.color="#FF0000";
@@ -10170,18 +9992,16 @@ function customizeStats() {
     stamLinkElt = makeElement('a', null, {'id':'mwap_stam', 'title':stamTitle});
     stamElt.parentNode.insertBefore(stamLinkElt, stamElt);
     stamLinkElt.appendChild(stamElt);
-    stamLinkElt.addEventListener('click', checkVaultStatus, false);
   }
 
   // Make health icon&text clickable for instant healing.
   var hospitalElt = xpathFirst('.//div[@id="game_stats"]//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
-  var healLinkHref = 'http://mwfb.zynga.com/mwfb' + SCRIPT.controller + 'hospital' + SCRIPT.action + 'heal' + SCRIPT.city + (city + 1);
   var healLinkElt = document.getElementById('mwap_heal');
   var healElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text health_text_bg" and contains(text(), "HEALTH")]', appLayoutElt);
   if (!healElt)
-    healElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Health")]', appLayoutElt);
-  if (!healElt)
     healElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="health" and contains(text(), "Health")]', appLayoutElt);
+  if (!healElt)
+    healElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Health")]', appLayoutElt);
   if (healElt) {
     if (!healLinkElt) {
       healElt.style.color="#FF0000";
@@ -10190,12 +10010,6 @@ function customizeStats() {
       healElt.parentNode.insertBefore(healLinkElt, healElt);
       healLinkElt.appendChild(healElt);
     }
-    // Substitute AJAX navigation if code is available.
-    healLinkElt.href = healLinkHref;
-    if (hospitalElt)
-      // Make instant heal work without switching pages.
-      healLinkElt.setAttribute('onclick', hospitalElt.getAttribute('onclick').replace('view', 'heal').replace('popup_fodder', SCRIPT.ajaxPage));
-
     // Substitute the "hide" icon if currently hiding in the hospital.
     var hidingInHospital = /transparent url/i.test(healElt.getAttribute('style'));
     if (health < 20 && isGMChecked('hideInHospital')) {
@@ -10206,6 +10020,13 @@ function customizeStats() {
     } else if (hidingInHospital) {
       healElt.style.background = '';
       healElt.title = 'Click to heal immediately.';
+    }
+    // Substitute AJAX navigation if code is available.
+    //healLinkElt.href = 'http://mwfb.zynga.com/mwfb' + SCRIPT.controller + 'hospital' + SCRIPT.action + 'heal' + SCRIPT.city + (city + 1);
+    if (hospitalElt) {
+      // Make instant heal work without switching pages.
+      //healLinkElt.setAttribute('onclick', hospitalElt.getAttribute('onclick').replace('view', 'heal').replace('popup_fodder', SCRIPT.ajaxPage));
+      healLinkElt.addEventListener('click', quickHeal, false);
     }
   }
 
@@ -10223,6 +10044,38 @@ function customizeStats() {
   }
 
   setListenStats(true);
+}
+
+function quickHeal(healCity) {
+  var byUser = false;
+  if (isNaN(healCity)) {
+    byUser = true;
+    healCity = city;
+  }
+
+  if (!byUser) {
+    // Do not quick-heal if city has changed
+    if (city != healCity) {
+      DEBUG('Switching city too fast, not quick-healing.');
+      return;
+    }
+    // One last check to make sure the city hasn't changed
+    var eltBankCity = xpathFirst('.//a[@class="bank_deposit"]', appLayoutElt);
+    if (eltBankCity) {
+      if (eltBankCity.getAttribute('onclick').match(/xw_city=(\d+)/)) {
+        var thisCity = RegExp.$1 - 1;
+        if (thisCity != healCity) {
+          addToLog('warning Icon', 'Quickhealing Error: Current City: ' + cities[thisCity][CITY_NAME] + ' Expected City: ' + cities[healCity][CITY_NAME]);
+          return false;
+        }
+      }
+    }
+  }
+
+  var jsonElt = getJSONPage(true, 'quick heal');
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","' + SCRIPT.controller + 'hospital' + SCRIPT.action + 'heal' + SCRIPT.city + (healCity + 1) + '", 1, 1, 0, 0); return false;'});
+  clickElement(elt);
+  return;
 }
 
 function quickBank(bankCity, amount) {
@@ -10507,7 +10360,7 @@ function customizeProfile() {
         };
         loadUrl (getHitUrl(remoteuserid), urlLoaded);*/
         var jsonElt = getJSONPage(true, 'ice check');
-        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + getHitUrl(remoteuserid) + '", 1, 1, 0, 0); return false;'});
+        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + remoteuserid + '", 1, 1, 0, 0); return false;'});
         clickElement(elt);
       }
       // Don't continue if buttons already there
@@ -10947,8 +10800,8 @@ function customizeVegasJobs() {
     }*/
   }
 
-  /* Highlight the best and worst jobs.
   var elt;
+  /* Highlight the best and worst jobs.
   if (worstRatio != bestRatio) {
     while (bestJobs.length) {
       elt = bestJobs.pop();
@@ -12113,14 +11966,12 @@ BrowserDetect.init();
         'Hide Collections: <strong>'+ showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
 
-
-
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
-		'Loot filter: <strong>' + GM_getValue('filterLootOpt') + '</strong><br>' +
+        'Loot filter: <strong>' + GM_getValue('filterLootOpt') + '</strong><br>' +
         '---------------------Mafia Tab--------------------<br>' +
         'Automatically asks for job help: <strong>' + showIfUnchecked(GM_getValue('autoAskJobHelp')) + '</strong><br>' +
         'Ask for Moscow help: <strong>' + GM_getValue('selectMoscowTier') + '</strong><br>' +
@@ -12845,27 +12696,26 @@ function autoLotto() {
 }
 
 function autoWishlist() {
-  var shareWishlist = GM_getValue('autoShareWishlistTime');
-
+  var shareWishlist = parseFloat(GM_getValue('autoShareWishlistTime', '1'));
   // Go to the wishlist.
-  elt = xpathFirst('//div[@class="nav_link profile_link"]//a');
-  eltWishlist = xpathFirst('//a[contains(.,"Share Wishlist with Your Friends")]');
+  var elt = xpathFirst('//div[@class="nav_link profile_link"]//a');
+  var wishlistElt = xpathFirst('.//div[@id="wishlist_share_button"]', innerPageElt);
   if (elt) {
     clickElement(elt);
     DEBUG('Redirecting to post wishlist');
 
-    if (eltWishlist) {
-      if (shareWishlist > 0) {
-        clickElement(eltWishlist);
-        DEBUG('Clicked to post wishlist.');
-        addToLog('info Icon','Clicked to share wishlist, sharing again in '+shareWishlist+' hour(s)');
-        if(shareWishlist == 1)
-          setGMTime('wishListTimer', '1 hour');
-        else
-          setGMTime('wishListTimer', shareWishlist + ' hours');
+    if (wishlistElt) {
+      var buttonElt = xpathFirst('.//a', wishlistElt);
+      if (buttonElt) {
+          clickElement(buttonElt);
+          addToLog('info Icon','Clicked to share wishlist, sharing again in '+shareWishlist+' hour(s)');
+          if(shareWishlist == 1)
+            setGMTime('wishListTimer', '1 hour');
+          else
+            setGMTime('wishListTimer', shareWishlist + ' hours');
       } else {
-        addToLog('warning Icon', 'Please increase wishlist sharing time.');
-        setGMTime('wishListTimer', '1 hour');
+        addToLog('warning Icon', 'Unable to share your wishlist, will try later.');
+        setGMTime('wishListTimer', '05:00');
       }
     }
   }
@@ -14636,8 +14486,7 @@ function randomizeStamina() {
     //if (spendMode != newStaminaMode) {
       newStaminaMode = spendMode;
       DEBUG('Stamina Spend Mode : ' + staminaSpendChoices[spendMode]);
-    }
-    else {
+    } else {
       DEBUG('Stamina Spend Mode did not qualify');
     }
 
@@ -14652,17 +14501,7 @@ function randomizeStamina() {
         GM_setValue('fightLocation', stamLoc);
         DEBUG('Fight location set to : ' + cities[stamLoc][CITY_NAME]);
         break;
-      }
-
-
-
-
-
-
-
-
-
-      else {
+      } else {
         DEBUG('Fight location did not qualify');
       }
     }
@@ -14693,8 +14532,7 @@ function randomizeStamina() {
         GM_setValue('hitmanLocation', stamLoc);
         DEBUG('Hitman location set to : ' + cities[stamLoc][CITY_NAME]);
         break;
-      }
-      else {
+      } else {
         DEBUG('Hitman location did not qualify');
       }
     }
@@ -14703,6 +14541,7 @@ function randomizeStamina() {
 
 // Handle our private JSON response page.
 function getJSONPage(create, action, context) {
+  //function do_ajax(div, url, liteLoad, alignTop, precall, callback, callback_params, noIncrement)
   var elt = document.getElementById(SCRIPT.ajaxResult);
   if (!elt && create) {
     elt = makeElement('div', null, {'id':SCRIPT.ajaxResult, 'style':'display: none;'});
@@ -14711,7 +14550,7 @@ function getJSONPage(create, action, context) {
     if (context != null)
       elt.setAttribute('context', context);
     //elt.addEventListener('DOMSubtreeModified', logJSONResponse, false);
-    document.getElementById('inner_page').parentNode.appendChild(elt);
+    document.getElementById('mainDiv').appendChild(elt);
   }
   return !elt ? null : elt;
 }
@@ -14746,6 +14585,24 @@ function logJSONResponse(jsonElt) {
 
   try {
     switch (action) {
+      // Log quickHeal() response.
+      case 'quick heal':
+        var respJSON = eval ('(' + responseText + ')');
+        var respTxt = respJSON['hospital_message'];
+        // Attempt to correct the displayed health value
+        if (healthElt && responseText.match(/,"user_health":([0-9]+),/i)) {
+          healthElt.innerHTML = RegExp.$1;
+        }
+        if (respTxt.match(/the doctor healed ([0-9]+) health (.+)/i)) {
+          //GM_setValue('healWaitStarted',false);
+          var addHealth = RegExp.$1;
+          var cost = RegExp.$2.match(REGEX_CASH);
+          addToLog('health Icon', '<span style="color:#FF9999;">' + 'Quickheal: +'+ addHealth + ' health for <span class="expense">' + cost + '</span>.</span>');
+        } else if (/you cannot heal so fast/i.test(respTxt)) {
+          addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
+        }
+        break;
+
       // Log Ice Check response.
       case 'ice check':
         var alive = !/You can't add/.test(responseText);
@@ -15945,8 +15802,7 @@ function getMWUrl (server, params) {
 }
 
 function getHitUrl (targetId) {
-  return "xw_controller=hitlist&xw_action=set&target_id=" + targetId;
-  //return getMWUrl ('html_server', {'xw_controller':'hitlist', 'xw_action':'set', 'target_id':targetId});
+  return getMWUrl ('html_server', {'xw_controller':'hitlist', 'xw_action':'set', 'target_id':targetId});
 }
 
 function getProfileUrl (userId) {
