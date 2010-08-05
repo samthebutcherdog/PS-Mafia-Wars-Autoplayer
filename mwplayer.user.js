@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.611
+// @version     1.1.612
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.611',
+  version: '1.1.612',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8800,7 +8800,7 @@ function cleanLoot(strType, sortLootType) {
     }
     eltRow = nextItem;
     var txtData = eltRow.innerHTML.clean().trim();
-  } while (txtData != strTerminus);
+  } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 }
 
 function sortAttack(colLoot) {
