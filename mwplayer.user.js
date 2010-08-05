@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.613
+// @version     1.1.614
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.613',
+  version: '1.1.614',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1555,7 +1555,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     'Touristy Desert Rat', 'Local Desert Rat', 'Professional Desert Rat', 'Big Time Desert Rat',
     'Apprentice Bully', 'Skilled Bully', 'Master Bully','Apprentice Brute', 'Skilled Brute', 'Master Brute','Apprentice Hunter', 'Skilled Hunter', 'Master Hunter',
     'Apprentice Slayer', 'Skilled Slayer', 'Master Slayer','Apprentice Killer', 'Skilled Killer', 'Master Killer','Apprentice Executioner', 'Skilled Executioner', 'Master Executioner',
-    'Apprentice  Assassin', 'Skilled  Assassin', 'Master  Assassin',
+    'Apprentice Assassin', 'Skilled Assassin', 'Master Assassin',
     'Apprentice Burglar', 'Burglar', 'Master Burglar', 'Apprentice Robber', 'Robber', 'Master Robber', 'Apprentice Thief', 'Thief', 'Master Thief', 'Grand Master Thief',
     'Trainee', 'Sparring Partner', 'Novice', 'Journeyman', 'Fighter', 'Boxer', 'Contender', 'Finalist', 'Champion', 'World Champion'
   );
@@ -4443,10 +4443,10 @@ function saveDefaultSettings() {
   GM_setValue('fightClanName', defaultClans.join('\n'));
   GM_setValue('hitmanClanName', defaultClans.join('\n'));
 
-  GM_setValue(randomFightLocations,'00000');
-  GM_setValue(randomRobLocations,'00000');
-  GM_setValue(randomHitmanLocations,'00000');
-  GM_setValue(randomSpendModes,'0000');
+  GM_setValue(randomFightLocations,'10000');
+  GM_setValue(randomRobLocations,'10000');
+  GM_setValue(randomHitmanLocations,'10000');
+  GM_setValue(randomSpendModes,'1000');
 
   GM_setValue('robLocation', NY);
   GM_setValue('selectStaminaKeep', 0);
