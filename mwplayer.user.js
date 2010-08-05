@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.612
+// @version     1.1.613
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.612',
+  version: '1.1.613',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1538,6 +1538,28 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['North Las Vegas','Paradise City','The Lower Strip','Shogun Casino','Mojave Desert']
   );
 
+  var mwTitles = new Array(
+    'Street Thug', 'Skilled Street Thug', 'Master Street Thug', 'Associate', 'Skilled Associate', 'Master Associate', 'Soldier', 'Skilled Soldier', 'Master Soldier',
+    'Enforcer', 'Skilled Enforcer', 'Master Enforcer', 'Hitman', 'Skilled Hitman', 'Master Hitman', 'Capo', 'Skilled Capo', 'Master Capo',
+    'Consigliere', 'Skilled Consigliere', 'Master Consigliere', 'Underboss', 'Skilled Underboss', 'Master Underboss', 'Boss', 'Skilled Boss', 'Master Boss',
+    'El Soldado', 'El Soldado Experto', 'El Soldado Principal', 'El Capitan', 'El Capitan Experto', 'El Capitan Principal', 'El Jefe', 'El Jefe Experto', 'El Jefe Principal',
+    'El Patron', 'El Patron Experto', 'El Patron Principal', 'El Padrino', 'El Padrino Experto', 'El Padrino Principal', 'El Cacique', 'El Cacique Experto', 'El Cacique Principal',
+    'Baklan', 'Umelyj Baklan', 'Matyoryj Baklan', 'Boets', 'Umelyj Boets', 'Matyoryj Boets', 'Brigadir', 'Umelyj Brigadir', 'Matyoryj Brigadir',
+    'Avtoritet', 'Umelyj Avtoritet', 'Matyoryj Avtoritet', 'Vor', 'Umelyj Vor', 'Matyoryj Vor', 'Pakhan', 'Umelyj Pakhan', 'Matyoryj Pakhan',
+    'Brawler', 'Apprentice Brawler', 'Skilled Brawler', 'Master Brawler', 'Criminal', 'Apprentice Criminal', 'Skilled Criminal', 'Master Criminal',
+    'Pirate', 'Apprentice Pirate', 'Skilled Pirate', 'Master Pirate', 'Commandant', 'Apprentice Commandant', 'Skilled Commandant', 'Master Commandant',
+    'Oyabun', 'Apprentice Oyabun', 'Skilled Oyabun', 'Master Oyabun', 'Dragon Head', 'Apprentice Dragon Head', 'Skilled Dragon Head', 'Master Dragon Head',
+    'Burglar','Apprentice Burglar', 'Skilled Burglar', 'Master Burglar', 'Saboteur', 'Apprentice Saboteur', 'Skilled Saboteur', 'Master Saboteur',
+    'Touristy Bandito', 'Local Bandito', 'Professional Bandito', 'Big Time Bandito', 'Touristy Hustler', 'Local Hustler', 'Professional Hustler', 'Big Time Hustler',
+    'Touristy Cowboy', 'Local Cowboy', 'Professional Cowboy', 'Big Time Cowboy', 'Touristy Maverick', 'Local Maverick', 'Professional Maverick', 'Big Time Maverick',
+    'Touristy Desert Rat', 'Local Desert Rat', 'Professional Desert Rat', 'Big Time Desert Rat',
+    'Apprentice Bully', 'Skilled Bully', 'Master Bully','Apprentice Brute', 'Skilled Brute', 'Master Brute','Apprentice Hunter', 'Skilled Hunter', 'Master Hunter',
+    'Apprentice Slayer', 'Skilled Slayer', 'Master Slayer','Apprentice Killer', 'Skilled Killer', 'Master Killer','Apprentice Executioner', 'Skilled Executioner', 'Master Executioner',
+    'Apprentice  Assassin', 'Skilled  Assassin', 'Master  Assassin',
+    'Apprentice Burglar', 'Burglar', 'Master Burglar', 'Apprentice Robber', 'Robber', 'Master Robber', 'Apprentice Thief', 'Thief', 'Master Thief', 'Grand Master Thief',
+    'Trainee', 'Sparring Partner', 'Novice', 'Journeyman', 'Fighter', 'Boxer', 'Contender', 'Finalist', 'Champion', 'World Champion'
+  );
+  
   const CHOICE_JOBNO   = 0;
   const CHOICE_JOBNAME = 1;
   const CHOICE_CITY    = 2;
@@ -2016,6 +2038,7 @@ function doAutoPlay () {
   if (running && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
   }
+    
 
   // Auto-lotto (limit to level 7 and above)
   if (running && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
@@ -2047,6 +2070,11 @@ function doAutoPlay () {
     if (autoMainframe()) return;
   }
 
+  // Auto-Enforce title
+  if (running && !maxed && GM_getValue('autoEnforcedTitle')!='' && !timeLeftGM('autoEnforcedTitleTimer')) {
+    if (autoEnforce()) return;
+  }
+  
   // Auto-GiftAccept
   if (running && !maxed && isGMChecked('autoGiftAccept') && hasHome) {
     if (autoGiftQueue()) return;
@@ -2604,6 +2632,97 @@ function autoStat() {
     return false;
   }
 }
+
+var shareWishlist = parseFloat(GM_getValue('autoShareWishlistTime', '1'));
+  // Go to the wishlist.
+  var elt = xpathFirst('//div[@class="nav_link profile_link"]//a');
+  var wishlistElt = xpathFirst('.//div[@id="wishlist_share_button"]', innerPageElt);
+  if (elt) {
+    clickElement(elt);
+    DEBUG('Redirecting to post wishlist');
+
+    if (wishlistElt) {
+      var buttonElt = xpathFirst('.//a', wishlistElt);
+      if (buttonElt) {
+          clickElement(buttonElt);
+          addToLog('info Icon','Clicked to share wishlist, sharing again in '+shareWishlist+' hour(s)');
+          if(shareWishlist == 1)
+            setGMTime('wishListTimer', '1 hour');
+          else
+            setGMTime('wishListTimer', shareWishlist + ' hours');
+      } else {
+        addToLog('warning Icon', 'Unable to share your wishlist, will try later.');
+        setGMTime('wishListTimer', '05:00');
+      }
+    }
+  }
+
+
+
+function autoEnforce() {
+  // Load profile
+  if (!onProfileNav()) {
+    Autoplay.fx = goMyProfile;
+    Autoplay.start();
+    return true;
+  }
+    
+  var titleChange=0;
+  var oldindex=0;
+  var newindex=0;
+  var logtxt="";
+  
+  if (onProfileNav()) {    
+    var selectElt = xpathFirst('.//select[@name="title"]', innerPageElt);
+    if(!selectElt){
+      DEBUG('selectElt NOT found');
+    } else {
+      oldindex = selectElt.selectedIndex;
+      DEBUG('Current Selection :'+oldindex+' - '+ selectElt[oldindex].text+' trying to change to' + GM_getValue('autoEnforcedTitle'));
+      if(selectElt[oldindex].text != GM_getValue('autoEnforcedTitle') ){        
+        for(newindex = 0; newindex < selectElt.length; ++newindex) {
+          DEBUG(selectElt[newindex].text);        
+          if(selectElt[newindex].text == GM_getValue('autoEnforcedTitle')) {
+            selectElt.selectedIndex = newindex;
+            DEBUG('Title set to :'+selectElt[newindex].text);
+            titleChange=1;
+          }    
+        }       
+      } else {
+        logtxt +='MW title already set to '+ GM_getValue('autoEnforcedTitle')+'. ';
+        titleChange=2;
+      }      
+    
+      if(titleChange==1){
+        var clickElt = xpathFirst('.//input[@type="submit" and contains(@value,"Change Title")]', innerPageElt);
+        if(clickElt) {
+          DEBUG('clickElt found');
+          clickElement(clickElt);
+          DEBUG('Clicked to Change Title to '+ GM_getValue('autoEnforcedTitle'));
+          logtxt +='MW title changed to '+ GM_getValue('autoEnforcedTitle')+'. ';
+        } else {
+          DEBUG('clickElt not found');
+          logtxt +='MW title not changed - Click Button not Found. ';
+        }      
+      } else if(titleChange==0) {
+          logtxt +='Invalid MW Title or No change Needed : Title not changed. ';      
+      } 
+    }
+    
+  } else {
+    addToLog('warning Icon','BUG DETECTED: Unable to load Profile page.');    
+  }
+  
+  var autoEnforceTime = parseFloat(GM_getValue('autoEnforcedTitleTime', '1'));
+  if(autoEnforceTime == 1)
+    setGMTime('autoEnforcedTitleTimer', '1 hour');
+  else
+    setGMTime('autoEnforcedTitleTimer', autoEnforceTime + ' hours');
+  logtxt += 'Trying again in '+autoEnforceTime+' hour(s).'
+  addToLog('info Icon', logtxt);
+  return;          
+  
+}  
 
 // Get reward to cost ratio:
 function calcJobratio(job) {
@@ -4472,6 +4591,19 @@ function saveSettings() {
   for (i = 0, iLength=autoStatPrios.length; i < iLength; ++i)
     GM_setValue(autoStatPrios[i], document.getElementById(autoStatPrios[i]).value);
 
+  GM_setValue('autoEnforcedTitle', (document.getElementById('autoEnforcedTitle').value)?document.getElementById('autoEnforcedTitle').value:"");  
+  
+  // Validate autoEnforcedTitleTime
+  var autoEnforcedTitleTime = document.getElementById('autoEnforcedTitleTime').value;
+  if (isNaN(autoEnforcedTitleTime) || parseFloat(autoEnforcedTitleTime) < 1) {
+    alert('The Enforce Title timer has to be at least 1 hour. For decimal numbers please use ".", e.g. 1.5.\nDefaulting it to 1 hour.');
+    document.getElementById('autoEnforcedTitleTime').value = 2;
+    return;
+  } else {
+    GM_setValue('autoEnforcedTitleTime',autoEnforcedTitleTime);
+  }
+  
+    
   // Validate the auto-stat setting.
   var autoStatOn = (document.getElementById('autoStat').checked === true);
   for (i = 0, iLength=autoStatBases.length; i < iLength; ++i) {
@@ -6479,7 +6611,36 @@ function createAutostatTab() {
   var autoDailyChecklist = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 225px; left: 20px;'});
   makeElement('input', autoDailyChecklist, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', autoDailyChecklist, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-Daily Checklist'));
-
+  
+  // Enforce Title
+  
+  id = 'autoEnforcedTitle';
+  title = 'Change your MW title';  
+  var autoEnforcedTitleSelect = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 250px; left: 20px;width:95%;'});
+  makeElement('label', autoEnforcedTitleSelect, {'for':id, 'title':title}).appendChild(document.createTextNode('Enforce a New Title : '));
+    
+  var autoEnforcedTitle = makeElement('select', autoEnforcedTitleSelect, {'id':id, 'title':title, 'style':'margin-left:0.5em'});
+  chooseTitle = document.createElement('option');
+  chooseTitle.text = 'Do not Enfore a New Title';
+  chooseTitle.value = '';
+  if (GM_getValue('autoEnforcedTitle') == '') chooseTitle.selected = true;
+  autoEnforcedTitle.appendChild(chooseTitle);
+  
+  for(i=0, iLength = mwTitles.length;i < iLength;++i){
+    chooseTitle = document.createElement('option');
+    chooseTitle.text = mwTitles[i];
+    chooseTitle.value = mwTitles[i];
+    if (GM_getValue('autoEnforcedTitle') == mwTitles[i]) chooseTitle.selected = true;
+    autoEnforcedTitle.appendChild(chooseTitle);
+  }
+  
+  title = 'Enter the number of hours to wait before changing the title again. Has to be at least 1 hour, and can be decimal (e.g. 1.5).';
+  id = 'autoEnforcedTitleTime';
+  makeElement('label', autoEnforcedTitleSelect, {'for':id, 'title':title,'style':'margin-left: 190px;'}).appendChild(document.createTextNode(' every '));  
+  makeElement('input', autoEnforcedTitleSelect, {'type':'text', 'value':GM_getValue(id, '2'), 'title':title, 'id':id, 'size':'1'});
+  autoEnforcedTitleSelect.appendChild(document.createTextNode(' hour(s)'));  
+     
+  
   return autostatTab;
 }
 
@@ -9514,6 +9675,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
       '<br>&nbsp;&nbsp;AskforHelpBangkokTimer: ' + getHoursTime('AskforHelpBangkokTimer') +
       '<br>&nbsp;&nbsp;wishListTimer: ' + getHoursTime('wishListTimer') +
+      '<br>&nbsp;&nbsp;autoEnforcedTitleTimer: ' + getHoursTime('autoEnforcedTitleTimer') +
       '<br>&nbsp;&nbsp;warTimer: ' + getHoursTime('warTimer') +
       '<br>&nbsp;&nbsp;dailyChecklistTimer: ' + getHoursTime('dailyChecklistTimer') +
       '<br>&nbsp;&nbsp;autoGiftAcceptTimer: ' + getHoursTime('autoGiftAcceptTimer') +
@@ -9531,6 +9693,8 @@ function resetTimers(popup) {
   addToLog('warning Icon', 'All active timers have been reset.');
   if (timeLeftGM('miniPackTimer')<3600) GM_setValue('miniPackTimer', 0);
   if (timeLeftGM('wishListTimer')<3600) GM_setValue('wishListTimer', 0);
+  //if (timeLeftGM('autoEnforcedTitleTimer')<3600)
+  GM_setValue('autoEnforcedTitleTimer', 0);
   if (timeLeftGM('warTimer')<900) GM_setValue('warTimer', 0);
   if (timeLeftGM('buildCarTimer')<900) GM_setValue('buildCarTimer', 0);
   if (timeLeftGM('buildWeaponTimer')<900) GM_setValue('buildWeaponTimer', 0);
@@ -12018,6 +12182,8 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-autoMainframeCode: <strong>' + GM_getValue('autoMainframeCode') + '</strong><br>' +
         'autoResetTimers: <strong>' + showIfUnchecked(GM_getValue('autoResetTimers')) + '</strong><br>' +
         'autoDailyChecklist: <strong>' + showIfUnchecked(GM_getValue('autoDailyChecklist')) + '</strong><br>' +
+        'autoEnforcedTitle: <strong>' + GM_getValue('autoEnforcedTitle') + '</strong><br>' +
+        '&nbsp;&nbsp;Hour interval for title enforcing: <strong>' + GM_getValue('autoEnforcedTitleTime') + '</strong><br>' +
         '-------------------Energy Tab--------------------<br>' +
         'Enable auto-mission: <strong>' + showIfUnchecked(GM_getValue('autoMission')) + '</strong><br>' +
         'Enabled job bursts: <strong>' + showIfUnchecked(GM_getValue('burstJob')) + ' == Fire ' + GM_getValue('burstJobCount') + ' job attempts everytime</strong><br>' +
