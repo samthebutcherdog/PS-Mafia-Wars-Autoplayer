@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.614
+// @version     1.1.615
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.614',
+  version: '1.1.615',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2632,32 +2632,6 @@ function autoStat() {
     return false;
   }
 }
-
-var shareWishlist = parseFloat(GM_getValue('autoShareWishlistTime', '1'));
-  // Go to the wishlist.
-  var elt = xpathFirst('//div[@class="nav_link profile_link"]//a');
-  var wishlistElt = xpathFirst('.//div[@id="wishlist_share_button"]', innerPageElt);
-  if (elt) {
-    clickElement(elt);
-    DEBUG('Redirecting to post wishlist');
-
-    if (wishlistElt) {
-      var buttonElt = xpathFirst('.//a', wishlistElt);
-      if (buttonElt) {
-          clickElement(buttonElt);
-          addToLog('info Icon','Clicked to share wishlist, sharing again in '+shareWishlist+' hour(s)');
-          if(shareWishlist == 1)
-            setGMTime('wishListTimer', '1 hour');
-          else
-            setGMTime('wishListTimer', shareWishlist + ' hours');
-      } else {
-        addToLog('warning Icon', 'Unable to share your wishlist, will try later.');
-        setGMTime('wishListTimer', '05:00');
-      }
-    }
-  }
-
-
 
 function autoEnforce() {
   // Load profile
