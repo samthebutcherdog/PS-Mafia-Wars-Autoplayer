@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.615
+// @version     1.1.616
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.615',
+  version: '1.1.616',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1103,7 +1103,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var healOptions = new Array(
     ['forceHealOpt3','Heal if stamina can be spent'],
     ['forceHealOpt4','Heal if stamina is full'],
-    ['forceHealOpt5','Heal after 5 minutes']
+    ['forceHealOpt5','Heal after 5 minutes'],
+    ['forceHealOpt6','Heal if Health is Above 19']
   );
 
   // Define all jobs. The array elements are:
@@ -1559,7 +1560,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     'Apprentice Burglar', 'Burglar', 'Master Burglar', 'Apprentice Robber', 'Robber', 'Master Robber', 'Apprentice Thief', 'Thief', 'Master Thief', 'Grand Master Thief',
     'Trainee', 'Sparring Partner', 'Novice', 'Journeyman', 'Fighter', 'Boxer', 'Contender', 'Finalist', 'Champion', 'World Champion'
   );
-  
+
   const CHOICE_JOBNO   = 0;
   const CHOICE_JOBNAME = 1;
   const CHOICE_CITY    = 2;
@@ -1990,26 +1991,25 @@ function doAutoPlay () {
   }
 
   //auto-heal area
-  DEBUG('  entering auto-heal  - 0 ') ;
+//  DEBUG('  entering auto-heal ') ;
   if (running &&
+      canForceHeal() &&
       health < maxHealth &&
       isGMChecked('autoHeal') &&
       health < GM_getValue('healthLevel', 0) &&
-      (stamina >= GM_getValue('stamina_min_heal')) &&
-//      (health > 19 || (SpendStamina.canBurn &&  stamina > 0)    || canForceHeal() )
-      ( ((health > 19) && (SpendStamina.canBurn && (stamina > 0) ) )|| canForceHeal() )
+      (stamina >= GM_getValue('stamina_min_heal'))
+//   ( ((health > 19) && (SpendStamina.canBurn && (stamina > 0) ) )|| canForceHeal() )
   ) {
-    DEBUG('auto-heal passed main block check, checking can auto heal - - 1 ');
+//    DEBUG('auto-heal passed main block check, checking can auto heal ');
     if(canautoheal()) {
-      DEBUG('auto-healing - - 7 ');
+      DEBUG('auto-healing ');
       if(autoHeal()) return;
     }
   } else {
-    DEBUG (' autoheal skipped in main loop ')
-    DEBUG(' hi ' + health + ' ' + SpendStamina.canBurn + ' ' + stamina + ' ' + canForceHeal() );
+    DEBUG(' autoheal skipped in main loop ' + health + ' ' + SpendStamina.canBurn + ' ' + stamina + ' ' + canForceHeal() );
   }
 
-  DEBUG('after auto-heal  - - X ');
+//  DEBUG('after auto-heal  - - X ');
 
   // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
   if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
@@ -2038,7 +2038,7 @@ function doAutoPlay () {
   if (running && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
   }
-    
+
 
   // Auto-lotto (limit to level 7 and above)
   if (running && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
@@ -2074,7 +2074,7 @@ function doAutoPlay () {
   if (running && !maxed && GM_getValue('autoEnforcedTitle')!='' && !timeLeftGM('autoEnforcedTitleTimer')) {
     if (autoEnforce()) return;
   }
-  
+
   // Auto-GiftAccept
   if (running && !maxed && isGMChecked('autoGiftAccept') && hasHome) {
     if (autoGiftQueue()) return;
@@ -2205,18 +2205,20 @@ function doAutoPlay () {
 function canautoheal() {
 // DEBUG('in can auto heal - - 2 ');
   if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) {
-    DEBUG('in can auto heal return false - STAMINA_HOW_FIGHTROB - 3 ');
+    DEBUG(' STAMINA_HOW_FIGHTROB  blocked autoheal ');
     return false;
   }
   if(GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) {
-    DEBUG('in can auto heal return false - STAMINA_HOW_ROBBING - 4 ');
+    DEBUG(' STAMINA_HOW_ROBBING blocked autoheal ');
     return false;
   }
-  if((GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_RANDOM) && (isGMChecked('fightrob'))) {
-    DEBUG('in can auto heal return false - STAMINA_HOW_FIGHT_RANDOM and fightrob - 5 ');
-    return false;
-  }
-  DEBUG('in can auto heal returning true - - 6 ');
+// no longer needed
+//  if((GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_RANDOM) && (isGMChecked('fightrob'))) {
+//    DEBUG('in can auto heal return false - STAMINA_HOW_FIGHT_RANDOM and fightrob - 5 ');
+//    return false;
+//  }
+
+//  DEBUG('canautoheal is allowing healing ');
   return true;
 }
 
@@ -2315,7 +2317,6 @@ function autoHeal() {
       return false;
     }
   }
-  DEBUG(' in autoheal routine -3 ');
 
   // Found a heal link. Click it.
   Autoplay.fx = function() {
@@ -2640,33 +2641,33 @@ function autoEnforce() {
     Autoplay.start();
     return true;
   }
-    
+
   var titleChange=0;
   var oldindex=0;
   var newindex=0;
   var logtxt="";
-  
-  if (onProfileNav()) {    
+
+  if (onProfileNav()) {
     var selectElt = xpathFirst('.//select[@name="title"]', innerPageElt);
     if(!selectElt){
       DEBUG('selectElt NOT found');
     } else {
       oldindex = selectElt.selectedIndex;
       DEBUG('Current Selection :'+oldindex+' - '+ selectElt[oldindex].text+' trying to change to' + GM_getValue('autoEnforcedTitle'));
-      if(selectElt[oldindex].text != GM_getValue('autoEnforcedTitle') ){        
+      if(selectElt[oldindex].text != GM_getValue('autoEnforcedTitle') ){
         for(newindex = 0; newindex < selectElt.length; ++newindex) {
-          DEBUG(selectElt[newindex].text);        
+          DEBUG(selectElt[newindex].text);
           if(selectElt[newindex].text == GM_getValue('autoEnforcedTitle')) {
             selectElt.selectedIndex = newindex;
             DEBUG('Title set to :'+selectElt[newindex].text);
             titleChange=1;
-          }    
-        }       
+          }
+        }
       } else {
         logtxt +='MW title already set to '+ GM_getValue('autoEnforcedTitle')+'. ';
         titleChange=2;
-      }      
-    
+      }
+
       if(titleChange==1){
         var clickElt = xpathFirst('.//input[@type="submit" and contains(@value,"Change Title")]', innerPageElt);
         if(clickElt) {
@@ -2677,16 +2678,16 @@ function autoEnforce() {
         } else {
           DEBUG('clickElt not found');
           logtxt +='MW title not changed - Click Button not Found. ';
-        }      
+        }
       } else if(titleChange==0) {
-          logtxt +='Invalid MW Title or No change Needed : Title not changed. ';      
-      } 
+          logtxt +='Invalid MW Title or No change Needed : Title not changed. ';
+      }
     }
-    
+
   } else {
-    addToLog('warning Icon','BUG DETECTED: Unable to load Profile page.');    
+    addToLog('warning Icon','BUG DETECTED: Unable to load Profile page.');
   }
-  
+
   var autoEnforceTime = parseFloat(GM_getValue('autoEnforcedTitleTime', '1'));
   if(autoEnforceTime == 1)
     setGMTime('autoEnforcedTitleTimer', '1 hour');
@@ -2694,9 +2695,9 @@ function autoEnforce() {
     setGMTime('autoEnforcedTitleTimer', autoEnforceTime + ' hours');
   logtxt += 'Trying again in '+autoEnforceTime+' hour(s).'
   addToLog('info Icon', logtxt);
-  return;          
-  
-}  
+  return;
+
+}
 
 // Get reward to cost ratio:
 function calcJobratio(job) {
@@ -2964,7 +2965,11 @@ function canForceHeal() {
   if (isGMChecked('forceHealOpt5') && GM_getValue('healWaitStarted') && !timeLeftGM('healWaitTime')) {
     return true;
   }
+  // Heal when health is above 19
+  if (isGMChecked('forceHealOpt6') && health > 19)
+    return true;
 
+  DEBUG( 'stopped  from healing in canforceheal ');
   return false;
 }
 
@@ -2982,9 +2987,9 @@ function canSpendStamina(minHealth) {
       case STAMINA_HOW_ROBBING:
         minHealth = 0;
       //mychangestamina
-      case STAMINA_HOW_FIGHT_RANDOM:
+//      case STAMINA_HOW_FIGHT_RANDOM:
       case STAMINA_HOW_FIGHTROB:
-        if((isGMChecked('fightrob')) && ( stamina > 25) ) {
+        if( stamina > 25)  {
 //          DEBUG(' -- fight rob checked in fight random -- ');
           minHealth = 0;
         }
@@ -3606,12 +3611,13 @@ function autoStaminaSpend() {
 
   var how = getStaminaMode();
   switch (how) {
+    case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:
       return autoFight(how);
 
     case STAMINA_HOW_FIGHTROB:
-    case STAMINA_HOW_FIGHT_RANDOM:
-      if (  (isGMChecked('fightrob')) && ((health < 21)  && (stamina > 25 )  )  )  {
+//    case STAMINA_HOW_FIGHT_RANDOM:
+      if ( (health < 21)  && (stamina > 25 ) ) {
         DEBUG(' -- going to autorob -- ');
         return autoRob();
       } else {
@@ -4565,8 +4571,8 @@ function saveSettings() {
   for (i = 0, iLength=autoStatPrios.length; i < iLength; ++i)
     GM_setValue(autoStatPrios[i], document.getElementById(autoStatPrios[i]).value);
 
-  GM_setValue('autoEnforcedTitle', (document.getElementById('autoEnforcedTitle').value)?document.getElementById('autoEnforcedTitle').value:"");  
-  
+  GM_setValue('autoEnforcedTitle', (document.getElementById('autoEnforcedTitle').value)?document.getElementById('autoEnforcedTitle').value:"");
+
   // Validate autoEnforcedTitleTime
   var autoEnforcedTitleTime = document.getElementById('autoEnforcedTitleTime').value;
   if (isNaN(autoEnforcedTitleTime) || parseFloat(autoEnforcedTitleTime) < 1) {
@@ -4576,8 +4582,8 @@ function saveSettings() {
   } else {
     GM_setValue('autoEnforcedTitleTime',autoEnforcedTitleTime);
   }
-  
-    
+
+
   // Validate the auto-stat setting.
   var autoStatOn = (document.getElementById('autoStat').checked === true);
   for (i = 0, iLength=autoStatBases.length; i < iLength; ++i) {
@@ -4694,7 +4700,7 @@ function saveSettings() {
   //Start Save Heal Tab Settings
   //Heal Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','hideAttacks'
+    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt6','hideAttacks'
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -4790,7 +4796,7 @@ function saveSettings() {
   //Start Save About Tab Settings
   //About Tab Checkboxes
   saveCheckBoxElementArray([
-    'TestChanges',
+    'TestChanges'
   ]);
   //End Save About Tab Settings
 
@@ -6585,21 +6591,21 @@ function createAutostatTab() {
   var autoDailyChecklist = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 225px; left: 20px;'});
   makeElement('input', autoDailyChecklist, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', autoDailyChecklist, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-Daily Checklist'));
-  
+
   // Enforce Title
-  
+
   id = 'autoEnforcedTitle';
-  title = 'Change your MW title';  
+  title = 'Change your MW title';
   var autoEnforcedTitleSelect = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 250px; left: 20px;width:95%;'});
   makeElement('label', autoEnforcedTitleSelect, {'for':id, 'title':title}).appendChild(document.createTextNode('Enforce a New Title : '));
-    
+
   var autoEnforcedTitle = makeElement('select', autoEnforcedTitleSelect, {'id':id, 'title':title, 'style':'margin-left:0.5em'});
   chooseTitle = document.createElement('option');
-  chooseTitle.text = 'Do not Enfore a New Title';
+  chooseTitle.text = 'Do not Enforce a New Title';
   chooseTitle.value = '';
   if (GM_getValue('autoEnforcedTitle') == '') chooseTitle.selected = true;
   autoEnforcedTitle.appendChild(chooseTitle);
-  
+
   for(i=0, iLength = mwTitles.length;i < iLength;++i){
     chooseTitle = document.createElement('option');
     chooseTitle.text = mwTitles[i];
@@ -6607,14 +6613,14 @@ function createAutostatTab() {
     if (GM_getValue('autoEnforcedTitle') == mwTitles[i]) chooseTitle.selected = true;
     autoEnforcedTitle.appendChild(chooseTitle);
   }
-  
+
   title = 'Enter the number of hours to wait before changing the title again. Has to be at least 1 hour, and can be decimal (e.g. 1.5).';
   id = 'autoEnforcedTitleTime';
-  makeElement('label', autoEnforcedTitleSelect, {'for':id, 'title':title,'style':'margin-left: 190px;'}).appendChild(document.createTextNode(' every '));  
+  makeElement('label', autoEnforcedTitleSelect, {'for':id, 'title':title,'style':'margin-left: 190px;'}).appendChild(document.createTextNode(' every '));
   makeElement('input', autoEnforcedTitleSelect, {'type':'text', 'value':GM_getValue(id, '2'), 'title':title, 'id':id, 'size':'1'});
-  autoEnforcedTitleSelect.appendChild(document.createTextNode(' hour(s)'));  
-     
-  
+  autoEnforcedTitleSelect.appendChild(document.createTextNode(' hour(s)'));
+
+
   return autostatTab;
 }
 
@@ -6974,7 +6980,6 @@ function createEnergyTab() {
 // Create Stamina Tab
 // Create Stamina Sub Tabs
 function createStaminaSubTab_FightRandom(staminaTabSub) {
-  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7156,7 +7161,6 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
 }
 
 function createStaminaSubTab_FightSpecific(staminaTabSub) {
-  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7251,7 +7255,6 @@ function createStaminaSubTab_FightSpecific(staminaTabSub) {
 }
 
 function createStaminaSubTab_FightRob(staminaTabSub) {
-  GM_setValue('fightrob', 'checked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7460,7 +7463,6 @@ function createStaminaSubTab_FightRob(staminaTabSub) {
 }
 
 function createStaminaSubTab_Rob(staminaTabSub) {
-  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7489,7 +7491,6 @@ function createStaminaSubTab_Rob(staminaTabSub) {
 }
 
 function createStaminaSubTab_CollectBounties(staminaTabSub) {
-  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7609,7 +7610,6 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
 }
 
 function createStaminaSubTab_SetBounties(staminaTabSub) {
-  GM_setValue('fightrob', 'unchecked')  ;
 
   // Location setting
   item = makeElement('div', staminaTabSub);
@@ -7662,7 +7662,6 @@ function createStaminaSubTab_SetBounties(staminaTabSub) {
 }
 
 function createStaminaSubTab_Random(staminaTabSub) {
-  GM_setValue('fightrob', 'unchecked')  ;
 
   // Stamina Spend choice setting
   var SpendModes = GM_getValue('randomSpendModes');
@@ -7906,7 +7905,7 @@ function createHealTab() {
   makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(attackIcon)});
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Attack at critical health'));
   makeElement('br', rhs, {'class':'hide'});
-  title = 'Hide in hospital while health is below 20';
+  title = 'Hide in hospital ';
   id = 'hideInHospital';
   var hideInHosp = makeElement('input', rhs, {'type':'checkbox', 'title':title, 'id':id, 'value':'checked'}, id);
   makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(hideIcon)});
@@ -7915,7 +7914,8 @@ function createHealTab() {
 
   elt = makeElement('div', rhs, {'style':'position: relative; line-height: 150%; left: 17px;','id':'hideOpts'});
   for (i = 0, iLength=healOptions.length; i < iLength; i++) {
-    id = healOptions[i][0];
+//    for (i = 0, iLength=2; i < iLength; i++) {
+  id = healOptions[i][0];
     title = healOptions[i][1];
     var optElt = makeElement('div', elt);
     makeElement('input', optElt, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
@@ -12041,15 +12041,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Exp to pause at: <strong>'+ GM_getValue('autoPauseExp') + '</strong><br>' +
         'Delay rate low: <strong>'+ GM_getValue('d1') + '</strong><br>' +
         'Delay rate high: <strong>' + GM_getValue('d2') + '</strong><br>' +
-        'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Heal in : <strong>' + locations[GM_getValue('healLocation')] + '</strong><br>' +
-        '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
-        '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Minimum Stamina Allowing auto-Heal: <strong>' + GM_getValue('stamina_min_heal') + '</strong><br>' +
         'Idle in City: <strong>' + showIfUnchecked(GM_getValue('idleInCity')) + '</strong><br>' +
         '&nbsp;&nbsp;Selected city: <strong>' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '</strong><br>' +
         'Enable auto-lotto: <strong>' + showIfUnchecked(GM_getValue('autoLottoOpt')) + '</strong><br>' +
@@ -12082,10 +12073,6 @@ BrowserDetect.init();
         'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('hideLiveUpdatesIcon')) + '</strong><br>' +
         'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideIconRow')) + '</strong><br>' +
         'Hide Collections: <strong>'+ showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
-        'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
-
-        'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
-        '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
         'Set window title to name on Facebook account: <strong>' + showIfUnchecked(GM_getValue('fbwindowtitle')) + '</strong><br>' +
@@ -12184,7 +12171,7 @@ BrowserDetect.init();
         '-------------------Stamina Tab-------------------<br>' +
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
-        'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
+//        'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
         'Hide Finished Collection Items: <strong>' + showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
@@ -12224,6 +12211,19 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Stamina use started: <strong>' + GM_getValue('useStaminaStarted') + '</strong><br>' +
         'Stamina reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
         'Ignore reserve to level-up: <strong>' + showIfUnchecked(GM_getValue('allowStaminaToLevelUp')) + '</strong><br>' +
+        '------------------Healing Tab-------------------<br>' +
+        'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Heal in : <strong>' + locations[GM_getValue('healLocation')] + '</strong><br>' +
+        '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
+        '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
+        '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal when health is above 19: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt6')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Minimum Stamina Allowing auto-Heal: <strong>' + GM_getValue('stamina_min_heal') + '</strong><br>' +
+        'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
+        '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         '------------------Cash Tab-------------------<br>' +
         'Enable auto-upgrade <strong>' + showIfUnchecked(GM_getValue('autoBuy')) + '</strong><br>' +
         '&nbsp;&nbsp;-Min cash (NY): <strong>' + GM_getValue('minCashNew York') + '</strong><br>' +
@@ -12256,6 +12256,8 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Minimum deposit: V$<strong>' + GM_getValue('bankConfigVegas') + '</strong><br>' +
         '&nbsp;&nbsp;-Vault Level: <strong>' + GM_getValue('vaultHandling') + '</strong><br>' +
         '&nbsp;&nbsp;-Free vault space: V$<strong>' + makeCommaValue(GM_getValue('vaultSpace')) + '</strong><br>' +
+        '------------------About Tab-------------------<br>' +
+        'Testing New Script Updates: <strong>'+ showIfUnchecked(GM_getValue('TestChanges')) + '</strong><br>' +
         '>  >  >  >  >  END SETTINGS DUMP  <  <  <  <  <');
 }
 
