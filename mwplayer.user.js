@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.617
+// @version     1.1.618
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.617',
+  version: '1.1.618',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -587,6 +587,39 @@ var cashVegasIcon   = '<img src="data:image/gif;base64,R0lGODlhEAAQAPcAAAAAAAAAE
 var healthIcon = '<img src="' +
                     'data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH1wUIFAADTJ17vgAAAJlJREFUOMvFk7ERwjAMRb84L2ENkhmgyh5pWYAFmIExoPQUHiDF9xiiCkeMgu+cIr+z/P30ZZ8FG3rdL/a9Pl+f4vlCSgk5ZwzD9Cmq0h63cWUkaaoqLgAA5nllBwCpAV4C+bfZUoxRQNJ6RdLCJl6qcc0PecJOhWbnul4l2Z3geMDvHSwzHvcKjY4eQEop1hlAlr/QdVpV8QYMB23AfeHdZQAAAABJRU5ErkJggg==" />';
 
+var healOnIcon ='<img src="' +
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAARCAMAAADaFm2tAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAAB/DgF/DwOAESORLySRLyORMCSRMDibQ0KgTFOpXVSpXf7+/v7//wAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFrZ/zwAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzgAAAATUlEQVQYV2Ng' +
+                    'IAUwggAzEIAZDCCCjQcIWBBcXl5eHnasXFZWVk6QLCeQwcjAzANkQwEPM2lcJg4ODm6QUVxABhPEGbjthTmSDe4qhBcAHwsFNLibilQAAAAASUVORK5CYII=';
+
+var healOnHoldIcon ='<img src="' +
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAARCAMAAADaFm2tAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAP9qAP9qAf9sA/5/I/5/JP6LOP6RQv2bVP7+/v7//wAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJDCLbUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzgAAAAS0lEQVQYV5WP' +
+                    'UQ7AIAhDUSoK9z/wylxiluiH74O0aQJF5IaSKHmF5GhOsGxEeNtaAD3TTlFEnfrD9c5WMxu5alDUWeN8lyn+JdcLD6yDBBjl85icAAAAAElFTkSuQmCC';
+
+var healOffIcon ='<img src="' +
+                    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAARCAMAAADaFm2tAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAP8AAP8BAf8DA/4kI/4kJP44OP5DQv1UVP7+/v7//wAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+                    'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABIaOuIAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzgAAAAS0lEQVQYV5WP' +
+                    'UQ7AIAhDUSoK9z/wylxiluiH74O0aQJF5IaSKHmF5GhOsGxEeNtaAD3TTlFEnfrD9c5WMxu5alDUWeN8lyn+JdcLD6yDBBjl85icAAAAAElFTkSuQmCC';
+                    
 var foundIcon = '<img src="' +
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADC0lEQVR42o2SbUhTYRSAz3vvdjc3l7p0OXXmQsnhRzBLi/IrI1KhlFBJg0ApRCItK8u0EjQViuhHQT9TIpH8kaFUwq' +
                     'IgI1MpDcNMxT40m86Vus9739vRZmi/fOHhwOE9z3k/DoF1rvPpGQnaqYmGX6y09Grfu4GVPFlPcUnFFTlxOY+oZqefka9jIeLCfKq30zFVNTB0b43gQsOtTRh0iByRICylNNDlsPtJZTIXIcwX+6x5gFgt+d6fh0' +
@@ -4724,7 +4757,21 @@ function saveSettings() {
       GM_setValue ('rideHitlistXP', rideHitlistXP);
     }
   }
-
+  
+  //Change autoheal shortcut if necessary 
+  if(!isGMChecked('autoHeal')) {     
+    document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
+    document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';            
+  } else {
+    if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB){
+      document.getElementById('mwap_toggleheal').innerHTML=healOnHoldIcon;
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
+    } else {
+      document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
+    }
+  }
+  
   //End Save Heal Tab Settings
 
   //Start Save Cash Tab Settings
@@ -9448,15 +9495,16 @@ function refreshMWAPCSS() {
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}') +
 
                  // Move the messagecenter button(s):
-                 (isGMChecked('hideMessageIcon') ?
+                 (isGMChecked('hideMessageIcon') ?                 
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}') +
-                 //' div[id="message_center_div"] {z-index: 10001 !important;}' +
-
+                 //' div[id="message_center_div"] {z-index: 10001 !important;}' +                 
+                 
+                 
                  // Move Slot Machine and click box:
                  (isGMChecked('HideSlotMachine') ?
                   ' #slots_icon_container  {display: none;}' +
@@ -9488,10 +9536,10 @@ function refreshMWAPCSS() {
                     ' #gc_collectible_container {display: none;}' :
                     ' #gc_collectible_container {position: absolute; top: 145px; left: 755px; z-index: 100;} ') +
 
-                // Move zstream  icon and make it smaller:
-                 (isGMChecked('hideLiveUpdatesIcon') ?
+                // Move zstream icon and make it smaller:
+                 (isGMChecked('hideLiveUpdatesIcon') ?                                   
                    ' #zstream_icon {display: none;}' :
-                   ' #zstream_icon {position: absolute; top: 10px; left: 305px; z-index: 100;} ') +
+                   ' #zstream_icon {position: absolute; top: 10px; left:290px; z-index: 100;} ') +
 
                 // Hide Icon Row (header_mid_row) - This is the part containing all the icons (messege center, promo, live updates):
                 (isGMChecked('hideIconRow') ?
@@ -10088,7 +10136,7 @@ function customizeStats() {
       setGMTime('miniPackTimer', '8 hours');
     } else var miniPackTitle = timeLeftPack + ' until Mini-Pack is available.';
     miniPackTitle += ' Click to attempt to fire immediately.';
-    nrgElt.style.color="#FF0000";
+    nrgElt.style.color="#FF0000";    
     nrgElt.style.textDecoration="underline";
     nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':miniPackTitle});
     nrgElt.parentNode.insertBefore(nrgLinkElt, nrgElt);
@@ -10123,11 +10171,39 @@ function customizeStats() {
   if (healElt) {
     if (!healLinkElt) {
       healElt.style.color="#FF0000";
-      healElt.style.textDecoration="underline";
+      healElt.style.textDecoration="underline";            
+      healElt.style.display="inline";
       healLinkElt = makeElement('a', null, {'id':'mwap_heal', 'title':'Click to heal immediately.'});
       healElt.parentNode.insertBefore(healLinkElt, healElt);
-      healLinkElt.appendChild(healElt);
+      healLinkElt.appendChild(healElt);      
+      healLinkElt.style.textDecoration="none";            
+      
+      var newLink = document.getElementById('mwap_toggleheal');      
+      if(!newLink) {
+        
+        if (!isGMChecked('autoHeal')) {
+          newLinkTitle='autoHeal unchecked';
+        } else {
+          if (GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) newLinkTitle='autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
+          else newLinkTitle='autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';
+        }
+      
+        newLink = makeElement('a', null, {'id':'mwap_toggleheal', 'title':newLinkTitle});        
+        
+        if (!isGMChecked('autoHeal')) {
+          newLink.innerHTML=healOffIcon;
+        } else {
+          if (GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) newLink.innerHTML=healOnHoldIcon;
+          else newLink.innerHTML=healOnIcon;
+        }                
+        newLink.style.padding="0px 0px 0px 8px";       
+        newLink.style.display="inline";
+        healParent = healLinkElt.parentNode;        
+        healParent.insertBefore(newLink, healParent.childNodes[2]);              
+        newLink.addEventListener('click', toggleHeal, false);      
+      } 
     }
+    
     // Substitute the "hide" icon if currently hiding in the hospital.
     var hidingInHospital = /transparent url/i.test(healElt.getAttribute('style'));
     if (health < 20 && isGMChecked('hideInHospital')) {
@@ -10162,6 +10238,23 @@ function customizeStats() {
   }
 
   setListenStats(true);
+}
+
+function toggleHeal() {  
+  if(isGMChecked('autoHeal')) { 
+    GM_setValue('autoHeal', 0);
+    document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
+    document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';
+  } else {
+    GM_setValue('autoHeal', 'checked');
+    if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB){
+      document.getElementById('mwap_toggleheal').innerHTML=healOnHoldIcon;
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';
+    } else {
+      document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
+    }  
+  }
 }
 
 function quickHeal(healCity) {
@@ -15620,9 +15713,10 @@ function handlePopups() {
                   DEBUG('handlePopups(): Clicked to publish iced opponent bonus.');
                 } else {
                   // Get rid of Iced popup:
-                  addToLog('info Icon', ' You <span style="color:#00FFFF;">ICED</span> ' +
-                    linkToString(opponentNameElt, 'user') + '. ' + icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' +
-                    icedCountElt.innerHTML + '</span> without publishing Iced bonus (Frequency:only every '+publishFrequency+'th time)');
+                  logtxt = 'You <span style="color:#00FFFF;">ICED</span> ' + linkToString(opponentNameElt, 'user') + '. ' +
+                           icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + icedCountElt.innerHTML + '</span>.';
+                    if(isGMChecked('autoIcePublish')) logtxt+= ' Iced bonus not published (Frequency:only every '+publishFrequency+'th time)';
+                    addToLog('info Icon', logtxt);
                   return(closePopup(popupElts[i], "Iced Popup"));
                 }
               } else {
