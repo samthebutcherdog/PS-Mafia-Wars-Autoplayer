@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.616
+// @version     1.1.617
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.616',
+  version: '1.1.617',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14531,7 +14531,16 @@ function logFightResponse(rootElt, resultElt, context) {
     if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
     if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
     if(txtLog) addToLog('lootbag Icon', txtLog);
-
+    
+    //Look for Victory Coins
+    if (innerNoTags.match(/(.+?) victory coins/i)) {   
+      gainCoins = RegExp.$1;
+      totalCoins = xpathFirst('.//div[@class="fightmastery_tokens"]', rootElt);
+      innerCoins = totalCoins? totalCoins.innerHTML : '';
+      innerCoinsTotal = innerCoins.split(" ")[0];      
+      addToLog('info Icon', 'Gained <span class="good">' +gainCoins+ ' Victory Coin(s)</span>, bringing your total to : <span class="good">'+innerCoinsTotal+'</span>'); 
+    }
+    
     // Update the statistics.
     takeFightStatistics(experience, winCount, lossCount, cost, resultType);
     updateLogStats();
