@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.618
+// @version     1.1.619
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.618',
+  version: '1.1.619',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -619,7 +619,7 @@ var healOffIcon ='<img src="' +
                     'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
                     'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABIaOuIAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzgAAAAS0lEQVQYV5WP' +
                     'UQ7AIAhDUSoK9z/wylxiluiH74O0aQJF5IaSKHmF5GhOsGxEeNtaAD3TTlFEnfrD9c5WMxu5alDUWeN8lyn+JdcLD6yDBBjl85icAAAAAElFTkSuQmCC';
-                    
+
 var foundIcon = '<img src="' +
                     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADC0lEQVR42o2SbUhTYRSAz3vvdjc3l7p0OXXmQsnhRzBLi/IrI1KhlFBJg0ApRCItK8u0EjQViuhHQT9TIpH8kaFUwq' +
                     'IgI1MpDcNMxT40m86Vus9739vRZmi/fOHhwOE9z3k/DoF1rvPpGQnaqYmGX6y09Grfu4GVPFlPcUnFFTlxOY+oZqefka9jIeLCfKq30zFVNTB0b43gQsOtTRh0iByRICylNNDlsPtJZTIXIcwX+6x5gFgt+d6fh0' +
@@ -1134,10 +1134,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Force Heal options
   var healOptions = new Array(
-    ['forceHealOpt3','Heal if stamina can be spent'],
-    ['forceHealOpt4','Heal if stamina is full'],
-    ['forceHealOpt5','Heal after 5 minutes'],
-    ['forceHealOpt6','Heal if Health is Above 19']
+    ['forceHealOpt6','Disable Heal if Health is below 20','check to Disable healing while below 20 health, Overrides ALL Lower Settings'],
+    ['forceHealOpt5','Heal after 5 minutes','if health drops below 20, start a 5 minute timer, Then allow healing'],
+    ['forceHealOpt4','Heal if stamina is full','allow healing if stamina is full and not blocked from above choices'],
+    ['forceHealOpt3','Heal if stamina can be spent','try to heal. overridden by the top 2 choices']
   );
 
   // Define all jobs. The array elements are:
@@ -2035,11 +2035,14 @@ function doAutoPlay () {
   ) {
 //    DEBUG('auto-heal passed main block check, checking can auto heal ');
     if(canautoheal()) {
-      DEBUG('auto-healing ');
+      DEBUG('auto-healing '); // hide/remove after testing
       if(autoHeal()) return;
     }
   } else {
-    DEBUG(' autoheal skipped in main loop ' + health + ' ' + SpendStamina.canBurn + ' ' + stamina + ' ' + canForceHeal() );
+// hide/remove after testing
+//    DEBUG(' autoheal skipped in main loop ');
+    DEBUG('heal skipped, actual stamina:' + stamina +' stamina_Min_heal:'+ GM_getValue('stamina_min_heal') +  ' force heal:' + canForceHeal() );
+    DEBUG('heal skipped, current health:' + health + ' full:' + maxHealth + ' heal when health falls below:' + GM_getValue('healthLevel', 0) );
   }
 
 //  DEBUG('after auto-heal  - - X ');
@@ -2986,23 +2989,31 @@ function canForceHeal() {
   if(!isGMChecked('hideInHospital'))
     return true;
 
-  // Heal when stamina can be spent
-  if (isGMChecked('forceHealOpt3') && canSpendStamina(0))
-    return true;
+  // disable Heal when health is below 20
+  if (isGMChecked('forceHealOpt6') && health < 20) {
+    DEBUG( 'health is below 20, stopped from healing in canforceheal ');
+    return false;
+    }
 
+  // Heal after 5 minutes
+  if(isGMChecked('forceHealOpt5') && GM_getValue('healWaitStarted') && timeLeftGM('healWaitTime')) {
+    DEBUG( ' healing blocked ' + GM_getValue('healWaitStarted') + ' due to 5 minute wait timer. remaining:' + timeLeftGM('healWaitTime') ); // hide/remove after testing
+   return false;
+  } else {
+      if(isGMChecked('forceHealOpt5')) {
+        DEBUG( '5 minute timer is up, Allowing Heal'); // hide/remove after testing
+        return true;
+      }
+  }
   // Heal when stamina is full
   if (isGMChecked('forceHealOpt4') && stamina >= maxStamina)
     return true;
 
-  // Heal after 5 minutes
-  if (isGMChecked('forceHealOpt5') && GM_getValue('healWaitStarted') && !timeLeftGM('healWaitTime')) {
-    return true;
-  }
-  // Heal when health is above 19
-  if (isGMChecked('forceHealOpt6') && health > 19)
+  // Heal when stamina can be spent
+  if (isGMChecked('forceHealOpt3') && canSpendStamina(0))
     return true;
 
-  DEBUG( 'stopped  from healing in canforceheal ');
+  DEBUG( 'healing blocked because stamina full & spent are unchecked in canforceheal '); // hide/remove after testing
   return false;
 }
 
@@ -3019,14 +3030,10 @@ function canSpendStamina(minHealth) {
       case STAMINA_HOW_AUTOHITLIST:
       case STAMINA_HOW_ROBBING:
         minHealth = 0;
-      //mychangestamina
-//      case STAMINA_HOW_FIGHT_RANDOM:
       case STAMINA_HOW_FIGHTROB:
         if( stamina > 25)  {
-//          DEBUG(' -- fight rob checked in fight random -- ');
           minHealth = 0;
         }
-//        else DEBUG(' -- fight rob shows UNchecked OR stamina less than 26 in fight random -- ');
     }
   }
 
@@ -4757,21 +4764,21 @@ function saveSettings() {
       GM_setValue ('rideHitlistXP', rideHitlistXP);
     }
   }
-  
-  //Change autoheal shortcut if necessary 
-  if(!isGMChecked('autoHeal')) {     
+
+  //Change autoheal shortcut if necessary
+  if(!isGMChecked('autoHeal')) {
     document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
-    document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';            
+    document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';
   } else {
     if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB){
       document.getElementById('mwap_toggleheal').innerHTML=healOnHoldIcon;
-      document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
     } else {
       document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
-      document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
     }
   }
-  
+
   //End Save Heal Tab Settings
 
   //Start Save Cash Tab Settings
@@ -7964,9 +7971,10 @@ function createHealTab() {
 //    for (i = 0, iLength=2; i < iLength; i++) {
   id = healOptions[i][0];
     title = healOptions[i][1];
+    info = healOptions[i][2];
     var optElt = makeElement('div', elt);
-    makeElement('input', optElt, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-    label = makeElement('label', optElt, {'for':id, 'title':title});
+    makeElement('input', optElt, {'type':'checkbox', 'id':id, 'title':info, 'value':'checked'}, id);
+    label = makeElement('label', optElt, {'for':id, 'title':info});
     label.appendChild(document.createTextNode(' ' + title));
   }
   elt.style.display = hideInHosp.checked ? '' : 'none';
@@ -9495,16 +9503,16 @@ function refreshMWAPCSS() {
                  (isGMChecked('leftAlign') ? ' #final_wrapper {margin: 0; position: static; text-align: left; width: 760px;}' : ' #final_wrapper {margin: 0 auto; position: static; text-align: left; width: 760px;}') +
 
                  // Move the messagecenter button(s):
-                 (isGMChecked('hideMessageIcon') ?                 
+                 (isGMChecked('hideMessageIcon') ?
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {display: none;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {display: none;}' :
                   ' div[style$="position: absolute; top: 13px; right: 126px; width: 45px; z-index: 1;"] {position: relative !important; top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}') +
-                 //' div[id="message_center_div"] {z-index: 10001 !important;}' +                 
-                 
-                 
+                 //' div[id="message_center_div"] {z-index: 10001 !important;}' +
+
+
                  // Move Slot Machine and click box:
                  (isGMChecked('HideSlotMachine') ?
                   ' #slots_icon_container  {display: none;}' +
@@ -9537,7 +9545,7 @@ function refreshMWAPCSS() {
                     ' #gc_collectible_container {position: absolute; top: 145px; left: 755px; z-index: 100;} ') +
 
                 // Move zstream icon and make it smaller:
-                 (isGMChecked('hideLiveUpdatesIcon') ?                                   
+                 (isGMChecked('hideLiveUpdatesIcon') ?
                    ' #zstream_icon {display: none;}' :
                    ' #zstream_icon {position: absolute; top: 10px; left:290px; z-index: 100;} ') +
 
@@ -10136,7 +10144,7 @@ function customizeStats() {
       setGMTime('miniPackTimer', '8 hours');
     } else var miniPackTitle = timeLeftPack + ' until Mini-Pack is available.';
     miniPackTitle += ' Click to attempt to fire immediately.';
-    nrgElt.style.color="#FF0000";    
+    nrgElt.style.color="#FF0000";
     nrgElt.style.textDecoration="underline";
     nrgLinkElt = makeElement('a', null, {'id':'mwap_nrg', 'title':miniPackTitle});
     nrgElt.parentNode.insertBefore(nrgLinkElt, nrgElt);
@@ -10171,39 +10179,39 @@ function customizeStats() {
   if (healElt) {
     if (!healLinkElt) {
       healElt.style.color="#FF0000";
-      healElt.style.textDecoration="underline";            
+      healElt.style.textDecoration="underline";
       healElt.style.display="inline";
       healLinkElt = makeElement('a', null, {'id':'mwap_heal', 'title':'Click to heal immediately.'});
       healElt.parentNode.insertBefore(healLinkElt, healElt);
-      healLinkElt.appendChild(healElt);      
-      healLinkElt.style.textDecoration="none";            
-      
-      var newLink = document.getElementById('mwap_toggleheal');      
+      healLinkElt.appendChild(healElt);
+      healLinkElt.style.textDecoration="none";
+
+      var newLink = document.getElementById('mwap_toggleheal');
       if(!newLink) {
-        
+
         if (!isGMChecked('autoHeal')) {
           newLinkTitle='autoHeal unchecked';
         } else {
-          if (GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) newLinkTitle='autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
-          else newLinkTitle='autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';
+          if (GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) newLinkTitle='autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
+          else newLinkTitle='autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
         }
-      
-        newLink = makeElement('a', null, {'id':'mwap_toggleheal', 'title':newLinkTitle});        
-        
+
+        newLink = makeElement('a', null, {'id':'mwap_toggleheal', 'title':newLinkTitle});
+
         if (!isGMChecked('autoHeal')) {
           newLink.innerHTML=healOffIcon;
         } else {
           if (GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) newLink.innerHTML=healOnHoldIcon;
           else newLink.innerHTML=healOnIcon;
-        }                
-        newLink.style.padding="0px 0px 0px 8px";       
+        }
+        newLink.style.padding="0px 0px 0px 8px";
         newLink.style.display="inline";
-        healParent = healLinkElt.parentNode;        
-        healParent.insertBefore(newLink, healParent.childNodes[2]);              
-        newLink.addEventListener('click', toggleHeal, false);      
-      } 
+        healParent = healLinkElt.parentNode;
+        healParent.insertBefore(newLink, healParent.childNodes[2]);
+        newLink.addEventListener('click', toggleHeal, false);
+      }
     }
-    
+
     // Substitute the "hide" icon if currently hiding in the hospital.
     var hidingInHospital = /transparent url/i.test(healElt.getAttribute('style'));
     if (health < 20 && isGMChecked('hideInHospital')) {
@@ -10240,8 +10248,8 @@ function customizeStats() {
   setListenStats(true);
 }
 
-function toggleHeal() {  
-  if(isGMChecked('autoHeal')) { 
+function toggleHeal() {
+  if(isGMChecked('autoHeal')) {
     GM_setValue('autoHeal', 0);
     document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
     document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';
@@ -10249,11 +10257,11 @@ function toggleHeal() {
     GM_setValue('autoHeal', 'checked');
     if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB){
       document.getElementById('mwap_toggleheal').innerHTML=healOnHoldIcon;
-      document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
     } else {
       document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
-      document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when stamina falls below '+GM_getValue('healthLevel')+'.';  
-    }  
+      document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
+    }
   }
 }
 
@@ -12310,10 +12318,10 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Disable Heal when health is below 20: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt6')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Heal when health is above 19: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt6')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Minimum Stamina Allowing auto-Heal: <strong>' + GM_getValue('stamina_min_heal') + '</strong><br>' +
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
@@ -14624,16 +14632,16 @@ function logFightResponse(rootElt, resultElt, context) {
     if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
     if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
     if(txtLog) addToLog('lootbag Icon', txtLog);
-    
+
     //Look for Victory Coins
-    if (innerNoTags.match(/(.+?) victory coins/i)) {   
+    if (innerNoTags.match(/(.+?) victory coins/i)) {
       gainCoins = RegExp.$1;
       totalCoins = xpathFirst('.//div[@class="fightmastery_tokens"]', rootElt);
       innerCoins = totalCoins? totalCoins.innerHTML : '';
-      innerCoinsTotal = innerCoins.split(" ")[0];      
-      addToLog('info Icon', 'Gained <span class="good">' +gainCoins+ ' Victory Coin(s)</span>, bringing your total to : <span class="good">'+innerCoinsTotal+'</span>'); 
+      innerCoinsTotal = innerCoins.split(" ")[0];
+      addToLog('info Icon', 'Gained <span class="good">' +gainCoins+ ' Victory Coin(s)</span>, bringing your total to : <span class="good">'+innerCoinsTotal+'</span>');
     }
-    
+
     // Update the statistics.
     takeFightStatistics(experience, winCount, lossCount, cost, resultType);
     updateLogStats();
