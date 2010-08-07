@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.621
+// @version     1.1.622
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.621',
+  version: '1.1.622',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4074,9 +4074,17 @@ function findFightOpponent(element) {
       continue;
     }
 
-    if (opponent.level > opponentLevelMax) {
-      levelMaxCount++;
-      continue;
+    if (GM_getValue('fightMobMode')) {
+      // Mob fight mode.  Fight players of higher level but smaller mafia.
+      if (opponent.level > (opponentLevelMax * 501 / opponent.mafia)) {
+        levelMaxCount++;
+        continue;
+      } 
+	} else {
+      if (opponent.level > opponentLevelMax) {
+        levelMaxCount++;
+        continue;
+      }	 
     }
     if (opponent.mafia > opponentMafiaMax) {
       mafiaMaxCount++;
@@ -7158,6 +7166,17 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
+  
+  // Mob fight
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Fight higher levels if the mafia is smaller.  You mob them, overwhelm the smaller numbers';
+  id = 'fightMobMode';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMobMode');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Mob Fight'));
 
   // Remove stronger opponents?
   item = makeElement('div', staminaTabSub);
@@ -7459,6 +7478,17 @@ function createStaminaSubTab_FightRob(staminaTabSub) {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
+  
+  // Mob fight
+  item = makeElement('div', staminaTabSub);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Fight higher levels if the mafia is smaller.  You mob them, overwhelm the smaller numbers';
+  id = 'fightMobMode';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMobMode');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Mob Fight'));
 
   // Remove stronger opponents?
   item = makeElement('div', staminaTabSub);
@@ -8270,6 +8300,8 @@ function validateStaminaTab() {
       s.fightMafiaMaxRelative = checked('fightMafiaMaxRelative');
       s.fightMafiaMin = parseInt(document.getElementById('fightMafiaMin').value);
       s.fightMafiaMinRelative = checked('fightMafiaMinRelative');
+
+      s.fightMobMode = checked('fightMobMode');
 
       s.fightNames = checked('fightNames');
       s.fightAvoidNames = checked('fightAvoidNames');
