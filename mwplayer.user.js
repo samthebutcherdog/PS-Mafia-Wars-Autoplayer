@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.624
+// @version     1.1.625
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.624',
+  version: '1.1.625',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1880,6 +1880,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 function synchSettings() {
   copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
 }
+
+// TEMP FIX - Disable saving of posting objects
+GM_setValue('autoLevelPublish', 0);
+GM_setValue('autoAchievementPublish', 0);
+GM_setValue('autoIcePublish', 0);
+GM_setValue('autoShareWishList', 0);
+GM_setValue('autoSecretStash', 0);
 
 // Send settings to background storage
 function sendSettings() {
@@ -4581,6 +4588,13 @@ function saveSettings() {
     'sendEnergyPack','askEnergyPack','rewardEnergyPack',
     'autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
   ]);
+	// TEMP FIX - Disable saving of posting objects
+	GM_setValue('autoLevelPublish', 0);
+	GM_setValue('autoAchievementPublish', 0);
+	GM_setValue('autoIcePublish', 0);
+	GM_setValue('autoShareWishList', 0);
+	GM_setValue('autoSecretStash', 0);
+	
   //MafiaTab Settings and Validation
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
 
