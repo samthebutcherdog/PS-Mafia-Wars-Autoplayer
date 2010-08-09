@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.625
+// @version     1.1.626
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.625',
+  version: '1.1.626',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2251,15 +2251,10 @@ function canautoheal() {
     DEBUG(' STAMINA_HOW_FIGHTROB  blocked autoheal ');
     return false;
   }
-  if(GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) {
+  if((GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) && (isGMChecked('BlockHealRobbing')) )  {
     DEBUG(' STAMINA_HOW_ROBBING blocked autoheal ');
     return false;
   }
-// no longer needed
-//  if((GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHT_RANDOM) && (isGMChecked('fightrob'))) {
-//    DEBUG('in can auto heal return false - STAMINA_HOW_FIGHT_RANDOM and fightrob - 5 ');
-//    return false;
-//  }
 
 //  DEBUG('canautoheal is allowing healing ');
   return true;
@@ -4086,12 +4081,12 @@ function findFightOpponent(element) {
       if (opponent.level > (opponentLevelMax * 501 / opponent.mafia)) {
         levelMaxCount++;
         continue;
-      } 
+      }
 	} else {
       if (opponent.level > opponentLevelMax) {
         levelMaxCount++;
         continue;
-      }	 
+      }
     }
     if (opponent.mafia > opponentMafiaMax) {
       mafiaMaxCount++;
@@ -4594,7 +4589,7 @@ function saveSettings() {
 	GM_setValue('autoIcePublish', 0);
 	GM_setValue('autoShareWishList', 0);
 	GM_setValue('autoSecretStash', 0);
-	
+
   //MafiaTab Settings and Validation
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
 
@@ -4762,7 +4757,7 @@ function saveSettings() {
   //Start Save Heal Tab Settings
   //Heal Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt6','hideAttacks'
+    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt6','hideAttacks','BlockHealRobbing'
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -7180,7 +7175,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
-  
+
   // Mob fight
   item = makeElement('div', staminaTabSub);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -7530,7 +7525,7 @@ function createStaminaSubTab_FightRob(staminaTabSub) {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
-  
+
   // Mob fight
   item = makeElement('div', staminaTabSub);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -7552,7 +7547,7 @@ function createStaminaSubTab_FightRob(staminaTabSub) {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Remove stronger opponents'));
-  
+
 
   item = makeElement('div', staminaTabSub);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -8060,6 +8055,7 @@ function createHealTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(attackIcon)});
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Attack at critical health'));
+
   makeElement('br', rhs, {'class':'hide'});
   title = 'Hide in hospital ';
   id = 'hideInHospital';
@@ -8095,6 +8091,17 @@ function createHealTab() {
     return true;
   };
   hideInHosp.addEventListener('click', hideHandler, false);
+
+
+ // block healing while robbing
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  id = 'BlockHealRobbing';
+  title = 'block auto heal while in ROB RANDOM OPPONENTS mode ';
+  makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' block auto heal while robbing'));
+
 
   // stamina minimum to allow healing
   item = makeElement('div', list);
@@ -12429,6 +12436,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Minimum Stamina Allowing auto-Heal: <strong>' + GM_getValue('stamina_min_heal') + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;block auto-Heal while robbing: <strong>' + GM_getValue('BlockHealRobbing') + '</strong><br>' +
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         '------------------Cash Tab-------------------<br>' +
