@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.628
+// @version     1.1.629
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.628',
+  version: '1.1.629',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -134,7 +134,7 @@ function checkInPublishPopup() {
   if (xpathFirst('//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
       /connect\/uiserver/.test(window.location.href)) {
     setGMTime('postTimer', '00:10');
-    window.setTimeout(handlePublishing, 2000);
+    window.setTimeout(handlePublishing, 3000);
     return true;
   }
   return false;
@@ -152,7 +152,7 @@ function managePopups() {
   fetchPubOptions();
   // Handle more popups that just show up out of nowhere
   handlePopups();
-  window.setTimeout(managePopups, 2000);
+  window.setTimeout(managePopups, 3000);
 }
 
 // Load the iframe
@@ -7974,7 +7974,7 @@ function createStaminaTab() {
   label = makeElement('label', item, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Don\'t reserve stamina if within reach of the next level.'));
 
-   // Handler for switching sub-areas.
+  // Handler for switching sub-areas.
   var handleSpendChanged = function() {
     staminaTabSub.innerHTML = '';
     // Create the appropriate SubTab
@@ -8960,13 +8960,45 @@ function handleModificationTimer() {
       // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
       // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
       // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
-      var sortLootType = parseInt(GM_getValue('filterLootOpt'));
-      if (sortLootType != 0) {
-        cleanLoot("Weapons",sortLootType);
-        cleanLoot("Armor",sortLootType);
-        cleanLoot("Vehicles",sortLootType);
-        cleanLoot("Animals", sortLootType);
+      //var sortLootType = parseInt(GM_getValue('filterLootOpt'));
+      //if (sortLootType != 0) {
+      //  cleanLoot("Weapons",sortLootType);
+      //  cleanLoot("Armor",sortLootType);
+      //  cleanLoot("Vehicles",sortLootType);
+      //  cleanLoot("Animals", sortLootType);
+      //}
+      
+      // Handler for switching sub-areas.
+      var handleFilterChanged = function() {              
+        sortLootType = filterLootSelect.selectedIndex;
+        if(sortLootType != oldLootType){          
+          cleanLoot("Weapons",sortLootType);
+          cleanLoot("Armor",sortLootType);
+          cleanLoot("Vehicles",sortLootType);
+          cleanLoot("Animals", sortLootType);        
+          oldLootType = sortLootType;
+        }  
       }
+      
+      var lootElt = xpathFirst('.//li[contains(@class, "tab_on")]//div[contains(@class, "tab_content")]//a[contains(., "Loot")]', innerPageElt);      
+      var oldLootType=0;
+      var id = 'filterLootSelect';
+      var filterLootSelect = document.getElementById(id);
+      if(!filterLootSelect){
+        makeElement('br', lootElt.parentNode, {'class':'hide'});
+        var filterLootSelect = makeElement('select', lootElt.parentNode, {'id':id,'style':'padding-top:3px;'});
+        var filterOptions = ['Disabled','Attack','Defense','Combined'];
+        for (i = 0, iLength=filterOptions.length; i < iLength; ++i) {
+          choice = document.createElement('option');
+          choice.value = i;
+          choice.appendChild(document.createTextNode(filterOptions[i]));
+          filterLootSelect.appendChild(choice);
+        }
+        filterLootSelect.selectedIndex = GM_getValue('filterLootOpt', 0);      
+        handleFilterChanged();  
+      }     
+      
+      filterLootSelect.addEventListener('change', handleFilterChanged, false);
     }
 
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
@@ -9022,16 +9054,20 @@ function objLootItem() {
 }
 
 function cleanLoot(strType, sortLootType) {
+
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
-  if (eltLoot.title == "MWAP modified") {
-    return;
-  }
-  eltLoot.title = "MWAP modified";
-
+  
+  //if (eltLoot.title == "MWAP modified") {
+  //  return;
+  //}
+  //eltLoot.title = "MWAP modified";
+    
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
+  eltRow.style.display="";
   var colLoot = [];
-  do {
+  do {  
+  
     // Get Attack/Defense, and Total values
     var eltPicture = xpathFirst('.//td', eltRow);
     var eltAttackDef = eltPicture.nextSibling.nextSibling;
@@ -9051,7 +9087,8 @@ function cleanLoot(strType, sortLootType) {
     // hence the loot item is giftable.
     if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
     colLoot.push(objLoot); // add item to collection
-    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
+    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;    
+    eltRow.style.display="";
     var txtData = eltRow.innerHTML.clean().trim();
   } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 
@@ -9079,8 +9116,9 @@ function cleanLoot(strType, sortLootType) {
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   do {
+    if(eltRow.innerHTML.indexOf('colspan') !=-1) eltRow.style.display="none";
     // Get Attack/Defense values
-    var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
+    var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);    
     var eltDefense = eltAttack.nextSibling.nextSibling;
     var splitVal = eltAttack.innerHTML.split(" ");
     var intAttack = parseInt(splitVal[2]);
@@ -9089,17 +9127,22 @@ function cleanLoot(strType, sortLootType) {
     // Prep elements for possible removal
     var eltSibling = eltRow.nextSibling.nextSibling;
     var nextItem = eltSibling.nextSibling.nextSibling;
+    
     if (sortLootType == 3) {
       if(intAttack < minAttack && intDefense < minDefense){
         //Removal
-        eltRow.parentNode.removeChild(eltRow);
-        eltSibling.parentNode.removeChild(eltSibling);
+        //eltRow.parentNode.removeChild(eltRow);
+        //eltSibling.parentNode.removeChild(eltSibling);
+        eltRow.style.display="none";
+        eltSibling.style.display="none";
       }
     } else {
       if(intAttack < minAttack || intDefense < minDefense){
         //Removal
-        eltRow.parentNode.removeChild(eltRow);
-        eltSibling.parentNode.removeChild(eltSibling);
+        //eltRow.parentNode.removeChild(eltRow);
+        //eltSibling.parentNode.removeChild(eltSibling);
+        eltRow.style.display="none";
+        eltSibling.style.display="none";
       }
     }
     eltRow = nextItem;
@@ -9203,7 +9246,7 @@ function handlePublishing() {
               clickElement(skipElt);
 
             // Wait for 2 seconds before trying to close window manually
-            window.setTimeout(handlePublishing, 2000);
+            window.setTimeout(handlePublishing, 1000);
             DEBUG('Publish: Found ' + gmFlag);
             return true;
           }
@@ -9261,7 +9304,7 @@ function handlePublishing() {
 
   // If we get here, then at least one of the three buttons exists, so try again!
   DEBUG('Publish: Try again in 2 seconds.');
-  window.setTimeout(handlePublishing, 2000);
+  window.setTimeout(handlePublishing, 3000);
 }
 
 // Turns on/off the high-level event listener for the game.
