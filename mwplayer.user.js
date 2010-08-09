@@ -9065,6 +9065,8 @@ function cleanLoot(strType, sortLootType) {
     
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   eltRow.style.display="";
+  eltRow.nextSibling.nextSibling.style.display="";
+
   var colLoot = [];
   do {  
   
@@ -9089,6 +9091,7 @@ function cleanLoot(strType, sortLootType) {
     colLoot.push(objLoot); // add item to collection
     eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;    
     eltRow.style.display="";
+    eltRow.nextSibling.nextSibling.style.display="";
     var txtData = eltRow.innerHTML.clean().trim();
   } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 
