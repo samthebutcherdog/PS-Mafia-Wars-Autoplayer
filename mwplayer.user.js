@@ -29,7 +29,7 @@
 */
 
 // ==UserScript==
-// @name        PS Facebook Mafia Wars Autoplayer (MWAP)
+// @name        PS Facebook Mafia Wars Autoplayer (PS MWAP)
 // @namespace   mafiawars
 // @description Autoplayer for the facebook application - Mafia Wars
 // @include     http://facebook.mafiawars.com/mwfb/remote/html_server.php*
@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.629
+// @version     1.1.632
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.629',
+  version: '1.1.632',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -718,6 +718,7 @@ var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
+//var minHealth;                  // Healt reserve that allows fighting
 
 //new_header = false ; // change the commented out line to disable all changes
 new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new header
@@ -1822,7 +1823,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Set the initial run state.
   if (typeof GM_getValue('isRunning') != 'boolean') {
-    alert('MWAP: Inconsistent state found in settings, please check them!');
+    alert('PS MWAP: Inconsistent state found in settings, please check them!');
     GM_setValue('isRunning', false);
   }
   running = GM_getValue('isRunning');
@@ -2054,7 +2055,7 @@ function doAutoPlay () {
 
 //  DEBUG('after auto-heal  - - X ');
 
-  // Re-activating autoHeal in case you died and mwap cleared the playerupdates before it could parse the snuffed message:
+  // Re-activating autoHeal in case you died and PS MWAP cleared the playerupdates before it could parse the snuffed message:
   if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
     DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
     GM_setValue('autoHeal', 'checked');
@@ -2372,7 +2373,7 @@ function AskforHelp(hlpCity) {
   // Common function if job has failed
   var doAskFunction = function (askResult) {
     if (!askResult) {
-      addToLog('warning Icon', 'Unable to Ask for Help on ' + helpCity +'.'+ tabno+'. Please Check your \'Ask for Help\'-settings on MWAP\'s Mafia tab.');
+      addToLog('warning Icon', 'Unable to Ask for Help on ' + helpCity +'.'+ tabno+'. Please Check your \'Ask for Help\'-settings on PS MWAP\'s Mafia tab.');
       if(helpCity==2) GM_setValue('selectMoscowTier', 0);
       if(helpCity==3) GM_setValue('selectBangkokTier', 0);
     }
@@ -2931,7 +2932,7 @@ function autoMission() {
       if (jobs.length == 0) {
         // Skip jobs temporarily, and check the home page
         skipJobs = true;
-        //addToLog('warning Icon', 'Spend energy to do jobs automatically is turned off - Please check your \'Master tier:\'-settings on MWAP\'s Energy tab.');
+        //addToLog('warning Icon', 'Spend energy to do jobs automatically is turned off - Please check your \'Master tier:\'-settings on PS MWAP\'s Energy tab.');
         //DEBUG('autoMissin turned off - jobsToDo is Empty - Skipping Jobs atm');
         //GM_setValue('autoMission', 0);
         goHome();
@@ -4988,13 +4989,13 @@ function mwapOnOffMenu() {
 
   if (GM_getValue('isRunning') === false) {
     destroyByID('ap_mwap_pause');
-    title = 'Click to resume mwap';
+    title = 'Click to resume PS MWAP';
     var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     mwapElt.appendChild(document.createTextNode('resume'));
     mwapElt.addEventListener('click', mwapOnOff, false);
   } else {
     destroyByID('ap_mwap_pause');
-    title = 'Click to pause mwap';
+    title = 'Click to pause PS MWAP';
     var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     mwapElt.appendChild(document.createTextNode('pause'));
     mwapElt.addEventListener('click', mwapOnOff, false);
@@ -5494,7 +5495,7 @@ function createLogBox() {
     debugElt.appendChild(document.createTextNode('debug'));
     debugElt.addEventListener('click', debugOnOff, false);
 
-  title = 'Click to ' + (running ? 'pause' : 'resume') + ' mwap';
+  title = 'Click to ' + (running ? 'pause' : 'resume') + ' PS MWAP';
   var mwapElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_mwap_pause', 'style':'position: absolute; right: 60px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     mwapElt.appendChild(document.createTextNode(running ? 'pause' : 'resume'));
     mwapElt.addEventListener('click', mwapOnOff, false);
@@ -5736,7 +5737,7 @@ function createGeneralTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = 'Check this to refresh MWAP between the indicated time interval.';
+  title = 'Check this to refresh PS MWAP between the indicated time interval.';
   id = 'autoClick';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('img', lhs, {'style':'padding-left: 5px;','src':stripURI(energyIcon)});
@@ -6005,9 +6006,9 @@ function createDisplayTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'mastheadOnTop';
-  title = 'Enable to elevate MWAP-Header (pause/resume/settings etc) so that it\'s always on top';
+  title = 'Enable to elevate PS MWAP-Header (pause/resume/settings etc) so that it\'s always on top';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Elevate MWAP-Header'));
+  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Elevate PS MWAP-Header'));
 
   // Set Facebook account to window title
   item = makeElement('div', list);
@@ -6653,13 +6654,13 @@ function createAutostatTab() {
   makeElement('input', autoMainframe, {'type':'text', 'style':'width: 80px;margin-left:5px; text-align: right', 'title':title, 'value':GM_getValue(id, ''), 'id':id, 'size':'12'});
 
   id = 'autoResetTimers';
-  title = 'Check this to reset timers on MWAP startup';
+  title = 'Check this to reset timers on PS MWAP startup';
   var autoResetTimers = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 200px; left: 20px;'});
   makeElement('input', autoResetTimers, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', autoResetTimers, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-ResetTimers'));
 
   id = 'autoDailyChecklist';
-  title = 'Check this to have MWAP click through the daily checklist items';
+  title = 'Check this to have PS MWAP click through the daily checklist items';
   var autoDailyChecklist = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 225px; left: 20px;'});
   makeElement('input', autoDailyChecklist, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', autoDailyChecklist, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-Daily Checklist'));
@@ -8121,11 +8122,11 @@ function createHealTab() {
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
   id = 'hideAttacks';
-  title = 'Enable hitlist riding: MWAP disables autoHeal after you got n XP from attacks; it enables it again after parsing a snuffed message.';
+  title = 'Enable hitlist riding: PS MWAP disables autoHeal after you got n XP from attacks; it enables it again after parsing a snuffed message.';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Hitlist riding, turn off autoHeal after '));
   id = 'rideHitlistXP';
-  title = 'Enter the XP you want to gain before MWAP turns off autoHeal. Enter \'0\' if you want MWAP to turn off autoHeal after it detected a 0 xp attack.';
+  title = 'Enter the XP you want to gain before PS MWAP turns off autoHeal. Enter \'0\' if you want PS MWAP to turn off autoHeal after it detected a 0 xp attack.';
   makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'style':'width: 25px'});
   rhs.appendChild(document.createTextNode(' xp'));
 
@@ -8224,7 +8225,7 @@ function createCashTab () {
   }
   // Las Vegas: current vault level
   var vaultLevel = makeElement('div', cashTab, {'style':'top: '+xTop+'px; right: 5px;'});
-  title = 'Las Vegas: disable automatic vault handling, or select the level of your vault and let MWAP handle it.';
+  title = 'Las Vegas: disable automatic vault handling, or select the level of your vault and let PS MWAP handle it.';
   id = 'vaultHandling';
   //makeElement('label', vaultLevel, {'for':id, 'title':title}).appendChild(document.createTextNode('Las Vegas vault level'));
   makeElement('img', vaultLevel, {'src':stripURI(cashVegasIcon), 'style':'margin-right: 5px;'});
@@ -8272,7 +8273,7 @@ function createAboutTab() {
                                        'font-size: 10px;'});
   item.innerHTML = '<span class="good">Release changes:</span> <br><br>' + GM_getValue('newRevList') + '<br>' +
                    '<span class="bad">Previous changes:</span> <br><br>' + GM_getValue('oldRevList');
-  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>MWAP Team';
+  item.innerHTML = 'Revision history pulled out for the mean time...<br><br>Google\'s project hosting servers are being overwhelmed by this feature :D<br><br>PS MWAP Team';
 
    // Test New Changes
   var devTools = makeElement('div', aboutTab, {'style': 'top: 350px; left: 10px; font-size: 12px;'});
@@ -9058,18 +9059,16 @@ function cleanLoot(strType, sortLootType) {
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   
-  //if (eltLoot.title == "MWAP modified") {
+  //if (eltLoot.title == "PS MWAP modified") {
   //  return;
   //}
-  //eltLoot.title = "MWAP modified";
+  //eltLoot.title = "PS MWAP modified";
     
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   eltRow.style.display="";
   eltRow.nextSibling.nextSibling.style.display="";
-
   var colLoot = [];
-  do {  
-  
+  do {    
     // Get Attack/Defense, and Total values
     var eltPicture = xpathFirst('.//td', eltRow);
     var eltAttackDef = eltPicture.nextSibling.nextSibling;
@@ -9089,10 +9088,11 @@ function cleanLoot(strType, sortLootType) {
     // hence the loot item is giftable.
     if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
     colLoot.push(objLoot); // add item to collection
-    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;    
-    eltRow.style.display="";
-    eltRow.nextSibling.nextSibling.style.display="";
-    var txtData = eltRow.innerHTML.clean().trim();
+    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;   
+    eltRow.style.display=""; 
+    eltRow.nextSibling.nextSibling.style.display="";    
+    var txtData = eltRow.innerHTML.clean().trim();      
+    if(txtData=='line') eltRow.style.display="none";    
   } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 
   // Okay, main collection array, colLoot should be built at this point.
@@ -9118,8 +9118,11 @@ function cleanLoot(strType, sortLootType) {
   // Find respective section (Weapons/Armor/Vehicle/Animal)
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
-  do {
-    if(eltRow.innerHTML.indexOf('colspan') !=-1) eltRow.style.display="none";
+  var txtData = eltRow.innerHTML.clean().trim();
+  if(txtData=='line') eltRow.style.display="none";
+  do {    
+    
+    
     // Get Attack/Defense values
     var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);    
     var eltDefense = eltAttack.nextSibling.nextSibling;
@@ -9149,7 +9152,8 @@ function cleanLoot(strType, sortLootType) {
       }
     }
     eltRow = nextItem;
-    var txtData = eltRow.innerHTML.clean().trim();
+    txtData = eltRow.innerHTML.clean().trim();
+    if(txtData=='line') eltRow.style.display="none";
   } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 }
 
@@ -9852,7 +9856,7 @@ function refreshMWAPCSS() {
 }
 
 function showTimers() {
-  addToLog('info Icon', '<span style="color:#04B4AE;">Time left on MWAP Timers:' +
+  addToLog('info Icon', '<span style="color:#04B4AE;">Time left on PS MWAP Timers:' +
       '<br>&nbsp;&nbsp;miniPackTimer: ' + getHoursTime('miniPackTimer') +
       '<br>&nbsp;&nbsp;buildCarTimer: ' + getHoursTime('buildCarTimer') +
       '<br>&nbsp;&nbsp;buildWeaponTimer: ' + getHoursTime('buildWeaponTimer') +
@@ -10119,7 +10123,7 @@ function customizeMasthead() {
     .appendChild(document.createTextNode('For Chrome'));
 
   // Make a container for the autoplayer menu. //mychange
-  var mwapTitle = 'MWAP ' + SCRIPT.version ;
+  var mwapTitle = 'PS MWAP ' + SCRIPT.version ;
   if (new_header) mwapTitle += ' (nH)' ;  // mark header a new header
 
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
@@ -10130,10 +10134,10 @@ function customizeMasthead() {
 
   if(new_header){
     allHelpMenus = document.evaluate("//li[@class='dropdown divider']",document,null,XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,null);
-    helpMenu = allHelpMenus.snapshotItem(2);
+    helpMenu = allHelpMenus.snapshotItem(2);    
     helpMenu.innerHTML =
-      '<div class="help" >' +
-      '<a href="http://apps.facebook.com/inthemafia" onclick="return false;" class="dropdown">MWAP</a>' +
+      '<div class="help">' +
+      '<a href="http://apps.facebook.com/inthemafia" onclick="return false;" class="dropdown">PS MWAP</a>' +
       '</div>' +
       '<ul id="linklist">' +
       '<li><b style="padding-left:5px;">Downloads</b></li>' +
@@ -10165,33 +10169,37 @@ function customizeMasthead() {
        '</a></li>' +
        '<li><a></a></li>';
     linklist = document.getElementById('linklist');
-    linklist.style.width = "200px";
+    linklist.style.width = "200px";    
 
-    // Check Las Vegas Vault (MWAP menu)
+    // Check Las Vegas Vault (PS MWAP menu)
     var lobjcheckVault = makeElement('li', null, {'id':'checkVault'});
     lobjcheckVault.innerHTML = '<a id="checkVault">Check Las Vegas Vault</a>';
     lobjcheckVault.addEventListener('click', checkVaultStatus, false);
     linklist.insertBefore(lobjcheckVault, linklist.firstChild);
 
-    // Reset Timers (MWAP menu)
+    // Reset Timers (PS MWAP menu)
     var lobjresetTimers = makeElement('li', null, {'id':'resetTimers'});
     lobjresetTimers.innerHTML = '<a id="resetTimers">Reset Timers</a>';
     lobjresetTimers.addEventListener('click', resetTimers, false);
     linklist.insertBefore(lobjresetTimers, linklist.firstChild);
-    // Show Timers (MWAP menu)
+    // Show Timers (PS MWAP menu)
     var lobjshowTimers = makeElement('li', null, {'id':'showTimers'});
     lobjshowTimers.innerHTML = '<a id="showTimers">Show Timers</a>';
     lobjshowTimers.addEventListener('click', showTimers, false);
     linklist.insertBefore(lobjshowTimers, linklist.firstChild);
 
-    // Settings Link (MWAP menu)
+    // Settings Link (PS MWAP menu)
     var lobjAutoPlay = makeElement('li', null, {'id':'autoPlay'});
     lobjAutoPlay.innerHTML = '<a id="autoPlay">Settings</a>';
     lobjAutoPlay.addEventListener('click', toggleSettings, false);
     linklist.insertBefore(lobjAutoPlay, linklist.firstChild);
   } else {
     var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
-    titleElt.innerHTML = "MWAP";
+    titleElt.innerHTML = "PS MWAP";    
+    //titleElt.style.width= "115px";    
+    titleElt.parentNode.parentNode.parentNode.style.width= "120px";
+    titleElt.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
+    titleElt.parentNode.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
     var helpMenu = xpathFirst('.//div[@id="instruction_menu"]', helpElt);
     helpMenu.style.width = "200px";
     helpMenu.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
@@ -10224,26 +10232,26 @@ function customizeMasthead() {
                        '</a> ' +
                        '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
-    // Check Las Vegas Vault (MWAP menu)
+    // Check Las Vegas Vault (PS MWAP menu)
     var lobjcheckVault = makeElement('a', null, {'id':'checkVault'});
     lobjcheckVault.innerHTML = '<div class="sexy_destination middle"><span id="checkVault">Check Las Vegas Vault</span></div>';
     lobjcheckVault.addEventListener('click', checkVaultStatus, false);
     helpMenu.insertBefore(lobjcheckVault, helpMenu.firstChild);
 
-    // Reset Timers (MWAP menu)
+    // Reset Timers (PS MWAP menu)
     var lobjresetTimers = makeElement('a', null, {'id':'resetTimers'});
     lobjresetTimers.innerHTML = '<div class="sexy_destination middle"> ' +
                            '  <span id="resetTimers">Reset Timers</span></div>';
     lobjresetTimers.addEventListener('click', resetTimers, false);
     helpMenu.insertBefore(lobjresetTimers, helpMenu.firstChild);
-    // Show Timers (MWAP menu)
+    // Show Timers (PS MWAP menu)
     var lobjshowTimers = makeElement('a', null, {'id':'showTimers'});
     lobjshowTimers.innerHTML = '<div class="sexy_destination middle"> ' +
                            '  <span id="showTimers">Show Timers</span></div>';
     lobjshowTimers.addEventListener('click', showTimers, false);
     helpMenu.insertBefore(lobjshowTimers, helpMenu.firstChild);
 
-    // Settings Link (MWAP menu)
+    // Settings Link (PS MWAP menu)
     var lobjAutoPlay = makeElement('a', null, {'id':'autoPlay'});
     lobjAutoPlay.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
                            '<div class="sexy_destination middle"> ' +
@@ -10748,7 +10756,7 @@ function customizeProfile() {
       var rDisplay = false;
 
       // Explain the buttons
-      makeElement('a', statsDiv, {'id':'where_are_my_links', 'href':'javascript:alert("Due to the way Mafia Wars links to Facebook there are times where MWAP cannot find the Facebook profile ID. In those situations MWAP will not display buttons that require that ID. You can make the Facebook ID available by refreshing the profile page.");'}).appendChild(document.createTextNode('Where are my links?'));
+      makeElement('a', statsDiv, {'id':'where_are_my_links', 'href':'javascript:alert("Due to the way Mafia Wars links to Facebook there are times where PS MWAP cannot find the Facebook profile ID. In those situations PS MWAP will not display buttons that require that ID. You can make the Facebook ID available by refreshing the profile page.");'}).appendChild(document.createTextNode('Where are my links?'));
 
       // This is a refresh page button
       statsDiv.appendChild(document.createTextNode(' | '));
@@ -11659,10 +11667,10 @@ function customizeProps() {
   if (!propsDiv) {
     // Flash is enabled (we either found an <object> or flashblock is active)
     isFlashed = FLASH_ENABLED;
-    var flashLog = 'Warning: Flash is enabled. You must disable flash from your browser for MWAP to ' +
+    var flashLog = 'Warning: Flash is enabled. You must disable flash from your browser for PS MWAP to ' +
                    'get exact collect times, show property ROIs and auto-upgrade properties.<br>' +
-                   'Visit <a href="http://www.playerscripts.com">MWAP for Firefox</a> or ' +
-                   '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">MWAP for Chrome</a> for instructions.';
+                   'Visit <a href="http://www.playerscripts.com">PS MWAP for Firefox</a> or ' +
+                   '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18">PS MWAP for Chrome</a> for instructions.';
     if (isGMChecked('autoBuy'))
       addToLog('updateBad Icon', flashLog);
     else
@@ -12269,7 +12277,7 @@ BrowserDetect.init();
         'Browser Version: <strong>' + BrowserDetect.version + '</strong><br>' +
         'Operating System: <strong>' + BrowserDetect.OS + '</strong><br>' +
         'New Layout: <strong>' + new_header + '</strong><br>' +
-          '------------------ MWAP Settings---------------------<br>' +
+          '------------------ PS MWAP Settings---------------------<br>' +
         'Script Version: <strong>' + SCRIPT.version + '</strong><br>' +
         'Language: <strong>' + GM_getValue('language') + '</strong><br>' +
         'isFlashed: <strong>' + isFlashed + '</strong><br>' +
@@ -12323,7 +12331,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Filter pass: <strong>' + GM_getValue('filterPass') + '</strong><br>' +
         '&nbsp;&nbsp;Filter fail: <strong>' + GM_getValue('filterFail') + '</strong><br>' +
         'Left-align main frame: <strong>'+ showIfUnchecked(GM_getValue('leftAlign')) + '</strong><br>' +
-        'Elevate MWAP-Header: <strong>'+ showIfUnchecked(GM_getValue('mastheadOnTop')) + '</strong><br>' +
+        'Elevate PS MWAP-Header: <strong>'+ showIfUnchecked(GM_getValue('mastheadOnTop')) + '</strong><br>' +
         'Hide Daily List: <strong>'+ showIfUnchecked(GM_getValue('hideActionBox')) + '</strong><br>' +
         'Hide Limited Time Offers: <strong>'+ showIfUnchecked(GM_getValue('hideOffer')) + '</strong><br>' +
         'Hide gifts: <strong>'+ showIfUnchecked(GM_getValue('hideGifts')) + '</strong><br>' +
@@ -14639,7 +14647,8 @@ function logFightResponse(rootElt, resultElt, context) {
     // A fight took place. Results are in the "VS" format.
     var attackAgainElt;
     if (isGMChecked('staminaPowerattack'))
-      attackAgainElt = xpathFirst('.//a[contains(.,"Power Attack")]', resultElt);
+    DEBUG('Health at :'+health);
+    attackAgainElt = xpathFirst('.//a[contains(.,"Power Attack")]', resultElt);
     if (!attackAgainElt) attackAgainElt = xpathFirst('.//a[contains(.,"Attack Again")]', resultElt);
     lastOpponent.attackAgain = undefined;
 
@@ -15091,7 +15100,7 @@ function logJSONResponse(jsonElt) {
         } else if (/cannot deposit this much/i.test(respTxt)) {
           quickBankFail = false;
           var logText = 'You can\'t deposit this much (you don\'t have enough cash or your vault is to small).';
-          if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling MWAP vault handling.';
+          if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling PS MWAP vault handling.';
           addToLog(cities[context][CITY_CASH_CSS], logText);
           if (!isNaN(cashLeft)) {
             // Attempt to correct the displayed cash value
@@ -15103,7 +15112,7 @@ function logJSONResponse(jsonElt) {
         } else if (/cannot deposit anymore/i.test(respTxt)) {
           quickBankFail = false;
           var logText = 'You can\'t deposit anymore, your vault is full!';
-          if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling MWAP vault handling.';
+          if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling PS MWAP vault handling.';
           addToLog(cities[context][CITY_CASH_CSS], logText);
           if (GM_getValue('vaultHandling', 0)) GM_setValue('vaultSpace', '0');
           // Attempt to correct the displayed cash value
@@ -15795,7 +15804,7 @@ function handlePopups() {
             return(closePopup(popupElts[i], "The Global Cup Collection"));
           }
 
-          /* THESE POPUPS get processed only when MWAP is running: */
+          /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
 
             /* Disable Chop Shop/Weapon Depot popup detection for timers
