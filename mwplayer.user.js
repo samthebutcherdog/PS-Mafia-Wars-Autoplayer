@@ -718,7 +718,6 @@ var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
-//var minHealth;                  // Healt reserve that allows fighting
 
 //new_header = false ; // change the commented out line to disable all changes
 new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new header
