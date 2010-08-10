@@ -29,7 +29,7 @@
 */
 
 // ==UserScript==
-// @name        PS Facebook Mafia Wars Autoplayer (PS MWAP)
+// @name        PS Facebook Mafia Wars Autoplayer (MWAP)
 // @namespace   mafiawars
 // @description Autoplayer for the facebook application - Mafia Wars
 // @include     http://facebook.mafiawars.com/mwfb/remote/html_server.php*
@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.632
+// @version     1.1.633
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.632',
+  version: '1.1.633',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
