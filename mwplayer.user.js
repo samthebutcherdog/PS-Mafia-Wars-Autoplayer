@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.634
+// @version     1.1.635
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.634',
+  version: '1.1.635',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5731,7 +5731,7 @@ function createGeneralTab() {
   // Container for a list of settings.
   var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
-  // Refresh option
+  // Refresh option  
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -7050,14 +7050,62 @@ function createEnergyTab() {
 }
 
 // Create Stamina Tab
+// Create Stamina Sub Tab Functions
+function tabContainerDivs(subTab){
+  item = makeElement('div', subTab);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});  
+  makeElement('br', item, {'class':'hide'});  
+}
+
+function removeStrongerOpponents(staminaTabSub){
+  tabContainerDivs(staminaTabSub);  
+  title = 'Remove stronger opponents from the list automatically.';
+  id = 'fightRemoveStronger';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Remove stronger opponents'));
+}
+
+function staminaBursting(staminaTabSub){
+// Enable Stamina bursts
+  tabContainerDivs(staminaTabSub);
+  id = 'burstStamina';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Enable bursts:'));
+  // Burst Points
+  title = 'How many points to burst';
+  id = 'burstPoints';
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Burn '));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' points '));
+  // Burstmode
+  id = 'burstMode';
+  var burstMode = makeElement('select', rhs, {'id':id});
+  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(burstModes[i]));
+    burstMode.appendChild(choice);
+  }
+  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
+  // Powerattack
+  title = 'Power Attack';
+  id = 'staminaPowerattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('Powerattack'));
+}
+
+
 // Create Stamina Sub Tabs
 function createStaminaSubTab_FightRandom(staminaTabSub) {
 
   // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
   id = 'fightRandomLoc';
   var fightRandomLoc = makeElement('select', lhs, {'id':id});
@@ -7088,46 +7136,11 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Skip iced targets'));
 
-  // Enable Stamina bursts
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Spend bursts of stamina.';
-  id = 'burstStamina';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable bursts:'));
-  // Burst Points
-  title = 'How many points to burst';
-  id = 'burstPoints';
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' points '));
-  // Burstmode
-  id = 'burstMode';
-  var burstMode = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(burstModes[i]));
-    burstMode.appendChild(choice);
-  }
-  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
-  // Powerattack
-  title = 'Power Attack';
-  id = 'staminaPowerattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('Powerattack'));
+  //Replaces old stamina settings insert
+  staminaBursting(staminaTabSub);
 
   // Maximum level.
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   title = 'Avoid opponents higher than this level.';
   id = 'fightLevelMax';
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -7142,10 +7155,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label.appendChild(document.createTextNode(' Add my level'));
 
   // Maximum mafia size.
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   id = 'fightMafiaMax';
   title = 'Avoid opponents with mafia sizes larger than this.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -7160,10 +7170,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label.appendChild(document.createTextNode(' Add my mafia size'));
 
   // Minimum mafia size.
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   id = 'fightMafiaMin';
   title = 'Avoid opponents with mafia sizes smaller than this.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -7178,37 +7185,17 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label.appendChild(document.createTextNode(' Subtract from my mafia size'));
 
   // Mob fight
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   title = 'Fight higher levels if the mafia is smaller.  You mob them, overwhelm the smaller numbers';
   id = 'fightMobMode';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMobMode');
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'fightMobMode');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Mob Fight'));
 
   // Remove stronger opponents?
   removeStrongerOpponents(staminaTabSub);
-  /*
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Remove stronger opponents from the list automatically.';
-  id = 'fightRemoveStronger';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Remove stronger opponents'));
-  */
+  tabContainerDivs(staminaTabSub);  
 
-  patternFighting(staminaTabSub);
-  /*
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  rhs2 = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
   // Pattern Fighting ?
   title = ' Use Mafia Family Patterns when fighting';
   id = 'fightNames';
@@ -7228,18 +7215,15 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
-  */
 
   // Use stealth fighting?
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   title = 'Prefer opponents who won\'t be notified of your attacks.';
   id = 'fightStealth';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth');
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Use fight stealth'));
+  
   // Avoid Top Mafia bodyguards?
   title = 'Avoid opponents known to be Top Mafia bodyguards. This may ' +
           'decrease the frequency of losses due to critical hits.';
@@ -7248,40 +7232,11 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
 }
-function patternFighting(staminaTabSub) {
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  rhs2 = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  // Pattern Fighting ?
-  title = ' Use Mafia Family Patterns when fighting';
-  id = 'fightNames';
-  var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when fighting:'));
-  UseFightNames.addEventListener('click', clickUseFightNames, false);
-  makeElement('br', lhs);
-  id = 'fightAvoidNames';
-  title = ' Avoid mafia families';
-  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
-  makeElement('br', lhs);
-  id = 'fightOnlyNames';
-  title = ' Only Fight Mafia Families ';
-  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
-  makeElement('br', rhs);
-  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
-};
 
 function createStaminaSubTab_FightSpecific(staminaTabSub) {
 
   // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
   id = 'fightListLoc';
   var fightListLoc = makeElement('select', lhs, {'id':id});
@@ -7312,297 +7267,30 @@ function createStaminaSubTab_FightSpecific(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Skip iced targets'));
 
-  // Enable Stamina bursts
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Spend bursts of stamina.';
-  id = 'burstStamina';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable bursts:'));
-  // Burst Points
-  title = 'How many points to burst';
-  id = 'burstPoints';
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' points '));
-  // Burstmode
-  id = 'burstMode';
-  var burstMode = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(burstModes[i]));
-    burstMode.appendChild(choice);
-  }
-  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
-  // Powerattack
-  title = 'Power Attack';
-  id = 'staminaPowerattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('Powerattack'));
+  //Replaces old stamina settings insert
+  staminaBursting(staminaTabSub);
 
   // Opponent list
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   lhs.appendChild(document.createTextNode('Fight these opponents:'));
   makeElement('textarea', rhs, {'style':'position: static; width: 180px; height: 105px;', 'id':'fightList', 'title':'Enter each opponent\'s ID (not their name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightList', '')));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each Facebook ID on a separate line.'));
 
   // Remove stronger opponents?
-  removeStrongerOpponents(staminaTabSub);
-  /*
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Remove stronger opponents from the list automatically.';
-  id = 'fightRemoveStronger';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Remove stronger opponents'));
-  */
+  removeStrongerOpponents(staminaTabSub);  
 }
 
 function createStaminaSubTab_FightRob(staminaTabSub) {
   createStaminaSubTab_Rob(staminaTabSub);
   makeElement('hr', staminaTabSub);
   createStaminaSubTab_FightRandom(staminaTabSub);
-/*
-  // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-
-  lhs.appendChild(document.createTextNode('Rob in:'));
-  id = 'robLocation';
-  var robLocation = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=locations.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(locations[i]));
-    robLocation.appendChild(choice);
-  }
-  robLocation.selectedIndex = GM_getValue('robLocation', NY);
-
-  // Fast Rob
-  title = 'Fast rob, does not log';
-  id = 'fastRob';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked', 'style': 'margin-left: 10px;'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Fast Rob?'));
-
-  makeElement('hr', staminaTabSub);
-
-  // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
-  id = 'fightRandomLoc';
-  var fightRandomLoc = makeElement('select', lhs, {'id':id});
-  for (i = 0, iLength=fightLocations.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(fightLocations[i]));
-    fightRandomLoc.appendChild(choice);
-  }
-  fightRandomLoc.selectedIndex = GM_getValue('fightLocation', NY);
-
-  //rehit on money gain
-  title = 'Reattack until iced if money gained';
-  id = 'staminaReattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('While gaining $ '));
-  //Money gain treshold
-  title = 'Reattack if this amount is gained';
-  id = 'reattackThreshold';
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351;', 'value':GM_getValue(id, '65000'), 'size':'1'});
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-
-  // IceCheck
-  title = 'Attack ONLY live targets';
-  id = 'iceCheck';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'iceCheck');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Skip iced targets'));
-
-  // Enable Stamina bursts
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Spend bursts of stamina.';
-  id = 'burstStamina';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable bursts:'));
-  // Burst Points
-  title = 'How many points to burst';
-  id = 'burstPoints';
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' points '));
-  // Burstmode
-  id = 'burstMode';
-  var burstMode = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(burstModes[i]));
-    burstMode.appendChild(choice);
-  }
-  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
-  // Powerattack
-  title = 'Power Attack';
-  id = 'staminaPowerattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('Powerattack'));
-
-  // Maximum level.
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Avoid opponents higher than this level.';
-  id = 'fightLevelMax';
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Maximum level:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':5, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightLevelMax', '100'), 'size':'1'});
-
-  // Maximum level relative?
-  title = 'Make the maximum level be relative to your own. For example, if your level is 10, and maximum level is set to 5, opponents higher than level 15 will be avoided.';
-  id = 'fightLevelMaxRelative';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxRelative');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Add my level'));
-
-  // Maximum mafia size.
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'fightMafiaMax';
-  title = 'Avoid opponents with mafia sizes larger than this.',
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Maximum mafia:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMax', '501'), 'size':'1'});
-
-  // Maximum mafia relative?
-  title = 'Make the maximum mafia size be relative to your own. For example, if you have 300 mafia members, and maximum mafia is set to 50, opponents with more than 350 mafia members will be avoided.';
-  id = 'fightMafiaMaxRelative';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMaxRelative');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Add my mafia size'));
-
-  // Minimum mafia size.
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'fightMafiaMin';
-  title = 'Avoid opponents with mafia sizes smaller than this.',
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Minimum mafia:'));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMin', '1'), 'size':'1'});
-
-  // Minimum mafia relative?
-  title = 'Make the minimum mafia size be relative to your own. For example, if you have 300 mafia members, and minimum mafia is set to 50, opponents with less than 250 mafia members will be avoided.';
-  id = 'fightMafiaMinRelative';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Subtract from my mafia size'));
-
-  // Mob fight
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Fight higher levels if the mafia is smaller.  You mob them, overwhelm the smaller numbers';
-  id = 'fightMobMode';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMobMode');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Mob Fight'));
-
-  // Remove stronger opponents?
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Remove stronger opponents from the list automatically.';
-  id = 'fightRemoveStronger';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Remove stronger opponents'));
-
-
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  rhs2 = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  // Pattern Fighting ?
-  title = ' Use Mafia Family Patterns when fighting';
-  id = 'fightNames';
-  var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when fighting:'));
-  UseFightNames.addEventListener('click', clickUseFightNames, false);
-  makeElement('br', lhs);
-  id = 'fightAvoidNames';
-  title = ' Avoid mafia families';
-  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
-  makeElement('br', lhs);
-  id = 'fightOnlyNames';
-  title = ' Only Fight Mafia Families ';
-  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
-  makeElement('br', rhs);
-  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
-
-  // Use stealth fighting?
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Prefer opponents who won\'t be notified of your attacks.';
-  id = 'fightStealth';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth');
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Use fight stealth'));
-  // Avoid Top Mafia bodyguards?
-  title = 'Avoid opponents known to be Top Mafia bodyguards. This may ' +
-          'decrease the frequency of losses due to critical hits.';
-  id = 'fightAvoidBodyguards';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightAvoidBodyguards', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
-*/
 }
 
 function createStaminaSubTab_Rob(staminaTabSub) {
 
   // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-
+  tabContainerDivs(staminaTabSub);
   lhs.appendChild(document.createTextNode('Rob in:'));
   id = 'robLocation';
   var robLocation = makeElement('select', rhs, {'id':id});
@@ -7626,10 +7314,7 @@ function createStaminaSubTab_Rob(staminaTabSub) {
 function createStaminaSubTab_CollectBounties(staminaTabSub) {
 
   // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   lhs.appendChild(document.createTextNode('Collect bounties in:'));
   id = 'hitmanLocation';
   var hitmanLoc = makeElement('select', rhs, {'id':id});
@@ -7641,47 +7326,11 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   }
   hitmanLoc.selectedIndex = GM_getValue('hitmanLocation', NY);
 
-  // Enable Stamina bursts
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Spend bursts of stamina.';
-  id = 'burstStamina';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable bursts:'));
-  // Burst Points
-  title = 'How many points to burst';
-  id = 'burstPoints';
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' points '));
-  // Burstmode
-  id = 'burstMode';
-  var burstMode = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(burstModes[i]));
-    burstMode.appendChild(choice);
-  }
-  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
-  // Powerattack
-  title = 'Power Attack';
-  id = 'staminaPowerattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('Powerattack'));
-
+  //Replaces old stamina settings insert
+  staminaBursting(staminaTabSub);
 
   // Minimum bounty
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub); 
   id = 'hitmanBountyMin';
   title = 'Ignore targets with bounties below this measly amount.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -7689,10 +7338,7 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 7em; border: 1px solid #781351;', 'value':GM_getValue('hitmanBountyMin', '0')});
 
   // Bounty selection
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   lhs.appendChild(document.createTextNode('Prefer targets with:'));
   id = 'bountySelection';
   var bountySelection = makeElement('select', rhs, {'id':id});
@@ -7704,13 +7350,8 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   }
   bountySelection.selectedIndex = GM_getValue('bountySelection', BOUNTY_HIGHEST_BOUNTY);
 
-  //patternFighting(staminaTabSub);
+  tabContainerDivs(staminaTabSub);
   
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  rhs2 = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
   // Pattern Fighting ?
   title = ' Use Mafia Family Patterns for collecting bounties';
   id = 'hitmanNames';
@@ -7731,43 +7372,15 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('hitmanClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
-  
 
   // Remove stronger opponents?
-  removeStrongerOpponents(staminaTabSub);
-  /*
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Remove stronger opponents from the list automatically.';
-  id = 'fightRemoveStronger';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Remove stronger opponents'));
-  */
+  removeStrongerOpponents(staminaTabSub);  
 }
-
-function removeStrongerOpponents(staminaTabSub){
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Remove stronger opponents from the list automatically.';
-  id = 'fightRemoveStronger';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Remove stronger opponents'));
-}
-
 
 function createStaminaSubTab_SetBounties(staminaTabSub) {
 
   // Location setting
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   lhs.appendChild(document.createTextNode('Place bounties in:'));
   id = 'autoHitListLoc';
   var autoHitListLoc = makeElement('select', rhs, {'id':id});
@@ -7786,10 +7399,7 @@ function createStaminaSubTab_SetBounties(staminaTabSub) {
   label.appendChild(document.createTextNode(' Enable Background mode'));
 
   // Bounty amount
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   id = 'autoHitListBounty';
   title = 'Place a fixed bounty or check random',
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -7803,10 +7413,7 @@ function createStaminaSubTab_SetBounties(staminaTabSub) {
   label.appendChild(document.createTextNode(' random'));
 
   // Opponent list
-  item = makeElement('div', staminaTabSub);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
+  tabContainerDivs(staminaTabSub);
   lhs.appendChild(document.createTextNode('Hitlist these opponents:'));
   makeElement('textarea', rhs, {'style':'position: static; width: 180px; height: 105px;', 'id':'autoHitOpponentList', 'title':'Enter each opponent\'s ID (not their name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('autoHitOpponentList', '')));
   makeElement('br', rhs);
@@ -7817,7 +7424,7 @@ function createStaminaSubTab_Random(staminaTabSub) {
 
   // Stamina Spend choice setting
   var SpendModes = GM_getValue('randomSpendModes');
-  if(!SpendModes) SpendModes="0000";
+  if(!SpendModes) SpendModes="1000";
   var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
   item.appendChild(document.createTextNode('Stamina Spend Modes :'));
   makeElement('br', item);
@@ -7835,7 +7442,7 @@ function createStaminaSubTab_Random(staminaTabSub) {
 
   // Location setting for Fighting
   var fightCities = GM_getValue('randomFightLocations');
-  if(!fightCities) fightCities="00000";
+  if(!fightCities) fightCities="10000";
   var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;margin-top:1em;'});
   item.appendChild(document.createTextNode('Location Settings :'));
   makeElement('br', item);
@@ -7854,7 +7461,7 @@ function createStaminaSubTab_Random(staminaTabSub) {
 
   // Location setting for Robbing
   var robCities = GM_getValue('randomRobLocations');
-  if(!robCities) robCities="00000";
+  if(!robCities) robCities="10000";
   var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
   item.appendChild(document.createTextNode('Rob in:'));
   makeElement('br', item);
@@ -7872,7 +7479,7 @@ function createStaminaSubTab_Random(staminaTabSub) {
 
   // Location setting for Bounty Collection
   var hitCities = GM_getValue('randomHitmanLocations');
-  if(!hitCities) hitCities="00000";
+  if(!hitCities) hitCities="10000";
   var item = makeElement('div', staminaTabSub, {'style':'margin-left:0.5em;'});
   item.appendChild(document.createTextNode('Collect Bounties in:'));
   makeElement('br', item);
@@ -8683,7 +8290,8 @@ function validateStaminaTab() {
         } else {
           spendModes+='0';
         }
-      }
+      }      
+      if(!parseInt(spendModes)) spendModes = '1' + spendModes.substr(1);
       s.randomSpendModes=spendModes;
 
       var randomCities="";
@@ -8695,6 +8303,7 @@ function validateStaminaTab() {
           randomCities+='0';
         }
       }
+      if(!parseInt(randomCities)) randomCities = '1' + randomCities.substr(1);
       s.randomFightLocations=randomCities;
 
       randomCities="";
@@ -8706,6 +8315,7 @@ function validateStaminaTab() {
           randomCities+='0';
         }
       }
+      if(!parseInt(randomCities)) randomCities = '1' + randomCities.substr(1);
       s.randomRobLocations=randomCities;
 
       randomCities="";
@@ -8717,6 +8327,7 @@ function validateStaminaTab() {
           randomCities+='0';
         }
       }
+      if(!parseInt(randomCities)) randomCities = '1' + randomCities.substr(1);
       s.randomHitmanLocations=randomCities;
 
       break;
@@ -15798,10 +15409,10 @@ function handlePopups() {
           if (popupInnerNoTags.indexOf('The Slots Collection') != -1) return(closePopup(popupElts[i], "Slots Collection"));
 
           // Process The Global Cup Collection popup
-          if (popupInnerNoTags.indexOf('The Global Cup Collection') != -1) {
-            DEBUG('Popup Process: The Global Cup Collection Processed');
-            return(closePopup(popupElts[i], "The Global Cup Collection"));
-          }
+          if (popupInnerNoTags.indexOf('The Global Cup Collection') != -1) return(closePopup(popupElts[i], "The Global Cup Collection"));
+          
+          // Get rid of Grow your Mafia popup
+          if (popupInnerNoTags.indexOf('friend to be in your mafia and help') != -1) return(closePopup(popupElts[i], "Grow your Mafia"));
 
           /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
