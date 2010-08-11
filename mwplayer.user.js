@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.633
+// @version     1.1.634
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.633',
+  version: '1.1.634',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7704,8 +7704,8 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   }
   bountySelection.selectedIndex = GM_getValue('bountySelection', BOUNTY_HIGHEST_BOUNTY);
 
-  patternFighting(staminaTabSub);
-  /*
+  //patternFighting(staminaTabSub);
+  
   item = makeElement('div', staminaTabSub);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -7731,7 +7731,7 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'hitmanClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('hitmanClanName', defaultClans.join('\n'))));
   makeElement('br', rhs);
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
-  */
+  
 
   // Remove stronger opponents?
   removeStrongerOpponents(staminaTabSub);
