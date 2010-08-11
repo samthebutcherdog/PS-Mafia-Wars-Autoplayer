@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.635
+// @version     1.1.636
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.635',
+  version: '1.1.636',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1134,7 +1134,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Force Heal options
   var healOptions = new Array(
-    ['forceHealOpt6','Disable Heal if Health is below 20','check to Disable healing while below 20 health, Overrides ALL Lower Settings'],
+    ['forceHealOpt7','Heal if Health is above 19','check to allow healing while health is above 19, Overrides ALL Lower Settings'],
+//    ['forceHealOpt6','Disable Heal if Health is below 20','check to Disable healing while below 20 health, Overrides ALL Lower Settings'],
     ['forceHealOpt5','Heal after 5 minutes','if health drops below 20, start a 5 minute timer, Then allow healing'],
     ['forceHealOpt4','Heal if stamina is full','allow healing if stamina is full and not blocked from above choices'],
     ['forceHealOpt3','Heal if stamina can be spent','try to heal. overridden by the top 2 choices']
@@ -2033,13 +2034,12 @@ function doAutoPlay () {
   //auto-heal area
 //  DEBUG('  entering auto-heal ') ;
   if (running &&
-      canForceHeal() &&
       health < maxHealth &&
       isGMChecked('autoHeal') &&
       health < GM_getValue('healthLevel', 0) &&
-      (stamina >= GM_getValue('stamina_min_heal'))
-//   ( ((health > 19) && (SpendStamina.canBurn && (stamina > 0) ) )|| canForceHeal() )
-  ) {
+      (stamina >= GM_getValue('stamina_min_heal')) &&
+      canForceHeal()
+      ) {
 //    DEBUG('auto-heal passed main block check, checking can auto heal ');
     if(canautoheal()) {
       DEBUG('auto-healing '); // hide/remove after testing
@@ -2185,7 +2185,7 @@ function doAutoPlay () {
     return;
   }
   if (autoStaminaSpendif) {
-    if (autoStaminaSpend()) return;
+    if (autoStaminaSpend()) return;  // staminaspend is unchecked comes back false
 
     // Attempt failed. Randomize stamina setting (if set)
     if (isGMEqual('staminaSpendHow', STAMINA_HOW_RANDOM)) {
@@ -2991,11 +2991,23 @@ function canForceHeal() {
   if(!isGMChecked('hideInHospital'))
     return true;
 
-  // disable Heal when health is below 20
-  if (isGMChecked('forceHealOpt6') && health < 20) {
-    DEBUG( 'health is below 20, stopped from healing in canforceheal ');
-    return false;
+  // bypass all lower HiH settings and heal while health is above 19 and below 'need to heal minium'
+  if((health > 19) && isGMChecked('forceHealOpt7') ) {
+    DEBUG( 'heal if above 19 is checked, and true, in canforceheal ');
+    return true;
     }
+
+  // if able to level up on stamina and checked to do so, bypass HiH
+  if((SpendStamina.canBurn && stamina > 0) && isGMChecked('allowStaminaToLevelUp') ) {
+    DEBUG( 'enough stamina left to level up, and burn to level up, checked in canforceheal ');
+    return true;
+    }
+
+  // disable Heal when health is below 20
+//  if (isGMChecked('forceHealOpt6') && health < 20) {
+//    DEBUG( 'health is below 20, stopped from healing in canforceheal ');
+//    return false;
+//    }
 
   // Heal after 5 minutes
   if(isGMChecked('forceHealOpt5') && GM_getValue('healWaitStarted') && timeLeftGM('healWaitTime')) {
@@ -3015,7 +3027,7 @@ function canForceHeal() {
   if (isGMChecked('forceHealOpt3') && canSpendStamina(0))
     return true;
 
-  DEBUG( 'healing blocked because stamina full & spent are unchecked in canforceheal '); // hide/remove after testing
+  DEBUG( 'healing passed no HiH settings, blocked in HiH (canforceheal) '); // hide/remove after testing
   return false;
 }
 
@@ -4576,7 +4588,7 @@ function saveSettings() {
   //End Save Display Tab Settings
 
   //Start Save Mafia Tab Settings
-  
+
   //Mafia Tab Checkboxes
   saveCheckBoxElementArray([
     'autoAskJobHelp','acceptMafiaInvitations','autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareWishlist',
@@ -4758,7 +4770,8 @@ function saveSettings() {
   //Start Save Heal Tab Settings
   //Heal Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt6','hideAttacks','BlockHealRobbing'
+    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt7','hideAttacks','BlockHealRobbing'
+//    'forceHealOpt6',
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -5731,7 +5744,7 @@ function createGeneralTab() {
   // Container for a list of settings.
   var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
-  // Refresh option  
+  // Refresh option
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -7054,12 +7067,12 @@ function createEnergyTab() {
 function tabContainerDivs(subTab){
   item = makeElement('div', subTab);
   lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});  
-  makeElement('br', item, {'class':'hide'});  
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
 }
 
 function removeStrongerOpponents(staminaTabSub){
-  tabContainerDivs(staminaTabSub);  
+  tabContainerDivs(staminaTabSub);
   title = 'Remove stronger opponents from the list automatically.';
   id = 'fightRemoveStronger';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightRemoveStronger', 'checked');
@@ -7194,7 +7207,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
 
   // Remove stronger opponents?
   removeStrongerOpponents(staminaTabSub);
-  tabContainerDivs(staminaTabSub);  
+  tabContainerDivs(staminaTabSub);
 
   // Pattern Fighting ?
   title = ' Use Mafia Family Patterns when fighting';
@@ -7223,7 +7236,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth');
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Use fight stealth'));
-  
+
   // Avoid Top Mafia bodyguards?
   title = 'Avoid opponents known to be Top Mafia bodyguards. This may ' +
           'decrease the frequency of losses due to critical hits.';
@@ -7278,7 +7291,7 @@ function createStaminaSubTab_FightSpecific(staminaTabSub) {
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each Facebook ID on a separate line.'));
 
   // Remove stronger opponents?
-  removeStrongerOpponents(staminaTabSub);  
+  removeStrongerOpponents(staminaTabSub);
 }
 
 function createStaminaSubTab_FightRob(staminaTabSub) {
@@ -7330,7 +7343,7 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   staminaBursting(staminaTabSub);
 
   // Minimum bounty
-  tabContainerDivs(staminaTabSub); 
+  tabContainerDivs(staminaTabSub);
   id = 'hitmanBountyMin';
   title = 'Ignore targets with bounties below this measly amount.',
   label = makeElement('label', lhs, {'for':id, 'title':title});
@@ -7351,7 +7364,7 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   bountySelection.selectedIndex = GM_getValue('bountySelection', BOUNTY_HIGHEST_BOUNTY);
 
   tabContainerDivs(staminaTabSub);
-  
+
   // Pattern Fighting ?
   title = ' Use Mafia Family Patterns for collecting bounties';
   id = 'hitmanNames';
@@ -7374,7 +7387,7 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
   makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
 
   // Remove stronger opponents?
-  removeStrongerOpponents(staminaTabSub);  
+  removeStrongerOpponents(staminaTabSub);
 }
 
 function createStaminaSubTab_SetBounties(staminaTabSub) {
@@ -8290,7 +8303,7 @@ function validateStaminaTab() {
         } else {
           spendModes+='0';
         }
-      }      
+      }
       if(!parseInt(spendModes)) spendModes = '1' + spendModes.substr(1);
       s.randomSpendModes=spendModes;
 
@@ -8578,20 +8591,20 @@ function handleModificationTimer() {
       //  cleanLoot("Vehicles",sortLootType);
       //  cleanLoot("Animals", sortLootType);
       //}
-      
+
       // Handler for switching sub-areas.
-      var handleFilterChanged = function() {              
+      var handleFilterChanged = function() {
         sortLootType = filterLootSelect.selectedIndex;
-        if(sortLootType != oldLootType){          
+        if(sortLootType != oldLootType){
           cleanLoot("Weapons",sortLootType);
           cleanLoot("Armor",sortLootType);
           cleanLoot("Vehicles",sortLootType);
-          cleanLoot("Animals", sortLootType);        
+          cleanLoot("Animals", sortLootType);
           oldLootType = sortLootType;
-        }  
+        }
       }
-      
-      var lootElt = xpathFirst('.//li[contains(@class, "tab_on")]//div[contains(@class, "tab_content")]//a[contains(., "Loot")]', innerPageElt);      
+
+      var lootElt = xpathFirst('.//li[contains(@class, "tab_on")]//div[contains(@class, "tab_content")]//a[contains(., "Loot")]', innerPageElt);
       var oldLootType=0;
       var id = 'filterLootSelect';
       var filterLootSelect = document.getElementById(id);
@@ -8605,10 +8618,10 @@ function handleModificationTimer() {
           choice.appendChild(document.createTextNode(filterOptions[i]));
           filterLootSelect.appendChild(choice);
         }
-        filterLootSelect.selectedIndex = GM_getValue('filterLootOpt', 0);      
-        handleFilterChanged();  
-      }     
-      
+        filterLootSelect.selectedIndex = GM_getValue('filterLootOpt', 0);
+        handleFilterChanged();
+      }
+
       filterLootSelect.addEventListener('change', handleFilterChanged, false);
     }
 
@@ -8668,17 +8681,17 @@ function cleanLoot(strType, sortLootType) {
 
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
-  
+
   //if (eltLoot.title == "PS MWAP modified") {
   //  return;
   //}
   //eltLoot.title = "PS MWAP modified";
-    
+
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   eltRow.style.display="";
   eltRow.nextSibling.nextSibling.style.display="";
   var colLoot = [];
-  do {    
+  do {
     // Get Attack/Defense, and Total values
     var eltPicture = xpathFirst('.//td', eltRow);
     var eltAttackDef = eltPicture.nextSibling.nextSibling;
@@ -8698,11 +8711,11 @@ function cleanLoot(strType, sortLootType) {
     // hence the loot item is giftable.
     if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
     colLoot.push(objLoot); // add item to collection
-    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;   
-    eltRow.style.display=""; 
-    eltRow.nextSibling.nextSibling.style.display="";    
-    var txtData = eltRow.innerHTML.clean().trim();      
-    if(txtData=='line') eltRow.style.display="none";    
+    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
+    eltRow.style.display="";
+    eltRow.nextSibling.nextSibling.style.display="";
+    var txtData = eltRow.innerHTML.clean().trim();
+    if(txtData=='line') eltRow.style.display="none";
   } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 
   // Okay, main collection array, colLoot should be built at this point.
@@ -8730,11 +8743,11 @@ function cleanLoot(strType, sortLootType) {
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   var txtData = eltRow.innerHTML.clean().trim();
   if(txtData=='line') eltRow.style.display="none";
-  do {    
-    
-    
+  do {
+
+
     // Get Attack/Defense values
-    var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);    
+    var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
     var eltDefense = eltAttack.nextSibling.nextSibling;
     var splitVal = eltAttack.innerHTML.split(" ");
     var intAttack = parseInt(splitVal[2]);
@@ -8743,7 +8756,7 @@ function cleanLoot(strType, sortLootType) {
     // Prep elements for possible removal
     var eltSibling = eltRow.nextSibling.nextSibling;
     var nextItem = eltSibling.nextSibling.nextSibling;
-    
+
     if (sortLootType == 3) {
       if(intAttack < minAttack && intDefense < minDefense){
         //Removal
@@ -9744,7 +9757,7 @@ function customizeMasthead() {
 
   if(new_header){
     allHelpMenus = document.evaluate("//li[@class='dropdown divider']",document,null,XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,null);
-    helpMenu = allHelpMenus.snapshotItem(2);    
+    helpMenu = allHelpMenus.snapshotItem(2);
     helpMenu.innerHTML =
       '<div class="help">' +
       '<a href="http://apps.facebook.com/inthemafia" onclick="return false;" class="dropdown">PS MWAP</a>' +
@@ -9779,7 +9792,7 @@ function customizeMasthead() {
        '</a></li>' +
        '<li><a></a></li>';
     linklist = document.getElementById('linklist');
-    linklist.style.width = "200px";    
+    linklist.style.width = "200px";
 
     // Check Las Vegas Vault (PS MWAP menu)
     var lobjcheckVault = makeElement('li', null, {'id':'checkVault'});
@@ -9805,8 +9818,8 @@ function customizeMasthead() {
     linklist.insertBefore(lobjAutoPlay, linklist.firstChild);
   } else {
     var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
-    titleElt.innerHTML = "PS MWAP";    
-    //titleElt.style.width= "115px";    
+    titleElt.innerHTML = "PS MWAP";
+    //titleElt.style.width= "115px";
     titleElt.parentNode.parentNode.parentNode.style.width= "120px";
     titleElt.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
     titleElt.parentNode.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
@@ -12096,7 +12109,8 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
         '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;-Disable Heal when health is below 20: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt6')) + '</strong><br>' +
+        '&nbsp;&nbsp;&nbsp;-Heal if health is above 19: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt7')) + '</strong><br>' +
+//        '&nbsp;&nbsp;&nbsp;-Disable Heal when health is below 20: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt6')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
@@ -15410,7 +15424,7 @@ function handlePopups() {
 
           // Process The Global Cup Collection popup
           if (popupInnerNoTags.indexOf('The Global Cup Collection') != -1) return(closePopup(popupElts[i], "The Global Cup Collection"));
-          
+
           // Get rid of Grow your Mafia popup
           if (popupInnerNoTags.indexOf('friend to be in your mafia and help') != -1) return(closePopup(popupElts[i], "Grow your Mafia"));
 
@@ -15489,9 +15503,9 @@ function handlePopups() {
               var opponentElt = xpathFirst('.//div[@class="fightres_opponent"]');
               var opponentNameElt = xpathFirst('.//div[@class="fightres_name"]/a', opponentElt);
               if (icedCountElt && icedCountTextElt && opponentElt) {
-                bodyCount = parseInt(icedCountElt.innerHTML.replace(',', ''));                
+                bodyCount = parseInt(icedCountElt.innerHTML.replace(',', ''));
                 IcedPublishingCount = parseInt(GM_getValue('IcedPublishingCount')) ? parseInt(GM_getValue('IcedPublishingCount')) : 0;
-                publishFrequency =  parseInt(GM_getValue('autoIcePublishFrequency')) ? parseInt(GM_getValue('autoIcePublishFrequency')) : 1;                  
+                publishFrequency =  parseInt(GM_getValue('autoIcePublishFrequency')) ? parseInt(GM_getValue('autoIcePublishFrequency')) : 1;
                 logFrequency = parseInt(IcedPublishingCount % publishFrequency);
                 eltIce = xpathFirst('.//a[contains(.,"Share with Friends")]', popupElts[i]);
                 if(eltIce && isGMChecked('autoIcePublish') && (IcedPublishingCount % publishFrequency == 0)) {
@@ -15506,17 +15520,17 @@ function handlePopups() {
                            icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + icedCountElt.innerHTML + '</span>.';
                   if(isGMChecked('autoIcePublish')) logtxt+= ' Iced bonus not published ('+logFrequency+'/'+publishFrequency+')';
                   addToLog('info Icon', logtxt);
-                  IcedPublishingCount+=1;                  
-                  GM_setValue('IcedPublishingCount',IcedPublishingCount);    
+                  IcedPublishingCount+=1;
+                  GM_setValue('IcedPublishingCount',IcedPublishingCount);
                   return(closePopup(popupElts[i], "Iced Popup"));
                 }
-                IcedPublishingCount+=1;                
-                GM_setValue('IcedPublishingCount',IcedPublishingCount);    
+                IcedPublishingCount+=1;
+                GM_setValue('IcedPublishingCount',IcedPublishingCount);
               } else {
                 // missing info, just go away
                 return(closePopup(popupElts[i], "Iced Popup"));
               }
-              
+
             }
 
             //Process Reward for Energy Packs
