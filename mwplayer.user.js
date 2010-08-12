@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.638
+// @version     1.1.639
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.638',
+  version: '1.1.639',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2547,16 +2547,14 @@ function autoPlayerUpdates() {
 }
 
 // MiniPack!
-function miniPackForce() {
-  //GM_setValue('miniPackTimer', 0);
-  //miniPack();
-  DEBUG('Redirecting to force mini Energy');
-  window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
-}
 function miniPack() {
   if (timeLeftGM('miniPackTimer')) return;
+  miniPackForce();
+}
+function miniPackForce() {
+ if (getHoursTime('miniPackTimer') == 0)
   setGMTime('miniPackTimer', '8 hours');
-  DEBUG('Redirecting to use mini Energy');
+  DEBUG('Redirecting to force mini Energy');
   window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
 }
 
