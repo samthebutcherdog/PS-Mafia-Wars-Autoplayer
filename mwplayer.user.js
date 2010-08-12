@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.637
+// @version     1.1.638
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.637',
+  version: '1.1.638',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1135,7 +1135,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Force Heal options
   var healOptions = new Array(
     ['forceHealOpt7','Heal if Health is above 19','check to allow healing while health is above 19, Overrides ALL Lower Settings'],
-//    ['forceHealOpt6','Disable Heal if Health is below 20','check to Disable healing while below 20 health, Overrides ALL Lower Settings'],
     ['forceHealOpt5','Heal after 5 minutes','if health drops below 20, start a 5 minute timer, Then allow healing'],
     ['forceHealOpt4','Heal if stamina is full','allow healing if stamina is full and not blocked from above choices'],
     ['forceHealOpt3','Heal if stamina can be spent','try to heal. overridden by the top 2 choices']
@@ -2031,7 +2030,7 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
-  //auto-heal area
+  // auto-heal area
 //  DEBUG('  entering auto-heal ') ;
   if (running &&
       health < maxHealth &&
@@ -3003,12 +3002,6 @@ function canForceHeal() {
     return true;
     }
 
-  // disable Heal when health is below 20
-//  if (isGMChecked('forceHealOpt6') && health < 20) {
-//    DEBUG( 'health is below 20, stopped from healing in canforceheal ');
-//    return false;
-//    }
-
   // Heal after 5 minutes
   if(isGMChecked('forceHealOpt5') && GM_getValue('healWaitStarted') && timeLeftGM('healWaitTime')) {
     DEBUG( ' healing blocked ' + GM_getValue('healWaitStarted') + ' due to 5 minute wait timer. remaining:' + timeLeftGM('healWaitTime') ); // hide/remove after testing
@@ -3027,7 +3020,7 @@ function canForceHeal() {
   if (isGMChecked('forceHealOpt3') && canSpendStamina(0))
     return true;
 
-  DEBUG( 'healing passed no HiH settings, blocked in HiH (canforceheal) '); // hide/remove after testing
+  DEBUG( 'healing blocked in HiH (canforceheal) '); // hide/remove after testing
   return false;
 }
 
@@ -3039,14 +3032,14 @@ function canSpendStamina(minHealth) {
 
   if (isNaN(minHealth)) {
     // Up to 28 damage can be received in a fight.
-    minHealth = isGMChecked('attackCritical') ? 21 : 29;
+    minHealth = isGMChecked('attackCritical') ? 20 : 29;
     switch (stamMode) {
       case STAMINA_HOW_AUTOHITLIST:
       case STAMINA_HOW_ROBBING:
-        minHealth = 0;
+        minHealth = -25;
       case STAMINA_HOW_FIGHTROB:
         if( stamina > 25)  {
-          minHealth = 0;
+          minHealth = -25;
         }
     }
   }
@@ -4771,7 +4764,6 @@ function saveSettings() {
   //Heal Tab Checkboxes
   saveCheckBoxElementArray([
     'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt7','hideAttacks','BlockHealRobbing'
-//    'forceHealOpt6',
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -12110,7 +12102,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal if health is above 19: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt7')) + '</strong><br>' +
-//        '&nbsp;&nbsp;&nbsp;-Disable Heal when health is below 20: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt6')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal after 5 minutes: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt5')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
