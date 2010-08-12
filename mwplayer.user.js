@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.636
+// @version     1.1.637
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.636',
+  version: '1.1.637',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14706,10 +14706,15 @@ function logJSONResponse(jsonElt) {
         if ((/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)&lt;\/span/)) || (/you deposited/i.test(respTxt) && respTxt.match(/\$([0-9,,]+) into your vault/i))) {
           quickBankFail = false;
           var cashDeposit = RegExp.$1;
+          var cashDepositText = "";
+          if (cities[context][CITY_CASH_SYMBOL] == "V$" ) {
+            cashDepositText = '</span> was deposited in your vault.'
+          } else {
+            cashDepositText = '</span> was deposited in your account after the bank\'s fee.'
+          }
           addToLog(cities[context][CITY_CASH_CSS],
                    '<span class="money">' + cities[context][CITY_CASH_SYMBOL] +
-                   cashDeposit +
-                   '</span> was deposited in your account after the bank\'s fee.');
+                   cashDeposit + cashDepositText);
 
           // Attempt to correct the displayed cash value
           if (cityCashElt) {
