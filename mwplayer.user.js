@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.640
+// @version     1.1.641
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.640',
+  version: '1.1.641',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1024,13 +1024,15 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const CITY_ALLIANCE    = 11;
 
   // Constants for accessing mission array
-  const MISSION_NAME     = 0;
-  const MISSION_ENERGY   = 1;
-  const MISSION_NUMBER   = 2;
-  const MISSION_TAB      = 3;
-  const MISSION_CITY     = 4;
-  const MISSION_XP       = 5;
-  const MISSION_RATIO    = 6;
+  const MISSION_NAME     = 0; // 7
+  const MISSION_ENERGY   = 1; // 5
+  const MISSION_NUMBER   = 2; // 4
+  const MISSION_TAB      = 3; // 2
+  const MISSION_CITY     = 4; // 1
+  const MISSION_XP       = 5; // 6
+  const MISSION_TABPATH  = 6; // 3
+  const MISSION_NODE_LV  = 7; // 0 node line for Las Vegas
+  const MISSION_RATIO    = 8; // 8
 
   // Add city variables in this format
   // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
@@ -1133,418 +1135,380 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   );
 
   // Define all jobs. The array elements are:
-  // job description, energy cost, job number, tab number, city, exp payout
+  // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
   var missions = new Array(
-    ['Chase Away Thugs',1,1,1,NY,1],
-    ['Rob a Drug Runner',3,2,1,NY,3],
-    ['Rough Up Dealers',5,3,1,NY,5],
-    ['Rob the Warehouse',7,4,1,NY,8],
-    ['Collect Protection Money',2,5,1,NY,2],
-    ['Grow Your Family',3,8,1,NY,3],
-    ['Perform a Hit',2,37,1,NY,2],
-    ['Mugging',2,6,2,NY,2],
-    ['Auto Theft',2,7,2,NY,2],
-    ['Take Out a Rogue Cop',3,9,2,NY,3],
-    ['Collect on a Loan',3,10,2,NY,3],
-    ['Bank Heist',10,11,2,NY,13],
-    ['Jewelry Store Job',15,12,2,NY,20],
-    ['Hijack a Semi',8,38,2,NY,9],
-    ['Destroy Enemy Mob Hideout',5,13,3,NY,5],
-    ['Kill a Protected Snitch',5,14,3,NY,5],
-    ['Bust a Made Man Out of Prison',5,15,3,NY,5],
-    ['Asian Museum Break-in',18,16,3,NY,22],
-    ['Fight a Haitian Gang',6,17,3,NY,6],
-    ['Clip the Irish Mob\'s Local Enforcer',10,39,3,NY,11],
-    ['Steal a Tanker Truck',8,40,3,NY,9],
-    ['Federal Reserve Raid',25,18,4,NY,30],
-    ['Smuggle Thai Gems',7,19,4,NY,8],
-    ['Liquor Smuggling',30,22,4,NY,35],
-    ['Run Illegal Poker Game',20,26,4,NY,33],
-    ['Wiretap the Cops',30,28,4,NY,45],
-    ['Rob an Electronics Store',24,41,4,NY,26],
-    ['Burn Down a Tenement',18,42,4,NY,22],
-    ['Distill Some Liquor',10,23,4,NY,12],
-    ['Manufacture Tokens',10,24,4,NY,12],
-    ['Get Cheating Deck',10,25,4,NY,12],
-    ['Overtake Phone Central',10,27,4,NY,12],
-    ['Repel the Yakuza',13,29,5,NY,18],
-    ['Disrupt Rival Smuggling Ring',15,30,5,NY,20],
-    ['Invade Tong-controlled Neighborhood',25,31,5,NY,30],
-    ['Sell Guns to the Russian Mob',25,32,5,NY,35],
-    ['Protect your City against a Rival Family',35,33,5,NY,50],
-    ['Assassinate a Political Figure',35,34,5,NY,50],
-    ['Exterminate a Rival Family',40,35,5,NY,58],
-    ['Obtain Compromising Photos',28,43,5,NY,32],
-    ['Frame a Rival Capo',26,44,5,NY,33],
-    ['Steal an Air Freight Delivery',32,45,6,NY,36],
-    ['Run a Biker Gang Out of Town',35,46,6,NY,40],
-    ['Flip a Snitch',25,47,6,NY,30],
-    ['Steal Bank Records',30,48,6,NY,36],
-    ['Loot the Police Impound Lot',60,49,6,NY,60],
-    ['Recruit a Rival Crew Member',30,50,6,NY,39],
-    ['Dodge an FBI Tail',20,51,6,NY,27],
-    ['Whack a Rival Crew Leader',28,52,6,NY,38],
-    ['Influence a Harbor Official',50,53,7,NY,65],
-    ['Move Stolen Merchandise',36,54,7,NY,50],
-    ['Snuff a Rat',44,55,7,NY,62],
-    ['Help a Fugitive Flee the Country',40,56,7,NY,57],
-    ['Dispose of a Body',25,57,7,NY,36],
-    ['Ransom a Businessman\'s Kids',60,58,7,NY,70],
-    ['Fix the Big Game',50,59,7,NY,60],
-    ['Steal an Arms Shipment',45,60,7,NY,66],
-    ['Extort a Corrupt Judge',24,61,8,NY,36],
-    ['Embezzle Funds Through a Phony Company',50,62,8,NY,70],
-    ['Break Into the Armory',50,63,8,NY,60],
-    ['Rip Off the Armenian Mob',50,64,8,NY,68],
-    ['Muscle in on a Triad Operation',45,65,8,NY,68],
-    ['Ambush a Rival at a Sit Down',55,66,8,NY,80],
-    ['Order a Hit on a Public Official',35,67,8,NY,55],
-    ['Take Over an Identity Theft Ring',36,68,8,NY,52],
-    ['Settle a Beef... Permanently',35,69,9,NY,74],
-    ['Buy Off a Federal Agent',35,70,9,NY,50],
-    ['Make a Deal with the Mexican Cartel',40,71,9,NY,60],
-    ['Blackmail the District Attorney',44,72,9,NY,66],
-    ['Shake Down a City Council Member',85,73,9,NY,124],
-    ['Make Arrangements for a Visiting Don',40,74,9,NY,60],
-    ['Take Control of a Casino',70,75,9,NY,110],
-    ['Travel to the Old Country',52,76,9,NY,82],
-    // CUBA
-    ['Rob Your Cab Driver',12,1,1,CUBA,16],
-    ['Secure A Safehouse',36,2,1,CUBA,49],
-    ['Intimidate The Locals',52,3,1,CUBA,70],
-    ['Silence a Noisy Neighbor',32,4,1,CUBA,44],
-    ['Smuggle In Some Supplies',34,5,1,CUBA,45],
-    ['Set Up A Numbers Racket',44,6,1,CUBA,60],
-    ['Establish Contact With The FRG',38,7,1,CUBA,50],
-    ['Take Out The Local Police Chief',41,8,1,CUBA,55],
-    ['"Persuade" A Local To Talk',51,41,1,CUBA,69],
-    ['Assault A Snitch\'s Hideout',56,42,1,CUBA,75],
-    ['Transport A Shipment of US Arms',42,9,2,CUBA,59],
-    ['Meet With The FRG Leadership',38,10,2,CUBA,54],
-    ['Hold Up A Tour Bus',45,11,2,CUBA,65],
-    ['Ambush A Military Patrol',51,12,2,CUBA,72],
-    ['Capture An Army Outpost',56,13,2,CUBA,79],
-    ['Sneak A Friend Of The Family Into The Country',35,14,2,CUBA,50],
-    ['Ransack A Local Plantation',43,15,2,CUBA,61],
-    ['Burn Down A Hacienda',58,16,2,CUBA,82],
-    ['Offer "Protection" To A Nightclub',38,17,3,CUBA,56],
-    ['Rob The Banco Nacional Branch',52,18,3,CUBA,77],
-    ['Shake Down A Hotel Owner',40,19,3,CUBA,58],
-    ['Bring The Local Teamsters Under Your Control',46,20,3,CUBA,68],
-    ['Help The FRG Steal A Truckload Of Weapons',51,21,3,CUBA,74],
-    ['Hijack A Booze Shipment',45,22,3,CUBA,67],
-    ['Pillage A Shipyard',52,23,3,CUBA,76],
-    ['Take Over The Docks',60,24,3,CUBA,88],
-    ['Muscle In On A Local Casino',44,25,4,CUBA,67],
-    ['Establish A Loansharking Business',49,26,4,CUBA,74],
-    ['Eliminate A Rival Family\'s Agent',42,27,4,CUBA,64],
-    ['Pass On Some Intel To The FRG',45,28,4,CUBA,67],
-    ['Execute A Regional Arms Dealer',50,29,4,CUBA,76],
-    ['Sink A Competing Smuggler\'s Ship',52,30,4,CUBA,78],
-    ['Gun Down An Enemy Crew At The Airport',56,31,4,CUBA,85],
-    ['Assassinate An Opposing Consigliere',62,32,4,CUBA,93],
-    ['Raid The Arms Depot',53,33,5,CUBA,81],
-    ['Supply The FRG With Some Extra Muscle',46,34,5,CUBA,70],
-    ['Capture The Airport',56,35,5,CUBA,85],
-    ['Knock Off A Visiting Head Of State',52,36,5,CUBA,79],
-    ['Set Up A High Volume Smuggling Operation',55,37,5,CUBA,85],
-    ['Blow Up A Rail Line',50,38,5,CUBA,77],
-    ['Attack The Army Command Post',58,39,5,CUBA,88],
-    ['Storm The Presidential Palace',70,40,5,CUBA,106],
-    ['Arrange A New York Drug Shipment',62,43,6,CUBA,95],
-    ['Launder Money Through A Resort',72,44,6,CUBA,110],
-    ['Loot The National Museum',78,45,6,CUBA,117],
-    ['Send Some Help Home To New York',64,46,6,CUBA,98],
-    ['Take Over The Havana Reconstruction',82,47,6,CUBA,123],
-    ['Help Get An Associate A No Bid Contract',56,48,6,CUBA,85],
-    ['Trans-Ship A Container Full of Refugees',48,49,6,CUBA,73],
-    ['Meet With "The Russian"',58,50,6,CUBA,89],
-    // MOSCOW EPISODE 1
-    ['Smuggle Consumer Electronics for the Vory',46,1,1,MOSCOW,61],
-    ['Arrange A Drug Shipment for the Mafiya',40,2,1,MOSCOW,53],
-    ['Fight Off An Ultra-National Gang',112,3,1,MOSCOW,115],
-    // CHOICE POINT (Vory = 4, Mafia = 7)
-    ['Kidnap A Local Gang Leader for the Vory',47,4,1,MOSCOW,63],
-    //['Kill A Local Gang Leader for the Mafiya',47,7,1,MOSCOW,63],
-    // CHOICE RESULT (Vory)
-    ['Collect The Ransom',50,5,1,MOSCOW,64],
-    ['Receive Vory Intel On Dmitri',40,6,1,MOSCOW,54],
-    // CHOICE RESULT (Mafia)
-    //['Collect the Hit Payoff',56,8,1,MOSCOW,76],
-    //['Buy Mafiya Intel On Dmitri',52,9,1,MOSCOW,74],
-    //
-    ['Threaten A Gang\'s Supplier',58,10,1,MOSCOW,79],
-    ['Hijack An Arms Shipment From A Militant Gang',67,11,1,MOSCOW,90],
-    ['Hospitalize Some Nationalists',76,12,1,MOSCOW,104],
-    ['Confront Gang Leader Dmitri Leonov',1,13,1,MOSCOW,3],
-    // MOSCOW EPISODE 2
-    ['Bribe An Election Official',57,14,2,MOSCOW,77],
-    ['Silence A Political Critic',53,15,2,MOSCOW,73],
-    ['Violently Break Up A Campaign Rally',137,16,2,MOSCOW,141],
-    // CHOICE POINT (Vory = 17, Mafia = 20)
-    ['Fix A Local Election for the Vory',66,17,2,MOSCOW,91],
-    //['Abduct A Candidate\'s Wife For the Mafiya',66,20,2,MOSCOW,89],
-    // CHOICE RESULT (Vory)
-    ['Extract A Favor From The Winner',97,18,2,MOSCOW,128],
-    ['Catch Karpov Accepting A Bribe',77,19,2,MOSCOW,105],
-    // CHOICE RESULT (Mafia)
-    //['"Convince" The Candidate To Withdraw',90,21,2,MOSCOW,126],
-    //['Kill An Investigative Reporter',75,22,2,MOSCOW,107],
-    //
-    ['Pay Off The Port Authority In Arkhangelsk',57,23,2,MOSCOW,77],
-    ['Re-route An Equipment Shipment',80,24,2,MOSCOW,106],
-    ['Circulate Damaging Photos',99,25,2,MOSCOW,137],
-    ['Take Down Party Boss Karpov',1,26,2,MOSCOW,3],
-    // MOSCOW EPISODE 3
-    ['Case The RossijaBanc Building',65,31,3,MOSCOW,88],
-    ['Map Out The Escape Route',80,32,3,MOSCOW,108],
-    ['Rob The RossijaBanc Central Repository',165,33,3,MOSCOW,172],
-    // CHOICE POINT (Vory = 34, Mafia = 37)
-    ['Take A Guard Hostage During Your Escape',82,34,3,MOSCOW,112],
-    //['Execute A Bank Guard During Your Escape',82,37,3,MOSCOW,112],
-    // CHOICE RESULT (Vory)
-    ['Use The Guard\'s Keys To Access the Bank Armory',105,35,3,MOSCOW,140],
-    ['"Borrow" The Guard\'s Uniform After Releasing Him',88,36,3,MOSCOW,117],
-    // CHOICE RESULT (Mafia)
-    //['Steal The Bank President\'s Car Keys',99,38,3,MOSCOW,132],
-    //['Strip A Uniform Off The Corpse',91,39,3,MOSCOW,121],
-    //
-    ['Blackmail A Secretary For An Exec\'s Itinerary',96,40,3,MOSCOW,129],
-    ['Dispose Of A RossijaBanc Exec At Sea',89,41,3,MOSCOW,118],
-    ['Replace A Guard With Your Own Man',118,42,3,MOSCOW,165],
-    ['"Fire" Bank President Gregor Belikov',1,43,3,MOSCOW,3],
-    // MOSCOW EPISODE 4
-    ['Manage An Escort Service Catering to Soldiers',111,44,4,MOSCOW,151],
-    ['Support The Habit Of A Procurement Officer',125,45,4,MOSCOW,170],
-    ['Ransack A Defense Contractor\'s Office',198,46,4,MOSCOW,210],
-    // CHOICE POINT (Vory = 47, Mafia = 50)
-    ['Fly To The Siberian Military District',118,47,4,MOSCOW,161],
-    //['Travel To The Volga Military District',118,50,4,MOSCOW,161],
-    // CHOICE RESULT (Vory)
-    ['Rob A Troop Convoy',108,48,4,MOSCOW,143],
-    ['Intercept The Base\'s Pay Shipment',105,49,4,MOSCOW,143],
-    // CHOICE RESULT (Mafia)
-    //['Arrange The Sale Of Weapons-Grade Explosives',119,51,4,MOSCOW,158],
-    //['Capitalize On An Officer\'s Gambling Problem',107,52,4,MOSCOW,146],
-    //
-    ['Make Connections With An Arms Dealer',123,53,4,MOSCOW,168],
-    ['Transport Some Stolen Military Hardware',125,54,4,MOSCOW,165],
-    ['Buy Off The General\'s Command Team',134,55,4,MOSCOW,188],
-    ['Forcibly Demote General Osipov',1,56,4,MOSCOW,3],
-    // MOSCOW EPISODE 5
-    ['Stop A Terrorist Attack In Moscow',116,61,5,MOSCOW,159],
-    ['Discover Who Was Responsible',124,62,5,MOSCOW,170],
-    ['Hunt Down A Ural Liberation Front Contact',215,63,5,MOSCOW,230],
-    // CHOICE POINT (Vory = 64, Mafia = 67)
-    ['Infiltrate The ULF Cell',132,64,5,MOSCOW,181],
-    //['Discover The Location Of The Next ULF Attack',132,67,5,MOSCOW,181],
-    // CHOICE RESULT (Vory)
-    ['Help "Plan" The Next Attack',121,65,5,MOSCOW,160],
-    ['Sabotage The Plan From The Inside',127,66,5,MOSCOW,174],
-    // CHOICE RESULT (Mafia)
-    //['Kill A Lookout',127,68,5,MOSCOW,170],
-    //['Stop The ULF Attack',131,69,5,MOSCOW,180],
-    //
-    ['Torture A ULF Lieutenant',120,70,5,MOSCOW,164],
-    ['Look For The Boss\' Mountain Hideout',135,71,5,MOSCOW,180],
-    ['Start An Avalanche Above The Terrorist Camp',145,72,5,MOSCOW,205],
-    ['Battle Sonya "The Wolf" Bassinov',1,73,5,MOSCOW,3],
-    // MOSCOW EPISODE 6
-    ['Foil The Sabotage Of Your Moscow Holdings',130,74,6,MOSCOW,180],
-    ['Acquire Classified Files On Crime Syndicates',122,75,6,MOSCOW,169],
-    ['Gun Down Some Russian Muscle',238,76,6,MOSCOW,258],
-    // CHOICE POINT (Vory = 77, Mafia = 80)
-    ['Attack A Mafiya Business',136,77,6,MOSCOW,188],
-    //['Burn Down A Vory Safehouse',136,80,6,MOSCOW,188],
-    // CHOICE RESULT (Vory)
-    ['Hijack A Mafiya Cargo',134,78,6,MOSCOW,179],
-    ['Threaten A Mafiya Moneyman\'s Family',128,79,6,MOSCOW,176],
-    // CHOICE RESULT (Mafia)
-    //['Hit A Vory Nightclub',128,81,6,MOSCOW,171],
-    //['Break Into An Architect\'s Office',134,82,6,MOSCOW,185],
-    ['Take Over A West-Bound Trafficking Pipeline',140,83,6,MOSCOW,194],
-    ['Ship Black-Market Caviar To London',137,84,6,MOSCOW,189],
-    ['Assault The Mansion Walls',148,85,6,MOSCOW,211],
-    ['Take Out Viktor "Sibirchik" Titov',1,86,6,MOSCOW,3],
-    // BANGKOK EPISODE 1
-    ['Move Stolen Art Through Suvarnabhumi Airport',71,1,1,BANGKOK,111],
-    ['Show A Cocky Biker Who\'s In Charge',63,2,1,BANGKOK,101],
-    ['Take On Local Motorcycle Thugs',189,3,1,BANGKOK,253],
-    ['Meet A Gang\'s Rep In A Go-Go Bar',78,5,1,BANGKOK,120],           // CHOICE POINT (Yakuza = 5, Triad = 8)
-    ['Torch A Building For Insurance',110,6,1,BANGKOK,172],             // Yakuza
-    ['Arrange An "Accident" For A Witness',71,7,1,BANGKOK,111],         // Yakuza
-    ['Raid One Of Suchart\'s Gambling Dens',91,9,1,BANGKOK,133],        // Triad
-    ['Trash The Low-Rent Casino',71,10,1,BANGKOK,102],                  // Triad
-    ['Intercept An Ammo Shipment',65,11,1,BANGKOK,94],                  // CHOICE POINT (Yakuza = 11, Triad = 14)
-    ['Deliver It To A Japanese Front Company',94,12,1,BANGKOK,130],     // Yakuza
-    ['Pay Off A Corrupt Police Officer',64,13,1,BANGKOK,91],            // Yakuza
-    ['Sneak It On To A Chinese Cargo Ship',71,15,1,BANGKOK,102],        // Triad
-    ['Bribe A Dock Guard',52,16,1,BANGKOK,78],                          // Triad
-    ['Blow Up Suchart\'s Warehouse',111,17,1,BANGKOK,164],
-    ['Take Down Boss Suchart',1,18,1,BANGKOK,3],
-    // BANGKOK EPISODE 2
-    ['Force A Local Landowner To Sell',67,20,2,BANGKOK,95],
-    ['Receive A Kickback From The Buyer',73,21,2,BANGKOK,102],
-    ['Attack A Paramilitary Police Post',136,22,2,BANGKOK,167],
-    ['Set Up A Phony Business',62,24,2,BANGKOK,89],                     // CHOICE POINT (Yakuza = 24, Triad = 27)
-    ['Re-Route A Van Full Of Medical Supplies',52,25,2,BANGKOK,64],     // Yakuza
-    ['Resell The Stolen Supplies',52,26,2,BANGKOK,64],                  // Yakuza
-    ['Set Up A Bogus Chess Tournament',57,28,2,BANGKOK,77],             // Triad
-    ['Rob The Chess Masters',51,29,2,BANGKOK,72],                       // Triad
-    ['Pay Off The Guards At Bangkwang Prison',47,30,2,BANGKOK,65],      // CHOICE POINT (Yakuza = 30, Triad = 33)
-    ['Sneak A Yakuza Enforcer In',40,31,2,BANGKOK,48],                  // Yakuza
-    ['Help Stage An Accident For A Tong Inmate',36,32,2,BANGKOK,44],    // Yakuza
-    ['Break A Triad Hitman Out',57,34,2,BANGKOK,77],                    // Triad
-    ['Help Rub Out A Bosozoku Leader',62,35,2,BANGKOK,89],              // Triad
-    ['Expose A Crooked Royal Thai Police Officer',94,36,2,BANGKOK,132],
-    ['Discredit Police Commissioner Chatri',1,37,2,BANGKOK,3],
-    // BANGKOK EPISODE 3
-    ['Secure A Pirate Vessel',43,39,3,BANGKOK,46],                             // CHAPTER 1
-    ['Hire An Unsavory Crew',35,40,3,BANGKOK,53],                              // CHAPTER 1
-    ['Take Down A Rival Pirate Outfit',106,41,3,BANGKOK,146],                  // CHAPTER 1  HELP JOB
-    ['Hijack A Boat Load Of Electronics',35,43,3,BANGKOK,53],                  // CHAPTER 2  CHOICE POINT (Yakuza = 43, Triad = 46)
-    ['Truck The Cargo To Kuala Lumpur',60,44,3,BANGKOK,93],                    // CHAPTER 2  Yakuza
-    ['Smuggle Cigarettes Back Into Thailand',60,45,3,BANGKOK,93],              // CHAPTER 2  Yakuza
-    ['Ship The Cargo To Jakarta',49,47,3,BANGKOK,75],                          // CHAPTER 2  Triad
-    ['Return With A Shipment Of Weapons',49,48,3,BANGKOK,75],                  // CHAPTER 2  Triad
-    ['Steal Shipping Manifests',46,49,3,BANGKOK,71],                           // CHAPTER 3  CHOICE POINT (Yakuza = 49, Triad = 52)
-    ['Steal Japanese Auto Shipping Containers',56,53,3,BANGKOK,88],            // CHAPTER 3  Triad
-    ['Offload The Cars Onto A Waiting Barge',60,54,3,BANGKOK,93],              // CHAPTER 3  Triad
-    ['Hire Divers To Retrieve The Gold Bars',49,51,3,BANGKOK,75],              // CHAPTER 3  Yakuza
-    ['Sink A Chinese Metals Freighter',53,50,3,BANGKOK,84],                    // CHAPTER 3  Yakuza
-    ['Sink A Fleet Vessel',107,55,3,BANGKOK,135],                              // FINALE
-    ['Send Captain Mok Overboard',1,56,3,BANGKOK,3],                           // BOSS JOB
-    // BANGKOK EPISODE 4
-    ['Buy Some Chemicals On The Black Market',68,58,4,BANGKOK,84],             // CHAPTER 1
-    ['Make Contact With The United Wa State Army',52,59,4,BANGKOK,64],         // CHAPTER 1
-    ['Ambush A Burmese Army Convoy',144,60,4,BANGKOK,160],                     // CHAPTER 1  HELP JOB
-    ['Establish Contact With A CIA Agent',48,62,4,BANGKOK,60],                 // CHAPTER 2  CHOICE POINT (Yakuza = 62, Triad = 65)
-    ['Arrange To Process It In Bangkok',80,64,4,BANGKOK,100],                  // CHAPTER 2  Yakuza
-    ['Set Up An Opium Shipment',76,63,4,BANGKOK,92],                           // CHAPTER 2  Yakuza
-    ['Set Up The Import Of Illegal Chinese Arms',64,66,4,BANGKOK,80],          // CHAPTER 2  Triad
-    ['Ship The Yaa Baa Payment To Phuket',60,67,4,BANGKOK,76],                 // CHAPTER 2  Triad
-    ['Betray Commander Chang and the UWSA',52,68,4,BANGKOK,64],                // CHAPTER 3  CHOICE POINT (Yakuza = 68, Triad = 71)
-    ['Steal A Seized Drug Shipment',64,70,4,BANGKOK,80],                       // CHAPTER 3  Yakuza
-    ['Pass On Information To The Thai Police',44,69,4,BANGKOK,56],             // CHAPTER 3  Yakuza
-    ['Eliminate An Insurgent Escort',60,72,4,BANGKOK,72],                      // CHAPTER 3  Triad
-    ['Make Off With Stolen Military Hardware',56,73,4,BANGKOK,68],             // CHAPTER 3  Triad
-    ['Attack Chang\'s Heroin-Processing Facility',88,74,4,BANGKOK,112],        // FINALE
-    ['Kill Commander Chang',1,75,4,BANGKOK,3],                                 // BOSS JOB
-    // BANGKOK EPISODE 5A-Oyabun
-    ['Ship Burmese Sapphires Into Thailand',72,77,5,BANGKOK,92],               // CHAPTER 1
-    ['Smuggle The Sapphires Into Tokyo',52,78,5,BANGKOK,68],                   // CHAPTER 1
-    ['Fight Off A Minato-Kai Sponsored Hit',168,79,5,BANGKOK,188],             // CHAPTER 1  HELP JOB
-    ['Meet With Boss Matsumura\'s Advisor',56,81,5,BANGKOK,72],                // CHOICE POINT CHAPTER 2 (Yakuza = 81, Triad = 84)
-    ['Help Broker A Minato-Matsumura Peace',68,82,5,BANGKOK,88],               // CHAPTER 2  Yakuza
-    ['Take A Piece Of The Kabukicho Action',68,83,5,BANGKOK,88],               // CHAPTER 2  Yakuza
-    ['Assassinate The Minato-Kai Family Head',64,85,5,BANGKOK,102],            // CHAPTER 2  Triad
-    ['Frame An Enemy For The Murder',67,86,5,BANGKOK,106],                     // CHAPTER 2  Triad
-    ['Talk With A Police Insider About Matsumura',40,87,5,BANGKOK,52],         // CHOICE POINT CHAPTER 3 (Yakuza = 87, Triad = 90)
-    ['Gather More Evidence Of A Betrayal',80,88,5,BANGKOK,104],                // CHAPTER 3  Yakuza
-    ['Get The Support Of The Yakuza Families',84,89,5,BANGKOK,108],            // CHAPTER 3  Yakuza
-    ['Spread Distrust Among The Yakuza Families',78,91,5,BANGKOK,124],         // CHAPTER 3  Triad
-    ['Start A War Between Matsumura and Minato',78,92,5,BANGKOK,124],          // CHAPTER 3  Triad
-    ['Remove Matsumura\'s Loyal Lieutenants',104,93,5,BANGKOK,132],            // FINALE
-    ['Execute Oyabun Matsumura',1,94,5,BANGKOK,3],                             // BOSS JOB
-    // BANGKOK EPISODE 5B-Dragon Head
-    ['Set Up A Drug Shipment To China',49,96,6,BANGKOK,79],                    // CHAPTER 1
-    ['Dodge Customs At The Port of Hong Kong',64,97,6,BANGKOK,102],            // CHAPTER 1
-    ['Win A Shoot-Out With The Kowloon Police',149,98,6,BANGKOK,208],          // CHAPTER 1  HELP JOB
-    ['Intimidate Wealthy Expatriates',64,100,6,BANGKOK,102],                   // CHOICE POINT CHAPTER 2 (Yakuza = 100, Triad = 103)
-    ['Make An Example Of A Wealthy Industrialist',64,101,6,BANGKOK,102],       // CHAPTER 2  Yakuza
-    ['Fence The Goods Stolen From The Mansion',60,102,6,BANGKOK,97],           // CHAPTER 2  Yakuza
-    ['Extort The Head Of The Hong Kong Polo Club',67,104,6,BANGKOK,106],       // CHAPTER 2  Triad
-    ['Fix The Hong Kong Polo Invitational',64,105,6,BANGKOK,102],              // CHAPTER 2  Triad
-    ['Talk With Wei\'s Disloyal Enforcers',71,106,6,BANGKOK,115],              // CHOICE POINT CHAPTER 3 (Yakuza = 106, Triad = 109)
-    ['Sneak An Industrial Spy Into Hong Kong',64,107,6,BANGKOK,102],           // CHAPTER 3  Yakuza
-    ['Break In To Cheng-Wei Ballistics',67,108,6,BANGKOK,106],                 // CHAPTER 3  Yakuza
-    ['Kidnap One Of Wei\'s Trusted Advisors',56,110,6,BANGKOK,88],             // CHAPTER 3  Triad
-    ['Bury The Body Under A Construction Site',60,111,6,BANGKOK,97],           // Chapter 3  Triad
-    ['Attack Wei\'s Gambling Halls',96,112,6,BANGKOK,155],                     // FINALE
-    ['Dispose Of Mountain Master Wei',1,113,6,BANGKOK,3],                      // BOSS JOB
-    // BANGKOK EPISODE 6-Saboteur
-    ['Shore Up Control Of Your New Territory',60,115,7,BANGKOK,97],            // CHAPTER 1
-    ['Spread The Wealth To Your New Lieutenants',71,116,7,BANGKOK,115],        // CHAPTER 1
-    ['Eliminate The Last Traces Of Resistance',145,117,7,BANGKOK,199],         // CHAPTER 1  HELP JOB
-    ['Get A Gang Member Back Into Thailand',71,119,7,BANGKOK,115],             // CHOICE POINT CHAPTER 2 (Yakuza = 119, Triad = 122)
-    ['Break Into A Goverment Research Facility',74,120,7,BANGKOK,119],         // CHAPTER 2  Yakuza
-    ['Steal An Experimental Armor Prototype',67,121,7,BANGKOK,106],            // CHAPTER 2  Yakuza
-    ['Kidnap A Trade Consortium Leader',74,123,7,BANGKOK,119],                 // CHAPTER 2  Triad
-    ['Extort The Consortium\'s Remaining Officers',64,124,7,BANGKOK,102],      // CHAPTER 2  Triad
-    ['Undermine Nongchai\'s Support',78,125,7,BANGKOK,124],                    // CHOICE POINT CHAPTER 3 (Yakuza = 125, Triad = 128)
-    ['Acquire Information On A Government Supporter',71,126,7,BANGKOK,115],    // CHAPTER 3  Yakuza
-    ['Assassinate A Bangkok Council Member',67,127,7,BANGKOK,106],             // CHAPTER 3  Yakuza
-    ['Bribe A Royal Thai Army Colonel',74,129,7,BANGKOK,119],                  // CHAPTER 3  Triad
-    ['Route A Drug Shipment Through An Army Post',64,130,7,BANGKOK,102],       // Chapter 3  Triad
-    ['Infiltrate The Parliament House',85,131,7,BANGKOK,137],                  // FINALE
-    ['Depose Prime Minister Nongchai',1,132,7,BANGKOK,3],                      // BOSS JOB
-    // BANGKOK EPISODE 7-Assassin
-    ['Consolidate Political Power In Bangkok',56,134,8,BANGKOK,93],            // CHAPTER 1
-    ['Take Over The Royal Bank Of Thailand',64,135,8,BANGKOK,97],              // CHAPTER 1
-    ['Foil An Attempt On Your Life',156,136,8,BANGKOK,222],                    // CHAPTER 1  HELP JOB
-    ['Question The Surviving Assassin',74,138,8,BANGKOK,115],                  // CHAPTER 2
-    ['Gather Information On The Shadow King',71,139,8,BANGKOK,115],            // CHAPTER 2
-    ['Eliminate A Spy For The Shadow King',85,140,8,BANGKOK,133],              // CHAPTER 2
-    ['Hire A Guide To Find The Temple of Shadows',64,141,8,BANGKOK,102],       // CHAPTER 3
-    ['Fight Off A Hill Tribe Loyal To The Shadow King',89,142,8,BANGKOK,142],  // CHAPTER 3
-    ['Silence A Shadow Kingdom Patrol',81,143,8,BANGKOK,133],                  // CHAPTER 3
-    ['Battle Your Way Through The Temple',96,144,8,BANGKOK,159],               // FINALE
-    ['Overthrow The Shadow King',1,145,8,BANGKOK,3],                           // BOSS JOB
-    // LAS VEGAS NORTH LAS VEGAS
-    ['Move Your Crew Into a Safe House',9,1,1,LV,7],                             // DISTRICT 1 ENERGY PATH
-    ['Blackmail A Car Dealer',8,2,1,LV,11],                                      // DISTRICT 1 ENERGY PATH
-    ['Steal A Truckload Of Slots',24,3,1,LV,18],                                 // DISTRICT 1 ENERGY PATH
-    ['Secure Some Wheels',18,4,1,LV,25],                                         // DISTRICT 1 ENERGY PATH
-    ['Break into a gun shop',12,6,1,LV,16],                                      // DISTRICT 1 ENERGY PATH
-    ['Scout out alphabet city',15,7,1,LV,20],                                    // DISTRICT 1 ENERGY PATH
-    //['Roll a bingo parlour',6,5,1,LV,9],                                       // DISTRICT 1 FIGHT PATH
-    //['Open fire on Victor\'s crew',23,8,1,LV,27],                                // DISTRICT 1 SOCIAL JOB
-    //['Defeat Victor Lil\' Loco Alves',5,9,1,LV,6],                             // BOSS JOB USES STAMINA
-    // LAS VEGAS PARADISE CITY
-    ['Help a Rookie Out Of A Jam',15,10,2,LV,9],                                 // DISTRICT 2 ENERGY PATH
-    ['Fix a Boxing Match',11,13,2,LV,15],                                        // DISTRICT 2 ENERGY PATH
-    ['Clean Up At A Rigged Table',10,14,2,LV,14],                                // DISTRICT 2 ENERGY PATH
-    ['Recruit A Table Game Dealer',9,15,2,LV,12],                                // DISTRICT 2 ENERGY PATH (PROPERTY)
-    ['Strong-Arm A Limo Company',14,16,2,LV,18],                                 // DISTRICT 2 ENERGY PATH
-    ['Shut Down an Uncooperative Club',15,17,2,LV,20],                           // DISTRICT 2 ENERGY PATH
-    ['Hit Up a Nightclub',7,18,2,LV,9],                                          // DISTRICT 2 ENERGY PATH
-    //['Win an Underground Fight',11,11,2,LV,18],                                // DISTRICT 2 FIGHT PATH
-    //['Clip a Petty Thug',10,12,2,LV,16],                                       // DISTRICT 2 FIGHT PATH
-    //['Defeat Jimmy \'Big Time\' Mancus',5,19,2,LV,70],                         // BOSS JOB USES STAMINA
-    // LAS VEGAS THE LOWER STRIP
-    ['Buy Some Black-Market Info',9,20,3,LV,15],                                 // DISTRICT 3 ENERGY PATH
-    ['Do Some Late-Night Shopping',10,21,3,LV,17],                               // DISTRICT 3 ENERGY PATH
-    ['Convince A Resturateur To Leave Town',17,22,3,LV,24],                      // DISTRICT 3 ENERGY PATH (PROPERTY)
-    ['Arrange A Hardware Delivery',15,23,3,LV,23],                               // DISTRICT 3 ENERGY PATH
-    ['Break Into A Luxery Suite',17,24,3,LV,26],                                 // DISTRICT 3 ENERGY PATH
-    //['Open Fire On A Rival Outfit',14,25,3,LV,23],                               // DISTRICT 3 FIGHT PATH
-    //['Run A Visiting Gang Boss Out',17,26,3,LV,28],                              // DISTRICT 3 FIGHT PATH
-    //['Steal An SUV',12,27,3,LV,19],                                              // DISTRICT 3 SOCIAL PATH
-    //['Rob A Gem Broker',23,28,3,LV,36],                                          // DISTRICT 3 SOCIAL PATH
-    //['Defeat Juliana \'Black Widow\' Trieste',6,29,3,LV,200],                    // BOSS JOB USES STAMINA
-    // LAS VEGAS SHOGUN CASINO
-    ['Bribe A Casino Pit Boss',5,30,4,LV,8],                                    // DISTRICT 4 ENERGY PATH
-    ['Steal A Valet\'s Uniform',12,31,4,LV,20],                                 // DISTRICT 4 ENERGY PATH
-    ['Hijack A Poker Table Delivery',18,38,4,LV,27],                            // DISTRICT 4 ENERGY PATH (PROPERTY)
-    ['Swipe A Security Keycard',10,32,4,LV,16],                                 // DISTRICT 4 ENERGY PATH
-    ['Take Out An Aermed Casino Guard',13,33,4,LV,21],                          // DISTRICT 4 ENERGY PATH
-    ['Create A Distraction On The Floor',10,34,4,LV,17],                        // DISTRICT 4 ENERGY PATH
-    ['Hack The Casino Security System',12,35,4,LV,21],                          // DISTRICT 4 ENERGY PATH
-    ['Break Into The Vault',17,36,4,LV,26],                                     // DISTRICT 4 ENERGY PATH
-    ['Get To An Exit',22,37,4,LV,35],                                           // DISTRICT 4 ENERGY PATH
-    //['Defeat Roger Bidwell\, Chief of Security',6,39,4,LV,400],                 // BOSS JOB USES STAMINA
-    // LAS VEGAS MOJAVE DESERT
-    ['Move The Take Out Of Town',13,40,5,LV,21],                                // DISTRICT 5 ENERGY PATH
-    ['Buy Off A Crooked Border Agent',15,43,5,LV,24],                           // DISTRICT 5 ENERGY PATH
-    ['Rescue A Hotelier',10,50,5,LV,17],                                        // DISTRICT 5 ENERGY PATH (PROPERTY)
-    ['Arrange A Cartel Sale',9,45,5,LV,16],                                     // DISTRICT 5 ENERGY PATH
-    ['Create A Diversion',11,47,5,LV,18],                                       // DISTRICT 5 ENERGY PATH
-    ['Dispose Of The Evidence',14,48,5,LV,23]                                   // DISTRICT 5 ENERGY PATH
-    //['Fight Off A Hijack Crew',14,41,5,LV,23],                                  // DISTRICT 5 FIGHT PATH
-    //['Stash The Take',20,44,5,LV,33],                                           // DISTRICT 5 FIGHT PATH
-    //['Clean Out A Biker Bar',11,46,5,LV,19],                                    // DISTRICT 5 FIGHT PATH
-    //['Run A Highway Patrol Blockade',23,42,5,LV,37],                            // DISTRICT 5 SOCIAL PATH
-    //['Defeat \'Red\' Jackson',7,49,5,LV,600]                                   // BOSS JOB USES STAMINA
+//    7                                                     5   4 2   1       6 3    0                PATH
+//     7                                                    5   4 2    1      6 3    0     8 //
+    ['Chase Away Thugs'                                  ,  1,  1,1,NY     ,  1,0,''      ],
+    ['Rob a Drug Runner'                                 ,  3,  2,1,NY     ,  3,0,''      ],
+    ['Rough Up Dealers'                                  ,  5,  3,1,NY     ,  5,0,''      ],
+    ['Rob the Warehouse'                                 ,  7,  4,1,NY     ,  8,0,''      ],
+    ['Collect Protection Money'                          ,  2,  5,1,NY     ,  2,0,''      ],
+    ['Grow Your Family'                                  ,  3,  8,1,NY     ,  3,0,''      ],
+    ['Perform a Hit'                                     ,  2, 37,1,NY     ,  2,0,''      ],
+    ['Mugging'                                           ,  2,  6,2,NY     ,  2,0,''      ],
+    ['Auto Theft'                                        ,  2,  7,2,NY     ,  2,0,''      ],
+    ['Take Out a Rogue Cop'                              ,  3,  9,2,NY     ,  3,0,''      ],
+    ['Collect on a Loan'                                 ,  3, 10,2,NY     ,  3,0,''      ],
+    ['Bank Heist'                                        , 10, 11,2,NY     , 13,0,''      ],
+    ['Jewelry Store Job'                                 , 15, 12,2,NY     , 20,0,''      ],
+    ['Hijack a Semi'                                     ,  8, 38,2,NY     ,  9,0,''      ],
+    ['Destroy Enemy Mob Hideout'                         ,  5, 13,3,NY     ,  5,0,''      ],
+    ['Kill a Protected Snitch'                           ,  5, 14,3,NY     ,  5,0,''      ],
+    ['Bust a Made Man Out of Prison'                     ,  5, 15,3,NY     ,  5,0,''      ],
+    ['Asian Museum Break-in'                             , 18, 16,3,NY     , 22,0,''      ],
+    ['Fight a Haitian Gang'                              ,  6, 17,3,NY     ,  6,0,''      ],
+    ['Clip the Irish Mob\'s Local Enforcer'              , 10, 39,3,NY     , 11,0,''      ],
+    ['Steal a Tanker Truck'                              ,  8, 40,3,NY     ,  9,0,''      ],
+    ['Federal Reserve Raid'                              , 25, 18,4,NY     , 30,0,''      ],
+    ['Smuggle Thai Gems'                                 ,  7, 19,4,NY     ,  8,0,''      ],
+    ['Liquor Smuggling'                                  , 30, 22,4,NY     , 35,0,''      ],
+    ['Run Illegal Poker Game'                            , 20, 26,4,NY     , 33,0,''      ],
+    ['Wiretap the Cops'                                  , 30, 28,4,NY     , 45,0,''      ],
+    ['Rob an Electronics Store'                          , 24, 41,4,NY     , 26,0,''      ],
+    ['Burn Down a Tenement'                              , 18, 42,4,NY     , 22,0,''      ],
+    ['Distill Some Liquor'                               , 10, 23,4,NY     , 12,0,''      ],
+    ['Manufacture Tokens'                                , 10, 24,4,NY     , 12,0,''      ],
+    ['Get Cheating Deck'                                 , 10, 25,4,NY     , 12,0,''      ],
+    ['Overtake Phone Central'                            , 10, 27,4,NY     , 12,0,''      ],
+    ['Repel the Yakuza'                                  , 13, 29,5,NY     , 18,0,''      ],
+    ['Disrupt Rival Smuggling Ring'                      , 15, 30,5,NY     , 20,0,''      ],
+    ['Invade Tong-controlled Neighborhood'               , 25, 31,5,NY     , 30,0,''      ],
+    ['Sell Guns to the Russian Mob'                      , 25, 32,5,NY     , 35,0,''      ],
+    ['Protect your City against a Rival Family'          , 35, 33,5,NY     , 50,0,''      ],
+    ['Assassinate a Political Figure'                    , 35, 34,5,NY     , 50,0,''      ],
+    ['Exterminate a Rival Family'                        , 40, 35,5,NY     , 58,0,''      ],
+    ['Obtain Compromising Photos'                        , 28, 43,5,NY     , 32,0,''      ],
+    ['Frame a Rival Capo'                                , 26, 44,5,NY     , 33,0,''      ],
+    ['Steal an Air Freight Delivery'                     , 32, 45,6,NY     , 36,0,''      ],
+    ['Run a Biker Gang Out of Town'                      , 35, 46,6,NY     , 40,0,''      ],
+    ['Flip a Snitch'                                     , 25, 47,6,NY     , 30,0,''      ],
+    ['Steal Bank Records'                                , 30, 48,6,NY     , 36,0,''      ],
+    ['Loot the Police Impound Lot'                       , 60, 49,6,NY     , 60,0,''      ],
+    ['Recruit a Rival Crew Member'                       , 30, 50,6,NY     , 39,0,''      ],
+    ['Dodge an FBI Tail'                                 , 20, 51,6,NY     , 27,0,''      ],
+    ['Whack a Rival Crew Leader'                         , 28, 52,6,NY     , 38,0,''      ],
+    ['Influence a Harbor Official'                       , 50, 53,7,NY     , 65,0,''      ],
+    ['Move Stolen Merchandise'                           , 36, 54,7,NY     , 50,0,''      ],
+    ['Snuff a Rat'                                       , 44, 55,7,NY     , 62,0,''      ],
+    ['Help a Fugitive Flee the Country'                  , 40, 56,7,NY     , 57,0,''      ],
+    ['Dispose of a Body'                                 , 25, 57,7,NY     , 36,0,''      ],
+    ['Ransom a Businessman\'s Kids'                      , 60, 58,7,NY     , 70,0,''      ],
+    ['Fix the Big Game'                                  , 50, 59,7,NY     , 60,0,''      ],
+    ['Steal an Arms Shipment'                            , 45, 60,7,NY     , 66,0,''      ],
+    ['Extort a Corrupt Judge'                            , 24, 61,8,NY     , 36,0,''      ],
+    ['Embezzle Funds Through a Phony Company'            , 50, 62,8,NY     , 70,0,''      ],
+    ['Break Into the Armory'                             , 50, 63,8,NY     , 60,0,''      ],
+    ['Rip Off the Armenian Mob'                          , 50, 64,8,NY     , 68,0,''      ],
+    ['Muscle in on a Triad Operation'                    , 45, 65,8,NY     , 68,0,''      ],
+    ['Ambush a Rival at a Sit Down'                      , 55, 66,8,NY     , 80,0,''      ],
+    ['Order a Hit on a Public Official'                  , 35, 67,8,NY     , 55,0,''      ],
+    ['Take Over an Identity Theft Ring'                  , 36, 68,8,NY     , 52,0,''      ],
+    ['Settle a Beef... Permanently'                      , 35, 69,9,NY     , 74,0,''      ],
+    ['Buy Off a Federal Agent'                           , 35, 70,9,NY     , 50,0,''      ],
+    ['Make a Deal with the Mexican Cartel'               , 40, 71,9,NY     , 60,0,''      ],
+    ['Blackmail the District Attorney'                   , 44, 72,9,NY     , 66,0,''      ],
+    ['Shake Down a City Council Member'                  , 85, 73,9,NY     ,124,0,''      ],
+    ['Make Arrangements for a Visiting Don'              , 40, 74,9,NY     , 60,0,''      ],
+    ['Take Control of a Casino'                          , 70, 75,9,NY     ,110,0,''      ],
+    ['Travel to the Old Country'                         , 52, 76,9,NY     , 82,0,''      ],
+    ['Rob Your Cab Driver'                               , 12,  1,1,CUBA   , 16,0,''      ], // CUBA
+    ['Secure A Safehouse'                                , 36,  2,1,CUBA   , 49,0,''      ],
+    ['Intimidate The Locals'                             , 52,  3,1,CUBA   , 70,0,''      ],
+    ['Silence a Noisy Neighbor'                          , 32,  4,1,CUBA   , 44,0,''      ],
+    ['Smuggle In Some Supplies'                          , 34,  5,1,CUBA   , 45,0,''      ],
+    ['Set Up A Numbers Racket'                           , 44,  6,1,CUBA   , 60,0,''      ],
+    ['Establish Contact With The FRG'                    , 38,  7,1,CUBA   , 50,0,''      ],
+    ['Take Out The Local Police Chief'                   , 41,  8,1,CUBA   , 55,0,''      ],
+    ['"Persuade" A Local To Talk'                        , 51, 41,1,CUBA   , 69,0,''      ],
+    ['Assault A Snitch\'s Hideout'                       , 56, 42,1,CUBA   , 75,0,''      ],
+    ['Transport A Shipment of US Arms'                   , 42,  9,2,CUBA   , 59,0,''      ],
+    ['Meet With The FRG Leadership'                      , 38, 10,2,CUBA   , 54,0,''      ],
+    ['Hold Up A Tour Bus'                                , 45, 11,2,CUBA   , 65,0,''      ],
+    ['Ambush A Military Patrol'                          , 51, 12,2,CUBA   , 72,0,''      ],
+    ['Capture An Army Outpost'                           , 56, 13,2,CUBA   , 79,0,''      ],
+    ['Sneak A Friend Of The Family Into The Country'     , 35, 14,2,CUBA   , 50,0,''      ],
+    ['Ransack A Local Plantation'                        , 43, 15,2,CUBA   , 61,0,''      ],
+    ['Burn Down A Hacienda'                              , 58, 16,2,CUBA   , 82,0,''      ],
+    ['Offer "Protection" To A Nightclub'                 , 38, 17,3,CUBA   , 56,0,''      ],
+    ['Rob The Banco Nacional Branch'                     , 52, 18,3,CUBA   , 77,0,''      ],
+    ['Shake Down A Hotel Owner'                          , 40, 19,3,CUBA   , 58,0,''      ],
+    ['Bring The Local Teamsters Under Your Control'      , 46, 20,3,CUBA   , 68,0,''      ],
+    ['Help The FRG Steal A Truckload Of Weapons'         , 51, 21,3,CUBA   , 74,0,''      ],
+    ['Hijack A Booze Shipment'                           , 45, 22,3,CUBA   , 67,0,''      ],
+    ['Pillage A Shipyard'                                , 52, 23,3,CUBA   , 76,0,''      ],
+    ['Take Over The Docks'                               , 60, 24,3,CUBA   , 88,0,''      ],
+    ['Muscle In On A Local Casino'                       , 44, 25,4,CUBA   , 67,0,''      ],
+    ['Establish A Loansharking Business'                 , 49, 26,4,CUBA   , 74,0,''      ],
+    ['Eliminate A Rival Family\'s Agent'                 , 42, 27,4,CUBA   , 64,0,''      ],
+    ['Pass On Some Intel To The FRG'                     , 45, 28,4,CUBA   , 67,0,''      ],
+    ['Execute A Regional Arms Dealer'                    , 50, 29,4,CUBA   , 76,0,''      ],
+    ['Sink A Competing Smuggler\'s Ship'                 , 52, 30,4,CUBA   , 78,0,''      ],
+    ['Gun Down An Enemy Crew At The Airport'             , 56, 31,4,CUBA   , 85,0,''      ],
+    ['Assassinate An Opposing Consigliere'               , 62, 32,4,CUBA   , 93,0,''      ],
+    ['Raid The Arms Depot'                               , 53, 33,5,CUBA   , 81,0,''      ],
+    ['Supply The FRG With Some Extra Muscle'             , 46, 34,5,CUBA   , 70,0,''      ],
+    ['Capture The Airport'                               , 56, 35,5,CUBA   , 85,0,''      ],
+    ['Knock Off A Visiting Head Of State'                , 52, 36,5,CUBA   , 79,0,''      ],
+    ['Set Up A High Volume Smuggling Operation'          , 55, 37,5,CUBA   , 85,0,''      ],
+    ['Blow Up A Rail Line'                               , 50, 38,5,CUBA   , 77,0,''      ],
+    ['Attack The Army Command Post'                      , 58, 39,5,CUBA   , 88,0,''      ],
+    ['Storm The Presidential Palace'                     , 70, 40,5,CUBA   ,106,0,''      ],
+    ['Arrange A New York Drug Shipment'                  , 62, 43,6,CUBA   , 95,0,''      ],
+    ['Launder Money Through A Resort'                    , 72, 44,6,CUBA   ,110,0,''      ],
+    ['Loot The National Museum'                          , 78, 45,6,CUBA   ,117,0,''      ],
+    ['Send Some Help Home To New York'                   , 64, 46,6,CUBA   , 98,0,''      ],
+    ['Take Over The Havana Reconstruction'               , 82, 47,6,CUBA   ,123,0,''      ],
+    ['Help Get An Associate A No Bid Contract'           , 56, 48,6,CUBA   , 85,0,''      ],
+    ['Trans-Ship A Container Full of Refugees'           , 48, 49,6,CUBA   , 73,0,''      ],
+    ['Meet With "The Russian"'                           , 58, 50,6,CUBA   , 89,0,''      ],
+    ['Smuggle Consumer Electronics for the Vory'         , 46,  1,1,MOSCOW , 61,0,''      ], // MOSCOW EPISODE 1
+    ['Arrange A Drug Shipment for the Mafiya'            , 40,  2,1,MOSCOW , 53,0,''      ],
+    ['Fight Off An Ultra-National Gang'                  ,112,  3,1,MOSCOW ,115,0,''      ],
+    ['Kidnap A Local Gang Leader for the Vory'           , 47,  4,1,MOSCOW , 63,0,''      ], // CHOICE POINT (Vory = 4, Mafia = 7)
+  //['Kill A Local Gang Leader for the Mafiya'           , 47,  7,1,MOSCOW , 63,0,''      ],
+    ['Collect The Ransom'                                , 50,  5,1,MOSCOW , 64,0,''      ], // CHOICE RESULT (Vory)
+    ['Receive Vory Intel On Dmitri'                      , 40,  6,1,MOSCOW , 54,0,''      ], // CHOICE RESULT (Mafia)
+  //['Collect the Hit Payoff'                            , 56,  8,1,MOSCOW , 76,0,''      ],
+  //['Buy Mafiya Intel On Dmitri'                        , 52,  9,1,MOSCOW , 74,0,''      ],
+    ['Threaten A Gang\'s Supplier'                       , 58, 10,1,MOSCOW , 79,0,''      ],
+    ['Hijack An Arms Shipment From A Militant Gang'      , 67, 11,1,MOSCOW , 90,0,''      ],
+    ['Hospitalize Some Nationalists'                     , 76, 12,1,MOSCOW ,104,0,''      ],
+    ['Confront Gang Leader Dmitri Leonov'                ,  1, 13,1,MOSCOW ,  3,0,''      ],
+    ['Bribe An Election Official'                        , 57, 14,2,MOSCOW , 77,0,''      ], // MOSCOW EPISODE 2
+    ['Silence A Political Critic'                        , 53, 15,2,MOSCOW , 73,0,''      ],
+    ['Violently Break Up A Campaign Rally'               ,137, 16,2,MOSCOW ,141,0,''      ],
+    ['Fix A Local Election for the Vory'                 , 66, 17,2,MOSCOW , 91,0,''      ], // CHOICE POINT (Vory = 17, Mafia = 20)
+  //['Abduct A Candidate\'s Wife For the Mafiya'         , 66, 20,2,MOSCOW , 89,0,''      ],
+    ['Extract A Favor From The Winner'                   , 97, 18,2,MOSCOW ,128,0,''      ], // CHOICE RESULT (Vory)
+    ['Catch Karpov Accepting A Bribe'                    , 77, 19,2,MOSCOW ,105,0,''      ],
+  //['"Convince" The Candidate To Withdraw'              , 90, 21,2,MOSCOW ,126,0,''      ], // CHOICE RESULT (Mafia)
+  //['Kill An Investigative Reporter'                    , 75, 22,2,MOSCOW ,107,0,''      ],
+    ['Pay Off The Port Authority In Arkhangelsk'         , 57, 23,2,MOSCOW , 77,0,''      ],
+    ['Re-route An Equipment Shipment'                    , 80, 24,2,MOSCOW ,106,0,''      ],
+    ['Circulate Damaging Photos'                         , 99, 25,2,MOSCOW ,137,0,''      ],
+    ['Take Down Party Boss Karpov'                       ,  1, 26,2,MOSCOW ,  3,0,''      ],
+    ['Case The RossijaBanc Building'                     , 65, 31,3,MOSCOW , 88,0,''      ], // MOSCOW EPISODE 3
+    ['Map Out The Escape Route'                          , 80, 32,3,MOSCOW ,108,0,''      ],
+    ['Rob The RossijaBanc Central Repository'            ,165, 33,3,MOSCOW ,172,0,''      ],
+    ['Take A Guard Hostage During Your Escape'           , 82, 34,3,MOSCOW ,112,0,''      ], // CHOICE POINT (Vory = 34, Mafia = 37)
+  //['Execute A Bank Guard During Your Escape'           , 82, 37,3,MOSCOW ,112,0,''      ],
+    ['Use The Guard\'s Keys To Access the Bank Armory'   ,105, 35,3,MOSCOW ,140,0,''      ], // CHOICE RESULT (Vory)
+    ['"Borrow" The Guard\'s Uniform After Releasing Him' , 88, 36,3,MOSCOW ,117,0,''      ],
+  //['Steal The Bank President\'s Car Keys'              , 99, 38,3,MOSCOW ,132,0,''      ], // CHOICE RESULT (Mafia)
+  //['Strip A Uniform Off The Corpse'                    , 91, 39,3,MOSCOW ,121,0,''      ],
+    ['Blackmail A Secretary For An Exec\'s Itinerary'    , 96, 40,3,MOSCOW ,129,0,''      ],
+    ['Dispose Of A RossijaBanc Exec At Sea'              , 89, 41,3,MOSCOW ,118,0,''      ],
+    ['Replace A Guard With Your Own Man'                 ,118, 42,3,MOSCOW ,165,0,''      ],
+    ['"Fire" Bank President Gregor Belikov'              ,  1, 43,3,MOSCOW ,  3,0,''      ],
+    ['Manage An Escort Service Catering to Soldiers'     ,111, 44,4,MOSCOW ,151,0,''      ], // MOSCOW EPISODE 4
+    ['Support The Habit Of A Procurement Officer'        ,125, 45,4,MOSCOW ,170,0,''      ],
+    ['Ransack A Defense Contractor\'s Office'            ,198, 46,4,MOSCOW ,210,0,''      ],
+    ['Fly To The Siberian Military District'             ,118, 47,4,MOSCOW ,161,0,''      ], // CHOICE POINT (Vory = 47, Mafia = 50)
+  //['Travel To The Volga Military District'             ,118, 50,4,MOSCOW ,161,0,''      ],
+    ['Rob A Troop Convoy'                                ,108, 48,4,MOSCOW ,143,0,''      ], // CHOICE RESULT (Vory)
+    ['Intercept The Base\'s Pay Shipment'                ,105, 49,4,MOSCOW ,143,0,''      ],
+  //['Arrange The Sale Of Weapons-Grade Explosives'      ,119, 51,4,MOSCOW ,158,0,''      ], // CHOICE RESULT (Mafia)
+  //['Capitalize On An Officer\'s Gambling Problem'      ,107, 52,4,MOSCOW ,146,0,''      ],
+    ['Make Connections With An Arms Dealer'              ,123, 53,4,MOSCOW ,168,0,''      ],
+    ['Transport Some Stolen Military Hardware'           ,125, 54,4,MOSCOW ,165,0,''      ],
+    ['Buy Off The General\'s Command Team'               ,134, 55,4,MOSCOW ,188,0,''      ],
+    ['Forcibly Demote General Osipov'                    ,  1, 56,4,MOSCOW ,  3,0,''      ],
+    ['Stop A Terrorist Attack In Moscow'                 ,116, 61,5,MOSCOW ,159,0,''      ],  // MOSCOW EPISODE 5
+    ['Discover Who Was Responsible'                      ,124, 62,5,MOSCOW ,170,0,''      ],
+    ['Hunt Down A Ural Liberation Front Contact'         ,215, 63,5,MOSCOW ,230,0,''      ],
+    ['Infiltrate The ULF Cell'                           ,132, 64,5,MOSCOW ,181,0,''      ], // CHOICE POINT (Vory = 64, Mafia = 67)
+  //['Discover The Location Of The Next ULF Attack'      ,132, 67,5,MOSCOW ,181,0,''      ], // CHOICE RESULT (Vory)
+    ['Help "Plan" The Next Attack'                       ,121, 65,5,MOSCOW ,160,0,''      ],
+    ['Sabotage The Plan From The Inside'                 ,127, 66,5,MOSCOW ,174,0,''      ],
+  //['Kill A Lookout'                                    ,127, 68,5,MOSCOW ,170,0,''      ], // CHOICE RESULT (Mafia)
+  //['Stop The ULF Attack'                               ,131, 69,5,MOSCOW ,180,0,''      ],
+    ['Torture A ULF Lieutenant'                          ,120, 70,5,MOSCOW ,164,0,''      ],
+    ['Look For The Boss\' Mountain Hideout'              ,135, 71,5,MOSCOW ,180,0,''      ],
+    ['Start An Avalanche Above The Terrorist Camp'       ,145, 72,5,MOSCOW ,205,0,''      ],
+    ['Battle Sonya "The Wolf" Bassinov'                  ,  1, 73,5,MOSCOW ,  3,0,''      ],
+    ['Foil The Sabotage Of Your Moscow Holdings'         ,130, 74,6,MOSCOW ,180,0,''      ], // MOSCOW EPISODE 6
+    ['Acquire Classified Files On Crime Syndicates'      ,122, 75,6,MOSCOW ,169,0,''      ],
+    ['Gun Down Some Russian Muscle'                      ,238, 76,6,MOSCOW ,258,0,''      ],
+    ['Attack A Mafiya Business'                          ,136, 77,6,MOSCOW ,188,0,''      ], // CHOICE POINT (Vory = 77, Mafia = 80)
+  //['Burn Down A Vory Safehouse'                        ,136, 80,6,MOSCOW ,188,0,''      ],
+    ['Hijack A Mafiya Cargo'                             ,134, 78,6,MOSCOW ,179,0,''      ], // CHOICE RESULT (Vory)
+    ['Threaten A Mafiya Moneyman\'s Family'              ,128, 79,6,MOSCOW ,176,0,''      ], // CHOICE RESULT (Mafia)
+  //['Hit A Vory Nightclub'                              ,128, 81,6,MOSCOW ,171,0,''      ],
+  //['Break Into An Architect\'s Office'                 ,134, 82,6,MOSCOW ,185,0,''      ],
+    ['Take Over A West-Bound Trafficking Pipeline'       ,140, 83,6,MOSCOW ,194,0,''      ],
+    ['Ship Black-Market Caviar To London'                ,137, 84,6,MOSCOW ,189,0,''      ],
+    ['Assault The Mansion Walls'                         ,148, 85,6,MOSCOW ,211,0,''      ],
+    ['Take Out Viktor "Sibirchik" Titov'                 ,  1, 86,6,MOSCOW ,  3,0,''      ],
+    ['Move Stolen Art Through Suvarnabhumi Airport'      , 71,  1,1,BANGKOK,111,0,''      ], // BANGKOK EPISODE 1
+    ['Show A Cocky Biker Who\'s In Charge'               , 63,  2,1,BANGKOK,101,0,''      ],
+    ['Take On Local Motorcycle Thugs'                    ,189,  3,1,BANGKOK,253,0,''      ],
+    ['Meet A Gang\'s Rep In A Go-Go Bar'                 , 78,  5,1,BANGKOK,120,0,''      ],          // CHOICE POINT (Yakuza = 5, Triad = 8)
+    ['Torch A Building For Insurance'                    ,110,  6,1,BANGKOK,172,0,''      ],             // Yakuza
+    ['Arrange An "Accident" For A Witness'               , 71,  7,1,BANGKOK,111,0,''      ],        // Yakuza
+    ['Raid One Of Suchart\'s Gambling Dens'              , 91,  9,1,BANGKOK,133,0,''      ],       // Triad
+    ['Trash The Low-Rent Casino'                         , 71, 10,1,BANGKOK,102,0,''      ],                  // Triad
+    ['Intercept An Ammo Shipment'                        , 65, 11,1,BANGKOK, 94,0,''      ],                 // CHOICE POINT (Yakuza = 11, Triad = 14)
+    ['Deliver It To A Japanese Front Company'            , 94, 12,1,BANGKOK,130,0,''      ],     // Yakuza
+    ['Pay Off A Corrupt Police Officer'                  , 64, 13,1,BANGKOK, 91,0,''      ],           // Yakuza
+    ['Sneak It On To A Chinese Cargo Ship'               , 71, 15,1,BANGKOK,102,0,''      ],        // Triad
+    ['Bribe A Dock Guard'                                , 52, 16,1,BANGKOK, 78,0,''      ],                         // Triad
+    ['Blow Up Suchart\'s Warehouse'                      ,111, 17,1,BANGKOK,164,0,''      ],
+    ['Take Down Boss Suchart'                            ,  1, 18,1,BANGKOK,  3,0,''      ],
+    ['Force A Local Landowner To Sell'                   , 67, 20,2,BANGKOK, 95,0,''      ], // BANGKOK EPISODE 2
+    ['Receive A Kickback From The Buyer'                 , 73, 21,2,BANGKOK,102,0,''      ],
+    ['Attack A Paramilitary Police Post'                 ,136, 22,2,BANGKOK,167,0,''      ],
+    ['Set Up A Phony Business'                           , 62, 24,2,BANGKOK, 89,0,''      ],                     // CHOICE POINT (Yakuza = 24, Triad = 27)
+    ['Re-Route A Van Full Of Medical Supplies'           , 52, 25,2,BANGKOK, 64,0,''      ],     // Yakuza
+    ['Resell The Stolen Supplies'                        , 52, 26,2,BANGKOK, 64,0,''      ],                  // Yakuza
+    ['Set Up A Bogus Chess Tournament'                   , 57, 28,2,BANGKOK, 77,0,''      ],             // Triad
+    ['Rob The Chess Masters'                             , 51, 29,2,BANGKOK, 72,0,''      ],                       // Triad
+    ['Pay Off The Guards At Bangkwang Prison'            , 47, 30,2,BANGKOK, 65,0,''      ],      // CHOICE POINT (Yakuza = 30, Triad = 33)
+    ['Sneak A Yakuza Enforcer In'                        , 40, 31,2,BANGKOK, 48,0,''      ],                  // Yakuza
+    ['Help Stage An Accident For A Tong Inmate'          , 36, 32,2,BANGKOK, 44,0,''      ],    // Yakuza
+    ['Break A Triad Hitman Out'                          , 57, 34,2,BANGKOK, 77,0,''      ],                    // Triad
+    ['Help Rub Out A Bosozoku Leader'                    , 62, 35,2,BANGKOK, 89,0,''      ],              // Triad
+    ['Expose A Crooked Royal Thai Police Officer'        , 94, 36,2,BANGKOK,132,0,''      ],
+    ['Discredit Police Commissioner Chatri'              ,  1, 37,2,BANGKOK,  3,0,''      ],
+    ['Secure A Pirate Vessel'                            , 43, 39,3,BANGKOK, 46,0,''      ],                   // CHAPTER 1 // BANGKOK EPISODE 3
+    ['Hire An Unsavory Crew'                             , 35, 40,3,BANGKOK, 53,0,''      ],                    // CHAPTER 1
+    ['Take Down A Rival Pirate Outfit'                   ,106, 41,3,BANGKOK,146,0,''      ],          // CHAPTER 1  HELP JOB
+    ['Hijack A Boat Load Of Electronics'                 , 35, 43,3,BANGKOK, 53,0,''      ],        // CHAPTER 2  CHOICE POINT (Yakuza = 43, Triad = 46)
+    ['Truck The Cargo To Kuala Lumpur'                   , 60, 44,3,BANGKOK, 93,0,''      ],          // CHAPTER 2  Yakuza
+    ['Smuggle Cigarettes Back Into Thailand'             , 60, 45,3,BANGKOK, 93,0,''      ],    // CHAPTER 2  Yakuza
+    ['Ship The Cargo To Jakarta'                         , 49, 47,3,BANGKOK, 75,0,''      ],                // CHAPTER 2  Triad
+    ['Return With A Shipment Of Weapons'                 , 49, 48,3,BANGKOK, 75,0,''      ],        // CHAPTER 2  Triad
+    ['Steal Shipping Manifests'                          , 46, 49,3,BANGKOK, 71,0,''      ],                 // CHAPTER 3  CHOICE POINT (Yakuza = 49, Triad = 52)
+    ['Steal Japanese Auto Shipping Containers'           , 56, 53,3,BANGKOK, 88,0,''      ],  // CHAPTER 3  Triad
+    ['Offload The Cars Onto A Waiting Barge'             , 60, 54,3,BANGKOK, 93,0,''      ],    // CHAPTER 3  Triad
+    ['Hire Divers To Retrieve The Gold Bars'             , 49, 51,3,BANGKOK, 75,0,''      ],    // CHAPTER 3  Yakuza
+    ['Sink A Chinese Metals Freighter'                   , 53, 50,3,BANGKOK, 84,0,''      ],          // CHAPTER 3  Yakuza
+    ['Sink A Fleet Vessel'                               ,107, 55,3,BANGKOK,135,0,''      ],                      // FINALE
+    ['Send Captain Mok Overboard'                        ,  1, 56,3,BANGKOK,  3,0,''      ],               // BOSS JOB
+    ['Buy Some Chemicals On The Black Market'            , 68, 58,4,BANGKOK, 84,0,''      ],           // CHAPTER 1  //  BANGKOK EPISODE 4
+    ['Make Contact With The United Wa State Army'        , 52, 59,4,BANGKOK, 64,0,''      ],       // CHAPTER 1
+    ['Ambush A Burmese Army Convoy'                      ,144, 60,4,BANGKOK,160,0,''      ],                     // CHAPTER 1  HELP JOB
+    ['Establish Contact With A CIA Agent'                , 48, 62,4,BANGKOK, 60,0,''      ],               // CHAPTER 2  CHOICE POINT (Yakuza = 62, Triad = 65)
+    ['Arrange To Process It In Bangkok'                  , 80, 64,4,BANGKOK,100,0,''      ],                 // CHAPTER 2  Yakuza
+    ['Set Up An Opium Shipment'                          , 76, 63,4,BANGKOK, 92,0,''      ],                         // CHAPTER 2  Yakuza
+    ['Set Up The Import Of Illegal Chinese Arms'         , 64, 66,4,BANGKOK, 80,0,''      ],        // CHAPTER 2  Triad
+    ['Ship The Yaa Baa Payment To Phuket'                , 60, 67,4,BANGKOK, 76,0,''      ],               // CHAPTER 2  Triad
+    ['Betray Commander Chang and the UWSA'               , 52, 68,4,BANGKOK, 64,0,''      ],              // CHAPTER 3  CHOICE POINT (Yakuza = 68, Triad = 71)
+    ['Steal A Seized Drug Shipment'                      , 64, 70,4,BANGKOK, 80,0,''      ],                     // CHAPTER 3  Yakuza
+    ['Pass On Information To The Thai Police'            , 44, 69,4,BANGKOK, 56,0,''      ],           // CHAPTER 3  Yakuza
+    ['Eliminate An Insurgent Escort'                     , 60, 72,4,BANGKOK, 72,0,''      ],                    // CHAPTER 3  Triad
+    ['Make Off With Stolen Military Hardware'            , 56, 73,4,BANGKOK, 68,0,''      ],           // CHAPTER 3  Triad
+    ['Attack Chang\'s Heroin-Processing Facility'        , 88, 74,4,BANGKOK,112,0,''      ],       // FINALE
+    ['Kill Commander Chang'                              ,  1, 75,4,BANGKOK,  3,0,''      ],                             // BOSS JOB
+    ['Ship Burmese Sapphires Into Thailand'              , 72, 77,5,BANGKOK, 92,0,''      ],           // CHAPTER 1  // BANGKOK EPISODE 5A-Oyabun
+    ['Smuggle The Sapphires Into Tokyo'                  , 52, 78,5,BANGKOK, 68,0,''      ],               // CHAPTER 1
+    ['Fight Off A Minato-Kai Sponsored Hit'              ,168, 79,5,BANGKOK,188,0,''      ],           // CHAPTER 1  HELP JOB
+    ['Meet With Boss Matsumura\'s Advisor'               , 56, 81,5,BANGKOK, 72,0,''      ],            // CHOICE POINT CHAPTER 2 (Yakuza = 81, Triad = 84)
+    ['Help Broker A Minato-Matsumura Peace'              , 68, 82,5,BANGKOK, 88,0,''      ],           // CHAPTER 2  Yakuza
+    ['Take A Piece Of The Kabukicho Action'              , 68, 83,5,BANGKOK, 88,0,''      ],           // CHAPTER 2  Yakuza
+    ['Assassinate The Minato-Kai Family Head'            , 64, 85,5,BANGKOK,102,0,''      ],         // CHAPTER 2  Triad
+    ['Frame An Enemy For The Murder'                     , 67, 86,5,BANGKOK,106,0,''      ],                  // CHAPTER 2  Triad
+    ['Talk With A Police Insider About Matsumura'        , 40, 87,5,BANGKOK, 52,0,''      ],     // CHOICE POINT CHAPTER 3 (Yakuza = 87, Triad = 90)
+    ['Gather More Evidence Of A Betrayal'                , 80, 88,5,BANGKOK,104,0,''      ],             // CHAPTER 3  Yakuza
+    ['Get The Support Of The Yakuza Families'            , 84, 89,5,BANGKOK,108,0,''      ],         // CHAPTER 3  Yakuza
+    ['Spread Distrust Among The Yakuza Families'         , 78, 91,5,BANGKOK,124,0,''      ],      // CHAPTER 3  Triad
+    ['Start A War Between Matsumura and Minato'          , 78, 92,5,BANGKOK,124,0,''      ],       // CHAPTER 3  Triad
+    ['Remove Matsumura\'s Loyal Lieutenants'             ,104, 93,5,BANGKOK,132,0,''      ],          // FINALE
+    ['Execute Oyabun Matsumura'                          ,  1, 94,5,BANGKOK,  3,0,''      ],                       // BOSS JOB
+    ['Set Up A Drug Shipment To China'                   , 49, 96,6,BANGKOK, 79,0,''      ],                // CHAPTER 1  // BANGKOK EPISODE 5B-Dragon Head
+    ['Dodge Customs At The Port of Hong Kong'            , 64, 97,6,BANGKOK,102,0,''      ],         // CHAPTER 1
+    ['Win A Shoot-Out With The Kowloon Police'           ,149, 98,6,BANGKOK,208,0,''      ],        // CHAPTER 1  HELP JOB
+    ['Intimidate Wealthy Expatriates'                    , 64,100,6,BANGKOK,102,0,''      ],                 // CHOICE POINT CHAPTER 2 (Yakuza = 100, Triad = 103)
+    ['Make An Example Of A Wealthy Industrialist'        , 64,101,6,BANGKOK,102,0,''      ],     // CHAPTER 2  Yakuza
+    ['Fence The Goods Stolen From The Mansion'           , 60,102,6,BANGKOK, 97,0,''      ],        // CHAPTER 2  Yakuza
+    ['Extort The Head Of The Hong Kong Polo Club'        , 67,104,6,BANGKOK,106,0,''      ],     // CHAPTER 2  Triad
+    ['Fix The Hong Kong Polo Invitational'               , 64,105,6,BANGKOK,102,0,''      ],            // CHAPTER 2  Triad
+    ['Talk With Wei\'s Disloyal Enforcers'               , 71,106,6,BANGKOK,115,0,''      ],            // CHOICE POINT CHAPTER 3 (Yakuza = 106, Triad = 109)
+    ['Sneak An Industrial Spy Into Hong Kong'            , 64,107,6,BANGKOK,102,0,''      ],         // CHAPTER 3  Yakuza
+    ['Break In To Cheng-Wei Ballistics'                  , 67,108,6,BANGKOK,106,0,''      ],               // CHAPTER 3  Yakuza
+    ['Kidnap One Of Wei\'s Trusted Advisors'             , 56,110,6,BANGKOK, 88,0,''      ],          // CHAPTER 3  Triad
+    ['Bury The Body Under A Construction Site'           , 60,111,6,BANGKOK, 97,0,''      ],        // Chapter 3  Triad
+    ['Attack Wei\'s Gambling Halls'                      , 96,112,6,BANGKOK,155,0,''      ],                   // FINALE
+    ['Dispose Of Mountain Master Wei'                    ,  1,113,6,BANGKOK,  3,0,''      ],                 // BOSS JOB
+    ['Shore Up Control Of Your New Territory'            , 60,115,7,BANGKOK, 97,0,''      ],         // CHAPTER 1 // BANGKOK EPISODE 6-Saboteur
+    ['Spread The Wealth To Your New Lieutenants'         , 71,116,7,BANGKOK,115,0,''      ],      // CHAPTER 1
+    ['Eliminate The Last Traces Of Resistance'           ,145,117,7,BANGKOK,199,0,''      ],        // CHAPTER 1  HELP JOB
+    ['Get A Gang Member Back Into Thailand'              , 71,119,7,BANGKOK,115,0,''      ],           // CHOICE POINT CHAPTER 2 (Yakuza = 119, Triad = 122)
+    ['Break Into A Goverment Research Facility'          , 74,120,7,BANGKOK,119,0,''      ],       // CHAPTER 2  Yakuza
+    ['Steal An Experimental Armor Prototype'             , 67,121,7,BANGKOK,106,0,''      ],          // CHAPTER 2  Yakuza
+    ['Kidnap A Trade Consortium Leader'                  , 74,123,7,BANGKOK,119,0,''      ],               // CHAPTER 2  Triad
+    ['Extort The Consortium\'s Remaining Officers'       , 64,124,7,BANGKOK,102,0,''      ],    // CHAPTER 2  Triad
+    ['Undermine Nongchai\'s Support'                     , 78,125,7,BANGKOK,124,0,''      ],                  // CHOICE POINT CHAPTER 3 (Yakuza = 125, Triad = 128)
+    ['Acquire Information On A Government Supporter'     , 71,126,7,BANGKOK,115,0,''      ],  // CHAPTER 3  Yakuza
+    ['Assassinate A Bangkok Council Member'              , 67,127,7,BANGKOK,106,0,''      ],           // CHAPTER 3  Yakuza
+    ['Bribe A Royal Thai Army Colonel'                   , 74,129,7,BANGKOK,119,0,''      ],                // CHAPTER 3  Triad
+    ['Route A Drug Shipment Through An Army Post'        , 64,130,7,BANGKOK,102,0,''      ],     // Chapter 3  Triad
+    ['Infiltrate The Parliament House'                   , 85,131,7,BANGKOK,137,0,''      ],                // FINALE
+    ['Depose Prime Minister Nongchai'                    ,  1,132,7,BANGKOK,  3,0,''      ],                 // BOSS JOB
+    ['Consolidate Political Power In Bangkok'            , 56,134,8,BANGKOK, 93,0,''      ],         // CHAPTER 1  // BANGKOK EPISODE 7-Assassin
+    ['Take Over The Royal Bank Of Thailand'              , 64,135,8,BANGKOK, 97,0,''      ],           // CHAPTER 1
+    ['Foil An Attempt On Your Life'                      ,156,136,8,BANGKOK,222,0,''      ],                   // CHAPTER 1  HELP JOB
+    ['Question The Surviving Assassin'                   , 74,138,8,BANGKOK,115,0,''      ],                // CHAPTER 2
+    ['Gather Information On The Shadow King'             , 71,139,8,BANGKOK,115,0,''      ],          // CHAPTER 2
+    ['Eliminate A Spy For The Shadow King'               , 85,140,8,BANGKOK,133,0,''      ],            // CHAPTER 2
+    ['Hire A Guide To Find The Temple of Shadows'        , 64,141,8,BANGKOK,102,0,''      ],     // CHAPTER 3
+    ['Fight Off A Hill Tribe Loyal To The Shadow King'   , 89,142,8,BANGKOK,142,0,''      ], // CHAPTER 3
+    ['Silence A Shadow Kingdom Patrol'                   , 81,143,8,BANGKOK,133,0,''      ],                // CHAPTER 3
+    ['Battle Your Way Through The Temple'                , 96,144,8,BANGKOK,159,0,''      ],             // FINALE
+    ['Overthrow The Shadow King'                         ,  1,145,8,BANGKOK,  3,0,''      ],    // BOSS JOB
+///////////////////////////////////////////////////////////////////////////////////////////
+    ['Get the Hills Brothers\' Attention'            ,110,'promo',1,LV     ,220,0,''      ],
+    ['Move Your Crew Into a Safe House'                  ,  9,  1,1,LV     ,  7,0,'node1' ],    // ENERGY DISTRICT 1  LAS VEGAS NORTH LAS VEGAS
+    ['Blackmail A Car Dealer'                            ,  8,  2,1,LV     , 11,0,'node2' ],    // ENERGY
+    ['Steal A Truckload Of Slots'                        , 24,  3,1,LV     , 18,0,'node3' ],    // ENERGY
+    ['Secure Some Wheels'                                , 18,  4,1,LV     , 25,0,'node4' ],    // ENERGY
+    ['Roll a bingo parlor'                               ,  6,  5,1,LV     ,  9,1,'node5' ],    // FIGHT
+    ['Break into a gun shop'                             , 12,  6,1,LV     , 16,0,'node6' ],    // ENERGY
+    ['Scout out alphabet city'                           , 15,  7,1,LV     , 20,0,'node7' ],    // ENERGY
+    ['Open fire on Victor\'s crew'                       , 23,  8,1,LV     , 27,0,'node8' ],    // SOCIAL
+    ['Boss: Defeat Victor Lil\' Loco Alves'              ,  5,  9,1,LV     ,  6,0,'node9' ],    //        BOSS JOB STAMINA
+    ['Help a Bookie Out Of A Jam'                        , 15, 10,2,LV     ,  9,0,'node10'],    // ENERGY DISTRICT 2  LAS VEGAS PARADISE CITY
+    ['Win an Underground Fight'                          , 11, 11,2,LV     , 18,1,'node11'],    // FIGHT
+    ['Clip a Petty Thug'                                 , 10, 12,2,LV     , 16,1,'node12'],    // FIGHT
+    ['Fix a Boxing Match'                                , 11, 13,2,LV     , 15,0,'node13'],    // ENERGY
+    ['Clean Up At A Rigged Table'                        , 10, 14,2,LV     , 14,0,'node14'],    // ENERGY
+    ['Recruit A Table Game Dealer'                       ,  9, 15,2,LV     , 12,0,'node15'],    // ENERGY (PROPERTY)
+    ['Strong-Arm A Limo Company'                         , 14, 16,2,LV     , 18,0,'node16'],    // ENERGY
+    ['Shut Down an Uncooperative Club'                   , 15, 17,2,LV     , 20,0,'node17'],    // ENERGY
+    ['Hit Up a Nightclub'                                ,  7, 18,2,LV     ,  9,0,'node18'],    // ENERGY
+    ['Boss: Defeat Jimmy \'Big Time\' Mancuso'           ,  5, 19,2,LV     , 70,0,'node19'],    //        BOSS JOB STAMINA
+    ['Open Fire On A Rival Outfit'                       , 14, 20,3,LV     , 23,1,'node20'],    // FIGHT  DISTRICT 3  LAS VEGAS THE LOWER STRIP
+    ['Buy Some Black-Market Info'                        ,  9, 21,3,LV     , 15,0,'node21'],    // ENERGY
+    ['Steal An SUV'                                      , 12, 22,3,LV     , 19,2,'node22'],    // SOCIAL
+    ['Run A Visiting Gang Boss Out'                      , 17, 23,3,LV     , 28,1,'node23'],    // FIGHT
+    ['Do Some Late Night Shopping'                       , 10, 24,3,LV     , 17,0,'node24'],    // ENERGY
+    ['Rob A Gem Broker'                                  , 23, 25,3,LV     , 36,2,'node25'],    // SOCIAL
+    ['Convince A Restaurateur To Leave Town'             , 17, 26,3,LV     , 24,0,'node26'],    // ENERGY (PROPERTY)
+    ['Arrange A Hardware Delivery'                       , 15, 27,3,LV     , 23,0,'node27'],    // ENERGY
+    ['Break Into A Luxury Suite'                         , 17, 28,3,LV     , 26,0,'node28'],    // ENERGY
+    ['Boss: Defeat Juliana \"Black Widow\" Trieste'      ,  6, 29,3,LV     ,200,0,'node29'],    //        BOSS JOB STAMINA
+    ['Bribe A Casino Pit Boss'                           ,  5, 30,4,LV     ,  8,0,'node30'],    // ENERGY DISTRICT 4  LAS VEGAS SHOGUN CASINO
+    ['Steal A Valet\'s Uniform'                          , 12, 31,4,LV     , 20,0,'node31'],    // ENERGY
+    ['Swipe A Security Keycard'                          , 10, 32,4,LV     , 16,0,'node32'],    // ENERGY
+    ['Take Out An Armed Casino Guard'                    , 13, 33,4,LV     , 21,1,'node33'],    // fight
+    ['Create A Distraction On The Floor'                 , 10, 34,4,LV     , 17,0,'node34'],    // ENERGY
+    ['Hack The Casino Security System'                   , 12, 35,4,LV     , 21,0,'node35'],    // ENERGY
+    ['Break Into The Vault'                              , 17, 36,4,LV     , 26,0,'node36'],    // ENERGY
+    ['Get To An Exit'                                    , 22, 37,4,LV     , 35,0,'node37'],    // ENERGY
+    ['Hijack A Poker Table Delivery'                     , 18, 38,4,LV     , 27,0,'node38'],    // ENERGY (PROPERTY)
+    ['Boss: Defeat Roger Bidwell\, Chief of Security'    ,  6, 39,4,LV     ,400,0,'node39'],    //        BOSS JOB STAMINA
+    ['Move The Take Out Of Town'                         , 13, 40,5,LV     , 21,0,'node40'],    // ENERGY DISTRICT 5 LAS VEGAS MOJAVE DESERT
+    ['Fight Off A Hijack Crew'                           , 14, 41,5,LV     , 23,1,'node41'],    // FIGHT
+    ['Run A Highway Patrol Blockade'                     , 23, 42,5,LV     , 37,2,'node42'],    // SOCIAL
+    ['Buy Off A Crooked Border Agent'                    , 15, 43,5,LV     , 24,0,'node43'],    // ENERGY
+    ['Stash The Take'                                    , 20, 44,5,LV     , 33,1,'node44'],    // FIGHT
+    ['Arrange A Cartel Sale'                             ,  9, 45,5,LV     , 16,0,'node45'],    // ENERGY
+    ['Clean Out A Biker Bar'                             , 11, 46,5,LV     , 19,1,'node46'],    // FIGHT
+    ['Create A Diversion'                                , 11, 47,5,LV     , 18,0,'node47'],    // ENERGY
+    ['Dispose Of The Evidence'                           , 14, 48,5,LV     , 23,0,'node48'],    // ENERGY
+    ['Boss: Defeat \'Red\' Jackson'                      ,  7, 49,5,LV     ,600,0,'node49'],    //        BOSS JOB STAMINA
+    ['Rescue A Hotelier'                                 , 10, 50,5,LV     , 17,0,'node50']    // ENERGY PATH (PROPERTY)
+///////////////////////////////////////////////////////////////////////////////////////////// DONT forget the comma above
   );
 
   var missionTabs = new Array(
@@ -2875,7 +2839,13 @@ function autoMission() {
   var jobno       = missions[jobid][MISSION_NUMBER];
   var tabno       = missions[jobid][MISSION_TAB];
   var cityno      = missions[jobid][MISSION_CITY];
-  DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno);
+  var tabnopath   = missions[jobid][MISSION_TABPATH];
+  var nodelv      = missions[jobid][MISSION_NODE_LV];
+
+//newlv
+  if (!tabnopath) var tabnopath = 0 ; //may not be needed when all works
+  if (!nodelv)    var nodelv    = ''  ;
+  DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno + ' tabnopath ' + tabnopath );
 
   if (SpendEnergy.floor &&
       isGMChecked('allowEnergyToLevelUp') &&
@@ -2910,6 +2880,7 @@ function autoMission() {
 
   // Go to the correct city.
   if (city != cityno) {
+    DEBUG (' - WRONG CITY -');  // newlv
     Autoplay.fx = function() { doJobFunction(goLocation(cityno)); };
     Autoplay.start();
     return;
@@ -2917,9 +2888,18 @@ function autoMission() {
 
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
+    DEBUG (' - WRONG TAB -');  // newlv
     Autoplay.fx = function() { doJobFunction(goJobTab(tabno)); };
     Autoplay.start();
     return;
+  }
+
+//newlv if LV Go to the correct job tabnopath.
+  if(city == LV){
+    if (!onJobTabpath(tabnopath)) {
+      DEBUG (' - wrong tab path, changing -'); //newlv
+      goJobTabPath(tabnopath);
+    }
   }
 
   // Buy requirements first, if any
@@ -2948,8 +2928,26 @@ function currentJobTab() {
   return parseInt(elt.getAttribute('onclick').split('tab=')[1].split("'")[0]);
 }
 
+/// current Job Tab path //newlv
+function currentJobTabPath() {
+    var tst = null ;
+  var elt = xpathFirst('.//div[contains(@class, "path_on")]//a', innerPageElt);
+ tst = parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
+//    DEBUG(' JOB TAB - path - returning  tst =' + tst + '=');
+  if (tst==null)     DEBUG(' JOB TAB - path - !tst path not found - ');
+  if   (!elt ||  tst==null ) {
+        DEBUG(' JOB TAB - path - not found RETURNING -1 no elt or tst');
+    return -1;  }
+//    return parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
+    return tst;
+}
+
 function onJobTab(tabno) {
   return currentJobTab() == parseInt(tabno) ? true : false;
+}
+//newlv
+function onJobTabpath(tabnopath) {
+  return currentJobTabPath() == parseInt(tabnopath) ? true : false;
 }
 
 function canForceHeal() {
@@ -10431,6 +10429,7 @@ function jobMastery(element, newJobs) {
   var jobno      = missions[selectMission][MISSION_NUMBER];
   var tabno      = missions[selectMission][MISSION_TAB];
   var cityno     = missions[selectMission][MISSION_CITY];
+  var tabnopath  = missions[selectMission][MISSION_TABPATH];
 
   if (city != cityno || !onJobTab(tabno)) return;
 
@@ -10539,13 +10538,16 @@ function customizeVegasJobs() {
   var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info")]', innerPageElt);
 
   if (!vegasJobs || vegasJobs.length == 0) return false;
-  DEBUG('Found ' + vegasJobs.length + ' new jobs.');
+  DEBUG('Found ' + vegasJobs.length + ' new vegas jobs in customizevegasjobs.');
 
-/*  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
-  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
-  try {
+// 6 is tab path
+/*    var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
+    var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
+try {
     availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
     masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
+//  availableJobs[city][currentTab][currentTabPath] = [];
+//  masteredJobs[city][currentTab][currentTabPath] = [];
   } catch (ex) {
     // ignore
   }
@@ -10611,16 +10613,17 @@ function customizeVegasJobs() {
     if (!costElt) continue;
     var cost = parseCash(costElt.innerHTML);
 
-    // Is this a boss job?
+    // Is this a boss or fight job?
     var isBossJob = xpathFirst('.//div[@class="job_ribbon ribbon_boss"]', currentJob);
+    var isFightJob = xpathFirst('.//div[@class="job_ribbon ribbon_fights"]', currentJob);
 
     var expElt = xpathFirst('.//dd[@class="experience"]', jobReward);
     if (expElt)
       var reward = parseInt(expElt.innerHTML);
     else
       var reward = 0;
-    // If this isn't a boss job, add 10% to the reward (mastermind bonus)
-    if (reward && !isBossJob)
+    // If this isn't a boss or fight job, add 10% to the reward (mastermind bonus)
+    if (reward && !isBossJob && !isFightJob)
       reward = Math.floor(reward * 1.10);
 
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
@@ -10633,8 +10636,8 @@ function customizeVegasJobs() {
     var moneyTxt = '';
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
-      // If this isn't a boss job, add 15% to the money payout (bagman bonus)
-      if (money && !isBossJob)
+      // If this isn't a boss or fight job, add 15% to the money payout (bagman bonus)
+      if (money && !isBossJob  && !isFightJob)
         money = Math.round(money * 1.15);
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
@@ -10721,7 +10724,7 @@ function customizeNewJobs() {
 
   if (!newJobs || newJobs.length == 0) return false;
 
-  DEBUG('Found ' + newJobs.length + ' new jobs.');
+  DEBUG('Found ' + newJobs.length + ' new jobs in customizeNewJobs.');
 
   var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
   var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
@@ -10765,7 +10768,7 @@ function customizeNewJobs() {
 
     jobsFound++;
     var jobPercentage = getJobMastery(currentJob, true);
-    //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
+    DEBUG(jobName + ', Mastery level: in customizenewjobs: ' + jobPercentage);
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
@@ -10924,7 +10927,8 @@ function customizeJobs() {
   var masteredJobsCount = 0;
   var jobsFound = 0;
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
-    var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
+//    var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
+      var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_title " or @class="job_name_oneline job_no_border" ]', jobTables[x]);
 
     for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
       var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].clean().trim();
@@ -10946,7 +10950,7 @@ function customizeJobs() {
 
       jobsFound++;
       var jobPercentage = getJobMastery(jobRow, false);
-      //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
+      DEBUG(jobName + ', Mastery level: in customizejobs: ' + jobPercentage);
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -13471,6 +13475,7 @@ function goJobsNav() {
 function goJobTab(tabno) {
   var elt;
   var currentTab = currentJobTab();
+//  DEBUG('in tab go 2 Job tab: city=' + city + ' ' +  ' currentTab=' + currentTab +  ' tabno=' + tabno);
   if (currentTab == -1) {
     // We're not even on a jobs page yet. Go there.
     return goJobsNav();
@@ -13484,26 +13489,40 @@ function goJobTab(tabno) {
   // For NY and BK we look for the 'more jobs' or 'more episodes' tab to move between job bars
   // NY has jobs_bar0 and jobs_bar1 where as BK has only jobs_bar0, account for this later
   var barno = 0;
-  if (city == NY) barno = (tabno < 6 ? 0 : 1);
-  if (city == BANGKOK) barno = (tabno < 5 ? 0 : 1);
+  if (city == NY     ) barno =           (tabno < 6 ? 0 : 1);
+  if (city == BANGKOK) barno =           (tabno < 5 ? 0 : 1);
+  if (city == LV     ) barno =           (tabno < 5 ? 1 : 2);
   var currentBar = 0;
-  if (city == NY) currentBar = (currentTab < 6 ? 0 : 1);
+  if (city == NY     ) currentBar = (currentTab < 6 ? 0 : 1);
   if (city == BANGKOK) currentBar = (currentTab < 5 ? 0 : 1);
+  if (city == LV     ) currentBar = (currentTab < 5 ? 1 : 2);
   DEBUG('goJobTab: city=' + city + ' currentBar=' + currentBar + ' currentTab=' + currentTab + ' barno=' + barno + ' tabno=' + tabno);
+
   if (currentBar != barno) {
     var jobWord;
-    if (city == NY) jobWord = currentBar == 1 ? "Easy Jobs" : "More Jobs";
-    if (city == BANGKOK) jobWord = currentBar == 1 ? "Previous" : "More Episodes";
+if ( city != LV){
+    DEBUG(' city not lv ' + city );
+    if (city == BANGKOK) jobWord = currentBar == 1 ? "Previous"   : "More Episodes";
+    if (city == NY)      jobWord = currentBar == 1 ? "Easy Jobs"  : "More Jobs";
     elt = xpathFirst('.//ul[contains(@id,"jobs_bar")]' +
                      '//a[contains(text(), "'+jobWord+'")]', innerPageElt);
-    DEBUG('Clicked to go to job bar ' + barno + '. ');
     clickElement(elt);
     return true;
+
+    } else {
+    if (city == LV)      jobWord = currentBar == 1 ? "Forward" : "Reverse" ;
+    DEBUG(' city IS LV ' + city + ' jobword=' + jobWord );
+  elt =  xpathFirst('.//a[contains(@onclick, "tab' + jobWord + '")]', innerPageElt);
+    DEBUG('Clicked to go to job bar ' + barno + '. jobword = ' + jobWord);
+    DEBUG('line to click ' + elt );
+    clickElement(elt);
+    }
   }
 
   // Adjust the barno for BK because BK only has one bar number, jobs_bar0.
   if (city == BANGKOK) barno = 0;
-
+  if(city == LV) barno = tabno ;
+//  DEBUG(' - - - tabno=' + tabno + ' barno='+ barno);
   // Handle old and new tab param names
   elt = xpathFirst('.//ul[@id="jobs_bar' + barno + '"]//a[' +
                    'contains(@onclick, "&story_tab=' + tabno + '") or ' +
@@ -13523,6 +13542,28 @@ function goJobTab(tabno) {
   DEBUG('Clicked to go to job tab ' + tabno + '.');
   return true;
 }
+//newlv
+////////    start go job tab path
+function goJobTabPath(tabnopath) {
+  var elt;
+  var currentTabPath = currentJobTabPath();
+  DEBUG('in path go 2 Job sub path: city=' + city + ' ' +  ' currentTabPath=' + currentTabPath +  ' tabnopath=' + tabnopath  );
+
+  if (currentTabPath == tabnopath) {
+    DEBUG('Already on job  tab sub path' + tabnopath);
+    return true;
+  }
+  elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.changePath('+tabnopath+');")]');
+
+  if (!elt) {
+    addToLog('warning Icon', 'BUG DETECTED: Can\'t find job tab path link to click. wanting on job path ' + tabnopath + ', current tab path' + currentTabPath + '.');
+    return false;
+  }
+  clickElement(elt);
+  DEBUG(' Clicked to go to job tab ' + tabnopath + 'in gojobtabpath elt-b=' + elt );
+  return true;
+}
+///////////// end go job tab path
 
 // Get the number of job clicks to attempt
 function getJobClicks() {
@@ -13550,6 +13591,8 @@ function goJob(jobno) {
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
   else // If retrieving by job no fails, simply retrieve the job link
   if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
+  if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=fight_job")]', jobRow)
+  if (!elt) elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]');
 
   if (elt) {
     clickAction = 'job';
@@ -14429,7 +14472,7 @@ function randomizeStamina() {
   }
 }
 
-// Handle our private do_ajax response pages. 
+// Handle our private do_ajax response pages.
 function createAjaxPage(autoplay, action, context) {
   //function do_ajax(div, url, liteLoad, alignTop, precall, callback, callback_params, noIncrement)
   var ajaxID = autoplay ? SCRIPT.ajaxPage : SCRIPT.ajaxResult;
@@ -14802,7 +14845,7 @@ function logResponse(rootElt, action, context) {
       }
       break;
 
-  /* inner_page/popup_fodder responses: */ 
+  /* inner_page/popup_fodder responses: */
     case 'autohit':
     case 'fight':
       return logFightResponse(rootElt, messagebox, context);
