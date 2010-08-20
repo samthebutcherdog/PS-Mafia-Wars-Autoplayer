@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.643
+// @version     1.1.644
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.643',
+  version: '1.1.644',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9008,11 +9008,11 @@ function refreshGlobalStats() {
   staminaElt = document.getElementById('user_stamina');
   maxStaminaElt = document.getElementById('user_max_stamina');
   levelElt = document.getElementById('user_level');
-  curExpElt = document.getElementById('user_experience');
+//  curExpElt = document.getElementById('user_experience');
   if(new_header) {
     ptsToNextLevelElt = document.getElementById('user_xp_to_next_level');
   } else {
-    lvlExpElt = document.getElementById('exp_for_next_level');
+    lvlExpElt = document.getElementById('exp_to_next_level');
   }
 
   // Update basic player information.
@@ -9027,16 +9027,17 @@ function refreshGlobalStats() {
   maxStamina = parseInt(maxStaminaElt.innerHTML);
 
   level = parseInt(levelElt.innerHTML);
-  /*
-  curExp = parseInt(curExpElt.innerHTML);
+
+//  curExp = parseInt(curExpElt.innerHTML);
   if(new_header){
     ptsToNextLevel = parseInt(ptsToNextLevelElt.innerHTML);
     lvlExp = curExp + ptsToNextLevel;
   } else {
     lvlExp = parseInt(lvlExpElt.innerHTML);
-    ptsToNextLevel = lvlExp - curExp;
+//    ptsToNextLevel = lvlExp - curExp;
+    ptsToNextLevel = lvlExp;
   }
-*/
+
   // Get the mafia size and pending invites.
   mafia = xpathFirst('//span[@id="user_group_size"]');
   if (mafia) {
