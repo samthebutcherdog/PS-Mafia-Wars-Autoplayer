@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.642
+// @version     1.1.643
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.642',
+  version: '1.1.643',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9027,6 +9027,7 @@ function refreshGlobalStats() {
   maxStamina = parseInt(maxStaminaElt.innerHTML);
 
   level = parseInt(levelElt.innerHTML);
+  /*
   curExp = parseInt(curExpElt.innerHTML);
   if(new_header){
     ptsToNextLevel = parseInt(ptsToNextLevelElt.innerHTML);
@@ -9035,7 +9036,7 @@ function refreshGlobalStats() {
     lvlExp = parseInt(lvlExpElt.innerHTML);
     ptsToNextLevel = lvlExp - curExp;
   }
-
+*/
   // Get the mafia size and pending invites.
   mafia = xpathFirst('//span[@id="user_group_size"]');
   if (mafia) {
