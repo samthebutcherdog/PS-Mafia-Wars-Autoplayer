@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.641
+// @version     1.1.642
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.641',
+  version: '1.1.642',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8571,61 +8571,82 @@ function objLootItem() {
 function cleanLoot(strType, sortLootType) {
   // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
   var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
+  var minAttack = 0;
+  var minDefense = 0;
 
-  //if (eltLoot.title == "PS MWAP modified") {
+  if (eltLoot.title == "") {
   //  return;
-  //}
   //eltLoot.title = "PS MWAP modified";
 
   var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
   eltRow.style.display="";
   eltRow.nextSibling.nextSibling.style.display="";
   var colLoot = [];
-  do {
-    // Get Attack/Defense, and Total values
-    var eltPicture = xpathFirst('.//td', eltRow);
-    var eltAttackDef = eltPicture.nextSibling.nextSibling;
-    var eltAttack = xpathFirst('.//td', eltAttackDef);
-    var eltDefense = eltAttack.nextSibling.nextSibling;
-    var eltQuantity = eltAttackDef.nextSibling.nextSibling;
-    // eltQuantity should be formated "Owned:"/#/<Add> so if it has "Add" then the item is giftable.
-    var splitAttack = eltAttack.innerHTML.clean().trim().split(" ");
-    var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
-    var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
-    var objLoot = new objLootItem();
-    objLoot.Attack = parseInt(splitAttack[0]);
-    objLoot.Defense = parseInt(splitDefense[0]);
-    objLoot.Quantity = parseInt(splitQuantity[1]);
-    objLoot.Element = eltRow;
-    // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
-    // hence the loot item is giftable.
-    if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
-    colLoot.push(objLoot); // add item to collection
-    eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
-    eltRow.style.display="";
-    eltRow.nextSibling.nextSibling.style.display="";
-    var txtData = eltRow.innerHTML.clean().trim();
-    if(txtData=='line') eltRow.style.display="none";
-  } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
+    do {
+      // Get Attack/Defense, and Total values
+      var eltPicture = xpathFirst('.//td', eltRow);
+      var eltAttackDef = eltPicture.nextSibling.nextSibling;
+      var eltAttack = xpathFirst('.//td', eltAttackDef);
+      var eltDefense = eltAttack.nextSibling.nextSibling;
+      var eltQuantity = eltAttackDef.nextSibling.nextSibling;
+      // eltQuantity should be formated "Owned:"/#/<Add> so if it has "Add" then the item is giftable.
+      var splitAttack = eltAttack.innerHTML.clean().trim().split(" ");
+      var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
+      var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
+      var objLoot = new objLootItem();
+      objLoot.Attack = parseInt(splitAttack[0]);
+      objLoot.Defense = parseInt(splitDefense[0]);
+      objLoot.Quantity = parseInt(splitQuantity[1]);
+      objLoot.Element = eltRow;
+      // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
+      // hence the loot item is giftable.
+      if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
+      colLoot.push(objLoot); // add item to collection
+      eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
+      //eltRow.style.display="";
+      //eltRow.nextSibling.nextSibling.style.display="";
+      var txtData = eltRow.innerHTML.clean().trim();
+      if(txtData=='line') eltRow.style.display="none";
+    } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
 
-  // Okay, main collection array, colLoot should be built at this point.
-  var minAttack = 0;
-  var minDefense = 0;
-  switch(sortLootType) {
-    case 0: // No filter
-      break;
-    case 1: // Attack only
-      minAttack = parseInt(sortAttack(colLoot));
-      break;
-    case 2: // Defense Only
-      minDefense = parseInt(sortDefense(colLoot));
-      break;
-    case 3: // Attack/Defense Combo
-      minAttack = parseInt(sortAttack(colLoot));
-      minDefense = parseInt(sortDefense(colLoot));
-      break;
-    case 4:  // Giftable only (not programmed yet obviously...  ^_^)
-      break;
+    // Okay, main collection array, colLoot should be built at this point.
+    switch(sortLootType) {
+      case 0: // No filter
+        break;
+      case 1: // Attack only
+        minAttack = parseInt(sortAttack(colLoot));
+        break;
+      case 2: // Defense Only
+        minDefense = parseInt(sortDefense(colLoot));
+        break;
+      case 3: // Attack/Defense Combo
+        minAttack = parseInt(sortAttack(colLoot));
+        minDefense = parseInt(sortDefense(colLoot));
+        break;
+      case 4:  // Giftable only (not programmed yet obviously...  ^_^)
+        break;
+    }
+	eltLoot.title = minAttack + ',' + minDefense;
+  } else {
+    var parseVals = eltLoot.title.split(",");
+	minAttack = parseInt(parseVals[0]);
+	minDefense = parseInt(parseVals[1]);
+    switch(sortLootType) {
+      case 0: // No filter
+        break;
+      case 1: // Attack only
+        minDefense = 0;
+        break;
+      case 2: // Defense Only
+        minAttack = 0;
+        break;
+      case 3: // Attack/Defense Combo
+        minAttack = parseInt(sortAttack(colLoot));
+        minDefense = parseInt(sortDefense(colLoot));
+        break;
+      case 4:  // Giftable only (not programmed yet obviously...  ^_^)
+        break;
+    }
   }
   DEBUG ('minAttack = ' + minAttack + '   minDefense = ' + minDefense);
   // Find respective section (Weapons/Armor/Vehicle/Animal)
@@ -8652,6 +8673,9 @@ function cleanLoot(strType, sortLootType) {
         //eltSibling.parentNode.removeChild(eltSibling);
         eltRow.style.display="none";
         eltSibling.style.display="none";
+      } else {
+        eltRow.style.display="";
+        eltSibling.style.display="";
       }
     } else {
       if(intAttack < minAttack || intDefense < minDefense){
@@ -8660,6 +8684,9 @@ function cleanLoot(strType, sortLootType) {
         //eltSibling.parentNode.removeChild(eltSibling);
         eltRow.style.display="none";
         eltSibling.style.display="none";
+      } else {
+        eltRow.style.display="";
+        eltSibling.style.display="";
       }
     }
     eltRow = nextItem;
