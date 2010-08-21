@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.645
+// @version     1.1.646
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.645',
+  version: '1.1.646',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2685,7 +2685,7 @@ function calcJobratio(job) {
 // Retreive if and how much energy can be salvaged for the next level (eg after spending an energy pack)
 function canSalvageEnergy(job) {
   if (energy <= maxEnergy) return false;
-  var amount = energy - (Math.ceil((lvlExp - curExp) / missions[job][MISSION_XP]) * missions[job][MISSION_ENERGY]) - maxEnergy;
+  var amount = energy - (Math.ceil((ptsToNextLevel) / missions[job][MISSION_XP]) * missions[job][MISSION_ENERGY]) - maxEnergy;
   if (amount > 0) return amount;
   else return false;
 }
@@ -2699,7 +2699,7 @@ function canMission() {
 
     var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})') + ')');
     var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})') + ')');
-    var expLeft = lvlExp - curExp;
+    var expLeft = ptsToNextLevel;
     var ratio = Math.ceil(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var multiple_jobs_ratio_sorted = [];
@@ -4464,11 +4464,11 @@ function saveSettings() {
   GM_setValue('d2', document.getElementById('d2').value);
 
   if (saveCheckBoxElement('autoPauseBefore')) {
-    GM_setValue('autoPauselvlExp', lvlExp);
+    GM_setValue('autoPauselvlExp', ptsToNextLevel);
     GM_setValue('autoPauseActivated', false);
   }
   if (saveCheckBoxElement('autoPauseAfter')) {
-    GM_setValue('autoPauselvlExp', lvlExp);
+    GM_setValue('autoPauselvlExp', ptsToNextLevel);
   }
   GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
 
@@ -9100,12 +9100,8 @@ function refreshGlobalStats() {
   staminaElt = document.getElementById('user_stamina');
   maxStaminaElt = document.getElementById('user_max_stamina');
   levelElt = document.getElementById('user_level');
-//  curExpElt = document.getElementById('user_experience');
-  if(new_header) {
-    ptsToNextLevelElt = document.getElementById('user_xp_to_next_level');
-  } else {
-    lvlExpElt = document.getElementById('exp_to_next_level');
-  }
+
+    //      user_xp_level
 
   // Update basic player information.
   cities[city][CITY_CASH] = parseCash(cashElt.innerHTML);
@@ -9117,17 +9113,22 @@ function refreshGlobalStats() {
   maxEnergy = parseInt(maxEnergyElt.innerHTML);
   stamina = parseInt(staminaElt.firstChild.nodeValue);
   maxStamina = parseInt(maxStaminaElt.innerHTML);
-
   level = parseInt(levelElt.innerHTML);
+
+  // Set all the element globals. They change.
+
+//  curExpElt = document.getElementById('user_experience');
 //  curExp = parseInt(curExpElt.innerHTML);
-  if(new_header){
+  if(new_header) {
+    ptsToNextLevelElt = document.getElementById('user_xp_to_next_level');
     ptsToNextLevel = parseInt(ptsToNextLevelElt.innerHTML);
-    lvlExp = curExp + ptsToNextLevel;
+    lvlExp = ptsToNextLevel;
   } else {
+    lvlExpElt = document.getElementById('exp_to_next_level');  // exp needed to level up
     lvlExp = parseInt(lvlExpElt.innerHTML);
-//    ptsToNextLevel = lvlExp - curExp;
     ptsToNextLevel = lvlExp;
   }
+
 
   // Get the mafia size and pending invites.
   mafia = xpathFirst('//span[@id="user_group_size"]');
@@ -9200,23 +9201,23 @@ function refreshSettings() {
   // Auto-pause reset
   if (GM_getValue('autoPauseActivated') === true &&
       isGMChecked('autoPauseBefore') &&
-      GM_getValue('autoPauselvlExp') < lvlExp) {
-    GM_setValue('autoPauselvlExp', lvlExp);
+      GM_getValue('autoPauselvlExp') < ptsToNextLevel) {
+    GM_setValue('autoPauselvlExp',ptsToNextLevel);
     GM_setValue('autoPauseActivated', false);
   }
 
   // Auto-pause logic
   if (running && isGMChecked('autoPause')) {
     if (isGMChecked('autoPauseBefore') &&
-        GM_getValue('autoPauseExp', '') >= lvlExp - curExp &&
+        GM_getValue('autoPauseExp', '') >= ptsToNextLevel &&
         GM_getValue('autoPauseActivated', false) === false) {
       addToLog('pause Icon', 'Auto-pause in effect. Experience threshold reached.');
       GM_setValue('autoPauseActivated', true);
       pause();
     } else if (isGMChecked('autoPauseAfter') &&
-               GM_getValue('autoPauselvlExp', '') < lvlExp) {
+               GM_getValue('autoPauselvlExp', '') < ptsToNextLevel) {
       addToLog('pause Icon', 'Auto-pause in effect. Leveled up.');
-      GM_setValue('autoPauselvlExp', lvlExp);
+      GM_setValue('autoPauselvlExp', ptsToNextLevel);
       pause();
     }
   }
@@ -11409,7 +11410,7 @@ function setLevelUpRatio() {
   var elt = document.getElementById('level_up_ratio');
   if (elt) {
     if (energy) {
-      var ratio = Math.ceil((lvlExp - curExp) / energy * 100) / 100;
+      var ratio = Math.ceil((ptsToNextLevel) / energy * 100) / 100;
       //elt.childNodes[1].nodeValue = ' A ' + (ratio > 10? '>10' : ratio) + 'x pay ratio would be needed to level up on energy alone.';
       elt.childNodes[1].nodeValue = ' Ratio needed: ' + (ratio > 10? '>10' : ratio) + 'x.';
       elt.style.display = 'block';
