@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.646
+// @version     1.1.647
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.646',
+  version: '1.1.647',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1496,6 +1496,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Get To An Exit'                                    , 22, 37,4,LV    , 35,0,'node37'],    // ENERGY
     ['Hijack A Poker Table Delivery'                     , 18, 38,4,LV    , 27,0,'node38'],    // ENERGY (PROPERTY)
 //  ['Boss: Defeat Roger Bidwell\, Chief of Security'    ,  6, 39,4,LV    ,400,0,'node39'],    //        BOSS JOB STAMINA
+
+// job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
     ['Move The Take Out Of Town'                         , 13, 40,5,LV    , 21,0,'node40'],    // ENERGY DISTRICT 5 LAS VEGAS MOJAVE DESERT
 //  ['Fight Off A Hijack Crew'                           , 14, 41,5,LV    , 23,1,'node41'],    //  FIGHT
     ['Run A Highway Patrol Blockade'                     , 23, 42,5,LV    , 37,2,'node42'],    //SOCIAL
@@ -10678,8 +10680,6 @@ function customizeVegasJobs() {
   var currentTabPath = currentJobTabPath();
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
-//  availableJobs[city][currentTab][currentTabPath] = [];
-//  masteredJobs[city][currentTab][currentTabPath] = [];
 
 
   // FIXME: Change this once we encounter locked jobs for the new header
@@ -10731,6 +10731,7 @@ function customizeVegasJobs() {
       }
     }
 
+// lv stamina check may go here
 
     // Skip this for jobs without jobCost
     if (!jobCost) continue;
@@ -10750,14 +10751,13 @@ function customizeVegasJobs() {
       var reward = parseInt(expElt.innerHTML);
     else
       var reward = 0;
-    // If this isn't a boss job, add 10% to the reward (mastermind bonus)
-    if (reward && !isBossJob && !isFightJob)
-      reward = Math.floor(reward * 1.10);
+//    If this isn't a boss job, add 10% to the reward (mastermind bonus)  // the reward comes from above, dont add here
+//    if (reward && !isBossJob )   // this screws up the level up ratio shown by the payout number on each job
+//      reward = Math.floor(reward * 1.10);
 
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
-    // XP payout ratio
-    var ratio = Math.round(reward / cost * 100) / 100;
+    var ratio = Math.round (reward / cost * 100) / 100;
     var xpTxt = ' (' + ratio + ')';
 
     // Money payout ratio
@@ -10765,8 +10765,8 @@ function customizeVegasJobs() {
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
       // If this isn't a boss job, add 15% to the money payout (bagman bonus)
-    if (reward && !isBossJob && !isFightJob)
-        money = Math.round(money * 1.15);
+//    if (reward && !isBossJob )  // this screws up the display on job screen
+//        money = Math.round(money * 1.15);
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
 
