@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.648
+// @version     1.1.649
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.648',
+  version: '1.1.649',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11501,7 +11501,7 @@ function getJobRow(jobName, contextNode) {
 //      DEBUG('getJobRow for jobno: '+jobno);
       rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', contextNode);
       //Fetching logic for Vegas jobs
-      if (!rowElt) {
+      if (!rowElt && (city==LV)) {
         var jobContainer = "job"+jobno;
         DEBUG('getJobRow - - - LV method for jobno: '+jobno+' = '+jobContainer);
       rowElt = xpathFirst('.//div[@id="'+jobContainer+'"]', contextNode);
@@ -15053,12 +15053,15 @@ function logResponse(rootElt, action, context) {
       var jobContainer = "job"+missions[GM_getValue('selectMission')][MISSION_NUMBER];
       var jobContainerElt = xpathFirst('.//div[@id="'+jobContainer+'"]', rootElt);
       var masteryGainElt = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
+
       var masteryGainTxt = "";
       var pushNextJob = false;
-      if(masteryGainElt) masteryGainTxt = '. Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
-      if(parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) == 100)) pushNextJob = true;
-    if(pushNextJob == true) DEBUG('check below for accuracy, if not 100 then there is a problem');
-
+      if(masteryGainElt)
+          {
+            masteryGainTxt = '. Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+            if(parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) == 100)) pushNextJob = true;
+            if(pushNextJob == true) DEBUG('check below for accuracy, if not 100 then there is a problem');
+         }
   if( city == LV ){
     if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100)
      { //    DEBUG('100 % flagged for mastery' );
