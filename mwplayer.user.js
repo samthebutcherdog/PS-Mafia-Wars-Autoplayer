@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.647
+// @version     1.1.648
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.647',
+  version: '1.1.648',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10747,32 +10747,31 @@ function customizeVegasJobs() {
     var isFightJob = xpathFirst('.//div[@class="job_ribbon ribbon_fights"]', currentJob);
 
     var expElt = xpathFirst('.//dd[@class="experience"]', jobReward);
-    if (expElt)
-      var reward = parseInt(expElt.innerHTML);
-    else
-      var reward = 0;
-//    If this isn't a boss job, add 10% to the reward (mastermind bonus)  // the reward comes from above, dont add here
-//    if (reward && !isBossJob )   // this screws up the level up ratio shown by the payout number on each job
-//      reward = Math.floor(reward * 1.10);
+    if (expElt)   var reward = parseInt(expElt.innerHTML);
+    else    var reward = 0;
 
+//    If this isn't a boss job, add 10% to the reward (wheelman bonus)  // the reward should be actually checked or ask for
+    if (reward && !isBossJob )
+      reward = Math.floor(reward * 1.10); // energy 41- exp 68, actually 74
+//  16595 19085
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
     var ratio = Math.round (reward / cost * 100) / 100;
-    var xpTxt = ' (' + ratio + ')';
+//   var xpTxt = ' (' + ratio + ')'; //original
+     var xpTxt = ' ' + reward + ' (' + ratio + ')';
 
     // Money payout ratio
     var moneyTxt = '';
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
       // If this isn't a boss job, add 15% to the money payout (bagman bonus)
-//    if (reward && !isBossJob )  // this screws up the display on job screen
-//        money = Math.round(money * 1.15);
+    if (reward && !isBossJob )
+        money = Math.round(money * 1.15);
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
 
       moneyTxt = ' (' + mratio + ')';
     }
-
     // Calculate time left for each job
     var timePerEnergy = isGMChecked('isManiac') ? 3 : 5;
     timePerEnergy = isGMChecked('hasHelicopter') ? timePerEnergy - .5: timePerEnergy;
@@ -10782,10 +10781,11 @@ function customizeVegasJobs() {
     if (cost > energy) timeTxt = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
 
     if (!xpathFirst('.//span[@id="ratio_xp"]', expElt))
-      makeElement('span', expElt, {'id':'ratio_xp', 'style':'color:red; font-size: 10px'})
+      makeElement('span', expElt, {'title':' Experience Received Is Calculated With 10% Wheelman Bonus Included. ','id':'ratio_xp', 'style':'color:red; font-size: 10px'})
         .appendChild(document.createTextNode(xpTxt));
+
     if (!xpathFirst('.//span[@id="ratio_money"]', moneyElt))
-      makeElement('span', moneyElt, {'id':'ratio_money', 'style':'color:red; font-size: 10px'})
+      makeElement('span', moneyElt, {'title':' Calculated With 15% Bagman Bonus Included','id':'ratio_money', 'style':'color:red; font-size: 10px'})
         .appendChild(document.createTextNode(moneyTxt));
     //makeElement('span', costElt, {'style':'color:green; font-size: 10px'})
       //.appendChild(document.createTextNode(timeTxt));
