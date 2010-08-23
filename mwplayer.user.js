@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.649
+// @version     1.1.650
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.649',
+  version: '1.1.650',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8532,12 +8532,14 @@ function handleModificationTimer() {
         setListenContent(false);
         makeElement('div', jobResults[i], {'id':'job_flag', 'style':'display: none;'});
         setListenContent(true);
-        DEBUG('Detected Las Vegas job_results change on job '+i);
+        DEBUG('Detected Las Vegas job_results change on job ='+i);
         pageChanged = true;
         if (running) justPlay = true;
-        DEBUG(jobResults[i]+ 'Flagged');
+//      DEBUG(jobResults[i]+ 'Flagged');
+        DEBUG( 'Flagged');
       } else {
-       DEBUG(jobResults[i]+ 'Already Flagged');
+//     DEBUG(jobResults[i]+ 'Already Flagged');
+       DEBUG('Already Flagged');
       }
     }
   }
@@ -10510,6 +10512,7 @@ function customizeProfile() {
 
 // Return the job mastery level
 function getJobMastery(jobRow, newJobs) {
+//    DEBUG(' getjobmastery checking');
   // Logic for new job layout
   if (newJobs) {
     if (jobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
@@ -10544,8 +10547,34 @@ function getJobMastery(jobRow, newJobs) {
   return 0;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Set the next job to be mastered for mastery job options
 function jobMastery(element, newJobs) {
+//    DEBUG('in jobmastery');
   if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) return;
 
   var selectMission = parseInt(GM_getValue('selectMission', 1));
@@ -10580,9 +10609,10 @@ function jobMastery(element, newJobs) {
   for (var i = 0, iLength = missions.length; i < iLength; i++) {
     // Only get the jobs from this city tier
     if (city == missions[i][MISSION_CITY] && tabno == missions[i][MISSION_TAB]) {
-      DEBUG('Getting the jobrow for '+missions[i][MISSION_NAME]);
+//      DEBUG('Getting the jobrow for '+missions[i][MISSION_NAME]);
       var thisJobRow = getJobRow(missions[i][MISSION_NAME]);
-      DEBUG('Got Jobrow for '+missions[i][MISSION_NAME]);
+//      DEBUG('Got Jobrow for '+missions[i][MISSION_NAME]);
+
       if (thisJobRow) {
         var masteryLevel = getJobMastery(thisJobRow, newJobs);
         tierPercent += masteryLevel;
@@ -10616,7 +10646,7 @@ function jobMastery(element, newJobs) {
         addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
       else
         addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');
-      DEBUG('Checking job tier mastery.');
+  //    DEBUG('Checking job tier mastery.');
       if (tierPercent == 100) {
         // Find the first job of the next tier.
         // NOTE: This assumes that the missions array is sorted by city and
@@ -10658,7 +10688,29 @@ function jobMastery(element, newJobs) {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function customizeVegasJobs() {
+    DEBUG(' in customizeVegasJobs');
+
   // Handle Las Vegas job layout
   var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info")]', innerPageElt);
 
@@ -10708,16 +10760,18 @@ function customizeVegasJobs() {
     // Skip jobs not in missions array
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (isNaN(jobMatch)) {
-      addToLog('warning Icon', jobName + ' not found in missions array. ');
+      addToLog('search Icon', jobName + ' not found in missions array. ');
       continue;
     }
 
     jobsFound++;
+//    DEBUG ('    just before getjobmastery in vegas ');
     var jobPercentage = getJobMastery(currentJob, true);
-    DEBUG(jobName + ', Calculated Mastery level: ' + jobPercentage);
+    DEBUG(jobName + ', Calculated Vegas Mastery level: ' + jobPercentage);  //getJobMastery
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
+//        DEBUG(' multiple jobs checked ');
       // Ignore mastered jobs
       if (jobPercentage == 100) {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)  masteredJobs[city][currentTab].push(jobMatch);
@@ -10730,6 +10784,9 @@ function customizeVegasJobs() {
         availableJobs[city][currentTab].push(jobMatch);
       }
     }
+    //else DEBUG(' multiple jobs NOT checked ');
+
+
 
 // lv stamina check may go here
 
@@ -10844,10 +10901,14 @@ function customizeVegasJobs() {
   // Set the job progress
   jobMastery(innerPageElt, true);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
+      DEBUG(' end of customizeVegasJobs');
+
   return true;
 }
 
 function customizeNewJobs() {
+DEBUG(' in customizeNewJobs');
+
   // Handle new job layout
   var newJobs = $x('.//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix")]', innerPageElt);
 
@@ -10891,7 +10952,7 @@ function customizeNewJobs() {
     // Skip jobs not in missions array
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (isNaN(jobMatch)) {
-      addToLog('warning Icon', jobName + ' not found in missions array. ');
+      addToLog('search Icon', jobName + ' not found in missions array. ');
       continue;
     }
 
@@ -11009,6 +11070,8 @@ function customizeNewJobs() {
   // Set the job progress
   jobMastery(innerPageElt, true);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
+  DEBUG(' end of customizeNewJobs');
+
   return true;
 }
 
@@ -11030,6 +11093,7 @@ function requiresBizItem (jobRow) {
 }
 
 function customizeJobs() {
+DEBUG(' in customizeJobs');
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
 
@@ -11073,7 +11137,7 @@ function customizeJobs() {
         if (!/Level[\s\w]+Master/.test(jobName)) {
           var choiceMatch = choiceJobs.searchArray(jobName,1)[0];
           if (isNaN(choiceMatch))
-            addToLog('warning Icon', jobName + ' not found in missions array.');
+            addToLog('search Icon', jobName + ' not found in missions array.');
         }
         continue;
       }
@@ -11195,6 +11259,8 @@ function customizeJobs() {
   jobMastery(innerPageElt, false);
   DEBUG('Jobs found: ' + jobsFound + ', Mastered jobs: ' + masteredJobsCount);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
+DEBUG(' end of customizeJobs');
+
   return true;
 }
 
@@ -11493,19 +11559,19 @@ function clickWarListRemove() {
 function getJobRow(jobName, contextNode) {
   var rowElt, conTxt = '',LVjob=0;
   try {
-    DEBUG('getJobRow for : '+jobName);
+//    DEBUG('getJobRow for : '+jobName);
     // Retrieve by job number first
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (!isNaN(jobMatch)) {
       var jobno = missions[jobMatch][MISSION_NUMBER];
-//      DEBUG('getJobRow for jobno: '+jobno);
       rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', contextNode);
       //Fetching logic for Vegas jobs
       if (!rowElt && (city==LV)) {
         var jobContainer = "job"+jobno;
-        DEBUG('getJobRow - - - LV method for jobno: '+jobno+' = '+jobContainer);
       rowElt = xpathFirst('.//div[@id="'+jobContainer+'"]', contextNode);
         LVjob = 1;
+//       if(rowElt)  DEBUG('got getJobRow - - - LV method for jobno: '+jobno+' = '+jobContainer);
+
       }
     }
 
@@ -11544,6 +11610,7 @@ function getJobRow(jobName, contextNode) {
   if (!rowElt) return false;
   return rowElt;
 }
+
 function getJobRowItems(jobName) {
   var currentJob = jobName;
   var currentJobRow = getJobRow(currentJob, innerPageElt);
@@ -15047,33 +15114,74 @@ function logResponse(rootElt, action, context) {
       return true;
       break;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     case 'job':
+      var masteryGainElt ;
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
       xpGainElt = xpGainElt ? xpGainElt : xpathFirst('.//dd[@class="experience"]', messagebox);
       var jobContainer = "job"+missions[GM_getValue('selectMission')][MISSION_NUMBER];
       var jobContainerElt = xpathFirst('.//div[@id="'+jobContainer+'"]', rootElt);
-      var masteryGainElt = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
+      masteryGainElt = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
+
+
+
+
+
+
+
+
+
 
       var masteryGainTxt = "";
       var pushNextJob = false;
+// IF we have the mastery bar,
       if(masteryGainElt)
-          {
-            masteryGainTxt = '. Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
-            if(parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) == 100)) pushNextJob = true;
-            if(pushNextJob == true) DEBUG('check below for accuracy, if not 100 then there is a problem');
-         }
-  if( city == LV ){
-    if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100)
-     { //    DEBUG('100 % flagged for mastery' );
-         DEBUG((parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) + '% =100% flagged as MASTERED ' );
-         goHome();
-     } else {
-     DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
-     }
-  }
+       {
+         if( (GM_getValue('selectTier')!= '0.0'  ) ||
+           (!isGMChecked('multipleJobs'))  )
+             {
+
+              masteryGainTxt = '. Las Vegas Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+              if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 )
+                {
+                   pushNextJob = true;
+                   DEBUG((parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) + '% =100% flagged as MASTERED ' );
+                } else {
+                DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
+                }
+             } else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
+       } else DEBUG(' mastery check skipped no masterygainelt ');
+/*
+            DEBUG(' - - - TIER VALUE - - - ' +  GM_getValue('selectTier') );
+if(   GM_getValue('multipleJobs')== '0'  )
+      DEBUG(' - - - TIER VALUE - - - =' +   GM_getValue('multipleJobs') );
+else  DEBUG(' - - - - - TIER VALUE wrong =' +  GM_getValue('multipleJobs') );
+DEBUG (' CHECK MULTIPLE JOBS=' + GM_getValue('multipleJobs'));
+DEBUG (' CHECK MULTIPLE JOBS SHOW IF=' + showIfUnchecked(GM_getValue('multipleJobs')));
+*/
+      if (pushNextJob) DEBUG (' - - - push next job was true ');
+    else DEBUG (' - - - push next job was false ');
+
+
 
 
       if (xpGainElt) {
+DEBUG (' - - - push next job expgainelt 2 ');
         jobOptimizeOn = false;
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' +
@@ -15093,11 +15201,10 @@ function logResponse(rootElt, action, context) {
           result += ' You spent 0 energy on this job.';
         }
         addToLog('process Icon', result);
+
         jobCombo(rootElt);
-
-        if(masteryGainElt) jobLoot(jobContainerElt);
+        if(masteryGainElt) jobLoot(jobContainerElt);  // here
         else jobLoot(rootElt);
-
         // Add message if job tier prize found.
         if (innerNoTags.match(/.*(An* .+ was added to your inventory[^.]*.)/i)) {
           addToLog('lootbag Icon', RegExp.$1);
@@ -15108,7 +15215,11 @@ function logResponse(rootElt, action, context) {
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
         if (isGMChecked('autoAskJobHelp') &&
             (!xpGainMin || xpGain >= xpGainMin)) {
+
+
           var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
+// ask for help
+
           if (elt) {
             Autoplay.fx = function() {
               clickElement(elt);
@@ -15118,25 +15229,46 @@ function logResponse(rootElt, action, context) {
             return true;
           }
         }
-
-        return false;
+//        return false;  // temp comment out
       } else if (innerNoTags.indexOf('You are not high enough level to do this job') != -1) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
+ DEBUG (' - - - push next job was true 3 ');
       } else if (innerNoTags.indexOf('Success') != -1) {
         jobOptimizeOn = false;
         addToLog('process Icon', inner);
+ DEBUG (' - - - push next job was true 4 ');
+
       } else {
         DEBUG('Unrecognized job response.');
       }
+
+
       if (pushNextJob) {
           DEBUG('Job Mastery of 100% detected, Reloading');
-          Autoplay.fx= autoReload(true);
+          goHome();
+//          Autoplay.fx= autoReload(true);
+      }else {
+        DEBUG(' pushnextjob is false ! ! ! .');
+return ;
       }
+
       Autoplay.start();
       return true;
       break;
+
+
+
+
+
+
+
+
+
+
+
+
 
     case 'hitman':
       // If the target is gone, there is nothing to do.
@@ -15223,6 +15355,15 @@ function logResponse(rootElt, action, context) {
       updateLogStats(STAMINA_HOW_HITMAN);
       randomizeStamina();
       break;
+
+
+
+
+
+
+
+
+
 
     case 'war':
       // Remove invalid war targets
