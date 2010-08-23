@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.650
+// @version     1.1.651
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.650',
+  version: '1.1.651',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1461,14 +1461,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Blackmail A Car Dealer'                            ,  8,  2,1,LV    , 11,0,'node2' ],    // ENERGY
     ['Steal A Truckload Of Slots'                        , 24,  3,1,LV    , 18,0,'node3' ],    // ENERGY
     ['Secure Some Wheels'                                , 18,  4,1,LV    , 25,0,'node4' ],    // ENERGY
-//  ['Roll a bingo parlor'                               ,  6,  5,1,LV    ,  9,1,'node5' ],    //  FIGHT
+  ['Roll a bingo parlor'                               ,  6,  5,1,LV    ,  9,1,'node5' ],    //  FIGHT
     ['Break into a gun shop'                             , 12,  6,1,LV    , 16,0,'node6' ],    // ENERGY
     ['Scout out alphabet city'                           , 15,  7,1,LV    , 20,0,'node7' ],    // ENERGY
     ['Open fire on Victor\'s crew'                       , 23,  8,1,LV    , 27,0,'node8' ],    //SOCIAL
 //  ['Boss: Defeat Victor Lil\' Loco Alves'              ,  5,  9,1,LV    ,  6,0,'node9' ],    //        BOSS JOB STAMINA
     ['Help a Bookie Out Of A Jam'                        , 15, 10,2,LV    ,  9,0,'node10'],    // ENERGY DISTRICT 2  LAS VEGAS PARADISE CITY
-//  ['Win an Underground Fight'                          , 11, 11,2,LV    , 18,1,'node11'],    //  FIGHT
-//  ['Clip a Petty Thug'                                 , 10, 12,2,LV    , 16,1,'node12'],    //  FIGHT
+  ['Win an Underground Fight'                          , 11, 11,2,LV    , 18,1,'node11'],    //  FIGHT
+  ['Clip a Petty Thug'                                 , 10, 12,2,LV    , 16,1,'node12'],    //  FIGHT
     ['Fix a Boxing Match'                                , 11, 13,2,LV    , 15,0,'node13'],    // ENERGY
     ['Clean Up At A Rigged Table'                        , 10, 14,2,LV    , 14,0,'node14'],    // ENERGY
     ['Recruit A Table Game Dealer'                       ,  9, 15,2,LV    , 12,0,'node15'],    // ENERGY (PROPERTY)
@@ -1476,10 +1476,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Shut Down an Uncooperative Club'                   , 15, 17,2,LV    , 20,0,'node17'],    // ENERGY
     ['Hit Up a Nightclub'                                ,  7, 18,2,LV    ,  9,0,'node18'],    // ENERGY
 //  ['Boss: Defeat Jimmy \'Big Time\' Mancuso'           ,  5, 19,2,LV    , 70,0,'node19'],    //        BOSS JOB STAMINA
-//  ['Open Fire On A Rival Outfit'                       , 14, 20,3,LV    , 23,1,'node20'],    //  FIGHT  DISTRICT 3  LAS VEGAS THE LOWER STRIP
+  ['Open Fire On A Rival Outfit'                       , 14, 20,3,LV    , 23,1,'node20'],    //  FIGHT  DISTRICT 3  LAS VEGAS THE LOWER STRIP
     ['Buy Some Black-Market Info'                        ,  9, 21,3,LV    , 15,0,'node21'],    // ENERGY
     ['Steal An SUV'                                      , 12, 22,3,LV    , 19,2,'node22'],    //SOCIAL
-//  ['Run A Visiting Gang Boss Out'                      , 17, 23,3,LV    , 28,1,'node23'],    //  FIGHT
+  ['Run A Visiting Gang Boss Out'                      , 17, 23,3,LV    , 28,1,'node23'],    //  FIGHT
     ['Do Some Late Night Shopping'                       , 10, 24,3,LV    , 17,0,'node24'],    // ENERGY
     ['Rob A Gem Broker'                                  , 23, 25,3,LV    , 36,2,'node25'],    //SOCIAL
     ['Convince A Restaurateur To Leave Town'             , 17, 26,3,LV    , 24,0,'node26'],    // ENERGY (PROPERTY)
@@ -1489,7 +1489,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Bribe A Casino Pit Boss'                           ,  5, 30,4,LV    ,  8,0,'node30'],    // ENERGY DISTRICT 4  LAS VEGAS SHOGUN CASINO
     ['Steal A Valet\'s Uniform'                          , 12, 31,4,LV    , 20,0,'node31'],    // ENERGY
     ['Swipe A Security Keycard'                          , 10, 32,4,LV    , 16,0,'node32'],    // ENERGY
-//  ['Take Out An Armed Casino Guard'                    , 13, 33,4,LV    , 21,1,'node33'],    //  fight
+  ['Take Out An Armed Casino Guard'                    , 13, 33,4,LV    , 21,1,'node33'],    //  fight
     ['Create A Distraction On The Floor'                 , 10, 34,4,LV    , 17,0,'node34'],    // ENERGY
     ['Hack The Casino Security System'                   , 12, 35,4,LV    , 21,0,'node35'],    // ENERGY
     ['Break Into The Vault'                              , 17, 36,4,LV    , 26,0,'node36'],    // ENERGY
@@ -1499,22 +1499,22 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
 // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
     ['Move The Take Out Of Town'                         , 13, 40,5,LV    , 21,0,'node40'],    // ENERGY DISTRICT 5 LAS VEGAS MOJAVE DESERT
-//  ['Fight Off A Hijack Crew'                           , 14, 41,5,LV    , 23,1,'node41'],    //  FIGHT
+  ['Fight Off A Hijack Crew'                           , 14, 41,5,LV    , 23,1,'node41'],    //  FIGHT
     ['Run A Highway Patrol Blockade'                     , 23, 42,5,LV    , 37,2,'node42'],    //SOCIAL
     ['Buy Off A Crooked Border Agent'                    , 15, 43,5,LV    , 24,0,'node43'],    // ENERGY
     ['Stash The Take'                                    , 20, 44,5,LV    , 33,2,'node44'],    //social
     ['Arrange A Cartel Sale'                             ,  9, 45,5,LV    , 16,0,'node45'],    // ENERGY
-//  ['Clean Out A Biker Bar'                             , 11, 46,5,LV    , 19,1,'node46'],    //  FIGHT
+  ['Clean Out A Biker Bar'                             , 11, 46,5,LV    , 19,1,'node46'],    //  FIGHT
     ['Create A Diversion'                                , 11, 47,5,LV    , 18,0,'node47'],    // ENERGY
     ['Dispose Of The Evidence'                           , 14, 48,5,LV    , 23,0,'node48'],    // ENERGY
 //  ['Boss: Defeat \'Red\' Jackson'                      ,  7, 49,5,LV    ,600,0,'node49'],    //        BOSS JOB STAMINA
     ['Rescue A Hotelier'                                 , 10, 50,5,LV    , 17,0,'node50'],    // ENERGY PATH (PROPERTY)
-//  ['Remove An Unhelpful Union Rep'                     , 15, 51,6,LV    , 26,1,'node51'],    //  fight PATH
+  ['Remove An Unhelpful Union Rep'                     , 15, 51,6,LV    , 26,1,'node51'],    //  fight PATH
     ['Get A Council Member On Board'                     , 17, 52,6,LV    , 27,0,'node52'],    // ENERGY PATH
     ['Buy Off A Precinct Captain'                        , 18, 53,6,LV    , 29,0,'node53'],    // ENERGY PATH
-//  ['Eliminate A Hill Supplier'                         , 16, 54,6,LV    , 28,1,'node54'],    //  fight PATH
+  ['Eliminate A Hill Supplier'                         , 16, 54,6,LV    , 28,1,'node54'],    //  fight PATH
     ['Convince A Judge To Step Down'                     , 14, 55,6,LV    , 29,0,'node55'],    // ENERGY PATH
-//  ['Wipe Out The Hill Security Detail'                 , 18, 56,6,LV    , 32,1,'node56'],    //  fight PATH
+  ['Wipe Out The Hill Security Detail'                 , 18, 56,6,LV    , 32,1,'node56'],    //  fight PATH
     ['Remove The Hill\'s Support Base'                   , 17, 57,6,LV    , 27,2,'node57'],    //social  PATH
     ['Reveal A Politician\'s Dirty Secret'               , 19, 58,6,LV    , 30,0,'node58'],    // ENERGY PATH
     ['Infiltrate The Hill Resort'                        , 16, 59,6,LV    , 25,0,'node59']     // ENERGY PATH
@@ -2892,7 +2892,7 @@ function autoMission() {
     }
   };
 
-  DEBUG('Going to the correct city');
+//  DEBUG('Going to the correct city');
   // Go to the correct city.
   if (city != cityno) {
     Autoplay.fx = function() { doJobFunction(goLocation(cityno)); };
@@ -2900,7 +2900,7 @@ function autoMission() {
     return;
   }
 
-  DEBUG('Going to the correct job tab');
+//  DEBUG('Going to the correct job tab');
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
     Autoplay.fx = function() { doJobFunction(goJobTab(tabno)); };
@@ -2916,7 +2916,7 @@ function autoMission() {
     }
   }
 
-    DEBUG('- - Going to buy necessary items first for jobname' + jobName );
+//    DEBUG('- - Going to buy necessary items first for jobname' + jobName );
   // Buy requirements first, if any
   if (getJobRowItems(jobName)) {
 
@@ -4616,7 +4616,7 @@ function saveSettings() {
   //Energy Tab Checkboxes
   saveCheckBoxElementArray([
     'autoMission','masterAllJobs','multipleJobs','burstJob','endLevelOptimize','checkMiniPack','autoEnergyPack','autoEnergyPackForce',
-    'hasHelicopter','hasGoldenThrone','isManiac','allowEnergyToLevelUp'
+    'hasHelicopter','hasGoldenThrone','isManiac','allowEnergyToLevelUp','skipfight'
   ]);
   //Energy Settings and Validation
   //Validate burstJobCount
@@ -6886,6 +6886,16 @@ function createEnergyTab() {
 
   masterAllJobs.addEventListener('change', handler, false);
   multipleJobs.addEventListener('change', handler, false);
+
+  // skip stamina spending jobs
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  id = 'skipfight';
+  title = 'Check this to skip Fighting Style Jobs In Tier Mastery.';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' Skip Fighting In Job Tier Mastery '));
 
   // Spend buff packs?
   item = makeElement('div', list);
@@ -10526,8 +10536,8 @@ function getJobMastery(jobRow, newJobs) {
   }
 
   // Locked jobs are mastered too
-  if (/Mastered/i.test(jobRow.innerHTML) || isJobLocked(jobRow))
-    return 100;
+  if (/Mastered/i.test(jobRow.innerHTML) || isJobLocked(jobRow) )
+      return 100;
   else if (jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i))
     return parseInt(RegExp.$1);
 
@@ -10546,31 +10556,6 @@ function getJobMastery(jobRow, newJobs) {
   DEBUG('No mastery items found. Assuming 0% mastery level.');
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Set the next job to be mastered for mastery job options
 function jobMastery(element, newJobs) {
@@ -10688,26 +10673,6 @@ function jobMastery(element, newJobs) {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function customizeVegasJobs() {
     DEBUG(' in customizeVegasJobs');
 
@@ -10777,16 +10742,15 @@ function customizeVegasJobs() {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)  masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
       }
-      // Skip locked jobs
-      if (isJobLocked(currentJob)) {
-        DEBUG('Job ' + jobName + '(' + jobMatch + ') is locked in vegas. Skipping.');
-      } else {
-        availableJobs[city][currentTab].push(jobMatch);
-      }
-    }
-    //else DEBUG(' multiple jobs NOT checked ');
-
-
+      // Skip locked jobs and optional fight jobs
+        if(isJobLocked(currentJob)
+        || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) )
+           {
+             DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - FIGHT - in Vegas. Skipping.');
+           } else {
+             availableJobs[city][currentTab].push(jobMatch);
+           }
+        }  //else DEBUG(' multiple jobs NOT checked ');
 
 // lv stamina check may go here
 
@@ -11074,6 +11038,8 @@ DEBUG(' in customizeNewJobs');
 
   return true;
 }
+
+function isJobFight (jobAction) {  return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
 
 function isJobLocked (jobAction) {
   return (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
@@ -12151,6 +12117,7 @@ BrowserDetect.init();
         'Auto send energy pack: <strong>' + showIfUnchecked(GM_getValue('sendEnergyPack')) + '</strong><br>' +
         'Auto ask energy pack: <strong>' + showIfUnchecked(GM_getValue('askEnergyPack')) + '</strong><br>' +
         'Reward for energy pack: <strong>' + showIfUnchecked(GM_getValue('rewardEnergyPack')) + '</strong><br>' +
+        'Skip Fighting In Job Tier Mastery: <strong>' + showIfUnchecked(GM_getValue('skipfight')) + '</strong><br>' +
         'Check for mini Energy Packs: <strong>' + showIfUnchecked(GM_getValue('checkMiniPack')) + '</strong><br>' +
         'Energy threshold: <strong>' + GM_getValue('selectEnergyUse') + ' ' + numberSchemes[GM_getValue('selectEnergyUseMode', 0)] + ' (refill to ' + SpendEnergy.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
@@ -15114,22 +15081,6 @@ function logResponse(rootElt, action, context) {
       return true;
       break;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     case 'job':
       var masteryGainElt ;
       xpGainElt = xpathFirst('.//dd[@class="message_experience"]', messagebox);
@@ -15166,22 +15117,12 @@ function logResponse(rootElt, action, context) {
                 }
              } else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
        } else DEBUG(' mastery check skipped no masterygainelt ');
-/*
-            DEBUG(' - - - TIER VALUE - - - ' +  GM_getValue('selectTier') );
-if(   GM_getValue('multipleJobs')== '0'  )
-      DEBUG(' - - - TIER VALUE - - - =' +   GM_getValue('multipleJobs') );
-else  DEBUG(' - - - - - TIER VALUE wrong =' +  GM_getValue('multipleJobs') );
-DEBUG (' CHECK MULTIPLE JOBS=' + GM_getValue('multipleJobs'));
-DEBUG (' CHECK MULTIPLE JOBS SHOW IF=' + showIfUnchecked(GM_getValue('multipleJobs')));
-*/
-      if (pushNextJob) DEBUG (' - - - push next job was true ');
+
+    if (pushNextJob) DEBUG (' - - - push next job was true ');
     else DEBUG (' - - - push next job was false ');
 
-
-
-
       if (xpGainElt) {
-DEBUG (' - - - push next job expgainelt 2 ');
+//DEBUG (' - - - push next job expgainelt 2 ');
         jobOptimizeOn = false;
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' +
@@ -15230,25 +15171,26 @@ DEBUG (' - - - push next job expgainelt 2 ');
           }
         }
 //        return false;  // temp comment out
+
+
       } else if (innerNoTags.indexOf('You are not high enough level to do this job') != -1) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
- DEBUG (' - - - push next job was true 3 ');
+// DEBUG (' - - - push next job was true 3 ');
       } else if (innerNoTags.indexOf('Success') != -1) {
         jobOptimizeOn = false;
         addToLog('process Icon', inner);
- DEBUG (' - - - push next job was true 4 ');
+// DEBUG (' - - - push next job was true 4 ');
 
       } else {
         DEBUG('Unrecognized job response.');
       }
-
-
+// this code was never reached that i could tell without commenting out the return false 16 lines up
       if (pushNextJob) {
           DEBUG('Job Mastery of 100% detected, Reloading');
           goHome();
-//          Autoplay.fx= autoReload(true);
+//          Autoplay.fx= autoReload(true);  // would just hang
       }else {
         DEBUG(' pushnextjob is false ! ! ! .');
 return ;
@@ -15257,18 +15199,6 @@ return ;
       Autoplay.start();
       return true;
       break;
-
-
-
-
-
-
-
-
-
-
-
-
 
     case 'hitman':
       // If the target is gone, there is nothing to do.
