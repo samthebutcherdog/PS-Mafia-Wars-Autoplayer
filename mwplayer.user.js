@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.651
+// @version     1.1.652
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.651',
+  version: '1.1.652',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8618,7 +8618,8 @@ function handleModificationTimer() {
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
       // Find and remove special event collections from collections page
       var arrCollection=new Array("One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
-                    "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%");
+                    "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash",
+                    "successful robberies by 10%","Maltese Falcon");
       for (item in arrCollection)
       {
         var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "' + arrCollection[item] + '") and contains(.,"Bonus Received:")]', innerPageElt);
@@ -9925,7 +9926,7 @@ function customizeMasthead() {
 function customizeStats() {
   // Don't watch the stats area while we're making changes to it.
   setListenStats(false);
-
+/*
   // Show points until next level.
 //  var elt = xpathFirst('.//div[@id="user_stats"]//h4[@class="experience" and contains(text(), "Experience")]', appLayoutElt);
 //  if (!elt) elt = xpathFirst('.//div[@id="user_stats"]//span[@class="stat_title" and contains(text(),"Experience")]', appLayoutElt);
