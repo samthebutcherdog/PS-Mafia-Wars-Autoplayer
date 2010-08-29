@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.653
+// @version     1.1.654
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.653',
+  version: '1.1.654',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11615,7 +11615,7 @@ function getJobRowItems(jobName) {
     }
     return true;
   }
-
+  /*
   // New Job layout handling
   var amtElt = xpathFirst('.//strong[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', currentJobRow);
   if (amtElt) {
@@ -11627,6 +11627,7 @@ function getJobRowItems(jobName) {
       return (autoBankWithdraw(cashDiff));
     }
   }
+  */
 
   // Logic to switch to the required job first
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
@@ -11676,7 +11677,7 @@ function getJobRowItems(jobName) {
       return true;
     }
   }
-
+  /*
   // Withdraw money
   var amtElt = xpathFirst('.//td[contains(@class,"job_energy")]//span[@class="money" or @class="bad"]', currentJobRow);
   if (amtElt) {
@@ -11688,6 +11689,7 @@ function getJobRowItems(jobName) {
       return (autoBankWithdraw(cashDiff));
     }
   }
+  */
   return false;
 }
 
