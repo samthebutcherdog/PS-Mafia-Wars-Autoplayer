@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.654
+// @version     1.1.655
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.654',
+  version: '1.1.655',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7190,6 +7190,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Use fight stealth'));
 
+  /*
   // Avoid Top Mafia bodyguards?
   title = 'Avoid opponents known to be Top Mafia bodyguards. This may ' +
           'decrease the frequency of losses due to critical hits.';
@@ -7197,6 +7198,7 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightAvoidBodyguards', 'checked');
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Avoid Top Mafia bodyguards'));
+  */
 }
 
 function createStaminaSubTab_FightSpecific(staminaTabSub) {
@@ -7995,7 +7997,7 @@ function validateStaminaTab() {
       s.fightRemoveStronger = checked('fightRemoveStronger');
 
       s.fightStealth = checked('fightStealth');
-      s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
+      //s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
 
       // Validate reattack settings.
       if (isNaN(s.reattackThreshold)) {
@@ -8213,7 +8215,7 @@ function validateStaminaTab() {
       s.fightRemoveStronger = checked('fightRemoveStronger');
 
       s.fightStealth = checked('fightStealth');
-      s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
+      //s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
 
       // Validate reattack settings.
       if (isNaN(s.reattackThreshold)) {
@@ -12129,7 +12131,7 @@ BrowserDetect.init();
         '-------------------Stamina Tab-------------------<br>' +
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
-//        'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
+        //'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
         'Hide Finished Collection Items: <strong>' + showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
@@ -12141,7 +12143,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Random fight max mafia: <strong>' + GM_getValue('fightMafiaMax') + ' (' + showIfRelative('fightMafiaMaxRelative') + ')</strong><br>' +
         '&nbsp;&nbsp;-Random fight min mafia: <strong>' + GM_getValue('fightMafiaMin') + ' (' + showIfRelative('fightMafiaMinRelative') + ')</strong><br>' +
         '&nbsp;&nbsp;-Random fight stealth: <strong>' + showIfUnchecked(GM_getValue('fightStealth')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Random fight avoid bodyguards: <strong>' + showIfUnchecked(GM_getValue('fightAvoidBodyguards')) + '</strong><br>' +
+        //'&nbsp;&nbsp;-Random fight avoid bodyguards: <strong>' + showIfUnchecked(GM_getValue('fightAvoidBodyguards')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight use Patterns: <strong>' + showIfUnchecked(GM_getValue('fightNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight avoid names: <strong>' + showIfUnchecked(GM_getValue('fightAvoidNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight specific names: <strong>' + showIfUnchecked(GM_getValue('fightOnlyNames')) + '</strong><br>' +
@@ -14481,6 +14483,7 @@ function logFightResponse(rootElt, resultElt, context) {
       result += ' <span class="bad">' +
                 'LOST ' + cost + '</span>.';
       resultType = 0;
+	  /*
       // Check for a critical hit.
       if (innerNoTags.match(/critical hit/i)) {
         resultType++;
@@ -14495,19 +14498,20 @@ function logFightResponse(rootElt, resultElt, context) {
           result += ' <span class="warn">(critical hit)</span>';
         }
       } else {
-        // Show any boost the opponent used.
-        if (userBoost && userBoost.match(/[^(]+/)) {
-          result += ' <span class="warn">('+RegExp.lastMatch.trim()+')</span>';
-        }
-
-        // Don't fight this opponent again.
-        result += ' Too strong!';
-        if (how == STAMINA_HOW_FIGHT_RANDOM ||
-            isGMChecked('fightRemoveStronger')) {
-          result += ' Avoiding.';
-          setFightOpponentAvoid(context);
-        }
+	  */
+      // Show any boost the opponent used.
+      if (userBoost && userBoost.match(/[^(]+/)) {
+        result += ' <span class="warn">('+RegExp.lastMatch.trim()+')</span>';
       }
+
+      // Don't fight this opponent again.
+      result += ' Too strong!';
+      if (how == STAMINA_HOW_FIGHT_RANDOM ||
+          isGMChecked('fightRemoveStronger')) {
+        result += ' Avoiding.';
+        setFightOpponentAvoid(context);
+      }
+      //}
       addToLog('omg Icon', result);
     }
 
