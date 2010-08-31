@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.656
+// @version     1.1.657
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.656',
+  version: '1.1.657',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11049,7 +11049,7 @@ DEBUG(' in customizeNewJobs');
 function isJobFight (jobAction) {  return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
 
 function isJobLocked (jobAction) {
-  return (jobAction.innerHTML.indexOf('sexy_button_locked') >= 0 &&
+  return (jobAction.innerHTML.indexOf('lock') >= 0 &&
           jobAction.innerHTML.indexOf('Help') == -1);
 }
 
