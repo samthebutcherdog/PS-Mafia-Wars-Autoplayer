@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.662
+// @version     1.1.663
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.662',
+  version: '1.1.663',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11730,7 +11730,6 @@ function jobCombo(element) {
 
 function jobLoot(element) {
   var i, lootbag = [];
-  var booVegasFlag = true;
 
   // See what loot was gained.
   var messages = $x('.//td[@class="message_body"]', element);
@@ -11744,12 +11743,11 @@ function jobLoot(element) {
       var txtLog = '<span class="loot">'+' Found '+ loot + ' in the job.</span>';
       lootbag.push(loot);
       addToLog('lootbag Icon', txtLog);
-      booVegasFlag = false;
     }
   }
 
   // Vegas Loot on jobs
-  if (booVegasFlag) {
+  if (city == LV) {
     var jobResults = xpathFirst('.//div[@class="job_results"]', element);
     var strLoot = '';
     messages = $x('.//img', jobResults);
