@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.658
+// @version     1.1.659
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.658',
+  version: '1.1.659',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -523,28 +523,11 @@ var pauseIcon = '<img src="data:image/gif;base64,' +
     'OxkhADs=' +
     '" />';
 
-var defenseIcon = '<img src="data:image/gif;base64,' +
-    'R0lGODlhDQANANU/AFFzrH2m60V0ukhrpazH/CQ0TYuv8U19yVeK3Cc7Wl+Q4F2O3S1MfFCAzBgdJRsjMjtinj9loVp4r22a52aFvzlPdIGYwk2AzneUzVN/x2iDt8ja/ZS29mOAtT9dj9Pi/jFShI6hxHef6G2N' +
-    'x0VdiDlLaePs/rrR/SxEaaWwxYCh4lWH1198slqJ1mN5oqLA93uSv05ihUJkm0JusF+IyzRdm22b6DdfnGWV5HSg7YKq9Hul8Iiv+K/J/M3e/v///yH5BAEAAD8ALAAAAAANAA0AAAZ4wJTp4ysaiwRMaHPqOZ9O' +
-    'lcZC4PCu2OuoA3txdOAwmMJycQy7tHonkkhiBkNuTs/hAKRSIDCx+f0TNAAVDjiGh4YKAAMFPx4tCwqSCgsZAzI/Pw8HDSsInw0REQmZPygzAgcXAhAQDKWZCTezswwOsJkPDDUgjaVBADsK' +
-    '" />';
-
 var staminaIcon = '<img src="data:image/gif;base64,' +
     'R0lGODlhEAAQANU/ANVbbJmZmkVHRikpKVV5Wq2fnux4itCxt8fIx76WnBYWFjU1NYyNjaVweJOSlNxqdysVF3t6fgcGBnR0daOhp76/vnZze7lcZOaMmq6Bh7KtrpN8hIJCSaCXmIGFi6qurmVjYm1jZGhpapOL' +
     'jHRoa1EpLnJvdt9KUeyQoZ+foLKJkeBpfE5QUO/w8FRJTOJTXpSVmudVZNHR0sdkb91wfICAgIR0d7t3g2VeZamnq7NWXPJugGRWXH9BR4BfXAAAACH5BAEAAD8ALAAAAAAQABAAAAaJwJ9wSCwaj0OJUFBTiByB' +
     'QIohWAxSFeEA8SFUWjJExOKBRSZCBYlAGBU6HQvFQclFhJtXiMVAaDQmA0UDADsJAiA8LjgBCkUJJzE+IgsiCgMTSkMDNAYABJcDCgQOmkI2KwYNggsCLI5FGQ8oKrCmRTcPGAe3Rw0XM7xIQyU9HDrDQxDLvcnO' +
     'QkEAOwo=' +
-    '" />';
-
-var huhIcon = '<img src="data:image/png;base64,' +
-    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADW0lEQVR42l2Te0xTVxzHv+f2PniMlQpLAaXY8oxhg5FIXNjQNHGSOTFN6EzmH8THZqJuzixspnUs0wGLxkf2yIIxZn843IaOTM3mNCE4fCaii84Q' +
-    'TKAWJrTYUqBl13tv7707PUaHO8lJzuv3Ob/vL78vwf9GIBB0CgK/WZIkt2GaTtMECMyALMu9qqodLSsrCcx/T54sgsGgheP4PQkZLce7B4TL1wOYmkqwuwULMlFX68LbTdWayCf3G7reWl5eqj8FjI6OWURR7P7t' +
-    'j/uew50XYaMBQpoA88kvdKEpGqan5rDj3XqsqM3vUVXVm4IwwPhEqO3cpVHfoWP9yLFbsajAhuY1VSh15MDCEYwEo+jquYl7oRlEwjP4YOOrqK95ob20xOUnDx6MO+MKN9T43gkhJy8bz2dn4MSnjbBlpT1TG01L' +
-    'YlNLN4YTjxCdmMbJQ15NIko5iUQibZ8fv+XrvRUEny6huaES76+tZkF7v+lFPEPCvg11bP9913Uc7L8HXVbhrnZgh6einczOzl6t9f26LEPiAVXFYpp+cUE2JN6Cb3++iXc8L6NjfS0DfHXkIr67Mw5IImQlib5P' +
-    '3NdIbGY25Np52u502WFMz+Dv6BwicxpAtfs9VdjrrQEhBAN/jsF74AKstEaczYrAcAiDXzSEHwM+PGMvcuVh+OE/iEenAV1HXUUe+v2vs+BzfUN4q/MK4oKArFwrinMzERyZwGAHBSQSias1rb8viwtpmEiogIVK' +
-    'od3TvHQhWt+oYKmv/OgXjGRksqyQ1JGfJSJLlXHZt4JKiMXafCfv+joHQjAIRwEWNpeX5uIVh5UBjp0fwiRHzw2DZceZBrbU2OFfXdxOJicfOqMKGar67IKg8gL9hT7kOHQ0LsGulSUMULXlR9wW0x8DDB2ipmFg' +
-    't1t7jjwqZ40UnYq1/XAj5Nv2022AVh80k49XlWHra04GaNh1GoO8RKVRAO2Hr9e9hLVLstsLFxX4GSAcDltESeruuhH27Dx1B6qRchCZZxWT1UWk24NNL6Kp0tajKIq3qMihPzVTCsIL4p5J2Wz5su++cPavEMZi' +
-    'MrsrtKXjzUo7ttcXaTZe35/U1FaHo/A/M80fqZqk7CwIglvTTabBQswAtXKvoqpHFxbkP2PnfwFXFV5DkrUSVwAAAABJRU5ErkJgggo=' +
     '" />';
 
 var updateBadIcon = '<img src="data:image/png;base64,' +
@@ -606,14 +589,6 @@ var yeahIcon = '<img src="data:image/png;base64,' +
     'otJbjBKHkEp/Ml6yNYYzpuezWL4s5VMtT8acCMQcb5XL3eJE8VgBlR7BeMGW9Z4yT9y1CeyucuhdTGDxfftaBO7G4L+zg91UocxVmCiy51NpiP3n2treUPujL8xhOjYOzZYsQWANyRYlU4Y9Br6oHd5bDh0bCpSO' +
     'ixJiWx71YY09J5pM/WEbzFcDmHvwwBu2wnikg+lEj4mwBe5bC5h1OUqcwpdC60dxegRmR06TyjCF9G9z+qM2uCJmuMJmaNZaUrCSIi6X+jJIBBYtW5Cge7cd7sgoHDfDaAvKQGAlRZYc6ltJlMxX03UzlaRlBdQr' +
     'zSCwksLRbOpHUSb7pcsnxCCwngvM2Rm/ugUCi84fycr4l2t8Bb6iqTxSCgNIAAAAAElFTkSuQmCC' +
-    '" />';
-
-var mafiaHatIcon = '<img src="data:image/gif;base64,' +
-    'R0lGODlhGAASANU/AKysrDg4OJSUlIuLi1tbW3Jycnx9fUtMTK0nMqKiokJCQqhqcMbGxhUVFU0gJKWlpWI0OCQjI5tGTk0PFF5JSpdmamxsbGZlZYgtNJ+fn4aGhpmZmYKCgol5ewcHB7Ozsra2tlFRUJiLjGpq' +
-    'amBgYFVWVj0mJ4+QkFtTU1NUVGBiYk1HSJqjom5vb5ZbX6+vr2dnZzYHC7hLVDEwMXh1daipqWxeX28XHkdHR5h/gbYgLL+/v6Gnp5KYmJycnAAAACH5BAEAAD8ALAAAAAAYABIAAAb/wJ9w+PMYj0gjcSk0BjSP' +
-    'R+2x4ZQiDSWz2CgwHhyaRuADgD6jiGf7a4QYvgKB0OIIEi+AQNHYehoDH3IlKhoJDwIGJCVXWUR/DRkgBmIbCYkXITglIzAKWFwNBAkMDC8PlwYtJJoKIQQHKhcBHhERAiAAOyAvCScGFiQErQopBzgHIQ0RPr2S' +
-    'LzUZA6oXJAcKAQErJZowEQUAGWR5Dz6/BTAEOAEzMw4owy0zAuInIlIJG9MFFyXrMyYmhChxwEAAAQJO9HCxgAeLHtNaqCihAOAEE/5IaMDBgcMAARV0yFiQowMNGxQgTJgQw0SIYhkIBLCgysAAFwh0IECA4cbK' +
-    'VYs4UgQgUcPCnxEcWhCAYaCDCwkYMECAQAEeDgUaABBY0+bCAA2ZShBQoUIYQQUFAZyYscTDDAsINaCDcQFGAQ0ZXmhQwHVLgwCcWhQYPKJEgD5MggAAOwo=' +
     '" />';
 
 var plussignIcon = '<img src="data:image/gif;base64,' +
@@ -701,16 +676,6 @@ var healOffIcon = '<img src="data:image/png;base64,' +
     'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeLKJyQAAAAlwSFlzAAAO' +
     'wgAADsIBFShKgAAAABl0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjUuNUmK/OAAAABGSURBVBhXlY/BCgAgCEOrZer//3Czggjq0DttDOZMKShkiEE1gm3d3erVAmiRNgq2GPXCyp/NIqJRpRR5znjfZYpz5H6h' +
     'A1vyA1TohQLlAAAAAElFTkSuQmCC' +
-    '" />';
-
-var foundIcon = '<img src="data:image/png;base64,' +
-    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADC0lEQVR42o2SbUhTYRSAz3vvdjc3l7p0OXXmQsnhRzBLi/IrI1KhlFBJg0ApRCItK8u0EjQViuhHQT9TIpH8kaFUwqIgI1MpDcNMxT40m86Vus97' +
-    '39vRZmi/fOHhwOE9z3k/DoF1rvPpGQnaqYmGX6y09Grfu4GVPFlPcUnFFTlxOY+oZqefka9jIeLCfKq30zFVNTB0b43gQsOtTRh0iByRICylNNDlsPtJZTIXIcwX+6x5gFgt+d6fh0zXXrzsJ57CIs9pzMg0MrOU' +
-    'F0URqCBE2G2LAQqltxkIkbmdziRWwvZcrz7X8u8KKEjEkOUpnET4pe6iSP0FQYhlGNZMCBF4t2uSd7uH5V6KucbK0z2rBTkYNiNBSAfixu4W7K5zOuzpcoWyEwUah90Ww8nkHxiGGWm8WNa9WpCKIRbZhXQiFAWz' +
-    '2NGIm92cTDaLOQPD0mGFUvmaERl5RXFh72pBtkegRVqxWEmpsID3Peqr9u2NMujzxpmpuHnRxvlJVN+2KnQteMGazB1prhVBHobtSAjyBAVSkVJOLufCohK3pDUOPzBSQkHCMsALFFSsAs5E5pgUhDuwImAwFHsk' +
-    'UyigLMsI2+Mi9zXONO3eiJ/qKwWQ4q54bSLsCd4LJaZ6qIsuPPf/HOzHEIpIOU6i1e9Rlff87lCoZRtBpA5Qe/nDSWMNNH9sg7c/2iHRP/v9sqD8St0m/C4dy3kxWLks0wT4SIMTbM+tLpM013AXusbvgzEwGRZ5' +
-    'DpoHK0Hvw4NacnBmWXCs6HiFxfwz7nH7o9zVJ+oaefipf7o2IlpzGA6EVy59DdR1F+B49uF7qMAYUPV3EnfG7wgODAvPDNKFtd65UW8tq67lQjfr1DvjI2teLVw94XCPwLbAfBCYaBj8XokDCeDFxUBGyOWyNW9Q' +
-    'WnEpS0bEm59GRy/qDbHdyUlxC4ZoTZvpa22K2TYIPGVBQgTQeBshOehsJ+G5Q2sEaSlJvvbFxTdW69ypoZGxp0u57+ZxjmGh1OKaKJh3moNVnObLBom2iXfT2/qgSP4PU3k9tCVxAe4AAAAASUVORK5CYIIK' +
     '" />';
 
 var warningIcon = '<img src="data:image/png;base64,' +
@@ -11781,15 +11746,18 @@ function jobLoot(element) {
   }
 
   // Vegas Loot on jobs
-  var jobResults = xpathFirst('.//div[@class="job_results"]', element);
-  messages = $x('.//img', jobResults);
+  messages = $x('.//dl[@class="clearfix"]', element);
   numMessages = messages.length;
   for (i = 0; i < numMessages; i++) {
     var inner = messages[i].innerHTML;
-    var loot = messages[i].title;
-    var txtLog = '<span class="loot">'+' Found '+ loot + ' in the job.</span>';
-    lootbag.push(loot);
-    addToLog('lootbag Icon', txtLog);
+    var innerNoTags = messages[i].innerHTML.untag();
+    if (inner.match(/title/))
+    {
+      var loot = inner.substr(inner.indexOf("title")+7, inner.indexOf("src")-4);
+      var txtLog = '<span class="loot">'+' Found '+ loot + ' in the job.</span>';
+      lootbag.push(loot);
+      addToLog('lootbag Icon', txtLog);
+    }
   }
 
   var items = getSavedList('itemList');
@@ -14485,22 +14453,6 @@ function logFightResponse(rootElt, resultElt, context) {
       result += ' <span class="bad">' +
                 'LOST ' + cost + '</span>.';
       resultType = 0;
-	  /*
-      // Check for a critical hit.
-      if (innerNoTags.match(/critical hit/i)) {
-        resultType++;
-        if (innerNoTags.match(/bodyguard/i)) {
-          resultType++;
-          result += ' <span class="warn">(bodyguard critical hit)</span>';
-          if (how == STAMINA_HOW_FIGHT_RANDOM &&
-              isGMChecked('fightAvoidBodyguards')) {
-            setFightOpponentAvoid(context);
-          }
-        } else {
-          result += ' <span class="warn">(critical hit)</span>';
-        }
-      } else {
-	  */
       // Show any boost the opponent used.
       if (userBoost && userBoost.match(/[^(]+/)) {
         result += ' <span class="warn">('+RegExp.lastMatch.trim()+')</span>';
@@ -14519,8 +14471,8 @@ function logFightResponse(rootElt, resultElt, context) {
 
     // Check for any fatalities.
     if (innerNoTags.match(/body\s+count\s+to\s+(\d+)/i)) {
-      //addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
-      addToLog('info Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
+      addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
+      //addToLog('info Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
     }
     if (innerNoTags.indexOf('You were snuffed') != -1) {
       addToLog('omg Icon', 'You <span class="bad">' + 'DIED' + '</span> in the fight.');
@@ -15686,6 +15638,10 @@ function handlePopups() {
 
           // Get rid of Grow your Mafia popup
           if (popupInnerNoTags.indexOf('friend to be in your mafia and help') != -1) return(closePopup(popupElts[i], "Grow your Mafia"));
+
+          // Get rid of Daily take popup
+					// FIXME show take or do something fun with this
+					if (popupInnerNoTags.indexOf('keep the streak alive') != -1) return(closePopup(popupElts[i], "The Daily Take"));
 
           /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
