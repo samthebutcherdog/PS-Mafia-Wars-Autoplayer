@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.660
+// @version     1.1.661
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.660',
+  version: '1.1.661',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10494,15 +10494,16 @@ function customizeProfile() {
 
 // Return the job mastery level
 function getJobMastery(jobRow, newJobs) {
-//    DEBUG(' getjobmastery checking');
+  //DEBUG(' getjobmastery checking for :'+jobRow.innerHTML.untag());
   // Logic for new job layout
   if (newJobs) {
-    if (jobRow.innerHTML.match(/>(\d+)%\s+Job\s+Mastery/i))
-      { DEBUG('1) getJobMastery = '+RegExp.$1); return parseInt(RegExp.$1);  }
-    else if (jobRow.innerHTML.match(/margin-right:\s+(\d+)%/i))
-      { DEBUG('2) getJobMastery = '+RegExp.$1); return parseInt(100 - RegExp.$1); }
-    else if (jobRow.innerHTML.match(/(\d+)%/i))
-      { DEBUG('3) getJobMastery = '+RegExp.$1); return parseInt(RegExp.$1); }
+    var mastery = 0;  
+    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i))
+      { mastery = RegExp.$1; DEBUG('1) getJobMastery = '+mastery); return parseInt(mastery); }
+    else if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i))
+      { mastery = RegExp.$1; DEBUG('2) getJobMastery = '+mastery); return parseInt(100-mastery);  }
+    else if (jobRow.innerHTML.untag().match(/(\d+)%/i))
+      { mastery = RegExp.$1; DEBUG('3) getJobMastery = '+mastery); return parseInt(mastery);  }
     DEBUG('4) getJobMastery not found');
     return 100;
   }
