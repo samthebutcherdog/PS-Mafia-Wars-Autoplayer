@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.659
+// @version     1.1.660
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.659',
+  version: '1.1.660',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11729,6 +11729,7 @@ function jobCombo(element) {
 
 function jobLoot(element) {
   var i, lootbag = [];
+  var booVegasFlag = true;
 
   // See what loot was gained.
   var messages = $x('.//td[@class="message_body"]', element);
@@ -11742,18 +11743,17 @@ function jobLoot(element) {
       var txtLog = '<span class="loot">'+' Found '+ loot + ' in the job.</span>';
       lootbag.push(loot);
       addToLog('lootbag Icon', txtLog);
+      booVegasFlag = false;
     }
   }
 
   // Vegas Loot on jobs
-  messages = $x('.//dl[@class="clearfix"]', element);
-  numMessages = messages.length;
-  for (i = 0; i < numMessages; i++) {
-    var inner = messages[i].innerHTML;
-    var innerNoTags = messages[i].innerHTML.untag();
-    if (inner.match(/title/))
-    {
-      var loot = inner.substr(inner.indexOf("title")+7, inner.indexOf("src")-4);
+  if (booVegasFlag) {
+    var jobResults = xpathFirst('.//div[@class="job_results"]', element);
+    messages = $x('.//img', jobResults);
+    numMessages = messages.length;
+    for (i = 0; i < numMessages; i++) {
+      var loot = messages[i].title;
       var txtLog = '<span class="loot">'+' Found '+ loot + ' in the job.</span>';
       lootbag.push(loot);
       addToLog('lootbag Icon', txtLog);
