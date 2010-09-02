@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.664
+// @version     1.1.665
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.664',
+  version: '1.1.665',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3405,21 +3405,21 @@ function logRobResponse(rootElt, resultElt, context) {
     var cashElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
     var itemElt = xpathFirst('.//div[@class="rob_res_expanded_details_item"]',eltRob);
     var user   = linkToString(targetElt, 'user');
-    var result = 'Rob ' + user + ' ';
+    var result = 'Robbed ' + user + ' ';
 
     if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
       success = true;
       if (cashElt)
-        result += '<span class="good">Success '+ cashElt.innerHTML +'</span>';
+        result += ' with <span class="good">Success</span> gaining <span class="good">'+ cashElt.innerHTML +'</span> and';
       else
         if (itemElt)
-          result += '<span class="good">Success '+ itemElt.innerHTML +'</span>';
+          result += ' with <span class="good">Success</span> gaining <span class="good">'+ itemElt.innerHTML +'</span> and';
     }
     else
-      result += '<span class="bad">Failed</span>';
+      result += ' and <span class="bad">Failed</span> gaining';
 
     if (expElt)
-      result += ' and <span class="good">' + expElt.innerHTML + '</span>.';
+      result += ' <span class="good">' + expElt.innerHTML + '</span>.';
 
     addToLog('yeah Icon', result);
 
@@ -5756,7 +5756,7 @@ function createGeneralTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  title = ' Collect lotto bonus at: '
+  title = ' Collect Daily Chance bonus at: '
   id = 'autoLottoBonus';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
@@ -6352,14 +6352,14 @@ function createMafiaTab() {
   }
   autoGiftAcceptReward.selectedIndex = GM_getValue('autoGiftAcceptReward', 0);
 
-  // Option for opening safehouse gifts
+  // Option for opening Crime Spree gifts
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
-  title = 'Click to open safehouse gifts';
+  title = 'Click to open Crime Spree gifts';
   id = 'autoSafehouse';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically open safehouse gifts'));
+  makeElement('label', rhs, {'for':id, 'title':title}).appendChild(document.createTextNode(' Automatically open Crime Spree gifts'));
 
   // Energy pack settings?
   item = makeElement('div', list);
@@ -11985,8 +11985,8 @@ BrowserDetect.init();
         'Delay rate high: <strong>' + GM_getValue('d2') + '</strong><br>' +
         'Idle in City: <strong>' + showIfUnchecked(GM_getValue('idleInCity')) + '</strong><br>' +
         '&nbsp;&nbsp;Selected city: <strong>' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '</strong><br>' +
-        'Enable auto-lotto: <strong>' + showIfUnchecked(GM_getValue('autoLottoOpt')) + '</strong><br>' +
-        'Enable collect lotto bonus: <strong>' + showIfUnchecked(GM_getValue('autoLottoBonus'))  + ' == ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)] + '</strong><br>' +
+        'Enable auto-Daily Chance: <strong>' + showIfUnchecked(GM_getValue('autoLottoOpt')) + '</strong><br>' +
+        'Enable collect Daily Chance bonus: <strong>' + showIfUnchecked(GM_getValue('autoLottoBonus'))  + ' == ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)] + '</strong><br>' +
         'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
         'Spend all: <strong>' + showIfUnchecked(GM_getValue('burnFirst')) + ' == ' + burnModes[GM_getValue('burnOption')] + '</strong><br>' +
         'Perform featured jobs: <strong>' + showIfUnchecked(GM_getValue('featJob')) + '</strong><br>' +
@@ -12043,7 +12043,7 @@ BrowserDetect.init();
         'Auto Gift Accept: <strong>' + showIfUnchecked(GM_getValue('autoGiftAccept'))  + '</strong><br>' +
         '&nbsp;&nbsp;Gift Choice: <strong>' + GM_getValue('autoGiftAcceptChoice', 'none')   + '</strong><br>' +
         '&nbsp;&nbsp;Gift Reward: <strong>' + GM_getValue('autoGiftAcceptReward', 'none')   + '</strong><br>' +
-        'Auto Safehouse: <strong>' + showIfUnchecked(GM_getValue('autoSafehouse'))  + '</strong><br>' +
+        'Auto Crime Spree: <strong>' + showIfUnchecked(GM_getValue('autoSafehouse'))  + '</strong><br>' +
         'Auto War: <strong>' + showIfUnchecked(GM_getValue('autoWar'))  + '</strong><br>' +
         '&nbsp;&nbsp;War Mode: <strong>' + warModeChoices[GM_getValue('warMode', 0)]  + '</strong><br>' +
         '&nbsp;&nbsp;Auto War Target List: <strong>' + GM_getValue('autoWarTargetList', 0) + '</strong><br>' +
@@ -12612,7 +12612,7 @@ function autoLotto() {
     if (actionLink) {
       Autoplay.fx = function() {
         clickElement(actionLink);
-        DEBUG('Clicked to see lotto results.');
+        DEBUG('Clicked to see Daily Chance results.');
       };
       Autoplay.start();
       return true;
@@ -12655,7 +12655,7 @@ function autoLotto() {
 
       // This is the prize number
       var lottoPrize = parseInt(lottoProgress.substr(lottoProgress.indexOf(" of 6") - 1, 1));
-      DEBUG('Lotto Prize = ' + autoLottoBonusList[lottoPrize - 1]);
+      DEBUG('Daily Chance Prize = ' + autoLottoBonusList[lottoPrize - 1]);
 
       // Is the current item the correct one?
       if (lottoPrize == (GM_getValue('autoLottoBonusItem', 0) + 1)) {
@@ -12664,28 +12664,29 @@ function autoLotto() {
         if (bonusClaim) {
           Autoplay.fx = function() {
             clickElement(bonusClaim);
-            addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: Claimed bonus: ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)]);
-            DEBUG('Claimed lotto bonus item: ' + lottoPrize);
+            addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Daily Chance</span>: Claimed bonus: ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)]);
+            DEBUG('Claimed Daily Chance bonus item: ' + lottoPrize);
           };
           Autoplay.start();
           return true;
         }
         // Safety net. If we get here, then the page layout has changed and the buttons cannot be found
-        DEBUG('Cannot click the lotto bonus button.');
+        DEBUG('Cannot click the Daily Chance bonus button.');
         Autoplay.fx = goHome;
         Autoplay.start();
         return false;
       } else {
-        DEBUG('Lotto bonus not matched.');
+        DEBUG('Daily Chance bonus not matched.');
       }
     }
   }
 
   var randomTicket = xpathFirst('.//div[@class="sexy_button" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
+  if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and @onclick="autoSelect(1);"]', innerPageElt);
   if (randomTicket) {
     clickElement(randomTicket);
     var submitTicket = xpathFirst('.//input[@class="sexy_lotto" and @type="submit" and contains(@value,"Submit Ticket")]', innerPageElt);
-
+    if (!submitTicket) submitTicket = xpathFirst('.//button[@class="sexy_button_new short_white" and @type="submit" and @name="do"]', innerPageElt);
     if (submitTicket) {
       var ticket = ' ';
       for (i = 1; i < 6; i++) {
@@ -12698,7 +12699,7 @@ function autoLotto() {
 
       Autoplay.fx = goHome;
       clickElement(submitTicket);
-      addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: Played ticket' + ticket + '.');
+      addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Daily Chance</span>: Played ticket' + ticket + '.');
     }
     Autoplay.start();
     return true;
@@ -12712,9 +12713,9 @@ function autoLotto() {
       var noticketsEntered = xpath('.//center//div', innerPageElt);
       if ((noticketsEntered) && (noticketsEntered.snapshotLength>0) &&
          (noticketsEntered.snapshotItem(1).parentNode.innerHTML.indexOf("You didn't enter any tickets")!=-1))
-        addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto</span>: No tickets entered for the last drawing.');
+        addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Daily Chance</span>: No tickets entered for the last drawing.');
       else
-        addToLog('warning Icon', 'BUG DETECTED: Can\'t find lotto results.');
+        addToLog('warning Icon', 'BUG DETECTED: Can\'t find Daily Chance results.');
       return false;
     }
     var winningtickets = [0, 0, 0, 0, 0, 0];
@@ -12727,7 +12728,7 @@ function autoLotto() {
       }
       winningtickets[count] = winningtickets[count] + 1;
     }
-    var lottoLog = '<span style="font-weight:bold;color:rgb(255,217,39);">Lotto winners</span>: ';
+    var lottoLog = '<span style="font-weight:bold;color:rgb(255,217,39);">Daily Chance winners</span>: ';
     var atleastOneWinner = false;
     for (j = 1; j < 6; j++)
       if (winningtickets[j]>0) {
@@ -13208,21 +13209,21 @@ function autoSafehouse() {
   var eltSafehouseGift = xpathFirst('.//div[@class="gift_safehouse_gift_display"]', innerPageElt);
   //DEBUG('eltSafehouseGift = ' + eltSafehouseGift);
   if (!eltSafehouseGift) {
-    addToLog('info Icon','Safehouse: No gifts available');
+    addToLog('info Icon','Crime Spree: No gifts available');
     setGMTime('autoSafehouseTimer', "00:10:00");
     return false;
   }
   var cntSafehouseGiftReady = eltSafehouseGift.innerHTML.indexOf('door_open');
   if (cntSafehouseGiftReady < 0) {
     // No gift ready to be open
-    addToLog('info Icon','Safehouse: No gifts available');
+    addToLog('info Icon','Crime Spree: No gifts available');
     setGMTime('autoSafehouseTimer', "00:10:00");
     return false;
   }
 
   // Really, this about all that has to be done, the rest is cosmetic
   // This URL doesn't seem to change at this time since the refresh causes all the gifts to shift
-  addToLog('info Icon','Safehouse: Grabbing a gift!');
+  addToLog('info Icon','Crime Spree: Grabbing a gift!');
   document.location = "http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=safehouse&xw_action=open_gift_free&xw_city=1&box_num=0";
 
   // This might never be needed, but let's just do it anyway
@@ -13401,12 +13402,12 @@ function onHome() {
 }
 
 function onSafehouseNav() {
-  // Return true if we're on the safehouse nav, false otherwise.
+  // Return true if we're on the Crime Spree nav, false otherwise.
   if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', appLayoutElt)) {
-    //DEBUG('Safehouse: On safehouse page');
+    //DEBUG('Crime Spree: On Crime Spree page');
     return true;
   }
-  //DEBUG('Safehouse: NOT on safehouse page');
+  //DEBUG('Crime Spree: NOT on Crime Spree page');
   return false;
 }
 
@@ -13520,10 +13521,10 @@ function goHome() {
 function goSafehouseNav() {
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page","remote/html_server.php?xw_controller=safehouse&xw_action=view", 1, 1, 0, 0); return false;'});
   if (!elt) {
-    addToLog('warning Icon', 'Can\'t make Safehouse nav link to click.');
+    addToLog('warning Icon', 'Can\'t make Crime Spree nav link to click.');
   } else {
     clickElement(elt);
-    DEBUG('Clicked to load Safehouse nav.');
+    DEBUG('Clicked to load Crime Spree nav.');
   }
   return;
 }
@@ -15628,8 +15629,8 @@ function handlePopups() {
           // Get rid of buyframe popup (You are almost out of reward points)
           if (popupInner.indexOf('xw_action=buyframe_popup') != -1) return(closePopup(popupElts[i], "Buy Reward Points"));
 
-          // Get rid of Safehouse Congratulations popup
-          if (popupInnerNoTags.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i], "Safehouse Congratulations"));
+          // Get rid of Crime Spree Congratulations popup
+          if (popupInnerNoTags.indexOf('safehouse_congrats') != -1) return(closePopup(popupElts[i], "Crime Spree Congratulations"));
 
           // Get rid of Treasure Chest popup
           if (popupInnerNoTags.indexOf('Treasure Chest') != -1) return(closePopup(popupElts[i], "Treasure Chest"));
@@ -15659,7 +15660,10 @@ function handlePopups() {
 					// FIXME show take or do something fun with this
 					if (popupInnerNoTags.indexOf('keep the streak alive') != -1) return(closePopup(popupElts[i], "The Daily Take"));
 
-          /* THESE POPUPS get processed only when PS MWAP is running: */
+          // Get rid of Proceed to Vegas Level 6 popup
+          if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
+
+          /* THESE POPUPS get processed only when PS MWAP is running: */          
           if (running) {
 
             /* Disable Chop Shop/Weapon Depot popup detection for timers
@@ -15702,18 +15706,18 @@ function handlePopups() {
               return true;
             }
 
-            // Process Safehouse popup
+            // Process Crime Spree popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
             if (eltPubButton) {
               if (popupInnerNoTags.match(/and you got (.+?)/)) {
-                DEBUG('Popup Process: Safehouse Loot Processed');
-                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ RegExp.$1 + ' from the safehouse.</span>');
+                DEBUG('Popup Process: Crime Spree Loot Processed');
+                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ RegExp.$1 + ' from the Crime Spree.</span>');
               }
               if (isGMChecked('autoSafehousePublish')) {
                 clickElement(eltPubButton);
                 return true;
               } else {
-                return(closePopup(popupElts[i], "Safehouse Gifts"));
+                return(closePopup(popupElts[i], "Crime Spree Gifts"));
               }
             }
 
@@ -15788,26 +15792,29 @@ function handlePopups() {
             // Process Robbery Loot popup
             if (popupInnerNoTags.indexOf('You cleared the full board') != -1) {
               // Look for any loot on popup
-              addToLog('warning Icon', 'Popup Process: Processing robbing board');
+              DEBUG('Popup Process: Processing robbing board');
               if (popupInner.match(/You\s+(earned|gained|received|collected)\s+(some|an?)\s+bonus\s+(.+?)<\/div>/i)) {
                 addToLog('lootbag Icon', '<span class="loot">'+' Found '+ RegExp.$3 + ' on robbing board.</span>');
               }
               if (popupInnerNoTags.match(/(\d+) Bonus Experience/i)) {
                 //var exp = m[1].replace(/[^0-9]/g, '');
-                var exp = RegExp.$1.replace(/[^0-9]/g, '');
-                addToLog('yeah Icon', 'Robbing board cleared. <span class="good">Bonus: ' + exp + ' Experience</span>');
+                var exp = RegExp.$1.replace(/[^0-9]/g, '');                
+                var boardrecord ="";
+                if (popupInner.match(/Your record on this board was\s+(.+?)\./i)) boardrecord = ' Record: <span class="good">' + RegExp.$1+'</span>';
+                
+                addToLog('yeah Icon', 'Robbing board cleared. Bonus: <span class="good">' + exp + ' Experience</span>.'+ boardrecord);
                 updateRobStatistics(null,parseInt(exp));
                 updateLogStats();
               }
               return(closePopup(popupElts[i], "Robbing Board Popup"));
             }
-  /*
+  
             // Process Level Up popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
             if (eltPubButton) {
               if (popupInnerNoTags.match(/promoted to Level (.+?) C/)) {
                 DEBUG('Popup Process: Level Up Processed');
-                addToLog('lootbag Icon', '<span class="loot">'+' You were promoted to level '+ RegExp.$1);
+                addToLog('info Icon', '<span class="loot">'+' You were promoted to level '+ RegExp.$1);
               }
               if (isGMChecked('autoLevelPublish')) {
                 clickElement(eltPubButton);
@@ -15815,7 +15822,7 @@ function handlePopups() {
               } else {
                 return(closePopup(popupElts[i], "Level Up"));
               }
-            } */
+            } 
 
             // Process Loyalty popup
             if (isGMChecked('autoGiftAccept') && popupInnerNoTags.indexOf('Show Your Loyalty') != -1) {
