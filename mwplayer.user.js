@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.663
+// @version     1.1.664
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.663',
+  version: '1.1.664',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -434,6 +434,12 @@ var attackIcon = '<img src="data:image/gif;base64,' +
     '48HkEwl6xo4UIUCUbEJLaMbhjEASTBrd+qUGgQGLQs8UIB6hb9Co+CsPOx9CCzEBDRmJCg8FPEcoJzU1BAQ1ERo7Gi4yExc8BgYMEQk3Dg4bSisJEAkADlFCDDkfF66wFgl5PzqoQkEAOwo=' +
     '" />';
 
+var defenseIcon = '<img src="data:image/gif;base64,' +
+    'R0lGODlhDQANANU/AFFzrH2m60V0ukhrpazH/CQ0TYuv8U19yVeK3Cc7Wl+Q4F2O3S1MfFCAzBgdJRsjMjtinj9loVp4r22a52aFvzlPdIGYwk2AzneUzVN/x2iDt8ja/ZS29mOAtT9dj9Pi/jFShI6hxHef6G2N' +
+    'x0VdiDlLaePs/rrR/SxEaaWwxYCh4lWH1198slqJ1mN5oqLA93uSv05ihUJkm0JusF+IyzRdm22b6DdfnGWV5HSg7YKq9Hul8Iiv+K/J/M3e/v///yH5BAEAAD8ALAAAAAANAA0AAAZ4wJTp4ysaiwRMaHPqOZ9O' +
+    'lcZC4PCu2OuoA3txdOAwmMJycQy7tHonkkhiBkNuTs/hAKRSIDCx+f0TNAAVDjiGh4YKAAMFPx4tCwqSCgsZAzI/Pw8HDSsInw0REQmZPygzAgcXAhAQDKWZCTezswwOsJkPDDUgjaVBADsK' +
+    '" />';
+		
 var closeButtonIcon = '<img src="data:image/png;base64,' +
     'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0Jb' +
     'BiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FF' +
@@ -15645,6 +15651,9 @@ function handlePopups() {
 
           // Get rid of Grow your Mafia popup
           if (popupInnerNoTags.indexOf('friend to be in your mafia and help') != -1) return(closePopup(popupElts[i], "Grow your Mafia"));
+
+          // Get rid of Slot Machine Teaser popup
+          if (popupInnerNoTags.indexOf('New Loot!') != -1) return(closePopup(popupElts[i], "Slot Machine Flushed"));
 
           // Get rid of Daily take popup
 					// FIXME show take or do something fun with this
