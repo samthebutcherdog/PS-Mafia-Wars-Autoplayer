@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.665
+// @version     1.1.666
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.665',
+  version: '1.1.666',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -708,7 +708,8 @@ var hideIcon = '<img src="data:image/gif;base64,' +
     'Gx8zyUULAC9JSFMrAAtTQkEAOw==' +
     '" />';
 
-var bgTabImage =  '<img src="http://playerscripts.com/images/mwap_graphics/generaltabimage.png" />';
+//var bgTabImage =  '<img src="http://playerscripts.com/images/mwap_graphics/generaltabimage.png" />';
+var bgTabImage =  '<img src="http://users.telenet.be/donnaB/mwap.png" />';
 
 var checkedIcon = '<img src="data:image/gif;base64,' +
     'R0lGODlhEAAQAOYAAAAAAP///1pdWVlcWF5hXV1gXFteWi0xKz5CPCcpJmNnYVPwAFLuAFHsAFHqAFDoAE/mAE/kAE7iAEvYAEnUAEXIAETGAETEAEPCAELAAEG8AD+2AD60AD2yAD2wADusADuqADiiADOUAC+I' +
@@ -5401,7 +5402,8 @@ function showPassiveStats() {
 function createLogBox() {
   var title;
 
-  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 10px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
+  //var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 10px; top: 10px; bottom: 10px; width: 450px; background: black url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
+  var mafiaLogBox = makeElement('div', document.body, {'id':'mafiaLogBox', 'style':'position: fixed; right: 10px; top: 10px; bottom: 10px; width: 450px; background: #800000 url(http://mwdirectfb3.static.zynga.com/mwfb/graphics/MW_FB_Background_760.gif); text-align: left; padding: 5px; border: 1px solid; border-color: #FFFFFF; z-index: 98; font-size: 12px;'});
 
   var logClrButton = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'style':'position: absolute; left: 5px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     logClrButton.appendChild(document.createTextNode('clear log'));
@@ -5430,7 +5432,8 @@ function createLogBox() {
     mwapElt.appendChild(document.createTextNode(running ? 'pause' : 'resume'));
     mwapElt.addEventListener('click', mwapOnOff, false);
 
-  var logBox = makeElement('div', mafiaLogBox, {'id':'logBox', 'style':'position: absolute; overflow: auto; right: 0px; top: 20px; bottom: 75px; width: 448px; background-color: #111111; font-size:11px; color: #BCD2EA; text-align: left; padding: 5px; border: 1px solid;'});
+  //var logBox = makeElement('div', mafiaLogBox, {'id':'logBox', 'style':'position: absolute; overflow: auto; right: 0px; top: 20px; bottom: 75px; width: 448px; background-color: #111111; font-size:11px; color: #BCD2EA; text-align: left; padding: 5px; border: 1px solid;'});
+  var logBox = makeElement('div', mafiaLogBox, {'id':'logBox', 'style':'position: absolute; overflow: auto; right: 0px; top: 20px; bottom: 75px; width: 448px; background-color: #800000; font-size:11px; color: #BCD2EA; text-align: left; padding: 5px; border: 1px solid;'});
     logBox.innerHTML = GM_getValue('itemLog', '');
 
   // stat tabs....
@@ -5551,7 +5554,8 @@ function createSettingsBox() {
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 540px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 600px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  //var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 600px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 600px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #000; background: #800000', 'id':'settingsBox'});
   //End settings box
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
@@ -9395,7 +9399,7 @@ function refreshMWAPCSS() {
                  '#statsWindow .sexy_button button{background:transparent;border:medium none #FFF;color:#FFD927;cursor:pointer;font-size:14px;font-weight:700;margin:0}' +
                  '#statsWindow .sexy_button button:hover{color:#BCD2EA;font-weight:700;text-decoration:none}' +
                  '#statsWindow .tabcontent{display:none;}' +
-                 '#statsWindow label {font-weight: normal; color: #BCD2EA}' +
+                 '#statsWindow label {font-weight: normal; color: #000}' +
                  // ********************** Settings Tab CSS **********************
                  '#settingsBox #tabNav div{border-right:1px solid #000;float:left;padding:0 7px;position:static;text-align:center}' +
                  '#settingsBox #tabNav div.selected{background : #666666;}' +
@@ -9406,7 +9410,7 @@ function refreshMWAPCSS() {
                  '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
                  '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
                  '#settingsBox select,#settingsBox input{border:1px solid;} #settingsBox textarea{border:2px solid;}' +
-                 '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
+                 '#settingsBox label {font-weight: normal; color: #000}' +
                  '#settingsBox img,#settingsBox label,#settingsBox span,#settingsBox input,#settingsBox select {vertical-align: middle;}' +
                  '#settingsBox img,#settingsBox span,#settingsBox label {position: static;}' +
                  '#settingsBox #generalTab div, #mafiaTab div, #displayTab div, #energyTab div, #healTab div {position: static;}' +
