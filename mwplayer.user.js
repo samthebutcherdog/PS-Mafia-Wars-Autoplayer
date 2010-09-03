@@ -39,18 +39,18 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.667
+// @version     1.1.668
 // ==/UserScript==
 
 // search for new_header   for changes
 //
-// TestChanges    <- new questionable changes can have the option to disable using this ( check box on bottom of display tab)
+// TestChanges    <- new questionable changes can have the option to disable using this (check box on bottom of display tab)
 // if (TestChanges){ code };
 // else { original code };    <- optional
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.667',
+  version: '1.1.668',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1643,11 +1643,11 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Mansion Details','Break Into An Architect\'s Office',MOSCOW],
     ['Mansion Details','Threaten A Mafiya Moneyman\'s Family',MOSCOW],
     ['Satellite Phone','Hijack A Boat Load Of Electronics',BANGKOK],
-    ['Car Key Copy','Secure Some Wheels',LV],
-    ['Hot Tip','Clean Up At A Rigged Table',LV],
-    ['Alarm Code','Do Some Late Night Shopping',LV],
-    ['Hotel Security Key Card','Hack The Casino Security System',LV],
-    ['Unwanted Evidence','Dispose Of The Evidence',LV]
+    ['Car Key Copy','Blackmail A Car Dealer',LV],
+    ['Hot Tip','Help A Bookie Out Of A Jam ',LV],
+    ['Alarm Code','Buy Some Black-Market Info',LV],
+    ['Hotel Security Key Card','Swipe A Security Keycard',LV],
+    ['Unwanted Evidence','Create A Diversion',LV]
   );
 
   // Sort requirement jobs by level requirement, ascending
@@ -2860,7 +2860,10 @@ function autoMission() {
         popJob();
         autoMission();
       }
-    }
+    } 
+    else {
+      DEBUG('Job Performed ... going to process results ...');
+    }    
   };
 
 //  DEBUG('Going to the correct city');
@@ -2871,7 +2874,7 @@ function autoMission() {
     return;
   }
 
-//  DEBUG('Going to the correct job tab');
+  //DEBUG('Going to the correct job tab');
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
     Autoplay.fx = function() { doJobFunction(goJobTab(tabno)); };
@@ -2879,7 +2882,7 @@ function autoMission() {
     return;
   }
 
-//newlv if LV Go to the correct job tabnopath.
+  //newlv if LV Go to the correct job tabnopath.
   if(city == LV){
     if (!onJobTabpath(tabnopath)) {
       DEBUG (' - wrong tab path, changing -'); //newlv
@@ -2887,7 +2890,7 @@ function autoMission() {
     }
   }
 
-//    DEBUG('- - Going to buy necessary items first for jobname' + jobName );
+  // DEBUG('- - Going to buy necessary items first for jobname' + jobName );
   // Buy requirements first, if any
   if (getJobRowItems(jobName)) {
 
@@ -8509,13 +8512,10 @@ function handleModificationTimer() {
     }
   }
   // Added handling for Las Vegas job page changes
-  //var jobResults = $x('./div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
-   var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
+  var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
   if (jobResults && jobResults.length > 0) {
-//    DEBUG(jobResults.length +' Jobresults for Vegas Found');
 
     for (var i = 0, iLength=jobResults.length; i < iLength; ++i) {
-//      DEBUG('Jobresult '+i+' - ' +jobResults[i].innerHTML);
       if (jobResults[i] && !xpathFirst('./div[@id="job_flag"]', jobResults[i])) {
         setListenContent(false);
         makeElement('div', jobResults[i], {'id':'job_flag', 'style':'display: none;'});
@@ -8523,10 +8523,8 @@ function handleModificationTimer() {
         DEBUG('Detected Las Vegas job_results change on job ='+i);
         pageChanged = true;
         if (running) justPlay = true;
-//      DEBUG(jobResults[i]+ 'Flagged');
         DEBUG( 'Flagged');
       } else {
-//     DEBUG(jobResults[i]+ 'Already Flagged');
        DEBUG('Already Flagged');
       }
     }
@@ -8994,8 +8992,7 @@ function innerPageChanged(justPlay) {
 
   getPlayerEquip();
   // Customize the display.
-  if (!justPlay) {
-    DEBUG('Customizing job page if necessary');
+  if (!justPlay) {    
     setListenContent(false);
     customizeMasthead();
     customizeLayout();
@@ -9011,28 +9008,28 @@ function innerPageChanged(justPlay) {
       customizeFight();
     }
     setListenContent(true);
-  }
-  DEBUG('Customizing job page FINISHED');
+  }  
   try {
     // If a click action was taken, check the response.
     if (clickAction) {
       var action = clickAction;
-      var context = clickContext;
-      DEBUG('MWAP clicked something : '+action);
+      var context = clickContext;      
       clickAction = undefined;
       clickContext = undefined;
-      if(action && context) DEBUG('action : '+action+' - context : '+context.innerHTML);
-      //DEBUG('Getting the logresponse');
+      if(action && context) DEBUG('action : '+action+' - context : '+context.innerHTML);      
       if (!logResponse(innerPageElt, action, context)) {
+        DEBUG('We could not get a response, so kick off auto-play');
         // No further action was taken. Kick off auto-play.
         doAutoPlay();
       }
     } else {
       // Kick off auto-play.
+      DEBUG('No action was taken, so kick off auto-play');
       doAutoPlay();
     }
   } catch (ex) {
     addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
+    DEBUG('BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
     autoReload(true);
   }
 }
@@ -10500,18 +10497,12 @@ function customizeProfile() {
 
 // Return the job mastery level
 function getJobMastery(jobRow, newJobs) {
-  //DEBUG(' getjobmastery checking for :'+jobRow.innerHTML.untag());
   // Logic for new job layout
   if (newJobs) {
-    var mastery = 0;  
-    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i))
-      { mastery = RegExp.$1; DEBUG('1) getJobMastery = '+mastery); return parseInt(mastery); }
-    else if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i))
-      { mastery = RegExp.$1; DEBUG('2) getJobMastery = '+mastery); return parseInt(100-mastery);  }
-    else if (jobRow.innerHTML.untag().match(/(\d+)%/i))
-      { mastery = RegExp.$1; DEBUG('3) getJobMastery = '+mastery); return parseInt(mastery);  }
-    DEBUG('4) getJobMastery not found');
-    return 100;
+    var mastery = 100;  
+    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i)) { mastery = parseInt(RegExp.$1); }
+    else { if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i)) mastery = 100-parseInt(RegExp.$1) }      
+    return mastery;
   }
 
   // Locked jobs are mastered too
@@ -10531,7 +10522,6 @@ function getJobMastery(jobRow, newJobs) {
     }
     return parseInt(masteryPct);
   }
-
   DEBUG('No mastery items found. Assuming 0% mastery level.');
   return 0;
 }
@@ -10573,15 +10563,11 @@ function jobMastery(element, newJobs) {
   for (var i = 0, iLength = missions.length; i < iLength; i++) {
     // Only get the jobs from this city tier
     if (city == missions[i][MISSION_CITY] && tabno == missions[i][MISSION_TAB]) {
-//      DEBUG('Getting the jobrow for '+missions[i][MISSION_NAME]);
       var thisJobRow = getJobRow(missions[i][MISSION_NAME]);
-//      DEBUG('Got Jobrow for '+missions[i][MISSION_NAME]);
-
       if (thisJobRow) {
         var masteryLevel = getJobMastery(thisJobRow, newJobs);
         tierPercent += masteryLevel;
         jobCount++;
-
         // Get the first unmastered job on this tier
         if (!firstFound && masteryLevel < 100) {
           firstFound = true;
@@ -10610,11 +10596,10 @@ function jobMastery(element, newJobs) {
         addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
       else
         addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');
-  //    DEBUG('Checking job tier mastery.');
+      // DEBUG('Checking job tier mastery.');
       if (tierPercent == 100) {
         // Find the first job of the next tier.
-        // NOTE: This assumes that the missions array is sorted by city and
-        //       then by tier.
+        // NOTE: This assumes that the missions array is sorted by city and then by tier.
         var nextTierJob;
         for (i = selectMission + 1, iLength=missions.length; i < iLength; ++i) {
           if (missions[i][MISSION_CITY] != cityno) {
@@ -10652,16 +10637,14 @@ function jobMastery(element, newJobs) {
   }
 }
 
-function customizeVegasJobs() {
-    DEBUG(' in customizeVegasJobs');
-
+function customizeVegasJobs() {    
   // Handle Las Vegas job layout
   var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info")]', innerPageElt);
 
   if (!vegasJobs || vegasJobs.length == 0) return false;
   DEBUG('Found ' + vegasJobs.length + ' new vegas jobs in customizevegasjobs.');
 
-// 6 is tab path newlv
+//  6 is tab path newlv
 //  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
 //  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
   var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
@@ -10709,30 +10692,48 @@ function customizeVegasJobs() {
     }
 
     jobsFound++;
-//    DEBUG ('    just before getjobmastery in vegas ');
     var jobPercentage = getJobMastery(currentJob, true);
     DEBUG(jobName + ', Calculated Vegas Mastery level: ' + jobPercentage);  //getJobMastery
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
-//        DEBUG(' multiple jobs checked ');
       // Ignore mastered jobs
       if (jobPercentage == 100) {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)  masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
       }
+      
+      //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
+      var skipCurrentJob = false;
+      stamElt = xpathFirst('.//dd[@class="stamina"]', currentJob);  
+      if(stamElt) {
+        reqStam = parseInt(stamElt.innerHTML.untag());        
+        if(reqStam > stamina) {
+          skipCurrentJob = true;
+          DEBUG('Required Stamina: ' +reqStam+' - Current Stamina: '+stamina+'. Skipping');
+        }  
+      }  
+      
+      nrgElt = xpathFirst('.//dd[@class="energy"]', currentJob);
+      if(!nrgElt) nrgElt = xpathFirst('.//td[@class="job_energy"]', currentJob);
+      if(nrgElt) {
+        reqNrg = parseInt(nrgElt.innerHTML.untag());        
+        if(reqNrg > energy) {
+          skipCurrentJob = true;
+          DEBUG('Required Energy: ' +reqNrg+' - Current Energy: '+energy+'. Skipping');
+        }  
+      }
+      
       // Skip locked jobs and optional fight jobs
-        if(isJobLocked(currentJob)
+        if(isJobLocked(currentJob) || skipCurrentJob
         || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) )
            {
-             DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - FIGHT - in Vegas. Skipping.');
+             DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - skip FIGHT in Vegas - or - lack of /energy/stam - Skipping.');
            } else {
              availableJobs[city][currentTab].push(jobMatch);
            }
-        }  //else DEBUG(' multiple jobs NOT checked ');
-
-// lv stamina check may go here
-
+        }
+    
     // Skip this for jobs without jobCost
     if (!jobCost) continue;
 
@@ -10812,18 +10813,18 @@ function customizeVegasJobs() {
   if (worstRatio != bestRatio) {
     while (bestJobs.length) {
       elt = bestJobs.pop();
-      makeElement('br', elt);
+      //makeElement('br', elt);
       elt = makeElement('span', elt, {'style':'color:#52E259; font-size: 10px'});
-      makeElement('img', elt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
-      elt.appendChild(document.createTextNode(' BEST'));
+      //makeElement('img', elt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      elt.appendChild(document.createTextNode(' (BEST)'));
     }
     while (worstJobs.length) {
       elt = worstJobs.pop();
-      makeElement('br', elt);
+      //makeElement('br', elt);
       elt = makeElement('span', elt, {'style':'color:#EC2D2D; font-size: 10px'});
-      makeElement('img', elt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
-      elt.appendChild(document.createTextNode(' WORST'));
-    }
+      //makeElement('img', elt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
+      elt.appendChild(document.createTextNode(' (WORST)'));
+    }    
   }
 
   // Show the experience to energy ratio needed to level up.
@@ -10843,15 +10844,12 @@ function customizeVegasJobs() {
 
   // Set the job progress
   jobMastery(innerPageElt, true);
-  tierMastery(jobsFound, masteredJobsCount, currentTab);
-      DEBUG(' end of customizeVegasJobs');
+  tierMastery(jobsFound, masteredJobsCount, currentTab);      
 
   return true;
 }
 
 function customizeNewJobs() {
-DEBUG(' in customizeNewJobs');
-
   // Handle new job layout
   var newJobs = $x('.//div[@id="new_user_jobs"]//div[contains(@class, "job clearfix")]', innerPageElt);
 
@@ -11013,7 +11011,6 @@ DEBUG(' in customizeNewJobs');
   // Set the job progress
   jobMastery(innerPageElt, true);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
-  DEBUG(' end of customizeNewJobs');
 
   return true;
 }
@@ -11038,7 +11035,6 @@ function requiresBizItem (jobRow) {
 }
 
 function customizeJobs() {
-DEBUG(' in customizeJobs');
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
 
@@ -11204,7 +11200,6 @@ DEBUG(' in customizeJobs');
   jobMastery(innerPageElt, false);
   DEBUG('Jobs found: ' + jobsFound + ', Mastered jobs: ' + masteredJobsCount);
   tierMastery(jobsFound, masteredJobsCount, currentTab);
-DEBUG(' end of customizeJobs');
 
   return true;
 }
@@ -11502,9 +11497,9 @@ function clickWarListRemove() {
 }
 
 function getJobRow(jobName, contextNode) {
+  DEBUG('Getting the JobRow element for job:'+jobName);
   var rowElt, conTxt = '',LVjob=0;
-  try {
-//    DEBUG('getJobRow for : '+jobName);
+  try {  
     // Retrieve by job number first
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (!isNaN(jobMatch)) {
@@ -11513,20 +11508,17 @@ function getJobRow(jobName, contextNode) {
       //Fetching logic for Vegas jobs
       if (!rowElt && (city==LV)) {
         var jobContainer = "job"+jobno;
-      rowElt = xpathFirst('.//div[@id="'+jobContainer+'"]', contextNode);
+        rowElt = xpathFirst('.//div[@id="'+jobContainer+'"]', contextNode);
         LVjob = 1;
-//       if(rowElt)  DEBUG('got getJobRow - - - LV method for jobno: '+jobno+' = '+jobContainer);
-
       }
     }
 
     // cheat way to buy needed stuff and not wait for a reply   works as is
- var elt = xpathFirst('.//a[contains(@onclick, "MapController.buyItems('+jobno+'); return false;")]') ;
- if(elt) {
-   DEBUG('cheating on buying for now found  a link to click - - jobno=' + jobno );
-   clickElement(elt);
-}
-
+    var elt = xpathFirst('.//a[contains(@onclick, "MapController.buyItems('+jobno+'); return false;")]') ;
+    if(elt) {
+      DEBUG('Cheating on buying for now found a link to click - - jobno=' + jobno );
+      clickElement(elt);
+    }
 
     // If no rows found, retrieve by name
     if (!rowElt) {
@@ -11551,6 +11543,7 @@ function getJobRow(jobName, contextNode) {
 
   } catch(ex) {
     addToLog('warning Icon', 'BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + jobName + ']');
+    DEBUG('BUG DETECTED (getJobRow): [exception: ' + ex + '], [conTxt: ' + conTxt + '], [jobName: ' + jobName + ']');
   }
   if (!rowElt) return false;
   return rowElt;
@@ -11558,8 +11551,8 @@ function getJobRow(jobName, contextNode) {
 
 function getJobRowItems(jobName) {
   var currentJob = jobName;
-  var currentJobRow = getJobRow(currentJob, innerPageElt);
-  if (!currentJobRow) return false;
+  var currentJobRow = getJobRow(currentJob, innerPageElt);  
+  if (!currentJobRow) return false;  
   var inner = innerPageElt? innerPageElt.innerHTML : '';
   var innerNoTags = inner.untag();
 
@@ -11609,13 +11602,16 @@ function getJobRowItems(jobName) {
   */
 
   // Logic to switch to the required job first
+  DEBUG('getJobRowItems(jobName) - Looking for Required Items for: ' +currentJob);
+  
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
-
+  //if(!necessaryItems) necessaryItems = $x('.//div[@class="needed_gate_loot"]//img', currentJobRow);
+    
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
   if (necessaryItems.length > 0) {
-    // Save the current job for later. The current job should not already
-    // exist in the list, so check first.
+    DEBUG('Some Items Required for this job');
+    // Save the current job for later. The current job should not already exist in the list, so check first.
     var items = getSavedList('itemList');
     var jobs = getSavedList('jobsToDo', '');
     if (jobs.indexOf(currentJob) == -1) {
@@ -11655,7 +11651,78 @@ function getJobRowItems(jobName) {
       popJob();
       return true;
     }
+  } else {
+    necessaryItems = xpathFirst('.//span[@class="missing_req_items"]', currentJobRow);
+    itmSearch='';
+    if(necessaryItems){
+      DEBUG('Needed Item Txt Elt: '+necessaryItems.innerHTML);
+      itmSearch = necessaryItems.innerHTML;
+      //itmSearch = "Car Cop Key Chain (x1)";
+      itmSearch = itmSearch.replace("(×1)", "");
+      DEBUG('Needed Item: '+itmSearch);
+    } else {
+      necessaryItems = xpathFirst('.//div[@class="needed_gate_loot"]', currentJobRow);
+      if(necessaryItems){        
+        DEBUG('Needed Item Img Elt: '+necessaryItems.innerHTML); 
+        //strItems = xpathFirst('.//img', necessaryItems);
+        //item = strItems.title;
+        
+        messages = $x('.//img', necessaryItems);
+        numMessages = messages.length;
+        for (i = 0; i < numMessages; i++) {
+          var item = messages[i].title;
+          if (itmSearch == '') {
+            itmSearch = item;
+          } else {
+            itmSearch = itmSearch + ', ' + item;
+          }          
+        }
+        if (numMessages > 0) {          
+          DEBUG('Needed Item(s): '+itmSearch);
+        }  
+      }
+    }
+        
+    if(itmSearch!=''){
+      DEBUG('Single Item Required for this job');
+      // Save the current job for later. The current job should not already exist in the list, so check first.
+      var items = getSavedList('itemList');
+      var jobs = getSavedList('jobsToDo', '');
+      DEBUG('Current Job List: '+jobs);
+      if (jobs.indexOf(currentJob) == -1) {
+        jobs.push(currentJob);
+        DEBUG('Saving ' + currentJob + ' for later. Need to fetch pre-req items first.');
+        setSavedList('jobsToDo', jobs);
+      } else {
+       DEBUG(currentJob + ' already saved for later. Need to fetch pre-req items first.');
+      } 
+
+      var itemFound = false;
+      // Try fetching the items from the job requirement array
+      requirementJob.forEach(
+        function(j){
+          if (level >= cities[j[2]][CITY_LEVEL] && j[0] == itmSearch) {
+            jobs.push(j[1]);
+            items.push(itmSearch);
+            itemFound = true;
+            jobFound = j[1];
+          }
+        }
+      );
+
+      // Set the flag if at least one item is found
+      if (!itemFound) DEBUG(itmSearch + ' not found in the requirement job array.');
+      else { 
+        DEBUG(itmSearch + ' was found in the requirement job array for: '+jobFound);
+        setSavedList('itemList', items.unique());
+        setSavedList('jobsToDo', jobs);
+        popJob();
+        return true;
+      }  
+    }    
   }
+  
+  
   /*
   // Withdraw money
   var amtElt = xpathFirst('.//td[contains(@class,"job_energy")]//span[@class="money" or @class="bad"]', currentJobRow);
@@ -13761,21 +13828,18 @@ function getJobClicks() {
   return parseInt(numClicks);
 }
 
-function goJob(jobno) {
-
-  DEBUG('Clicking parameter jobno :'+jobno);
+function goJob(jobno) {  
   // Retrieve the jobRow
   var jobName = missions[GM_getValue('selectMission')][MISSION_NAME];
   var jobNo = missions[GM_getValue('selectMission')][MISSION_NUMBER];
   DEBUG('Clicking jobNo/jobName : '+jobNo+ ' / '+jobName);
-  var jobRow = getJobRow(jobName, innerPageElt);
-  //DEBUG(jobRow.innerHTML);
+  var jobRow = getJobRow(jobName, innerPageElt);  
   // Get the action element by job no first
   var elt;
   var tmp = 1 ;
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
-//  if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
-   // If retrieving by job no fails, simply retrieve the job link
+  // if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
+  // if retrieving by job no fails, simply retrieve the job link
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow)                    ; tmp = 2 ;} // first 2 are above line broke down
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]') ; tmp = 3 ;} // lv jobs
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=fight_job")]', jobRow)                ; tmp = 4 ;} // i forget :) may not need
@@ -13784,8 +13848,8 @@ function goJob(jobno) {
 
   //DEBUG(elt.innerHTML);
   if (elt) {
-  DEBUG(' job string used was =' + tmp );
-   clickAction = 'job';
+    DEBUG(' job string used was =' + tmp );
+    clickAction = 'job';
     suspendBank = false;
     clickBurst (elt, getJobClicks());
     DEBUG('Clicked to perform job: ' + jobName + '.');
@@ -14894,7 +14958,7 @@ function logJSONResponse(responseText, action, context) {
 // Returns: true if something has been done that will cause the inner page
 //          to change, such as clicking somewhere or loading another page.
 function logResponse(rootElt, action, context) {
-  //DEBUG('In routine logResponse - rootElt : '+rootElt.innerHTML);
+  DEBUG('Processing logResponse');
   // Set default timer properties.
   Autoplay.fx = goHome;
   Autoplay.delay = getAutoPlayDelay();
@@ -15062,25 +15126,15 @@ function logResponse(rootElt, action, context) {
       var jobContainer = "job"+missions[GM_getValue('selectMission')][MISSION_NUMBER];
       var jobContainerElt = xpathFirst('.//div[@id="'+jobContainer+'"]', rootElt);
       masteryGainElt = xpathFirst('.//div[@id="'+jobContainer+'"]//div[@class="mastery_bar"]', rootElt);
-
-
-
-
-
-
-
-
-
+      jobName = missions[GM_getValue('selectMission')][MISSION_NAME];
 
       var masteryGainTxt = "";
       var pushNextJob = false;
-// IF we have the mastery bar,
-      if(masteryGainElt)
-       {
+      // IF we have the mastery gain bar,
+      if(masteryGainElt) {
          if( (GM_getValue('selectTier')!= '0.0'  ) ||
            (!isGMChecked('multipleJobs'))  )
              {
-
               masteryGainTxt = '. Las Vegas Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
               if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 )
                 {
@@ -15090,31 +15144,22 @@ function logResponse(rootElt, action, context) {
                 DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
                 }
              } else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
-       } else DEBUG(' mastery check skipped no masterygainelt ');
+      } else DEBUG(' mastery check skipped no masterygainelt ');
 
-    if (pushNextJob) DEBUG (' - - - push next job was true ');
-    else DEBUG (' - - - push next job was false ');
+      if (pushNextJob) DEBUG (' - - - push next job was true ');
+      else DEBUG (' - - - push next job was false ');
 
       if (xpGainElt) {
-//DEBUG (' - - - push next job expgainelt 2 ');
+        //DEBUG (' - - - push next job expgainelt 2 ');
         jobOptimizeOn = false;
         // Job completed successfully.
-        result = 'You performed ' + '<span class="job">' +
-                 missions[GM_getValue('selectMission')][MISSION_NAME] +
-                 '</span> earning <span class="good">' +
-                 xpGainElt.innerHTML.toLowerCase() + '</span>';
+        result = 'You performed ' + '<span class="job">' + jobName + '</span> earning <span class="good">' + xpGainElt.innerHTML.toLowerCase() + '</span>';
         var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
         cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
-        if (cashGainElt) {
-          result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
-        }
-        if(masteryGainElt){
-          result += masteryGainTxt;
-        }
+        if (cashGainElt) result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
+        if(masteryGainElt) result += masteryGainTxt;
         result += '.';
-        if (innerNoTags.indexOf('you spent no energy') != -1) {
-          result += ' You spent 0 energy on this job.';
-        }
+        if (innerNoTags.indexOf('you spent no energy') != -1) result += ' You spent 0 energy on this job.';
         addToLog('process Icon', result);
 
         jobCombo(rootElt);
@@ -15128,12 +15173,9 @@ function logResponse(rootElt, action, context) {
         // Ask for help if auto ask is on and enough experience was gained.
         var xpGain = parseInt(xpGainElt.innerHTML);
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
-        if (isGMChecked('autoAskJobHelp') &&
-            (!xpGainMin || xpGain >= xpGainMin)) {
-
-
+        if (isGMChecked('autoAskJobHelp') && (!xpGainMin || xpGain >= xpGainMin)) {
           var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
-// ask for help
+          // ask for help
 
           if (elt) {
             Autoplay.fx = function() {
@@ -15144,34 +15186,36 @@ function logResponse(rootElt, action, context) {
             return true;
           }
         }
-//        return false;  // temp comment out
-
-
       } else if (innerNoTags.indexOf('You are not high enough level to do this job') != -1) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
         addToLog('warning Icon', 'Job processing will stop');
         GM_setValue('autoMission', 0);
-// DEBUG (' - - - push next job was true 3 ');
+        // DEBUG (' - - - push next job was true 3 ');
       } else if (innerNoTags.indexOf('Success') != -1) {
         jobOptimizeOn = false;
         addToLog('process Icon', inner);
-// DEBUG (' - - - push next job was true 4 ');
-
+        // DEBUG (' - - - push next job was true 4 ');
+      } else if (innerNoTags.indexOf('Missing') != -1) {        
+        DEBUG ('Seems we are missing some items that we need to get before we can continue with '+jobName);
+        if (getJobRowItems(jobName)) {
+          DEBUG(' - - need items jobid='+jobid+' selectMission='+GM_getValue('selectMission', 1));
+          if (jobid != GM_getValue('selectMission', 1))  Autoplay.fx = autoMission;            
+        }
       } else {
         DEBUG('Unrecognized job response.');
       }
-// this code was never reached that i could tell without commenting out the return false 16 lines up
+      return;
+
       if (pushNextJob) {
           DEBUG('Job Mastery of 100% detected, Reloading');
           goHome();
-//          Autoplay.fx= autoReload(true);  // would just hang
       }else {
-        DEBUG(' pushnextjob is false ! ! ! .');
-return ;
+        return ;
       }
 
       Autoplay.start();
       return true;
+
       break;
 
     case 'hitman':
@@ -15259,15 +15303,6 @@ return ;
       updateLogStats(STAMINA_HOW_HITMAN);
       randomizeStamina();
       break;
-
-
-
-
-
-
-
-
-
 
     case 'war':
       // Remove invalid war targets
@@ -15604,7 +15639,7 @@ function handlePopups() {
           if (popupInner.indexOf('id="marketplace"') != -1 // The Marketplace
             || popupInner.indexOf('id="original_buyframe_popup"') != -1  // The Marketplace
             || popupInner.indexOf('marketplace_title.png') != -1  // The Marketplace
-            || popupInner.indexOf('giftcard_iframe') != -1  // The Marketplace
+            || popupInner.indexOf('giftcard_iframe') != -1  // The Marketplace            
 
             || popupInner.indexOf('xw_controller=hospital') != -1 // The Hospital
             || popupInner.indexOf('bank_popup') != -1 // The Bank
@@ -15678,8 +15713,8 @@ function handlePopups() {
             if (eltPubButton) {
               //DEBUG('Popup Process: The Hospital Processed');
               //clickElement(eltPubButton);
-            }*/
-
+            }*/            
+            
             // Process Sharing Secret Stash
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
             if (eltPubButton) {
