@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.668
+// @version     1.1.669
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.668',
+  version: '1.1.669',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1428,29 +1428,29 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 ///////////////////////////////////////////////////////////////////////////////////////////// DONT forget the comma above
 //     60 jobs, 6 boss, 11 fight, 6 social, 37 energy
 //      7                                                   5   4 2   1       6 3   0                PATH
-    ['Move Your Crew Into a Safe House'                  ,  9,  1,1,LV    ,  7,0,'node1' ],    // ENERGY DISTRICT 1  LAS VEGAS NORTH LAS VEGAS
+    ['Move Your Crew Into A Safe House'                  ,  9,  1,1,LV    ,  7,0,'node1' ],    // ENERGY DISTRICT 1  LAS VEGAS NORTH LAS VEGAS
     ['Blackmail A Car Dealer'                            ,  8,  2,1,LV    , 11,0,'node2' ],    // ENERGY
     ['Steal A Truckload Of Slots'                        , 24,  3,1,LV    , 18,0,'node3' ],    // ENERGY
     ['Secure Some Wheels'                                , 18,  4,1,LV    , 25,0,'node4' ],    // ENERGY
-  ['Roll a bingo parlor'                               ,  6,  5,1,LV    ,  9,1,'node5' ],    //  FIGHT
-    ['Break into a gun shop'                             , 12,  6,1,LV    , 16,0,'node6' ],    // ENERGY
-    ['Scout out alphabet city'                           , 15,  7,1,LV    , 20,0,'node7' ],    // ENERGY
-    ['Open fire on Victor\'s crew'                       , 23,  8,1,LV    , 27,0,'node8' ],    //SOCIAL
-//  ['Boss: Defeat Victor Lil\' Loco Alves'              ,  5,  9,1,LV    ,  6,0,'node9' ],    //        BOSS JOB STAMINA
-    ['Help a Bookie Out Of A Jam'                        , 15, 10,2,LV    ,  9,0,'node10'],    // ENERGY DISTRICT 2  LAS VEGAS PARADISE CITY
-  ['Win an Underground Fight'                          , 11, 11,2,LV    , 18,1,'node11'],    //  FIGHT
-  ['Clip a Petty Thug'                                 , 10, 12,2,LV    , 16,1,'node12'],    //  FIGHT
-    ['Fix a Boxing Match'                                , 11, 13,2,LV    , 15,0,'node13'],    // ENERGY
+    ['Roll a Bingo Parlor'                               ,  6,  5,1,LV    ,  9,1,'node5' ],    //  FIGHT
+    ['Break Into A Gun Shop'                             , 12,  6,1,LV    , 16,0,'node6' ],    // ENERGY
+    ['Scout Out Alphabet City'                           , 15,  7,1,LV    , 20,0,'node7' ],    // ENERGY
+    ['Open Fire On Victor&amp;\'s Crew'                  , 23,  8,1,LV    , 27,0,'node8' ],    //SOCIAL
+//   ['Boss: Defeat Victor Lil\' Loco Alves'             ,  5,  9,1,LV    ,  6,0,'node9' ],    //        BOSS JOB STAMINA
+    ['Help A Bookie Out Of A Jam'                        , 15, 10,2,LV    ,  9,0,'node10'],    // ENERGY DISTRICT 2  LAS VEGAS PARADISE CITY
+    ['Win An Underground Fight'                          , 11, 11,2,LV    , 18,1,'node11'],    //  FIGHT
+    ['Clip A Petty Thug'                                 , 10, 12,2,LV    , 16,1,'node12'],    //  FIGHT
+    ['Fix A Boxing Match'                                , 11, 13,2,LV    , 15,0,'node13'],    // ENERGY
     ['Clean Up At A Rigged Table'                        , 10, 14,2,LV    , 14,0,'node14'],    // ENERGY
     ['Recruit A Table Game Dealer'                       ,  9, 15,2,LV    , 12,0,'node15'],    // ENERGY (PROPERTY)
     ['Strong-Arm A Limo Company'                         , 14, 16,2,LV    , 18,0,'node16'],    // ENERGY
-    ['Shut Down an Uncooperative Club'                   , 15, 17,2,LV    , 20,0,'node17'],    // ENERGY
-    ['Hit Up a Nightclub'                                ,  7, 18,2,LV    ,  9,0,'node18'],    // ENERGY
+    ['Shut Down An Uncooperative Club'                   , 15, 17,2,LV    , 20,0,'node17'],    // ENERGY
+    ['Hit Up A Nightclub'                                ,  7, 18,2,LV    ,  9,0,'node18'],    // ENERGY
 //  ['Boss: Defeat Jimmy \'Big Time\' Mancuso'           ,  5, 19,2,LV    , 70,0,'node19'],    //        BOSS JOB STAMINA
-  ['Open Fire On A Rival Outfit'                       , 14, 20,3,LV    , 23,1,'node20'],    //  FIGHT  DISTRICT 3  LAS VEGAS THE LOWER STRIP
+    ['Open Fire On A Rival Outfit'                       , 14, 20,3,LV    , 23,1,'node20'],    //  FIGHT  DISTRICT 3  LAS VEGAS THE LOWER STRIP
     ['Buy Some Black-Market Info'                        ,  9, 21,3,LV    , 15,0,'node21'],    // ENERGY
     ['Steal An SUV'                                      , 12, 22,3,LV    , 19,2,'node22'],    //SOCIAL
-  ['Run A Visiting Gang Boss Out'                      , 17, 23,3,LV    , 28,1,'node23'],    //  FIGHT
+    ['Run A Visiting Gang Boss Out'                      , 17, 23,3,LV    , 28,1,'node23'],    //  FIGHT
     ['Do Some Late Night Shopping'                       , 10, 24,3,LV    , 17,0,'node24'],    // ENERGY
     ['Rob A Gem Broker'                                  , 23, 25,3,LV    , 36,2,'node25'],    //SOCIAL
     ['Convince A Restaurateur To Leave Town'             , 17, 26,3,LV    , 24,0,'node26'],    // ENERGY (PROPERTY)
@@ -1470,22 +1470,22 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
 // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
     ['Move The Take Out Of Town'                         , 13, 40,5,LV    , 21,0,'node40'],    // ENERGY DISTRICT 5 LAS VEGAS MOJAVE DESERT
-  ['Fight Off A Hijack Crew'                           , 14, 41,5,LV    , 23,1,'node41'],    //  FIGHT
+    ['Fight Off A Hijack Crew'                           , 14, 41,5,LV    , 23,1,'node41'],    //  FIGHT
     ['Run A Highway Patrol Blockade'                     , 23, 42,5,LV    , 37,2,'node42'],    //SOCIAL
     ['Buy Off A Crooked Border Agent'                    , 15, 43,5,LV    , 24,0,'node43'],    // ENERGY
     ['Stash The Take'                                    , 20, 44,5,LV    , 33,2,'node44'],    //social
     ['Arrange A Cartel Sale'                             ,  9, 45,5,LV    , 16,0,'node45'],    // ENERGY
-  ['Clean Out A Biker Bar'                             , 11, 46,5,LV    , 19,1,'node46'],    //  FIGHT
+    ['Clean Out A Biker Bar'                             , 11, 46,5,LV    , 19,1,'node46'],    //  FIGHT
     ['Create A Diversion'                                , 11, 47,5,LV    , 18,0,'node47'],    // ENERGY
     ['Dispose Of The Evidence'                           , 14, 48,5,LV    , 23,0,'node48'],    // ENERGY
 //  ['Boss: Defeat \'Red\' Jackson'                      ,  7, 49,5,LV    ,600,0,'node49'],    //        BOSS JOB STAMINA
     ['Rescue A Hotelier'                                 , 10, 50,5,LV    , 17,0,'node50'],    // ENERGY PATH (PROPERTY)
-  ['Remove An Unhelpful Union Rep'                     , 15, 51,6,LV    , 26,1,'node51'],    //  fight PATH
+    ['Remove An Unhelpful Union Rep'                     , 15, 51,6,LV    , 26,1,'node51'],    //  fight PATH
     ['Get A Council Member On Board'                     , 17, 52,6,LV    , 27,0,'node52'],    // ENERGY PATH
     ['Buy Off A Precinct Captain'                        , 18, 53,6,LV    , 29,0,'node53'],    // ENERGY PATH
-  ['Eliminate A Hill Supplier'                         , 16, 54,6,LV    , 28,1,'node54'],    //  fight PATH
+    ['Eliminate A Hill Supplier'                         , 16, 54,6,LV    , 28,1,'node54'],    //  fight PATH
     ['Convince A Judge To Step Down'                     , 14, 55,6,LV    , 29,0,'node55'],    // ENERGY PATH
-  ['Wipe Out The Hill Security Detail'                 , 18, 56,6,LV    , 32,1,'node56'],    //  fight PATH
+    ['Wipe Out The Hill Security Detail'                 , 18, 56,6,LV    , 32,1,'node56'],    //  fight PATH
     ['Remove The Hill\'s Support Base'                   , 17, 57,6,LV    , 27,2,'node57'],    //social  PATH
     ['Reveal A Politician\'s Dirty Secret'               , 19, 58,6,LV    , 30,0,'node58'],    // ENERGY PATH
     ['Infiltrate The Hill Resort'                        , 16, 59,6,LV    , 25,0,'node59']     // ENERGY PATH
@@ -1673,7 +1673,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     return this.replace(/<[^>]*>/g, '');
   };
   String.prototype.clean = function() {
-    return this.replace(/<\/?[^>]+(>|$)/g, '');
+    return this.replace(/<\/?[^>]+(>|$)&/g, '');
   };
 
   Array.prototype.searchArray = function(target, index) {
@@ -9018,7 +9018,7 @@ function innerPageChanged(justPlay) {
       clickContext = undefined;
       if(action && context) DEBUG('action : '+action+' - context : '+context.innerHTML);      
       if (!logResponse(innerPageElt, action, context)) {
-        DEBUG('We could not get a response, so kick off auto-play');
+        DEBUG('We could not get a valid response, so kick off auto-play');
         // No further action was taken. Kick off auto-play.
         doAutoPlay();
       }
@@ -9558,12 +9558,15 @@ function doQuickClicks() {
 
     // Click the reward button
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
-
+    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
+    
     // Click the 'Call for Help!' button
     if (doClick('.//div//a[@class="sexy_button" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
-
+    if (doClick('.//div//a[@class="sexy_button" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
+    
     // Click the 'Rally More Help!' button
-    //if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
+    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
+    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
     // Can bank flag
     var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
@@ -11061,9 +11064,9 @@ function customizeJobs() {
   var masteredJobsCount = 0;
   var jobsFound = 0;
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
-//newlv
-      var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_title " or @class="job_name_oneline job_no_border" ]', jobTables[x]);
-//    var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
+    //newlv
+    var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_title " or @class="job_name_oneline job_no_border" ]', jobTables[x]);
+    // var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
 
     for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
       var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].clean().trim();
@@ -11629,7 +11632,7 @@ function getJobRowItems(jobName) {
         // Try fetching the items from the job requirement array
         requirementJob.forEach(
           function(j){
-            if (level >= cities[j[2]][CITY_LEVEL] && j[0] == itmSearch) {
+            if (level >= cities[j[2]][CITY_LEVEL] && j[0].toUpperCase().trim() == itmSearch.toUpperCase().trim()) {
               jobs.push(j[1]);
               items.push(itmSearch);
               itemFound = true;
@@ -11713,8 +11716,8 @@ function getJobRowItems(jobName) {
       // Set the flag if at least one item is found
       if (!itemFound) DEBUG(itmSearch + ' not found in the requirement job array.');
       else { 
-        DEBUG(itmSearch + ' was found in the requirement job array for: '+jobFound);
-        setSavedList('itemList', items.unique());
+        DEBUG(itmSearch + ' was found in the requirement job array for: '+jobFound);        
+        setSavedList('itemList', items.unique());        
         setSavedList('jobsToDo', jobs);
         popJob();
         return true;
@@ -11740,16 +11743,16 @@ function getJobRowItems(jobName) {
 }
 
 function popJob(){
-  var jobs = getSavedList('jobsToDo', '');
+  var jobs = getSavedList('jobsToDo', '');  
   // Set the very next job to perform.
-  var doJob = jobs.pop();
+  var doJob = jobs.pop();  
   setSavedList('jobsToDo', jobs);
   var i = 0;
   missions.forEach(
-    function(f) {
-      if (f[0] == doJob) {
+    function(f) {      
+      if (f[0].toUpperCase().trim() == doJob.toUpperCase().trim()) {
         GM_setValue('selectMission', i);
-        addToLog('process Icon', 'Switching job to ' + doJob + '.');
+        addToLog('process Icon', 'Switching job to ' + doJob + '.');        
       }
       i++;
     }
@@ -11826,26 +11829,30 @@ function jobLoot(element) {
     messages = $x('.//img', jobResults);
     numMessages = messages.length;
     for (i = 0; i < numMessages; i++) {
-      var loot = messages[i].title;
-      if (strLoot == '') {
-        strLoot = loot;
-      } else {
-        strLoot = strLoot + ' and ' + loot;
+      if(messages[i].title){
+        var loot = messages[i].title;
+        if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
+        if (strLoot == '') {
+          strLoot = 'Found <span class="loot">'+loot+'</span> in the job.';
+        } else {
+          strLoot = strLoot + '<br>Found <span class="loot">' + loot+'</span> in the job.';
+        }
+        lootbag.push(loot);
       }
-      lootbag.push(loot);
     }
-    if (numMessages > 0) {
-      var txtLog = '<span class="loot">'+' Found '+ strLoot + ' in the job.</span>';
-      addToLog('lootbag Icon', txtLog);
+    if (numMessages > 0 && strLoot !='') {
+      //var txtLog = strLoot + '<br> in the job.';
+      addToLog('lootbag Icon', strLoot);
     }
   }
-
+  
+  DEBUG('Found ' + lootbag.length + ' item(s) on this job.');
+  
   var items = getSavedList('itemList');
   if (typeof(items[0]) == 'undefined' || items.length == 0) {
     DEBUG('No items in required item list.');
     return;
   }
-  DEBUG('Found ' + lootbag.length + ' item(s) on this job.');
 
   var itemFound = false;
   var itemName;
@@ -12728,6 +12735,7 @@ function autoLotto() {
       if (lottoPrize == (GM_getValue('autoLottoBonusItem', 0) + 1)) {
         // Grab the mastery button
         var bonusClaim = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Claim Prize")]', innerPageElt);
+        if(!bonusClaim) bonusClaim = xpathFirst('.//a[@class="sexy_button_new short_white" contains(text(), "Claim Prize")]', innerPageElt);
         if (bonusClaim) {
           Autoplay.fx = function() {
             clickElement(bonusClaim);
@@ -12750,6 +12758,7 @@ function autoLotto() {
 
   var randomTicket = xpathFirst('.//div[@class="sexy_button" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
   if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and @onclick="autoSelect(1);"]', innerPageElt);
+  if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
   if (randomTicket) {
     clickElement(randomTicket);
     var submitTicket = xpathFirst('.//input[@class="sexy_lotto" and @type="submit" and contains(@value,"Submit Ticket")]', innerPageElt);
@@ -15174,9 +15183,9 @@ function logResponse(rootElt, action, context) {
         var xpGain = parseInt(xpGainElt.innerHTML);
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
         if (isGMChecked('autoAskJobHelp') && (!xpGainMin || xpGain >= xpGainMin)) {
-          var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
+        var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
+        if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);          
           // ask for help
-
           if (elt) {
             Autoplay.fx = function() {
               clickElement(elt);
@@ -15204,13 +15213,13 @@ function logResponse(rootElt, action, context) {
       } else {
         DEBUG('Unrecognized job response.');
       }
-      return;
+      //return;
 
       if (pushNextJob) {
           DEBUG('Job Mastery of 100% detected, Reloading');
           goHome();
       }else {
-        return ;
+        return;
       }
 
       Autoplay.start();
