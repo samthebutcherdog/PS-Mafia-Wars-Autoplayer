@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.669
+// @version     1.1.670
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.669',
+  version: '1.1.670',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -13846,7 +13846,8 @@ function goJob(jobno) {
   // Get the action element by job no first
   var elt;
   var tmp = 1 ;
-  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
+  //if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
+  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'") and not(contains(@onclick, "xw_controller=marketplace"))]', jobRow);
   // if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
   // if retrieving by job no fails, simply retrieve the job link
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow)                    ; tmp = 2 ;} // first 2 are above line broke down
