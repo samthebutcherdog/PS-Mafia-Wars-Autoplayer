@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.671
+// @version     1.1.672
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.671',
+  version: '1.1.672',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2039,10 +2039,11 @@ function doAutoPlay () {
     if (autoDailyChecklist()) return;
   }
 
+  
   // Auto-mainframe
-  if (running && !maxed && isGMChecked('autoMainframe') && hasHome) {
-    if (autoMainframe()) return;
-  }
+  //if (running && !maxed && isGMChecked('autoMainframe') && hasHome) {
+  //  if (autoMainframe()) return;
+  //}
 
   // Auto-Enforce title
   if (running && !maxed && GM_getValue('autoEnforcedTitle')!='' && !timeLeftGM('autoEnforcedTitleTimer')) {
@@ -2075,8 +2076,7 @@ function doAutoPlay () {
   var energyCountdownElt = xpathFirst('.//div[contains(@id, "mbox_energy_timer_container")]', innerPageElt);
   if (energyCountdownElt) {
     if (energyCountdownElt.style.display == 'block') {
-      energyPack = false;
-      //DEBUG('Energy Pack forced to false since countdown timer exists.');
+      energyPack = false;      
     }
   }
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
@@ -2327,9 +2327,7 @@ function AskforHelp(hlpCity) {
     Autoplay.fx = function() { doAskFunction(goJobTab(tabno)); };
     Autoplay.start();
     return true;
-  }
-
-  DEBUG('Right City. Right Tab. Looking for the Ask for Help-job');
+  }  
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
     setGMTime(timerName, '2 hour');
@@ -2342,8 +2340,7 @@ function AskforHelp(hlpCity) {
     if (askHelpFriends) {
       addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
       clickElement(askHelpFriends);
-      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
-      DEBUG(' Resetting Timer for 12 hours on ' + helpCity +'.'+ tabno);
+      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);      
       setGMTime(timerName, '12 hours');
     return true;
     } else {
@@ -2849,10 +2846,7 @@ function autoMission() {
       if (jobs.length == 0) {
         // Skip jobs temporarily, and check the home page
         DEBUG('No more jobs to perform.');
-        skipJobs = true;
-        //addToLog('warning Icon', 'Spend energy to do jobs automatically is turned off - Please check your \'Master tier:\'-settings on PS MWAP\'s Energy tab.');
-        //DEBUG('autoMissin turned off - jobsToDo is Empty - Skipping Jobs atm');
-        //GM_setValue('autoMission', 0);
+        skipJobs = true;        
         goHome();
       } else {
         // Else Get the next job to perform
@@ -2860,13 +2854,9 @@ function autoMission() {
         popJob();
         autoMission();
       }
-    } 
-    else {
-      DEBUG('Job Performed ... going to process results ...');
-    }    
+    }     
   };
 
-//  DEBUG('Going to the correct city');
   // Go to the correct city.
   if (city != cityno) {
     Autoplay.fx = function() { doJobFunction(goLocation(cityno)); };
@@ -2874,7 +2864,6 @@ function autoMission() {
     return;
   }
 
-  //DEBUG('Going to the correct job tab');
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
     Autoplay.fx = function() { doJobFunction(goJobTab(tabno)); };
@@ -2882,28 +2871,22 @@ function autoMission() {
     return;
   }
 
-  //newlv if LV Go to the correct job tabnopath.
+  // Go to the correct job tabnopath in LV
   if(city == LV){
-    if (!onJobTabpath(tabnopath)) {
-      DEBUG (' - wrong tab path, changing -'); //newlv
+    if (!onJobTabpath(tabnopath)) {      
       goJobTabPath(tabnopath);
     }
   }
-
-  // DEBUG('- - Going to buy necessary items first for jobname' + jobName );
+  
   // Buy requirements first, if any
-  if (getJobRowItems(jobName)) {
-
-    DEBUG(' - - need items jobid='+jobid+' selectMission='+GM_getValue('selectMission', 1));
-
+  if (getJobRowItems(jobName)) {    
     if (jobid != GM_getValue('selectMission', 1))
       Autoplay.fx = autoMission;
     Autoplay.delay = noDelay;
     Autoplay.start();
     return;
   }
-
-  DEBUG('Finally doing the job '+ jobno + ' - '+jobName);
+  
   // Do the job
   Autoplay.fx = function() { doJobFunction(goJob(jobno)); };
   Autoplay.delay = (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) == 0) ? noDelay : getAutoPlayDelay();
@@ -2924,7 +2907,7 @@ function currentJobTab() {
 
     /// current Job Tab path
 function currentJobTabPath() {
-    var tst = null ;
+  var tst = null ;
   var elt = xpathFirst('.//div[contains(@class, "path_on")]//a', innerPageElt);
 //  if (!elt)     DEBUG(' JOB TAB - path - !elt path not found - ');
 //       tst = (elt.getAttribute('onclick').match(/  0  /) ); // returns 0
@@ -2933,20 +2916,20 @@ function currentJobTabPath() {
 //+ -- means to match thoose digits one or more times
 //$ -- this means the end of the string, so with the pattern pieces before it, it must not have anything but "new_" and some numbers, then the end of the string (string being the ID attribute)
 
- tst = parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
+  tst = parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
 //    DEBUG(' JOB TAB - path - returning  tst =' + tst + '=');
   if (tst==null)     DEBUG(' JOB TAB - path - !tst path not found - ');
   if   (!elt ||  tst==null ) {
         DEBUG(' JOB TAB - path - not found RETURNING -1 no elt or tst');
     return -1;  }
 //    return parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
-    return tst;
+  return tst;
 }
 
 function onJobTab(tabno) {
   return currentJobTab() == parseInt(tabno) ? true : false;
 }
-//newlv
+
 function onJobTabpath(tabnopath) {
   return currentJobTabPath() == parseInt(tabnopath) ? true : false;
 }
@@ -3505,8 +3488,7 @@ function autoHitman() {
   var bountyMin = parseCash(GM_getValue('hitmanBountyMin', 0));
   var hitmanNames = isGMChecked('hitmanNames');
   var avoidNames = isGMChecked('hitmanAvoidNames');
-  var onlyNames = isGMChecked('hitmanOnlyNames');
-  DEBUG('Settings '+hitmanNames+avoidNames+onlyNames);
+  var onlyNames = isGMChecked('hitmanOnlyNames');  
   var blacklistCount = 0;
   var bountyCount = 0;
   var namesCount = 0;
@@ -3528,16 +3510,14 @@ function autoHitman() {
       namesCount++;
       continue;
     }
-
     if (hitmanNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_HITMAN)) {
       namesCount++;
       continue;
     }
-
     opponentsQualified.push(opponent);
   }
-  DEBUG(bountyCount + ' disqualified on bounty, ' +
-        namesCount + ' on name, ' + blacklistCount + ' on blacklist.');
+  
+  DEBUG(bountyCount + ' disqualified on bounty, ' + namesCount + ' on name, ' + blacklistCount + ' on blacklist.');
 
   if (!opponentsQualified.length) return false;
 
@@ -3571,8 +3551,7 @@ function autoHitman() {
     clickAction = 'hitman';
     clickContext = opponentsQualified[bountyIndex];
     staminaBurst (BURST_ALWAYS, clickContext.attack);
-    DEBUG('Clicked to hit ' + clickContext.name +
-          ' (' + clickContext.id + ').');
+    DEBUG('Clicked to hit ' + clickContext.name + ' (' + clickContext.id + ').');
   };
   Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
   Autoplay.start();
@@ -4338,8 +4317,8 @@ function saveDefaultSettings() {
 
   // Misc Tab
   GM_setValue('autoResetTimers', 0);
-  GM_setValue('autoMainframe', 0);
-  GM_setValue('autoMainframeCode', 0);
+  //GM_setValue('autoMainframe', 0);
+  //GM_setValue('autoMainframeCode', 0);
   GM_setValue('autoDailyChecklist', 0);
   GM_setValue('autoStat', 0);
   GM_setValue('autoStatDisable', 0);
@@ -4431,7 +4410,8 @@ function saveSettings() {
   //Start Save General Tab Settings
   //General Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','hourlyStatsOpt','burnFirst','featJob'
+  //  'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','hourlyStatsOpt','burnFirst','featJob'
+    'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','burnFirst','featJob'
   ]);
   //General Tab Settings
   GM_setValue('r1', document.getElementById('r1').value);
@@ -4533,7 +4513,8 @@ function saveSettings() {
   //Autostat Tab Checkboxes
   saveCheckBoxElementArray([
     'autoStat','autoStatDisable','autoStatAttackFallback','autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback','autoStatStaminaFallback',
-    'autoMainframe','autoResetTimers','autoDailyChecklist',
+  //  'autoMainframe','autoResetTimers','autoDailyChecklist',
+    'autoResetTimers','autoDailyChecklist',
   ]);
   //Autostat Settings and Validation
   GM_setValue('restAutoStat', 0);
@@ -4575,14 +4556,14 @@ function saveSettings() {
   }
 
   // Validate mainframe
-  var autoMainframe        = (document.getElementById('autoMainframe').checked === true);
-  var autoMainframeCode    = document.getElementById('autoMainframeCode').value;
-  var autoMainframeCodeInt = parseInt(autoMainframeCode);
-  if (autoMainframe && (autoMainframeCodeInt == 0)) {
-    alert('You must enter your mainframe code to enable autoMainframe.');
-    return;
-  }
-  GM_setValue('autoMainframeCode', autoMainframeCode);
+  //var autoMainframe        = (document.getElementById('autoMainframe').checked === true);
+  //var autoMainframeCode    = document.getElementById('autoMainframeCode').value;
+  //var autoMainframeCodeInt = parseInt(autoMainframeCode);
+  //if (autoMainframe && (autoMainframeCodeInt == 0)) {
+  //  alert('You must enter your mainframe code to enable autoMainframe.');
+  //  return;
+  //}
+  //GM_setValue('autoMainframeCode', autoMainframeCode);
 
   //End Save Autostat Tab Settings
 
@@ -5305,7 +5286,7 @@ function clearStats() {
 
   //ATK
   //New tracking stats for NY
-  GM_setValue('hourlyStats', '0');
+  //GM_setValue('hourlyStats', '0');
   GM_setValue('fightExpNY', 0);          //Number of exper. points earned from fights in NY
   GM_setValue('fightWinsNY', 0);         //Count of fights won in NY
   GM_setValue('fightWin$NY', '0');       //$ won from fights in NY
@@ -5632,9 +5613,7 @@ function createSettingsBox() {
     updateButton.addEventListener('click', updateScript, false);
   }
 
-  createDynamicDrive();
-
-  DEBUG('Menu created.');
+  createDynamicDrive(); 
 }
 
 // Create Dynamic Drive Script
@@ -5774,6 +5753,7 @@ function createGeneralTab() {
   }
   lottoBonusSelect.selectedIndex = GM_getValue('autoLottoBonusItem', 0);
 
+  /*
   // Hourly-stat
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -5783,7 +5763,8 @@ function createGeneralTab() {
   title = ' Enable hourly stats updates [Beta] ';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
-
+  */
+  
   // Burn option
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -6575,6 +6556,7 @@ function createAutostatTab() {
     sel.selectedIndex = GM_getValue(autoStatPrios[i], 0);
   }
 
+  /*
   id = 'autoMainframe';
   title = 'Check this to enable auto-code for the mainframe';
   var autoMainframe = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 175px; left: 20px;'});
@@ -6583,7 +6565,7 @@ function createAutostatTab() {
   title = 'Enter mainframe code';
   id = 'autoMainframeCode';
   makeElement('input', autoMainframe, {'type':'text', 'style':'width: 80px;margin-left:5px; text-align: right', 'title':title, 'value':GM_getValue(id, ''), 'id':id, 'size':'12'});
-
+*/
   id = 'autoResetTimers';
   title = 'Check this to reset timers on PS MWAP startup';
   var autoResetTimers = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 200px; left: 20px;'});
@@ -8354,8 +8336,6 @@ function createStatWindow() {
   var statTab = makeElement('div', statsWindow, {'id':'statTab', 'class':'tabcontent'});
 
   createDynamicDrive();
-
-  DEBUG('Stat Menu Created.');
 }
 
 function clickAutoPause() {
@@ -8511,8 +8491,11 @@ function handleModificationTimer() {
       if (running) justPlay = true;
     }
   }
+  
+  //ROJ
   // Added handling for Las Vegas job page changes
   var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
+  //var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_info"]', innerPageElt);
   if (jobResults && jobResults.length > 0) {
 
     for (var i = 0, iLength=jobResults.length; i < iLength; ++i) {
@@ -8619,8 +8602,7 @@ function handleModificationTimer() {
 
       if (foundPopup) {
         pageChanged = true;
-        justPlay = true;
-        //DEBUG('Detected popup: ' + popupElt.innerHTML.untag().slice(0,100));
+        justPlay = true;        
       }
     }
   }
@@ -8845,15 +8827,18 @@ function handlePublishing() {
 
       // If OK button is found, close the window by pressing it
       if (okElt) {
-        DEBUG('Publish: Clicked Okay');
+        DEBUG('Publish: Clicked OK button');
         clickElement(okElt);
 
       // If (1) Pub button is not found anymore; or
       //    (2) It's been 10 seconds since the post window loaded
       // Then close the window
       } else if (!pubElt || !timeLeftGM('postTimer')) {
-        if (skipElt) { DEBUG('Publish: Clicked Skip'); clickElement(skipElt); }
-        else DEBUG('Publish: Found no skip button');
+        if (skipElt) { 
+          DEBUG('Publish: Clicked Skip');
+          clickElement(skipElt); 
+        }
+        else DEBUG('Publish: no Skip button found');
       }
 
       // Perform publishing logic once posting buttons have loaded
@@ -8862,11 +8847,8 @@ function handlePublishing() {
         var checkPublish = function (xpathString, gmFlag, pubElt, skipElt) {
           var eltDiv = xpathFirst(xpathString);
           if (eltDiv) {
-            if (isGMChecked(gmFlag))
-              clickElement(pubElt);
-            else
-              clickElement(skipElt);
-
+            if (isGMChecked(gmFlag)) clickElement(pubElt);
+            else clickElement(skipElt);
             // Wait for 1 second before trying to close window manually
             window.setTimeout(handlePublishing, 1000);
             DEBUG('Publish: Found ' + gmFlag);
@@ -9015,10 +8997,9 @@ function innerPageChanged(justPlay) {
       var action = clickAction;
       var context = clickContext;      
       clickAction = undefined;
-      clickContext = undefined;
-      if(action && context) DEBUG('action : '+action+' - context : '+context.innerHTML);      
+      clickContext = undefined;      
       if (!logResponse(innerPageElt, action, context)) {
-        DEBUG('We could not get a valid response, so kick off auto-play');
+        DEBUG('We did not get a valid logresponse, so kick off auto-play');
         // No further action was taken. Kick off auto-play.
         doAutoPlay();
       }
@@ -9158,7 +9139,7 @@ function refreshGlobalStats() {
     addToLog('experience Icon', '<span style="color:#00FFCC;"> Congratulations on reaching level <strong>' + level + '</strong>!</span>');
     GM_setValue('restAutoStat', 0);
   }
-
+/*
   //ATK
   // Check if hourly stats need updating.
   if (isGMChecked('hourlyStatsOpt')) {
@@ -9167,6 +9148,7 @@ function refreshGlobalStats() {
       updateHourlyStats();
     }
   }
+*/  
   return true;
 }
 
@@ -9577,6 +9559,10 @@ function doQuickClicks() {
       quickBank(city, cities[city][CITY_CASH]);
     }
 
+/*  
+    //This has to be fixed, since Z changed the way energy packs can be sent to mafia members
+    //This code does not work anymore
+  
     // Auto-send energy pack
     var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
     if (isGMChecked('sendEnergyPack') && (actionElt ||
@@ -9599,7 +9585,7 @@ function doQuickClicks() {
             DEBUG('Daily Checklist: Clicked to send energy pack to my mafia.');
           }
         }
-      }*/
+      }
       // Grab the container used for sending energy and click the first send energy link
       var checkElt = xpathFirst('.//div[@id="mbox_energy_send_container" and contains(@style,"block")]//a[@class="sexy_button_new short_black"]', innerPageElt);
       if (checkElt) {
@@ -9613,7 +9599,7 @@ function doQuickClicks() {
         DEBUG('Daily Checklist: Clicked to send energy pack to my mafia.');
       }
     }
-
+*/
     // Get daily checklist bonus
     var actionElt = getActionBox('Daily Checklist Complete');
     if (actionElt) {
@@ -9641,15 +9627,11 @@ function doQuickClicks() {
     var actionElt = xpathFirst('.//div[@id="mbox_energy_timer_container"]', innerPageElt);
     if (isGMChecked('rewardEnergyPack') && !timeLeftGM('rewardEnergyTimer') && actionElt) {
       var actionLink = xpathFirst('//a[contains(text(), "Show more")]', innerPageElt);
-      if (actionLink) {
-        //DEBUG('Show More link to reward your mafia for Energy Packs found.');
+      if (actionLink) {        
         clickElement(actionLink);
         addToLog('info Icon','Clicked to reward your mafia for Energy Packs.');
-        //DEBUG('Clicked to reward your mafia for Energy Packs.');
-      } else {
-        DEBUG('Link to reward your mafia for Energy Packs not found.');
-      }
-      DEBUG(' Resetting rewardEnergyTimer for 4 hours');
+        DEBUG('Clicked to reward your mafia for Energy Packs.');      
+      }  
       setGMTime('rewardEnergyTimer', '4 hours');
     }
 
@@ -10503,7 +10485,7 @@ function getJobMastery(jobRow, newJobs) {
   // Logic for new job layout
   if (newJobs) {
     var mastery = 100;  
-    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i)) { mastery = parseInt(RegExp.$1); }
+    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i) || jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i)) { mastery = parseInt(RegExp.$1); }
     else { if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i)) mastery = 100-parseInt(RegExp.$1) }      
     return mastery;
   }
@@ -10530,8 +10512,7 @@ function getJobMastery(jobRow, newJobs) {
 }
 
 // Set the next job to be mastered for mastery job options
-function jobMastery(element, newJobs) {
-  DEBUG('in function jobMastery');
+function jobMastery(element, newJobs) {  
   if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) return;
 
   var selectMission = parseInt(GM_getValue('selectMission', 1));
@@ -10543,8 +10524,7 @@ function jobMastery(element, newJobs) {
   if (city != cityno || !onJobTab(tabno)) return;
 
   var currentJobRow = getJobRow(currentJob, element);
-  DEBUG('Calculating progress for ' + currentJob + '.');
-
+ 
   // Calculate tier mastery.
   DEBUG('Checking mastery for each job.');
   var tierLevel = 0;
@@ -10595,11 +10575,8 @@ function jobMastery(element, newJobs) {
   if (currentJobMastered || jobPercentComplete == -1) {
     var jobList = getSavedList('jobsToDo');
     if (jobList.length == 0) {
-      if (currentJobMastered)
-        addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
-      else
-        addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');
-      // DEBUG('Checking job tier mastery.');
+      if (currentJobMastered) addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
+      else addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');      
       if (tierPercent == 100) {
         // Find the first job of the next tier.
         // NOTE: This assumes that the missions array is sorted by city and then by tier.
@@ -10647,9 +10624,9 @@ function customizeVegasJobs() {
   if (!vegasJobs || vegasJobs.length == 0) return false;
   DEBUG('Found ' + vegasJobs.length + ' new vegas jobs in customizevegasjobs.');
 
-//  6 is tab path newlv
-//  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
-//  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
+  //  6 is tab path newlv
+  //  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
+  //  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{},6:{}})');
   var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
   var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
   try {
@@ -10692,8 +10669,7 @@ function customizeVegasJobs() {
     }
 
     jobsFound++;
-    var jobPercentage = getJobMastery(currentJob, true);
-    DEBUG(jobName + ', Calculated Vegas Mastery level: ' + jobPercentage);  //getJobMastery
+    var jobPercentage = getJobMastery(currentJob, true);    
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
@@ -10750,14 +10726,14 @@ function customizeVegasJobs() {
     if (expElt)   var reward = parseInt(expElt.innerHTML);
     else    var reward = 0;
 
-//    If this isn't a boss job, add 10% to the reward (wheelman bonus)  // the reward should be actually checked or ask for
+//  If this isn't a boss job, add 10% to the reward (wheelman bonus)  // the reward should be actually checked or ask for
     if (reward && !isBossJob )
       reward = Math.floor(reward * 1.10); // energy 41- exp 68, actually 74
 //  16595 19085
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
     var ratio = Math.round (reward / cost * 100) / 100;
-//   var xpTxt = ' (' + ratio + ')'; //original
+//  var xpTxt = ' (' + ratio + ')'; //original
      var xpTxt = ' ' + reward + ' (' + ratio + ')';
 
     // Money payout ratio
@@ -10808,25 +10784,25 @@ function customizeVegasJobs() {
   }
 
   var elt;
-  // Highlight the best and worst jobs.
+  // Highlight the best and worst jobs.  
   if (worstRatio != bestRatio) {
     var i=0;
     while (bestJobs.length) {
+      elt = bestJobs.pop();
       var id = 'bestJob'+i;
-      elt = document.getElementById(id);
-      if(!elt){
-        elt = bestJobs.pop();        
+      addelt = document.getElementById(id);
+      if(!addelt || elt.innerHTML.indexOf('(BEST)') == -1) {        
         elt = makeElement('span', elt, {'id':id, 'style':'color:#52E259; font-size: 10px'});        
         elt.appendChild(document.createTextNode(' (BEST)'));
       }
       i++;      
     }
-    i = 0;
+    i = 0;    
     while (worstJobs.length) {      
+      elt = worstJobs.pop();        
       id = 'worstJob'+i;
-      elt = document.getElementById(id);
-      if(!elt){
-        elt = worstJobs.pop();        
+      addelt = document.getElementById(id);
+      if(!addelt || elt.innerHTML.indexOf('(WORST)') == -1) {        
         elt = makeElement('span', elt, {'id':id, 'style':'color:#EC2D2D; font-size: 10px'});        
         elt.appendChild(document.createTextNode(' (WORST)'));
       }
@@ -10905,8 +10881,7 @@ function customizeNewJobs() {
     }
 
     jobsFound++;
-    var jobPercentage = getJobMastery(currentJob, true);
-    //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
+    var jobPercentage = getJobMastery(currentJob, true);    
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
@@ -11091,8 +11066,7 @@ function customizeJobs() {
       }
 
       jobsFound++;
-      var jobPercentage = getJobMastery(jobRow, false);
-      //DEBUG(jobName + ', Mastery level: ' + jobPercentage);
+      var jobPercentage = getJobMastery(jobRow, false);      
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -11503,8 +11477,7 @@ function clickWarListRemove() {
   }
 }
 
-function getJobRow(jobName, contextNode) {
-  DEBUG('Getting the JobRow element for job:'+jobName);
+function getJobRow(jobName, contextNode) {  
   var rowElt, conTxt = '',LVjob=0;
   try {  
     // Retrieve by job number first
@@ -11609,8 +11582,6 @@ function getJobRowItems(jobName) {
   */
 
   // Logic to switch to the required job first
-  DEBUG('getJobRowItems(jobName) - Looking for Required Items for: ' +currentJob);
-  
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
   //if(!necessaryItems) necessaryItems = $x('.//div[@class="needed_gate_loot"]//img', currentJobRow);
     
@@ -11660,19 +11631,12 @@ function getJobRowItems(jobName) {
   } else {
     necessaryItems = xpathFirst('.//span[@class="missing_req_items"]', currentJobRow);
     itmSearch='';
-    if(necessaryItems){
-      DEBUG('Needed Item Txt Elt: '+necessaryItems.innerHTML);
-      itmSearch = necessaryItems.innerHTML;
-      //itmSearch = "Car Cop Key Chain (x1)";
-      itmSearch = itmSearch.replace("(×1)", "");
-      DEBUG('Needed Item: '+itmSearch);
+    if(necessaryItems){      
+      itmSearch = necessaryItems.innerHTML;      
+      itmSearch = itmSearch.replace("(×1)", "");      
     } else {
       necessaryItems = xpathFirst('.//div[@class="needed_gate_loot"]', currentJobRow);
-      if(necessaryItems){        
-        DEBUG('Needed Item Img Elt: '+necessaryItems.innerHTML); 
-        //strItems = xpathFirst('.//img', necessaryItems);
-        //item = strItems.title;
-        
+      if(necessaryItems){                
         messages = $x('.//img', necessaryItems);
         numMessages = messages.length;
         for (i = 0; i < numMessages; i++) {
@@ -11682,15 +11646,12 @@ function getJobRowItems(jobName) {
           } else {
             itmSearch = itmSearch + ', ' + item;
           }          
-        }
-        if (numMessages > 0) {          
-          DEBUG('Needed Item(s): '+itmSearch);
-        }  
+        }        
       }
     }
         
     if(itmSearch!=''){
-      DEBUG('Single Item Required for this job');
+      DEBUG('Item(s) Required for this job');
       // Save the current job for later. The current job should not already exist in the list, so check first.
       var items = getSavedList('itemList');
       var jobs = getSavedList('jobsToDo', '');
@@ -11718,8 +11679,7 @@ function getJobRowItems(jobName) {
 
       // Set the flag if at least one item is found
       if (!itemFound) DEBUG(itmSearch + ' not found in the requirement job array.');
-      else { 
-        DEBUG(itmSearch + ' was found in the requirement job array for: '+jobFound);        
+      else {         
         setSavedList('itemList', items.unique());        
         setSavedList('jobsToDo', jobs);
         popJob();
@@ -12060,7 +12020,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Selected city: <strong>' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '</strong><br>' +
         'Enable auto-Daily Chance: <strong>' + showIfUnchecked(GM_getValue('autoLottoOpt')) + '</strong><br>' +
         'Enable collect Daily Chance bonus: <strong>' + showIfUnchecked(GM_getValue('autoLottoBonus'))  + ' == ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)] + '</strong><br>' +
-        'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
+        //'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
         'Spend all: <strong>' + showIfUnchecked(GM_getValue('burnFirst')) + ' == ' + burnModes[GM_getValue('burnOption')] + '</strong><br>' +
         'Perform featured jobs: <strong>' + showIfUnchecked(GM_getValue('featJob')) + '</strong><br>' +
         '&nbsp;&nbsp;Selected job: <strong>' + featJobNames[GM_getValue('featJobIndex', 0)] + '</strong><br>' +
@@ -12154,7 +12114,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Stamina Fallback: <strong>' + GM_getValue('autoStatStaminaFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Rest AutoStat: <strong>' + GM_getValue('restAutoStat') + '</strong><br>' +
         '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +
-        'autoMainframe: <strong>' + showIfUnchecked(GM_getValue('autoMainframe')) + '</strong><br>' +
+        //'autoMainframe: <strong>' + showIfUnchecked(GM_getValue('autoMainframe')) + '</strong><br>' +
         '&nbsp;&nbsp;-autoMainframeCode: <strong>' + GM_getValue('autoMainframeCode') + '</strong><br>' +
         'autoResetTimers: <strong>' + showIfUnchecked(GM_getValue('autoResetTimers')) + '</strong><br>' +
         'autoDailyChecklist: <strong>' + showIfUnchecked(GM_getValue('autoDailyChecklist')) + '</strong><br>' +
@@ -12671,6 +12631,7 @@ function getActionBox(boxDesc) {
 // Fetch the action link for the given message box
 function getActionLink(boxDiv, linkText) {
   var linkElt = xpathFirst('.//a[contains(.,"'+linkText+'")]', boxDiv);
+  if(!linkElt)linkElt = xpathFirst('.//a//span[contains(.,"'+linkText+'")]', boxDiv);
   if (linkElt) return linkElt;
   return false;
 }
@@ -12850,7 +12811,6 @@ function autoWishlist() {
   if (elt) {
     clickElement(elt);
     DEBUG('Redirecting to post wishlist');
-
     if (wishlistElt) {
       var buttonElt = xpathFirst('.//a', wishlistElt);
       if (buttonElt) {
@@ -12929,16 +12889,17 @@ function autoWar() {
   if (actionElt) {
     // Check if "War in Progress" is there
     // FIXME: Causes looping
-    /*var actionLink = getActionLink (actionElt, 'Check War');
-    if (actionLink) {
+    var actionLink = getActionLink (actionElt, 'Check War');    
+    if (actionLink && checkOnWar) {
       Autoplay.fx = function() {
         setGMTime('warTimer', '00:00');
         clickElement(actionLink);
         DEBUG('Clicked to check war in progress.');
+        checkOnWar = false;
       };
       Autoplay.start();
       return true;
-    }*/
+    }
 
     // Check if "Reward friends" is there
     actionLink = getActionLink (actionElt, 'Reward Friends');
@@ -12954,7 +12915,7 @@ function autoWar() {
   }
 
   // Check the timer, do we even need to go further?
-  if (timeLeftGM('warTimer') > 0) return false;
+  if (timeLeftGM('warTimer') > 0) return false;  
 
   // We need to be on the war page to go any further
   if (!onWarTab()) {
@@ -12969,6 +12930,7 @@ function autoWar() {
     Autoplay.fx = function() {
       clickAction = action;
       clickElement(warStartButton);
+      checkOnWar = true;
       DEBUG('Clicked to start a new war.');
     };
     Autoplay.start();
@@ -12980,7 +12942,7 @@ function autoWar() {
   if (warStatus) {
     var warTimer = warStatus.innerHTML;
     setGMTime('warTimer', warTimer);
-    DEBUG('War is not available yet, checking again after ' + warTimer + ' hours.');
+    DEBUG('War is not available yet, checking again after ' + warTimer + ' hours.');    
   } else {
     // Get war Target
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
@@ -13046,7 +13008,6 @@ function autoGiftWaiting() {
       return true;
     }
   }
-
   return false;
 }
 
@@ -13187,9 +13148,7 @@ function autoGiftAccept() {
       if (giftCount3012 > 0) {
         // Ok, we have at least one gift!
         for (var i =0; i < giftCount3012; i++) {
-          var eltThisGift = eltGiftContainer3012.snapshotItem(i).innerHTML.slice(eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('_main"'));
-          //DEBUG('Gifts: Snapshot ' + i + ': ' + eltThisGift);
-
+          var eltThisGift = eltGiftContainer3012.snapshotItem(i).innerHTML.slice(eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('_main"'));          
           var eltX = 'event_' + eltThisGift + '_main';
           var eltGiftContent = iframeGiftWindow.contentDocument.getElementById(eltX);
           var giftSender = eltGiftContent.innerHTML.slice(0, eltGiftContent.innerHTML.indexOf(' has sent you')).untag().clean().ltrim().rtrim();
@@ -13221,9 +13180,7 @@ function autoGiftAccept() {
       if (giftCount3018 > 0) {
         // Ok, we have at least one gift!
         for (var i =0; i < giftCount3018; i++) {
-          var eltThisGift = eltGiftContainer3018.snapshotItem(i).innerHTML.slice(eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('_main"'));
-          //DEBUG('Gifts: Snapshot ' + i + ': ' + eltThisGift);
-
+          var eltThisGift = eltGiftContainer3018.snapshotItem(i).innerHTML.slice(eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('_main"'));    
           var eltX = 'event_' + eltThisGift + '_main';
           var eltGiftContent = iframeGiftWindow.contentDocument.getElementById(eltX);
           var giftSender = eltGiftContent.innerHTML.slice(0, eltGiftContent.innerHTML.indexOf(' needs a partner')).untag().clean().ltrim().rtrim();
@@ -13376,6 +13333,7 @@ function autoDailyChecklist() {
   return false;
 }
 
+/*
 function autoMainframe() {
   // Check for mainframe on main page
   var eltMainframe = xpathFirst('.//img[contains(@src, "Code_MessageBox")]', innerPageElt);
@@ -13409,6 +13367,7 @@ function autoMainframe() {
   }
   return false;
 }
+*/
 
 function goProperties(propCity) {
   // Make sure we're in the correct city
@@ -13975,6 +13934,7 @@ function goLocation(toCity) {
   return false;
 }
 
+/*
 //ATK
 //Hourly Stats Tracking - Experimental Work in Progress
 function updateHourlyStats() {
@@ -14185,6 +14145,7 @@ function updateHourlyStats() {
   }
   GM_setValue('hourOfDay', String(currentHour));
 }
+*/
 
 function prepStatsArray(workingArray, currentHour){
   for (var i = 0; i < workingArray.length; i++){
@@ -14453,17 +14414,14 @@ function logFightResponse(rootElt, resultElt, context) {
     for(i=0;i<5;i++) {
       eltStashID = 'fight_loot_feed_btn_'+i;
       eltStash = document.getElementById(eltStashID, resultElt);
-      if (eltStash && isGMChecked('autoSecretStash')){
-        DEBUG('Secret Stash Found.');
+      if (eltStash && isGMChecked('autoSecretStash')){        
         var SecretStashFightingCount = parseInt(GM_getValue('SecretStashFightingCount')) ? parseInt(GM_getValue('SecretStashFightingCount')) : 0;
         var publishFrequency =  parseInt(GM_getValue('autoSecretStashFrequency')) ? parseInt(GM_getValue('autoSecretStashFrequency')) : 1;
         var logFrequency = parseInt(SecretStashFightingCount % publishFrequency);
         if(SecretStashFightingCount % publishFrequency == 0) {
-          clickElement(eltStash);
-          DEBUG('Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
+          clickElement(eltStash);          
           addToLog('info Icon','Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
         } else {
-          DEBUG('Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
           addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
         }
         SecretStashFightingCount+=1;
@@ -14523,7 +14481,6 @@ function logFightResponse(rootElt, resultElt, context) {
         winCount = parseInt(RegExp.$1);
       if (innerNoTags.match(/loss:\s*(\d+)/i))
         lossCount = parseInt(RegExp.$1);
-      DEBUG('Power Attack Results : '+winCount+'/'+lossCount);
     }
 
     var powerAttackResult="";
@@ -14646,8 +14603,7 @@ function logFightResponse(rootElt, resultElt, context) {
   }  else if (innerNoTags.indexOf('too weak') != -1) {
     addToLog('info Icon', '<span style="color:#FF9999;">' + 'Too weak to fight.'+ '</span>');
   } else {
-    DEBUG('Unrecognized fight response:');
-    DEBUG(inner);
+    DEBUG('Unrecognized fight response:' + inner);    
   }
 
   randomizeStamina();
@@ -14692,7 +14648,7 @@ function randomizeStamina() {
     randomCities = GM_getValue('randomRobLocations');
     while (spendMode == STAMINA_HOW_ROBBING) {
       var stamLoc = Math.floor(Math.random()*(cities.length));
-      DEBUG('Rbo City Randomize set to : '+ stamLoc + ' was ' +GM_getValue('robLocation'));
+      DEBUG('Rob City Randomize set to : '+ stamLoc + ' was ' +GM_getValue('robLocation'));
       //if (!isGMEqual('robLocation', stamLoc) && randomCities[stamLoc]=='1') {
       if (randomCities[stamLoc]=='1') {
         GM_setValue('robLocation', stamLoc);
@@ -14966,8 +14922,7 @@ function logJSONResponse(responseText, action, context) {
 // context: (optional) Any further data needed to describe the action
 // Returns: true if something has been done that will cause the inner page
 //          to change, such as clicking somewhere or loading another page.
-function logResponse(rootElt, action, context) {
-  DEBUG('Processing logResponse');
+function logResponse(rootElt, action, context) {  
   // Set default timer properties.
   Autoplay.fx = goHome;
   Autoplay.delay = getAutoPlayDelay();
@@ -15037,14 +14992,11 @@ function logResponse(rootElt, action, context) {
   if (!messagebox) {
 
     if(action == 'autohit') return false;
-    DEBUG('logResponse: HTML=' + rootElt.innerHTML);
-    DEBUG('Unexpected response page: no message box found!');
+    DEBUG('Unexpected response page: no message box found -logResponse: HTML=' + rootElt.innerHTML);    
 
     // If fighting from a user-specified list, cycle it.
     // Otherwise, the problem might repeat indefinitely.
-    if (action == 'fight' && GM_getValue('staminaSpendHow') == getStaminaMode()) {
-      cycleSavedList('fightList');
-    }
+    if (action == 'fight' && GM_getValue('staminaSpendHow') == getStaminaMode()) cycleSavedList('fightList');
 
     return false;
   }
@@ -15148,12 +15100,11 @@ function logResponse(rootElt, action, context) {
               if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 )
                 {
                    pushNextJob = true;
-                   DEBUG((parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) + '% =100% flagged as MASTERED ' );
-                } else {
-                DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
+                   //DEBUG((parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) + '% =100% flagged as MASTERED ' );
+                //} else DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
                 }
-             } else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
-      } else DEBUG(' mastery check skipped no masterygainelt ');
+             } //else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
+      } //else DEBUG(' mastery check skipped no masterygainelt ');
 
       if (pushNextJob) DEBUG (' - - - push next job was true ');
       else DEBUG (' - - - push next job was false ');
@@ -15204,8 +15155,7 @@ function logResponse(rootElt, action, context) {
         jobOptimizeOn = false;
         addToLog('process Icon', inner);
         // DEBUG (' - - - push next job was true 4 ');
-      } else if (innerNoTags.indexOf('Missing') != -1) {        
-        DEBUG ('Seems we are missing some items that we need to get before we can continue with '+jobName);
+      } else if (innerNoTags.indexOf('Missing') != -1) {                
         if (getJobRowItems(jobName)) {
           DEBUG(' - - need items jobid='+jobid+' selectMission='+GM_getValue('selectMission', 1));
           if (jobid != GM_getValue('selectMission', 1))  Autoplay.fx = autoMission;            
@@ -15216,8 +15166,9 @@ function logResponse(rootElt, action, context) {
       //return;
 
       if (pushNextJob) {
-          DEBUG('Job Mastery of 100% detected, Reloading');
-          goHome();
+          DEBUG('Job Mastery of 100% detected, Reloading');          
+          customizeVegasJobs();
+          //goHome();
       }else {
         return;
       }
@@ -15386,15 +15337,14 @@ function logResponse(rootElt, action, context) {
         addToLog('process Icon', 'Accepted ' + accepts.length + ' mafia ' +
                  (accepts.length > 1 ? ' invites.' : ' invite.'));
       } else {
-        DEBUG('Unrecognized response for "accept" action.');
-        DEBUG(inner);
+        DEBUG('Unrecognized response for "accept" action : '+inner);
       }
       break;
 
     case 'energypack':
       addToLog('energyPack Icon', 'Used an <span class="good">Energy Pack</span>.');
       energyPackElt = undefined;
-      DEBUG(inner);
+      DEBUG('Unrecognized response for "energypack" action : '+inner);
       break;
 
     case 'help':
@@ -15649,17 +15599,14 @@ function handlePopups() {
             || popupInner.indexOf('id="original_buyframe_popup"') != -1  // The Marketplace
             || popupInner.indexOf('marketplace_title.png') != -1  // The Marketplace
             || popupInner.indexOf('giftcard_iframe') != -1  // The Marketplace            
-
             || popupInner.indexOf('xw_controller=hospital') != -1 // The Hospital
             || popupInner.indexOf('bank_popup') != -1 // The Bank
             || popupInner.indexOf('vault_popup') != -1 // Las Vegas Vault
-
             || popupInner.indexOf('xw_controller=challenge') != -1 // Challenges
             || popupInner.indexOf('chop_build_final') != -1 // Chop Shop/Weapon Depot success popup
             || popupInner.indexOf('id="ChopShopCarousel"') != -1 // Chop Shop/Weapon Depot craft popup
             || popupInner.indexOf('mw_app=slotmachine') != -1 // Slot Machine
             || popupInner.indexOf('id="map_boss_fight"') != -1 // Vegas Boss fights
-
             || popupInner.indexOf('class="account_settings_title"') != -1 // Account Settings
             ) {
             continue;
@@ -15818,7 +15765,6 @@ function handlePopups() {
               var i=1;
               energyRewardID = 'energy_thnx_btn_'+i;
               while(energyReward = document.getElementById(energyRewardID, popupElts[i])){
-                DEBUG('Energy Reward button Found.');
                 var eltThanx = xpathFirst('.//a[contains(.,"Thank")]', energyReward);
                 if(eltThanx){
                   clickElement(eltThanx);
