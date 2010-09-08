@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.672
+// @version     1.1.673
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.672',
+  version: '1.1.673',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -765,6 +765,7 @@ var suspendBank = false;        // Suspend banking for a while
 var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
+var checkOnWar;
 
 //new_header = false ; // change the commented out line to disable all changes
 new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new header
