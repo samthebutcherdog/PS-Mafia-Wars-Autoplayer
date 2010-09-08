@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.673
+// @version     1.1.674
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.673',
+  version: '1.1.674',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12696,7 +12696,7 @@ function autoLotto() {
       if (lottoPrize == (GM_getValue('autoLottoBonusItem', 0) + 1)) {
         // Grab the mastery button
         var bonusClaim = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Claim Prize")]', innerPageElt);
-        if(!bonusClaim) bonusClaim = xpathFirst('.//a[@class="sexy_button_new short_white" contains(text(), "Claim Prize")]', innerPageElt);
+        if(!bonusClaim) bonusClaim = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(text(), "Claim Prize")]', innerPageElt);
         if (bonusClaim) {
           Autoplay.fx = function() {
             clickElement(bonusClaim);
