@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.670
+// @version     1.1.671
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.670',
+  version: '1.1.671',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1673,7 +1673,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     return this.replace(/<[^>]*>/g, '');
   };
   String.prototype.clean = function() {
-    return this.replace(/<\/?[^>]+(>|$)&/g, '');
+    return this.replace(/<\/?[^>]+(>|$)/g, '');
   };
 
   Array.prototype.searchArray = function(target, index) {
@@ -9558,15 +9558,15 @@ function doQuickClicks() {
 
     // Click the reward button
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
-    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
+    if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
     
     // Click the 'Call for Help!' button
     if (doClick('.//div//a[@class="sexy_button" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
-    if (doClick('.//div//a[@class="sexy_button" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
+    if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
     
     // Click the 'Rally More Help!' button
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
-    if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
+    if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
     // Can bank flag
     var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
@@ -10531,7 +10531,7 @@ function getJobMastery(jobRow, newJobs) {
 
 // Set the next job to be mastered for mastery job options
 function jobMastery(element, newJobs) {
-//    DEBUG('in jobmastery');
+  DEBUG('in function jobMastery');
   if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) return;
 
   var selectMission = parseInt(GM_getValue('selectMission', 1));
@@ -10550,7 +10550,7 @@ function jobMastery(element, newJobs) {
   var tierLevel = 0;
   var jobPercentComplete = -1;
   if (currentJobRow) jobPercentComplete = getJobMastery(currentJobRow, newJobs);
-
+  DEBUG('Job is '+jobPercentComplete+' % complete');
   var currentJobMastered = (jobPercentComplete == 100);
   if (currentJobRow) {
     if (newJobs && currentJobRow.className.match(/mastery_level_(\d+)/i))
@@ -10663,12 +10663,10 @@ function customizeVegasJobs() {
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
 
-
   // FIXME: Change this once we encounter locked jobs for the new header
   var isJobLocked = function (thisJob) {
     return /locked/i.test(thisJob.innerHTML);
   };
-
 
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
@@ -10678,7 +10676,6 @@ function customizeVegasJobs() {
 
   var masteredJobsCount = 0;
   var jobsFound = 0;
-
 
   for (var i = 0, iLength = vegasJobs.length; i < iLength; ++i) {
     var currentJob = vegasJobs[i];
@@ -10728,14 +10725,13 @@ function customizeVegasJobs() {
       }
       
       // Skip locked jobs and optional fight jobs
-        if(isJobLocked(currentJob) || skipCurrentJob
-        || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) )
-           {
-             DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - skip FIGHT in Vegas - or - lack of /energy/stam - Skipping.');
-           } else {
-             availableJobs[city][currentTab].push(jobMatch);
-           }
-        }
+      if(isJobLocked(currentJob) || skipCurrentJob || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) )
+        {
+          DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - skip FIGHT in Vegas - or - lack of /energy/stam - Skipping.');
+        } else {
+          availableJobs[city][currentTab].push(jobMatch);
+      }
+    }
     
     // Skip this for jobs without jobCost
     if (!jobCost) continue;
@@ -10814,19 +10810,27 @@ function customizeVegasJobs() {
   var elt;
   // Highlight the best and worst jobs.
   if (worstRatio != bestRatio) {
+    var i=0;
     while (bestJobs.length) {
-      elt = bestJobs.pop();
-      //makeElement('br', elt);
-      elt = makeElement('span', elt, {'style':'color:#52E259; font-size: 10px'});
-      //makeElement('img', elt, {'src':stripURI(yeahIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
-      elt.appendChild(document.createTextNode(' (BEST)'));
+      var id = 'bestJob'+i;
+      elt = document.getElementById(id);
+      if(!elt){
+        elt = bestJobs.pop();        
+        elt = makeElement('span', elt, {'id':id, 'style':'color:#52E259; font-size: 10px'});        
+        elt.appendChild(document.createTextNode(' (BEST)'));
+      }
+      i++;      
     }
-    while (worstJobs.length) {
-      elt = worstJobs.pop();
-      //makeElement('br', elt);
-      elt = makeElement('span', elt, {'style':'color:#EC2D2D; font-size: 10px'});
-      //makeElement('img', elt, {'src':stripURI(omgIcon), 'width':'12', 'height':'12', 'style':'vertical-align:middle'});
-      elt.appendChild(document.createTextNode(' (WORST)'));
+    i = 0;
+    while (worstJobs.length) {      
+      id = 'worstJob'+i;
+      elt = document.getElementById(id);
+      if(!elt){
+        elt = worstJobs.pop();        
+        elt = makeElement('span', elt, {'id':id, 'style':'color:#EC2D2D; font-size: 10px'});        
+        elt.appendChild(document.createTextNode(' (WORST)'));
+      }
+      i++;      
     }    
   }
 
@@ -11650,7 +11654,6 @@ function getJobRowItems(jobName) {
     if (itemsFound) {
       setSavedList('itemList', items.unique());
       setSavedList('jobsToDo', jobs);
-
       popJob();
       return true;
     }
@@ -11816,7 +11819,7 @@ function jobLoot(element) {
         innerNoTags.match(/found(?:\s+an?)?\s+(.*?)\s+on\s+the/i) ||
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
       var loot = RegExp.$1;
-      var txtLog = '<span class="loot">'+' Found '+ loot + ' in the job.</span>';
+      var txtLog = ''+' Found <span class="loot">'+ loot + '</span> in the job.';
       lootbag.push(loot);
       addToLog('lootbag Icon', txtLog);
     }
@@ -11832,16 +11835,12 @@ function jobLoot(element) {
       if(messages[i].title){
         var loot = messages[i].title;
         if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
-        if (strLoot == '') {
-          strLoot = 'Found <span class="loot">'+loot+'</span> in the job.';
-        } else {
-          strLoot = strLoot + '<br>Found <span class="loot">' + loot+'</span> in the job.';
-        }
+        if (strLoot) strLoot = '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
+        else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';
         lootbag.push(loot);
       }
     }
-    if (numMessages > 0 && strLoot !='') {
-      //var txtLog = strLoot + '<br> in the job.';
+    if (numMessages > 0 && strLoot !='') {      
       addToLog('lootbag Icon', strLoot);
     }
   }
@@ -13846,7 +13845,7 @@ function goJob(jobno) {
   // Get the action element by job no first
   var elt;
   var tmp = 1 ;
-  //if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
+//  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'") and not(contains(@onclick, "xw_controller=marketplace"))]', jobRow);
   // if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
   // if retrieving by job no fails, simply retrieve the job link
@@ -14578,11 +14577,11 @@ function logFightResponse(rootElt, resultElt, context) {
       foundLoot = match[2] + ' ' + match[3];
       totalAttack = !isUndefined(prevAttackEquip) ? curAttackEquip - prevAttackEquip: 0;
       totalDefense = !isUndefined(prevDefenseEquip) ? curDefenseEquip - prevDefenseEquip: 0;
-      if(txtLog) txtLog += '<br/><span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
-      else txtLog = '<span class="loot">'+' Found '+ foundLoot + ' in the fight.</span>';
+      if(txtLog) txtLog += '<br/>'+' Found <span class="loot">'+ foundLoot + '</span> in the fight.';
+      else txtLog = ' Found <span class="loot">'+ foundLoot + '</span> in the fight.';
     }
-    if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=' + curAttackEquip;
-    if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=' + curDefenseEquip;
+    if(totalAttack>0) txtLog += '<br/>Loot Stat: Attack Strength: Old=' + prevAttackEquip + ', New=<span class="loot">' + curAttackEquip+'</span>';
+    if(totalDefense>0) txtLog += '<br/>Loot Stat: Defense Strength: Old=' + prevDefenseEquip + ', New=<span class="loot">' + curDefenseEquip+'</span>';
     if(txtLog) addToLog('lootbag Icon', txtLog);
 
     //Look for Victory Coins
