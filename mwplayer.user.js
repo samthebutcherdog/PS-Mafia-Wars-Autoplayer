@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.674
+// @version     1.1.675
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.674',
+  version: '1.1.675',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8531,37 +8531,24 @@ function handleModificationTimer() {
 // Only Process when not running
   if (!running) {
     if (onLootTab()) {
-      // TODO: Need fields (min(Weapon/Armor/Vehicle/Animal)(Attack/Defense) in settings for corresponding categories
-      // USAGE: cleanLoot(minAttack, minDefense, Category, Stop Category)
-      // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
-      //var sortLootType = parseInt(GM_getValue('filterLootOpt'));
-      //if (sortLootType != 0) {
-      //  cleanLoot("Weapons",sortLootType);
-      //  cleanLoot("Armor",sortLootType);
-      //  cleanLoot("Vehicles",sortLootType);
-      //  cleanLoot("Animals", sortLootType);
-      //}
-
-      // Handler for switching sub-areas.
       var handleFilterChanged = function() {
         sortLootType = filterLootSelect.selectedIndex;
         if(sortLootType != oldLootType){
-          cleanLoot("Weapons",sortLootType);
-          cleanLoot("Armor",sortLootType);
-          cleanLoot("Vehicles",sortLootType);
-          cleanLoot("Animals", sortLootType);
+          cleanLoot(sortLootType);
           oldLootType = sortLootType;
         }
       }
-
-      var lootElt = xpathFirst('.//li[contains(@class, "tab_on")]//div[contains(@class, "tab_content")]//a[contains(., "Loot")]', innerPageElt);
+      var lootElt = xpathFirst('.//div[@class="title"][contains(.,"Loot")]', innerPageElt);
       var oldLootType=0;
       var id = 'filterLootSelect';
       var filterLootSelect = document.getElementById(id);
       if(!filterLootSelect){
-        makeElement('br', lootElt.parentNode, {'class':'hide'});
-        var filterLootSelect = makeElement('select', lootElt.parentNode, {'id':id,'style':'padding-top:3px;'});
-        var filterOptions = ['Disabled','Attack','Defense','Combined'];
+        makeElement('br', lootElt, {'class':'hide'});
+        var filterLootSelect = makeElement('select', lootElt, {'id':id,'style':'padding-top:3px;'});
+        var filterOptions = ['Filter Disabled','Weapons-Attack','Weapons-Defense','Weapons-Combined',
+          'Armor-Attack','Armor-Defense','Armor-Combined',
+          'Vehicles-Attack','Vehicles-Defense','Vehicles-Combined',
+          'Animals-Attack','Animals-Defense','Animals-Combined'];
         for (i = 0, iLength=filterOptions.length; i < iLength; ++i) {
           choice = document.createElement('option');
           choice.value = i;
@@ -8569,10 +8556,9 @@ function handleModificationTimer() {
           filterLootSelect.appendChild(choice);
         }
         filterLootSelect.selectedIndex = GM_getValue('filterLootOpt', 0);
+        filterLootSelect.addEventListener('change', handleFilterChanged, false);
         handleFilterChanged();
       }
-
-      filterLootSelect.addEventListener('change', handleFilterChanged, false);
     }
 
     if (isGMChecked('HideCollections') && onCollectionsTab()) {
@@ -8626,133 +8612,225 @@ function objLootItem() {
   this.Element = null;
   this.Giftable = false;
 }
+function clearLootPage() {
+    //Hide everything 
+    var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
+	var numRows = colRows.length;
+    var id = 'MWAP_Temp_Loot_List';
+    var tempDiv = document.getElementById(id);
+    if(tempDiv) {
+      tempDiv.parentNode.removeChild(tempDiv);
+    }
+    for (var i = 0; i < numRows; i++) {
+      colRows[i].style.display="none";  // Hide everything.
+    }
+}
+function restoreLootPage() {
+    //Restore everything 
+    var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
+	var numRows = colRows.length;
+    var id = 'MWAP_Temp_Loot_List';
+    var tempDiv = document.getElementById(id);
+    if(tempDiv) {
+      tempDiv.parentNode.removeChild(tempDiv);
+    }
+    for (var i = 0; i < numRows; i++) {
+      colRows[i].style.display="";  // Show everything.      
+    }
+}
 
-function cleanLoot(strType, sortLootType) {
-  // sortLootType values: 0= none, 1= Attack only, 2= Defense only, 3= A/D Combo, 4= Giftable only
-  var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
+function cleanLoot(sortLootType) {
+  var eltLoot = xpathFirst('.//table[@class="main_table"]', innerPageElt);
   var minAttack = 0;
   var minDefense = 0;
 
-  if (eltLoot.title == "") {
-  //  return;
-  //eltLoot.title = "PS MWAP modified";
+  var eltWeapons = '';
+  var eltArmor = '';
+  var eltAnimals = '';
+  var eltVehicles = '';
+  var eltSpecialLoot = '';
+  try {
+  if (eltLoot.title == "") {  //Run once
+  
+    var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
+	var numRows = colRows.length;
+    var colLoot = new Array(4);
+    for (var i = 0; i < 5; i++) {
+      colLoot[i] = [];
+    }
+    var lootType = 0;
+    var horzLine = colRows[0].innerHTML.clean().trim();
+    for (var i = 0; i < numRows; i++) {
+      var rowVal = $x('.//td',colRows[i]);
+      
+      switch(colRows[i].innerHTML.clean().trim()) {
+      case 'Hidden Loot':
+        lootType = -1;
+        break;
+      case 'Weapons':
+        lootType = 0;
+        eltWeapons = colRows[i];
+        break;
+      
+      case 'Armor':
+        lootType = 1;
+        eltArmor = colRows[i];
+        break;
+      case 'Animals':
+        lootType = 2;
+        eltAnimals = colRows[i];
+        break;
+      case 'Vehicles':
+        eltVehicles = colRows[i];
+        lootType = 3;
+        break;
+      case 'Special Loot':
+        eltSpecialLoot = colRows[i];
+        lootType = 4;
+        break;
+      case 'Prep Loot':
+        lootType = -1;
+        break;
+      case horzLine:
+        break;
+      default:
+         
+        var nameLoot = $x('.//strong',rowVal[1]);
+          
+        if (rowVal[5] == undefined) break;
+        var splitAttack = rowVal[2].innerHTML.clean().trim().split(" ");
+        var splitDefense = rowVal[3].innerHTML.clean().trim().split(" ");
+        var splitQuantity = rowVal[5].innerHTML.clean().trim().split(" ");
+        var objLoot = new objLootItem();
+        objLoot.Name = nameLoot[0].innerHTML;
+        objLoot.Attack = parseInt(splitAttack[0]);
+        objLoot.Defense = parseInt(splitDefense[0]);
+        objLoot.Quantity = parseInt(splitQuantity[1]);
+        colLoot[lootType].push(objLoot);
+        // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
+        // hence the loot item is giftable.
+        if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
+        break;
+        
+      }
+      eltWeapons.title = JSON.stringify(colLoot[0]);
+      eltArmor.title = JSON.stringify(colLoot[1]);
+      eltAnimals.title = JSON.stringify(colLoot[2]);
+      eltVehicles.title = JSON.stringify(colLoot[3]);
+      eltSpecialLoot.title = JSON.stringify(colLoot[4]);
 
-  var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
-  eltRow.style.display="";
-  eltRow.nextSibling.nextSibling.style.display="";
-  var colLoot = [];
-    do {
-      // Get Attack/Defense, and Total values
-      var eltPicture = xpathFirst('.//td', eltRow);
-      var eltAttackDef = eltPicture.nextSibling.nextSibling;
-      var eltAttack = xpathFirst('.//td', eltAttackDef);
-      var eltDefense = eltAttack.nextSibling.nextSibling;
-      var eltQuantity = eltAttackDef.nextSibling.nextSibling;
-      // eltQuantity should be formated "Owned:"/#/<Add> so if it has "Add" then the item is giftable.
-      var splitAttack = eltAttack.innerHTML.clean().trim().split(" ");
-      var splitDefense = eltDefense.innerHTML.clean().trim().split(" ");
-      var splitQuantity = eltQuantity.innerHTML.clean().trim().split(" ");
-      var objLoot = new objLootItem();
-      objLoot.Attack = parseInt(splitAttack[0]);
-      objLoot.Defense = parseInt(splitDefense[0]);
-      objLoot.Quantity = parseInt(splitQuantity[1]);
-      objLoot.Element = eltRow;
-      // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
-      // hence the loot item is giftable.
-      if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
-      colLoot.push(objLoot); // add item to collection
-      eltRow = eltRow.nextSibling.nextSibling.nextSibling.nextSibling;
-      //eltRow.style.display="";
-      //eltRow.nextSibling.nextSibling.style.display="";
-      var txtData = eltRow.innerHTML.clean().trim();
-      if(txtData=='line') eltRow.style.display="none";
-    } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
+      
+    }
+    eltLoot.title = "break";
+  } 
+  var strType = "";
+  switch(sortLootType) {
+    case 0: //Disabled;
+      restoreLootPage();
+      return;
+      break;
+    case 1: //Attack
+    case 2: //Defense
+    case 3: //Combined
+      lootType = 0;
+      strType = "Weapons";
+      break;
+    case 4: //Attack
+    case 5: //Defense
+    case 6: //Combined
+      lootType = 1;
+      strType = "Armor";
+      break;
+    case 10: //Attack
+    case 11: //Defense
+    case 12: //Combined
+      lootType = 2;
+      strType = "Animals";
+      break;
+    case 7: //Attack
+    case 8: //Defense
+    case 9: //Combined
+      lootType = 3;
+      strType = "Vehicles";
+      break;
+  }
+    // Find header you want to work on...
+    clearLootPage();
+    var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
+    eltLoot.style.display="";
+    var colLoot = JSON.parse(eltLoot.title);
+    var Combined = false;
 
-    // Okay, main collection array, colLoot should be built at this point.
     switch(sortLootType) {
-      case 0: // No filter
-        break;
-      case 1: // Attack only
+      case 1: //Attack
+      case 4: 
+      case 7: 
+      case 10:
         minAttack = parseInt(sortAttack(colLoot));
+
         break;
-      case 2: // Defense Only
+      case 2: 
+      case 5: //Defense
+      case 8: 
+      case 11:
         minDefense = parseInt(sortDefense(colLoot));
         break;
-      case 3: // Attack/Defense Combo
+      case 3: 
+      case 6: 
+      case 9: 
+      case 12: //Combined
         minAttack = parseInt(sortAttack(colLoot));
         minDefense = parseInt(sortDefense(colLoot));
-        break;
-      case 4:  // Giftable only (not programmed yet obviously...  ^_^)
+        Combined = true;
         break;
     }
-	eltLoot.title = minAttack + ',' + minDefense;
-  } else {
-    var parseVals = eltLoot.title.split(",");
-	minAttack = parseInt(parseVals[0]);
-	minDefense = parseInt(parseVals[1]);
-    switch(sortLootType) {
-      case 0: // No filter
-        break;
-      case 1: // Attack only
-        minDefense = 0;
-        break;
-      case 2: // Defense Only
-        minAttack = 0;
-        break;
-      case 3: // Attack/Defense Combo
-        minAttack = parseInt(sortAttack(colLoot));
-        minDefense = parseInt(sortDefense(colLoot));
-        break;
-      case 4:  // Giftable only (not programmed yet obviously...  ^_^)
-        break;
+    
+    var objLoot = new objLootItem();
+    var divElt = document.createElement("div");
+    divElt.setAttribute('id', 'MWAP_Temp_Loot_List');
+	var numRows = colLoot.length - 1;
+    for (var i = 0; i < numRows; i++) {
+      var newElt = document.createElement("tr");
+      var tdName = document.createElement("td");
+      var tdAttack = document.createElement("td");
+      var tdDefense = document.createElement("td");
+      var tdQuantity = document.createElement("td");
+
+      var txtElt = document.createTextNode(colLoot[i].Name);
+      tdName.appendChild(txtElt);
+      
+      txtElt = document.createTextNode("Attack: " + colLoot[i].Attack);
+      tdAttack.appendChild(txtElt);
+      
+      txtElt = document.createTextNode("Defense: " + colLoot[i].Defense);
+      tdDefense.appendChild(txtElt);
+
+      txtElt = document.createTextNode("Total: " + colLoot[i].Quantity);
+      tdQuantity.appendChild(txtElt);
+      
+      newElt.appendChild(tdName);
+      newElt.appendChild(tdAttack);
+      newElt.appendChild(tdDefense);
+      newElt.appendChild(tdQuantity);
+
+      if (Combined) {
+        if(colLoot[i].Attack > minAttack -1 || colLoot[i].Defense > minDefense -1) divElt.appendChild(newElt);
+      } else {
+        if(colLoot[i].Attack > minAttack -1 && colLoot[i].Defense > minDefense -1) divElt.appendChild(newElt);
+      }
     }
+    insertAfter(eltLoot,divElt);
+
+  } catch (ex) {
+    addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
   }
   DEBUG ('minAttack = ' + minAttack + '   minDefense = ' + minDefense);
-  // Find respective section (Weapons/Armor/Vehicle/Animal)
-  var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
-  var eltRow = eltLoot.nextSibling.nextSibling;  //Go to first item.
-  var txtData = eltRow.innerHTML.clean().trim();
-  if(txtData=='line') eltRow.style.display="none";
 
-   do {
-    // Get Attack/Defense values
-    var eltAttack = xpathFirst('.//td//table//tbody//tr//td[contains(., "Attack")]', eltRow);
-    var eltDefense = eltAttack.nextSibling.nextSibling;
-    var splitVal = eltAttack.innerHTML.split(" ");
-    var intAttack = parseInt(splitVal[2]);
-    splitVal = eltDefense.innerHTML.split(" ");
-    var intDefense = parseInt(splitVal[2]);
-    // Prep elements for possible removal
-    var eltSibling = eltRow.nextSibling.nextSibling;
-    var nextItem = eltSibling.nextSibling.nextSibling;
-
-    if (sortLootType == 3) {
-      if(intAttack < minAttack && intDefense < minDefense){
-        //Removal
-        //eltRow.parentNode.removeChild(eltRow);
-        //eltSibling.parentNode.removeChild(eltSibling);
-        eltRow.style.display="none";
-        eltSibling.style.display="none";
-      } else {
-        eltRow.style.display="";
-        eltSibling.style.display="";
-      }
-    } else {
-      if(intAttack < minAttack || intDefense < minDefense){
-        //Removal
-        //eltRow.parentNode.removeChild(eltRow);
-        //eltSibling.parentNode.removeChild(eltSibling);
-        eltRow.style.display="none";
-        eltSibling.style.display="none";
-      } else {
-        eltRow.style.display="";
-        eltSibling.style.display="";
-      }
-    }
-    eltRow = nextItem;
-    txtData = eltRow.innerHTML.clean().trim();
-    if(txtData=='line') eltRow.style.display="none";
-  } while ((txtData != "Weapons") && (txtData != "Armor") && (txtData != "Animals") && (txtData != "Special Loot") && (txtData != "Vehicles"));
+}
+// This function inserts newNode after referenceNode
+function insertAfter( referenceNode, newNode )
+{
+    referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
 }
 
 function sortAttack(colLoot) {
