@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.675
+// @version     1.1.676
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.675',
+  version: '1.1.676',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8650,8 +8650,9 @@ function cleanLoot(sortLootType) {
   var eltVehicles = '';
   var eltSpecialLoot = '';
   try {
-  if (eltLoot.title == "") {  //Run once
-  
+  if (eltLoot.id == "") {  //Run once
+    eltLoot.id = "break";
+
     var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
 	var numRows = colRows.length;
     var colLoot = new Array(4);
@@ -8713,15 +8714,12 @@ function cleanLoot(sortLootType) {
         break;
         
       }
-      eltWeapons.title = JSON.stringify(colLoot[0]);
-      eltArmor.title = JSON.stringify(colLoot[1]);
-      eltAnimals.title = JSON.stringify(colLoot[2]);
-      eltVehicles.title = JSON.stringify(colLoot[3]);
-      eltSpecialLoot.title = JSON.stringify(colLoot[4]);
-
-      
+      eltWeapons.id = JSON.stringify(colLoot[0]);
+      eltArmor.id = JSON.stringify(colLoot[1]);
+      eltAnimals.id = JSON.stringify(colLoot[2]);
+      eltVehicles.id = JSON.stringify(colLoot[3]);
+      eltSpecialLoot.id = JSON.stringify(colLoot[4]);
     }
-    eltLoot.title = "break";
   } 
   var strType = "";
   switch(sortLootType) {
@@ -8758,7 +8756,7 @@ function cleanLoot(sortLootType) {
     clearLootPage();
     var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
     eltLoot.style.display="";
-    var colLoot = JSON.parse(eltLoot.title);
+    var colLoot = JSON.parse(eltLoot.id);
     var Combined = false;
 
     switch(sortLootType) {
