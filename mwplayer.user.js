@@ -39,18 +39,18 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.679
+// @version     1.1.680
 // ==/UserScript==
 
 // search for new_header   for changes
 //
-// TestChanges    <- new questionable changes can have the option to disable using this (check box on bottom of display tab)
-// if (TestChanges){ code };
+// TestChanges    <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
+// if (isGMChecked(TestChanges)){ code };
 // else { original code };    <- optional
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.679',
+  version: '1.1.680',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10517,7 +10517,7 @@ function getJobMastery(jobRow, newJobs) {
   // Logic for new job layout
   if (newJobs) {
     var mastery = 100;  
-    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i) || jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i)) { mastery = parseInt(RegExp.$1); }
+    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i) || jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i)) { mastery = parseInt(RegExp.$1); }    
     else { if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i)) mastery = 100-parseInt(RegExp.$1) }      
     return mastery;
   }
@@ -10674,7 +10674,7 @@ function customizeVegasJobs() {
 
   // FIXME: Change this once we encounter locked jobs for the new header
   var isJobLocked = function (thisJob) {
-    return /locked/i.test(thisJob.innerHTML);
+    return /locked/i.test(thisJob.innerHTML.untag());
   };
 
   // Display an experience to energy payoff ratio for each job.
@@ -10885,8 +10885,8 @@ function customizeNewJobs() {
   masteredJobs[city][currentTab] = [];
 
   // FIXME: Change this once we encounter locked jobs for the new header
-  var isJobLocked = function (thisJob) {
-    return /locked/i.test(thisJob.innerHTML);
+  var isJobLocked = function (thisJob) {    
+    return /locked/i.test(thisJob.innerHTML.untag());
   };
 
   // Display an experience to energy payoff ratio for each job.
@@ -11031,9 +11031,9 @@ function customizeNewJobs() {
 
 function isJobFight (jobAction) {  return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
 
-function isJobLocked (jobAction) {
-  return (jobAction.innerHTML.indexOf('lock') >= 0 &&
-          jobAction.innerHTML.indexOf('Help') == -1);
+function isJobLocked (jobAction) {    
+  return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);  
+
 }
 
 // Return item name if missing job item is from a business
@@ -11049,6 +11049,7 @@ function requiresBizItem (jobRow) {
 }
 
 function customizeJobs() {
+  
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
 
@@ -11811,6 +11812,7 @@ function jobLoot(element) {
         innerNoTags.match(/found(?:\s+an?)?\s+(.*?)\s+on\s+the/i) ||
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
       var loot = RegExp.$1;
+      if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
       var txtLog = ''+' Found <span class="loot">'+ loot + '</span> in the job.';
       lootbag.push(loot);
       addToLog('lootbag Icon', txtLog);
@@ -12312,8 +12314,11 @@ function parsePlayerUpdates(messagebox) {
       // The fight was won.
       cost = RegExp.$2;
       var experience = RegExp.$1;
-      result += '<span class="good">' + ' WON ' + cost + '</span>' + ' and ' +
-                '<span class="good">' + experience +' experience.</span>';
+      //result += '<span class="good">' + ' WON ' + cost + '</span>' + ' and ' +
+      //          '<span class="good">' + experience +' experience.</span>';
+                
+      result += ' and <span class="good">WON</span>, gaining <span class="good">' + cost + '</span> and ' +
+        '<span class="good">' + experience + ' experience</span>. '+powerAttackResult;                
       var cashLoc = parseCashLoc(cost);
       cost = parseCash(cost);
       experience = parseInt(experience);
@@ -12361,7 +12366,8 @@ function parsePlayerUpdates(messagebox) {
     } else if (messageTextNoTags.match(/you lost.*and losing .*?([A-Z]?\$[\d,]*\d)/i)) {
       // The fight was lost.
       cost   = RegExp.$1;
-      result += '<span class="bad">' + ' LOST ' + cost + '.</span>';
+      //result += '<span class="bad">' + ' LOST ' + cost + '.</span>';
+      result += ' and <span class="bad">LOST</span>, losing <span class="bad">' + cost + '</span>.';
       var cashLoc = parseCashLoc(cost);
       cost = parseCash(cost);
       GM_setValue('passivefightLossCountInt', GM_getValue('passivefightLossCountInt', 0) + attackCount);
