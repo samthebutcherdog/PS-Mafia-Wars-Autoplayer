@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.680
+// @version     1.1.681
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.680',
+  version: '1.1.681',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11748,7 +11748,7 @@ function popJob(){
     function(f) {      
       if (f[0].toUpperCase().trim() == doJob.toUpperCase().trim()) {
         GM_setValue('selectMission', i);
-        addToLog('process Icon', 'Switching job to ' + doJob + '.');        
+        addToLog('info Icon', 'Switching job to ' + doJob + '.');        
       }
       i++;
     }
@@ -11802,7 +11802,7 @@ function jobCombo(element) {
 
 function jobLoot(element) {
   var i, lootbag = [];
-
+  var strLoot = '';
   // See what loot was gained.
   var messages = $x('.//td[@class="message_body"]', element);
   var numMessages = messages.length;
@@ -11813,16 +11813,17 @@ function jobLoot(element) {
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
       var loot = RegExp.$1;
       if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
-      var txtLog = ''+' Found <span class="loot">'+ loot + '</span> in the job.';
+      if (strLoot) strLoot = '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
+      else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';      
       lootbag.push(loot);
-      addToLog('lootbag Icon', txtLog);
+      addToLog('lootbag Icon', strLoot);
     }
   }
 
   // Vegas Loot on jobs
   if (city == LV) {
     var jobResults = xpathFirst('.//div[@class="job_results"]', element);
-    var strLoot = '';
+    strLoot = '';
     messages = $x('.//img', jobResults);
     numMessages = messages.length;
     for (i = 0; i < numMessages; i++) {
@@ -11857,7 +11858,7 @@ function jobLoot(element) {
       if (itemName.indexOf(items[j]) != -1 ) {
         // we found some needed loot
         itemFound = true;
-        addToLog('found Icon', itemName + ' is the item we were looking for!');
+        addToLog('found Icon','<span class="loot>'+ itemName + '</span> is the item we were looking for!');
         removeSavedListItem('itemList', itemName);
         removeJobForItem('jobsToDo', itemName);
         popJob();
@@ -12318,7 +12319,7 @@ function parsePlayerUpdates(messagebox) {
       //          '<span class="good">' + experience +' experience.</span>';
                 
       result += ' and <span class="good">WON</span>, gaining <span class="good">' + cost + '</span> and ' +
-        '<span class="good">' + experience + ' experience</span>. '+powerAttackResult;                
+        '<span class="good">' + experience + ' experience</span>.';
       var cashLoc = parseCashLoc(cost);
       cost = parseCash(cost);
       experience = parseInt(experience);
@@ -12896,6 +12897,7 @@ function autoWarAttack() {
     // Get the "right" side elements
     if (parentElt && parentElt.childNodes[5]) {
       var atkElt = xpathFirst('.//a[@class="sexy_button"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
+      if (!atkElt) atkElt = xpathFirst('.//a[@class="sexy_button_new short_red sexy_attack_new"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
       if (atkElt) return atkElt;
     }
     return false;
