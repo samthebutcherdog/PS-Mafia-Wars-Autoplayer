@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.681
+// @version     1.1.682
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.681',
+  version: '1.1.682',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -717,6 +717,9 @@ const minDelay = 1000;          // Minimum delay on commands
 var running;                    // Is the autoplayer running?
 var innerPageElt;               // The currently visible inner page
 var appLayoutElt;               // The currently visible content page
+var mastheadElt;                // Masthead content
+var statsrowElt;                // statsrow content
+var menubarElt;                 // menubar content
 var cash;                       // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
@@ -3613,7 +3616,7 @@ function autoBankDeposit(bankCity, amount) {
   }
 
   // Make sure we're at the bank.
-  var bankElt = xpathFirst('.//div[@id="bank_popup"]', appLayoutElt);
+  var bankElt = xpathFirst('.//div[@id="bank_popup"]', statsrowElt);
   if (!bankElt) {
     Autoplay.fx = goBank;
     Autoplay.start();
@@ -3671,7 +3674,7 @@ function autoBankDeposit(bankCity, amount) {
 
 function autoBankWithdraw(amount) {
   // Make sure we're at the bank.
-  var formElt = xpathFirst('.//div[@id="bank_popup"]', appLayoutElt);
+  var formElt = xpathFirst('.//div[@id="bank_popup"]', statsrowElt);
   if (!formElt) {
     Autoplay.fx = goBank;
     clickAction = 'withdraw';
@@ -8402,6 +8405,9 @@ function handleModificationTimer() {
   var justPlay = false;
   var prevPageElt = innerPageElt;
   appLayoutElt = document.getElementById('mw_city_wrapper');
+  statsrowElt = document.getElementById('stats_row');
+  mastheadElt = document.getElementById('mw_masthead');
+  menubarElt = document.getElementById('menubar');
   innerPageElt = document.getElementById('inner_page');
 
   if (!innerPageElt) return;
@@ -9927,7 +9933,7 @@ function customizeStats() {
 
   // Make bank icon clickable for instant banking
   var bankLinkElt = document.getElementById('mwap_bank');
-  var bankElt = xpathFirst('.//div[@id="game_stats"]//div[@id="cash_stats_'+cities[city][CITY_ALIAS]+'"]/h4/text()', appLayoutElt);
+  var bankElt = xpathFirst('.//div[@id="game_stats"]//div[@id="cash_stats_'+cities[city][CITY_ALIAS]+'"]/h4/text()', statsrowElt);
   if (bankElt && !bankLinkElt) {
     bankLinkElt = makeElement('a', null, {'id': 'mwap_bank', 'title': 'Click to bank immediately.'});
     bankElt.parentNode.insertBefore(bankLinkElt, bankElt);
@@ -9937,11 +9943,11 @@ function customizeStats() {
 
   // Make energy icon & text clickable for mini pack.
   var nrgLinkElt = document.getElementById('mwap_nrg');
-  var nrgElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text energy_text_bg" and contains(text(), "ENERGY")]', appLayoutElt);
+  var nrgElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text energy_text_bg" and contains(text(), "ENERGY")]', statsrowElt);
   if (!nrgElt)
-    nrgElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="energy" and contains(text(), "Energy")]', appLayoutElt);
+    nrgElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="energy" and contains(text(), "Energy")]', statsrowElt);
   if (!nrgElt)
-    nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', appLayoutElt);
+    nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', statsrowElt);
   if (nrgElt && !nrgLinkElt) {
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0) var miniPackTitle = 'Mini-Pack available now.';
@@ -9960,11 +9966,11 @@ function customizeStats() {
 
   // Make stamina text & icon pointable for showing.
   var stamLinkElt = document.getElementById('mwap_stam');
-  var stamElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text stamina_text_bg" and contains(text(), "STAMINA")]', appLayoutElt);
+  var stamElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text stamina_text_bg" and contains(text(), "STAMINA")]', statsrowElt);
   if (!stamElt)
-    stamElt = xpathFirst('.//div[@id="game_stats"]//h4[contains(text(), "Stamina")]', appLayoutElt);
+    stamElt = xpathFirst('.//div[@id="game_stats"]//h4[contains(text(), "Stamina")]', statsrowElt);
   if (!stamElt)
-    stamElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Stamina")]', appLayoutElt);
+    stamElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Stamina")]', statsrowElt);
   if (stamElt && !stamLinkElt) {
     var stamTitle = 'Minimum Stamina for auto-healing set at ' + GM_getValue('stamina_min_heal') + ' points.';
     stamElt.style.color="#FF0000";
@@ -9975,13 +9981,13 @@ function customizeStats() {
   }
 
   // Make health icon&text clickable for instant healing.
-  var hospitalElt = xpathFirst('.//div[@id="game_stats"]//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
+  var hospitalElt = xpathFirst('.//div[@id="game_stats"]//a[@class="heal_link" or @class="heal_link vt-p"]', statsrowElt);
   var healLinkElt = document.getElementById('mwap_heal');
-  var healElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text health_text_bg" and contains(text(), "HEALTH")]', appLayoutElt);
+  var healElt = xpathFirst('./div[@class="mw_header"]//div[@class="mid_row_text health_text_bg" and contains(text(), "HEALTH")]', statsrowElt);
   if (!healElt)
-    healElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="health" and contains(text(), "Health")]', appLayoutElt);
+    healElt = xpathFirst('.//div[@id="game_stats"]//h4[@class="health" and contains(text(), "Health")]', statsrowElt);
   if (!healElt)
-    healElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Health")]', appLayoutElt);
+    healElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Health")]', statsrowElt);
   if (healElt) {
     if (!healLinkElt) {
       healElt.style.color="#FF0000";
@@ -10149,7 +10155,7 @@ function quickBank(bankCity, amount) {
   }
 
   // One last check to make sure the city hasn't changed
-  var eltBankCity = xpathFirst('.//a[@class="bank_deposit"]', appLayoutElt);
+  var eltBankCity = xpathFirst('.//a[@class="bank_deposit"]', statsrowElt);
   if (eltBankCity) {
     if (eltBankCity.getAttribute('onclick').match(/xw_city=(\d+)/)) {
       var thisCity = RegExp.$1 - 1;
@@ -13609,7 +13615,7 @@ function goMyProfile() {
   if(new_header){
     var elt = xpathFirst('//a[@class="dropdown_narrow"]');
   } else {
-    var elt = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]', appLayoutElt);
+    var elt = xpathFirst('.//div[@class="nav_link profile_link"]//a[contains(.,"Profile")]', mastheadElt);
   }
   if (!elt) {
     addToLog('warning Icon', 'Can\'t find Profile nav link to click.');
@@ -13685,7 +13691,7 @@ function goJobsNav() {
 //  }
   var elt = xpathFirst('//div[@class="nav_link jobs_link"]/a');
   if (!elt) {
-    var elt = xpathFirst('.//a[@class="header_job_button"]', appLayoutElt);
+    var elt = xpathFirst('.//a[@class="header_job_button"]', mastheadElt);
     if (!elt) {
       addToLog('warning Icon', 'Can\'t find jobs nav link to click.');
       return false;
@@ -13875,7 +13881,7 @@ function goPropertyNav() {
   if(new_header){
     var elt = xpathFirst('//a[@class="header_properties_button"]')
   } else {
-    var elt = xpathFirst('.//span[@id="nav_link_properties"]//a', appLayoutElt);
+    var elt = xpathFirst('.//span[@id="nav_link_properties"]//a', menubarElt);
   }
 
   if (!elt) {
