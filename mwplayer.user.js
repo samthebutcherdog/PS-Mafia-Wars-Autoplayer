@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.677
+// @version     1.1.678
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.677',
+  version: '1.1.678',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8603,11 +8603,11 @@ function cleanLoot(sortLootType) {
   var minAttack = 0;
   var minDefense = 0;
 
-  var eltWeapons = '';
-  var eltArmor = '';
-  var eltAnimals = '';
-  var eltVehicles = '';
-  var eltSpecialLoot = '';
+  var eltWeapons = document.createElement('tr');
+  var eltArmor = document.createElement('tr');
+  var eltAnimals = document.createElement('tr');
+  var eltVehicles = document.createElement('tr');
+  var eltSpecialLoot = document.createElement('tr');
   try {
   if (eltLoot.id == "") {  //Run once
     eltLoot.id = "break";
@@ -8629,22 +8629,26 @@ function cleanLoot(sortLootType) {
         break;
       case 'Weapons':
         lootType = 0;
+        colRows[i].setAttribute("id", "Weapons");
         eltWeapons = colRows[i];
-        break;
-      
+        break;      
       case 'Armor':
         lootType = 1;
+        colRows[i].setAttribute("id", "Armor");
         eltArmor = colRows[i];
         break;
       case 'Animals':
         lootType = 2;
+        colRows[i].setAttribute("id", "Animals");
         eltAnimals = colRows[i];
         break;
       case 'Vehicles':
+        colRows[i].setAttribute("id", "Vehicles");
         eltVehicles = colRows[i];
         lootType = 3;
         break;
       case 'Special Loot':
+        colRows[i].setAttribute("id", "Special Loot");
         eltSpecialLoot = colRows[i];
         lootType = 4;
         break;
@@ -8673,11 +8677,11 @@ function cleanLoot(sortLootType) {
         break;
         
       }
-      eltWeapons.id = JSON.stringify(colLoot[0]);
-      eltArmor.id = JSON.stringify(colLoot[1]);
-      eltAnimals.id = JSON.stringify(colLoot[2]);
-      eltVehicles.id = JSON.stringify(colLoot[3]);
-      eltSpecialLoot.id = JSON.stringify(colLoot[4]);
+      eltWeapons.setAttribute("class", JSON.stringify(colLoot[0]));
+      eltArmor.setAttribute("class", JSON.stringify(colLoot[1]));
+      eltAnimals.setAttribute("class",JSON.stringify(colLoot[2]));
+      eltVehicles.setAttribute("class", JSON.stringify(colLoot[3]));
+      eltSpecialLoot.setAttribute("class", JSON.stringify(colLoot[4]));
     }
   } 
   var strType = "";
@@ -8713,9 +8717,9 @@ function cleanLoot(sortLootType) {
   }
     // Find header you want to work on...
     clearLootPage();
-    var eltLoot = xpathFirst('.//tr[contains(., "' + strType + '")]', innerPageElt);
+    var eltLoot = document.getElementById(strType);
     eltLoot.style.display="";
-    var colLoot = JSON.parse(eltLoot.id);
+    var colLoot = JSON.parse(eltLoot.getAttribute('class'));
     var Combined = false;
 
     switch(sortLootType) {
