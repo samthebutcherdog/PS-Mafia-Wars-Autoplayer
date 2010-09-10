@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.676
+// @version     1.1.677
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.676',
+  version: '1.1.677',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -573,21 +573,7 @@ var energyIcon = '<img src="data:image/gif;base64,' +
     '4okpdCl0K1OiQBXSGA6NggMA+ATCXsNwOIBrng/61+oEIOtDLkRhLhYoMTh3F11CJTY2KhKGPwgYMiAjjT8vIiwIlBUZKRGUPzA7n0Iboz9BADs=' +
     '" />';
 
-var killedMobsterIcon = '<img src="data:image/jpeg;base64,' +
-    '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' +
-    '" />';
+var killedMobsterIcon = '<img src="http://playerscripts.com/images/mwap_graphics/icon_killed.png" />';
 
 var yeahIcon = '<img src="data:image/png;base64,' +
     'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAGrSURBVDjLvZPZLkNhFIV75zjvYm7VGFNCqoZUJ+ro' +
@@ -1934,14 +1920,7 @@ function doAutoPlay () {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
 
-  // Build Cars
-  if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
-    if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
-  }
-  // Build Weapons
-  if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
-    if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
-  }
+
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -1954,7 +1933,15 @@ function doAutoPlay () {
       }
     }
   }
-
+	// Collect Take first then try to build
+  // Build Cars
+  if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
+    if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
+  }
+  // Build Weapons
+  if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
+    if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
+  }
   // Player updates
   if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
@@ -2040,12 +2027,6 @@ function doAutoPlay () {
     if (autoDailyChecklist()) return;
   }
 
-  
-  // Auto-mainframe
-  //if (running && !maxed && isGMChecked('autoMainframe') && hasHome) {
-  //  if (autoMainframe()) return;
-  //}
-
   // Auto-Enforce title
   if (running && !maxed && GM_getValue('autoEnforcedTitle')!='' && !timeLeftGM('autoEnforcedTitleTimer')) {
     if (autoEnforce()) return;
@@ -2057,7 +2038,7 @@ function doAutoPlay () {
     if (autoGiftAccept()) return;
   }
 
-  // Auto-Safehouse
+  // Auto-Safehouse (aka Crime Spree now)
   if (running && !maxed && isGMChecked('autoSafehouse') && hasHome) {
     if (autoSafehouse()) return;
   }
@@ -4411,7 +4392,6 @@ function saveSettings() {
   //Start Save General Tab Settings
   //General Tab Checkboxes
   saveCheckBoxElementArray([
-  //  'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','hourlyStatsOpt','burnFirst','featJob'
     'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','burnFirst','featJob'
   ]);
   //General Tab Settings
@@ -4514,7 +4494,6 @@ function saveSettings() {
   //Autostat Tab Checkboxes
   saveCheckBoxElementArray([
     'autoStat','autoStatDisable','autoStatAttackFallback','autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback','autoStatStaminaFallback',
-  //  'autoMainframe','autoResetTimers','autoDailyChecklist',
     'autoResetTimers','autoDailyChecklist',
   ]);
   //Autostat Settings and Validation
@@ -4556,15 +4535,6 @@ function saveSettings() {
     }
   }
 
-  // Validate mainframe
-  //var autoMainframe        = (document.getElementById('autoMainframe').checked === true);
-  //var autoMainframeCode    = document.getElementById('autoMainframeCode').value;
-  //var autoMainframeCodeInt = parseInt(autoMainframeCode);
-  //if (autoMainframe && (autoMainframeCodeInt == 0)) {
-  //  alert('You must enter your mainframe code to enable autoMainframe.');
-  //  return;
-  //}
-  //GM_setValue('autoMainframeCode', autoMainframeCode);
 
   //End Save Autostat Tab Settings
 
@@ -5287,7 +5257,6 @@ function clearStats() {
 
   //ATK
   //New tracking stats for NY
-  //GM_setValue('hourlyStats', '0');
   GM_setValue('fightExpNY', 0);          //Number of exper. points earned from fights in NY
   GM_setValue('fightWinsNY', 0);         //Count of fights won in NY
   GM_setValue('fightWin$NY', '0');       //$ won from fights in NY
@@ -5754,17 +5723,7 @@ function createGeneralTab() {
   }
   lottoBonusSelect.selectedIndex = GM_getValue('autoLottoBonusItem', 0);
 
-  /*
-  // Hourly-stat
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  id = 'hourlyStatsOpt';
-  title = ' Enable hourly stats updates [Beta] ';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(title));
-  */
+
   
   // Burn option
   item = makeElement('div', list);
@@ -9216,16 +9175,7 @@ function refreshGlobalStats() {
     addToLog('experience Icon', '<span style="color:#00FFCC;"> Congratulations on reaching level <strong>' + level + '</strong>!</span>');
     GM_setValue('restAutoStat', 0);
   }
-/*
-  //ATK
-  // Check if hourly stats need updating.
-  if (isGMChecked('hourlyStatsOpt')) {
-    var currentTime = new Date();
-    if (GM_getValue('hourOfDay') != currentTime.getHours()) {
-      updateHourlyStats();
-    }
-  }
-*/  
+
   return true;
 }
 
@@ -9504,6 +9454,7 @@ function refreshMWAPCSS() {
                  '#mafiaLogBox .logEvent.warning.Icon{background-image:url(' + stripURI(warningIcon) + ')}' +
                  '#mafiaLogBox .logEvent.info.Icon{background-image:url(' + stripURI(infoIcon) + ')}' +
                  '#mafiaLogBox .logEvent.lootbag.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
+								 '#mafiaLogBox .logEvent.killedMobster.Icon{background-image:url(' + stripURI(killedMobsterIcon) + ')}' +
                  '#mafiaLogBox .logEvent.found.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
                  '#mafiaLogBox .logEvent.updateGood.Icon{background-image:url(' + stripURI(updateGoodIcon) + ')}' +
                  '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
@@ -12097,7 +12048,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Selected city: <strong>' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '</strong><br>' +
         'Enable auto-Daily Chance: <strong>' + showIfUnchecked(GM_getValue('autoLottoOpt')) + '</strong><br>' +
         'Enable collect Daily Chance bonus: <strong>' + showIfUnchecked(GM_getValue('autoLottoBonus'))  + ' == ' + autoLottoBonusList[GM_getValue('autoLottoBonusItem', 0)] + '</strong><br>' +
-        //'Enable hourly stat: <strong>' + showIfUnchecked(GM_getValue('hourlyStatsOpt')) + '</strong><br>' +
         'Spend all: <strong>' + showIfUnchecked(GM_getValue('burnFirst')) + ' == ' + burnModes[GM_getValue('burnOption')] + '</strong><br>' +
         'Perform featured jobs: <strong>' + showIfUnchecked(GM_getValue('featJob')) + '</strong><br>' +
         '&nbsp;&nbsp;Selected job: <strong>' + featJobNames[GM_getValue('featJobIndex', 0)] + '</strong><br>' +
@@ -13410,42 +13360,6 @@ function autoDailyChecklist() {
   return false;
 }
 
-/*
-function autoMainframe() {
-  // Check for mainframe on main page
-  var eltMainframe = xpathFirst('.//img[contains(@src, "Code_MessageBox")]', innerPageElt);
-  if (!eltMainframe) return false;
-  //DEBUG('eltMainframe.src = ' + eltMainframe.src);
-  clickElement(eltMainframe);
-  DEBUG('Clicked to open mainframe.');
-
-  var eltSecretCode = xpathFirst('//*[@id="secretcode_input"]');
-  //DEBUG('eltSecretCode = ' + eltSecretCode);
-  if (eltSecretCode) {
-    eltSecretCode.value = GM_getValue('autoMainframeCode',0);
-    eltRedeemButton = xpathFirst('.//a[contains(@onclick, "redeemSecretCode")]', innerPageElt);
-    //DEBUG('eltRedeemButton = ' + eltRedeemButton);
-    if (eltRedeemButton) {
-      clickElement(eltRedeemButton);
-      DEBUG('Clicked to redeem mainframe code.');
-    }
-  }
-
-  // Check for the mainframe redeem code success
-  var eltMainframeSuccess = xpathFirst('.//div[contains(@class, "secretcode_reward")]//h3', innerPageElt);
-  if (eltMainframeSuccess) {
-    addToLog('info Icon','Mainframe reward: ' + eltMainframeSuccess.innerHTML);
-    var eltMainframeClose = xpathFirst('.//a[contains(@class, "sexy_button_new")]//span[contains(text(), "Close")]', innerPageElt);
-    // Ok, close the mainframe
-    clickElement(eltMainframeClose);
-    DEBUG('Clicked to close mainframe.');
-    goHome();
-    return true;
-  }
-  return false;
-}
-*/
-
 function goProperties(propCity) {
   // Make sure we're in the correct city
   if (city != propCity) {
@@ -14592,7 +14506,7 @@ function logFightResponse(rootElt, resultElt, context) {
 
     // Check for any fatalities.
     if (innerNoTags.match(/body\s+count\s+to\s+(\d+)/i)) {
-      addToLog('info Icon', killedMobsterIcon + ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
+      addToLog('killedMobster Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
       //addToLog('info Icon', ' You <span class="bad">' + 'KILLED' + '</span> ' + user + '. Your body count has increased to <span class="bad">' + RegExp.$1 + '</span>.');
     }
     if (innerNoTags.indexOf('You were snuffed') != -1) {
@@ -15324,8 +15238,7 @@ function logResponse(rootElt, action, context) {
         if (context.id) {
           addSavedListItem('hitmanListKilled', context.id, 100);
         }
-        addToLog('lootbag Icon', killedMobsterIcon +
-                 ' You <span class="bad">KILLED</span> ' +
+        addToLog('killedMobster Icon', ' You <span class="bad">KILLED</span> ' +
                  linkToString(context.profile, 'user') +
                  ' and collected the <span class="money">' +
                  context.bounty + '</span> bounty set by ' +
@@ -16394,16 +16307,6 @@ function makeCommaValue(nStr) {
   return nStr == (nStr = nStr.replace(rgx, "$1$2,$3")) ? nStr : makeCommaValue(nStr);
 }
 
-/*function makeCommaValue(nStr) {
-  nStr += '';
-  x = nStr.split('.');
-  x1 = x[0];
-  var rgx = /(\d+)(\d{3})/;
-  while (rgx.test(x1)) {
-    x1 = x1.replace(rgx, '$1' + ',' + '$2');
-  }
-  return x1;
-}*/
 
 /******************************** DATE/TIME ********************************/
 
