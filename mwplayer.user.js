@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.678
+// @version     1.1.679
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.678',
+  version: '1.1.679',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8401,7 +8401,7 @@ function handleModificationTimer() {
   var pageChanged = false;
   var justPlay = false;
   var prevPageElt = innerPageElt;
-  appLayoutElt = document.getElementById('app_layout');
+  appLayoutElt = document.getElementById('mw_city_wrapper');
   innerPageElt = document.getElementById('inner_page');
 
   if (!innerPageElt) return;
