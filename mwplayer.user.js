@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.682
+// @version     1.1.683
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.682',
+  version: '1.1.683',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -720,6 +720,7 @@ var appLayoutElt;               // The currently visible content page
 var mastheadElt;                // Masthead content
 var statsrowElt;                // statsrow content
 var menubarElt;                 // menubar content
+var popupfodderElt;             // popupfodder Element
 var cash;                       // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
@@ -2245,12 +2246,12 @@ function autoHeal() {
     return true;
   }
   // Check if hospitalpopup is visible and healbutton is present.
-  var healElt = xpathFirst('.//div[@id="popup_fodder"]/div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and not(contains(@style,"none"))]//a[contains(@onclick,"xw_action=heal")]', appLayoutElt);
+  var healElt = xpathFirst('.//div[@id="popup_fodder"]/div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and not(contains(@style,"none"))]//a[contains(@onclick,"xw_action=heal")]', popupfodderElt);
   // If not, go to hospital manually
   if (!healElt) {
     // Go to the hospital.
-    var hospitalElt = xpathFirst('.//div[@id="clock_health" and not(contains(@style,"none"))]//a[@class="heal_link" or @class="heal_link vt-p"]', appLayoutElt);
-    if (!hospitalElt) hospitalElt = xpathFirst('.//div[@id="clock_health" and not(contains(@style,"none"))]/a', appLayoutElt);
+    var hospitalElt = xpathFirst('.//div[@id="clock_health" and not(contains(@style,"none"))]//a[@class="heal_link" or @class="heal_link vt-p"]', statsrowElt);
+    if (!hospitalElt) hospitalElt = xpathFirst('.//div[@id="clock_health" and not(contains(@style,"none"))]/a', statsrowElt);
     if (hospitalElt) {
       Autoplay.fx = function() {
         clickElement(hospitalElt);
@@ -8540,9 +8541,9 @@ function handleModificationTimer() {
 
   if (running) {
     // Popups opened?
-    var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
-    if (!onProfileNav() && popupElt && popupElt.scrollWidth && popupElt.innerHTML.length > 0) {
-      var popupElts = $x('.//div[contains(@style, "block")]', popupElt);
+    //var popupElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
+    if (!onProfileNav() && popupfodderElt && popupfodderElt.scrollWidth && popupfodderElt.innerHTML.length > 0) {
+      var popupElts = $x('.//div[contains(@style, "block")]', popupfodderElt);
       if (popupElts && popupElts.length > 0) {
         for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
           if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
