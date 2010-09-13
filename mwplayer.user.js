@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.686
+// @version     1.1.687
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.686',
+  version: '1.1.687',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3382,13 +3382,13 @@ function logRobResponse(rootElt, resultElt, context) {
     if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
       success = true;
       if (cashElt)
-        result += ' with <span class="good">Success</span> gaining <span class="good">'+ cashElt.innerHTML +'</span> and';
+        result += ' with <span class="good">Success</span>, gaining <span class="good">'+ cashElt.innerHTML +'</span> and';
       else
         if (itemElt)
-          result += ' with <span class="good">Success</span> gaining <span class="good">'+ itemElt.innerHTML +'</span> and';
+          result += ' with <span class="good">Success</span>, gaining <span class="good">'+ itemElt.innerHTML +'</span> and';
     }
     else
-      result += ' and <span class="bad">Failed</span> gaining';
+      result += ' and <span class="bad">Failed</span>, gaining';
 
     if (expElt)
       result += ' <span class="good">' + expElt.innerHTML + '</span>.';
@@ -3398,7 +3398,7 @@ function logRobResponse(rootElt, resultElt, context) {
     if (eltRob)
       // Look for any loot on rob slot
       if (m = /alt="(.*?)"/.exec(eltRob.innerHTML)) {
-        addToLog('lootbag Icon', '<span class="loot">'+' Found '+ m[1] + ' in robbing.</span>');
+        addToLog('lootbag Icon', 'Found <span class="loot">'+ m[1] + '</span> in robbing.');
       }
 
     if (expElt)
@@ -3673,7 +3673,17 @@ function autoBankDeposit(bankCity, amount) {
   return true;
 }
 
-function autoBankWithdraw(amount) {
+function autoBankWithdraw(bankCity, amount) {
+  if(bankCity = LV){
+    DEBUG('Going to the vault to withdraw '+amount)
+    var withdrawUrl = "xw_controller=propertyV2&xw_action=doaction&xw_city=5&doaction=ActionBankWithdrawal&building_type=6&city=5&amount=" + amount;
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + withdrawUrl + '", 1, 1, 0, 0); return false;'});
+    createAjaxPage(false, 'quick withdraw', bankCity);
+    clickElement(elt);
+    DEBUG('Clicked to withdraw from the vault.');
+    return true;  
+  } else {
+  DEBUG('Going to the bank')
   // Make sure we're at the bank.
   var formElt = xpathFirst('.//div[@id="bank_popup"]', statsrowElt);
   if (!formElt) {
@@ -3717,6 +3727,7 @@ function autoBankWithdraw(amount) {
   Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
+  }
 }
 
 // Returns a non-empty array of the displayed opponents, or undefined.
@@ -4677,13 +4688,16 @@ function saveSettings() {
   if(!isGMChecked('autoHeal')) {
     document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
     document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';
+    addToLog('healOffIcon Icon', 'autoHeal turned OFF by User');
   } else {
     if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB){
       document.getElementById('mwap_toggleheal').innerHTML=healOnHoldIcon;
       document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
+      addToLog('healOnHoldIcon Icon', 'autoHeal turned ON by User, but OVERRULED');
     } else {
       document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
       document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
+      addToLog('healOncon Icon', 'autoHeal turned ON by User');
     }
   }
 
@@ -9483,6 +9497,14 @@ function refreshMWAPCSS() {
                  '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
                  '#mafiaLogBox .logEvent.cashVegas.Icon{background-image:url(' + stripURI(cashVegasIcon) + ')}' +
                  '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.healOnIcon.Icon{background-image:url(' + stripURI(healOnIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.healOffIcon.Icon{background-image:url(' + stripURI(healOffIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.healOnHoldIcon.Icon{background-image:url(' + stripURI(healOnHoldIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.staminaIcon.Icon{background-image:url(' + stripURI(staminaIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.energyIcon.Icon{background-image:url(' + stripURI(energyIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.attackIcon.Icon{background-image:url(' + stripURI(attackIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.defenseIcon.Icon{background-image:url(' + stripURI(defenseIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.healthIcon.Icon{background-image:url(' + stripURI(healthIcon) + ')}' +
                  // ********************** Energy Tab CSS **********************
                  '#ap_menu span:hover{text-decoration:underline}'+
                  '#ap_menu span{font-size: 12px; font-weight: bold; cursor: pointer; color: #FFD927}' +
@@ -10065,14 +10087,17 @@ function toggleHeal() {
     GM_setValue('autoHeal', 0);
     document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
     document.getElementById('mwap_toggleheal').title = 'autoHeal unchecked';
+    addToLog('healOffIcon Icon', 'autoHeal turned OFF by User');
   } else {
     GM_setValue('autoHeal', 'checked');
     if(GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB){
       document.getElementById('mwap_toggleheal').innerHTML=healOnHoldIcon;
       document.getElementById('mwap_toggleheal').title = 'autoHeal checked BUT OVERRULED - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
+      addToLog('healOnHoldIcon Icon', 'autoHeal turned ON by User, but overruled');
     } else {
       document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
       document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
+      addToLog('healOnIcon Icon', 'autoHeal turned ON by User');
     }
   }
 }
@@ -11608,19 +11633,21 @@ function getJobRowItems(jobName) {
     }
     return true;
   }
-  /*
+  
   // New Job layout handling
   var amtElt = xpathFirst('.//strong[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', currentJobRow);
+  if(!amtElt) amtElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', currentJobRow);
   if (amtElt) {
     var cashDiff = getJobClicks() * parseCash(amtElt.innerHTML.untag().trim()) - cities[city][CITY_CASH];
-
+    DEBUG('We need '+cashDiff+' for this job. Going to the bank/vault of '+city);
+  
     // Withdraw the amount we need
     if (cashDiff > 0) {
       suspendBank = true;
-      return (autoBankWithdraw(cashDiff));
+      return (autoBankWithdraw(city, cashDiff));
     }
   }
-  */
+  
 
   // Logic to switch to the required job first
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
@@ -11729,8 +11756,6 @@ function getJobRowItems(jobName) {
     }    
   }
   
-  
-  /*
   // Withdraw money
   var amtElt = xpathFirst('.//td[contains(@class,"job_energy")]//span[@class="money" or @class="bad"]', currentJobRow);
   if (amtElt) {
@@ -11739,10 +11764,10 @@ function getJobRowItems(jobName) {
     // Withdraw the amount we need
     if (cashDiff > 0) {
       suspendBank = true;
-      return (autoBankWithdraw(cashDiff));
+      return (autoBankWithdraw(city, cashDiff));
     }
   }
-  */
+  
   return false;
 }
 
@@ -14501,12 +14526,12 @@ function logFightResponse(rootElt, resultElt, context) {
     var resultType;
     var result = 'Fought ' + user + '\'s mafia of ' + userSize;
     if (experience) {
-      result += ' <span class="good">' + 'WON ' + cost + '</span>' + ' and ' +
-                '<span class="good">' + experience + ' experience</span> '+ ' '+powerAttackResult;
+      result += ' and <span class="good">' + 'WON</span>, gaining <span class="good">' + cost + '</span>' + ' and ' +
+                '<span class="good">' + experience + ' experience</span>. '+powerAttackResult;
       addToLog('yeah Icon', result);
     } else {
-      result += ' <span class="bad">' +
-                'LOST ' + cost + '</span>.';
+      result += ' and <span class="bad">' +
+                'LOST</span>, losing <span class="bad">' + cost + '</span>.';
       resultType = 0;
       // Show any boost the opponent used.
       if (userBoost && userBoost.match(/[^(]+/)) {
@@ -14814,6 +14839,13 @@ function logJSONResponse(responseText, action, context) {
         }
         break;
 
+      // Log any message from withdrawing money.
+      case 'quick withdraw':        
+        var respJSON = eval ('(' + responseText + ')');  
+        respTxt = respJSON['data'];
+        DEBUG(respTxt);
+        break;
+        
       // Log any message from depositing money.
       case 'quick deposit':
         var respJSON = eval ('(' + responseText + ')');
@@ -14996,7 +15028,7 @@ function logResponse(rootElt, action, context) {
   }
 
   if (action=='withdraw' && context) {
-    autoBankWithdraw(context);
+    autoBankWithdraw(city, context);
     Autoplay.start();
     return true;
   }
@@ -15335,7 +15367,8 @@ function logResponse(rootElt, action, context) {
           case ENERGY_STAT:    maxEnergy    += statInc; break;
           case STAMINA_STAT:   maxStamina   += statInc; break;
         }
-        addToLog('process Icon', '<span style="color:#885588;">'+statIcon+' '+statName+' increased by '+statInc+' point(s).</span>');
+        //addToLog('process Icon', '<span style="color:#885588;">'+statIcon+' '+statName+' increased by '+statInc+' point(s).</span>');
+        addToLog('statIcon Icon', '<span style="color:#885588;">'+statName+'</span> increased by <span style="color:#885588;">'+statInc+'</span> point(s).');
       } else {
         DEBUG('Failed to increment stat.');
       }
@@ -15398,7 +15431,7 @@ function logResponse(rootElt, action, context) {
         }
         if (innerNoTags.indexOf('Special Bonus') != -1) {
           var loot = innerNoTags.split('gained a ')[1];
-          addToLog('lootbag Icon', '<span class="loot">'+' Found a '+ loot.split('.<span')[0] + ' while helping on a job.</span>');
+          addToLog('lootbag Icon', 'Found a <span class="loot">'+ loot.split('.<span')[0] + '</span> while helping on a job.');
         }
         result = 'You received ' + '<span class="good">' +
                  cost + '</span>' + ' and ' +
@@ -15794,7 +15827,7 @@ function handlePopups() {
               // Look for any loot on popup
               DEBUG('Popup Process: Processing robbing board');
               if (popupInner.match(/You\s+(earned|gained|received|collected)\s+(some|an?)\s+bonus\s+(.+?)<\/div>/i)) {
-                addToLog('lootbag Icon', '<span class="loot">'+' Found '+ RegExp.$3 + ' on robbing board.</span>');
+                addToLog('lootbag Icon', 'Found <span class="loot">'+ RegExp.$3 + '</span> on robbing board.');
               }
               if (popupInnerNoTags.match(/(\d+) Bonus Experience/i)) {
                 //var exp = m[1].replace(/[^0-9]/g, '');
