@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.687
+// @version     1.1.688
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.687',
+  version: '1.1.688',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11636,13 +11636,12 @@ function getJobRowItems(jobName) {
   
   // New Job layout handling
   var amtElt = xpathFirst('.//strong[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', currentJobRow);
-  if(!amtElt) amtElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', currentJobRow);
+  if(!amtElt) amtElt = xpathFirst('.//div[@class="job_uses"]//dd[@class="vegas_cash_icon"]', currentJobRow);
   if (amtElt) {
     var cashDiff = getJobClicks() * parseCash(amtElt.innerHTML.untag().trim()) - cities[city][CITY_CASH];
-    DEBUG('We need '+cashDiff+' for this job. Going to the bank/vault of '+city);
-  
     // Withdraw the amount we need
     if (cashDiff > 0) {
+      DEBUG('We need '+cashDiff+' for this job. Going to the bank/vault of '+city);
       suspendBank = true;
       return (autoBankWithdraw(city, cashDiff));
     }
@@ -11846,7 +11845,7 @@ function jobLoot(element) {
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
       var loot = RegExp.$1;
       if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
-      if (strLoot) strLoot = '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
+      if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
       else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';      
       lootbag.push(loot);
       addToLog('lootbag Icon', strLoot);
@@ -11863,7 +11862,7 @@ function jobLoot(element) {
       if(messages[i].title){
         var loot = messages[i].title;
         if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
-        if (strLoot) strLoot = '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
+        if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
         else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';
         lootbag.push(loot);
       }
@@ -11891,7 +11890,7 @@ function jobLoot(element) {
       if (itemName.indexOf(items[j]) != -1 ) {
         // we found some needed loot
         itemFound = true;
-        addToLog('found Icon','<span class="loot>'+ itemName + '</span> is the item we were looking for!');
+        addToLog('found Icon','<span class="loot">'+ itemName + '</span> is the item we were looking for!');
         removeSavedListItem('itemList', itemName);
         removeJobForItem('jobsToDo', itemName);
         popJob();
@@ -14844,6 +14843,11 @@ function logJSONResponse(responseText, action, context) {
         var respJSON = eval ('(' + responseText + ')');  
         respTxt = respJSON['data'];
         DEBUG(respTxt);
+        if(/withdrew/i.test(respTxt)){
+          if(respTxt.match(/withdrew (.+?) from your vault/i)) addToLog('cashVegas Icon', 'You successfully withdrew '+RegExp.$1+ ' from your vault!');
+        } else {
+          addToLog('cashVegas Icon', 'Withdrawal failed.');
+        }
         break;
         
       // Log any message from depositing money.
@@ -15149,8 +15153,8 @@ function logResponse(rootElt, action, context) {
              } //else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
       } //else DEBUG(' mastery check skipped no masterygainelt ');
 
-      if (pushNextJob) DEBUG (' - - - push next job was true ');
-      else DEBUG (' - - - push next job was false ');
+      //if (pushNextJob) DEBUG (' - - - push next job was true ');
+      //else DEBUG (' - - - push next job was false ');
 
       if (xpGainElt) {
         //DEBUG (' - - - push next job expgainelt 2 ');
@@ -15358,6 +15362,7 @@ function logResponse(rootElt, action, context) {
         var statName = RegExp.$1;
         var statIndex = eval(statName.toUpperCase() + '_STAT');
         var statIcon = eval(statName.toLowerCase() + 'Icon');
+        var statIconTxt = statName.toLowerCase() + 'Icon';
         var statInc = isNaN(RegExp.$2) ? 1 : parseInt(RegExp.$2);
         GM_setValue('nextStat' , (statIndex + 1) % 4);
         switch (statIndex) {
@@ -15367,8 +15372,7 @@ function logResponse(rootElt, action, context) {
           case ENERGY_STAT:    maxEnergy    += statInc; break;
           case STAMINA_STAT:   maxStamina   += statInc; break;
         }
-        //addToLog('process Icon', '<span style="color:#885588;">'+statIcon+' '+statName+' increased by '+statInc+' point(s).</span>');
-        addToLog('statIcon Icon', '<span style="color:#885588;">'+statName+'</span> increased by <span style="color:#885588;">'+statInc+'</span> point(s).');
+        addToLog('process Icon', '<span style="color:#885588;">'+statIcon+' '+statName+' increased by '+statInc+' point(s).</span>');
       } else {
         DEBUG('Failed to increment stat.');
       }
@@ -15563,10 +15567,10 @@ function logResponse(rootElt, action, context) {
       } else {
         setGMTime(timerName, '24 hours');
         if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) {
-          var log = '<span class="loot"> You built '+ RegExp.$1;
+          var log = 'You built <span class="loot">'+ RegExp.$1+'</span>.';
           if (RegExp.$2.match(/You gained.+&nbsp;(.+?\.)/))
             log += ' You gained ' + RegExp.$1;
-          log += '</span>';
+          //log += '</span>';
           addToLog('lootbag Icon', log);
         }
       }
@@ -15733,7 +15737,7 @@ function handlePopups() {
               if (eltButton) {
                 eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
                 if (eltLoot) {
-                  addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a secret stash.</span>');
+                  addToLog('lootbag Icon', 'Received <span class="loot">'+ eltLoot.innerHTML.untag() + '</span> from a secret stash.');
                 }
                 clickElement(eltButton);
               }
@@ -15745,7 +15749,7 @@ function handlePopups() {
             if (eltPubButton) {
               if (popupInnerNoTags.match(/and you got (.+?)/)) {
                 DEBUG('Popup Process: Crime Spree Loot Processed');
-                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ RegExp.$1 + ' from the Crime Spree.</span>');
+                addToLog('lootbag Icon', 'Received <span class="loot">'+ RegExp.$1 + '</span> from the Crime Spree.');
               }
               if (isGMChecked('autoSafehousePublish')) {
                 clickElement(eltPubButton);
@@ -15760,7 +15764,7 @@ function handlePopups() {
               DEBUG('Popup Process: Red Mystery Bag Processed');
               eltLoot = xpathFirst('.//div[contains(@class,"good")]',popupElts[i]);
               if (eltLoot) {
-                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a red mystery bag.</span>');
+                addToLog('lootbag Icon', 'Received <span class="loot">'+ eltLoot.innerHTML.untag() + '</span> from a red mystery bag.');
               }
               return(closePopup(popupElts[i], "Red Mystery Bag"));
             }
