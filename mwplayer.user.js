@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.685
+// @version     1.1.686
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.685',
+  version: '1.1.686',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3088,7 +3088,7 @@ function autoHitlist() {
     }
 
     // Make the hit
-    var submitElt = xpathFirst('.//input[@type="submit"]', formElt);
+    var submitElt = xpathFirst('.//button[@type="submit"]', formElt);
     if (!submitElt) {
       if(isGMChecked('bgAutoHitCheck')) setGMTime("bgAutoHitTime", "01:00");
       return true;
