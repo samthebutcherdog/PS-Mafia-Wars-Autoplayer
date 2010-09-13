@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.690
+// @version     1.1.691
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.690',
+  version: '1.1.691',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14842,14 +14842,16 @@ function logJSONResponse(responseText, action, context) {
       case 'quick withdraw':        
         var respJSON = eval ('(' + responseText + ')');  
         respTxt = respJSON['data'];
+        var respText = JSON.parse(respTxt);
+        var vegasBank = respText.acct_balance
         DEBUG(respTxt);
-        if(/withdrew/i.test(respTxt)){
-          if(respTxt.match(/withdrew (.+?) from your vault/i)) addToLog('cashVegas Icon', 'You successfully withdrew '+RegExp.$1+ ' from your vault!');
-        } else {
-          addToLog('cashVegas Icon', 'Withdrawal failed.');
+        addToLog('cashVegas Icon', respText['success_message'] + ' ' + 'Bank Balance:' + vegasBank);
+        if(respText['success_message'].match(/failed/i)) {
+          addToLog('warning Icon', 'You are not enough money to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
+          addToLog('warning Icon', 'Job processing will stop');
+          GM_setValue('autoMission', 0);
         }
         break;
-        
       // Log any message from depositing money.
       case 'quick deposit':
         var respJSON = eval ('(' + responseText + ')');
