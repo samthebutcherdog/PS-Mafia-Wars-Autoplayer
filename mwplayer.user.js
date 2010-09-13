@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.684
+// @version     1.1.685
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.684',
+  version: '1.1.685',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2246,7 +2246,7 @@ function autoHeal() {
     return true;
   }
   // Check if hospitalpopup is visible and healbutton is present.
-  var healElt = xpathFirst('.//div[@id="popup_fodder"]/div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and not(contains(@style,"none"))]//a[contains(@onclick,"xw_action=heal")]', appLayoutElt);
+  var healElt = xpathFirst('.//div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and not(contains(@style,"none"))]//a[contains(@onclick,"xw_action=heal")]', popupfodderElt);
   // If not, go to hospital manually
   if (!healElt) {
     // Go to the hospital.
@@ -13448,7 +13448,7 @@ function onHome() {
 
 function onSafehouseNav() {
   // Return true if we're on the Crime Spree nav, false otherwise.
-  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', appLayoutElt)) {
+  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', innerPageElt)) {
     //DEBUG('Crime Spree: On Crime Spree page');
     return true;
   }
