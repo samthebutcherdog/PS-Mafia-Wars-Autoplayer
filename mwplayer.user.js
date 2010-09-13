@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.689
+// @version     1.1.690
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.689',
+  version: '1.1.690',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3685,7 +3685,7 @@ function autoBankWithdraw(bankCity, amount) {
   } else {
   DEBUG('Going to the bank')
   // Make sure we're at the bank.
-  var formElt = xpathFirst('.//div[@id="bank_popup"]', statsrowElt);
+  var formElt = xpathFirst('.//div[@id="bank_popup"]', popupfodderElt);
   if (!formElt) {
     Autoplay.fx = goBank;
     clickAction = 'withdraw';
