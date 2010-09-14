@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.693
+// @version     1.1.694
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.693',
+  version: '1.1.694',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3674,7 +3674,7 @@ function autoBankDeposit(bankCity, amount) {
 }
 
 function autoBankWithdraw(bankCity, amount) {
-  if(bankCity = LV){
+  if(bankCity == LV){
     DEBUG('Going to the vault to withdraw '+amount)
     var withdrawUrl = "xw_controller=propertyV2&xw_action=doaction&xw_city=5&doaction=ActionBankWithdrawal&building_type=6&city=5&amount=" + amount;
     var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + withdrawUrl + '", 1, 1, 0, 0); return false;'});
