@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.691
+// @version     1.1.692
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.691',
+  version: '1.1.692',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4697,7 +4697,7 @@ function saveSettings() {
     } else {
       document.getElementById('mwap_toggleheal').innerHTML=healOnIcon;
       document.getElementById('mwap_toggleheal').title = 'autoHeal checked - healing in '+ locations[GM_getValue('healLocation')] +' when health falls below '+GM_getValue('healthLevel')+'.';
-      addToLog('healOncon Icon', 'autoHeal turned ON by User');
+      addToLog('healOnIcon Icon', 'autoHeal turned ON by User');
     }
   }
 
@@ -10729,7 +10729,7 @@ function customizeVegasJobs() {
     // Skip jobs not in missions array
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (isNaN(jobMatch)) {
-      addToLog('search Icon', jobName + ' not found in missions array. ');
+      if !jobName.match(/Boss/i) addToLog('search Icon', jobName + ' not found in missions array. ');
       continue;
     }
 
@@ -14845,7 +14845,7 @@ function logJSONResponse(responseText, action, context) {
         var respText = JSON.parse(respTxt);
         var vegasBank = respText.acct_balance
         DEBUG(respTxt);
-        addToLog('cashVegas Icon', respText['success_message'] + ' ' + 'Bank Balance:' + vegasBank);
+        addToLog('cashVegas Icon', respText['success_message'] + '  Remaining Bank Balance: ' + cities[context][CITY_CASH_SYMBOL] + makeCommaValue(vegasBank));
         if(respText['success_message'].match(/failed/i)) {
           addToLog('warning Icon', 'You are not enough money to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
           addToLog('warning Icon', 'Job processing will stop');
