@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.697
+// @version     1.1.698
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.697',
+  version: '1.1.698',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -6012,7 +6012,7 @@ function createDisplayTab() {
   id = 'hideAttentionBox';
   title = 'Hide Icon Row';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Attention Msg'));
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Att Block'));
 
 // start a new line
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px;'});
@@ -9426,7 +9426,8 @@ function refreshMWAPCSS() {
                   ' div[id="travel_menu"] {width: 140px;}' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;}' +
 
-                 (isGMChecked('hideAttentionBox') ? ' div[id="popup_fodder"][style*="display: block;"], ' : '' ) +
+//                 (isGMChecked('hideAttentionBox') ? ' div[id="popup_fodder"][style*="display: block;"], ' : '' ) +
+                 (isGMChecked('hideAttentionBox') ? ' div[class="tab_box_content"][style*="padding: 5px; text-align: center; margin-bottom: 420px;"], ' : '' ) +
 
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' .message_box_full, ' : '' ) +
