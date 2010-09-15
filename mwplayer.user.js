@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.698
+// @version     1.1.699
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.698',
+  version: '1.1.699',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1483,8 +1483,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Neutralize a Security Patrol'                      , 14, 62,7,LV    , 24,1,'node62'],    // Stamina PATH
     ['Disable a Surveillance Station'                    , 21, 63,7,LV    , 33,0,'node63'],    // ENERGY PATH
     ['Infiltrate A Top Secret Bunker'                    , 18, 64,7,LV    , 32,0,'node64'],    // ENERGY PATH
-    ['Find A Route Through The Ducts'                    , 23, 65,7,LV    , 36,0,'node65'],    // ENERGY PATH
-    ['Attack A Guard Post'                               , 16, 66,7,LV    , 27,1,'node66'],    // Stamina PATH
+    ['Attack A Guard Post'                               , 16, 65,7,LV    , 27,1,'node65'],    // Stamina PATH
+    ['Find A Route Through The Ducts'                    , 23, 66,7,LV    , 36,0,'node66'],    // ENERGY PATH
     ['Take Out A Black Ops Team'                         , 18, 67,7,LV    , 32,1,'node67'],    // Stamina PATH
     ['Nab A High Tech Prototype'                         , 19, 68,7,LV    , 33,0,'node68'],    // ENERGY PATH
     ['Hack The Research Lab Door'                        , 18, 69,7,LV    , 29,0,'node69'],    // ENERGY PATH
