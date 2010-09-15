@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.696
+// @version     1.1.697
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.696',
+  version: '1.1.697',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4468,7 +4468,7 @@ function saveSettings() {
   //Display Tab Checkboxes
   saveCheckBoxElementArray([
     'autoLog','logPlayerUpdates','filterLog','leftAlign','mastheadOnTop','fbwindowtitle','showPulse','showLevel',
-    'hideGifts','hideGiftIcon','hideActionBox','hideOffer','hideFriendLadder', 'hideMessageIcon','hidePromoIcon','hideLiveUpdatesIcon','hideIconRow','HideSlotMachine','HideCollections'
+    'hideGifts','hideGiftIcon','hideActionBox','hideOffer','hideFriendLadder', 'hideMessageIcon','hidePromoIcon','hideLiveUpdatesIcon','hideAttentionBox','HideSlotMachine','HideCollections'
   ]);
 
   //Display Tab Settings and Validation
@@ -6009,10 +6009,10 @@ function createDisplayTab() {
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Live Updates Icon '));
 
 // Hide Icon Row in New Header
-  id = 'hideIconRow';
+  id = 'hideAttentionBox';
   title = 'Hide Icon Row';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Icon Row In New Header'));
+  makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' Attention Msg'));
 
 // start a new line
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px;'});
@@ -9394,7 +9394,7 @@ function refreshMWAPCSS() {
                    ' #zstream_icon {position: absolute; top: 10px; left:290px; z-index: 100;} ') +
 
                 // Hide Icon Row (header_mid_row) - This is the part containing all the icons (messege center, promo, live updates):
-                (isGMChecked('hideIconRow') ?
+                (isGMChecked('hideAttentionBox') ?
                   ' .header_mid_row div.header_various {display: none;}' :
                   ' .header_mid_row div.header_various {position: absolute; top: 1px; left: 825px; width: 12px; z-index: 100;} ') +
 
@@ -9425,6 +9425,9 @@ function refreshMWAPCSS() {
                     ' a[class="sexy_button_new short_black_white_border sexy_travel_new"] {width: 120px !important;}' +
                   ' div[id="travel_menu"] {width: 140px;}' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;}' +
+
+                 (isGMChecked('hideAttentionBox') ? ' div[id="popup_fodder"][style*="display: block;"], ' : '' ) +
+
                  // Hide action boxes
                  (isGMChecked('hideActionBox') ? ' .message_box_full, ' : '' ) +
                  (isGMChecked('hideActionBox') ? ' .menu_divider, ' : '' ) +
@@ -12134,7 +12137,7 @@ BrowserDetect.init();
         'Hide Gift Icon: <strong>'+ showIfUnchecked(GM_getValue('hideGiftIcon')) + '</strong><br>' +
         'Hide Promo Icon: <strong>'+ showIfUnchecked(GM_getValue('hidePromoIcon')) + '</strong><br>' +
         'Hide Live Updates Icon: <strong>'+ showIfUnchecked(GM_getValue('hideLiveUpdatesIcon')) + '</strong><br>' +
-        'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideIconRow')) + '</strong><br>' +
+        'Hide Icons: <strong>'+ showIfUnchecked(GM_getValue('hideAttentionBox')) + '</strong><br>' +
         'Hide Collections: <strong>'+ showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         'Show pulse on the fight page: <strong>' + showIfUnchecked(GM_getValue('showPulse')) + '</strong><br>' +
         'Show level on the hitlist page: <strong>' + showIfUnchecked(GM_getValue('showLevel')) + '</strong><br>' +
