@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.699
+// @version     1.1.700
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.699',
+  version: '1.1.700',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3831,7 +3831,7 @@ function getHitlist(element, forceRefresh) {
   //         ', name=' + opponent.name +
   //         ', bounty=' + opponent.bounty +
   //         ', time=' + opponent.time);
-  //}
+  // }
 
   return getHitlist.opponents;
 }
@@ -3905,7 +3905,7 @@ function getDisplayedOpponents(element, forceRefresh) {
   //         ', level=' + opponent.level +
   //         ', title=' + opponent.title +
   //         ', name=' + opponent.name);
-  //}
+  // }
 
   return getDisplayedOpponents.opponents;
 }
@@ -14570,7 +14570,7 @@ function logFightResponse(rootElt, resultElt, context) {
         result += ' Avoiding.';
         setFightOpponentAvoid(context);
       }
-      //}
+      // }
       addToLog('omg Icon', result);
     }
 
@@ -15022,7 +15022,7 @@ function logResponse(rootElt, action, context) {
 
   //if (!messagebox) {
   //  messagebox = xpathFirst('.//div[@class="job_container"]', rootElt);
-  //}
+  // }
 
   // New message box message
   if (!messagebox) {
@@ -15176,7 +15176,7 @@ function logResponse(rootElt, action, context) {
                 {
                    pushNextJob = true;
                    //DEBUG((parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) + '% =100% flagged as MASTERED ' );
-                //} else DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
+                // } else DEBUG('current mastery=' + (parseInt( masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')))) );
                 }
              } //else DEBUG(' mastery check skipped tier =' +  GM_getValue('selectTier')  + ' multiple' + (!isGMChecked('multipleJobs')) );
       } //else DEBUG(' mastery check skipped no masterygainelt ');
