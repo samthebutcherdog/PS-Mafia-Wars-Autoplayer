@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.694
+// @version     1.1.695
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.694',
+  version: '1.1.695',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -439,7 +439,7 @@ var defenseIcon = '<img src="data:image/gif;base64,' +
     'x0VdiDlLaePs/rrR/SxEaaWwxYCh4lWH1198slqJ1mN5oqLA93uSv05ihUJkm0JusF+IyzRdm22b6DdfnGWV5HSg7YKq9Hul8Iiv+K/J/M3e/v///yH5BAEAAD8ALAAAAAANAA0AAAZ4wJTp4ysaiwRMaHPqOZ9O' +
     'lcZC4PCu2OuoA3txdOAwmMJycQy7tHonkkhiBkNuTs/hAKRSIDCx+f0TNAAVDjiGh4YKAAMFPx4tCwqSCgsZAzI/Pw8HDSsInw0REQmZPygzAgcXAhAQDKWZCTezswwOsJkPDDUgjaVBADsK' +
     '" />';
-		
+
 var closeButtonIcon = '<img src="data:image/png;base64,' +
     'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0Jb' +
     'BiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FF' +
@@ -1451,15 +1451,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Bribe A Casino Pit Boss'                           ,  5, 30,4,LV    ,  8,0,'node30'],    // ENERGY DISTRICT 4  LAS VEGAS SHOGUN CASINO
     ['Steal A Valet\'s Uniform'                          , 12, 31,4,LV    , 20,0,'node31'],    // ENERGY
     ['Swipe A Security Keycard'                          , 10, 32,4,LV    , 16,0,'node32'],    // ENERGY
-  ['Take Out An Armed Casino Guard'                    , 13, 33,4,LV    , 21,1,'node33'],    //  fight
+    ['Take Out An Armed Casino Guard'                    , 13, 33,4,LV    , 21,1,'node33'],    //  fight
     ['Create A Distraction On The Floor'                 , 10, 34,4,LV    , 17,0,'node34'],    // ENERGY
     ['Hack The Casino Security System'                   , 12, 35,4,LV    , 21,0,'node35'],    // ENERGY
     ['Break Into The Vault'                              , 17, 36,4,LV    , 26,0,'node36'],    // ENERGY
     ['Get To An Exit'                                    , 22, 37,4,LV    , 35,0,'node37'],    // ENERGY
     ['Hijack A Poker Table Delivery'                     , 18, 38,4,LV    , 27,0,'node38'],    // ENERGY (PROPERTY)
 //  ['Boss: Defeat Roger Bidwell\, Chief of Security'    ,  6, 39,4,LV    ,400,0,'node39'],    //        BOSS JOB STAMINA
-
-// job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
     ['Move The Take Out Of Town'                         , 13, 40,5,LV    , 21,0,'node40'],    // ENERGY DISTRICT 5 LAS VEGAS MOJAVE DESERT
     ['Fight Off A Hijack Crew'                           , 14, 41,5,LV    , 23,1,'node41'],    //  FIGHT
     ['Run A Highway Patrol Blockade'                     , 23, 42,5,LV    , 37,2,'node42'],    //SOCIAL
@@ -1479,8 +1477,32 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Wipe Out The Hill Security Detail'                 , 18, 56,6,LV    , 32,1,'node56'],    //  fight PATH
     ['Remove The Hill\'s Support Base'                   , 17, 57,6,LV    , 27,2,'node57'],    //social  PATH
     ['Reveal A Politician\'s Dirty Secret'               , 19, 58,6,LV    , 30,0,'node58'],    // ENERGY PATH
-    ['Infiltrate The Hill Resort'                        , 16, 59,6,LV    , 25,0,'node59']     // ENERGY PATH
-//  ['Boss: Defeat Leon and Marcus Hill'                 ,  7, 60,6,LV    ,900,0,'node60']     //        boss job
+    ['Infiltrate The Hill Resort'                        , 16, 59,6,LV    , 25,0,'node59'],    // ENERGY PATH
+//  ['Boss: Defeat Leon and Marcus Hill'                 ,  7, 60,6,LV    ,900,0,'node60'],    //        boss job
+    ['Breach the Area 51 Perimeter'                      , 15, 61,7,LV    , 25,0,'node61'],    // ENERGY PATH
+    ['Neutralize a Security Patrol'                      , 14, 62,7,LV    , 24,1,'node62'],    // Stamina PATH
+    ['Disable a Surveillance Station'                    , 21, 63,7,LV    , 33,0,'node63'],    // ENERGY PATH
+    ['Infiltrate A Top Secret Bunker'                    , 18, 64,7,LV    , 32,0,'node64'],    // ENERGY PATH
+    ['Find A Route Through The Ducts'                    , 23, 65,7,LV    , 36,0,'node65'],    // ENERGY PATH
+    ['Attack A Guard Post'                               , 16, 66,7,LV    , 27,1,'node66'],    // Stamina PATH
+    ['Nab A High Tech Prototype'                         , 19, 67,7,LV    , 33,0,'node67'],    // ENERGY PATH
+    ['Take Out A Black Ops Team'                         , 18, 68,7,LV    , 32,1,'node68'],    // Stamina PATH
+    ['Hack The Research Lab Door'                        , 18, 69,7,LV    , 29,0,'node69'],    // ENERGY PATH
+//  ['Boss: Defeat Dr. Hank Williams'                    ,  8, 70,7,LV    ,120,0,'node70'],    //           Boss Job
+    ['Uncover Rumors About Governor Halloran'            , 17, 71,8,LV    , 28,0,'node71'],    // ENERGY PATH
+    ['Question Some Meth Heads'                          , 15, 72,8,LV    , 26,1,'node72'],    // Stamina PATH
+    ['Dig Up Links To Halloran And A Meth Ring'          , 20, 73,8,LV    , 35,0,'node73'],    // ENERGY PATH
+    ['Discover A Big Meth Buy At The Hoover Dam'         , 24, 74,8,LV    , 37,0,'node74'],    // Social PATH
+    ['Get Your Spotters In Place Above The Dam'          , 22, 75,8,LV    , 38,0,'node75'],    // ENERGY PATH
+    ['Take Out A Crooked DEA Unit'                       , 17, 76,8,LV    , 29,1,'node76'],    // Stamina PATH
+    ['Verify Halloran\'s Arrival At The Dam'             , 19, 77,8,LV    , 34,0,'node77'],    // ENERGY PATH
+    ['Take Down The Security Detail'                     , 20, 78,8,LV    , 35,1,'node78']     // Stamina PATH
+//  ['Boss: Defeat Governor Halloran'                    ,  8, 79,8,LV    ,120,0,'node79']     //           Boss Job
+
+// job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////
   );
 
@@ -1496,8 +1518,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Baklany','Boets','Brigadir','Avtoritet','Vor','Pakhan'],
     // BANGKOK
     ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head','Saboteur','Assassin'],
-    // LAS VEGAS
-    ['North Las Vegas','Paradise City','The Lower Strip','Shogun Casino','Mojave Desert','The Upper Strip']
+    // LAS VEGAS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ['North Las Vegas','Paradise City','The Lower Strip','Shogun Casino','Mojave Desert','The Upper Strip','Area 51','Hoover Dam']
   );
 
   var mwTitles = new Array(
@@ -2062,7 +2084,7 @@ function doAutoPlay () {
   var energyCountdownElt = xpathFirst('.//div[contains(@id, "mbox_energy_timer_container")]', innerPageElt);
   if (energyCountdownElt) {
     if (energyCountdownElt.style.display == 'block') {
-      energyPack = false;      
+      energyPack = false;
     }
   }
   var ptsFromEnergyPack = maxEnergy * 1.25 * getEnergyGainRate();
@@ -2313,7 +2335,7 @@ function AskforHelp(hlpCity) {
     Autoplay.fx = function() { doAskFunction(goJobTab(tabno)); };
     Autoplay.start();
     return true;
-  }  
+  }
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
     setGMTime(timerName, '2 hour');
@@ -2326,7 +2348,7 @@ function AskforHelp(hlpCity) {
     if (askHelpFriends) {
       addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
       clickElement(askHelpFriends);
-      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);      
+      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
       setGMTime(timerName, '12 hours');
     return true;
     } else {
@@ -2832,7 +2854,7 @@ function autoMission() {
       if (jobs.length == 0) {
         // Skip jobs temporarily, and check the home page
         DEBUG('No more jobs to perform.');
-        skipJobs = true;        
+        skipJobs = true;
         goHome();
       } else {
         // Else Get the next job to perform
@@ -2840,7 +2862,7 @@ function autoMission() {
         popJob();
         autoMission();
       }
-    }     
+    }
   };
 
   // Go to the correct city.
@@ -2859,20 +2881,20 @@ function autoMission() {
 
   // Go to the correct job tabnopath in LV
   if(city == LV){
-    if (!onJobTabpath(tabnopath)) {      
+    if (!onJobTabpath(tabnopath)) {
       goJobTabPath(tabnopath);
     }
   }
-  
+
   // Buy requirements first, if any
-  if (getJobRowItems(jobName)) {    
+  if (getJobRowItems(jobName)) {
     if (jobid != GM_getValue('selectMission', 1))
       Autoplay.fx = autoMission;
     Autoplay.delay = noDelay;
     Autoplay.start();
     return;
   }
-  
+
   // Do the job
   Autoplay.fx = function() { doJobFunction(goJob(jobno)); };
   Autoplay.delay = (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) == 0) ? noDelay : getAutoPlayDelay();
@@ -3474,7 +3496,7 @@ function autoHitman() {
   var bountyMin = parseCash(GM_getValue('hitmanBountyMin', 0));
   var hitmanNames = isGMChecked('hitmanNames');
   var avoidNames = isGMChecked('hitmanAvoidNames');
-  var onlyNames = isGMChecked('hitmanOnlyNames');  
+  var onlyNames = isGMChecked('hitmanOnlyNames');
   var blacklistCount = 0;
   var bountyCount = 0;
   var namesCount = 0;
@@ -3502,7 +3524,7 @@ function autoHitman() {
     }
     opponentsQualified.push(opponent);
   }
-  
+
   DEBUG(bountyCount + ' disqualified on bounty, ' + namesCount + ' on name, ' + blacklistCount + ' on blacklist.');
 
   if (!opponentsQualified.length) return false;
@@ -3681,7 +3703,7 @@ function autoBankWithdraw(bankCity, amount) {
     createAjaxPage(false, 'quick withdraw', bankCity);
     clickElement(elt);
     DEBUG('Clicked to withdraw from the vault.');
-    return true;  
+    return true;
   } else {
   DEBUG('Going to the bank')
   // Make sure we're at the bank.
@@ -5601,7 +5623,7 @@ function createSettingsBox() {
     updateButton.addEventListener('click', updateScript, false);
   }
 
-  createDynamicDrive(); 
+  createDynamicDrive();
 }
 
 // Create Dynamic Drive Script
@@ -5742,7 +5764,7 @@ function createGeneralTab() {
   lottoBonusSelect.selectedIndex = GM_getValue('autoLottoBonusItem', 0);
 
 
-  
+
   // Burn option
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -7898,7 +7920,7 @@ function validateStaminaTab() {
       // Get the settings.
       s.robLocation = document.getElementById('robLocation').selectedIndex;
       s.fastRob = checked('fastRob');
-	  
+
     case STAMINA_HOW_FIGHT_RANDOM: // Random fighting
       // Get the specific settings.
       s.fightLocation = document.getElementById('fightRandomLoc').selectedIndex;
@@ -8473,7 +8495,7 @@ function handleModificationTimer() {
       if (running) justPlay = true;
     }
   }
-  
+
   //ROJ
   // Added handling for Las Vegas job page changes
   var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
@@ -8570,7 +8592,7 @@ function handleModificationTimer() {
 
       if (foundPopup) {
         pageChanged = true;
-        justPlay = true;        
+        justPlay = true;
       }
     }
   }
@@ -8594,7 +8616,7 @@ function objLootItem() {
   this.Giftable = false;
 }
 function clearLootPage() {
-    //Hide everything 
+    //Hide everything
     var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
 	var numRows = colRows.length;
     var id = 'MWAP_Temp_Loot_List';
@@ -8607,7 +8629,7 @@ function clearLootPage() {
     }
 }
 function restoreLootPage() {
-    //Restore everything 
+    //Restore everything
     var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
 	var numRows = colRows.length;
     var id = 'MWAP_Temp_Loot_List';
@@ -8616,7 +8638,7 @@ function restoreLootPage() {
       tempDiv.parentNode.removeChild(tempDiv);
     }
     for (var i = 0; i < numRows; i++) {
-      colRows[i].style.display="";  // Show everything.      
+      colRows[i].style.display="";  // Show everything.
     }
 }
 
@@ -8644,7 +8666,7 @@ function cleanLoot(sortLootType) {
     var horzLine = colRows[0].innerHTML.clean().trim();
     for (var i = 0; i < numRows; i++) {
       var rowVal = $x('.//td',colRows[i]);
-      
+
       switch(colRows[i].innerHTML.clean().trim()) {
       case 'Hidden Loot':
         lootType = -1;
@@ -8653,7 +8675,7 @@ function cleanLoot(sortLootType) {
         lootType = 0;
         colRows[i].setAttribute("id", "Weapons");
         eltWeapons = colRows[i];
-        break;      
+        break;
       case 'Armor':
         lootType = 1;
         colRows[i].setAttribute("id", "Armor");
@@ -8680,9 +8702,9 @@ function cleanLoot(sortLootType) {
       case horzLine:
         break;
       default:
-         
+
         var nameLoot = $x('.//strong',rowVal[1]);
-          
+
         if (rowVal[5] == undefined) break;
         var splitAttack = rowVal[2].innerHTML.clean().trim().split(" ");
         var splitDefense = rowVal[3].innerHTML.clean().trim().split(" ");
@@ -8697,7 +8719,7 @@ function cleanLoot(sortLootType) {
         // hence the loot item is giftable.
         if (objLoot.Quantity != splitQuantity[1]) objLoot.Giftable = true;
         break;
-        
+
       }
       eltWeapons.setAttribute("class", JSON.stringify(colLoot[0]));
       eltArmor.setAttribute("class", JSON.stringify(colLoot[1]));
@@ -8705,7 +8727,7 @@ function cleanLoot(sortLootType) {
       eltVehicles.setAttribute("class", JSON.stringify(colLoot[3]));
       eltSpecialLoot.setAttribute("class", JSON.stringify(colLoot[4]));
     }
-  } 
+  }
   var strType = "";
   switch(sortLootType) {
     case 0: //Disabled;
@@ -8746,28 +8768,28 @@ function cleanLoot(sortLootType) {
 
     switch(sortLootType) {
       case 1: //Attack
-      case 4: 
-      case 7: 
+      case 4:
+      case 7:
       case 10:
         minAttack = parseInt(sortAttack(colLoot));
 
         break;
-      case 2: 
+      case 2:
       case 5: //Defense
-      case 8: 
+      case 8:
       case 11:
         minDefense = parseInt(sortDefense(colLoot));
         break;
-      case 3: 
-      case 6: 
-      case 9: 
+      case 3:
+      case 6:
+      case 9:
       case 12: //Combined
         minAttack = parseInt(sortAttack(colLoot));
         minDefense = parseInt(sortDefense(colLoot));
         Combined = true;
         break;
     }
-    
+
     var objLoot = new objLootItem();
     var divElt = document.createElement("div");
     divElt.setAttribute('id', 'MWAP_Temp_Loot_List');
@@ -8781,16 +8803,16 @@ function cleanLoot(sortLootType) {
 
       var txtElt = document.createTextNode(colLoot[i].Name);
       tdName.appendChild(txtElt);
-      
+
       txtElt = document.createTextNode("Attack: " + colLoot[i].Attack);
       tdAttack.appendChild(txtElt);
-      
+
       txtElt = document.createTextNode("Defense: " + colLoot[i].Defense);
       tdDefense.appendChild(txtElt);
 
       txtElt = document.createTextNode("Total: " + colLoot[i].Quantity);
       tdQuantity.appendChild(txtElt);
-      
+
       newElt.appendChild(tdName);
       newElt.appendChild(tdAttack);
       newElt.appendChild(tdDefense);
@@ -8896,9 +8918,9 @@ function handlePublishing() {
       //    (2) It's been 10 seconds since the post window loaded
       // Then close the window
       } else if (!pubElt || !timeLeftGM('postTimer')) {
-        if (skipElt) { 
+        if (skipElt) {
           DEBUG('Publish: Clicked Skip');
-          clickElement(skipElt); 
+          clickElement(skipElt);
         }
         else DEBUG('Publish: no Skip button found');
       }
@@ -9036,7 +9058,7 @@ function innerPageChanged(justPlay) {
 
   getPlayerEquip();
   // Customize the display.
-  if (!justPlay) {    
+  if (!justPlay) {
     setListenContent(false);
     customizeMasthead();
     customizeLayout();
@@ -9052,14 +9074,14 @@ function innerPageChanged(justPlay) {
       customizeFight();
     }
     setListenContent(true);
-  }  
+  }
   try {
     // If a click action was taken, check the response.
     if (clickAction) {
       var action = clickAction;
-      var context = clickContext;      
+      var context = clickContext;
       clickAction = undefined;
-      clickContext = undefined;      
+      clickContext = undefined;
       if (!logResponse(innerPageElt, action, context)) {
         DEBUG('We did not get a valid logresponse, so kick off auto-play');
         // No further action was taken. Kick off auto-play.
@@ -9603,11 +9625,11 @@ function doQuickClicks() {
     // Click the reward button
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
     if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(text(),"Reward Friends")]', 'autoWarRewardPublish')) return;
-    
+
     // Click the 'Call for Help!' button
     if (doClick('.//div//a[@class="sexy_button" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
     if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Ask Friends for Help!")]', 'autoWarResponsePublish')) return;
-    
+
     // Click the 'Rally More Help!' button
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
     if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
@@ -9621,10 +9643,10 @@ function doQuickClicks() {
       quickBank(city, cities[city][CITY_CASH]);
     }
 
-/*  
+/*
     //This has to be fixed, since Z changed the way energy packs can be sent to mafia members
     //This code does not work anymore
-  
+
     // Auto-send energy pack
     var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
     if (isGMChecked('sendEnergyPack') && (actionElt ||
@@ -9689,11 +9711,11 @@ function doQuickClicks() {
     var actionElt = xpathFirst('.//div[@id="mbox_energy_timer_container"]', innerPageElt);
     if (isGMChecked('rewardEnergyPack') && !timeLeftGM('rewardEnergyTimer') && actionElt) {
       var actionLink = xpathFirst('//a[contains(text(), "Show more")]', innerPageElt);
-      if (actionLink) {        
+      if (actionLink) {
         clickElement(actionLink);
         addToLog('info Icon','Clicked to reward your mafia for Energy Packs.');
-        DEBUG('Clicked to reward your mafia for Energy Packs.');      
-      }  
+        DEBUG('Clicked to reward your mafia for Energy Packs.');
+      }
       setGMTime('rewardEnergyTimer', '4 hours');
     }
 
@@ -10549,9 +10571,9 @@ function customizeProfile() {
 function getJobMastery(jobRow, newJobs) {
   // Logic for new job layout
   if (newJobs) {
-    var mastery = 100;  
-    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i) || jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i)) { mastery = parseInt(RegExp.$1); }    
-    else { if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i)) mastery = 100-parseInt(RegExp.$1) }      
+    var mastery = 100;
+    if (jobRow.innerHTML.untag().match(/>(\d+)%\s+Job\s+Mastery/i) || jobRow.innerHTML.untag().match(/(\d+)%/i) || jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i)) { mastery = parseInt(RegExp.$1); }
+    else { if (jobRow.innerHTML.untag().match(/margin-right:\s+(\d+)%/i)) mastery = 100-parseInt(RegExp.$1) }
     return mastery;
   }
 
@@ -10577,7 +10599,7 @@ function getJobMastery(jobRow, newJobs) {
 }
 
 // Set the next job to be mastered for mastery job options
-function jobMastery(element, newJobs) {  
+function jobMastery(element, newJobs) {
   if (isGMChecked('repeatJob') || isGMChecked('multipleJobs')) return;
 
   var selectMission = parseInt(GM_getValue('selectMission', 1));
@@ -10589,7 +10611,7 @@ function jobMastery(element, newJobs) {
   if (city != cityno || !onJobTab(tabno)) return;
 
   var currentJobRow = getJobRow(currentJob, element);
- 
+
   // Calculate tier mastery.
   DEBUG('Checking mastery for each job.');
   var tierLevel = 0;
@@ -10641,7 +10663,7 @@ function jobMastery(element, newJobs) {
     var jobList = getSavedList('jobsToDo');
     if (jobList.length == 0) {
       if (currentJobMastered) addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
-      else addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');      
+      else addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');
       if (tierPercent == 100) {
         // Find the first job of the next tier.
         // NOTE: This assumes that the missions array is sorted by city and then by tier.
@@ -10682,7 +10704,7 @@ function jobMastery(element, newJobs) {
   }
 }
 
-function customizeVegasJobs() {    
+function customizeVegasJobs() {
   // Handle Las Vegas job layout
   var vegasJobs = $x('.//div[@id="map_panels"]//div[contains(@class, "job_info")]', innerPageElt);
 
@@ -10734,7 +10756,7 @@ function customizeVegasJobs() {
     }
 
     jobsFound++;
-    var jobPercentage = getJobMastery(currentJob, true);    
+    var jobPercentage = getJobMastery(currentJob, true);
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
@@ -10743,28 +10765,28 @@ function customizeVegasJobs() {
         if (masteryList.length > 0 && masteryList.indexOf(String(jobMatch)) != -1)  masteredJobs[city][currentTab].push(jobMatch);
         masteredJobsCount++;
       }
-      
+
       //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
       var skipCurrentJob = false;
-      stamElt = xpathFirst('.//dd[@class="stamina"]', currentJob);  
+      stamElt = xpathFirst('.//dd[@class="stamina"]', currentJob);
       if(stamElt) {
-        reqStam = parseInt(stamElt.innerHTML.untag());        
+        reqStam = parseInt(stamElt.innerHTML.untag());
         if(reqStam > stamina) {
           skipCurrentJob = true;
           DEBUG('Required Stamina: ' +reqStam+' - Current Stamina: '+stamina+'. Skipping');
-        }  
-      }  
-      
+        }
+      }
+
       nrgElt = xpathFirst('.//dd[@class="energy"]', currentJob);
       if(!nrgElt) nrgElt = xpathFirst('.//td[@class="job_energy"]', currentJob);
       if(nrgElt) {
-        reqNrg = parseInt(nrgElt.innerHTML.untag());        
+        reqNrg = parseInt(nrgElt.innerHTML.untag());
         if(reqNrg > energy) {
           skipCurrentJob = true;
           DEBUG('Required Energy: ' +reqNrg+' - Current Energy: '+energy+'. Skipping');
-        }  
+        }
       }
-      
+
       // Skip locked jobs and optional fight jobs
       if(isJobLocked(currentJob) || skipCurrentJob || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) )
         {
@@ -10773,7 +10795,7 @@ function customizeVegasJobs() {
           availableJobs[city][currentTab].push(jobMatch);
       }
     }
-    
+
     // Skip this for jobs without jobCost
     if (!jobCost) continue;
 
@@ -10849,30 +10871,30 @@ function customizeVegasJobs() {
   }
 
   var elt;
-  // Highlight the best and worst jobs.  
+  // Highlight the best and worst jobs.
   if (worstRatio != bestRatio) {
     var i=0;
     while (bestJobs.length) {
       elt = bestJobs.pop();
       var id = 'bestJob'+i;
       addelt = document.getElementById(id);
-      if(!addelt || elt.innerHTML.indexOf('(BEST)') == -1) {        
-        elt = makeElement('span', elt, {'id':id, 'style':'color:#52E259; font-size: 10px'});        
+      if(!addelt || elt.innerHTML.indexOf('(BEST)') == -1) {
+        elt = makeElement('span', elt, {'id':id, 'style':'color:#52E259; font-size: 10px'});
         elt.appendChild(document.createTextNode(' (BEST)'));
       }
-      i++;      
+      i++;
     }
-    i = 0;    
-    while (worstJobs.length) {      
-      elt = worstJobs.pop();        
+    i = 0;
+    while (worstJobs.length) {
+      elt = worstJobs.pop();
       id = 'worstJob'+i;
       addelt = document.getElementById(id);
-      if(!addelt || elt.innerHTML.indexOf('(WORST)') == -1) {        
-        elt = makeElement('span', elt, {'id':id, 'style':'color:#EC2D2D; font-size: 10px'});        
+      if(!addelt || elt.innerHTML.indexOf('(WORST)') == -1) {
+        elt = makeElement('span', elt, {'id':id, 'style':'color:#EC2D2D; font-size: 10px'});
         elt.appendChild(document.createTextNode(' (WORST)'));
       }
-      i++;      
-    }    
+      i++;
+    }
   }
 
   // Show the experience to energy ratio needed to level up.
@@ -10892,7 +10914,7 @@ function customizeVegasJobs() {
 
   // Set the job progress
   jobMastery(innerPageElt, true);
-  tierMastery(jobsFound, masteredJobsCount, currentTab);      
+  tierMastery(jobsFound, masteredJobsCount, currentTab);
 
   return true;
 }
@@ -10918,7 +10940,7 @@ function customizeNewJobs() {
   masteredJobs[city][currentTab] = [];
 
   // FIXME: Change this once we encounter locked jobs for the new header
-  var isJobLocked = function (thisJob) {    
+  var isJobLocked = function (thisJob) {
     return /locked/i.test(thisJob.innerHTML.untag());
   };
 
@@ -10946,7 +10968,7 @@ function customizeNewJobs() {
     }
 
     jobsFound++;
-    var jobPercentage = getJobMastery(currentJob, true);    
+    var jobPercentage = getJobMastery(currentJob, true);
 
     // Determine available jobs
     if (isGMChecked('multipleJobs')) {
@@ -11064,8 +11086,8 @@ function customizeNewJobs() {
 
 function isJobFight (jobAction) {  return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
 
-function isJobLocked (jobAction) {    
-  return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);  
+function isJobLocked (jobAction) {
+  return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);
 
 }
 
@@ -11082,7 +11104,7 @@ function requiresBizItem (jobRow) {
 }
 
 function customizeJobs() {
-  
+
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
 
@@ -11132,7 +11154,7 @@ function customizeJobs() {
       }
 
       jobsFound++;
-      var jobPercentage = getJobMastery(jobRow, false);      
+      var jobPercentage = getJobMastery(jobRow, false);
       var jobInfo = xpathFirst('.//td[contains(@class,"job_name") and contains(.,"Master")]', jobRow);
       var jobCost = xpathFirst('.//td[contains(@class,"job_energy")]', jobRow);
       var jobReward = xpathFirst('.//td[contains(@class,"job_reward")]', jobRow);
@@ -11543,9 +11565,9 @@ function clickWarListRemove() {
   }
 }
 
-function getJobRow(jobName, contextNode) {  
+function getJobRow(jobName, contextNode) {
   var rowElt, conTxt = '',LVjob=0;
-  try {  
+  try {
     // Retrieve by job number first
     var jobMatch = missions.searchArray(jobName, 0)[0];
     if (!isNaN(jobMatch)) {
@@ -11597,8 +11619,8 @@ function getJobRow(jobName, contextNode) {
 
 function getJobRowItems(jobName) {
   var currentJob = jobName;
-  var currentJobRow = getJobRow(currentJob, innerPageElt);  
-  if (!currentJobRow) return false;  
+  var currentJobRow = getJobRow(currentJob, innerPageElt);
+  if (!currentJobRow) return false;
   var inner = innerPageElt? innerPageElt.innerHTML : '';
   var innerNoTags = inner.untag();
 
@@ -11633,7 +11655,7 @@ function getJobRowItems(jobName) {
     }
     return true;
   }
-  
+
   // New Job layout handling
   var amtElt = xpathFirst('.//strong[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', currentJobRow);
   if(!amtElt) amtElt = xpathFirst('.//div[@class="job_uses"]//dd[@class="vegas_cash_icon"]', currentJobRow);
@@ -11646,12 +11668,12 @@ function getJobRowItems(jobName) {
       return (autoBankWithdraw(city, cashDiff));
     }
   }
-  
+
 
   // Logic to switch to the required job first
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
   //if(!necessaryItems) necessaryItems = $x('.//div[@class="needed_gate_loot"]//img', currentJobRow);
-    
+
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
   if (necessaryItems.length > 0) {
@@ -11698,12 +11720,12 @@ function getJobRowItems(jobName) {
   } else {
     necessaryItems = xpathFirst('.//span[@class="missing_req_items"]', currentJobRow);
     itmSearch='';
-    if(necessaryItems){      
-      itmSearch = necessaryItems.innerHTML;      
-      itmSearch = itmSearch.replace("(×1)", "");      
+    if(necessaryItems){
+      itmSearch = necessaryItems.innerHTML;
+      itmSearch = itmSearch.replace("(×1)", "");
     } else {
       necessaryItems = xpathFirst('.//div[@class="needed_gate_loot"]', currentJobRow);
-      if(necessaryItems){                
+      if(necessaryItems){
         messages = $x('.//img', necessaryItems);
         numMessages = messages.length;
         for (i = 0; i < numMessages; i++) {
@@ -11712,11 +11734,11 @@ function getJobRowItems(jobName) {
             itmSearch = item;
           } else {
             itmSearch = itmSearch + ', ' + item;
-          }          
-        }        
+          }
+        }
       }
     }
-        
+
     if(itmSearch!=''){
       DEBUG('Item(s) Required for this job');
       // Save the current job for later. The current job should not already exist in the list, so check first.
@@ -11729,7 +11751,7 @@ function getJobRowItems(jobName) {
         setSavedList('jobsToDo', jobs);
       } else {
        DEBUG(currentJob + ' already saved for later. Need to fetch pre-req items first.');
-      } 
+      }
 
       var itemFound = false;
       // Try fetching the items from the job requirement array
@@ -11746,15 +11768,15 @@ function getJobRowItems(jobName) {
 
       // Set the flag if at least one item is found
       if (!itemFound) DEBUG(itmSearch + ' not found in the requirement job array.');
-      else {         
-        setSavedList('itemList', items.unique());        
+      else {
+        setSavedList('itemList', items.unique());
         setSavedList('jobsToDo', jobs);
         popJob();
         return true;
-      }  
-    }    
+      }
+    }
   }
-  
+
   // Withdraw money
   var amtElt = xpathFirst('.//td[contains(@class,"job_energy")]//span[@class="money" or @class="bad"]', currentJobRow);
   if (amtElt) {
@@ -11766,21 +11788,21 @@ function getJobRowItems(jobName) {
       return (autoBankWithdraw(city, cashDiff));
     }
   }
-  
+
   return false;
 }
 
 function popJob(){
-  var jobs = getSavedList('jobsToDo', '');  
+  var jobs = getSavedList('jobsToDo', '');
   // Set the very next job to perform.
-  var doJob = jobs.pop();  
+  var doJob = jobs.pop();
   setSavedList('jobsToDo', jobs);
   var i = 0;
   missions.forEach(
-    function(f) {      
+    function(f) {
       if (f[0].toUpperCase().trim() == doJob.toUpperCase().trim()) {
         GM_setValue('selectMission', i);
-        addToLog('info Icon', 'Switching job to ' + doJob + '.');        
+        addToLog('info Icon', 'Switching job to ' + doJob + '.');
       }
       i++;
     }
@@ -11846,7 +11868,7 @@ function jobLoot(element) {
       var loot = RegExp.$1;
       if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
       if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
-      else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';      
+      else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';
       lootbag.push(loot);
       addToLog('lootbag Icon', strLoot);
     }
@@ -11867,13 +11889,13 @@ function jobLoot(element) {
         lootbag.push(loot);
       }
     }
-    if (numMessages > 0 && strLoot !='') {      
+    if (numMessages > 0 && strLoot !='') {
       addToLog('lootbag Icon', strLoot);
     }
   }
-  
+
   DEBUG('Found ' + lootbag.length + ' item(s) on this job.');
-  
+
   var items = getSavedList('itemList');
   if (typeof(items[0]) == 'undefined' || items.length == 0) {
     DEBUG('No items in required item list.');
@@ -12349,7 +12371,7 @@ function parsePlayerUpdates(messagebox) {
       var experience = RegExp.$1;
       //result += '<span class="good">' + ' WON ' + cost + '</span>' + ' and ' +
       //          '<span class="good">' + experience +' experience.</span>';
-                
+
       result += ' and <span class="good">WON</span>, gaining <span class="good">' + cost + '</span> and ' +
         '<span class="good">' + experience + ' experience</span>.';
       var cashLoc = parseCashLoc(cost);
@@ -12960,7 +12982,7 @@ function autoWar() {
   if (actionElt) {
     // Check if "War in Progress" is there
     // FIXME: Causes looping
-    var actionLink = getActionLink (actionElt, 'Check War');    
+    var actionLink = getActionLink (actionElt, 'Check War');
     if (actionLink && checkOnWar) {
       Autoplay.fx = function() {
         setGMTime('warTimer', '00:00');
@@ -12986,7 +13008,7 @@ function autoWar() {
   }
 
   // Check the timer, do we even need to go further?
-  if (timeLeftGM('warTimer') > 0) return false;  
+  if (timeLeftGM('warTimer') > 0) return false;
 
   // We need to be on the war page to go any further
   if (!onWarTab()) {
@@ -13013,7 +13035,7 @@ function autoWar() {
   if (warStatus) {
     var warTimer = warStatus.innerHTML;
     setGMTime('warTimer', warTimer);
-    DEBUG('War is not available yet, checking again after ' + warTimer + ' hours.');    
+    DEBUG('War is not available yet, checking again after ' + warTimer + ' hours.');
   } else {
     // Get war Target
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
@@ -13219,7 +13241,7 @@ function autoGiftAccept() {
       if (giftCount3012 > 0) {
         // Ok, we have at least one gift!
         for (var i =0; i < giftCount3012; i++) {
-          var eltThisGift = eltGiftContainer3012.snapshotItem(i).innerHTML.slice(eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('_main"'));          
+          var eltThisGift = eltGiftContainer3012.snapshotItem(i).innerHTML.slice(eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3012.snapshotItem(i).innerHTML.indexOf('_main"'));
           var eltX = 'event_' + eltThisGift + '_main';
           var eltGiftContent = iframeGiftWindow.contentDocument.getElementById(eltX);
           var giftSender = eltGiftContent.innerHTML.slice(0, eltGiftContent.innerHTML.indexOf(' has sent you')).untag().clean().ltrim().rtrim();
@@ -13251,7 +13273,7 @@ function autoGiftAccept() {
       if (giftCount3018 > 0) {
         // Ok, we have at least one gift!
         for (var i =0; i < giftCount3018; i++) {
-          var eltThisGift = eltGiftContainer3018.snapshotItem(i).innerHTML.slice(eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('_main"'));    
+          var eltThisGift = eltGiftContainer3018.snapshotItem(i).innerHTML.slice(eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('id="event_')+10,eltGiftContainer3018.snapshotItem(i).innerHTML.indexOf('_main"'));
           var eltX = 'event_' + eltThisGift + '_main';
           var eltGiftContent = iframeGiftWindow.contentDocument.getElementById(eltX);
           var giftSender = eltGiftContent.innerHTML.slice(0, eltGiftContent.innerHTML.indexOf(' needs a partner')).untag().clean().ltrim().rtrim();
@@ -13830,12 +13852,12 @@ function getJobClicks() {
   return parseInt(numClicks);
 }
 
-function goJob(jobno) {  
+function goJob(jobno) {
   // Retrieve the jobRow
   var jobName = missions[GM_getValue('selectMission')][MISSION_NAME];
   var jobNo = missions[GM_getValue('selectMission')][MISSION_NUMBER];
   DEBUG('Clicking jobNo/jobName : '+jobNo+ ' / '+jobName);
-  var jobRow = getJobRow(jobName, innerPageElt);  
+  var jobRow = getJobRow(jobName, innerPageElt);
   // Get the action element by job no first
   var elt;
   var tmp = 1 ;
@@ -14449,12 +14471,12 @@ function logFightResponse(rootElt, resultElt, context) {
     for(i=0;i<5;i++) {
       eltStashID = 'fight_loot_feed_btn_'+i;
       eltStash = document.getElementById(eltStashID, resultElt);
-      if (eltStash && isGMChecked('autoSecretStash')){        
+      if (eltStash && isGMChecked('autoSecretStash')){
         var SecretStashFightingCount = parseInt(GM_getValue('SecretStashFightingCount')) ? parseInt(GM_getValue('SecretStashFightingCount')) : 0;
         var publishFrequency =  parseInt(GM_getValue('autoSecretStashFrequency')) ? parseInt(GM_getValue('autoSecretStashFrequency')) : 1;
         var logFrequency = parseInt(SecretStashFightingCount % publishFrequency);
         if(SecretStashFightingCount % publishFrequency == 0) {
-          clickElement(eltStash);          
+          clickElement(eltStash);
           addToLog('info Icon','Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
         } else {
           addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
@@ -14638,7 +14660,7 @@ function logFightResponse(rootElt, resultElt, context) {
   }  else if (innerNoTags.indexOf('too weak') != -1) {
     addToLog('info Icon', '<span style="color:#FF9999;">' + 'Too weak to fight.'+ '</span>');
   } else {
-    DEBUG('Unrecognized fight response:' + inner);    
+    DEBUG('Unrecognized fight response:' + inner);
   }
 
   randomizeStamina();
@@ -14839,8 +14861,8 @@ function logJSONResponse(responseText, action, context) {
         break;
 
       // Log any message from withdrawing money.
-      case 'quick withdraw':        
-        var respJSON = eval ('(' + responseText + ')');  
+      case 'quick withdraw':
+        var respJSON = eval ('(' + responseText + ')');
         respTxt = respJSON['data'];
         var respText = JSON.parse(respTxt);
         var vegasBank = respText.acct_balance
@@ -14971,7 +14993,7 @@ function logJSONResponse(responseText, action, context) {
 // context: (optional) Any further data needed to describe the action
 // Returns: true if something has been done that will cause the inner page
 //          to change, such as clicking somewhere or loading another page.
-function logResponse(rootElt, action, context) {  
+function logResponse(rootElt, action, context) {
   // Set default timer properties.
   Autoplay.fx = goHome;
   Autoplay.delay = getAutoPlayDelay();
@@ -15041,7 +15063,7 @@ function logResponse(rootElt, action, context) {
   if (!messagebox) {
 
     if(action == 'autohit') return false;
-    DEBUG('Unexpected response page: no message box found -logResponse: HTML=' + rootElt.innerHTML);    
+    DEBUG('Unexpected response page: no message box found -logResponse: HTML=' + rootElt.innerHTML);
 
     // If fighting from a user-specified list, cycle it.
     // Otherwise, the problem might repeat indefinitely.
@@ -15184,7 +15206,7 @@ function logResponse(rootElt, action, context) {
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
         if (isGMChecked('autoAskJobHelp') && (!xpGainMin || xpGain >= xpGainMin)) {
         var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
-        if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);          
+        if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);
           // ask for help
           if (elt) {
             Autoplay.fx = function() {
@@ -15204,10 +15226,10 @@ function logResponse(rootElt, action, context) {
         jobOptimizeOn = false;
         addToLog('process Icon', inner);
         // DEBUG (' - - - push next job was true 4 ');
-      } else if (innerNoTags.indexOf('Missing') != -1) {                
+      } else if (innerNoTags.indexOf('Missing') != -1) {
         if (getJobRowItems(jobName)) {
           DEBUG(' - - need items jobid='+jobid+' selectMission='+GM_getValue('selectMission', 1));
-          if (jobid != GM_getValue('selectMission', 1))  Autoplay.fx = autoMission;            
+          if (jobid != GM_getValue('selectMission', 1))  Autoplay.fx = autoMission;
         }
       } else {
         DEBUG('Unrecognized job response.');
@@ -15215,7 +15237,7 @@ function logResponse(rootElt, action, context) {
       //return;
 
       if (pushNextJob) {
-          DEBUG('Job Mastery of 100% detected, Reloading');          
+          DEBUG('Job Mastery of 100% detected, Reloading');
           customizeVegasJobs();
           //goHome();
       }else {
@@ -15647,7 +15669,7 @@ function handlePopups() {
           if (popupInner.indexOf('id="marketplace"') != -1 // The Marketplace
             || popupInner.indexOf('id="original_buyframe_popup"') != -1  // The Marketplace
             || popupInner.indexOf('marketplace_title.png') != -1  // The Marketplace
-            || popupInner.indexOf('giftcard_iframe') != -1  // The Marketplace            
+            || popupInner.indexOf('giftcard_iframe') != -1  // The Marketplace
             || popupInner.indexOf('xw_controller=hospital') != -1 // The Hospital
             || popupInner.indexOf('bank_popup') != -1 // The Bank
             || popupInner.indexOf('vault_popup') != -1 // Las Vegas Vault
@@ -15703,7 +15725,7 @@ function handlePopups() {
           // Get rid of Proceed to Vegas Level 6 popup
           if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
 
-          /* THESE POPUPS get processed only when PS MWAP is running: */          
+          /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
 
             /* Disable Chop Shop/Weapon Depot popup detection for timers
@@ -15718,8 +15740,8 @@ function handlePopups() {
             if (eltPubButton) {
               //DEBUG('Popup Process: The Hospital Processed');
               //clickElement(eltPubButton);
-            }*/            
-            
+            }*/
+
             // Process Sharing Secret Stash
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
             if (eltPubButton) {
@@ -15837,17 +15859,17 @@ function handlePopups() {
               }
               if (popupInnerNoTags.match(/(\d+) Bonus Experience/i)) {
                 //var exp = m[1].replace(/[^0-9]/g, '');
-                var exp = RegExp.$1.replace(/[^0-9]/g, '');                
+                var exp = RegExp.$1.replace(/[^0-9]/g, '');
                 var boardrecord ="";
                 if (popupInner.match(/Your record on this board was\s+(.+?)\./i)) boardrecord = ' Record: <span class="good">' + RegExp.$1+'</span>';
-                
+
                 addToLog('yeah Icon', 'Robbing board cleared. Bonus: <span class="good">' + exp + ' Experience</span>.'+ boardrecord);
                 updateRobStatistics(null,parseInt(exp));
                 updateLogStats();
               }
               return(closePopup(popupElts[i], "Robbing Board Popup"));
             }
-  
+
             // Process Level Up popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
             if (eltPubButton) {
@@ -15861,7 +15883,7 @@ function handlePopups() {
               } else {
                 return(closePopup(popupElts[i], "Level Up"));
               }
-            } 
+            }
 
             // Process Loyalty popup
             if (isGMChecked('autoGiftAccept') && popupInnerNoTags.indexOf('Show Your Loyalty') != -1) {
