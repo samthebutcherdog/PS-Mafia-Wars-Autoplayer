@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.702
+// @version     1.1.703
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.702',
+  version: '1.1.703',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4088,7 +4088,7 @@ function findFightOpponent(element) {
 
   var disqualifiedCount = levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + icedCount + blacklistCount;
   if (countOpp <= disqualifiedCount) {
-    addToLog('updateInfo Icon', 'Out of the ' + countOpp + ' opponent(s) listed on the fight page '+disqualifiedCount+' disqualified.<br>' +
+    addToLog('info Icon', 'Out of the ' + countOpp + ' opponent(s) listed on the fight page '+disqualifiedCount+' disqualified.<br>' +
               levelMaxCount + ' on max level, ' +  mafiaMaxCount + ' on max mafia, ' +  mafiaMinCount + ' on min mafia,<br>' +
               namesCount + ' on name pattern, ' +  factionCount + ' on faction, ' +  icedCount + ' already iced, <br>' +
               blacklistCount + ' by blacklisting (stronger opponents).<br>');
