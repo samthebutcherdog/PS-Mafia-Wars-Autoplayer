@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.700
+// @version     1.1.701
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.700',
+  version: '1.1.701',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14472,16 +14472,20 @@ function logFightResponse(rootElt, resultElt, context) {
     // Click the 'multiple' secret stash immediately on specified interval base
     var eltStash;
     var eltStashID;
+    var eltStashParent;
     for(i=0;i<5;i++) {
       eltStashID = 'fight_loot_feed_btn_'+i;
       eltStash = document.getElementById(eltStashID, resultElt);
       if (eltStash && isGMChecked('autoSecretStash')){
+        eltStashParent = eltStash.parentNode.parentNode // Should be a fightres_bonus_message element.
         var SecretStashFightingCount = parseInt(GM_getValue('SecretStashFightingCount')) ? parseInt(GM_getValue('SecretStashFightingCount')) : 0;
         var publishFrequency =  parseInt(GM_getValue('autoSecretStashFrequency')) ? parseInt(GM_getValue('autoSecretStashFrequency')) : 1;
         var logFrequency = parseInt(SecretStashFightingCount % publishFrequency);
         if(SecretStashFightingCount % publishFrequency == 0) {
           clickElement(eltStash);
-          addToLog('info Icon','Clicked to publish the secret stash ('+logFrequency+'/'+publishFrequency+')');
+          var stashFinder = xpathFirst('.//div[contains(.,"found the location")]/a', eltStashParent);
+          var stashUser = linkToString(stashFinder, 'stashUser');
+          addToLog('lootbag Icon','Clicked to send '+stashUser+' secret stash! ('+logFrequency+'/'+publishFrequency+')');
         } else {
           addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
         }
