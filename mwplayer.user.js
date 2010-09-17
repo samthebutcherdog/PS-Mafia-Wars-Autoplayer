@@ -1,4 +1,4 @@
-/**
+﻿/**
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.703
+// @version     1.1.704
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,20 +50,21 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.703',
+  version: '1.1.704',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
-  ajaxPage: 'ajax_inner',     // <div> for Autoplay for parsing with logResponse(), added as inner_page sibling
-  ajaxResult: 'ajax_result',  // <div> for parsing with logJSONResponse(), added as final_wrapper sibling
-   presentationurl: 'http://userscripts.org/scripts/show/77953',
+  presentationurl: 'http://userscripts.org/scripts/show/77953',
   url: 'http://www.playerscripts.com/rokdownloads/ps_facebook_mafia_wars_a.user.js',
   metadata: 'http://userscripts.org/scripts/source/77953.meta.js',
   controller: 'remote/html_server.php?xw_controller=',
   action: '&xw_action=',
   city: '&xw_city=',
   opponent: '&opponent_id=',
-  user: '&user_id='
+  user: '&user_id=',
+  /* <div> pages for parsing with logJSONResponse(), added as final_wrapper sibling; we use two pages to prevent interference */
+  ajaxIDSync: 'ajax_sync',    // page for Autoplay ('synchronous')
+  ajaxIDAsync: 'ajax_async'   // page for asynchronous clicking (quickbanking, profile icecheck etc)
 };
 
 // Set the storage path
@@ -747,7 +748,9 @@ var skipStaminaSpend = false;   // Skip stamina actions for now?
 var clickAction;                // Action being attempted with click simulation
 var clickContext;               // Context for clickAction
 var modificationTimer;          // Timer used to wait for content changes
-var ajaxResultTimer;            // Timer for ajaxResultElt
+var ajaxAction;                 // Action being attempted with do_ajax (asynchronous)
+var ajaxContext;                // Context for ajaxContext
+var popupTimer;                 // setInterval timer for handlePopups()
 var helpWar = false;            // Helping a friend's war?
 var idle = true;                // Is the script currently idle?
 var lastOpponent;               // Last opponent fought (object)
@@ -1501,8 +1504,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
 // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
 
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////
   );
 
@@ -1946,7 +1947,6 @@ function doAutoPlay () {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
 
-
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -1959,7 +1959,7 @@ function doAutoPlay () {
       }
     }
   }
-	// Collect Take first then try to build
+  // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
     if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
@@ -2176,6 +2176,7 @@ function doAutoPlay () {
   if (running && idle && isGMChecked('idleInCity') && city != GM_getValue('idleLocation', NY)) {
     DEBUG('Idling. Moving to ' + cities[GM_getValue('idleLocation', NY)][CITY_NAME] + '. ');
     Autoplay.fx = function(){goLocation(GM_getValue('idleLocation',NY));};
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return;
   }
@@ -2392,13 +2393,14 @@ function checkVaultStatus(byUser) {
   if (byUser == false && timeLeftGM('checkVaultTimer')) return;
   DEBUG('Checking vault status..')
   // Handle JSON response
-  createAjaxPage(false, 'check vault');
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
+  var ajaxID = createAjaxPage(false, 'check vault', LV);
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
   clickElement(elt);
   return;
 }
 
 function autoCollectTake(takeCity) {
+  Autoplay.delay = getAutoPlayDelay();
   // Go to the correct city.
   if (city != takeCity) {
     Autoplay.fx = function(){goLocation(takeCity);};
@@ -2413,14 +2415,13 @@ function autoCollectTake(takeCity) {
     return true;
   }
 
-  createAjaxPage(true);
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxPage + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'collectall' + SCRIPT.city + (takeCity+1) + '&requesttype=json", 1, 1, 0, 0); return false;'});
+  var ajaxID = createAjaxPage(true);
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'collectall' + SCRIPT.city + (takeCity+1) + '&requesttype=json", 1, 1, 0, 0); return false;'});
   Autoplay.fx = function() {
     clickAction = 'collect take';
     clickContext = takeCity;
     clickElement(elt);
   };
-  Autoplay.delay = getAutoPlayDelay();
   Autoplay.start();
   return true;
 }
@@ -2472,9 +2473,9 @@ function miniPack() {
   miniPackForce();
 }
 function miniPackForce() {
- if (getHoursTime('miniPackTimer') == 0)
-  setGMTime('miniPackTimer', '8 hours');
-  DEBUG('Redirecting to force mini Energy');
+  if (getHoursTime('miniPackTimer') == 0)
+    setGMTime('miniPackTimer', '1 hour');
+  DEBUG('Redirecting to use mini pack...');
   window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
 }
 
@@ -2579,6 +2580,7 @@ function autoStat() {
       clickElement(upgradeElt);
       DEBUG('Clicked to upgrade: ' + autoStatDescrips[statIndex + 1]);
     };
+    Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   } else {
@@ -2900,8 +2902,6 @@ function autoMission() {
   Autoplay.delay = (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) == 0) ? noDelay : getAutoPlayDelay();
   Autoplay.start();
 } // end of automission
-
-
 
 function currentJobTab() {
   var elt = xpathFirst('.//li[contains(@class, "tab_on")]//a', innerPageElt);
@@ -3231,13 +3231,13 @@ function autoFight(how) {
     return false;
   }
 
-  // Check for pulse, skipped iced opponents on the fight list
+  // Check for pulse, skip iced opponents on the fight list
   if (isGMChecked('iceCheck') && (how == STAMINA_HOW_FIGHT_LIST)) {
-    createAjaxPage(true);
-    var iceElt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxPage + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + opponent.id + '", 1, 1, 0, 0); return false;'});
+    var ajaxID = createAjaxPage(true);
+    var iceElt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + opponent.id + '", 1, 1, 0, 0); return false;'});
     Autoplay.fx = function() {
       clickAction = 'icecheck fightlist';
-      clickContext = opponent;
+      clickContext = {'opponent': opponent, 'attackElt': attackElt};
       clickElement(iceElt);
     };
     Autoplay.delay = noDelay;
@@ -3695,17 +3695,19 @@ function autoBankDeposit(bankCity, amount) {
   return true;
 }
 
-function autoBankWithdraw(bankCity, amount) {
-  if(bankCity == LV){
-    DEBUG('Going to the vault to withdraw '+amount)
+function autoBankWithdraw(amount) {
+  if (city == LV) {
+    // Use do_ajax to withdraw in LV
+    DEBUG('Going to the vault to withdraw '+amount);
     var withdrawUrl = "xw_controller=propertyV2&xw_action=doaction&xw_city=5&doaction=ActionBankWithdrawal&building_type=6&city=5&amount=" + amount;
-    var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + withdrawUrl + '", 1, 1, 0, 0); return false;'});
-    createAjaxPage(false, 'quick withdraw', bankCity);
+    var ajaxID = createAjaxPage(false, 'quick withdraw', LV);
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","remote/html_server.php?' + withdrawUrl + '", 1, 1, 0, 0); return false;'});
     clickElement(elt);
     DEBUG('Clicked to withdraw from the vault.');
     return true;
-  } else {
-  DEBUG('Going to the bank')
+  }
+
+  DEBUG('Going to the bank');
   // Make sure we're at the bank.
   var formElt = xpathFirst('.//div[@id="bank_popup"]', popupfodderElt);
   if (!formElt) {
@@ -3749,7 +3751,6 @@ function autoBankWithdraw(bankCity, amount) {
   Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
-  }
 }
 
 // Returns a non-empty array of the displayed opponents, or undefined.
@@ -4571,7 +4572,6 @@ function saveSettings() {
       return;
     }
   }
-
 
   //End Save Autostat Tab Settings
 
@@ -5432,11 +5432,11 @@ function createLogBox() {
   var statPassiveElt = makeElement('div', mafiaLogBox, {'id': 'statPassive', 'style':'display: none' });
 
   // tab buttons
-  var statPrimaryButton = makeElement('div', mafiaLogBox, {'id': 'btnPrimaryStat', 'class':'mouseunderline', 'style':'position: absolute; left: 5px; bottom: 63px; font-weight: 600; cursor: pointer; color: rgb(0, 255, 0);'});
+  var statPrimaryButton = makeElement('div', mafiaLogBox, {'id': 'btnPrimaryStat', 'class':'mouseunderline', 'style':'position: absolute; left: 5px; bottom: 61px; font-weight: 600; cursor: pointer; color: rgb(0, 255, 0);'});
   statPrimaryButton.appendChild(document.createTextNode('primary'));
   statPrimaryButton.addEventListener('click', showPrimaryStats, false);
 
-  var statPassiveButton = makeElement('div', mafiaLogBox, {'id': 'btnPassiveStat', 'class':'mouseunderline', 'style':'position: absolute; left: 85px; bottom: 63px; font-weight: 600; cursor: pointer; color: rgb(0, 128, 0);'});
+  var statPassiveButton = makeElement('div', mafiaLogBox, {'id': 'btnPassiveStat', 'class':'mouseunderline', 'style':'position: absolute; left: 85px; bottom: 61px; font-weight: 600; cursor: pointer; color: rgb(0, 128, 0);'});
   statPassiveButton.appendChild(document.createTextNode('passive'));
   statPassiveButton.addEventListener('click', showPassiveStats, false);
 
@@ -5762,8 +5762,6 @@ function createGeneralTab() {
     lottoBonusSelect.appendChild(choice);
   }
   lottoBonusSelect.selectedIndex = GM_getValue('autoLottoBonusItem', 0);
-
-
 
   // Burn option
   item = makeElement('div', list);
@@ -8136,7 +8134,7 @@ function validateStaminaTab() {
       }
       break;
 
-	/*
+      /*
       // Get the settings for Robbing.
       s.robLocation = document.getElementById('robLocation').selectedIndex;
       s.fastRob = checked('fastRob');
@@ -8450,16 +8448,6 @@ function handleModificationTimer() {
 
   if (!innerPageElt) return;
 
-  // Determine if our private AJAX page (for Autoplay) has changed.
-  var ajaxElt = document.getElementById(SCRIPT.ajaxPage);
-  if (ajaxElt && !xpathFirst('.//div[@id="ajax_flag"]', ajaxElt)) {
-    setListenContent(false);
-    makeElement('div', ajaxElt, {'id':'ajax_flag', 'style':'display: none;'});
-    setListenContent(true);
-    DEBUG('New ajax_inner content: ' + ajaxElt.id);
-    pageChanged = true;
-  }
-
   // Determine if the displayed page has changed.
   if (!xpathFirst('.//div[@id="inner_flag"]', innerPageElt)) {
     setListenContent(false);
@@ -8501,7 +8489,6 @@ function handleModificationTimer() {
   var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
   //var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_info"]', innerPageElt);
   if (jobResults && jobResults.length > 0) {
-
     for (var i = 0, iLength=jobResults.length; i < iLength; ++i) {
       if (jobResults[i] && !xpathFirst('./div[@id="job_flag"]', jobResults[i])) {
         setListenContent(false);
@@ -8607,7 +8594,6 @@ function handleModificationTimer() {
   }
 }
 
-
 function objLootItem() {
   this.Attack = 0;
   this.Defense = 0;
@@ -8618,7 +8604,7 @@ function objLootItem() {
 function clearLootPage() {
     //Hide everything
     var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
-	var numRows = colRows.length;
+    var numRows = colRows.length;
     var id = 'MWAP_Temp_Loot_List';
     var tempDiv = document.getElementById(id);
     if(tempDiv) {
@@ -8631,7 +8617,7 @@ function clearLootPage() {
 function restoreLootPage() {
     //Restore everything
     var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
-	var numRows = colRows.length;
+    var numRows = colRows.length;
     var id = 'MWAP_Temp_Loot_List';
     var tempDiv = document.getElementById(id);
     if(tempDiv) {
@@ -8657,7 +8643,7 @@ function cleanLoot(sortLootType) {
     eltLoot.id = "break";
 
     var colRows = $x('.//table[@class="main_table"]/tbody/tr',innerPageElt);
-	var numRows = colRows.length;
+    var numRows = colRows.length;
     var colLoot = new Array(4);
     for (var i = 0; i < 5; i++) {
       colLoot[i] = [];
@@ -8793,7 +8779,7 @@ function cleanLoot(sortLootType) {
     var objLoot = new objLootItem();
     var divElt = document.createElement("div");
     divElt.setAttribute('id', 'MWAP_Temp_Loot_List');
-	var numRows = colLoot.length - 1;
+    var numRows = colLoot.length - 1;
     for (var i = 0; i < numRows; i++) {
       var newElt = document.createElement("tr");
       var tdName = document.createElement("td");
@@ -8889,11 +8875,6 @@ function setModificationTimer() {
   //GM_log('Modification timer set.');
 }
 
-function handleDOMSubtreeModified(e) {
-  if (ignoreElement(e.target)) return;
-  logElement(e.target, 'subtree');
-}
-
 function handleContentModified(e) {
   if (ignoreElement(e.target)) return;
   //logElement(e.target, 'content');
@@ -8907,7 +8888,7 @@ function handlePublishing() {
       // Publishing/skipping posts
       var skipElt = xpathFirst('//input[@type="submit" and @name="cancel"]');
       var pubElt = xpathFirst('//input[@type="submit" and @name="publish"]');
-      var okElt = xpathFirst('//input[@type="submit" and @name="error_ok"]');
+      var okElt = xpathFirst('//input[@type="submit" and @name="ok"]');
 
       // If OK button is found, close the window by pressing it
       if (okElt) {
@@ -8933,8 +8914,8 @@ function handlePublishing() {
           if (eltDiv) {
             if (isGMChecked(gmFlag)) clickElement(pubElt);
             else clickElement(skipElt);
-            // Wait for 1 second before trying to close window manually
-            window.setTimeout(handlePublishing, 1000);
+            // Wait for 2 seconds before trying to close window manually
+            window.setTimeout(handlePublishing, 2000);
             DEBUG('Publish: Found ' + gmFlag);
             return true;
           }
@@ -8991,8 +8972,8 @@ function handlePublishing() {
   }
 
   // If we get here, then at least one of the three buttons exists, so try again!
-  DEBUG('Publish: Try again in 3 seconds.');
-  window.setTimeout(handlePublishing, 3000);
+  DEBUG('Publish: Try again in 2 seconds.');
+  window.setTimeout(handlePublishing, 2000);
 }
 
 // Turns on/off the high-level event listener for the game.
@@ -9094,7 +9075,7 @@ function innerPageChanged(justPlay) {
     }
   } catch (ex) {
     addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
-    DEBUG('BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
+    //DEBUG('BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
     autoReload(true);
   }
 }
@@ -9182,7 +9163,6 @@ function refreshGlobalStats() {
     lvlExp = parseInt(lvlExpElt.innerHTML);
     ptsToNextLevel = lvlExp;
   }
-
 
   // Get the mafia size and pending invites.
   mafia = xpathFirst('//span[@id="user_group_size"]');
@@ -9442,7 +9422,7 @@ function refreshMWAPCSS() {
                  (isGMChecked('hideFriendLadder') ? ' .friendladder_box, ' : '' ) +
                  // Hide the Zynga bar, progress bar, email bar, sms link, new button market place
                  ' #mwapHide, #mw_zbar, #mw_zbar iframe, #setup_progress_bar, #intro_box, ' +
-                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #ajax_inner, #ajax_result ' +
+                 ' *[id*="bouncy"], .fb_email_prof_header, .mw_sms, #ajax_sync, #ajax_async' +
                  ' {position: absolute !important; margin:0 !important; ' +
                  '  height:0 !important; width: 0 !important; display: none !important;}' +
                  // ********************** Stats Tab CSS **********************
@@ -9506,7 +9486,7 @@ function refreshMWAPCSS() {
                  '#mafiaLogBox .logEvent.warning.Icon{background-image:url(' + stripURI(warningIcon) + ')}' +
                  '#mafiaLogBox .logEvent.info.Icon{background-image:url(' + stripURI(infoIcon) + ')}' +
                  '#mafiaLogBox .logEvent.lootbag.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
-								 '#mafiaLogBox .logEvent.killedMobster.Icon{background-image:url(' + stripURI(killedMobsterIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.killedMobster.Icon{background-image:url(' + stripURI(killedMobsterIcon) + ')}' +
                  '#mafiaLogBox .logEvent.found.Icon{background-image:url(' + stripURI(lootbagIcon) + ')}' +
                  '#mafiaLogBox .logEvent.updateGood.Icon{background-image:url(' + stripURI(updateGoodIcon) + ')}' +
                  '#mafiaLogBox .logEvent.updateBad.Icon{background-image:url(' + stripURI(updateBadIcon) + ')}' +
@@ -10042,7 +10022,7 @@ function customizeStats() {
     if (!healLinkElt) {
       healElt.style.color="#FF0000";
       healElt.style.textDecoration="underline";
-      healElt.style.display="inline";
+      healElt.style.display="inline-block";
       healLinkElt = makeElement('a', null, {'id':'mwap_heal', 'title':'Click to heal immediately.'});
       healElt.parentNode.insertBefore(healLinkElt, healElt);
       healLinkElt.appendChild(healElt);
@@ -10066,8 +10046,7 @@ function customizeStats() {
           if (GM_getValue('staminaSpendHow') == STAMINA_HOW_FIGHTROB) newLink.innerHTML=healOnHoldIcon;
           else newLink.innerHTML=healOnIcon;
         }
-        newLink.style.padding="3px 0px 0px 8px";
-        newLink.style.display="inline";
+        newLink.style.padding="5px 0px 0px 8px";
         newLink.style.position="absolute";
         healParent = healLinkElt.parentNode;
         healParent.insertBefore(newLink, healParent.childNodes[2]);
@@ -10145,15 +10124,15 @@ function quickHeal(byUser) {
   }
 
   // Create heal link.
-  var healElt = makeElement('a', null, {'onclick':'return do_ajax("' + (byUser ? SCRIPT.ajaxResult : SCRIPT.ajaxPage) + '","' + SCRIPT.controller + 'hospital' + SCRIPT.action + 'heal' + SCRIPT.city + (healLocation + 1) + '", 1, 1, 0, 0); return false;'});
+  var healElt = makeElement('a', null, {'onclick':'return do_ajax("' + (byUser ? SCRIPT.ajaxIDAsync : SCRIPT.ajaxIDSync) + '","' + SCRIPT.controller + 'hospital' + SCRIPT.action + 'heal' + SCRIPT.city + (healLocation + 1) + '", 1, 1, 0, 0); return false;'});
   if (byUser) {
     createAjaxPage(false, 'quick heal');
     clickElement(healElt);
-    return;
+    return false;
   } else {
     createAjaxPage(true);
     Autoplay.fx = function() {
-      clickAction = 'heal';
+      clickAction = 'quick heal';
       clickElement(healElt);
       DEBUG('Clicked to quickheal.');
     };
@@ -10219,8 +10198,8 @@ function quickBank(bankCity, amount) {
     }
   }
 
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","remote/html_server.php?' + depositUrl + '", 1, 1, 0, 0); return false;'});
-  createAjaxPage(false, 'quick deposit', bankCity);
+  var ajaxID = createAjaxPage(false, 'quick deposit', bankCity);
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","remote/html_server.php?' + depositUrl + '", 1, 1, 0, 0); return false;'});
   clickElement(elt);
   DEBUG('Clicked to quickbank.');
   return false;
@@ -10418,8 +10397,8 @@ function customizeProfile() {
             titleElt.parentNode.insertBefore(attackXElt, titleElt.nextSibling);
           }
         }
-        createAjaxPage(false, 'icecheck profile');
-        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + SCRIPT.ajaxResult + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + remoteuserid + '", 1, 1, 0, 0); return false;'});
+        var ajaxID = createAjaxPage(false, 'icecheck profile', titleElt);
+        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + remoteuserid + '", 1, 1, 0, 0); return false;'});
         clickElement(elt);
       }
       // Don't continue if buttons already there
@@ -10582,8 +10561,8 @@ function getJobMastery(jobRow, newJobs) {
   }
 
   // Locked jobs are mastered too
-  if (/Mastered/i.test(jobRow.innerHTML) || isJobLocked(jobRow) )
-      return 100;
+  if (/Mastered/i.test(jobRow.innerHTML) || isJobLocked(jobRow))
+    return 100;
   else if (jobRow.innerHTML.match(/Job\s+Mastery\s+(\d+)%/i) || jobRow.innerHTML.match(/>(\d+)%/i))
     return parseInt(RegExp.$1);
 
@@ -10792,11 +10771,10 @@ function customizeVegasJobs() {
       }
 
       // Skip locked jobs and optional fight jobs
-      if(isJobLocked(currentJob) || skipCurrentJob || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) )
-        {
-          DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - skip FIGHT in Vegas - or - lack of /energy/stam - Skipping.');
-        } else {
-          availableJobs[city][currentTab].push(jobMatch);
+      if(isJobLocked(currentJob) || skipCurrentJob || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) ) {
+        DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - skip FIGHT in Vegas - or - lack of /energy/stam - Skipping.');
+      } else {
+        availableJobs[city][currentTab].push(jobMatch);
       }
     }
 
@@ -10836,7 +10814,6 @@ function customizeVegasJobs() {
         money = Math.round(money * 1.15);
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
-
       moneyTxt = ' (' + mratio + ')';
     }
     // Calculate time left for each job
@@ -10850,7 +10827,6 @@ function customizeVegasJobs() {
     if (!xpathFirst('.//span[@id="ratio_xp"]', expElt))
       makeElement('span', expElt, {'title':' Experience Received Is Calculated With 10% Wheelman Bonus Included. ','id':'ratio_xp', 'style':'color:red; font-size: 10px'})
         .appendChild(document.createTextNode(xpTxt));
-
     if (!xpathFirst('.//span[@id="ratio_money"]', moneyElt))
       makeElement('span', moneyElt, {'title':' Calculated With 15% Bagman Bonus Included','id':'ratio_money', 'style':'color:red; font-size: 10px'})
         .appendChild(document.createTextNode(moneyTxt));
@@ -11108,7 +11084,6 @@ function requiresBizItem (jobRow) {
 }
 
 function customizeJobs() {
-
   // Extras for jobs pages.
   var jobTables = $x('.//table[@class="job_list"]', innerPageElt);
 
@@ -11669,10 +11644,9 @@ function getJobRowItems(jobName) {
     if (cashDiff > 0) {
       DEBUG('We need '+cashDiff+' for this job. Going to the bank/vault of '+city);
       suspendBank = true;
-      return (autoBankWithdraw(city, cashDiff));
+      return (autoBankWithdraw(cashDiff));
     }
   }
-
 
   // Logic to switch to the required job first
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
@@ -11789,7 +11763,7 @@ function getJobRowItems(jobName) {
     // Withdraw the amount we need
     if (cashDiff > 0) {
       suspendBank = true;
-      return (autoBankWithdraw(city, cashDiff));
+      return (autoBankWithdraw(cashDiff));
     }
   }
 
@@ -12791,7 +12765,7 @@ function autoLotto() {
       if (lottoPrize == (GM_getValue('autoLottoBonusItem', 0) + 1)) {
         // Grab the mastery button
         var bonusClaim = xpathFirst('.//a/span[contains(@class, "sexy_lotto") and contains(text(), "Claim Prize")]', innerPageElt);
-        if(!bonusClaim) bonusClaim = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(text(), "Claim Prize")]', innerPageElt);
+        if(!bonusClaim) bonusClaim = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(., "Claim Prize")]', innerPageElt);
         if (bonusClaim) {
           Autoplay.fx = function() {
             clickElement(bonusClaim);
@@ -12814,11 +12788,12 @@ function autoLotto() {
 
   var randomTicket = xpathFirst('.//div[@class="sexy_button" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
   if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and @onclick="autoSelect(1);"]', innerPageElt);
-  if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
+  if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(., "Auto-Select Numbers")]', innerPageElt);
   if (randomTicket) {
     clickElement(randomTicket);
     var submitTicket = xpathFirst('.//input[@class="sexy_lotto" and @type="submit" and contains(@value,"Submit Ticket")]', innerPageElt);
-    if (!submitTicket) submitTicket = xpathFirst('.//button[@class="sexy_button_new short_white" and @type="submit" and @name="do"]', innerPageElt);
+    //if (!submitTicket) submitTicket = xpathFirst('.//button[@class="sexy_button_new short_white" and @type="submit" and @name="do"]', innerPageElt);
+    if (!submitTicket) submitTicket = xpathFirst('.//button[@class="sexy_button_new short_white" and @type="submit" and contains(.,"Submit Ticket")]', innerPageElt);
     if (submitTicket) {
       var ticket = ' ';
       for (i = 1; i < 6; i++) {
@@ -13808,8 +13783,6 @@ function goJobTab(tabno) {
 
   DEBUG(elt.innerHTML);
 
-
-
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
     return false;
@@ -13819,7 +13792,7 @@ function goJobTab(tabno) {
   return true;
 }
 //newlv
- ////////    start go job tab path
+////////    start go job tab path
 function goJobTabPath(tabnopath) {
   var elt;
   var currentTabPath = currentJobTabPath();
@@ -13838,7 +13811,7 @@ function goJobTabPath(tabnopath) {
   DEBUG(' Clicked to go to job tab ' + tabnopath + 'in gojobtabpath elt-b=' + elt );
   return true;
   //  return ;
-  }
+}
 ///////////// end go job tab path
 
 // Get the number of job clicks to attempt
@@ -13865,7 +13838,7 @@ function goJob(jobno) {
   // Get the action element by job no first
   var elt;
   var tmp = 1 ;
-//  if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
+  // if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'") and not(contains(@onclick, "xw_controller=marketplace"))]', jobRow);
   // if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
   // if retrieving by job no fails, simply retrieve the job link
@@ -14742,149 +14715,216 @@ function randomizeStamina() {
   }
 }
 
-// Handle our private do_ajax response pages.
+/* Handle our private do_ajax response pages.
+// case 1: autoplay==false for async clicks; please pass the variable(s) action (and optionally context)
+// case 2: autoplay==true for sync clicks for use with Autoplay.start(); action and context are set with Autoplay.fx
+// ajaxAction/ajaxContext are only used internally for async clicks, for sync clicks please use the default clickAction/clickContext vars.
+*/
 function createAjaxPage(autoplay, action, context) {
   //function do_ajax(div, url, liteLoad, alignTop, precall, callback, callback_params, noIncrement)
-  var ajaxID = autoplay ? SCRIPT.ajaxPage : SCRIPT.ajaxResult;
+  var ajaxID = autoplay ? SCRIPT.ajaxIDSync : SCRIPT.ajaxIDAsync;
   var elt = document.getElementById(ajaxID);
-  if (!elt) {
-    elt = makeElement('div', null, {'id':ajaxID, 'style':'display: none;'});
-    if (action != null)
-      elt.setAttribute('action', action);
-    if (context != null)
-      elt.setAttribute('context', context);
-    if (!autoplay) {
-      elt.addEventListener('DOMSubtreeModified', handleJSONModified, false);
-      document.getElementById('verytop').appendChild(elt);
-    } else {
-      setListenContent(false);
-      document.getElementById('content_row').appendChild(elt);
-      setListenContent(true);
+  if (elt) {
+    elt.removeEventListener('DOMSubtreeModified', handleAjaxModified, false);
+    elt.parentNode.removeChild(elt);
+  }
+  elt = makeElement('div', null, {'id':ajaxID, 'style':'display: none;'});
+  if (!autoplay) {
+    ajaxAction = action;
+    ajaxContext = context;
+  }
+  elt.addEventListener('DOMSubtreeModified', handleAjaxModified, false);
+  document.getElementById('verytop').appendChild(elt);
+  return ajaxID;
+}
+function handleAjaxModified(e) {
+  var ajaxElt = e.target;
+  // Remove event listener
+  ajaxElt.removeEventListener('DOMSubtreeModified', handleAjaxModified, false);
+  // Set result parsing timer
+  //if (ajaxResultTimer) window.clearTimeout(ajaxResultTimer);
+  window.setTimeout(function(){ajaxPageChanged(ajaxElt);}, 300);
+}
+function ajaxPageChanged(ajaxElt) {
+  if (!ajaxElt) return;
+  // Determine which of our private AJAX pages has changed and get the result.
+  var ajaxSync = ajaxElt.id == SCRIPT.ajaxIDSync ? true : false;
+  var ajaxResponse = ajaxElt.innerHTML;
+
+  // Remove ajax response element
+  ajaxElt.parentNode.removeChild(ajaxElt);
+
+  DEBUG('New ' + (ajaxSync ? 'synchronous' : 'asynchronous') + ' ajax results.');
+  // Handle changes to the ajax pages.
+  // If a click or ajax action was taken, check the response.
+  var action, context;
+  if (ajaxSync) {
+    action = clickAction;
+    context = clickContext;
+    clickAction = undefined;
+    clickContext = undefined;
+  } else {
+    action = ajaxAction;
+    context = ajaxContext;
+    ajaxAction = undefined;
+    ajaxContext = undefined;
+  }
+  if (!logJSONResponse(ajaxSync, ajaxResponse, action, context)) {
+    // No further action was taken. Kick off auto-play.
+    try {
+      doAutoPlay();
+    } catch (ex) {
+      addToLog('warning Icon', 'BUG DETECTED (ajaxPageChanged->doAutoPlay): ' + ex + '. Reloading.');
+      autoReload(true);
     }
   }
-  return elt;
 }
 
-function handleJSONModified(e) {
-  if (ajaxResultTimer) window.clearTimeout(ajaxResultTimer);
-  ajaxResultTimer = window.setTimeout(handleAjaxTimer, 200);
-}
-function handleAjaxTimer() {
-  // Check if do_ajax changed our private JSON response page.
-  var jsonElt = document.getElementById(SCRIPT.ajaxResult);
-  if (!jsonElt || jsonElt.innerHTML.length == 0) {
-    DEBUG('ajax_result not ready.');
-    return;
-  }
-  ajaxResultTimer = undefined;
-  var responseText = jsonElt.innerHTML.untag();
-  var action = jsonElt.getAttribute('action');
-  var context = jsonElt.getAttribute('context');
-  context = (context == null) ? null : parseInt(context);
-
-  // Remove event listener and JSON response
-  jsonElt.removeEventListener('DOMSubtreeModified', handleJSONModified, false);
-  jsonElt.parentNode.removeChild(jsonElt);
-
-  // URL variables have expired
-  if (/top\.location\.href/.test(responseText)) {
-    addToLog('info Icon', 'JSON response is invalid: URL variables may have expired.');
-    return;
-  }
-  logJSONResponse(responseText, action, context);
-}
-// Interpret the JSON response from a request
-function logJSONResponse(responseText, action, context) {
-  if (action != "icecheck profile") DEBUG(responseText);
-
-  var cityCashElt = null;
-  if (context != null)
-    cityCashElt = document.getElementById('user_cash_' + cities[context][CITY_ALIAS]);
-
+// Interpret the response from an ajax request, return false in case Autoplay isn't used:
+function logJSONResponse(autoplay, response, action, context) {
   try {
-    switch (action) {
-    /* do_ajax calls to ajax_page only (Autoplay): */
-      // Log any message from collecting property take.
-      case 'collect take':
-        var respJSON = eval ('(' + responseText + ')');
-        var respTxt = respJSON['data'];
-        //setGMTime('takeHour' + cities[context][CITY_NAME], '00:30:00');  // collect every 30 min
-        setGMTime('takeHour' + cities[context][CITY_NAME], '1 hour');  // collect every 1 hour
-        if (respTxt.match(/collected (.+?) from your properties\.","cash":([0-9]+)/i)) {
-          var cashLeft = parseInt(RegExp.$2);
-          var collectString = RegExp.$1.replace('$', cities[context][CITY_CASH_SYMBOL]);
-          addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
-          // Attempt to correct the displayed cash value
-          if (cityCashElt)
-            cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
-          cities[context][CITY_CASH] = cashLeft;
-        }
-        break;
+    var responseText = response.untag();
+    if (action.indexOf('icecheck') == -1) DEBUG(responseText);
 
-    /* do_ajax calls to ajax_result only: */
-      // Log quickHeal() response.
-      case 'quick heal':
-        var respJSON = eval ('(' + responseText + ')');
-        var respTxt = respJSON['hospital_message'];
-        // Attempt to correct the displayed health value
-        if (healthElt && responseText.match(/,"user_health":([0-9]+),/i)) {
-          healthElt.innerHTML = RegExp.$1;
+    // Analyze money related responses (collect take, check vault, deposit and withdraw)
+    var cityCashElt, cashLeft, acctBalance;
+    var respJSON, respData;
+    if (action == 'collect take' || action == 'check vault' || action == 'quick deposit' || action == 'quick withdraw') {
+      if (!isNaN(context)) {
+        context = parseInt(context);
+        cityCashElt = document.getElementById('user_cash_' + cities[context][CITY_ALIAS]);
+      }
+
+      respJSON = JSON.parse(responseText);
+      if (action == 'quick deposit' && context != LV) {
+        // Parse cash left for depositing anywhere but LV
+        cashLeft = isNaN(respJSON.user_cash) ? null : parseInt(respJSON.user_cash);
+      } else {
+        // Parsing stuff for the remaining cases
+        respData = JSON.parse(respJSON.data);
+        cashLeft = isNaN(respData.cash) ? null : parseInt(respData.cash);
+        if (action != 'collect take') {
+          acctBalance = parseInt(respData.acct_balance);
+          // Parse vault level and set free vault space
+          if (GM_getValue('vaultHandling', 0) || action == 'check vault') {
+            if (respJSON.data.match(/"name":"Vault","level":"?([0-9]+)"?,/i)) {
+              var vaultLevel = parseInt(RegExp.$1);
+              var vaultCapacity = vaultLevels[vaultLevel][1];
+              var vaultSpace = vaultCapacity - acctBalance;
+              if (action == 'check vault' && (vaultLevel != GM_getValue('vaultHandling', 0) || vaultSpace != GM_getValue('vaultSpace', 0)))
+                addToLog(cities[LV][CITY_CASH_CSS], 'Parsed new vault status: Level ' + vaultLevel + ', free vault space: V$' + makeCommaValue(vaultSpace));
+              else if (action == 'check vault')
+                addToLog(cities[LV][CITY_CASH_CSS], 'No change in your vault: Level ' + vaultLevel + ', free vault space: V$' + makeCommaValue(vaultSpace));
+              GM_setValue('vaultHandling', vaultLevel);
+              GM_setValue('vaultSpace', String(vaultSpace));
+            }
+          }
         }
-        if (respTxt.match(/the doctor healed ([0-9]+) health (.+)/i)) {
-          //GM_setValue('healWaitStarted',false);
-          var addHealth = RegExp.$1;
-          var cost = RegExp.$2.match(REGEX_CASH);
-          addToLog('health Icon', '<span style="color:#FF9999;">' + 'Quickheal: +'+ addHealth + ' health for <span class="expense">' + cost + '</span>.</span>');
-        } else if (/you cannot heal so fast/i.test(respTxt)) {
-          addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
-        }
-        break;
-      // Log Ice Check response.
+      }
+      // Attempt to correct the displayed cash value
+      if (cashLeft != null) {
+        if (cityCashElt)
+          cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
+        cities[context][CITY_CASH] = cashLeft;
+      }
+    }
+
+    switch (action) {
+      // Parse Ice Check responses.
       case 'icecheck profile':
         var alive = !/You can't add/.test(responseText);
-        var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
-        if (titleElt) {
-          titleElt.setAttribute('style', 'background: ' + (alive ? 'green;' : 'red;'));
-          titleElt.setAttribute('title', (alive ? 'Target is alive' : 'Target is iced') + ', click to refresh.');
-          titleElt.addEventListener('click', customizeProfile, false);
+        //var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
+        if (context) {
+          context.setAttribute('style', 'background: ' + (alive ? 'green;' : 'red;'));
+          context.setAttribute('title', (alive ? 'Target is alive' : 'Target is iced') + ', click to refresh.');
+          context.addEventListener('click', customizeProfile, false);
+          DEBUG('Successfully set target status: ' + (alive ? 'alive.' : 'iced.'));
+        }
+        return false;
+        break;
+      case 'icecheck fightlist':
+        var opponent = context.opponent;
+        if (/You can't add/.test(responseText)) {
+          addToLog('info Icon','Target is iced/dead, skipping opponent, id=' + opponent.id);
+          setFightOpponentInactive(opponent);
+
+          // Cycle fight list
+          cycleSavedList('fightList');
+          return false;
+        } else {
+          var attackElt = context.attackElt;
+          // Attack!
+          Autoplay.fx = function() {
+            clickAction = 'fight';
+            clickContext = opponent;
+            staminaBurst (BURST_ALWAYS, attackElt);
+            DEBUG('Clicked to fight: name=' + opponent.name +
+                  ', id=' + opponent.id + ', level=' + opponent.level +
+                  ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
+          };
+          Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
+          Autoplay.start();
+          return true;
         }
         break;
-      // Check Las Vegas vault data
-      case 'check vault':
-        var respJSON = eval ('(' + responseText + ')');
-        var respTxt = respJSON['data'];
-        setGMTime('checkVaultTimer', '00:10:00');
-        if (respTxt.match(/,"name":"vault","level":"?([0-9]+)"?,.+,"acct_balance":([0-9]+),/i)) {
-          var vaultLevel = parseInt(RegExp.$1);
-          var vaultCapacity = vaultLevels[vaultLevel][1];
-          var acctBalance = parseInt(RegExp.$2);
-          var vaultSpace = vaultCapacity - acctBalance;
-          if (vaultLevel != GM_getValue('vaultHandling', 0) || vaultSpace != GM_getValue('vaultSpace', 0))
-            addToLog(cities[LV][CITY_CASH_CSS], 'Parsed new vault status: Level ' + vaultLevel + ', free vault space: V$' + makeCommaValue(vaultSpace));
-          else
-            addToLog(cities[LV][CITY_CASH_CSS], 'No change in your Las Vegas Vault: Level ' + vaultLevel + ', free vault space: V$' + makeCommaValue(vaultSpace));
-          GM_setValue('vaultHandling', vaultLevel);
-          GM_setValue('vaultSpace', String(vaultSpace));
+
+      // Log quickHeal() response.
+      case 'quick heal':
+        // Attempt to correct the displayed health value
+        if (healthElt && responseText.match(/,"user_health":"?([0-9]+)"?,/i)) {
+          healthElt.innerHTML = RegExp.$1;
         }
+        if (responseText.match(/doctor healed ([0-9]+) health (.+?)\./i)) {
+          if (autoplay) GM_setValue('healWaitStarted',false);
+          var addHealth = RegExp.$1;
+          var cost = RegExp.$2.match(REGEX_CASH);
+          addToLog('health Icon', '<span style="color:#FF9999;">' + ' Health +'+ addHealth + ' for <span class="expense">' + cost + '</span>.</span>');
+        } else if (/you cannot heal so fast/i.test(responseText)) {
+          addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
+        }
+        if (autoplay) {
+          // Returning home after healing ensures that the home page still gets
+          // checked occasionally during sustained periods of stamina spending.
+          Autoplay.fx = goHome;
+          Autoplay.delay = noDelay;
+          Autoplay.start();
+          return true;
+        } else
+          return false;
+        break;
+
+      // Parse Las Vegas vault data
+      case 'check vault':
+        setGMTime('checkVaultTimer', '00:15:00');
+        return false;
+        break;
+
+      // Log any message from collecting property take.
+      case 'collect take':
+        setGMTime('takeHour' + cities[context][CITY_NAME], '1 hour');  // collect every 1 hour
+        if (respData.description.match(/have collected (.+?) from your properties/i)) {
+          var collectString = RegExp.$1.replace('$', cities[context][CITY_CASH_SYMBOL]);
+          addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
+        }
+        return false;
         break;
 
       // Log any message from withdrawing money.
       case 'quick withdraw':
-        var respJSON = eval ('(' + responseText + ')');
-        respTxt = respJSON['data'];
-        var respText = JSON.parse(respTxt);
-        var vegasBank = respText.acct_balance
-        DEBUG(respTxt);
-        addToLog('cashVegas Icon', respText['success_message'] + '  Remaining Bank Balance: ' + cities[context][CITY_CASH_SYMBOL] + makeCommaValue(vegasBank));
-        if(respText['success_message'].match(/failed/i)) {
-          addToLog('warning Icon', 'You are not enough money to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
-          addToLog('warning Icon', 'Job processing will stop');
+        var logBalance = '<br>Remaining Bank Balance: ' + cities[context][CITY_CASH_SYMBOL] + makeCommaValue(acctBalance);
+        if (/You Withdrew/i.test(respData.success_message)) {
+          addToLog('cashVegas Icon', respData.success_message + logBalance);
+        } else {
+        //} else if(/Withdrawal failed/i.test(respData.success_message)) {
+          addToLog('warning Icon', 'Disabling autoMission:<br>You don\'t have enough money to do ' +
+                    missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.' + logBalance);
           GM_setValue('autoMission', 0);
         }
+        return false;
         break;
+
       // Log any message from depositing money.
       case 'quick deposit':
-        var respJSON = eval ('(' + responseText + ')');
         // Log if city has changed after banking
         if (city != context) {
           addToLog('warning Icon', 'Warning! You have traveled from ' +
@@ -14893,87 +14933,46 @@ function logJSONResponse(responseText, action, context) {
                    ' while banking. Check your money.');
         }
 
-        var respTxt, cashLeft, acctBalance, vaultCapacity;
-        if (context == LV) {
-          respTxt = respJSON['data'];
-          if (respTxt.match(/"cash":([0-9]+),.+,"acct_balance":([0-9]+),/)) {
-            cashLeft = RegExp.$1;
-            acctBalance = parseInt(RegExp.$2);
-            if (GM_getValue('vaultHandling', 0)) {
-              vaultCapacity = vaultLevels[GM_getValue('vaultHandling',0)][1];
-              GM_setValue('vaultSpace', String(vaultCapacity - acctBalance));
-            }
-          }
-        } else {
-          respTxt = respJSON['deposit_message'];
-          cashLeft = respJSON['user_cash'];
-        }
-        cashLeft = isNaN(cashLeft) ? 0 : parseInt(cashLeft);
+        if (context == LV) var respDeposit = respData.success_message;
+        else var respDeposit = respJSON.deposit_message;
 
         // Money deposited (all cities)
-        if ((/was deposited/.test(respTxt) && respTxt.match(/\$([0-9,,]+)&lt;\/span/)) || (/you deposited/i.test(respTxt) && respTxt.match(/\$([0-9,,]+) into your vault/i))) {
+        if (respDeposit.match(/\$([0-9,,]+).+?was deposited/i) ||                   // success for all cities except LV
+            respDeposit.match(/You Deposited .\$([0-9,,]+) into your Vault/i)) {    // success for LV
           quickBankFail = false;
           var cashDeposit = RegExp.$1;
-          var cashDepositText = "";
-          if (cities[context][CITY_CASH_SYMBOL] == "V$" ) {
-            cashDepositText = '</span> was deposited in your vault.'
-          } else {
-            cashDepositText = '</span> was deposited in your account after the bank\'s fee.'
-          }
-          addToLog(cities[context][CITY_CASH_CSS],
-                   '<span class="money">' + cities[context][CITY_CASH_SYMBOL] +
-                   cashDeposit + cashDepositText);
+          addToLog(cities[context][CITY_CASH_CSS], '<span class="money">' + cities[context][CITY_CASH_SYMBOL] +
+                   cashDeposit + '</span> was deposited ' + (context == LV ? 'into your vault.' : 'in your account after the bank\'s fee.'));
 
-          // Attempt to correct the displayed cash value
-          if (cityCashElt) {
-            if (isNaN(cashLeft) && !isNaN(cashDeposit)) {
-              cashLeft = parseCash(cityCashElt.innerHTML) - parseCash(cashDeposit);
-              cashLeft = isNaN(cashLeft) ? 0 : Math.max(cashLeft, 0);
-            }
-            cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
-          }
-          if (!isNaN(cashLeft)) cities[context][CITY_CASH] = cashLeft;
         // Las Vegas: too much money
-        } else if (/cannot deposit this much/i.test(respTxt)) {
+        } else if (/cannot deposit this much/i.test(respDeposit)) {
           quickBankFail = false;
           var logText = 'You can\'t deposit this much (you don\'t have enough cash or your vault is to small).';
           if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling PS MWAP vault handling.';
           addToLog(cities[context][CITY_CASH_CSS], logText);
-          if (!isNaN(cashLeft)) {
-            // Attempt to correct the displayed cash value
-            if (cityCashElt)
-              cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
-            cities[context][CITY_CASH] = cashLeft;
-          }
         // Las Vegas: vault full
-        } else if (/cannot deposit anymore/i.test(respTxt)) {
+        } else if (/cannot deposit anymore/i.test(respDeposit)) {
           quickBankFail = false;
           var logText = 'You can\'t deposit anymore, your vault is full!';
           if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling PS MWAP vault handling.';
           addToLog(cities[context][CITY_CASH_CSS], logText);
           if (GM_getValue('vaultHandling', 0)) GM_setValue('vaultSpace', '0');
-          // Attempt to correct the displayed cash value
-          if (!isNaN(cashLeft)) {
-            if (cityCashElt)
-              cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
-            cities[context][CITY_CASH] = cashLeft;
-          }
         // Las Vegas: invalid amount
-        } else if (/invalid amount/i.test(respTxt)) {
+        } else if (/invalid amount/i.test(respDeposit)) {
           quickBankFail = false;
 
         // Not enough money
-        } else if (/have enough money/.test(respTxt)) {
+        } else if (/have enough money/.test(respDeposit)) {
           quickBankFail = false;
         // Minimum deposit not met ($10)
-        } else if (/deposit at least/.test(respTxt) && respTxt.match(/\$([0-9,,]+)/)) {
+        } else if (/deposit at least/.test(respDeposit) && respDeposit.match(/\$([0-9,,]+)/)) {
           quickBankFail = false;
           addToLog(cities[context][CITY_CASH_CSS],
                    'You need to deposit at least <span class="money">' + cities[context][CITY_CASH_SYMBOL] +
                    RegExp.$1);
 
         // Las Vegas: no vault?
-        } else if (/,"result":null,/.test(respTxt) || /"rp":0,.+,"acct_balance":0,/.test(respTxt)) {
+        } else if (respData.result == null || acctBalance == 0) {
           quickBankFail = false;
           addToLog(cities[context][CITY_CASH_CSS], 'Depositing failed without a response; if you are in Las Vegas, perhaps you don\'t have a vault yet?');
           if (GM_getValue('vaultHandling', 0)) GM_setValue('vaultSpace', '0');
@@ -14981,15 +14980,17 @@ function logJSONResponse(responseText, action, context) {
         // Unknown JSON response
         } else {
           quickBankFail = true;
-          addToLog('warning Icon', 'Deposit: Unknown JSON response:<br>' + respTxt);
+          addToLog('warning Icon', 'Deposit: Unknown JSON response:<br>' + responseText);
         }
+        return false;
         break;
 
       default:
         addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' + action + '".');
+        return false;
     }
   } catch (ex) {
-    DEBUG('Exception (logJSONResponse): ' + ex + ', action: ' + action + ', context: ' + context + ', response: <br>' + responseText);
+    DEBUG('Exception (logJSONResponse): ' + ex + ', autoplay: ' + autoplay + ', action: ' + action + ', context: ' + context + ', response: <br>' + responseText);
     //loadHome();
   }
 }
@@ -15026,7 +15027,7 @@ function logResponse(rootElt, action, context) {
 
   //if (!messagebox) {
   //  messagebox = xpathFirst('.//div[@class="job_container"]', rootElt);
-  // }
+  //}
 
   // New message box message
   if (!messagebox) {
@@ -15058,13 +15059,8 @@ function logResponse(rootElt, action, context) {
     messagebox = xpathFirst('.//div[@class="chop_build_final"]', appLayoutElt);
   }
 
-  // Check our ajaxPage for content
-  if(!messagebox) {
-    messagebox = xpathFirst('.//div[@id="' + SCRIPT.ajaxPage + '"]', appLayoutElt);
-  }
-
   if (action=='withdraw' && context) {
-    autoBankWithdraw(city, context);
+    autoBankWithdraw(context);
     Autoplay.start();
     return true;
   }
@@ -15088,49 +15084,6 @@ function logResponse(rootElt, action, context) {
   var cost, experience, result;
 
   switch (action) {
-  /* do_ajax calls to ajax_page: */
-    case 'collect take':
-      var elt = document.getElementById(SCRIPT.ajaxPage);
-      if (elt) innerNoTags = elt.innerHTML.untag();
-      logJSONResponse(innerNoTags, action, context);
-      return false;
-      break;
-    case 'icecheck fightlist':
-      var elt = document.getElementById(SCRIPT.ajaxPage);
-      if (elt) inner = elt.innerHTML;
-      if (/You can't add/.test(inner)) {
-        addToLog('info Icon','Target is iced/dead, skipping opponent, id=' + context.id);
-        setFightOpponentInactive(context);
-
-        // Cycle fight list
-        cycleSavedList('fightList');
-        return false;
-      } else {
-        var attackElt = context.profileAttack;
-        if (!attackElt && context.attack && context.attack.scrollWidth > 0) {
-          attackElt = context.attack;
-        }
-        // Just click the "Attack Again" button if it's there
-        if (lastOpponent && lastOpponent.attackAgain && context.match(lastOpponent)) {
-          attackElt = lastOpponent.attackAgain;
-          DEBUG('Clicking "Attack Again"!');
-        }
-        // Attack!
-        Autoplay.fx = function() {
-          clickAction = 'fight';
-          clickContext = context;
-          staminaBurst (BURST_ALWAYS, attackElt);
-          DEBUG('Clicked to fight: name=' + context.name +
-                ', id=' + context.id + ', level=' + context.level +
-                ', mafia=' + context.mafia + ', faction=' + context.faction);
-        };
-        Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
-        Autoplay.start();
-        return true;
-      }
-      break;
-
-  /* inner_page/popup_fodder responses: */
     case 'autohit':
     case 'fight':
       return logFightResponse(rootElt, messagebox, context);
@@ -15139,22 +15092,20 @@ function logResponse(rootElt, action, context) {
     case 'autoRob':
       return logRobResponse(rootElt, messagebox, context);
 
-    // quickHeal() and autoHeal() response parsing:
     case 'heal':
       if (innerNoTags.indexOf('doctor healed') != -1) {
         GM_setValue('healWaitStarted',false);
         var addHealth = inner.split('doctor healed <strong>')[1].split('health')[0];
-        cost = inner.split('doctor healed <strong>')[1].match(REGEX_CASH);
+        cost = innerNoTags.match(REGEX_CASH);
         addToLog('health Icon', '<span style="color:#FF9999;">' + ' Health +'+ addHealth + ' for <span class="expense">' + cost + '</span>.</span>');
-        if (isGMChecked('quickHeal') && healthElt && innerNoTags.match(/,"user_health":([0-9]+),/i)) {
-          healthElt.innerHTML = RegExp.$1;
-        }
       } else if (innerNoTags.indexOf('You cannot heal so fast') != -1) {
         addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
       }
 
       // Returning home after healing ensures that the home page still gets
       // checked occasionally during sustained periods of stamina spending.
+      Autoplay.fx = goHome;
+      Autoplay.delay = noDelay;
       Autoplay.start();
       return true;
       break;
@@ -15213,8 +15164,8 @@ function logResponse(rootElt, action, context) {
         var xpGain = parseInt(xpGainElt.innerHTML);
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
         if (isGMChecked('autoAskJobHelp') && (!xpGainMin || xpGain >= xpGainMin)) {
-        var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
-        if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);
+          var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
+          if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);
           // ask for help
           if (elt) {
             Autoplay.fx = function() {
@@ -15251,10 +15202,8 @@ function logResponse(rootElt, action, context) {
       }else {
         return;
       }
-
       Autoplay.start();
       return true;
-
       break;
 
     case 'hitman':
@@ -15686,6 +15635,7 @@ function handlePopups() {
             || popupInner.indexOf('id="ChopShopCarousel"') != -1 // Chop Shop/Weapon Depot craft popup
             || popupInner.indexOf('mw_app=slotmachine') != -1 // Slot Machine
             || popupInner.indexOf('id="map_boss_fight"') != -1 // Vegas Boss fights
+            || popupInner.indexOf('id="pop_box_map_boss_fight_popup"') != -1 // Boss fights
             || popupInner.indexOf('class="account_settings_title"') != -1 // Account Settings
             ) {
             continue;
@@ -15727,8 +15677,8 @@ function handlePopups() {
           if (popupInnerNoTags.indexOf('New Loot!') != -1) return(closePopup(popupElts[i], "Slot Machine Flushed"));
 
           // Get rid of Daily take popup
-					// FIXME show take or do something fun with this
-					if (popupInnerNoTags.indexOf('keep the streak alive') != -1) return(closePopup(popupElts[i], "The Daily Take"));
+          // FIXME show take or do something fun with this
+          if (popupInnerNoTags.indexOf('keep the streak alive') != -1) return(closePopup(popupElts[i], "The Daily Take"));
 
           // Get rid of Proceed to Vegas Level 6 popup
           if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
@@ -15837,7 +15787,7 @@ function handlePopups() {
               }
             }
 
-            //Process Reward for Energy Packs
+            // Process Reward for Energy Packs
             if (popupInner.indexOf('Thank') != -1 && isGMChecked('rewardEnergyPack')) {
               var energyReward;
               var energyRewardID;
@@ -16241,12 +16191,12 @@ function ignoreElement(element) {
   var id;
   if (parentElt) {
     id = parentElt.id;
-    if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1))
+    if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1))
       return true;
   }
 
   id = element.id;
-  if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1))
+  if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1))
     return true;
 
   return false;
@@ -16395,7 +16345,6 @@ function makeCommaValue(nStr) {
   var rgx = /^(.*\s)?(\d+)(\d{3}\b)/;
   return nStr == (nStr = nStr.replace(rgx, "$1$2,$3")) ? nStr : makeCommaValue(nStr);
 }
-
 
 /******************************** DATE/TIME ********************************/
 
