@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.705
+// @version     1.1.706
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.704',
+  version: '1.1.706',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -759,7 +759,6 @@ var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
 var checkOnWar;
-var colSecretStashes = [];      // Secret Stash repository
 
 //new_header = false ; // change the commented out line to disable all changes
 new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new header
@@ -9103,7 +9102,6 @@ function chooseSides() {
 
 function closePopUp() {
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
-  addToLog('info Icon', 'Closed FB Popup');
   if (skipPostElt) clickElement (skipPostElt);
 }
 
@@ -9126,7 +9124,7 @@ function refreshGlobalStats() {
   // Once we see a post pop-up, set the timer to close it
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
   if (running && skipPostElt)
-    window.setTimeout(closePopUp, 20000);
+    window.setTimeout(closePopUp, 10000);
 
   // Set all the element globals. They change.
   cashElt = document.getElementById('user_cash_' + cities[city][CITY_ALIAS]);
@@ -14457,12 +14455,10 @@ function logFightResponse(rootElt, resultElt, context) {
         var publishFrequency =  parseInt(GM_getValue('autoSecretStashFrequency')) ? parseInt(GM_getValue('autoSecretStashFrequency')) : 1;
         var logFrequency = parseInt(SecretStashFightingCount % publishFrequency);
         if(SecretStashFightingCount % publishFrequency == 0) {
-          colSecretStashes.push(eltStash);  //Store stash for future processing.
-          if (!timeLeftGM('secretStashTimer')) setGMTime('secretStashTimer', '10 seconds');
-          //clickElement(eltStash);
+          clickElement(eltStash);
           var stashFinder = xpathFirst('.//div[contains(.,"found the location")]/a', eltStashParent);
           var stashUser = linkToString(stashFinder, 'stashUser');
-          addToLog('lootbag Icon','Queued to send '+stashUser+' secret stash! ('+logFrequency+'/'+publishFrequency+')');
+          addToLog('lootbag Icon','Clicked to send '+stashUser+' secret stash! ('+logFrequency+'/'+publishFrequency+')');
         } else {
           addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
         }
@@ -15078,17 +15074,6 @@ function logResponse(rootElt, action, context) {
     if (action == 'fight' && GM_getValue('staminaSpendHow') == getStaminaMode()) cycleSavedList('fightList');
 
     return false;
-  }
-  if (!timeLeftGM('secretStashTimer'))  {
-    if (colSecretStashes.length) {
-      var eltStash = colSecretStashes.pop();  //Retrieve stash element.
-      clickElement(eltStash);
-      //process another secret stash 40 seconds later.
-      //this is set so long as to give the detect popup routine time to expire before creating a new popup.
-      setGMTime('secretStashTimer', '40 seconds'); 
-    } else {
-      setGMTime('secretStashTimer', '2 minutes'); //check every 2 mins.
-    }
   }
 
   // Since the attempted action received a response, stop skipping fight.
