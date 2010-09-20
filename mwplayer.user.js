@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.707
+// @version     1.1.708
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.707',
+  version: '1.1.708',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7074,6 +7074,13 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Add my level'));
 
+ // Override my level check?
+  title = 'Override the check for level to be the same or greater than my level - CAUTION: might cause slow fighting.';
+  id = 'fightLevelMaxOverride';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxOverride');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Override level check'));
+
   // Maximum mafia size.
   tabContainerDivs(staminaTabSub);
   id = 'fightMafiaMax';
@@ -7942,6 +7949,7 @@ function validateStaminaTab() {
 
       s.fightLevelMax = parseInt(document.getElementById('fightLevelMax').value);
       s.fightLevelMaxRelative = checked('fightLevelMaxRelative');
+      s.fightLevelMaxOverride = checked('fightLevelMaxOverride');
       s.fightMafiaMax = parseInt(document.getElementById('fightMafiaMax').value);
       s.fightMafiaMaxRelative = checked('fightMafiaMaxRelative');
       s.fightMafiaMin = parseInt(document.getElementById('fightMafiaMin').value);
@@ -7968,13 +7976,14 @@ function validateStaminaTab() {
       }
 
       // Validate the maximum level settings.
+			// Override level check code by bboyle.  Thanks!
       if (isNaN(s.fightLevelMax)) {
         alert('Please enter a maximum level for fighting.');
         return false;
       } else if (s.fightLevelMaxRelative && s.fightLevelMax < 0) {
         alert('Please enter a maximum relative level of zero or more.');
         return false;
-      } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level) {
+      } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level && !s.fightLevelMaxOverride) {
         addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
         s.fightLevelMax = level;
       } else if (!s.fightLevelMaxRelative && level >= 180 &&
@@ -8160,6 +8169,7 @@ function validateStaminaTab() {
 
       s.fightLevelMax = parseInt(document.getElementById('fightLevelMax').value);
       s.fightLevelMaxRelative = checked('fightLevelMaxRelative');
+      s.fightLevelMaxOverride = checked('fightLevelMaxOverride');
       s.fightMafiaMax = parseInt(document.getElementById('fightMafiaMax').value);
       s.fightMafiaMaxRelative = checked('fightMafiaMaxRelative');
       s.fightMafiaMin = parseInt(document.getElementById('fightMafiaMin').value);
@@ -8192,7 +8202,7 @@ function validateStaminaTab() {
       } else if (s.fightLevelMaxRelative && s.fightLevelMax < 0) {
         alert('Please enter a maximum relative level of zero or more.');
         return false;
-      } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level) {
+      } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level && !s.fightLevelMaxOverride) {
         addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
         s.fightLevelMax = level;
       } else if (!s.fightLevelMaxRelative && level >= 180 &&
