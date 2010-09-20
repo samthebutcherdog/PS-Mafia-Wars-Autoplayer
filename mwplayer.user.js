@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.709
+// @version     1.1.710
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.709',
+  version: '1.1.710',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -15252,9 +15252,12 @@ function logResponse(rootElt, action, context) {
         var xpGain = parseInt(xpGainElt.innerHTML);
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
         if (isGMChecked('autoAskJobHelp') && (!xpGainMin || xpGain >= xpGainMin)) {
+          // ask for help
           var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
           if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);
-          // ask for help
+          // below string is current for LV job help
+          if(!elt) elt = xpathFirst('.//div[@class="social_job"]//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(.,"Ask for Help")]');
+//          if (elt)  DEBUG (' - - - help WAS found to click  ');
           if (elt) {
             Autoplay.fx = function() {
               clickElement(elt);
