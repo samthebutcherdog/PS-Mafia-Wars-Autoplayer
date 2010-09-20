@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.708
+// @version     1.1.709
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.708',
+  version: '1.1.709',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -148,13 +148,13 @@ function fetchPubOptions() {
                 'autoWarResponsePublish', 'autoWarRallyPublish', 'autoWarPublish']);
 }
 
-function managePopups() {
+/*function managePopups() {
   // Refresh the publishing options
   fetchPubOptions();
   // Handle more popups that just show up out of nowhere
   handlePopups();
   window.setTimeout(managePopups, 3000);
-}
+}*/
 
 // Load the iframe
 function checkLoadIframe() {
@@ -1815,7 +1815,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Make sure the modification timer goes off at least once.
   setModificationTimer();
-  managePopups();
+  // Set timer for handlePopups(), interval at 2.5s.
+  if (!popupTimer) popupTimer = window.setInterval(handlePopups, 2500);
 
   var initialized = true;
   DEBUG('Completed initialize.');
@@ -3308,10 +3309,11 @@ function autoRob() {
     return true;
   } else {
     Autoplay.fx = function(){
+      var eltRobButton = getCurRobButton();
       clickAction = 'autoRob';
-      clickContext = getCurRobSlotId();
-      DEBUG("Context : " + clickContext);
-      doRob();
+      clickContext = getCurRobSlotId(eltRobButton);
+      if (!isGMChecked('fastRob')) DEBUG("Context : " + clickContext);
+      doRob(eltRobButton);
     };
     Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
     Autoplay.start();
@@ -3347,41 +3349,53 @@ function needToRefresh()
 }
 
 function refreshRobbingGrid() {
-  var elt = xpathFirst('//a[@id="rob_refresh_cost"]');
+  var elt = xpathFirst('//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]');
+  if (!elt) return;
   clickElement(elt);
   DEBUG('Clicked to refresh robbing grid.');
 };
 
-function sleepRob(ms){
+/*function sleepRob(ms){
   var dt = new Date();
   dt.setTime(dt.getTime() + ms);
   while (new Date().getTime() < dt.getTime());
-}
+}*/
 
-function doRob(){
-  var m;
-  var eltRobStam = xpathFirst('//div[@class="rob_prop_stamina"]');
-  if (eltRobStam) {
-    if (m = /(.*)/.exec(eltRobStam.innerHTML)) {
-      var stam = m[1].replace(/[^0-9]/g, '');
-      GM_setValue('totalRobStamInt', (isNaN(parseInt(GM_getValue('totalRobStamInt', 0))) ? 0 : parseInt(GM_getValue('totalRobStamInt', 0))) + parseInt(stam));
-    }
-  }
-  if(isGMChecked('fastRob')){
+function doRob(eltRobButton) {
+  if (isGMChecked('fastRob')) {
     var eltRob = $x('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
-    for(var i=0, iLength = eltRob.length; i < iLength; i++){
-      clickElement(eltRob[i]);
-      sleepRob(500);
+    function fastRob() {
+      if (eltRob.length > 0)
+        clickElement(eltRob.pop());
+      else {
+        window.clearInterval(fastRobID);
+      }
     }
+    if (!eltRob || eltRob.length == 0) return;
+    DEBUG('Starting fastRob: Clicking ' + eltRob.length + ' rob buttons.');
+    var fastRobID = window.setInterval(fastRob, 10);
   } else {
-    var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
-    clickElement(eltRob);
+    if (!eltRobButton) eltRobButton = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+    if (!eltRobButton) return;
+    var m;
+    var eltRobStam = xpathFirst('./div[@class="rob_prop_stamina"]', eltRobButton.parentNode.parentNode);
+    if (eltRobStam) {
+      if (m = /(.*)/.exec(eltRobStam.innerHTML)) {
+        var stam = m[1].replace(/[^0-9]/g, '');
+        GM_setValue('totalRobStamInt', (isNaN(parseInt(GM_getValue('totalRobStamInt', 0))) ? 0 : parseInt(GM_getValue('totalRobStamInt', 0))) + parseInt(stam));
+      }
+    }
+    clickElement(eltRobButton);
     DEBUG('Clicked to rob.');
   }
 }
 
-function getCurRobSlotId(){
+function getCurRobButton(){
   var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
+  return eltRob;
+}
+function getCurRobSlotId(eltRob){
+  //var eltRob = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
   if(eltRob) // rob btn, rob target, rob slot
     return eltRob.parentNode.parentNode.parentNode.id;
   return null;
@@ -7976,7 +7990,7 @@ function validateStaminaTab() {
       }
 
       // Validate the maximum level settings.
-			// Override level check code by bboyle.  Thanks!
+      // Override level check code by bboyle.  Thanks!
       if (isNaN(s.fightLevelMax)) {
         alert('Please enter a maximum level for fighting.');
         return false;
@@ -9047,7 +9061,11 @@ function innerPageChanged(justPlay) {
     }
   }
 
+  // Parse player attack/defense equip stats
   getPlayerEquip();
+  // Parse TopMafia boni (mastermind,bagman)
+  getTopMafia();
+
   // Customize the display.
   if (!justPlay) {
     setListenContent(false);
@@ -9110,7 +9128,8 @@ function chooseSides() {
   });
 }
 
-function closePopUp() {
+function closeFBPopup() {
+  if (!running) return;
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
   if (skipPostElt) clickElement (skipPostElt);
 }
@@ -9131,10 +9150,10 @@ function refreshGlobalStats() {
   else
     city = NY;
 
-  // Once we see a post pop-up, set the timer to close it
+  // Once we see a FB post pop-up, set the timer to close it
   var skipPostElt = document.getElementById('fb_dialog_cancel_button');
   if (running && skipPostElt)
-    window.setTimeout(closePopUp, 10000);
+    window.setTimeout(closeFBPopup, 10000);
 
   // Set all the element globals. They change.
   cashElt = document.getElementById('user_cash_' + cities[city][CITY_ALIAS]);
@@ -10295,9 +10314,43 @@ function getPlayerStats() {
   }
 }
 
+function getTopMafia() {
+  // Make sure we're on the My Mafia tab.
+  if (!onMyMafiaTab())
+    return;
+
+  var mafiaBoxElt = xpathFirst('.//div[@class="tab_box topmafia_box"]', innerPageElt);
+  if (!mafiaBoxElt) return;
+
+  var mastermind = '1.0';
+  //var wheelman = '1.0';
+  var bagman = '1.0';
+  var mastermindElt = xpathFirst('.//div[contains(@style,"topmafia_mastermind")]/div[@class="tg_main_level"]', mafiaBoxElt);
+  //var wheelmanElt = xpathFirst('.//div[contains(@style,"topmafia_wheelman")]/div[@class="tg_main_level"]', mafiaBoxElt);
+  var bagmanElt = xpathFirst('.//div[contains(@style,"topmafia_bagman")]/div[@class="tg_main_level"]', mafiaBoxElt);
+  if (mastermindElt && mastermindElt.innerHTML.match(/<strong>([0-9]+)%<\/strong>/i)) {
+    mastermind = parseInt(RegExp.$1);
+    mastermind = mastermind < 10 ? '1.0' + mastermind : '1.' + mastermind;
+  }
+  /*if (wheelmanElt && wheelmanElt.innerHTML.match(/<strong>([0-9]+)%<\/strong>/i)) {
+    wheelman = parseInt(RegExp.$1);
+    wheelman = wheelman < 10 ? '1.0' + wheelman : '1.' + wheelman;
+  }*/
+  if (bagmanElt && bagmanElt.innerHTML.match(/<strong>([0-9]+)%<\/strong>/i)) {
+    bagman = parseInt(RegExp.$1);
+    bagman = bagman < 10 ? '1.0' + bagman : '1.' + bagman;
+  }
+  DEBUG('Parsed Mastermind bonus: x' + parseFloat(mastermind));
+  //DEBUG('Parsed Wheelman bonus: x' + parseFloat(wheelman));
+  DEBUG('Parsed Bagman bonus: x' + parseFloat(bagman));
+  if (!isGMEqual('mafiaMastermind', mastermind)) GM_setValue('mafiaMastermind', mastermind);
+  //if (!isGMEqual('mafiaWheelman', wheelman)) GM_setValue('mafiaWheelman', wheelman);
+  if (!isGMEqual('mafiaBagman', bagman)) GM_setValue('mafiaBagman', bagman);
+}
+
 function getPlayerEquip() {
   // Make sure we're on the fight tab.
-  if (!onFightTab()) {
+  if (!onFightTab() && !onInventoryTab() && !onLootTab()) {
     //Autoplay.fx = goFightTab;
     //Autoplay.start();
     return;
@@ -10315,6 +10368,10 @@ function getPlayerEquip() {
 }
 
 function customizeProfile() {
+  // Make sure we're on a profile.
+  var statsTable = xpathFirst('.//td[@class="stats_left"]', innerPageElt);
+  if (!statsTable) return false;
+
   // Fetch Player Stats
   getPlayerStats();
 
@@ -10349,10 +10406,6 @@ function customizeProfile() {
     }
     return anchorElt;
   };
-
-  // Make sure we're on a profile.
-  var statsTable = xpathFirst('.//td[@class="stats_left"]', innerPageElt);
-  if (!statsTable) return false;
 
   var statsDiv = xpathFirst('.//a[contains(., "Sucker Punch")]/..', innerPageElt);
   if (statsDiv) {
@@ -10797,31 +10850,31 @@ function customizeVegasJobs() {
     if (!costElt) continue;
     var cost = parseCash(costElt.innerHTML);
 
-    // Is this a boss job?
+    // Is this a boss or fight job?
     var isBossJob = xpathFirst('.//div[@class="job_ribbon ribbon_boss"]', currentJob);
     var isFightJob = xpathFirst('.//div[@class="job_ribbon ribbon_fights"]', currentJob);
 
     var expElt = xpathFirst('.//dd[@class="experience"]', jobReward);
-    if (expElt)   var reward = parseInt(expElt.innerHTML);
-    else    var reward = 0;
+    if (expElt) var reward = parseInt(expElt.innerHTML);
+    else var reward = 0;
 
-//  If this isn't a boss job, add 10% to the reward (wheelman bonus)  // the reward should be actually checked or ask for
-    if (reward && !isBossJob )
-      reward = Math.floor(reward * 1.10); // energy 41- exp 68, actually 74
+//  If this isn't a boss job, add the mastermind bonus to the reward (10% max)
+    if (reward && !isBossJob)
+      reward = Math.floor(reward * parseFloat(GM_getValue('mafiaMastermind', '1.10')));
 //  16595 19085
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
     var ratio = Math.round (reward / cost * 100) / 100;
 //  var xpTxt = ' (' + ratio + ')'; //original
-     var xpTxt = ' ' + reward + ' (' + ratio + ')';
+    var xpTxt = ' ' + reward + ' (' + ratio + ')';
 
     // Money payout ratio
     var moneyTxt = '';
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
-      // If this isn't a boss job, add 15% to the money payout (bagman bonus)
-    if (reward && !isBossJob )
-        money = Math.round(money * 1.15);
+      // If this isn't a boss job, add the bagman bonus to the money payout (15% max)
+      if (reward && !isBossJob )
+        money = Math.round(money * parseFloat(GM_getValue('mafiaBagman', '1.15')));
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
       moneyTxt = ' (' + mratio + ')';
@@ -10835,10 +10888,10 @@ function customizeVegasJobs() {
     if (cost > energy) timeTxt = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
 
     if (!xpathFirst('.//span[@id="ratio_xp"]', expElt))
-      makeElement('span', expElt, {'title':' Experience Received Is Calculated With 10% Wheelman Bonus Included. ','id':'ratio_xp', 'style':'color:red; font-size: 10px'})
+      makeElement('span', expElt, {'title':' Experience is calculated with ' + GM_getValue('mafiaMastermind', '1.10') + 'x Mastermind Bonus.','id':'ratio_xp', 'style':'color:red; font-size: 10px'})
         .appendChild(document.createTextNode(xpTxt));
     if (!xpathFirst('.//span[@id="ratio_money"]', moneyElt))
-      makeElement('span', moneyElt, {'title':' Calculated With 15% Bagman Bonus Included','id':'ratio_money', 'style':'color:red; font-size: 10px'})
+      makeElement('span', moneyElt, {'title':'Money is calculated with ' + GM_getValue('mafiaBagman', '1.15') + 'x Bagman Bonus.','id':'ratio_money', 'style':'color:red; font-size: 10px'})
         .appendChild(document.createTextNode(moneyTxt));
     //makeElement('span', costElt, {'style':'color:green; font-size: 10px'})
       //.appendChild(document.createTextNode(timeTxt));
@@ -10887,11 +10940,9 @@ function customizeVegasJobs() {
     }
   }
 
-  // Show the experience to energy ratio needed to level up.
+  // Show the experience to energy/stamina ratios needed to level up.
   if (!document.getElementById('level_up_ratio')) {
-    elt = makeElement('div', null, {'id':'level_up_ratio', 'style':'position:absolute; text-align: left; right:60px; font-size: 10px; width: 80px; display:none'});
-    makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
-    elt.appendChild(document.createTextNode(''));
+    elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratios needed to level up: combined, on energy only, on stamina only.', 'style':'position:absolute; top:45px; right:60px; width: 80px; text-align: left; font-size: 10px; display:none;'});
     var positionElt = xpathFirst('.//div[@id="job_paths"]/div[contains(@style,"clear")]', innerPageElt);
     positionElt.parentNode.insertBefore(elt, positionElt);
   }
@@ -11058,8 +11109,8 @@ function customizeNewJobs() {
 
   // Show the experience to energy ratio needed to level up.
   elt = makeElement('div', null, {'id':'level_up_ratio', 'style':'text-align:center; display:none;'});
-  makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
-  elt.appendChild(document.createTextNode(''));
+  //makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
+  //elt.appendChild(document.createTextNode(''));
   newJobs[0].parentNode.insertBefore(elt, newJobs[0]);
 
   setLevelUpRatio();
@@ -11244,9 +11295,9 @@ function customizeJobs() {
   }
 
   // Show the experience to energy ratio needed to level up.
-  elt = makeElement('div', null, {'id':'level_up_ratio', 'style':'position:absolute; text-align: center; right:10px; font-size: 12px; width: 180px; display:none;'});
-  makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
-  elt.appendChild(document.createTextNode(''));
+  elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratio needed to level up on energy alone.', 'style':'position:absolute; text-align: center; right:10px; font-size: 12px; width: 180px; display:none;'});
+  //makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
+  //elt.appendChild(document.createTextNode(''));
   jobTables[0].parentNode.insertBefore(elt, jobTables[0]);
 
   setLevelUpRatio();
@@ -11471,16 +11522,28 @@ function customizeHitlist() {
 }
 
 function setLevelUpRatio() {
+  var combined = (city == LV);
   var elt = document.getElementById('level_up_ratio');
   if (elt) {
-    if (energy) {
-      var ratio = Math.ceil((ptsToNextLevel) / energy * 100) / 100;
-      //elt.childNodes[1].nodeValue = ' A ' + (ratio > 10? '>10' : ratio) + 'x pay ratio would be needed to level up on energy alone.';
-      elt.childNodes[1].nodeValue = ' Ratio needed: ' + (ratio > 10? '>10' : ratio) + 'x.';
-      elt.style.display = 'block';
-    } else {
-      elt.style.display = 'none';
+    var ratioHTML = '';
+    if (combined && (stamina || energy)) {
+      var ratio = Math.ceil((ptsToNextLevel) / (energy + stamina) * 100) / 100;
+      ratioHTML = 'Combined: ' + (ratio > 20 ? '> 20' : ratio) + 'x<br>';
     }
+    if (energy) {
+      var ratioEnergy = Math.ceil((ptsToNextLevel) / energy * 100) / 100;
+      if (combined) ratioHTML += 'Energy: ' + (ratioEnergy > 20 ? '> 20' : ratioEnergy) + 'x<br>';
+      else ratioHTML = 'Ratio needed: ' + (ratioEnergy > 20 ? '> 20' : ratioEnergy) + 'x.';
+    }
+    if (combined && stamina) {
+      var ratioStamina = Math.ceil((ptsToNextLevel) / stamina * 100) / 100;
+      ratioHTML += 'Stamina: ' + (ratioStamina > 20 ? '> 20' : ratioStamina) + 'x';
+    }
+    elt.innerHTML = ratioHTML;
+    if (ratio || ratioEnergy || ratioStamina)
+      elt.style.display = 'block';
+    else
+      elt.style.display = 'none';
   }
 }
 
@@ -13550,6 +13613,14 @@ function onHitlistTab() {
   return false;
 }
 
+function onInventoryTab() {
+  // Return true if we're on the inventory tab, false otherwise.
+  if (xpathFirst('.//li[contains(@class,"tab_on")]//a[contains(.,"Inventory")]', innerPageElt)) {
+    return true;
+  }
+  return false;
+}
+
 function onLootTab() {
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Loot")]', innerPageElt)) {
     return true;
@@ -15100,7 +15171,14 @@ function logResponse(rootElt, action, context) {
       break;
 
     case 'autoRob':
-      return logRobResponse(rootElt, messagebox, context);
+      if (!isGMChecked('fastRob')) return logRobResponse(rootElt, messagebox, context);
+      else {
+        randomizeStamina();
+        Autoplay.fx = goRobbingTab;
+        Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
+        Autoplay.start();
+        return true;
+      }
 
     case 'heal':
       if (innerNoTags.indexOf('doctor healed') != -1) {
@@ -15620,6 +15698,9 @@ function handlePopups() {
     return;
   }
 
+  // Refresh the publishing options
+  fetchPubOptions();
+  // Handle more popups that just show up out of nowhere
   try {
     //DEBUG('Popups: Checking for popups');
 
@@ -15832,8 +15913,10 @@ function handlePopups() {
                 if (popupInner.match(/Your record on this board was\s+(.+?)\./i)) boardrecord = ' Record: <span class="good">' + RegExp.$1+'</span>';
 
                 addToLog('yeah Icon', 'Robbing board cleared. Bonus: <span class="good">' + exp + ' Experience</span>.'+ boardrecord);
-                updateRobStatistics(null,parseInt(exp));
-                updateLogStats();
+                if (!isGMChecked('fastRob')) {
+                  updateRobStatistics(null,parseInt(exp));
+                  updateLogStats();
+                }
               }
               return(closePopup(popupElts[i], "Robbing Board Popup"));
             }
@@ -16079,7 +16162,7 @@ function attackXfromProfile() {
 
 // Load Chuck-A-Crap script by Arun
 function eventclick_chuckaCrap() {
-	var src = 'http://arunsmafiascripts.googlecode.com/files/ChuckACrapQueue.js?' + Math.random();
+  var src = 'http://arunsmafiascripts.googlecode.com/files/ChuckACrapQueue.js?' + Math.random();
   remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
