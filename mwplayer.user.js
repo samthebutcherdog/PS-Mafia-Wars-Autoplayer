@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.710
+// @version     1.1.711
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.710',
+  version: '1.1.711',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -15490,7 +15490,8 @@ function logResponse(rootElt, action, context) {
         user = context.user;
       }
       if (innerNoTags.indexOf('not your friend') != -1 ||
-          innerNoTags.indexOf('You need to be friends') != -1) {
+          innerNoTags.indexOf('You need to be friends') != -1 ||
+					innerNoTags.indexOf('to help on a job.') != -1) {
         addToLog('info Icon', 'Failed to help' + (user? ' ' + user : '') +
                  ' with job. Reason: not friends.');
       } else if (innerNoTags.indexOf('You are too late') != -1) {
