@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.717
+// @version     1.1.718
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.717',
+  version: '1.1.718',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12651,6 +12651,31 @@ function parsePlayerUpdates(messagebox) {
       }
     }
 
+      } else if (messageTextNoTags.indexOf('but still needs a few more') != -1) {
+    if (isGMChecked('autoPartsHelp')) {
+      // Help requested by a fellow mafia member.
+      messageTextNoTags.match(/(.*) is close to completing a.*/i);
+      var userText = RegExp.$1;
+      //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+      elt = xpathFirst('.//a[contains(@href, "action=cs_help_item")]', messagebox);
+      if (elt) {
+        // Help immediately.
+        Autoplay.fx = function() {
+          clickAction = 'help parts';
+          clickContext = {
+            user: userText,
+            help: linkToString(elt)
+          };
+          clickElement(elt);
+          DEBUG('Clicked to help with parts.');
+        };
+        Autoplay.delay = noDelay;
+        Autoplay.start();
+        return false;
+      } else {
+        addToLog('warning Icon', 'BUG DETECTED: Unable to find parts help element.');
+      }
+    }
   } else if (messageTextNoTags.indexOf('wants to build an awesome') != -1) {
     if (isGMChecked('autoPartsHelp')) {
       // Help requested by a fellow mafia member.
@@ -12682,7 +12707,7 @@ function parsePlayerUpdates(messagebox) {
       messageTextNoTags.match(/(.*) has decided to.*/i);
       var userText = RegExp.$1;
       //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-      elt = xpathFirst('.//a[contains(@href, "action=cs_help_initial")]', messagebox);
+      elt = xpathFirst('.//a[contains(@href, "action=cs_help_item")]', messagebox);
       if (elt) {
         // Help immediately.
         Autoplay.fx = function() {
