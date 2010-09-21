@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.711
+// @version     1.1.712
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.711',
+  version: '1.1.712',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11128,7 +11128,8 @@ function customizeNewJobs() {
 function isJobFight (jobAction) {  return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
 
 function isJobLocked (jobAction) {
-  return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);
+  return (/lock/i.test(jobAction.innerHTML.untag()) && !/help/i.test(jobAction.innerHTML.untag()));
+  //return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);
 
 }
 
@@ -14669,6 +14670,26 @@ function logFightResponse(rootElt, resultElt, context) {
       addToLog('info Icon', 'Gained <span class="good">' +gainCoins+ ' Victory Coin(s)</span>, bringing your total to : <span class="good">'+innerCoinsTotal+'</span>');
     }
 
+    // Check Fightlevel / Fight Mastery
+    fightMeterTxt = xpathFirst('.//div[@class="fightmastery_meter_text"]', rootElt);
+    innerMeterTxt = fightMeterTxt? fightMeterTxt.innerHTML : '';
+    fightMeterPct = xpathFirst('.//div[@class="fightmastery_meter_text_percent"]', rootElt);      
+    innerMeterPct = fightMeterPct? fightMeterPct.innerHTML : '';
+    
+    if(innerMeterTxt && innerMeterPct) {
+      oldfightMeterTxt = GM_getValue('fightLevel')
+      oldfightMeterPct = GM_getValue('fightLevelPct')      
+      AttackCounts = GM_getValue('fightLevelAttacks')+winCount+lossCount;      
+      GM_setValue('fightLevelAttacks',  AttackCounts);
+      if( (innerMeterTxt != oldfightMeterTxt) || (innerMeterPct != oldfightMeterPct) ) {
+        totalCount = winCount+lossCount;
+        GM_setValue('fightLevel', innerMeterTxt);
+        GM_setValue('fightLevelPct', innerMeterPct);
+        GM_setValue('fightLevelAttacks', totalCount);
+        addToLog('info Icon', 'Fight Mastery '+ innerMeterTxt + ' ('+innerMeterPct + ') completed after '+AttackCounts+ ' attacks.');
+      }  
+    }    
+    
     // Update the statistics.
     takeFightStatistics(experience, winCount, lossCount, cost, resultType);
     updateLogStats();
