@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.713
+// @version     1.1.714
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.713',
+  version: '1.1.714',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1815,8 +1815,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Make sure the modification timer goes off at least once.
   setModificationTimer();
-  // Set timer for handlePopups(), interval at 2.5s.
-  if (!popupTimer) popupTimer = window.setInterval(handlePopups, 2500);
+  // Set timer for handlePopups(), interval at 2s.
+  if (!popupTimer) popupTimer = window.setInterval(handlePopups, 2000);
 
   var initialized = true;
   DEBUG('Completed initialize.');
@@ -3304,7 +3304,7 @@ function autoRob() {
     DEBUG("Refreshing the rob grid.");
     // refresh the 3x3 grid.
     Autoplay.fx = refreshRobbingGrid;
-    Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
+    Autoplay.delay = (isGMChecked('staminaNoDelay') && !isGMChecked('fastRob')) ? noDelay : getAutoPlayDelay();
     Autoplay.start();
     return true;
   } else {
@@ -3373,7 +3373,7 @@ function doRob(eltRobButton) {
     }
     if (!eltRob || eltRob.length == 0) return;
     DEBUG('Starting fastRob: Clicking ' + eltRob.length + ' rob buttons.');
-    var fastRobID = window.setInterval(fastRob, 10);
+    var fastRobID = window.setInterval(fastRob, 0);
   } else {
     if (!eltRobButton) eltRobButton = xpathFirst('//div[@class="rob_btn"]//a[@class="sexy_button_new short_red"]');
     if (!eltRobButton) return;
@@ -9227,7 +9227,7 @@ function refreshGlobalStats() {
   }
 
   // Show congratulations if level has increased.
-  if (running && level > GM_getValue('currentLevel')) {
+  if (level > GM_getValue('currentLevel')) {
     GM_setValue('currentLevel', level);
     addToLog('experience Icon', '<span style="color:#00FFCC;"> Congratulations on reaching level <strong>' + level + '</strong>!</span>');
     GM_setValue('restAutoStat', 0);
@@ -14673,13 +14673,13 @@ function logFightResponse(rootElt, resultElt, context) {
     // Check Fightlevel / Fight Mastery
     fightMeterTxt = xpathFirst('.//div[@class="fightmastery_meter_text"]', rootElt);
     innerMeterTxt = fightMeterTxt? fightMeterTxt.innerHTML : '';
-    fightMeterPct = xpathFirst('.//div[@class="fightmastery_meter_text_percent"]', rootElt);      
+    fightMeterPct = xpathFirst('.//div[@class="fightmastery_meter_text_percent"]', rootElt);
     innerMeterPct = fightMeterPct? fightMeterPct.innerHTML : '';
-    
+
     if(innerMeterTxt && innerMeterPct) {
       oldfightMeterTxt = GM_getValue('fightLevel',0)
-      oldfightMeterPct = GM_getValue('fightLevelPct',0)      
-      AttackCounts = GM_getValue('fightLevelAttacks',0)+winCount+lossCount;      
+      oldfightMeterPct = GM_getValue('fightLevelPct',0)
+      AttackCounts = GM_getValue('fightLevelAttacks',0)+winCount+lossCount;
       GM_setValue('fightLevelAttacks',  AttackCounts);
       if( (innerMeterTxt != oldfightMeterTxt) || (innerMeterPct != oldfightMeterPct) ) {
         totalCount = winCount+lossCount;
@@ -14687,9 +14687,9 @@ function logFightResponse(rootElt, resultElt, context) {
         GM_setValue('fightLevelPct', innerMeterPct);
         GM_setValue('fightLevelAttacks', totalCount);
         addToLog('info Icon', 'Fight Mastery '+ innerMeterTxt + ' ('+innerMeterPct + ') completed after '+AttackCounts+ ' attacks.');
-      }  
-    }     
-    
+      }
+    }
+
     // Update the statistics.
     takeFightStatistics(experience, winCount, lossCount, cost, resultType);
     updateLogStats();
@@ -15512,7 +15512,7 @@ function logResponse(rootElt, action, context) {
       }
       if (innerNoTags.indexOf('not your friend') != -1 ||
           innerNoTags.indexOf('You need to be friends') != -1 ||
-					innerNoTags.indexOf('to help on a job.') != -1) {
+          innerNoTags.indexOf('to help on a job.') != -1) {
         addToLog('info Icon', 'Failed to help' + (user? ' ' + user : '') +
                  ' with job. Reason: not friends.');
       } else if (innerNoTags.indexOf('You are too late') != -1) {
