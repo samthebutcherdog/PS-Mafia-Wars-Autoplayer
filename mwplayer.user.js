@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.712
+// @version     1.1.713
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.712',
+  version: '1.1.713',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14677,9 +14677,9 @@ function logFightResponse(rootElt, resultElt, context) {
     innerMeterPct = fightMeterPct? fightMeterPct.innerHTML : '';
     
     if(innerMeterTxt && innerMeterPct) {
-      oldfightMeterTxt = GM_getValue('fightLevel')
-      oldfightMeterPct = GM_getValue('fightLevelPct')      
-      AttackCounts = GM_getValue('fightLevelAttacks')+winCount+lossCount;      
+      oldfightMeterTxt = GM_getValue('fightLevel',0)
+      oldfightMeterPct = GM_getValue('fightLevelPct',0)      
+      AttackCounts = GM_getValue('fightLevelAttacks',0)+winCount+lossCount;      
       GM_setValue('fightLevelAttacks',  AttackCounts);
       if( (innerMeterTxt != oldfightMeterTxt) || (innerMeterPct != oldfightMeterPct) ) {
         totalCount = winCount+lossCount;
@@ -14688,7 +14688,7 @@ function logFightResponse(rootElt, resultElt, context) {
         GM_setValue('fightLevelAttacks', totalCount);
         addToLog('info Icon', 'Fight Mastery '+ innerMeterTxt + ' ('+innerMeterPct + ') completed after '+AttackCounts+ ' attacks.');
       }  
-    }    
+    }     
     
     // Update the statistics.
     takeFightStatistics(experience, winCount, lossCount, cost, resultType);
