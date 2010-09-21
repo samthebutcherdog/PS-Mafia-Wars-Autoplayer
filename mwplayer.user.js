@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.715
+// @version     1.1.716
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.715',
+  version: '1.1.716',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8521,7 +8521,7 @@ function handleModificationTimer() {
         DEBUG('Detected Las Vegas job_results change on job ='+i);
         pageChanged = true;
         if (running) justPlay = true;
-        DEBUG( 'Flagged');
+        DEBUG('Flagged');
       } else {
        DEBUG('Already Flagged');
       }
@@ -8539,51 +8539,6 @@ function handleModificationTimer() {
       DEBUG('Detected new rob results.');
       pageChanged = true;
       if (running) justPlay = true;
-    }
-  }
-
-// Only Process when not running
-  if (!running) {
-    if (onLootTab()) {
-      var handleFilterChanged = function() {
-        sortLootType = filterLootSelect.selectedIndex;
-        if(sortLootType != oldLootType){
-          cleanLoot(sortLootType);
-          oldLootType = sortLootType;
-        }
-      }
-      var lootElt = xpathFirst('.//div[@class="title"][contains(.,"Loot")]', innerPageElt);
-      var oldLootType=0;
-      var id = 'filterLootSelect';
-      var filterLootSelect = document.getElementById(id);
-      if(!filterLootSelect){
-        makeElement('br', lootElt, {'class':'hide'});
-        var filterLootSelect = makeElement('select', lootElt, {'id':id,'style':'padding-top:3px;'});
-        var filterOptions = ['Filter Disabled','Weapons-Attack','Weapons-Defense','Weapons-Combined',
-          'Armor-Attack','Armor-Defense','Armor-Combined',
-          'Vehicles-Attack','Vehicles-Defense','Vehicles-Combined',
-          'Animals-Attack','Animals-Defense','Animals-Combined'];
-        for (i = 0, iLength=filterOptions.length; i < iLength; ++i) {
-          choice = document.createElement('option');
-          choice.value = i;
-          choice.appendChild(document.createTextNode(filterOptions[i]));
-          filterLootSelect.appendChild(choice);
-        }
-        filterLootSelect.selectedIndex = GM_getValue('filterLootOpt', 0);
-        filterLootSelect.addEventListener('change', handleFilterChanged, false);
-        handleFilterChanged();
-      }
-    }
-
-    if (isGMChecked('HideCollections') && onCollectionsTab()) {
-      // Find and remove special event collections from collections page
-      var arrCollection=new Array("One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
-         "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%","Maltese Falcon");
-      for (item in arrCollection)
-      {
-        var eltCollection = xpathFirst('//div[@style="float: left;"][contains(., "' + arrCollection[item] + '") and contains(.,"Bonus Received:")]', innerPageElt);
-        if (eltCollection) removeCollection(eltCollection);
-      }
     }
   }
 
@@ -9077,6 +9032,8 @@ function innerPageChanged(justPlay) {
         !customizeJobs() &&
         !customizeNewJobs() &&
         !customizeVegasJobs() &&
+        !customizeLoot() &&
+        !customizeCollections() &&
         !customizeProfile() &&
         !customizeProps() &&
         !customizeHitlist()) {
@@ -10316,8 +10273,7 @@ function getPlayerStats() {
 
 function getTopMafia() {
   // Make sure we're on the My Mafia tab.
-  if (!onMyMafiaTab())
-    return;
+  if (!onMyMafiaTab()) return;
 
   var mafiaBoxElt = xpathFirst('.//div[@class="tab_box topmafia_box"]', innerPageElt);
   if (!mafiaBoxElt) return;
@@ -10350,11 +10306,7 @@ function getTopMafia() {
 
 function getPlayerEquip() {
   // Make sure we're on the fight tab.
-  if (!onFightTab() && !onInventoryTab() && !onLootTab()) {
-    //Autoplay.fx = goFightTab;
-    //Autoplay.start();
-    return;
-  }
+  if (!onFightTab() && !onInventoryTab() && !onLootTab()) return;
 
   var eltAttackStrength = xpathFirst('.//div[@class="fightbar_group_stat"]//img[contains(@alt, "Mafia Attack Strength")]', innerPageElt);
   if (eltAttackStrength) { prevAttackEquip = curAttackEquip; curAttackEquip = parseInt(eltAttackStrength.parentNode.childNodes[1].nodeValue.replace(',', '')); GM_setValue('curAttackEquip', curAttackEquip); }
@@ -10365,6 +10317,55 @@ function getPlayerEquip() {
     DEBUG('Current equipment attributes cannot be detected.');
   } else
     DEBUG('Fetched equipment stats.');
+}
+
+function customizeLoot() {
+  // Make sure we're on the loot tab.
+  if (!onLootTab()) return false;
+
+  var handleFilterChanged = function() {
+    sortLootType = filterLootSelect.selectedIndex;
+    if(sortLootType != oldLootType){
+      cleanLoot(sortLootType);
+      oldLootType = sortLootType;
+    }
+  }
+  var lootElt = xpathFirst('.//div[@class="title"][contains(.,"Loot")]', innerPageElt);
+  var oldLootType=0;
+  var id = 'filterLootSelect';
+  var filterLootSelect = document.getElementById(id);
+  if(!filterLootSelect){
+    makeElement('br', lootElt, {'class':'hide'});
+    var filterLootSelect = makeElement('select', lootElt, {'id':id,'style':'position:absolute;top:6px;left:60px;'});
+    var filterOptions = ['Filter Disabled','Weapons-Attack','Weapons-Defense','Weapons-Combined',
+      'Armor-Attack','Armor-Defense','Armor-Combined',
+      'Vehicles-Attack','Vehicles-Defense','Vehicles-Combined',
+      'Animals-Attack','Animals-Defense','Animals-Combined'];
+    for (i = 0, iLength=filterOptions.length; i < iLength; ++i) {
+      choice = document.createElement('option');
+      choice.value = i;
+      choice.appendChild(document.createTextNode(filterOptions[i]));
+      filterLootSelect.appendChild(choice);
+    }
+    filterLootSelect.selectedIndex = GM_getValue('filterLootOpt', 0);
+    filterLootSelect.addEventListener('change', handleFilterChanged, false);
+    handleFilterChanged();
+  }
+  return true;
+}
+
+function customizeCollections() {
+  // Make sure we're on the collections tab and "Hide finished collections" is enabled.
+  if (!onCollectionsTab() || !isGMChecked('HideCollections')) return false;
+
+  // Find and remove special event collections from collections page
+  var arrCollection=["One-Armed Bandit","Injury Time","22LR","Koenigsberg S10","Military Spy","Fox Hunter",
+     "Metsubushi","Irish Wolfhound","Firecrackers","Cupid\'s Arrow","20% more cash","successful robberies by 10%","Maltese Falcon"];
+  for (var i = 0; i < arrCollection.length; i++) {
+    var eltCollection = xpathFirst('.//div[@class="loot_main"]/div[(@style="float: left;" or @style="float:left;") and contains(.,"Bonus Received") and contains(.,"' + arrCollection[i] + '")]', innerPageElt);
+    if (eltCollection) removeCollection(eltCollection);
+  }
+  return true;
 }
 
 function customizeProfile() {
@@ -11933,7 +11934,7 @@ function jobLoot(element) {
     messages = $x('.//img', jobResults);
     numMessages = messages.length;
     for (i = 0; i < numMessages; i++) {
-            if(messages[i].title){
+      if(messages[i].title){
         var loot = messages[i].title;
         var parentText = messages[i].parentNode.innerHTML.untag();
         if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
