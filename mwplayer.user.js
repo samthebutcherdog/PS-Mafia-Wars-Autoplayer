@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.714
+// @version     1.1.715
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.714',
+  version: '1.1.715',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11933,11 +11933,12 @@ function jobLoot(element) {
     messages = $x('.//img', jobResults);
     numMessages = messages.length;
     for (i = 0; i < numMessages; i++) {
-      if(messages[i].title){
+            if(messages[i].title){
         var loot = messages[i].title;
+        var parentText = messages[i].parentNode.innerHTML.untag();
         if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
-        if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
-        else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';
+        if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+' ' +parentText+'</span> in the job.';
+        else strLoot = strLoot + 'Found <span class="loot">' + loot+' ' +parentText+'</span> in the job.';
         lootbag.push(loot);
       }
     }
