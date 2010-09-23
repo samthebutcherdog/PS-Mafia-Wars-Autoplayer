@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.718
+// @version     1.1.719
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.718',
+  version: '1.1.719',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10776,7 +10776,7 @@ function customizeVegasJobs() {
 
   // FIXME: Change this once we encounter locked jobs for the new header
   var isJobLocked = function (thisJob) {
-    return /locked/i.test(thisJob.innerHTML.untag());
+    return (/lock/i.test(thisJob.innerHTML.untag()) || /complete/i.test(thisJob.innerHTML.untag()));
   };
 
   // Display an experience to energy payoff ratio for each job.
@@ -10833,13 +10833,15 @@ function customizeVegasJobs() {
           DEBUG('Required Energy: ' +reqNrg+' - Current Energy: '+energy+'. Skipping');
         }
       }
-
-      // Skip locked jobs and optional fight jobs
-      if(isJobLocked(currentJob) || skipCurrentJob || (  ( isGMChecked('skipfight')) && isJobFight(currentJob) ) ) {
-        DEBUG('Job ' + jobName + '(' + jobMatch + ') is - locked - or - skip FIGHT in Vegas - or - lack of /energy/stam - Skipping.');
-      } else {
-        availableJobs[city][currentTab].push(jobMatch);
-      }
+      
+      // Skip locked jobs and optional fight jobs - more debugging since it seems to cause some troubles
+      if(isJobLocked(currentJob) || skipCurrentJob || ( isGMChecked('skipfight') && isJobFight(currentJob) ) ) {
+        if(isJobLocked(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : locked.');        
+        if(skipCurrentJob) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : lack of energy/stamina.');        
+        if(isGMChecked('skipfight') && isJobFight(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : skipping LV fight jobs.');        
+      }  
+      else availableJobs[city][currentTab].push(jobMatch);      
+    }
     }
 
     // Skip this for jobs without jobCost
@@ -10983,7 +10985,7 @@ function customizeNewJobs() {
 
   // FIXME: Change this once we encounter locked jobs for the new header
   var isJobLocked = function (thisJob) {
-    return /locked/i.test(thisJob.innerHTML.untag());
+    return (/lock/i.test(thisJob.innerHTML.untag()) || /complete/i.test(thisJob.innerHTML.untag()));
   };
 
   // Display an experience to energy payoff ratio for each job.
@@ -11126,12 +11128,11 @@ function customizeNewJobs() {
   return true;
 }
 
-function isJobFight (jobAction) {  return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
+function isJobFight (jobAction) { return (jobAction.innerHTML.indexOf('fight_list') >= 0 );  }
 
 function isJobLocked (jobAction) {
-  return (/lock/i.test(jobAction.innerHTML.untag()) && !/help/i.test(jobAction.innerHTML.untag()));
+  return ((/lock/i.test(jobAction.innerHTML.untag()) || /complete/i.test(jobAction.innerHTML.untag())) && !/help/i.test(jobAction.innerHTML.untag()));
   //return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);
-
 }
 
 // Return item name if missing job item is from a business
