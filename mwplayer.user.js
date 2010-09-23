@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.721
+// @version     1.1.722
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.721',
+  version: '1.1.722',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -3020,12 +3020,9 @@ function canSpendStamina(minHealth) {
   }
 
   // Only spend if stamina >= 20
-	// FIXME: Not sure what the original intent of this if statement. Since it doesn't work in its
-	// current state I commented it out.
-  /* if(GM_getValue('staminaSpendHow') !=  && stamMode == STAMINA_HOW_ROBBING)
+  if(GM_getValue('staminaSpendHow') != STAMINA_HOW_RANDOM && stamMode == STAMINA_HOW_ROBBING)
     return (stamina >= 25);
-  else */
-	if (stamMode == STAMINA_HOW_ROBBING) {
+  else if (stamMode == STAMINA_HOW_ROBBING) {
     if (stamina >= 25) return true;
     else {
       randomizeStamina();
@@ -3596,7 +3593,7 @@ function getStaminaMode() {
     newStaminaMode = undefined;
   }
 
-  return how;
+  return parseInt(how);
 }
 
 function autoStaminaSpend() {
