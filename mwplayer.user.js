@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.719
+// @version     1.1.720
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.719',
+  version: '1.1.720',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10840,8 +10840,7 @@ function customizeVegasJobs() {
         if(skipCurrentJob) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : lack of energy/stamina.');        
         if(isGMChecked('skipfight') && isJobFight(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : skipping LV fight jobs.');        
       }  
-      else availableJobs[city][currentTab].push(jobMatch);      
-    }
+      else availableJobs[city][currentTab].push(jobMatch);          
     }
 
     // Skip this for jobs without jobCost
