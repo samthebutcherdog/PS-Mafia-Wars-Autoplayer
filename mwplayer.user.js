@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.727
+// @version     1.1.728
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.727',
+  version: '1.1.728',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1029,11 +1029,11 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
     ['CM Santiago R10', 4, 'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
     ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
-    ['Rebel 2', 5, 'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +5 stamina'],
+    ['Rebel 2', 5, 'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +6 stamina'],
     ['Russian Dazatz 45', 6, 'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
-    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +5 energy'],
+    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
     ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
-    ['Thai XS Max', 8, 'Requires 75 car parts, 2 Thai car parts | 45 attack, 35 defense'],
+    ['Thai XS Max', 8, 'Requires 75 car parts, 2 thai car parts | 45 attack, 35 defense'],
     ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
     ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
     ['Mugati Sport', 13, 'Requires 135 car parts, 1 high tech car part | 35 attack, 51 defense, +3 attack'],
@@ -1043,16 +1043,16 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Weapons build
   var cityWeapons = new Array (
-    ['Random Common Weapon', 15, 'Requires 1 weapon parts'],
-    ['Random Uncommon Weapon', 16, 'Requires 3 weapon parts'],
-    ['Random Rare Weapon', 17, 'Requires 5 weapon parts'],
-    ['Ninja Sai', 18, 'Requires 30 weapon parts | 30 attack, 40 defense'],
-    ['First Blood', 19, 'Requires 8 weapon parts and 1 explosive arrow | 49 attack, 13 defense'],
-    ['Ultrasonic Gun', 20, 'Requires 12 weapon parts and 1 sonic emitter | 22 attack, 48 defense'],
-    ['Lazer Guided RPG', 21, 'Requires 21 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
-    ['Robber\'s Utility Belt', 22, 'Requires 24 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
-    ['Railgun', 23, 'Requires 27 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
-    ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
+    ['Random Common Weapon', 15, 'Requires 3 weapon parts'],
+    ['Random Uncommon Weapon', 16, 'Requires 9 weapon parts'],
+    ['Random Rare Weapon', 17, 'Requires 15 weapon parts'],
+    ['Ninja Sai', 18, 'Requires 24 weapon parts | 30 attack, 40 defense'],
+    ['First Blood', 19, 'Requires 30 weapon parts and 1 explosive arrow | 49 attack, 13 defense'],
+    ['Ultrasonic Gun', 20, 'Requires 36 weapon parts and 1 sonic emitter | 22 attack, 48 defense'],
+    ['Lazer Guided RPG', 21, 'Requires 63 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
+    ['Robber\'s Utility Belt', 22, 'Requires 72 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
+    ['Railgun', 23, 'Requires 81 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
+    ['Plasma Rifle', 24, 'Requires 105 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
 
   // Armory build CRAIG
@@ -1064,7 +1064,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Mariner\'s Suit ', 33, 'Requires 22 armor parts | 43 attack, 39 defense'],
     ['Pressure Suit', 34, 'Requires 28 armor parts | 45 attack, 40 defense'],
     ['Sleek Torso Guard ', 35, 'Requires 35 armor parts | 44 attack, 46 defense'],
-    ['Full Body Armor ', 36, 'Requires 38 armor parts, 1 boomerang and 1 grapple | 47 attack, 40 defense, +1 attack, +1 defense'],
+    ['Full Body Armor ', 36, 'Requires 38 armor parts | 47 attack, 40 defense, +1 attack, +1 defense'],
     ['MNU Suit', 37, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
     ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
   ); 
@@ -2398,7 +2398,7 @@ function buildItem(itemArray, itemIndex, buildType){
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
                         'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
-  
+
   if (elt) {
     Autoplay.fx = function() {
       clickAction = 'build item';
@@ -12413,9 +12413,9 @@ BrowserDetect.init();
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapons: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
+        '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Build Armor: <strong>' + showIfUnchecked(GM_getValue('buildArmor')) + '</strong><br>' +
         '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +       
-        '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -12699,80 +12699,32 @@ function parsePlayerUpdates(messagebox) {
       }
     }
 
-      } else if (messageTextNoTags.indexOf('but still needs a few more') != -1) {
-    if (isGMChecked('autoPartsHelp')) {
-      // Help requested by a fellow mafia member.
-      messageTextNoTags.match(/(.*) is close to completing a.*/i);
-      var userText = RegExp.$1;
-      //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-      elt = xpathFirst('.//a[contains(@href, "action=cs_help_item")]', messagebox);
-      if (elt) {
-        // Help immediately.
-        Autoplay.fx = function() {
-          clickAction = 'help parts';
-          clickContext = {
-            user: userText,
-            help: linkToString(elt)
-          };
-          clickElement(elt);
-          DEBUG('Clicked to help with parts.');
+  } else if (isGMChecked('autoPartsHelp') && (
+              messageTextNoTags.match(/(.*) is close to completing a/i) || // 'but still needs a few more'
+              messageTextNoTags.match(/(.*) wants to build an awesome/i) ||
+              messageTextNoTags.match(/(.*) has decided to upgrade/i)
+            )) {
+    // Help requested by a fellow mafia member.
+    var userText = RegExp.$1;
+    //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
+    elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_item")]', messagebox);
+    if (!elt) elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_initial")]', messagebox);
+    if (elt) {
+      // Help immediately.
+      Autoplay.fx = function() {
+        clickAction = 'help parts';
+        clickContext = {
+          user: userText,
+          help: linkToString(elt)
         };
-        Autoplay.delay = noDelay;
-        Autoplay.start();
-        return false;
-      } else {
-        addToLog('warning Icon', 'BUG DETECTED: Unable to find parts help element.');
-      }
-    }
-  } else if (messageTextNoTags.indexOf('wants to build an awesome') != -1) {
-    if (isGMChecked('autoPartsHelp')) {
-      // Help requested by a fellow mafia member.
-      messageTextNoTags.match(/(.*) wants to build an awesome.*/i);
-      var userText = RegExp.$1;
-      //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-      elt = xpathFirst('.//a[contains(@href, "action=cs_help_item")]', messagebox);
-      if (elt) {
-        // Help immediately.
-        Autoplay.fx = function() {
-          clickAction = 'help parts';
-          clickContext = {
-            user: userText,
-            help: linkToString(elt)
-          };
-          clickElement(elt);
-          DEBUG('Clicked to help with parts.');
-        };
-        Autoplay.delay = noDelay;
-        Autoplay.start();
-        return false;
-      } else {
-        addToLog('warning Icon', 'BUG DETECTED: Unable to find parts help element.');
-      }
-    }
-  } else if (messageTextNoTags.indexOf('has decided to upgrade') != -1) {
-    if (isGMChecked('autoPartsHelp')) {
-      // Help requested by a fellow mafia member.
-      messageTextNoTags.match(/(.*) has decided to.*/i);
-      var userText = RegExp.$1;
-      //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-      elt = xpathFirst('.//a[contains(@href, "action=cs_help_item")]', messagebox);
-      if (elt) {
-        // Help immediately.
-        Autoplay.fx = function() {
-          clickAction = 'help parts';
-          clickContext = {
-            user: userText,
-            help: linkToString(elt)
-          };
-          clickElement(elt);
-          DEBUG('Clicked to help with parts.');
-        };
-        Autoplay.delay = noDelay;
-        Autoplay.start();
-        return false;
-      } else {
-        addToLog('warning Icon', 'BUG DETECTED: Unable to find parts help element.');
-      }
+        clickElement(elt);
+        DEBUG('Clicked to help with parts.');
+      };
+      Autoplay.delay = noDelay;
+      Autoplay.start();
+      return false;
+    } else {
+      addToLog('warning Icon', 'BUG DETECTED: Unable to find parts help element.');
     }
 
   } else if (messageTextNoTags.indexOf('claimed your $') != -1) {
