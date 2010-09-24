@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.725
+// @version     1.1.726
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.725',
+  version: '1.1.726',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1055,6 +1055,20 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Plasma Rifle', 24, 'Requires 55 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
   );
 
+  // Armory build CRAIG
+  var cityArmor = new Array (
+    ['Random Common Armor', 28, 'Requires 2 armor parts'],
+    ['Random Uncommon Armor', 29, 'Requires 5 armor parts'],
+    ['Random Rare Armor', 30, 'Requires 14 armor parts'],
+    ['Plastic Legging', 31, 'Requires 18 armor parts | 33 attack, 41 defense'],
+    ['Mariner\'s Suit ', 32, 'Requires 22 armor parts | 43 attack, 39 defense'],
+    ['Pressure Suit', 33, 'Requires 28 armor parts | 45 attack, 40 defense'],
+    ['Sleek Torso Guard ', 34, 'Requires 35 armor parts | 44 attack, 46 defense'],
+    ['Full Body Armor ', 35, 'Requires 38 armor parts, 1 boomerang and 1 grapple | 47 attack, 40 defense, +1 attack, +1 defense'],
+    ['MNU Suit', 36, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
+    ['Power Armor ', 37, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
+  ); 
+  
   // Las Vegas vault levels
   var vaultLevels = new Array (
     ['Vault handling disabled', 0],
@@ -1969,6 +1983,11 @@ function doAutoPlay () {
   if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
   }
+  // Build Armor
+  if (running && !maxed && isGMChecked('buildArmor') && !timeLeftGM('buildArmorTimer')) {
+    if (buildItem(cityArmor, GM_getValue('buildArmorId',1), 13)) return;
+  }
+  
   // Player updates
   if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
@@ -4742,7 +4761,7 @@ function saveSettings() {
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoBuy','buildCar','buildWeapon','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
+    'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
     'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas'
   ]);
   //Cash Settings and Validation
@@ -4753,6 +4772,7 @@ function saveSettings() {
 
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
   GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
+  GM_setValue('buildArmorId', document.getElementById('buildArmorId').selectedIndex);
 
   var autoBankOn      = (document.getElementById('autoBank').checked === true);
   var autoBankCubaOn  = (document.getElementById('autoBankCuba').checked === true);
@@ -7777,7 +7797,27 @@ function createCashTab () {
   }
   weaponType.selectedIndex = GM_getValue(id, 7);
   weaponType.setAttribute('title', cityWeapons[weaponType.selectedIndex][2]);
+  
+  // Option to build a armor
+  xTop += 25;
+  title = 'Check this to build a armor every 24 hours';
+  id = 'buildArmor';
+  var buildArmor = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('input', buildArmor, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', buildArmor, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Build Armor'));
 
+  // Armor list
+  id = 'buildArmorId';
+  var armorType = makeElement('select', buildArmor, {'id':id, 'style':'position: static; margin-left: 5px;'});
+  for (i = 0, iLength=cityArmor.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityArmor[i][2]});
+    choice.appendChild(document.createTextNode(cityArmor[i][0]));
+    armorType.appendChild(choice);
+  }
+  armorType.selectedIndex = GM_getValue(id, 7);
+  armorType.setAttribute('title', cityArmor[armorType.selectedIndex][2]);
+    
   // Collect Takes
   var xTop = 50;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -12366,7 +12406,9 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourLas Vegas', 0) + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
-        'Build Weapongs: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
+        'Build Weapons: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
+        'Build Armor: <strong>' + showIfUnchecked(GM_getValue('buildArmor')) + '</strong><br>' +
+        '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +       
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
@@ -15323,13 +15365,24 @@ function logResponse(rootElt, action, context) {
 
         // Ask for help if auto ask is on and enough experience was gained.
         var xpGain = parseInt(xpGainElt.innerHTML);
+        var parentClass="";
         var xpGainMin = parseInt(GM_getValue('autoAskJobHelpMinExp'));
         if (isGMChecked('autoAskJobHelp') && (!xpGainMin || xpGain >= xpGainMin)) {
           // ask for help
           var elt = xpathFirst('.//div[@class="message_buttons"]//span[@class="sexy_jobhelp"]', messagebox);
           if(!elt) elt = xpathFirst('.//div[@class="message_buttons"]//a[@class="sexy_button_new short_white sexy_call_new" and contains(.,"Let Friends Get a Bonus")]', messagebox);
           // below string is current for LV job help
-          if(!elt) elt = xpathFirst('.//div[@class="social_job"]//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(.,"Ask for Help")]');
+          if(!elt) {
+            elt = xpathFirst('.//div[@class="social_job"]//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(.,"Ask for Help")]');
+            if(elt){ 
+              parentElt = elt.parentNode;              
+              //DEBUG(parentElt.innerHTML);
+              if(parentElt.innerHTML.indexOf("social_job_disabled")==-1) {
+                DEBUG("Ask for Help Button seems disabled - Not clicking");
+                elt = undefined;
+              }                
+            }
+          }
 //          if (elt)  DEBUG (' - - - help WAS found to click  ');
           if (elt) {
             Autoplay.fx = function() {
@@ -15699,10 +15752,12 @@ function logResponse(rootElt, action, context) {
       switch (context.buildType) {
         case 11: timerName = 'buildCarTimer'; break;
         case 12: timerName = 'buildWeaponTimer'; break;
+        case 13: timerName = 'buildArmorTimer'; break;
       }
       if (/You cannot craft/i.test(inner)) {
         if(context.buildType==11) inner = "Chop Shop : " + inner;
         if(context.buildType==12) inner = "Weapons Depot : " + inner;
+        if(context.buildType==13) inner = "Armory : " + inner;
       }
       // Visit again after 1 hour if you cannot craft yet
       if (/You cannot craft/i.test(inner) ||
