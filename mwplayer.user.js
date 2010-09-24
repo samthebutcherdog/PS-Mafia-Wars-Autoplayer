@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.726
+// @version     1.1.727
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.726',
+  version: '1.1.727',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1057,16 +1057,16 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Armory build CRAIG
   var cityArmor = new Array (
-    ['Random Common Armor', 28, 'Requires 2 armor parts'],
-    ['Random Uncommon Armor', 29, 'Requires 5 armor parts'],
-    ['Random Rare Armor', 30, 'Requires 14 armor parts'],
-    ['Plastic Legging', 31, 'Requires 18 armor parts | 33 attack, 41 defense'],
-    ['Mariner\'s Suit ', 32, 'Requires 22 armor parts | 43 attack, 39 defense'],
-    ['Pressure Suit', 33, 'Requires 28 armor parts | 45 attack, 40 defense'],
-    ['Sleek Torso Guard ', 34, 'Requires 35 armor parts | 44 attack, 46 defense'],
-    ['Full Body Armor ', 35, 'Requires 38 armor parts, 1 boomerang and 1 grapple | 47 attack, 40 defense, +1 attack, +1 defense'],
-    ['MNU Suit', 36, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
-    ['Power Armor ', 37, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
+    ['Random Common Armor', 29, 'Requires 2 armor parts'],
+    ['Random Uncommon Armor', 30, 'Requires 5 armor parts'],
+    ['Random Rare Armor', 31, 'Requires 14 armor parts'],
+    ['Plastic Legging', 32, 'Requires 18 armor parts | 33 attack, 41 defense'],
+    ['Mariner\'s Suit ', 33, 'Requires 22 armor parts | 43 attack, 39 defense'],
+    ['Pressure Suit', 34, 'Requires 28 armor parts | 45 attack, 40 defense'],
+    ['Sleek Torso Guard ', 35, 'Requires 35 armor parts | 44 attack, 46 defense'],
+    ['Full Body Armor ', 36, 'Requires 38 armor parts, 1 boomerang and 1 grapple | 47 attack, 40 defense, +1 attack, +1 defense'],
+    ['MNU Suit', 37, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
+    ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
   ); 
   
   // Las Vegas vault levels
@@ -2389,12 +2389,16 @@ function buildItem(itemArray, itemIndex, buildType){
     Autoplay.start();
     return true;
   }
-
+  DEBUG('Going to build '+itemArray[itemIndex][1]+' - '+buildType);
   // Build the clickable element
+ // var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
+  //                      '"remote/html_server.php?xw_controller=propertyV2&' +
+  //                      'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 1, 0, 0); return false;'});
+
   var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 1, 0, 0); return false;'});
-
+                        'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
+  
   if (elt) {
     Autoplay.fx = function() {
       clickAction = 'build item';
@@ -9559,6 +9563,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;miniPackTimer: ' + getHoursTime('miniPackTimer') +
       '<br>&nbsp;&nbsp;buildCarTimer: ' + getHoursTime('buildCarTimer') +
       '<br>&nbsp;&nbsp;buildWeaponTimer: ' + getHoursTime('buildWeaponTimer') +
+      '<br>&nbsp;&nbsp;buildArmorTimer: ' + getHoursTime('buildArmorTimer') +
       '<br>&nbsp;&nbsp;takeHourNew York: ' + getHoursTime('takeHourNew York') +
       '<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
       '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
@@ -9590,6 +9595,7 @@ function resetTimers(popup) {
   if (timeLeftGM('warTimer')<900) GM_setValue('warTimer', 0);
   if (timeLeftGM('buildCarTimer')<900) GM_setValue('buildCarTimer', 0);
   if (timeLeftGM('buildWeaponTimer')<900) GM_setValue('buildWeaponTimer', 0);
+  if (timeLeftGM('buildArmorTimer')<900) GM_setValue('buildArmorTimer', 0);
   if (timeLeftGM('takeHourLas Vegas')<300) GM_setValue('takeHourLas Vegas', 0);
   if (timeLeftGM('takeHourBangkok')<300) GM_setValue('takeHourBangkok', 0);
   if (timeLeftGM('takeHourCuba')<300) GM_setValue('takeHourCuba', 0);
