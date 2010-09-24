@@ -56,7 +56,7 @@ var SCRIPT = {
   appNo: '10979261223',
   presentationurl: 'http://userscripts.org/scripts/show/77953',
   url: 'http://www.playerscripts.com/rokdownloads/ps_facebook_mafia_wars_a.user.js',
-  metadata: 'http://userscripts.org/scripts/source/77953.meta.js',
+  metadata: 'http://www.playerscripts.com/rokdownloads/mwapmeta.js',
   controller: 'remote/html_server.php?xw_controller=',
   action: '&xw_action=',
   city: '&xw_city=',
