@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.728
+// @version     1.1.729
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.728',
+  version: '1.1.729',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7909,6 +7909,48 @@ function createAboutTab() {
 
   return aboutTab;
 }
+function dateWithin(beginDate,endDate,checkDate) {
+	var b,e,c;
+	b = Date.parse(beginDate);
+	e = Date.parse(endDate);
+	c = Date.parse(checkDate);
+	if((c <= e && c >= b)) {
+		return true;
+	}
+	return false;
+}
+
+function grabToolbarInfo(){
+  if (!gvar.isGreaseMonkey) return;
+  GM_xmlhttpRequest({
+    method: 'GET',
+    url: 'http://toolbar.zynga.com/game_stats_proxy.php?src=mw',
+    headers: {'Accept': 'application/atom+xml'},
+    onload: function (resp) {
+      DEBUG ('trigger');
+      if (resp.status != 200) return;
+
+      var toolbarInfo = JSON.parse(resp.responseText);
+      // Info in info.  user_health, user_energy, user_stamina, energy_timestamp, toolbar_energy_timestamp
+      // has_toolbar_enery_pack, has_energypack, error
+      
+      var datNow = new Date();
+      var modGMT;
+      datNow.setMilliseconds(0);
+      if (dateWithin('11/7/2010 02:00:00 AM','3/13/2011 02:00:00 AM','3/13/2011 02:00:00 AM')) {
+        modGMT = 7; //PST
+      //} else {
+        modGMT = 8; //PDT
+      }
+      var timer = toolbarInfo.toolbar_energy_timestamp - (datNow.getTime()/1000) + 3600 * modGMT;
+      
+      setGMTime('miniPackTimer', timer + ' seconds');
+      //addToLog ('info Icon',hours + ':' + minutes + ':' + seconds);
+
+      return;
+    }
+  });
+}
 
 function grabUpdateInfo() {
   if (!gvar.isGreaseMonkey) return;
@@ -10011,6 +10053,7 @@ function customizeStats() {
   if (!nrgElt)
     nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', statsrowElt);
   if (nrgElt && !nrgLinkElt) {
+    grabToolbarInfo(); //Fetch Toolbar Info
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0) var miniPackTitle = 'Mini-Pack available now.';
     else if (timeLeftPack == undefined) {
