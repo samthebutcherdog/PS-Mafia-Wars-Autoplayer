@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.729
+// @version     1.1.730
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.729',
+  version: '1.1.730',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -7927,7 +7927,6 @@ function grabToolbarInfo(){
     url: 'http://toolbar.zynga.com/game_stats_proxy.php?src=mw',
     headers: {'Accept': 'application/atom+xml'},
     onload: function (resp) {
-      DEBUG ('trigger');
       if (resp.status != 200) return;
 
       var toolbarInfo = JSON.parse(resp.responseText);
@@ -14981,6 +14980,7 @@ function ajaxPageChanged(ajaxElt) {
 function logJSONResponse(autoplay, response, action, context) {
   try {
     var responseText = response.untag();
+    DEBUG(responseText);
     if (action.indexOf('icecheck') == -1) DEBUG(responseText);
 
     // Analyze money related responses (collect take, check vault, deposit and withdraw)
@@ -15910,6 +15910,8 @@ function handlePopups() {
           /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
 
+            if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
+            if (popupElts[i].id == 'popup_fodder_zmc') return(closePopup(popupElts[i], "Your Requests Fodder"));
             /* Disable Chop Shop/Weapon Depot popup detection for timers
             // Get rid of Chop Shop/Weapon Depot popup
             if (popupInnerNoTags.match(/You have built (.+?)\./)) {
