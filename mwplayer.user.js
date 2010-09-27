@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.731
+// @version     1.1.732
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.731',
+  version: '1.1.732',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1660,7 +1660,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Ballistic Knife', 'Silence A Political Critic',MOSCOW],
     ['Severnyy Olen Snowbike', 'Extract A Favor From The Winner',MOSCOW],
     ['Set of Photos of Karpov', 'Kill An Investigative Reporter',MOSCOW],
+    ['Photos of Karpov', 'Kill An Investigative Reporter',MOSCOW],
     ['Set of Photos of Karpov', 'Catch Karpov Accepting A Bribe',MOSCOW],
+    ['Photos of Karpov', 'Catch Karpov Accepting A Bribe',MOSCOW],
     ['RAS-15', '"Convince" The Candidate To Withdraw',MOSCOW],
     ['Officer Corps Paycheck', 'Capitalize On An Officer\'s Gambling Problem',MOSCOW],
     ['Officer Corps Paycheck', 'Intercept The Base\'s Pay Shipment',MOSCOW],
