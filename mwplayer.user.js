@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.730
+// @version     1.1.731
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.730',
+  version: '1.1.731',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1993,44 +1993,12 @@ function doAutoPlay () {
     if (autoPlayerUpdates()) return;
   }
 
-  // auto-heal area
-//  DEBUG('  entering auto-heal ') ;
-  if (running &&
-      health < maxHealth &&
-      isGMChecked('autoHeal') &&
-      health < GM_getValue('healthLevel', 0) &&
-      (stamina >= GM_getValue('stamina_min_heal')) &&
-      canForceHeal()
-      ) {
-//    DEBUG('auto-heal passed main block check, checking can auto heal ');
-    if(canautoheal()) {
-      DEBUG('auto-healing '); // hide/remove after testing
-      if (isGMChecked('quickHeal')) {
-        if(quickHeal(false)) return;
-      } else {
-        if(autoHeal()) return;
-      }
-    }
-  } else {
-// hide/remove after testing
-//    DEBUG(' autoheal skipped in main loop ');
-    DEBUG('heal skipped, actual stamina:' + stamina +' stamina_Min_heal:'+ GM_getValue('stamina_min_heal') +  ' force heal:' + canForceHeal() );
-    DEBUG('heal skipped, current health:' + health + ' full:' + maxHealth + ' heal when health falls below:' + GM_getValue('healthLevel', 0) );
+  // Ask for help on Crew Collections
+  if (running && !maxed && isGMChecked('autoAskHelponCC') && !timeLeftGM('autoAskHelponCCTimer')) {  
+    DEBUG('Going to ask for help on Crew Collections.');
+    if (autoAskHelponCC()) return;
   }
-
-//  DEBUG('after auto-heal  - - X ');
-
-  // Re-activating autoHeal in case you died and PS MWAP cleared the playerupdates before it could parse the snuffed message:
-  if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
-    DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
-    GM_setValue('autoHeal', 'checked');
-  }
-
-  // Background mode hitlisting (limit to level 4 and above)
-  if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
-    if(autoHitlist()) return;
-  }
-
+  
   // Ask for Help on Moscow Tier
   if (running && !maxed && parseInt(GM_getValue('selectMoscowTier'))  && !timeLeftGM('AskforHelpMoscowTimer')) {
     DEBUG('going to Moscow for Ask for Help-job');
@@ -2087,6 +2055,44 @@ function doAutoPlay () {
   // Auto-Safehouse (aka Crime Spree now)
   if (running && !maxed && isGMChecked('autoSafehouse') && hasHome) {
     if (autoSafehouse()) return;
+  }    
+  
+  // auto-heal area
+//  DEBUG('  entering auto-heal ') ;
+  if (running &&
+      health < maxHealth &&
+      isGMChecked('autoHeal') &&
+      health < GM_getValue('healthLevel', 0) &&
+      (stamina >= GM_getValue('stamina_min_heal')) &&
+      canForceHeal()
+      ) {
+//    DEBUG('auto-heal passed main block check, checking can auto heal ');
+    if(canautoheal()) {
+      DEBUG('auto-healing '); // hide/remove after testing
+      if (isGMChecked('quickHeal')) {
+        if(quickHeal(false)) return;
+      } else {
+        if(autoHeal()) return;
+      }
+    }
+  } else {
+// hide/remove after testing
+//    DEBUG(' autoheal skipped in main loop ');
+    DEBUG('heal skipped, actual stamina:' + stamina +' stamina_Min_heal:'+ GM_getValue('stamina_min_heal') +  ' force heal:' + canForceHeal() );
+    DEBUG('heal skipped, current health:' + health + ' full:' + maxHealth + ' heal when health falls below:' + GM_getValue('healthLevel', 0) );
+  }
+
+//  DEBUG('after auto-heal  - - X ');
+
+  // Re-activating autoHeal in case you died and PS MWAP cleared the playerupdates before it could parse the snuffed message:
+  if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
+    DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
+    GM_setValue('autoHeal', 'checked');
+  }
+
+  // Background mode hitlisting (limit to level 4 and above)
+  if (running && !maxed && autoStaminaSpendif && isGMChecked('bgAutoHitCheck') && !timeLeftGM('bgAutoHitTime')){
+    if(autoHitlist()) return;
   }
 
   // Mini-pack check
@@ -2318,8 +2324,55 @@ function autoHeal() {
   return true;
 }
 
+
+function autoAskHelponCC(){
+  // Common function
+  var doAskFunction = function (askResult) {
+    if (!askResult) {
+      addToLog('warning Icon', 'Unable to Ask for Help on Crew Collections.');      
+    }
+  };
+  
+  // Go to the Inventory tab.
+  if (!onInventoryTab() && !onCollectionsTab()) {
+    Autoplay.fx = function() { doAskFunction(goInventoryNav()); };
+    Autoplay.start();
+    return true;
+  }
+ 
+  // Go to the Collections tab.
+  if (!onCollectionsTab()) {
+    Autoplay.fx = function() { doAskFunction(goCollectionsNav()); };
+    Autoplay.start();
+    return true;
+  }
+
+  DEBUG('Since we\'re here we must be on the Collections Page.');
+  var helpButtons;
+  var numButtons;
+  
+  helpButtons = $x('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);
+  numButtons = helpButtons.length;
+  DEBUG('Ask for Help on Crew Collections - '+numButtons+' found.');
+  
+  if(numButtons>0){
+    var askHelpFriends = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);    
+    if (askHelpFriends) {
+      addToLog('info Icon', 'Clicked to Ask for Help on Crew Collection.');
+      clickAction = 'crew collection';      
+      clickElement(askHelpFriends);      
+    return true;
+    }
+  } else {
+    DEBUG('No Help on Crew Collection buttons found - Resetting Timer for 4 hours');
+    setGMTime('autoAskHelponCC', '4 hours');
+  }
+  return;
+}
+
+
 function AskforHelp(hlpCity) {
-  // Common function if job has failed
+  // Common function
   var doAskFunction = function (askResult) {
     if (!askResult) {
       addToLog('warning Icon', 'Unable to Ask for Help on ' + helpCity +'.'+ tabno+'. Please Check your \'Ask for Help\'-settings on PS MWAP\'s Mafia tab.');
@@ -2371,12 +2424,12 @@ function AskforHelp(hlpCity) {
       clickElement(askHelpFriends);
       DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
       setGMTime(timerName, '12 hours');
-    return true;
+      return true;
     } else {
       setGMTime(timerName, '1 hour');
       addToLog('info Icon', ' You cannot Ask for Help yet on ' + helpCity +'.'+ tabno);
       DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);
-  }
+    }
   }
   return;
 }
@@ -4539,7 +4592,7 @@ function saveSettings() {
 
   //Mafia Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoAskJobHelp','acceptMafiaInvitations','autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareWishlist',
+    'autoAskJobHelp','acceptMafiaInvitations','autoAskHelponCC', 'autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareWishlist',
     'autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoWarBetray','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept','autoSafehouse',
     'sendEnergyPack','askEnergyPack','rewardEnergyPack',
     'autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
@@ -6204,6 +6257,17 @@ function createMafiaTab() {
   choiceBangkokTier.value = '8';
   if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
+
+  // Auto-accept mafia invitations
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Automatically ask for help on Crew Collections.';
+  id = 'autoAskHelponCC';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Ask for help on Crew collections'));
 
   // Auto-accept mafia invitations
   item = makeElement('div', list);
@@ -9008,6 +9072,9 @@ function handlePublishing() {
         // Job Help
         if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
+        // Collections
+        if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
+        
         // Moscow Job Help
         if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectMoscowTiercheck', pubElt, skipElt)) return;
 
@@ -9610,7 +9677,8 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
       '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
       '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
-      '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
+      '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +      
+      '<br>&nbsp;&nbsp;autoAskHelponCCTimer: ' + getHoursTime('autoAskHelponCCTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
       '<br>&nbsp;&nbsp;AskforHelpBangkokTimer: ' + getHoursTime('AskforHelpBangkokTimer') +
       '<br>&nbsp;&nbsp;wishListTimer: ' + getHoursTime('wishListTimer') +
@@ -9644,7 +9712,8 @@ function resetTimers(popup) {
   if (timeLeftGM('takeHourNew York')<300) GM_setValue('takeHourNew York', 0);
   if (timeLeftGM('dailyChecklistTimer')<3600) GM_setValue('dailyChecklistTimer', 0);
   if (timeLeftGM('autoGiftAcceptTimer')<3600) GM_setValue('autoGiftAcceptTimer', 0);
-  if (timeLeftGM('autoSafehouseTimer')<3600) GM_setValue('autoSafehouseTimer', 0);
+  if (timeLeftGM('autoSafehouseTimer')<3600) GM_setValue('autoSafehouseTimer', 0);  
+  if (timeLeftGM('autoAskHelponCC')<3600) GM_setValue('autoAskHelponCC', 0);
   if (timeLeftGM('AskforHelpMoscowTimer')<3600) GM_setValue('AskforHelpMoscowTimer', 0);
   if (timeLeftGM('AskforHelpBangkokTimer')<3600) GM_setValue('AskforHelpBangkokTimer', 0);
   if (timeLeftGM('rewardEnergyTimer')<1800) GM_setValue('rewardEnergyTimer', 0);
@@ -12297,6 +12366,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Automatically share wishlist: <strong>' + showIfUnchecked(GM_getValue('autoShareWishlist')) + '</strong><br>' +
         '&nbsp;&nbsp;Hour interval for sharing wishlist: <strong>' + GM_getValue('autoShareWishlistTime') + '</strong><br>' +
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
+        'Automatically ask for Help on Crew Collections: <strong>'+ showIfUnchecked(GM_getValue('autoAskHelponCC')) + '</strong><br>' +        
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
         'Automatically Help on Burners: <strong>' + showIfUnchecked(GM_getValue('autoBurnerHelp')) + '</strong><br>' +
@@ -13905,6 +13975,33 @@ function goJobsNav() {
   return true;
 }
 
+function goInventoryNav() {
+  var elt = xpathFirst('//div[@class="nav_link inventory_link"]/a');
+  if (!elt) {
+    var elt = xpathFirst('.//a[@class="header_inventory_button"]', mastheadElt);
+    if (!elt) {
+      addToLog('warning Icon', 'Can\'t find Inventory nav link to click.');
+      return false;
+    }
+  }
+  clickElement(elt);
+  DEBUG('Clicked to go to Inventory.');
+  return true;
+}
+
+function goCollectionsNav() {
+  var pagehtml = '"remote/html_server.php?xw_controller=collection&xw_action=view&xw_city=1"';
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+ pagehtml + ', 1, 1, 0, 0); return false;'});
+  if (elt) {
+    clickElement(elt);
+    DEBUG('Clicked to go to Collections tab.');
+    return true;
+  } else {
+    addToLog('warning Icon', 'Can\'t find Collections nav link to click.');
+    return false;
+  }
+}
+
 function goJobTab(tabno) {
   var elt;
   var currentTab = currentJobTab();
@@ -15098,11 +15195,13 @@ function logJSONResponse(autoplay, response, action, context) {
 
       // Log any message from collecting property take.
       case 'collect take':
+        DEBUG('Collected take '+respData.description);
         setGMTime('takeHour' + cities[context][CITY_NAME], '1 hour');  // collect every 1 hour
         if (respData.description.match(/have collected (.+?) from your properties/i)) {
           var collectString = RegExp.$1.replace('$', cities[context][CITY_CASH_SYMBOL]);
           addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
         }
+
         return false;
         break;
 
@@ -15377,11 +15476,13 @@ function logResponse(rootElt, action, context) {
             elt = xpathFirst('.//div[@class="social_job"]//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(.,"Ask for Help")]');
             if(elt){ 
               parentElt = elt.parentNode;              
-              //DEBUG(parentElt.innerHTML);
+              DEBUG(parentElt.innerHTML.untag());
               if(parentElt.innerHTML.indexOf("social_job_disabled")==-1) {
                 DEBUG("Ask for Help Button seems disabled - Not clicking");
                 elt = undefined;
               }                
+            } else {
+              elt = undefined;
             }
           }
 //          if (elt)  DEBUG (' - - - help WAS found to click  ');
@@ -15747,6 +15848,10 @@ function logResponse(rootElt, action, context) {
     case 'buy property':
       addToLog('info Icon', inner);
       break;
+      
+    case 'crew collection':
+      addToLog('info Icon', inner);
+      break;  
 
     case 'build item':
       var timerName = 'buildCarTimer';
