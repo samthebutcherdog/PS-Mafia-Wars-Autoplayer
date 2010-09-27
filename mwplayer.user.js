@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.732
+// @version     1.1.733
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.732',
+  version: '1.1.733',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8004,7 +8004,7 @@ function grabToolbarInfo(){
       datNow.setMilliseconds(0);
       if (dateWithin('11/7/2010 02:00:00 AM','3/13/2011 02:00:00 AM','3/13/2011 02:00:00 AM')) {
         modGMT = 7; //PST
-      //} else {
+      } else {
         modGMT = 8; //PDT
       }
       var timer = toolbarInfo.toolbar_energy_timestamp - (datNow.getTime()/1000) + 3600 * modGMT;
