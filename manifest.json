@@ -16,8 +16,8 @@
       "128": "mwap128.png",
       "48": "mwap48.png"
    },
-   "permissions": [ "http://code.google.com/p/mwplayer/*" ],
+   "permissions": [ "http://code.google.com/p/mwplayer/*", "http://toolbar.zynga.com/game_stats_proxy.php*" ],
    "name": "Autoplayer for Mafia Wars (Facebook)",
-   "version": "1.1.737",
+   "version": "1.1.738",
    "minimum_chrome_version": "4.0"
 }

@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.737
+// @version     1.1.738
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.737',
+  version: '1.1.738',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -722,7 +722,7 @@ var mastheadElt;                // Masthead content
 var statsrowElt;                // statsrow content
 var menubarElt;                 // menubar content
 var popupfodderElt;             // popupfodder Element
-var cash;                       // Cash array of values by city
+var cashElt;                    // Cash array of values by city
 var healthElt, health;          // Health DOM element and value
 var maxHealthElt, maxHealth;    // Maximum health DOM element and value
 var energyElt, energy;          // Energy DOM element and value
@@ -1818,7 +1818,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // If the user has chosen to reset timers on startup
   if (isGMChecked('autoResetTimers')) {
-    resetTimers(0);
+    resetTimers(false);
   }
 
   // This line is optional, but it makes the menu display faster.
@@ -1989,18 +1989,18 @@ function doAutoPlay () {
   if (running && !maxed && isGMChecked('buildArmor') && !timeLeftGM('buildArmorTimer')) {
     if (buildItem(cityArmor, GM_getValue('buildArmorId',1), 13)) return;
   }
-  
+
   // Player updates
   if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
   }
 
   // Ask for help on Crew Collections
-  if (running && !maxed && isGMChecked('autoAskHelponCC') && !timeLeftGM('autoAskHelponCCTimer')) {  
+  if (running && !maxed && isGMChecked('autoAskHelponCC') && !timeLeftGM('autoAskHelponCCTimer')) {
     DEBUG('Going to ask for help on Crew Collections.');
     if (autoAskHelponCC()) return;
   }
-  
+
   // Ask for Help on Moscow Tier
   if (running && !maxed && parseInt(GM_getValue('selectMoscowTier'))  && !timeLeftGM('AskforHelpMoscowTimer')) {
     DEBUG('going to Moscow for Ask for Help-job');
@@ -2057,8 +2057,8 @@ function doAutoPlay () {
   // Auto-Safehouse (aka Crime Spree now)
   if (running && !maxed && isGMChecked('autoSafehouse') && hasHome) {
     if (autoSafehouse()) return;
-  }    
-  
+  }
+
   // auto-heal area
 //  DEBUG('  entering auto-heal ') ;
   if (running &&
@@ -2331,17 +2331,17 @@ function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
     if (!askResult) {
-      addToLog('warning Icon', 'Unable to Ask for Help on Crew Collections.');      
+      addToLog('warning Icon', 'Unable to Ask for Help on Crew Collections.');
     }
   };
-  
+
   // Go to the Inventory tab.
   if (!onInventoryTab() && !onCollectionsTab()) {
     Autoplay.fx = function() { doAskFunction(goInventoryNav()); };
     Autoplay.start();
     return true;
   }
- 
+
   // Go to the Collections tab.
   if (!onCollectionsTab()) {
     Autoplay.fx = function() { doAskFunction(goCollectionsNav()); };
@@ -2352,17 +2352,17 @@ function autoAskHelponCC(){
   DEBUG('Since we\'re here we must be on the Collections Page.');
   var helpButtons;
   var numButtons;
-  
+
   helpButtons = $x('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);
   numButtons = helpButtons.length;
   DEBUG('Ask for Help on Crew Collections - '+numButtons+' found.');
-  
+
   if(numButtons>0){
-    var askHelpFriends = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);    
+    var askHelpFriends = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);
     if (askHelpFriends) {
       addToLog('info Icon', 'Clicked to Ask for Help on Crew Collection.');
-      clickAction = 'crew collection';      
-      clickElement(askHelpFriends);      
+      clickAction = 'crew collection';
+      clickElement(askHelpFriends);
     return true;
     }
   } else {
@@ -2552,7 +2552,7 @@ function miniPack() {
   miniPackForce();
 }
 function miniPackForce() {
-  if (getHoursTime('miniPackTimer') == 0)
+  if (!timeLeftGM('miniPackTimer'))
     setGMTime('miniPackTimer', '1 hour');
   DEBUG('Redirecting to use mini pack...');
   window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
@@ -3488,15 +3488,15 @@ function logRobResponse(rootElt, resultElt, context) {
     var success = false;
     var targetElt = xpathFirst('.//div[@class="rob_res_target_name"]/a',eltRob);
     var expElt   = xpathFirst('.//div[@class="rob_res_expanded_details_exp"]',eltRob);
-    var cashElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
+    var cashRobElt  = xpathFirst('.//div[@class="rob_res_expanded_details_cash"]',eltRob);
     var itemElt = xpathFirst('.//div[@class="rob_res_expanded_details_item"]',eltRob);
     var user   = linkToString(targetElt, 'user');
     var result = 'Robbed ' + user + ' ';
 
     if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
       success = true;
-      if (cashElt)
-        result += ' with <span class="good">Success</span>, gaining <span class="good">'+ cashElt.innerHTML +'</span> and';
+      if (cashRobElt)
+        result += ' with <span class="good">Success</span>, gaining <span class="good">'+ cashRobElt.innerHTML +'</span> and';
       else
         if (itemElt)
           result += ' with <span class="good">Success</span>, gaining <span class="good">'+ itemElt.innerHTML +'</span> and';
@@ -3522,10 +3522,10 @@ function logRobResponse(rootElt, resultElt, context) {
         needStatUpdate = true;
       }
 
-    if (cashElt && cashElt.innerHTML) {
-      //if (m = /(.*)/.exec(cashElt.innerHTML)) {
-      var cashInt = parseCash(cashElt.innerHTML);
-      var cashLoc = parseCashLoc(cashElt.innerHTML);
+    if (cashRobElt && cashRobElt.innerHTML) {
+      //if (m = /(.*)/.exec(cashRobElt.innerHTML)) {
+      var cashInt = parseCash(cashRobElt.innerHTML);
+      var cashLoc = parseCashLoc(cashRobElt.innerHTML);
       GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + cashInt));
       switch (cashLoc) {
         case NY: GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + cashInt)); break;
@@ -7867,7 +7867,7 @@ function createCashTab () {
   }
   weaponType.selectedIndex = GM_getValue(id, 7);
   weaponType.setAttribute('title', cityWeapons[weaponType.selectedIndex][2]);
-  
+
   // Option to build a armor
   xTop += 25;
   title = 'Check this to build a armor every 24 hours';
@@ -7887,7 +7887,7 @@ function createCashTab () {
   }
   armorType.selectedIndex = GM_getValue(id, 7);
   armorType.setAttribute('title', cityArmor[armorType.selectedIndex][2]);
-    
+
   // Collect Takes
   var xTop = 50;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -7976,14 +7976,14 @@ function createAboutTab() {
   return aboutTab;
 }
 function dateWithin(beginDate,endDate,checkDate) {
-	var b,e,c;
-	b = Date.parse(beginDate);
-	e = Date.parse(endDate);
-	c = Date.parse(checkDate);
-	if((c <= e && c >= b)) {
-		return true;
-	}
-	return false;
+  var b,e,c;
+  b = Date.parse(beginDate);
+  e = Date.parse(endDate);
+  c = Date.parse(checkDate);
+  if((c <= e && c >= b)) {
+    return true;
+  }
+  return false;
 }
 
 function grabToolbarInfo(){
@@ -7998,13 +7998,13 @@ function grabToolbarInfo(){
       var toolbarInfo = JSON.parse(resp.responseText);
       // Info in info.  user_health, user_energy, user_stamina, energy_timestamp, toolbar_energy_timestamp
       // has_toolbar_enery_pack, has_energypack, error
-      
+
       var datNow = new Date();
       var modGMT = 8;  // Default PDT
       datNow.setMilliseconds(0);
       if (dateWithin('11/7/2010 02:00:00 AM','3/13/2011 02:00:00 AM',datNow)) modGMT = 7; //PST
       var timer = toolbarInfo.toolbar_energy_timestamp - (datNow.getTime()/1000) + 3600 * modGMT;
-      
+
       setGMTime('miniPackTimer', timer + ' seconds');
       //addToLog ('info Icon',hours + ':' + minutes + ':' + seconds);
 
@@ -9072,7 +9072,7 @@ function handlePublishing() {
 
         // Collections
         if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
-        
+
         // Moscow Job Help
         if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectMoscowTiercheck', pubElt, skipElt)) return;
 
@@ -9675,7 +9675,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
       '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
       '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
-      '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +      
+      '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
       '<br>&nbsp;&nbsp;autoAskHelponCCTimer: ' + getHoursTime('autoAskHelponCCTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
       '<br>&nbsp;&nbsp;AskforHelpBangkokTimer: ' + getHoursTime('AskforHelpBangkokTimer') +
@@ -9689,34 +9689,37 @@ function showTimers() {
   return;
 }
 
-function resetTimers(popup) {
+function resetTimers(force) {
   // Reset the timers.
   // 3600 : if an hour has passed
   // 1800 : if half an hour has passed
   // 900  : if 15 minutes have passed
   // 300  : if 5 minutes have passed
+  var checkTimer = function(timername, limit) { if (force || timeLeftGM(timername) < limit) GM_setValue(timername, 0); };
+
+  checkTimer('miniPackTimer', 0);
+  checkTimer('wishListTimer', 3600);
+  checkTimer('autoEnforcedTitleTimer', 3600);
+  checkTimer('warTimer', 900);
+  checkTimer('buildCarTimer', 900);
+  checkTimer('buildWeaponTimer', 900);
+  checkTimer('buildArmorTimer', 900);
+  checkTimer('takeHourLas Vegas', 300);
+  checkTimer('takeHourBangkok', 300);
+  checkTimer('takeHourCuba', 300);
+  checkTimer('takeHourMoscow', 300);
+  checkTimer('takeHourNew York', 300);
+  checkTimer('dailyChecklistTimer', 3600);
+  checkTimer('autoGiftAcceptTimer', 3600);
+  checkTimer('autoSafehouseTimer', 3600);
+  checkTimer('autoAskHelponCC', 3600);
+  checkTimer('AskforHelpMoscowTimer', 3600);
+  checkTimer('AskforHelpBangkokTimer', 3600);
+  checkTimer('rewardEnergyTimer', 1800);
+  checkTimer('checkVaultTimer', 1800);
+
   addToLog('warning Icon', 'All active timers have been reset.');
-  //if (timeLeftGM('miniPackTimer')<3600) GM_setValue('miniPackTimer', 0);
-  if (timeLeftGM('wishListTimer')<3600) GM_setValue('wishListTimer', 0);
-  if (timeLeftGM('autoEnforcedTitleTimer')<3600) GM_setValue('autoEnforcedTitleTimer', 0);
-  if (timeLeftGM('warTimer')<900) GM_setValue('warTimer', 0);
-  if (timeLeftGM('buildCarTimer')<900) GM_setValue('buildCarTimer', 0);
-  if (timeLeftGM('buildWeaponTimer')<900) GM_setValue('buildWeaponTimer', 0);
-  if (timeLeftGM('buildArmorTimer')<900) GM_setValue('buildArmorTimer', 0);
-  if (timeLeftGM('takeHourLas Vegas')<300) GM_setValue('takeHourLas Vegas', 0);
-  if (timeLeftGM('takeHourBangkok')<300) GM_setValue('takeHourBangkok', 0);
-  if (timeLeftGM('takeHourCuba')<300) GM_setValue('takeHourCuba', 0);
-  if (timeLeftGM('takeHourMoscow')<300) GM_setValue('takeHourMoscow', 0);
-  if (timeLeftGM('takeHourNew York')<300) GM_setValue('takeHourNew York', 0);
-  if (timeLeftGM('dailyChecklistTimer')<3600) GM_setValue('dailyChecklistTimer', 0);
-  if (timeLeftGM('autoGiftAcceptTimer')<3600) GM_setValue('autoGiftAcceptTimer', 0);
-  if (timeLeftGM('autoSafehouseTimer')<3600) GM_setValue('autoSafehouseTimer', 0);  
-  if (timeLeftGM('autoAskHelponCC')<3600) GM_setValue('autoAskHelponCC', 0);
-  if (timeLeftGM('AskforHelpMoscowTimer')<3600) GM_setValue('AskforHelpMoscowTimer', 0);
-  if (timeLeftGM('AskforHelpBangkokTimer')<3600) GM_setValue('AskforHelpBangkokTimer', 0);
-  if (timeLeftGM('rewardEnergyTimer')<1800) GM_setValue('rewardEnergyTimer', 0);
-  if (timeLeftGM('checkVaultTimer')<1800) GM_setValue('checkVaultTimer', 0);
-  if (popup) {
+  if (force) {
     alert('All active timers have been reset.');
     // Restart the timers.
     Autoplay.delay = 150;
@@ -10290,7 +10293,7 @@ function quickBank(bankCity, amount) {
       bankCity = city;
       byUser = true;
     }
-    var cashElt = document.getElementById('user_cash_' + cities[bankCity][CITY_ALIAS]);
+    cashElt = document.getElementById('user_cash_' + cities[bankCity][CITY_ALIAS]);
     if (cashElt)
       amount = parseCash(cashElt.innerHTML);
     else
@@ -10838,7 +10841,7 @@ function jobMastery(element, newJobs) {
       var thisJobRow = getJobRow(missions[i][MISSION_NAME]);
       if (thisJobRow) {
         var masteryLevel = getJobMastery(thisJobRow, newJobs);
-        DEBUG('Masterylevel '+missions[i][MISSION_NAME]+' : '+masteryLevel);        
+        DEBUG('Masterylevel '+missions[i][MISSION_NAME]+' : '+masteryLevel);
         if ( (isGMChecked('skipfight') && !isJobFight(thisJobRow) ) || !isGMChecked('skipfight') ) {
           tierPercent += masteryLevel;
           jobCount++;
@@ -10847,11 +10850,11 @@ function jobMastery(element, newJobs) {
             firstFound = true;
             firstUnmastered = i;
             DEBUG('firstUnmastered job is '+missions[i][MISSION_NAME]);
-          }  
+          }
         }
       }
     }
-  }  
+  }
 
   if (jobCount > 0) {
     tierPercent = Math.floor(tierPercent / jobCount);
@@ -10993,14 +10996,14 @@ function customizeVegasJobs() {
           DEBUG('Required Energy: ' +reqNrg+' - Current Energy: '+energy+'. Skipping');
         }
       }
-      
+
       // Skip locked jobs and optional fight jobs - more debugging since it seems to cause some troubles
       if(isJobLocked(currentJob) || skipCurrentJob || ( isGMChecked('skipfight') && isJobFight(currentJob) ) ) {
-        if(isJobLocked(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : locked.');        
-        if(skipCurrentJob) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : lack of energy/stamina.');        
-        if(isGMChecked('skipfight') && isJobFight(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : skipping LV fight jobs.');        
-      }  
-      else availableJobs[city][currentTab].push(jobMatch);          
+        if(isJobLocked(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : locked.');
+        if(skipCurrentJob) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : lack of energy/stamina.');
+        if(isGMChecked('skipfight') && isJobFight(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : skipping LV fight jobs.');
+      }
+      else availableJobs[city][currentTab].push(jobMatch);
     }
 
     // Skip this for jobs without jobCost
@@ -12369,7 +12372,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Automatically share wishlist: <strong>' + showIfUnchecked(GM_getValue('autoShareWishlist')) + '</strong><br>' +
         '&nbsp;&nbsp;Hour interval for sharing wishlist: <strong>' + GM_getValue('autoShareWishlistTime') + '</strong><br>' +
         'Accept mafia invitations: <strong>'+ showIfUnchecked(GM_getValue('acceptMafiaInvitations')) + '</strong><br>' +
-        'Automatically ask for Help on Crew Collections: <strong>'+ showIfUnchecked(GM_getValue('autoAskHelponCC')) + '</strong><br>' +        
+        'Automatically ask for Help on Crew Collections: <strong>'+ showIfUnchecked(GM_getValue('autoAskHelponCC')) + '</strong><br>' +
         'Automatically Help on Jobs: <strong>' + showIfUnchecked(GM_getValue('autoHelp')) + '</strong><br>' +
         'Automatically Help on Wars: <strong>' + showIfUnchecked(GM_getValue('autoWarHelp')) + '</strong><br>' +
         'Automatically Help on Burners: <strong>' + showIfUnchecked(GM_getValue('autoBurnerHelp')) + '</strong><br>' +
@@ -12530,7 +12533,7 @@ BrowserDetect.init();
         'Build Weapons: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Build Armor: <strong>' + showIfUnchecked(GM_getValue('buildArmor')) + '</strong><br>' +
-        '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +       
+        '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -12822,8 +12825,7 @@ function parsePlayerUpdates(messagebox) {
     // Help requested by a fellow mafia member.
     var userText = RegExp.$1;
     //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
-    elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_item")]', messagebox);
-    if (!elt) elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_initial")]', messagebox);
+    elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_item") or contains(@onclick, "action=cs_help_initial")]', messagebox);
     if (elt) {
       // Help immediately.
       Autoplay.fx = function() {
@@ -13741,7 +13743,6 @@ function onPropertyNav() {
   if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2" or @id="propertyV2Help"]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13750,7 +13751,6 @@ function onProfileNav() {
   if (xpathFirst('.//li[contains(@class, "tab_off")]//a[contains(., "Achievements")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13759,7 +13759,6 @@ function onMyMafiaNav() {
   if (xpathFirst('.//li[contains(@class, "tab_first")]//a[contains(., "Recruit")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13768,7 +13767,6 @@ function onFightTab() {
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Fight")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13777,7 +13775,6 @@ function onHitlistTab() {
   if (xpathFirst('.//table[@class="hit_list"]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -14056,18 +14053,18 @@ function goJobTab(tabno) {
                    'contains(@onclick, "&story_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
-  
-  if (!elt) {    
+
+  if (!elt) {
     elt = xpathFirst('.//li[@id="tab_' + tabno + '"]//span[contains(text(), "Locked")]',innerPageElt);
     if(elt) {
-      addToLog('warning Icon', 'Job bar ' + barno + ', tab ' + tabno + ' is LOCKED. AutoMission disabled');      
+      addToLog('warning Icon', 'Job bar ' + barno + ', tab ' + tabno + ' is LOCKED. AutoMission disabled');
       GM_setValue('autoMission', 0);
     } else {
       addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
     }
     return false;
   }
-   
+
   clickElement(elt);
   DEBUG('Clicked to go to job tab ' + tabno + '.');
   return true;
@@ -15089,12 +15086,12 @@ function logJSONResponse(autoplay, response, action, context) {
     if (action.indexOf('icecheck') == -1) DEBUG(responseText);
 
     // Analyze money related responses (collect take, check vault, deposit and withdraw)
-    var cityCashElt, cashLeft, acctBalance;
+    var cashLeft, acctBalance;
     var respJSON, respData;
     if (action == 'collect take' || action == 'check vault' || action == 'quick deposit' || action == 'quick withdraw') {
       if (!isNaN(context)) {
         context = parseInt(context);
-        cityCashElt = document.getElementById('user_cash_' + cities[context][CITY_ALIAS]);
+        cashElt = document.getElementById('user_cash_' + cities[context][CITY_ALIAS]);
       }
 
       respJSON = JSON.parse(responseText);
@@ -15125,8 +15122,8 @@ function logJSONResponse(autoplay, response, action, context) {
       }
       // Attempt to correct the displayed cash value
       if (cashLeft != null) {
-        if (cityCashElt)
-          cityCashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
+        if (cashElt)
+          cashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
         cities[context][CITY_CASH] = cashLeft;
       }
     }
@@ -15482,13 +15479,13 @@ function logResponse(rootElt, action, context) {
           // below string is current for LV job help
           if(!elt) {
             elt = xpathFirst('.//div[@class="social_job"]//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(.,"Ask for Help")]');
-            if(elt){ 
-              parentElt = elt.parentNode;              
+            if(elt){
+              parentElt = elt.parentNode;
               DEBUG(parentElt.innerHTML.untag());
               if(parentElt.innerHTML.indexOf("social_job_disabled")==-1) {
                 DEBUG("Ask for Help Button seems disabled - Not clicking");
                 elt = undefined;
-              }                
+              }
             } else {
               elt = undefined;
             }
@@ -15856,10 +15853,10 @@ function logResponse(rootElt, action, context) {
     case 'buy property':
       addToLog('info Icon', inner);
       break;
-      
+
     case 'crew collection':
       addToLog('info Icon', inner);
-      break;  
+      break;
 
     case 'build item':
       var timerName = 'buildCarTimer';
