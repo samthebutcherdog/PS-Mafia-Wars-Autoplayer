@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.734
+// @version     1.1.735
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.734',
+  version: '1.1.735',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2992,7 +2992,7 @@ function currentJobTab() {
   return parseInt(elt.getAttribute('onclick').split('tab=')[1].split("'")[0]);
 }
 
-    /// current Job Tab path
+// current Job Tab path
 function currentJobTabPath() {
   var tst = null ;
   var elt = xpathFirst('.//div[contains(@class, "path_on")]//a', innerPageElt);
@@ -10838,16 +10838,20 @@ function jobMastery(element, newJobs) {
       var thisJobRow = getJobRow(missions[i][MISSION_NAME]);
       if (thisJobRow) {
         var masteryLevel = getJobMastery(thisJobRow, newJobs);
-        tierPercent += masteryLevel;
-        jobCount++;
-        // Get the first unmastered job on this tier
-        if (!firstFound && masteryLevel < 100) {
-          firstFound = true;
-          firstUnmastered = i;
+        DEBUG('Masterylevel '+missions[i][MISSION_NAME]+' : '+masteryLevel);        
+        if ( (isGMChecked('skipfight') && !isJobFight(thisJobRow) ) || !isGMChecked('skipfight') ) {
+          tierPercent += masteryLevel;
+          jobCount++;
+          // Get the first unmastered job on this tier
+          if (!firstFound && masteryLevel < 100) {
+            firstFound = true;
+            firstUnmastered = i;
+            DEBUG('firstUnmastered job is '+missions[i][MISSION_NAME]);
+          }  
         }
       }
     }
-  }
+  }  
 
   if (jobCount > 0) {
     tierPercent = Math.floor(tierPercent / jobCount);
@@ -10864,6 +10868,7 @@ function jobMastery(element, newJobs) {
   if (currentJobMastered || jobPercentComplete == -1) {
     var jobList = getSavedList('jobsToDo');
     if (jobList.length == 0) {
+      DEBUG("There are no more jobs in the to-do list.");
       if (currentJobMastered) addToLog('info Icon', 'You have mastered <span class="job">' + currentJob + '</span>.');
       else addToLog('info Icon', 'Job <span class="job">' + currentJob + '</span> is not available.');
       if (tierPercent == 100) {
@@ -14051,9 +14056,7 @@ function goJobTab(tabno) {
                    'contains(@onclick, "&story_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
-
-  DEBUG(elt.innerHTML);
-
+  
   if (!elt) {
     addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
     return false;
