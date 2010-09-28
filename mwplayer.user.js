@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.736
+// @version     1.1.737
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.736',
+  version: '1.1.737',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9696,7 +9696,7 @@ function resetTimers(popup) {
   // 900  : if 15 minutes have passed
   // 300  : if 5 minutes have passed
   addToLog('warning Icon', 'All active timers have been reset.');
-  if (timeLeftGM('miniPackTimer')<3600) GM_setValue('miniPackTimer', 0);
+  //if (timeLeftGM('miniPackTimer')<3600) GM_setValue('miniPackTimer', 0);
   if (timeLeftGM('wishListTimer')<3600) GM_setValue('wishListTimer', 0);
   if (timeLeftGM('autoEnforcedTitleTimer')<3600) GM_setValue('autoEnforcedTitleTimer', 0);
   if (timeLeftGM('warTimer')<900) GM_setValue('warTimer', 0);
