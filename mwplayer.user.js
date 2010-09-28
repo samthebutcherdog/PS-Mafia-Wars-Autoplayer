@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.735
+// @version     1.1.736
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.735',
+  version: '1.1.736',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14057,10 +14057,17 @@ function goJobTab(tabno) {
                    'contains(@onclick, "&episode_tab=' + tabno + '") or ' +
                    'contains(@onclick, "&tab=' + tabno + '")]', innerPageElt);
   
-  if (!elt) {
-    addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
+  if (!elt) {    
+    elt = xpathFirst('.//li[@id="tab_' + tabno + '"]//span[contains(text(), "Locked")]',innerPageElt);
+    if(elt) {
+      addToLog('warning Icon', 'Job bar ' + barno + ', tab ' + tabno + ' is LOCKED. AutoMission disabled');      
+      GM_setValue('autoMission', 0);
+    } else {
+      addToLog('warning Icon', 'BUG DETECTED: Can\'t find job bar ' + barno + ', tab ' + tabno + ' link to click. Currently on job bar ' + currentBar + ', tab ' + currentTab + '.');
+    }
     return false;
   }
+   
   clickElement(elt);
   DEBUG('Clicked to go to job tab ' + tabno + '.');
   return true;
