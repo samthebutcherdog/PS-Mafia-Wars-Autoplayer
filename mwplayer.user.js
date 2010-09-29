@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.738
+// @version     1.1.739
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.738',
+  version: '1.1.739',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1067,8 +1067,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Full Body Armor ', 36, 'Requires 38 armor parts | 47 attack, 40 defense, +1 attack, +1 defense'],
     ['MNU Suit', 37, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
     ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
-  ); 
-  
+  );
+
   // Las Vegas vault levels
   var vaultLevels = new Array (
     ['Vault handling disabled', 0],
@@ -1952,6 +1952,13 @@ function doAutoPlay () {
     }
   }
 
+  // Check if we tried firing the minipack
+  if (GM_getValue('miniPackFired', false)) {
+    GM_setValue('miniPackFired', false);
+    // Fetch Toolbar Info
+    grabToolbarInfo();
+  }
+
   // Click attack if on warNav
   if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
@@ -2326,7 +2333,6 @@ function autoHeal() {
   return true;
 }
 
-
 function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
@@ -2371,7 +2377,6 @@ function autoAskHelponCC(){
   }
   return;
 }
-
 
 function AskforHelp(hlpCity) {
   // Common function
@@ -2554,6 +2559,7 @@ function miniPack() {
 function miniPackForce() {
   if (!timeLeftGM('miniPackTimer'))
     setGMTime('miniPackTimer', '1 hour');
+  GM_setValue('miniPackFired', true);
   DEBUG('Redirecting to use mini pack...');
   window.location.replace('http://toolbar.zynga.com/click.php?to=mwgamestatsplaynow');
 }
@@ -4482,10 +4488,10 @@ function saveDefaultSettings() {
   GM_setValue('fightClanName', defaultClans.join('\n'));
   GM_setValue('hitmanClanName', defaultClans.join('\n'));
 
-  GM_setValue(randomFightLocations,'10000');
-  GM_setValue(randomRobLocations,'10000');
-  GM_setValue(randomHitmanLocations,'10000');
-  GM_setValue(randomSpendModes,'1000');
+  GM_setValue('randomFightLocations','10000');
+  GM_setValue('randomRobLocations','10000');
+  GM_setValue('randomHitmanLocations','10000');
+  GM_setValue('randomSpendModes','1000');
 
   GM_setValue('robLocation', NY);
   GM_setValue('selectStaminaKeep', 0);
@@ -7987,7 +7993,7 @@ function dateWithin(beginDate,endDate,checkDate) {
 }
 
 function grabToolbarInfo(){
-  if (!gvar.isGreaseMonkey) return;
+  if (!gvar.isGreaseMonkey) return false;
   GM_xmlhttpRequest({
     method: 'GET',
     url: 'http://toolbar.zynga.com/game_stats_proxy.php?src=mw',
@@ -7996,6 +8002,19 @@ function grabToolbarInfo(){
       if (resp.status != 200) return;
 
       var toolbarInfo = JSON.parse(resp.responseText);
+      DEBUG('Toolbar response: ' + resp.responseText);
+      if (!toolbarInfo || toolbarInfo.error) {
+        if (window.confirm('Error retrieving miniPack data, probably because it\s the first time you are trying to fire the miniPack in this browser/-profile.\n\n' +
+                           'Do you want MWAP to create the necessary cookies for you? If not, you have to install the Zynga Toolbar.\nPS: For this to work, ' +
+                           'you need to allow popups in your browser, and wait for ca. 20secs after confirming this dialog before closing the popup.')) {
+          function openSinglePopup(strUrl) { window.open(strUrl,"toolbar","resizable=yes,scrollbars=yes,status=yes"); }
+          window.setTimeout(function(){openSinglePopup('http://toolbar.zynga.com/game_iframe_proxy.php?playing=true');},1000);
+          window.setTimeout(function(){openSinglePopup('http://toolbar.zynga.com/game_iframe_proxy.php');},5000);
+        }
+        // abort any time changes
+        return;
+      }
+
       // Info in info.  user_health, user_energy, user_stamina, energy_timestamp, toolbar_energy_timestamp
       // has_toolbar_enery_pack, has_energypack, error
 
@@ -8595,9 +8614,9 @@ function handleModificationTimer() {
 
   if(new_header){
     var mastheadElt =  xpathFirst('//div[@class="header_top_row"]');
-    var elt = mastheadElt;
+    //var elt = mastheadElt;
   } else {
-    var elt, mastheadElt = document.getElementById('mw_masthead');
+    var mastheadElt = document.getElementById('mw_masthead');
   }
   if (!mastheadElt || !mastheadElt.scrollWidth || !refreshGlobalStats()) {
     handleUnexpectedPage();
@@ -9695,7 +9714,7 @@ function resetTimers(force) {
   // 1800 : if half an hour has passed
   // 900  : if 15 minutes have passed
   // 300  : if 5 minutes have passed
-  var checkTimer = function(timername, limit) { if (force || timeLeftGM(timername) < limit) GM_setValue(timername, 0); };
+  var checkTimer = function(timername, limit) { if (force || timeLeftGM(timername) < limit) setGMTime(timername, 0); };
 
   checkTimer('miniPackTimer', 0);
   checkTimer('wishListTimer', 3600);
@@ -9712,7 +9731,7 @@ function resetTimers(force) {
   checkTimer('dailyChecklistTimer', 3600);
   checkTimer('autoGiftAcceptTimer', 3600);
   checkTimer('autoSafehouseTimer', 3600);
-  checkTimer('autoAskHelponCC', 3600);
+  checkTimer('autoAskHelponCCTimer', 3600);
   checkTimer('AskforHelpMoscowTimer', 3600);
   checkTimer('AskforHelpBangkokTimer', 3600);
   checkTimer('rewardEnergyTimer', 1800);
@@ -9949,7 +9968,7 @@ function customizeMasthead() {
   // Change help instructions
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
 
-  if(new_header){
+  /*if(new_header){
     allHelpMenus = document.evaluate("//li[@class='dropdown divider']",document,null,XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,null);
     helpMenu = allHelpMenus.snapshotItem(2);
     helpMenu.innerHTML =
@@ -10010,72 +10029,77 @@ function customizeMasthead() {
     lobjAutoPlay.innerHTML = '<a id="autoPlay">Settings</a>';
     lobjAutoPlay.addEventListener('click', toggleSettings, false);
     linklist.insertBefore(lobjAutoPlay, linklist.firstChild);
-  } else {
-    var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
-    titleElt.innerHTML = "PS MWAP";
-    //titleElt.style.width= "115px";
-    titleElt.parentNode.parentNode.parentNode.style.width= "120px";
-    titleElt.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
-    titleElt.parentNode.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
-    var helpMenu = xpathFirst('.//div[@id="instruction_menu"]', helpElt);
-    helpMenu.style.width = "200px";
-    helpMenu.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
-                       '<div class="sexy_destination middle"><b>Downloads</b></div> ' +
-                       '<a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
-                       '</a> ' +
-                       '<a href="https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
-                       '</a> ' +
-                       '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Revert to Previous</div> ' +
-                       '</a> ' +
-                       '<div class="sexy_destination middle"><b>Websites</b></div> ' +
-                       '<a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts Chat</div> ' +
-                       '</a>' +
-                       '<a href="http://www.playerscripts.com/" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts</div> ' +
-                       '</a>' +
-                       '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Zolli Forums</div> ' +
-                       '</a>' +
-                       '<div class="sexy_destination middle"><b>Bookmarklets</b></div> ' +
-                       '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Farunsmafiascripts.googlecode.com%2Ffiles%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
-                       '</a> ' +
-                       '<a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
-                       '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.08</div> ' +
-                       '</a> ' +
-                       '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
+  } else {*/
+  var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
+  titleElt.innerHTML = "PS MWAP";
+  //titleElt.style.width= "115px";
+  titleElt.parentNode.parentNode.parentNode.style.width= "120px";
+  titleElt.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
+  titleElt.parentNode.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
+  var helpMenu = xpathFirst('.//div[@id="instruction_menu"]', helpElt);
+  helpMenu.style.width = "200px";
+  helpMenu.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
+                     '<div class="sexy_destination middle"><b>Downloads</b></div> ' +
+                     '<a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;For Firefox</div> ' +
+                     '</a> ' +
+                     '<a href="https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap" target="_blank"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;For Chrome</div> ' +
+                     '</a> ' +
+                     '<a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;Revert to Previous</div> ' +
+                     '</a> ' +
+                     '<div class="sexy_destination middle"><b>Websites</b></div> ' +
+                     '<a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts Chat</div> ' +
+                     '</a>' +
+                     '<a href="http://www.playerscripts.com/" target="_blank"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;PlayerScripts</div> ' +
+                     '</a>' +
+                     '<a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;Zolli Forums</div> ' +
+                     '</a>' +
+                     '<div class="sexy_destination middle"><b>Bookmarklets</b></div> ' +
+                     '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Farunsmafiascripts.googlecode.com%2Ffiles%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
+                     '</a> ' +
+                     '<a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.08</div> ' +
+                     '</a> ' +
+                     '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
-    // Check Las Vegas Vault (PS MWAP menu)
-    var lobjcheckVault = makeElement('a', null, {'id':'checkVault'});
-    lobjcheckVault.innerHTML = '<div class="sexy_destination middle"><span id="checkVault">Check Las Vegas Vault</span></div>';
-    lobjcheckVault.addEventListener('click', checkVaultStatus, false);
-    helpMenu.insertBefore(lobjcheckVault, helpMenu.firstChild);
+  // Check miniPack status (PS MWAP menu)
+  var lobjcheckPack = makeElement('a', null, {'id':'checkPack'});
+  lobjcheckPack.innerHTML = '<div class="sexy_destination middle"><span id="checkPack">Check miniPack status</span></div>';
+  lobjcheckPack.addEventListener('click', grabToolbarInfo, false);
+  helpMenu.insertBefore(lobjcheckPack, helpMenu.firstChild);
 
-    // Reset Timers (PS MWAP menu)
-    var lobjresetTimers = makeElement('a', null, {'id':'resetTimers'});
-    lobjresetTimers.innerHTML = '<div class="sexy_destination middle"> ' +
-                           '  <span id="resetTimers">Reset Timers</span></div>';
-    lobjresetTimers.addEventListener('click', resetTimers, false);
-    helpMenu.insertBefore(lobjresetTimers, helpMenu.firstChild);
-    // Show Timers (PS MWAP menu)
-    var lobjshowTimers = makeElement('a', null, {'id':'showTimers'});
-    lobjshowTimers.innerHTML = '<div class="sexy_destination middle"> ' +
-                           '  <span id="showTimers">Show Timers</span></div>';
-    lobjshowTimers.addEventListener('click', showTimers, false);
-    helpMenu.insertBefore(lobjshowTimers, helpMenu.firstChild);
+  // Check Las Vegas Vault (PS MWAP menu)
+  var lobjcheckVault = makeElement('a', null, {'id':'checkVault'});
+  lobjcheckVault.innerHTML = '<div class="sexy_destination middle"><span id="checkVault">Check Las Vegas Vault</span></div>';
+  lobjcheckVault.addEventListener('click', checkVaultStatus, false);
+  helpMenu.insertBefore(lobjcheckVault, helpMenu.firstChild);
 
-    // Settings Link (PS MWAP menu)
-    var lobjAutoPlay = makeElement('a', null, {'id':'autoPlay'});
-    lobjAutoPlay.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
-                           '<div class="sexy_destination middle"> ' +
-                           '  <span id="autoPlay">Settings</span></div>';
-    lobjAutoPlay.addEventListener('click', toggleSettings, false);
-    helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
-  }
+  // Reset Timers (PS MWAP menu)
+  var lobjresetTimers = makeElement('a', null, {'id':'resetTimers'});
+  lobjresetTimers.innerHTML = '<div class="sexy_destination middle"> ' +
+                         '  <span id="resetTimers">Reset Timers</span></div>';
+  lobjresetTimers.addEventListener('click', resetTimers, false);
+  helpMenu.insertBefore(lobjresetTimers, helpMenu.firstChild);
+  // Show Timers (PS MWAP menu)
+  var lobjshowTimers = makeElement('a', null, {'id':'showTimers'});
+  lobjshowTimers.innerHTML = '<div class="sexy_destination middle"> ' +
+                         '  <span id="showTimers">Show Timers</span></div>';
+  lobjshowTimers.addEventListener('click', showTimers, false);
+  helpMenu.insertBefore(lobjshowTimers, helpMenu.firstChild);
+
+  // Settings Link (PS MWAP menu)
+  var lobjAutoPlay = makeElement('a', null, {'id':'autoPlay'});
+  lobjAutoPlay.innerHTML = '<a><div class="sexy_destination top" style="height: 0px; padding: 0px"></div></a>' +
+                         '<div class="sexy_destination middle"> ' +
+                         '  <span id="autoPlay">Settings</span></div>';
+  lobjAutoPlay.addEventListener('click', toggleSettings, false);
+  helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
 
   // Settings Link main page
   menuElt.appendChild(document.createTextNode(' | '));
@@ -10122,12 +10146,12 @@ function customizeStats() {
   if (!nrgElt)
     nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', statsrowElt);
   if (nrgElt && !nrgLinkElt) {
-    grabToolbarInfo(); //Fetch Toolbar Info
     var timeLeftPack = getHoursTime('miniPackTimer');
-    if (timeLeftPack == 0) var miniPackTitle = 'Mini-Pack available now.';
-    else if (timeLeftPack == undefined) {
+    if (timeLeftPack == 0 || timeLeftPack == undefined) {
+      var miniPackTitle = 'Mini-Pack available now (or timer is undefined).';
+    /*} else if (timeLeftPack == undefined) {
       var miniPackTitle = 'Mini-Pack Timer has been reset.';
-      setGMTime('miniPackTimer', '8 hours');
+      setGMTime('miniPackTimer', '8 hours');*/
     } else var miniPackTitle = timeLeftPack + ' until Mini-Pack is available.';
     miniPackTitle += ' Click to attempt to fire immediately.';
     nrgElt.style.color="#FF0000";
