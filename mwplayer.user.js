@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.739
+// @version     1.1.740
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.739',
+  version: '1.1.740',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2333,6 +2333,7 @@ function autoHeal() {
   return true;
 }
 
+
 function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
@@ -2377,6 +2378,7 @@ function autoAskHelponCC(){
   }
   return;
 }
+
 
 function AskforHelp(hlpCity) {
   // Common function
@@ -3502,6 +3504,7 @@ function logRobResponse(rootElt, resultElt, context) {
     if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
       success = true;
       if (cashRobElt)
+
         result += ' with <span class="good">Success</span>, gaining <span class="good">'+ cashRobElt.innerHTML +'</span> and';
       else
         if (itemElt)
@@ -9739,6 +9742,27 @@ function resetTimers(force) {
 
   addToLog('warning Icon', 'All active timers have been reset.');
   if (force) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     alert('All active timers have been reset.');
     // Restart the timers.
     Autoplay.delay = 150;
@@ -10101,6 +10125,7 @@ function customizeMasthead() {
   lobjAutoPlay.addEventListener('click', toggleSettings, false);
   helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
 
+
   // Settings Link main page
   menuElt.appendChild(document.createTextNode(' | '));
   var lobjAutoPlay = makeElement('span', menuElt, {'id':'autoPlay'});
@@ -10146,6 +10171,7 @@ function customizeStats() {
   if (!nrgElt)
     nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', statsrowElt);
   if (nrgElt && !nrgLinkElt) {
+
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0 || timeLeftPack == undefined) {
       var miniPackTitle = 'Mini-Pack available now (or timer is undefined).';
@@ -12117,6 +12143,8 @@ function jobLoot(element) {
   // Vegas Loot on jobs
   if (city == LV) {
     var jobResults = xpathFirst('.//div[@class="job_results"]', element);
+
+
     strLoot = '';
     messages = $x('.//img', jobResults);
     numMessages = messages.length;
@@ -12850,6 +12878,7 @@ function parsePlayerUpdates(messagebox) {
     var userText = RegExp.$1;
     //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
     elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_item") or contains(@onclick, "action=cs_help_initial")]', messagebox);
+
     if (elt) {
       // Help immediately.
       Autoplay.fx = function() {
@@ -13767,6 +13796,7 @@ function onPropertyNav() {
   if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2" or @id="propertyV2Help"]', innerPageElt)) {
     return true;
   }
+
   return false;
 }
 
@@ -13775,6 +13805,7 @@ function onProfileNav() {
   if (xpathFirst('.//li[contains(@class, "tab_off")]//a[contains(., "Achievements")]', innerPageElt)) {
     return true;
   }
+
   return false;
 }
 
@@ -13783,6 +13814,7 @@ function onMyMafiaNav() {
   if (xpathFirst('.//li[contains(@class, "tab_first")]//a[contains(., "Recruit")]', innerPageElt)) {
     return true;
   }
+
   return false;
 }
 
@@ -13791,6 +13823,7 @@ function onFightTab() {
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Fight")]', innerPageElt)) {
     return true;
   }
+
   return false;
 }
 
@@ -13799,6 +13832,7 @@ function onHitlistTab() {
   if (xpathFirst('.//table[@class="hit_list"]', innerPageElt)) {
     return true;
   }
+
   return false;
 }
 
@@ -14147,10 +14181,78 @@ function goJob(jobno) {
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow)                    ; tmp = 2 ;} // first 2 are above line broke down
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]') ; tmp = 3 ;} // lv jobs
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=fight_job")]', jobRow)                ; tmp = 4 ;} // i forget :) may not need
-  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]')    ; tmp = 5 ;} // will do LV job fight (first of the 3 fights in list), no logic
-  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
+
+//  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]')    ; tmp = 5 ;} // will do LV job fight (first of the 3 fights in list), no logic
+
+
+  if (!elt) { 
+  // lv fight jobs
+    targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);   
+    numTargets = targetElts.length;
+    DEBUG('Number of Targets Found : '+ numTargets);
+    if(numTargets){    
+
+      // Get the user's criteria for opponents.
+      var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
+      var opponentMafiaMax = parseInt(GM_getValue('fightMafiaMax', 501));
+      
+      // Make any relative adjustments (if enabled).
+      if (GM_getValue('fightLevelMaxRelative', false)) {
+        opponentLevelMax = opponentLevelMax + level;
+      }
+      if (GM_getValue('fightMafiaMaxRelative', false)) {
+        opponentMafiaMax = opponentMafiaMax + mafia;
+      }
+    
+      DEBUG('Only doing the job if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
+      var smallestMafia = opponentMafiaMax;
+      var lowestLevel = opponentLevelMax;
+      var foundOpp = false;
+      for(i=0;i<numTargets;i++){           
+        targetParent = targetElts[i].parentNode.parentNode;
+        parentNoTags = targetParent.innerHTML.untag();       
+        if (parentNoTags.match(/(.+?)\s+(.+?)\s+(.+?)\s+Fight/i)) {          
+          OppName = RegExp.$1;
+          OppSize = RegExp.$2;
+          OppLevel = RegExp.$3;                               
+        } else {
+          OppNameElt = xpathFirst('.//dt[@class="name"]//span[@class="player_data"]', targetParent);   
+          if(OppNameElt) OppName = OppNameElt.innerHTML.untag();          
+          OppSizeElt = xpathFirst('.//dd[@class="group_size"]//span[@class="player_data"]', targetParent);   
+          if(OppSizeElt) OppSize = OppSizeElt.innerHTML.untag();          
+          OppLevelElt = xpathFirst('.//dd[@class="level"]//span[@class="player_data"]', targetParent);   
+          if(OppLevelElt) OppLevel = OppLevelElt.innerHTML.untag();          
+        } 
+        //DEBUG('Name : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
+        if(OppSize < smallestMafia || (OppSize == smallestMafia && OppLevel < lowestLevel)){
+            OppTarget = targetElts[i];
+            OppTargetParent = targetParent;
+            smallestMafia = OppSize;
+            lowestLevel = OppLevel;
+            foundOpp = true;               
+            DEBUG('Switching Target : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
+        } else {
+          DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
+        }  
+      } 
+      if(foundOpp){
+        DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
+        elt=OppTarget;
+      } else {        
+        addToLog('warning Icon', 'Opponents did not qualify ... Going home to find new opponents.');
+        elt=undefined;
+        goHome();
+        return false;
+      }  
+      tmp = 5 ;
+    } else {
+      if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
+    }    
+  }  
+  //if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
 
   //DEBUG(elt.innerHTML);
+
   if (elt) {
     DEBUG(' job string used was =' + tmp );
     clickAction = 'job';
@@ -14161,6 +14263,8 @@ function goJob(jobno) {
   } else {
     return false;
   }
+
+
 }
 
 function goFightNav() {
@@ -15147,6 +15251,7 @@ function logJSONResponse(autoplay, response, action, context) {
       // Attempt to correct the displayed cash value
       if (cashLeft != null) {
         if (cashElt)
+
           cashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
         cities[context][CITY_CASH] = cashLeft;
       }
