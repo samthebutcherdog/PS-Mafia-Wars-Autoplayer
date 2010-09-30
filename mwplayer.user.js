@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.740
+// @version     1.1.741
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.740',
+  version: '1.1.741',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1022,23 +1022,28 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Cars
   var cityCars = new Array (
+    //['Midnight', , 'Requires 10 car parts, 1 special part | 28 attack, 33 defense, +1 defense'],
     ['Sonic Five', 25, 'Requires 12 car parts | 32 attack, 30 defense'],
     ['Random Common Car', 1, 'Requires 10 car parts'],
+    //['Palermo Luxury', , 'Requires 20 car parts, 2 special parts | 36 attack, 35 defense, +5 health'],
     ['General Ulysses', 26, 'Requires 28 car parts| 38 attack, 28 defense'],
     ['Random Rare Car', 2, 'Requires 25 car parts'],
+    //['Sleek', , 'Requires 30 car parts, 3 special parts | 35 attack, 37 defense, +1 attack'],
     ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
     ['CM Santiago R10', 4, 'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
     ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
     ['Rebel 2', 5, 'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +6 stamina'],
     ['Russian Dazatz 45', 6, 'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
-    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
     ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
+    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
     ['Thai XS Max', 8, 'Requires 75 car parts, 2 thai car parts | 45 attack, 35 defense'],
     ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
     ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
     ['Mugati Sport', 13, 'Requires 135 car parts, 1 high tech car part | 35 attack, 51 defense, +3 attack'],
     ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 high tech car parts | 52 attack, 29 defense, +3 defense'],
     ['Day Rider 2K', 27, 'Requires 175 car parts, 1 suspension coil | 45 attack, 50 defense, +1 attack, +1 defense']
+    //['Sportster', , 'Requires 185 car parts, 10 special parts | 52 attack, 46 defense, +3 energy, +3 stamina'],
+    //['Extended Cab 640', , 'Requires 200 car parts, 15 special parts | 53 attack, 55 defense, +3 skill points']
   );
 
   // Weapons build
@@ -1052,7 +1057,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Lazer Guided RPG', 21, 'Requires 63 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
     ['Robber\'s Utility Belt', 22, 'Requires 72 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
     ['Railgun', 23, 'Requires 81 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
-    ['Plasma Rifle', 24, 'Requires 105 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']
+    ['Plasma Rifle', 24, 'Requires 105 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']/*,
+    ['Dirty Trick', , 'Requires 110 weapon parts and 3 special parts | 45 attack, 49 defense, +5 health, +2 stamina'],
+    ['Electric Prod', , 'Requires 115 weapon parts and 6 special parts | 50 attack, 50 defense, +5 health, +2 energy'],
+    ['Hack Blade', , 'Requires 120 weapon parts and 9 special parts | 45 attack, 51 defense, +6 defense'],
+    ['Stun Knuckles', , 'Requires 125 weapon parts and 12 special parts | 52 attack, 48 defense, +6 attack'],
+    ['Wasper Knife', , 'Requires 130 weapon parts and 15 special parts | 51 attack, 51 defense, +4 skill points'],*/
   );
 
   // Armory build CRAIG
@@ -1818,7 +1828,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // If the user has chosen to reset timers on startup
   if (isGMChecked('autoResetTimers')) {
-    resetTimers(false);
+    resetTimers();
   }
 
   // This line is optional, but it makes the menu display faster.
@@ -2333,7 +2343,6 @@ function autoHeal() {
   return true;
 }
 
-
 function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
@@ -2374,11 +2383,10 @@ function autoAskHelponCC(){
     }
   } else {
     DEBUG('No Help on Crew Collection buttons found - Resetting Timer for 4 hours');
-    setGMTime('autoAskHelponCC', '4 hours');
+    setGMTime('autoAskHelponCCTimer', '4 hours');
   }
   return;
 }
-
 
 function AskforHelp(hlpCity) {
   // Common function
@@ -2421,7 +2429,7 @@ function AskforHelp(hlpCity) {
   }
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
-    setGMTime(timerName, '2 hour');
+    setGMTime(timerName, '2 hours');
     addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
     DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
   } else {
@@ -3504,7 +3512,6 @@ function logRobResponse(rootElt, resultElt, context) {
     if(xpathFirst('.//div[@class="rob_res_outcome good"]',eltRob)){
       success = true;
       if (cashRobElt)
-
         result += ' with <span class="good">Success</span>, gaining <span class="good">'+ cashRobElt.innerHTML +'</span> and';
       else
         if (itemElt)
@@ -4466,7 +4473,7 @@ function saveDefaultSettings() {
   GM_setValue('filterLootOpt', 0);
 
   // Energy tab.
-  GM_setValue('estimateJobRatio', '1');
+  GM_setValue('estimateJobRatio', '2');
   GM_setValue('autoEnergyPackForce', 0);
   GM_setValue('autoEnergyPackForcePts', 0);
 
@@ -6990,7 +6997,7 @@ function createEnergyTab() {
   title = 'Estimate the average experience-to-energy ratio of the jobs you will be performing. For example, a job that paid 10 experience points and required 5 energy would have a ratio of 2. Enter 0 if you prefer to have energy packs fire regardless of waste.';
   id = 'estimateJobRatio';
   label.appendChild(document.createTextNode(' Full packs @ ratio '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: #781351;', 'value':GM_getValue('estimateJobRatio', '1'), 'size':'1'});
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':4, 'style':'vertical-align:middle; width: 30px; border: #781351;', 'value':GM_getValue('estimateJobRatio', '2'), 'size':'1'});
   makeElement('br', item, {'class':'hide'});
 
   // Energy packs force
@@ -7995,8 +8002,24 @@ function dateWithin(beginDate,endDate,checkDate) {
   return false;
 }
 
-function grabToolbarInfo(){
-  if (!gvar.isGreaseMonkey) return false;
+function grabToolbarInfo(manually) {
+  // Function for creating the cookies necessary to use miniPacks without installing the Zynga toolbar:
+  var createToolbarCookies = function() {
+    var openSinglePopup = function(strUrl) { window.open(strUrl,"toolbar","resizable=yes,scrollbars=yes,status=yes"); }
+    window.setTimeout(function(){openSinglePopup('http://toolbar.zynga.com/game_iframe_proxy.php?playing=true');},1000);
+    window.setTimeout(function(){openSinglePopup('http://toolbar.zynga.com/game_iframe_proxy.php');},5000);
+  }
+
+  // In case the current browser lacks greasemonkey (chrome):
+  if (!gvar.isGreaseMonkey) {
+    if (manually && window.confirm('Can\'t retrieve Toolbar info with this browser.\n\n' +
+                       'In case the miniPack doesn\'t work here, you could let MWAP create the necessary cookies for you.\nPS: For this to work, ' +
+                       'you need to allow popups in your browser, and wait for ca. 10 secs before closing the popup (after confirming this dialog).')) {
+      createToolbarCookies();
+    }
+    return;
+  }
+
   GM_xmlhttpRequest({
     method: 'GET',
     url: 'http://toolbar.zynga.com/game_stats_proxy.php?src=mw',
@@ -8007,12 +8030,10 @@ function grabToolbarInfo(){
       var toolbarInfo = JSON.parse(resp.responseText);
       DEBUG('Toolbar response: ' + resp.responseText);
       if (!toolbarInfo || toolbarInfo.error) {
-        if (window.confirm('Error retrieving miniPack data, probably because it\s the first time you are trying to fire the miniPack in this browser/-profile.\n\n' +
+        if (window.confirm('Error retrieving Toolbar info, probably because it\s the first time you are trying to fire the miniPack in this browser/-profile.\n\n' +
                            'Do you want MWAP to create the necessary cookies for you? If not, you have to install the Zynga Toolbar.\nPS: For this to work, ' +
-                           'you need to allow popups in your browser, and wait for ca. 20secs after confirming this dialog before closing the popup.')) {
-          function openSinglePopup(strUrl) { window.open(strUrl,"toolbar","resizable=yes,scrollbars=yes,status=yes"); }
-          window.setTimeout(function(){openSinglePopup('http://toolbar.zynga.com/game_iframe_proxy.php?playing=true');},1000);
-          window.setTimeout(function(){openSinglePopup('http://toolbar.zynga.com/game_iframe_proxy.php');},5000);
+                           'you need to allow popups in your browser, and wait for ca. 10 secs before closing the popup (after confirming this dialog).')) {
+          createToolbarCookies();
         }
         // abort any time changes
         return;
@@ -9414,14 +9435,14 @@ function getStaminaGainRate() {
                      GM_getValue('hitmanWinCountInt',0) +
                      GM_getValue('hitmanLossCountInt',0) +
                      GM_getValue('totalRobStamInt',0);
-  if (!expGained || !staminaSpent) return 0;
+  if (!expGained || !staminaSpent) return 2;
 
   return expGained / staminaSpent;
 }
 
 function getEnergyGainRate() {
-  var rate = parseFloat(GM_getValue('estimateJobRatio', '1.0'));
-  return rate? rate : 0;
+  var rate = parseFloat(GM_getValue('estimateJobRatio', '2'));
+  return (!isNaN(rate)) ? rate : 2;
 }
 
 function setFBParams() {
@@ -9711,17 +9732,17 @@ function showTimers() {
   return;
 }
 
-function resetTimers(force) {
+function resetTimers(manually) {
   // Reset the timers.
   // 3600 : if an hour has passed
   // 1800 : if half an hour has passed
   // 900  : if 15 minutes have passed
   // 300  : if 5 minutes have passed
-  var checkTimer = function(timername, limit) { if (force || timeLeftGM(timername) < limit) setGMTime(timername, 0); };
+  var checkTimer = function(timername, limit) { if (manually || timeLeftGM(timername) < limit) setGMTime(timername, 0); };
 
   checkTimer('miniPackTimer', 0);
-  checkTimer('wishListTimer', 3600);
-  checkTimer('autoEnforcedTitleTimer', 3600);
+  checkTimer('wishListTimer', 300);
+  checkTimer('autoEnforcedTitleTimer', 1800);
   checkTimer('warTimer', 900);
   checkTimer('buildCarTimer', 900);
   checkTimer('buildWeaponTimer', 900);
@@ -9731,38 +9752,18 @@ function resetTimers(force) {
   checkTimer('takeHourCuba', 300);
   checkTimer('takeHourMoscow', 300);
   checkTimer('takeHourNew York', 300);
-  checkTimer('dailyChecklistTimer', 3600);
+  checkTimer('dailyChecklistTimer', 900);
   checkTimer('autoGiftAcceptTimer', 3600);
   checkTimer('autoSafehouseTimer', 3600);
   checkTimer('autoAskHelponCCTimer', 3600);
-  checkTimer('AskforHelpMoscowTimer', 3600);
-  checkTimer('AskforHelpBangkokTimer', 3600);
+  checkTimer('AskforHelpMoscowTimer', 1800);
+  checkTimer('AskforHelpBangkokTimer', 1800);
   checkTimer('rewardEnergyTimer', 1800);
-  checkTimer('checkVaultTimer', 1800);
+  checkTimer('checkVaultTimer', 900);
+  checkTimer('tournamentTimer', 300);
 
   addToLog('warning Icon', 'All active timers have been reset.');
-  if (force) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  if (manually) {
     alert('All active timers have been reset.');
     // Restart the timers.
     Autoplay.delay = 150;
@@ -10092,9 +10093,9 @@ function customizeMasthead() {
                      '</a> ' +
                      '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
-  // Check miniPack status (PS MWAP menu)
+  // Grab Toolbar info (PS MWAP menu)
   var lobjcheckPack = makeElement('a', null, {'id':'checkPack'});
-  lobjcheckPack.innerHTML = '<div class="sexy_destination middle"><span id="checkPack">Check miniPack status</span></div>';
+  lobjcheckPack.innerHTML = '<div class="sexy_destination middle"><span id="checkPack">Grab Toolbar info</span></div>';
   lobjcheckPack.addEventListener('click', grabToolbarInfo, false);
   helpMenu.insertBefore(lobjcheckPack, helpMenu.firstChild);
 
@@ -10124,7 +10125,6 @@ function customizeMasthead() {
                          '  <span id="autoPlay">Settings</span></div>';
   lobjAutoPlay.addEventListener('click', toggleSettings, false);
   helpMenu.insertBefore(lobjAutoPlay, helpMenu.firstChild);
-
 
   // Settings Link main page
   menuElt.appendChild(document.createTextNode(' | '));
@@ -10171,7 +10171,6 @@ function customizeStats() {
   if (!nrgElt)
     nrgElt = xpathFirst('.//div[@id="game_stats"]//span[@class="stat_title" and contains(text(),"Energy")]', statsrowElt);
   if (nrgElt && !nrgLinkElt) {
-
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0 || timeLeftPack == undefined) {
       var miniPackTitle = 'Mini-Pack available now (or timer is undefined).';
@@ -12143,8 +12142,6 @@ function jobLoot(element) {
   // Vegas Loot on jobs
   if (city == LV) {
     var jobResults = xpathFirst('.//div[@class="job_results"]', element);
-
-
     strLoot = '';
     messages = $x('.//img', jobResults);
     numMessages = messages.length;
@@ -12878,7 +12875,6 @@ function parsePlayerUpdates(messagebox) {
     var userText = RegExp.$1;
     //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
     elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_item") or contains(@onclick, "action=cs_help_initial")]', messagebox);
-
     if (elt) {
       // Help immediately.
       Autoplay.fx = function() {
@@ -13189,7 +13185,7 @@ function autoWishlist() {
             setGMTime('wishListTimer', shareWishlist + ' hours');
       } else {
         addToLog('warning Icon', 'Unable to share your wishlist, will try later.');
-        setGMTime('wishListTimer', '05:00');
+        setGMTime('wishListTimer', '10:00');
       }
     }
   }
@@ -13796,7 +13792,6 @@ function onPropertyNav() {
   if (xpathFirst('.//*[@name="buy_props" or @id="flash_content_propertiesV2" or @id="propertyV2Help"]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13805,7 +13800,6 @@ function onProfileNav() {
   if (xpathFirst('.//li[contains(@class, "tab_off")]//a[contains(., "Achievements")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13814,7 +13808,6 @@ function onMyMafiaNav() {
   if (xpathFirst('.//li[contains(@class, "tab_first")]//a[contains(., "Recruit")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13823,7 +13816,6 @@ function onFightTab() {
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Fight")]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -13832,7 +13824,6 @@ function onHitlistTab() {
   if (xpathFirst('.//table[@class="hit_list"]', innerPageElt)) {
     return true;
   }
-
   return false;
 }
 
@@ -14184,18 +14175,17 @@ function goJob(jobno) {
 
 //  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]')    ; tmp = 5 ;} // will do LV job fight (first of the 3 fights in list), no logic
 
-
-  if (!elt) { 
+  if (!elt) {
   // lv fight jobs
-    targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);   
+    targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);
     numTargets = targetElts.length;
     DEBUG('Number of Targets Found : '+ numTargets);
-    if(numTargets){    
+    if(numTargets){
 
       // Get the user's criteria for opponents.
       var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
       var opponentMafiaMax = parseInt(GM_getValue('fightMafiaMax', 501));
-      
+
       // Make any relative adjustments (if enabled).
       if (GM_getValue('fightLevelMaxRelative', false)) {
         opponentLevelMax = opponentLevelMax + level;
@@ -14203,52 +14193,52 @@ function goJob(jobno) {
       if (GM_getValue('fightMafiaMaxRelative', false)) {
         opponentMafiaMax = opponentMafiaMax + mafia;
       }
-    
+
       DEBUG('Only doing the job if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
       var smallestMafia = opponentMafiaMax;
       var lowestLevel = opponentLevelMax;
       var foundOpp = false;
-      for(i=0;i<numTargets;i++){           
+      for(i=0;i<numTargets;i++){
         targetParent = targetElts[i].parentNode.parentNode;
-        parentNoTags = targetParent.innerHTML.untag();       
-        if (parentNoTags.match(/(.+?)\s+(.+?)\s+(.+?)\s+Fight/i)) {          
+        parentNoTags = targetParent.innerHTML.untag();
+        if (parentNoTags.match(/(.+?)\s+(.+?)\s+(.+?)\s+Fight/i)) {
           OppName = RegExp.$1;
           OppSize = RegExp.$2;
-          OppLevel = RegExp.$3;                               
+          OppLevel = RegExp.$3;
         } else {
-          OppNameElt = xpathFirst('.//dt[@class="name"]//span[@class="player_data"]', targetParent);   
-          if(OppNameElt) OppName = OppNameElt.innerHTML.untag();          
-          OppSizeElt = xpathFirst('.//dd[@class="group_size"]//span[@class="player_data"]', targetParent);   
-          if(OppSizeElt) OppSize = OppSizeElt.innerHTML.untag();          
-          OppLevelElt = xpathFirst('.//dd[@class="level"]//span[@class="player_data"]', targetParent);   
-          if(OppLevelElt) OppLevel = OppLevelElt.innerHTML.untag();          
-        } 
+          OppNameElt = xpathFirst('.//dt[@class="name"]//span[@class="player_data"]', targetParent);
+          if(OppNameElt) OppName = OppNameElt.innerHTML.untag();
+          OppSizeElt = xpathFirst('.//dd[@class="group_size"]//span[@class="player_data"]', targetParent);
+          if(OppSizeElt) OppSize = OppSizeElt.innerHTML.untag();
+          OppLevelElt = xpathFirst('.//dd[@class="level"]//span[@class="player_data"]', targetParent);
+          if(OppLevelElt) OppLevel = OppLevelElt.innerHTML.untag();
+        }
         //DEBUG('Name : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         if(OppSize < smallestMafia || (OppSize == smallestMafia && OppLevel < lowestLevel)){
             OppTarget = targetElts[i];
             OppTargetParent = targetParent;
             smallestMafia = OppSize;
             lowestLevel = OppLevel;
-            foundOpp = true;               
+            foundOpp = true;
             DEBUG('Switching Target : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         } else {
           DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
-        }  
-      } 
+        }
+      }
       if(foundOpp){
         DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
-      } else {        
+      } else {
         addToLog('warning Icon', 'Opponents did not qualify ... Going home to find new opponents.');
         elt=undefined;
         goHome();
         return false;
-      }  
+      }
       tmp = 5 ;
     } else {
       if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
-    }    
-  }  
+    }
+  }
   //if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
 
   //DEBUG(elt.innerHTML);
@@ -14263,8 +14253,6 @@ function goJob(jobno) {
   } else {
     return false;
   }
-
-
 }
 
 function goFightNav() {
@@ -15251,7 +15239,6 @@ function logJSONResponse(autoplay, response, action, context) {
       // Attempt to correct the displayed cash value
       if (cashLeft != null) {
         if (cashElt)
-
           cashElt.innerHTML = cities[context][CITY_CASH_SYMBOL] + makeCommaValue(cashLeft);
         cities[context][CITY_CASH] = cashLeft;
       }
@@ -15323,7 +15310,7 @@ function logJSONResponse(autoplay, response, action, context) {
 
       // Parse Las Vegas vault data
       case 'check vault':
-        setGMTime('checkVaultTimer', '00:15:00');
+        setGMTime('checkVaultTimer', '00:30:00');
         return false;
         break;
 
@@ -16007,11 +15994,10 @@ function logResponse(rootElt, action, context) {
         addToLog('info Icon', inner);
       } else {
         setGMTime(timerName, '24 hours');
-        if (inner.match(/You built (.+?\.)(.+?)<\/div>/)) {
+        if (inner.match(/You built (.+?)\./)) {
           var log = 'You built <span class="loot">'+ RegExp.$1+'</span>.';
-          if (RegExp.$2.match(/You gained.+&nbsp;(.+?\.)/))
+          if (inner.match(/You gained.+&nbsp;(.+?\.)/))
             log += ' You gained ' + RegExp.$1;
-          //log += '</span>';
           addToLog('lootbag Icon', log);
         }
       }
@@ -16094,12 +16080,13 @@ function handlePopups() {
             || popupInner.indexOf('bank_popup') != -1 // The Bank
             || popupInner.indexOf('vault_popup') != -1 // Las Vegas Vault
             || popupInner.indexOf('xw_controller=challenge') != -1 // Challenges
-            || popupInner.indexOf('chop_build_final') != -1 // Chop Shop/Weapon Depot success popup
+            || popupInner.indexOf('Build Complete') != -1 // Chop Shop/Weapon Depot success popup
             || popupInner.indexOf('id="ChopShopCarousel"') != -1 // Chop Shop/Weapon Depot craft popup
             || popupInner.indexOf('mw_app=slotmachine') != -1 // Slot Machine
             || popupInner.indexOf('id="map_boss_fight"') != -1 // Vegas Boss fights
             || popupInner.indexOf('id="pop_box_map_boss_fight_popup"') != -1 // Boss fights
             || popupInner.indexOf('class="account_settings_title"') != -1 // Account Settings
+            || popupInner.indexOf('TournamentController.nextPage()') != -1 // Tournament Ready to fight popup
             ) {
             continue;
           }
@@ -16145,6 +16132,9 @@ function handlePopups() {
 
           // Get rid of Proceed to Vegas Level 6 popup
           if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
+
+          // Get rid of Your Requests popup
+          if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
 
           /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
@@ -16658,12 +16648,16 @@ function ignoreElement(element) {
   var id;
   if (parentElt) {
     id = parentElt.id;
-    if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1))
+    if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1
+        || id.indexOf('tournament_time_left') != -1 || id.indexOf('tournament_try_again_timer') != -1
+        ))
       return true;
   }
 
   id = element.id;
-  if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1))
+  if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1
+        || id.indexOf('tournament_time_left') != -1 || id.indexOf('tournament_try_again_timer') != -1
+        ))
     return true;
 
   return false;
