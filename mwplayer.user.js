@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.741
+// @version     1.1.742
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.741',
+  version: '1.1.742',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1079,6 +1079,19 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
   );
 
+  // Tournament Classes
+  // Format: long description, short description, min mafia, max xp
+  var tournamentClasses = new Array (
+    ['Flyweight Tournament', 'Flyweight', 1, 200],
+    ['Bantamweight Tournament', 'Bantamweight', 25, 300],
+    ['Featherweight Tournament', 'Featherweight', 50, 400],
+    ['Lightweight Tournament', 'Lightweight', 100, 600],
+    ['Welterweight Tournament', 'Welterweight', 150, 800],
+    ['Middleweight Tournament', 'Middleweight', 250, 932],
+    ['Cruiserweight Tournament', 'Cruiserweight', 350, 1064],
+    ['Heavyweight Tournament', 'Heavyweight', 501, 1200]
+  );
+
   // Las Vegas vault levels
   var vaultLevels = new Array (
     ['Vault handling disabled', 0],
@@ -2076,6 +2089,11 @@ function doAutoPlay () {
     if (autoSafehouse()) return;
   }
 
+  // Auto-Tournament
+  if (running && isGMChecked('autoTournament') && !timeLeftGM('tournamentTimer')) {  // && !maxed
+    if (autoTournament()) return;
+  }
+
   // auto-heal area
 //  DEBUG('  entering auto-heal ') ;
   if (running &&
@@ -2097,8 +2115,8 @@ function doAutoPlay () {
   } else {
 // hide/remove after testing
 //    DEBUG(' autoheal skipped in main loop ');
-    DEBUG('heal skipped, actual stamina:' + stamina +' stamina_Min_heal:'+ GM_getValue('stamina_min_heal') +  ' force heal:' + canForceHeal() );
-    DEBUG('heal skipped, current health:' + health + ' full:' + maxHealth + ' heal when health falls below:' + GM_getValue('healthLevel', 0) );
+    //DEBUG('heal skipped, actual stamina:' + stamina +' stamina_Min_heal:'+ GM_getValue('stamina_min_heal') +  ' force heal:' + canForceHeal() );
+    //DEBUG('heal skipped, current health:' + health + ' full:' + maxHealth + ' heal when health falls below:' + GM_getValue('healthLevel', 0) );
   }
 
 //  DEBUG('after auto-heal  - - X ');
@@ -4538,13 +4556,24 @@ function saveSettings() {
   //Start Save General Tab Settings
   //General Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','burnFirst','featJob'
+    'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','burnFirst','featJob','autoTournament'
   ]);
   //General Tab Settings
-  GM_setValue('r1', document.getElementById('r1').value);
-  GM_setValue('r2', document.getElementById('r2').value);
-  GM_setValue('d1', document.getElementById('d1').value);
-  GM_setValue('d2', document.getElementById('d2').value);
+
+  // Validation of refresh and delay values
+  var minRefresh = parseInt(document.getElementById('r1').value); var maxRefresh = parseInt(document.getElementById('r2').value);
+  var minDelay = parseInt(document.getElementById('d1').value); var maxDelay = parseInt(document.getElementById('d2').value);
+  if (minRefresh > maxRefresh || minRefresh <= maxDelay || minRefresh < 8) {
+    alert('Your refresh values are invalid, they have to be greater than the max delay and at least 8s.');
+    return;
+  } else if (minDelay > maxDelay || minDelay == 0) {
+    alert('Your delay values are invalid, they have to be at least 1s.');
+    return;
+  }
+  GM_setValue('r1', String(minRefresh));
+  GM_setValue('r2', String(maxRefresh));
+  GM_setValue('d1', String(minDelay));
+  GM_setValue('d2', String(maxDelay));
 
   if (saveCheckBoxElement('autoPauseBefore')) {
     GM_setValue('autoPauselvlExp', ptsToNextLevel);
@@ -4561,6 +4590,8 @@ function saveSettings() {
 
   GM_setValue('burnOption', document.getElementById('burnOption').value);
   GM_setValue('featJobIndex', document.getElementById('featJobIndex').selectedIndex);
+
+  GM_setValue('autoTournamentClass', parseInt(document.getElementById('autoTournamentClass').selectedIndex));
 
   for (i = 0, iLength=cities.length; i < iLength; ++i) {
     if (cities[i][CITY_SIDES].length > 0) {
@@ -5908,6 +5939,24 @@ function createGeneralTab() {
     featJobs.appendChild(choice);
   }
   featJobs.selectedIndex = GM_getValue('featJobIndex', 0);
+
+  // auto tournament
+  item = makeElement('div', list);
+  lhs = makeElement('div', item, {'class':'lhs'});
+  rhs = makeElement('div', item, {'class':'rhs'});
+  makeElement('br', item, {'class':'hide'});
+  title = 'Check to automatically perform Tournament in Las Vegas';
+  id = 'autoTournament';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Perform autoTournament:'));
+  var classesElt = makeElement('select', rhs, {'id':'autoTournamentClass','title':'Choose the weight class'});
+  for (i = 0, iLength=tournamentClasses.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(tournamentClasses[i][1] + ' (min mafia: ' + tournamentClasses[i][2] + ')')); //', max xp: ' + tournamentClasses[i][3]));
+    classesElt.appendChild(choice);
+  }
+  classesElt.selectedIndex = GM_getValue('autoTournamentClass', 0);
 
   // Choose Sides
   item = makeElement('div', list);
@@ -8013,7 +8062,7 @@ function grabToolbarInfo(manually) {
   // In case the current browser lacks greasemonkey (chrome):
   if (!gvar.isGreaseMonkey) {
     if (manually && window.confirm('Can\'t retrieve Toolbar info with this browser.\n\n' +
-                       'In case the miniPack doesn\'t work here, you could let MWAP create the necessary cookies for you.\nPS: For this to work, ' +
+                       'In case the miniPack doesn\'t work here at all,\nyou could let MWAP create the necessary cookies for you.\nPS: For this to work, ' +
                        'you need to allow popups in your browser, and wait for ca. 10 secs before closing the popup (after confirming this dialog).')) {
       createToolbarCookies();
     }
@@ -9718,6 +9767,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
       '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
       '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
+      '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
       '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
       '<br>&nbsp;&nbsp;autoAskHelponCCTimer: ' + getHoursTime('autoAskHelponCCTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
@@ -10173,7 +10223,7 @@ function customizeStats() {
   if (nrgElt && !nrgLinkElt) {
     var timeLeftPack = getHoursTime('miniPackTimer');
     if (timeLeftPack == 0 || timeLeftPack == undefined) {
-      var miniPackTitle = 'Mini-Pack available now (or timer is undefined).';
+      var miniPackTitle = 'Mini-Pack available now.';
     /*} else if (timeLeftPack == undefined) {
       var miniPackTitle = 'Mini-Pack Timer has been reset.';
       setGMTime('miniPackTimer', '8 hours');*/
@@ -13353,6 +13403,233 @@ function autoWar() {
   return false;
 }
 
+function autoTournament() {
+  // Check if we're in Las Vegas
+  if (city != LV) {
+    Autoplay.fx = function(){goLocation(LV);};
+    Autoplay.start();
+    return true;
+  }
+  // Check if we're on the tournament tab
+  if (!onTournamentTab()) {
+    DEBUG('autoTournament(): not on tournament tab, going there...');
+    Autoplay.fx = goTournamentTab;
+    Autoplay.start();
+    return true;
+  }
+
+  // Check if tournament is available
+  var timerTournamentElt = xpathFirst('.//div[@id="tournament_parent"]//span[@id="tournament_try_again_timer"]', innerPageElt);
+  if (timerTournamentElt && timerTournamentElt.innerHTML) {
+    var timerTournament = timerTournamentElt.innerHTML;
+    DEBUG('Timer found: ' + timerTournament);
+    setGMTime('tournamentTimer', timerTournament);
+    goHome();
+    return false;
+  }
+  // Check if tournament tab is fully loaded
+  var footerElt = xpathFirst('.//div[@id="tournament_footer"]/div[contains(@id,"tournament_footer_") and @class="tournament_footer_on"]', innerPageElt);
+  if (!footerElt || !footerElt.id) {
+    //addToLog('info Icon', 'autoTournament(): tournament_timer not found and no tournament_footer selected, waiting...');
+    Autoplay.fx = autoTournament;
+    Autoplay.start();
+    return true;
+  }
+
+  // Everything looks ok here
+  DEBUG('autoTournament(): Progress OK'); // (tournament_timer not found and tournament_footer selected)
+  // Set delay for tournament stuff to 5s for stability
+  Autoplay.delay = 5000;
+
+  // Assign step elts
+  var tournamentPage1 = xpathFirst('.//div[@class="tournament_page" and @id="tournament_page1"]', innerPageElt);
+  var tournamentPage2 = xpathFirst('.//div[@class="tournament_page" and @id="tournament_page2"]', innerPageElt);
+  var tournamentPage3 = xpathFirst('.//div[@class="tournament_page" and @id="tournament_page3"]', innerPageElt);
+  var tournamentPage4 = xpathFirst('.//div[@class="tournament_page" and @id="tournament_page4"]', innerPageElt);
+  var tournamentPage5 = xpathFirst('.//div[@class="tournament_page" and @id="tournament_page5"]', innerPageElt);
+
+  // Parse stats
+  var statsSkills = xpathFirst('.//div[@id="tournament_footer"]//div[@class="tournament_atkdef_icon"]', innerPageElt);
+  var statsMafia = xpathFirst('.//div[@id="tournament_footer"]//div[@class="tournament_mafia_icon_self"]', innerPageElt);
+  if (statsSkills && statsSkills.innerHTML) statsSkills = parseInt(statsSkills.innerHTML.replace(',', ''));
+  if (statsMafia && statsMafia.innerHTML) statsMafia = parseInt(statsMafia.innerHTML);
+  DEBUG('autoTournament(): Parsed def+atk skill: ' + statsSkills + ', mafia: ' + statsMafia);
+
+  // Reset the auto-refresh timer before each step
+  autoReload();
+/***** Which tournament step are we at? *****/
+  DEBUG('footer: ' + footerElt.id);
+  switch (footerElt.id) {
+/*** Step 1 Class ***/
+    case 'tournament_footer_one':
+      DEBUG('autoTournament(): Currently at step 1 "Class"');
+      //var arrowUpElt = xpathFirst('.//div[@class="tournament_belt_arrowup"]', innerPageElt);
+      //var arrowDownElt = xpathFirst('.//div[@class="tournament_belt_arrowdown"]', innerPageElt);
+      var chosenClass = tournamentClasses[GM_getValue('autoTournamentClass', 0)];
+      var selectedClassElt = xpathFirst('.//div[@class="tournament_belt_unlocked" or @class="tournament_belt_locked"]//div[@class="tournament_belt_descrip"]', tournamentPage1);
+      if (!selectedClassElt || !selectedClassElt.innerHTML) {
+        // Error, disabling autoTournament
+        addToLog('warning Icon', 'autoTournament(): Error finding/parsing a selected class.');
+        //GM_setValue('autoTournament', 0);
+        return false;
+      }
+      // Check if correct class needs to be clicked
+      if (selectedClassElt.innerHTML != chosenClass[0]) {
+        var classElt = xpathFirst('.//div[@id="tourney_belt_text_bg_' + GM_getValue('autoTournamentClass', 0) + '"]', tournamentPage1);
+        if (classElt) {
+          // Select correct class
+          clickElement(classElt);
+          DEBUG('autoTournament(): Clicked to select ' + chosenClass[0]);
+          Autoplay.fx = autoTournament;
+          Autoplay.start();
+          return true;
+        } else {
+          // Error
+          addToLog('warning Icon', 'autoTournament(): Disabling autoTournament, couldn\'t find class to select.');
+          GM_setValue('autoTournament', 0);
+          return false;
+        }
+      } else {
+        // Correct class is selected, go to step "Entry" (if possible)
+        var nextPageElt = xpathFirst('.//div[@id="tournament_nextpage" and contains(@style,"opacity: 1")]', innerPageElt);
+        if (nextPageElt) {
+          clickElement(nextPageElt);
+          DEBUG('autoTournament(): Clicked to go to step "Entry"');
+          Autoplay.fx = autoTournament;
+          Autoplay.start();
+          return true;
+        } else {
+          // Error, disabling autoTournament: eg class locked (mafia size too low)
+          addToLog('warning Icon', 'autoTournament(): Disabling autoTournament, selected class is locked, please choose another.');
+          GM_setValue('autoTournament', 0);
+          return false;
+        }
+      }
+      break;
+
+/*** Step 2 Entry ***/
+    case 'tournament_footer_two':
+      DEBUG('autoTournament(): Currently at step 2 "Entry"');
+      var currentRoundElt = xpathFirst('.//div[contains(@class,"tournament_round_container tournament_round_") and not(contains(@class,"_locked")) and not(contains(@class,"_champion"))]', tournamentPage2);
+      var costCash = parseCash(xpathFirst('.//div[@class="tournament_round_cost tournament_chip"]', currentRoundElt).innerHTML);
+      var costStam = parseInt(xpathFirst('.//div[@class="tournament_round_cost tournament_stamina"]', currentRoundElt).innerHTML);
+      DEBUG('autoTournament(): V$' + costCash + ', STAM: ' + costStam);
+      GM_setValue('tournamentStamina', costStam);
+      if (costStam > stamina) {
+        addToLog('warning Icon', 'autoTournament(): We need '+(costStam-stamina)+' more stamina for this round, skipping for 15min...');
+        setGMTime('tournamentTimer', '00:15:00');
+        return false;
+      }
+      // Check if we have enough money on hand
+      var cashDiff = costCash - cities[LV][CITY_CASH];
+      if (cashDiff > 0) {
+        // Withdraw the amount we need
+        addToLog('info Icon', 'autoTournament(): We need V$'+costCash+' for this round. Withdrawing V$'+cashDiff+'...');
+        // Suspend banking
+        suspendBank = true;
+        autoBankWithdraw(cashDiff);
+        Autoplay.fx = autoTournament;
+        Autoplay.start();
+        return true;
+      }
+      // We have enough money, go to "Bet" (by clicking "Fight" and then "Step into the Ring" in the confirmation popup
+      var nextPageElt = xpathFirst('.//div[contains(@id,"pop_box_") and @class="pop_box" and not(contains(@style,"none"))]//a[@class="sexy_button_new short_white" and contains(.,"Step into the Ring")]', innerPageElt);
+      if (!nextPageElt) nextPageElt = xpathFirst('.//div[@id="tournament_nextpage"]', innerPageElt);
+      if (nextPageElt) {
+        clickElement(nextPageElt);
+        DEBUG('autoTournament(): Clicked to go to "Bet" page');
+        Autoplay.fx = autoTournament;
+        Autoplay.start();
+        return true;
+      } else {
+        // Error, disabling autoTournament
+        addToLog('warning Icon', 'autoTournament(): No Fight button found, disabling autoTournament.');
+        GM_setValue('autoTournament', 0);
+        return false;
+      }
+      break;
+
+/*** Step 3 Bet ***/
+    case 'tournament_footer_three':
+      DEBUG('autoTournament(): Currently at step 3 "Bet"');
+      // Reactivate banking
+      suspendBank = false;
+      var nextPageElt = xpathFirst('.//div[contains(@id,"pop_box_") and @class="pop_box" and not(contains(@style,"none"))]//a[@class="sexy_button_new short_red" and contains(.,"Fight Anyway")]', innerPageElt);
+      if (!nextPageElt) nextPageElt = xpathFirst('.//div[@id="tournament_nextpage"]', innerPageElt);
+      if (nextPageElt) {
+        clickElement(nextPageElt);
+        DEBUG('autoTournament(): Clicked to go to "Fight" page');
+        Autoplay.fx = autoTournament;
+        Autoplay.start();
+        return true;
+      } else {
+        // Error, disabling autoTournament
+        addToLog('warning Icon', 'autoTournament(): No Next button found, disabling autoTournament.');
+        GM_setValue('autoTournament', 0);
+        return false;
+      }
+      break;
+
+/*** Step 4 Fight ***/
+    case 'tournament_footer_four':
+      // Check if we really are at step 4
+      if (!tournamentPage5 || tournamentPage5.style.display == 'none') {
+        DEBUG('autoTournament(): Currently at step 4 "Fight"');
+        // Click the fight next round button
+        var fightElt = xpathFirst('.//a[@class="sexy_button_new short_red" and contains(@id,"tournament_brackets_round") and contains(@id,"_fight")]', innerPageElt);
+        if (fightElt) {
+          if (fightElt.innerHTML && fightElt.innerHTML.match(/<span>(.+?)<\/span>/i)) var fightRound = RegExp.$1;
+          else var fightRound = 'fight the next round';
+          clickElement(fightElt);
+          DEBUG('autoTournament(): Clicked to ' + fightRound);
+          Autoplay.fx = autoTournament;
+          Autoplay.start();
+          return true;
+        } else {
+          // Error, disabling autoTournament: eg class locked (mafia size too low)
+          addToLog('warning Icon', 'autoTournament(): No Fight All Rounds button found, disabling autoTournament.');
+          GM_setValue('autoTournament', 0);
+          return false;
+        }
+      } else {
+/*** Step 5 Result ***/
+        DEBUG('autoTournament(): Currently at step 5 "Result"');
+        // Tournament finished, results are here
+        var expElt = xpathFirst('.//div[@class="tournament_result_left_side"]/div[@class="tournament_result_exp"]', tournamentPage5);
+        var fansElt = xpathFirst('.//div[@class="tournament_result_left_side"]/div[@class="tournament_result_fans"]', tournamentPage5);
+        var tokensElt = xpathFirst('.//div[@class="tournament_result_left_side"]/div[@class="tournament_result_tokens"]', tournamentPage5);
+        var chipsElt = xpathFirst('.//div[@class="tournament_result_left_side"]/div[@class="tournament_result_chips"]', tournamentPage5);
+        //var collectElt = xpathFirst('.//div[@class="tournament_result_left_side"]', tournamentPage5);
+
+        var hasLost = xpathFirst('.//a[contains(text(),"Why did I lose")]', tournamentPage5);
+        var hasGained = '';
+        if (expElt) hasGained += ' XP: ' + expElt.innerHTML;
+        if (chipsElt) hasGained += ' Cash: V$' + chipsElt.innerHTML;
+        if (tokensElt) hasGained += ' Tokens: ' + tokensElt.innerHTML;
+        if (fansElt) hasGained += ' Fans: ' + fansElt.innerHTML;
+
+        if (!hasLost) {
+          addToLog('yeah Icon', 'Tournament finished, you won!' + (hasGained ? '<br><span class="good">Gained' + hasGained + '</span>' : ''));
+        } else {
+          addToLog('omg Icon', 'Tournament finished, you lost!' + (hasGained ? '<br><span class="good">Gained' + hasGained + '</span>' : ''));
+        }
+        //pause();
+        //return false;
+        var nextPageElt = xpathFirst('.//div[@id="tournament_nextpage"]', innerPageElt);
+        if (nextPageElt) {
+          clickElement(nextPageElt);
+          DEBUG('autoTournament(): Clicked to finish the tournament');
+          Autoplay.fx = autoTournament;
+          Autoplay.start();
+          return true;
+        }
+      }
+      break;
+  }
+
+  return false;
+}
+
 function autoGiftWaiting() {
   // Check the message box menu for gifts, rather than opening each gift, just go to the loot page to see them all
   var eltGiftsWaiting = xpathFirst('.//div[contains(@id, "counter_bg_send_gifts")]', innerPageElt);
@@ -13814,6 +14091,14 @@ function onMyMafiaNav() {
 function onFightTab() {
   // Return true if we're on the fight tab, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Fight")]', innerPageElt)) {
+    return true;
+  }
+  return false;
+}
+
+function onTournamentTab() {
+  // Return true if we're on the tournament tab, false otherwise.
+  if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Tournaments")]', innerPageElt)) {
     return true;
   }
   return false;
@@ -14284,6 +14569,20 @@ function goFightTab() {
   }
   clickElement(elt);
   DEBUG('Clicked to go to fight tab.');
+}
+
+function goTournamentTab() {
+  /*var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Tournaments")]', innerPageElt);
+  if (!elt) {
+    goFightNav();
+    return;
+  }
+  clickElement(elt);*/
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page","remote/html_server.php?xw_controller=tournament&xw_action=view&xw_city=5", 1, 1, 0, 0); return false;'});
+  if (elt) {
+    clickElement(elt);
+    DEBUG('Clicked to go to tournament tab.');
+  }
 }
 
 function goHitlistTab() {
@@ -16135,6 +16434,26 @@ function handlePopups() {
 
           // Get rid of Your Requests popup
           if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
+
+          // Get rid of Welcome to Tournaments popup
+          if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
+          // Get rid of Tournament Expired popup
+          if (popupInnerNoTags.indexOf('Your previous tournament has expired') != -1) return(closePopup(popupElts[i], "Tournament Expired"));
+
+          // Get rid of "The Daily Take" popup
+          if (popupInnerNoTags.indexOf('Keep the streak alive') != -1) {
+            var logtxt='';
+            var m;
+            if ((m=/for playing ([0-9]+) days? in a row you got/i.exec(popupInnerNoTags))) {
+              logtxt = 'Bonus for playing for ' + m[1] + ' day(s): ';
+            }
+            var bonusElt = xpathFirst('.//div[contains(@style,"font-size: 18px; margin-bottom: 5px;")]', popupElts[i]);
+            if (bonusElt && bonusElt.innerHTML) logtxt += '<span class="loot">' + bonusElt.innerHTML + '</span>';
+            addToLog('lootbag Icon',logtxt);
+
+            return(closePopup(popupElts[i], "The Daily Take"));
+            //return("The Daily Take");
+          }
 
           /* THESE POPUPS get processed only when PS MWAP is running: */
           if (running) {
