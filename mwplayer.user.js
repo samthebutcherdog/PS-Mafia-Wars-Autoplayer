@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.742
+// @version     1.1.743
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.742',
+  version: '1.1.743',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9790,7 +9790,7 @@ function resetTimers(manually) {
   // 300  : if 5 minutes have passed
   var checkTimer = function(timername, limit) { if (manually || timeLeftGM(timername) < limit) setGMTime(timername, 0); };
 
-  checkTimer('miniPackTimer', 0);
+  checkTimer('miniPackTimer', 300);
   checkTimer('wishListTimer', 300);
   checkTimer('autoEnforcedTitleTimer', 1800);
   checkTimer('warTimer', 900);
@@ -13468,9 +13468,10 @@ function autoTournament() {
       var chosenClass = tournamentClasses[GM_getValue('autoTournamentClass', 0)];
       var selectedClassElt = xpathFirst('.//div[@class="tournament_belt_unlocked" or @class="tournament_belt_locked"]//div[@class="tournament_belt_descrip"]', tournamentPage1);
       if (!selectedClassElt || !selectedClassElt.innerHTML) {
-        // Error, disabling autoTournament
+        // Error
         addToLog('warning Icon', 'autoTournament(): Error finding/parsing a selected class.');
         //GM_setValue('autoTournament', 0);
+        goHome();
         return false;
       }
       // Check if correct class needs to be clicked
@@ -13485,8 +13486,9 @@ function autoTournament() {
           return true;
         } else {
           // Error
-          addToLog('warning Icon', 'autoTournament(): Disabling autoTournament, couldn\'t find class to select.');
-          GM_setValue('autoTournament', 0);
+          addToLog('warning Icon', 'autoTournament(): Couldn\'t find class to select.');
+          //GM_setValue('autoTournament', 0);
+          goHome();
           return false;
         }
       } else {
@@ -13502,6 +13504,7 @@ function autoTournament() {
           // Error, disabling autoTournament: eg class locked (mafia size too low)
           addToLog('warning Icon', 'autoTournament(): Disabling autoTournament, selected class is locked, please choose another.');
           GM_setValue('autoTournament', 0);
+          goHome();
           return false;
         }
       }
@@ -13518,6 +13521,7 @@ function autoTournament() {
       if (costStam > stamina) {
         addToLog('warning Icon', 'autoTournament(): We need '+(costStam-stamina)+' more stamina for this round, skipping for 15min...');
         setGMTime('tournamentTimer', '00:15:00');
+        goHome();
         return false;
       }
       // Check if we have enough money on hand
@@ -13542,9 +13546,10 @@ function autoTournament() {
         Autoplay.start();
         return true;
       } else {
-        // Error, disabling autoTournament
-        addToLog('warning Icon', 'autoTournament(): No Fight button found, disabling autoTournament.');
-        GM_setValue('autoTournament', 0);
+        // Error
+        addToLog('warning Icon', 'autoTournament(): No Next button found.');
+        //GM_setValue('autoTournament', 0);
+        goHome();
         return false;
       }
       break;
@@ -13563,9 +13568,10 @@ function autoTournament() {
         Autoplay.start();
         return true;
       } else {
-        // Error, disabling autoTournament
-        addToLog('warning Icon', 'autoTournament(): No Next button found, disabling autoTournament.');
-        GM_setValue('autoTournament', 0);
+        // Error
+        addToLog('warning Icon', 'autoTournament(): No Next button found.');
+        //GM_setValue('autoTournament', 0);
+        goHome();
         return false;
       }
       break;
@@ -13586,10 +13592,9 @@ function autoTournament() {
           Autoplay.start();
           return true;
         } else {
-          // Error, disabling autoTournament: eg class locked (mafia size too low)
-          addToLog('warning Icon', 'autoTournament(): No Fight All Rounds button found, disabling autoTournament.');
-          GM_setValue('autoTournament', 0);
-          return false;
+          // Error
+          addToLog('warning Icon', 'autoTournament(): No Fight button found.');
+          //GM_setValue('autoTournament', 0);
         }
       } else {
 /*** Step 5 Result ***/
@@ -13626,7 +13631,8 @@ function autoTournament() {
       }
       break;
   }
-
+  // Something went wrong, reload
+  goHome();
   return false;
 }
 
@@ -15667,7 +15673,7 @@ function logJSONResponse(autoplay, response, action, context) {
           if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling PS MWAP vault handling.';
           addToLog(cities[context][CITY_CASH_CSS], logText);
         // Las Vegas: vault full
-        } else if (/cannot deposit anymore/i.test(respDeposit)) {
+        } else if (/cannot deposit any more/i.test(respDeposit)) {
           quickBankFail = false;
           var logText = 'You can\'t deposit anymore, your vault is full!';
           if (!GM_getValue('vaultHandling', 0)) logText += '<br>Please consider enabling PS MWAP vault handling.';
