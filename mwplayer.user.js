@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.744
+// @version     1.1.745
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.744',
+  version: '1.1.745',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8688,7 +8688,7 @@ function handleUnexpectedPage() {
   Autoplay.start();
 }
 
-function handleModificationTimer(e) {
+function handleModificationTimer(target) {
   // The timer has gone off, so assume that page updates have finished.
   //GM_log('Changes finished.');
   modificationTimer = undefined;
@@ -8819,7 +8819,8 @@ function handleModificationTimer(e) {
     }
   } else {
     // Check on every cash change if we should quickbank
-    if (running && e && e.target && e.target.className=="cur_cash") doQuickBank();
+    if (running && target && (target.className=="cur_cash" || (target.parentNode && target.parentNode.className=="cur_cash")))
+      doQuickBank();
   }
 }
 
@@ -9098,16 +9099,16 @@ function removeCollection(eltCollection) {
   if (eltSibling4) eltSibling4.setAttribute('style','display:none;');
 }
 
-function setModificationTimer(e) {
+function setModificationTimer(target) {
   if (modificationTimer) window.clearTimeout(modificationTimer);
-  modificationTimer = window.setTimeout(function(){handleModificationTimer(e);}, 500);
+  modificationTimer = window.setTimeout(function(){handleModificationTimer(target);}, 500);
   //GM_log('Modification timer set.');
 }
 
 function handleContentModified(e) {
   if (ignoreElement(e.target)) return;
   //logElement(e.target, 'content');
-  setModificationTimer(e);
+  setModificationTimer(e.target);
 }
 
 function handlePublishing() {
@@ -13548,7 +13549,7 @@ function autoTournament() {
       var cashDiff = costCash - cities[LV][CITY_CASH];
       if (cashDiff > 0) {
         // Withdraw the amount we need
-        addToLog('info Icon', 'autoTournament(): We need V$'+costCash+' for this round. Withdrawing V$'+cashDiff+'...');
+        DEBUG('autoTournament(): We need V$'+costCash+' for this round. Withdrawing V$'+cashDiff+'...');
         // Suspend banking
         suspendBank = true;
         autoBankWithdraw(cashDiff);
@@ -16996,14 +16997,14 @@ function ignoreElement(element) {
   if (parentElt) {
     id = parentElt.id;
     if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1
-        || id.indexOf('tournament_time_left') != -1 || id.indexOf('tournament_try_again_timer') != -1
+        || id.indexOf('tournament_time_left') != -1 || id.indexOf('tournament_try_again_timer') != -1 || id.indexOf('zmc_event_count') != -1
         ))
       return true;
   }
 
   id = element.id;
   if (id && (id.indexOf('countdown') != -1 || id.indexOf('timer') != -1 || id.indexOf('ask_for_job_help_time') != -1
-        || id.indexOf('tournament_time_left') != -1 || id.indexOf('tournament_try_again_timer') != -1
+        || id.indexOf('tournament_time_left') != -1 || id.indexOf('tournament_try_again_timer') != -1 || id.indexOf('zmc_event_count') != -1
         ))
     return true;
 
