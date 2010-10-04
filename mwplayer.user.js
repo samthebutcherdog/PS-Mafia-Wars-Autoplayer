@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.743
+// @version     1.1.744
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.743',
+  version: '1.1.744',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -941,7 +941,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Array of lottery bonus items
   var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', '1 Godfather point', '+20 energy points', '1-5 Godfather points'];
 
-  // Prop Income
+  /* Prop Income
   var propsData = new Array (
     // Name, income per level per hour
     ['Louie\'s Deli', 250],
@@ -956,7 +956,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Mega Casino', 300000]
 // close above and open below to trick script into buying casino's
 //    ['Mega Casino',   300000000]
-  );
+  );*/
 
   // Stat Ordinal constants
   const ATTACK_STAT  = 0;
@@ -1851,6 +1851,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   // Add event listeners.
   setListenContent(true);
+  setListenStats(true);
 
   // Make sure the modification timer goes off at least once.
   setModificationTimer();
@@ -1988,7 +1989,7 @@ function doAutoPlay () {
   }
 
   // Auto-bank
-  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank &&
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
   if (running && canBank) {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
@@ -3465,7 +3466,7 @@ function refreshRobbingGrid() {
   if (!elt) return;
   clickElement(elt);
   DEBUG('Clicked to refresh robbing grid.');
-};
+}
 
 /*function sleepRob(ms){
   var dt = new Date();
@@ -4561,19 +4562,21 @@ function saveSettings() {
   //General Tab Settings
 
   // Validation of refresh and delay values
-  var minRefresh = parseInt(document.getElementById('r1').value); var maxRefresh = parseInt(document.getElementById('r2').value);
-  var minDelay = parseInt(document.getElementById('d1').value); var maxDelay = parseInt(document.getElementById('d2').value);
-  if (minRefresh > maxRefresh || minRefresh <= maxDelay || minRefresh < 8) {
-    alert('Your refresh values are invalid, they have to be greater than the max delay and at least 8s.');
+  var refreshLow = parseInt(document.getElementById('r1').value); var refreshHigh = parseInt(document.getElementById('r2').value);
+  var delayLow = parseInt(document.getElementById('d1').value); var delayHigh = parseInt(document.getElementById('d2').value);
+  if (refreshLow > refreshHigh || refreshLow <= delayHigh || refreshLow < 8) {
+    alert('The refresh values are invalid, defaulting them to 30s->110s.\nPS: Both have to be greater than the high delay value and at least 8s.');
+    document.getElementById('r1').value = 30; document.getElementById('r2').value = 110;
     return;
-  } else if (minDelay > maxDelay || minDelay == 0) {
-    alert('Your delay values are invalid, they have to be at least 1s.');
+  } else if (delayLow > delayHigh || delayLow < 1 || delayHigh < 2) {
+    alert('The delay values are invalid, defaulting them to 3s->5s.\nPS: Low delay has to be at least 1s, high delay at least 2s.');
+    document.getElementById('d1').value = 3; document.getElementById('d2').value = 5;
     return;
   }
-  GM_setValue('r1', String(minRefresh));
-  GM_setValue('r2', String(maxRefresh));
-  GM_setValue('d1', String(minDelay));
-  GM_setValue('d2', String(maxDelay));
+  GM_setValue('r1', String(refreshLow));
+  GM_setValue('r2', String(refreshHigh));
+  GM_setValue('d1', String(delayLow));
+  GM_setValue('d2', String(delayHigh));
 
   if (saveCheckBoxElement('autoPauseBefore')) {
     GM_setValue('autoPauselvlExp', ptsToNextLevel);
@@ -4612,14 +4615,6 @@ function saveSettings() {
   ]);
 
   //Display Tab Settings and Validation
-  GM_setValue('autoLogLength', document.getElementById('autoLogLength').value);
-
-  var filterOpt = document.getElementById('filterOpt').value;
-  GM_setValue(filterOpt == 0 ? 'filterPass' : 'filterFail', document.getElementById('filterPatterns').value);
-  GM_setValue('filterOpt', filterOpt);
-  var filterLootOpt = document.getElementById('filterLootOpt').value;
-  GM_setValue('filterLootOpt', filterLootOpt);
-
   var logPlayerUpdates = (document.getElementById('logPlayerUpdates').checked === true);
   var logPlayerUpdatesMax = parseInt(document.getElementById('logPlayerUpdatesMax').value);
   if (logPlayerUpdates && (isNaN(logPlayerUpdatesMax) || logPlayerUpdatesMax < 0 || logPlayerUpdatesMax > 70)) {
@@ -4628,13 +4623,15 @@ function saveSettings() {
     return;
   }
 
-  // Examine share wishlist time
-  var shareWishlistTime = document.getElementById('autoShareWishlistTime').value;
-  if (isNaN(shareWishlistTime) || parseFloat(shareWishlistTime) < 1) {
-    alert('The share wishlist timer has to be at least 1 hour. For decimal numbers please use ".", e.g. 1.5.\nDefaulting it to 1 hour.');
-    document.getElementById('autoShareWishlistTime').value = 1;
-    return;
-  }
+  GM_setValue('autoLogLength', document.getElementById('autoLogLength').value);
+  GM_setValue('logPlayerUpdatesMax', logPlayerUpdatesMax);
+
+  var filterOpt = document.getElementById('filterOpt').value;
+  GM_setValue(filterOpt == 0 ? 'filterPass' : 'filterFail', document.getElementById('filterPatterns').value);
+  GM_setValue('filterOpt', filterOpt);
+  var filterLootOpt = document.getElementById('filterLootOpt').value;
+  GM_setValue('filterLootOpt', filterLootOpt);
+
   //End Save Display Tab Settings
 
   //Start Save Mafia Tab Settings
@@ -4647,6 +4644,13 @@ function saveSettings() {
     'autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
   ]);
   //MafiaTab Settings and Validation
+  // Examine share wishlist time
+  var shareWishlistTime = document.getElementById('autoShareWishlistTime').value;
+  if (isNaN(shareWishlistTime) || parseFloat(shareWishlistTime) < 1) {
+    alert('The share wishlist timer has to be at least 1 hour. For decimal numbers please use ".", e.g. 1.5.\nDefaulting it to 1 hour.');
+    document.getElementById('autoShareWishlistTime').value = 1;
+    return;
+  }
   GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
 
   GM_setValue('selectMoscowTier', (document.getElementById('selectMoscowTier').value)?document.getElementById('selectMoscowTier').value:0);
@@ -4657,7 +4661,7 @@ function saveSettings() {
   GM_setValue('autoIcePublishFrequency', document.getElementById('autoIcePublishFrequency').value);
   GM_setValue('autoSecretStashFrequency', document.getElementById('autoSecretStashFrequency').value);
 
-  GM_setValue('autoShareWishlistTime', document.getElementById('autoShareWishlistTime').value);
+  GM_setValue('autoShareWishlistTime', shareWishlistTime);
 
   GM_setValue('autoGiftAcceptChoice', document.getElementById('autoGiftAcceptChoice').selectedIndex);
   GM_setValue('autoGiftAcceptReward', document.getElementById('autoGiftAcceptReward').selectedIndex);
@@ -5174,13 +5178,16 @@ function addToLog(icon, line) {
   var repeatCount;
   if (logLen) {
     var elt = logBox.firstChild.childNodes[1];
-    if (elt && elt.innerHTML.untag().indexOf(String(line).untag()) == 0) {
-      if (elt.innerHTML.match(/\((\d+) times\)$/)) {
-        repeatCount = parseInt(RegExp.$1) + 1;
-      } else {
-        repeatCount = 2;
+    if (elt && elt.innerHTML) {
+      var m = elt.innerHTML.untag().match(/^(.+?)(?:\s\((\d+) times\))?$/);
+      if (m && m[1] == String(line).untag()) {
+        if (m[2]) {
+          repeatCount = parseInt(m[2]) + 1;
+        } else {
+          repeatCount = 2;
+        }
+        line += ' (' + repeatCount + ' times)';
       }
-      line += ' (' + repeatCount + ' times)';
     }
   }
 
@@ -5806,9 +5813,9 @@ function createGeneralTab() {
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Refresh every:'));
 
-  makeElement('input', rhs, {'type':'text','value':GM_getValue('r1', '30'), 'id':'r1', 'size':'1', 'style':'text-align: center'});
+  makeElement('input', rhs, {'type':'text', 'title':'Low refresh rate, has to be >= 8','value':GM_getValue('r1', '30'), 'id':'r1', 'size':'1', 'style':'text-align: center'});
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' to '));
-  makeElement('input', rhs, {'type':'text','value':GM_getValue('r2', '110'), 'id':'r2', 'size':'1', 'style':'text-align: center'});
+  makeElement('input', rhs, {'type':'text', 'title':'High refresh rate, has to be >= 8','value':GM_getValue('r2', '110'), 'id':'r2', 'size':'1', 'style':'text-align: center'});
   makeElement('label', rhs, {'for':id}).appendChild(document.createTextNode(' seconds '));
 
   // Delay option
@@ -5820,9 +5827,9 @@ function createGeneralTab() {
   label = makeElement('label', lhs, {'title':title});
   label.appendChild(document.createTextNode('Delay between actions:'));
 
-  makeElement('input', rhs, {'type':'text', 'value':GM_getValue('d1', '3'), 'id':'d1', 'size':'1', 'style':'text-align: center'});
+  makeElement('input', rhs, {'type':'text', 'title':'Low delay rate, has to be >= 1', 'value':GM_getValue('d1', '3'), 'id':'d1', 'size':'1', 'style':'text-align: center'});
   rhs.appendChild(document.createTextNode(' to '));
-  makeElement('input', rhs, {'type':'text', 'value':GM_getValue('d2', '5'), 'id':'d2', 'size':'1', 'style':'text-align: center'});
+  makeElement('input', rhs, {'type':'text', 'title':'High delay rate, has to be >= 2', 'value':GM_getValue('d2', '5'), 'id':'d2', 'size':'1', 'style':'text-align: center'});
   rhs.appendChild(document.createTextNode(' seconds'));
 
   // Auto-pause
@@ -6946,7 +6953,8 @@ function createEnergyTab() {
     }
 
     // Multiple job choices
-    divChoice = makeElement('div', null, {'class':'ap_option', 'chkid':id});
+    if (mission[MISSION_TABPATH] == 0) divChoice = makeElement('div', null, {'class':'ap_option', 'chkid':id});
+    else divChoice = makeElement('div', null, {'class':'ap_option', 'chkid':id, 'style':'color: red'});
     divChoice.addEventListener('click', chkHandler, false);
     makeElement('img', divChoice, {'style':'width: 15px; height: 15px;', 'id':'img' + id, 'src': checkState ? stripURI(checkedIcon) : stripURI(unCheckedIcon)});
     choiceM = makeElement('input', divChoice, {'type':'checkbox', 'id':id, 'title':title, 'style':'display: none', 'value':'checked'});
@@ -6982,7 +6990,7 @@ function createEnergyTab() {
     var title, labelText;
     if (multipleJobs.checked) {
       labelText = 'Job selection:';
-      title = 'Select one or more jobs to perform. Jobs will be performed in an automatically optimized order.';
+      title = 'Select one or more jobs to perform. Jobs will be performed in an automatically optimized order. Red colored jobs require stamina instead of energy.';
       selectMissionLabel.firstChild.nodeValue = labelText;
       selectMissionLabel.title = title;
       selectMissionM.title = title;
@@ -8680,7 +8688,7 @@ function handleUnexpectedPage() {
   Autoplay.start();
 }
 
-function handleModificationTimer() {
+function handleModificationTimer(e) {
   // The timer has gone off, so assume that page updates have finished.
   //GM_log('Changes finished.');
   modificationTimer = undefined;
@@ -8809,6 +8817,9 @@ function handleModificationTimer() {
     } catch(ex) {
       addToLog('warning Icon', 'BUG DETECTED (pageChanged): ' + ex);
     }
+  } else {
+    // Check on every cash change if we should quickbank
+    if (running && e && e.target && e.target.className=="cur_cash") doQuickBank();
   }
 }
 
@@ -9087,16 +9098,16 @@ function removeCollection(eltCollection) {
   if (eltSibling4) eltSibling4.setAttribute('style','display:none;');
 }
 
-function setModificationTimer() {
+function setModificationTimer(e) {
   if (modificationTimer) window.clearTimeout(modificationTimer);
-  modificationTimer = window.setTimeout(handleModificationTimer, 500);
+  modificationTimer = window.setTimeout(function(){handleModificationTimer(e);}, 500);
   //GM_log('Modification timer set.');
 }
 
 function handleContentModified(e) {
   if (ignoreElement(e.target)) return;
   //logElement(e.target, 'content');
-  setModificationTimer();
+  setModificationTimer(e);
 }
 
 function handlePublishing() {
@@ -9221,7 +9232,7 @@ function setListenStats(on) {
 
 function statsInserted(e) {
   //if (!ignoreElement(e.target)) logElement(e.target, 'statsInserted');
-
+  if (ignoreElement(e.target)) return;
   // Check for a change in a particular statistic. This is where we'll
   // notice some types of changes that happen without user or script
   // actions, such as earning energy.
@@ -9244,6 +9255,17 @@ function statsInserted(e) {
   }
 }
 
+function doQuickBank() {
+  // Can bank flag
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
+                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
+
+  // Do quick banking
+  if (canBank && !isNaN(city) && !isNaN(cities[city][CITY_CASH])) {
+    quickBank(city, cities[city][CITY_CASH]);
+  }
+}
+
 function innerPageChanged(justPlay) {
   // Reset auto-reload (if enabled).
   DEBUG('innerPageChanged');
@@ -9252,6 +9274,7 @@ function innerPageChanged(justPlay) {
   // Perform actions here not requiring response logging
   doParseMessages();
   if (running) {
+    doQuickBank();
     doQuickClicks();
     if(isGMChecked('autoShareWishlist') && !timeLeftGM('wishListTimer')){
       autoWishlist();
@@ -9855,15 +9878,6 @@ function doQuickClicks() {
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
     if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
 
-    // Can bank flag
-    var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
-                  cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-
-    // Do quick banking
-    if (canBank && !isNaN(city) && !isNaN(cities[city][CITY_CASH])) {
-      quickBank(city, cities[city][CITY_CASH]);
-    }
-
 /*
     //This has to be fixed, since Z changed the way energy packs can be sent to mafia members
     //This code does not work anymore
@@ -10414,8 +10428,8 @@ function quickBank(bankCity, amount) {
   } else
     var depositUrl = "xw_controller=bank&xw_action=deposit_all&xw_city=" + (bankCity + 1);
 
-  // If cash being deposited is greater than 1 billion, do NOT quick-bank!
-  if (amount > 1000000000) {
+  // If cash being deposited is greater than 10 billion, do NOT quick-bank!
+  if (amount > 10000000000) {
     if (byUser)
       addToLog('updateBad Icon', 'Depositing <strong class="good">' + cities[bankCity][CITY_CASH_SYMBOL] + makeCommaValue(amount) +
                '</strong>!?!<strong class="bad"> HELL NO!</strong> Sink it from the banking page.');
@@ -11692,19 +11706,27 @@ function customizeProps() {
   for (var i = 0, iLength = propRows.length; i < iLength; ++i) {
     var props = $x('.//td[contains(@style,"padding-right")]', propRows[i]);
 
-    var prop =  {'name'  : props[0].innerHTML,
-                 'id'    : (i + 1),
-                'level'  : parseFloat(props[1].innerHTML),
-                'cost'   : parseFloat(props[2].innerHTML.untag().replace(/[\D]/gi,''))}
+    var prop =  {'name'    : props[0].innerHTML,
+                 'id'      : (i + 1),
+                 'level'   : parseFloat(props[1].innerHTML),
+                 'cost'    : parseFloat(props[2].innerHTML.untag().replace(/[\D]/gi,'')),
+                 'take'    : parseFloat(props[3].innerHTML.replace(/[$,\,]/gi,'')),
+                 'takeTime': parseFloat(props[3].innerHTML.replace(/.+\//g,''))
+                }
 
-    // ROI
-    prop['roi'] = propsData[i][1] / prop['cost'];
+    // ROI and Income per Level per Hour
+    prop['ICpLpHR'] = prop['take'] / prop['level'] / prop['takeTime'];
+    prop['roi'] = prop['ICpLpHR'] / prop['cost'];
+    // prop['roi'] = propsData[i][1] / prop['cost'];
 
     // Set next take time
     if  (/href=/.test(props[4].innerHTML))
       nextTake = '00:00';
     else if (!/N\/A/.test(props[4].innerHTML) && timeLeft(props[4].innerHTML) < timeLeft(nextTake))
       nextTake = props[4].innerHTML;
+
+    // Show Income per Level per Hour
+    props[3].innerHTML += '<span style="color: green; font-size: 10px;"> ' + prop['ICpLpHR'].toFixed() + ' $/L/hr </span>'
 
     // Show ROI
     if (i > 0 && !isNaN(prop['roi'])) {
@@ -12183,11 +12205,12 @@ function jobLoot(element) {
       var loot = RegExp.$1;
       if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
       if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
-      else strLoot = strLoot + 'Found <span class="loot">' + loot+'</span> in the job.';
+      else strLoot += 'Found <span class="loot">' + loot+'</span> in the job.';
       lootbag.push(loot);
-      addToLog('lootbag Icon', strLoot);
     }
   }
+  if (numMessages > 0 && strLoot !='')
+    addToLog('lootbag Icon', strLoot);
 
   // Vegas Loot on jobs
   if (city == LV) {
@@ -12201,7 +12224,7 @@ function jobLoot(element) {
         var parentText = messages[i].parentNode.innerHTML.untag();
         if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
         if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+' ' +parentText+'</span> in the job.';
-        else strLoot = strLoot + 'Found <span class="loot">' + loot+' ' +parentText+'</span> in the job.';
+        else strLoot += 'Found <span class="loot">' + loot+' ' +parentText+'</span> in the job.';
         lootbag.push(loot);
       }
     }
@@ -13438,8 +13461,8 @@ function autoTournament() {
 
   // Everything looks ok here
   DEBUG('autoTournament(): Progress OK'); // (tournament_timer not found and tournament_footer selected)
-  // Set delay for tournament stuff to 5s for stability
-  Autoplay.delay = 5000;
+  // Set delay for tournament stuff to 3s
+  Autoplay.delay = 3000;
 
   // Assign step elts
   var tournamentPage1 = xpathFirst('.//div[@class="tournament_page" and @id="tournament_page1"]', innerPageElt);
@@ -13458,7 +13481,8 @@ function autoTournament() {
   // Reset the auto-refresh timer before each step
   autoReload();
 /***** Which tournament step are we at? *****/
-  DEBUG('footer: ' + footerElt.id);
+  //DEBUG('footer: ' + footerElt.id);
+  var nextButton = function() { return xpathFirst('.//div[@id="tournament_nextpage" and not(contains(@style,"opacity: 0.5")) and not(contains(@style,"none"))]', innerPageElt); };
   switch (footerElt.id) {
 /*** Step 1 Class ***/
     case 'tournament_footer_one':
@@ -13471,8 +13495,7 @@ function autoTournament() {
         // Error
         addToLog('warning Icon', 'autoTournament(): Error finding/parsing a selected class.');
         //GM_setValue('autoTournament', 0);
-        goHome();
-        return false;
+        break;
       }
       // Check if correct class needs to be clicked
       if (selectedClassElt.innerHTML != chosenClass[0]) {
@@ -13488,12 +13511,11 @@ function autoTournament() {
           // Error
           addToLog('warning Icon', 'autoTournament(): Couldn\'t find class to select.');
           //GM_setValue('autoTournament', 0);
-          goHome();
-          return false;
+          break;
         }
       } else {
         // Correct class is selected, go to step "Entry" (if possible)
-        var nextPageElt = xpathFirst('.//div[@id="tournament_nextpage" and contains(@style,"opacity: 1")]', innerPageElt);
+        var nextPageElt = nextButton();
         if (nextPageElt) {
           clickElement(nextPageElt);
           DEBUG('autoTournament(): Clicked to go to step "Entry"');
@@ -13504,8 +13526,7 @@ function autoTournament() {
           // Error, disabling autoTournament: eg class locked (mafia size too low)
           addToLog('warning Icon', 'autoTournament(): Disabling autoTournament, selected class is locked, please choose another.');
           GM_setValue('autoTournament', 0);
-          goHome();
-          return false;
+          break;
         }
       }
       break;
@@ -13521,8 +13542,7 @@ function autoTournament() {
       if (costStam > stamina) {
         addToLog('warning Icon', 'autoTournament(): We need '+(costStam-stamina)+' more stamina for this round, skipping for 15min...');
         setGMTime('tournamentTimer', '00:15:00');
-        goHome();
-        return false;
+        break;
       }
       // Check if we have enough money on hand
       var cashDiff = costCash - cities[LV][CITY_CASH];
@@ -13538,7 +13558,7 @@ function autoTournament() {
       }
       // We have enough money, go to "Bet" (by clicking "Fight" and then "Step into the Ring" in the confirmation popup
       var nextPageElt = xpathFirst('.//div[contains(@id,"pop_box_") and @class="pop_box" and not(contains(@style,"none"))]//a[@class="sexy_button_new short_white" and contains(.,"Step into the Ring")]', innerPageElt);
-      if (!nextPageElt) nextPageElt = xpathFirst('.//div[@id="tournament_nextpage"]', innerPageElt);
+      if (!nextPageElt) nextPageElt = nextButton();
       if (nextPageElt) {
         clickElement(nextPageElt);
         DEBUG('autoTournament(): Clicked to go to "Bet" page');
@@ -13549,8 +13569,7 @@ function autoTournament() {
         // Error
         addToLog('warning Icon', 'autoTournament(): No Next button found.');
         //GM_setValue('autoTournament', 0);
-        goHome();
-        return false;
+        break;
       }
       break;
 
@@ -13560,7 +13579,7 @@ function autoTournament() {
       // Reactivate banking
       suspendBank = false;
       var nextPageElt = xpathFirst('.//div[contains(@id,"pop_box_") and @class="pop_box" and not(contains(@style,"none"))]//a[@class="sexy_button_new short_red" and contains(.,"Fight Anyway")]', innerPageElt);
-      if (!nextPageElt) nextPageElt = xpathFirst('.//div[@id="tournament_nextpage"]', innerPageElt);
+      if (!nextPageElt) nextPageElt = nextButton();
       if (nextPageElt) {
         clickElement(nextPageElt);
         DEBUG('autoTournament(): Clicked to go to "Fight" page');
@@ -13571,13 +13590,14 @@ function autoTournament() {
         // Error
         addToLog('warning Icon', 'autoTournament(): No Next button found.');
         //GM_setValue('autoTournament', 0);
-        goHome();
-        return false;
+        break;
       }
       break;
 
 /*** Step 4 Fight ***/
     case 'tournament_footer_four':
+      // Set delay for tournament fighting to 6s for stability
+      Autoplay.delay = 6000;
       // Check if we really are at step 4
       if (!tournamentPage5 || tournamentPage5.style.display == 'none') {
         DEBUG('autoTournament(): Currently at step 4 "Fight"');
@@ -13595,6 +13615,7 @@ function autoTournament() {
           // Error
           addToLog('warning Icon', 'autoTournament(): No Fight button found.');
           //GM_setValue('autoTournament', 0);
+          break;
         }
       } else {
 /*** Step 5 Result ***/
@@ -13618,13 +13639,15 @@ function autoTournament() {
         } else {
           addToLog('omg Icon', 'Tournament finished, you lost!' + (hasGained ? '<br><span class="good">Gained' + hasGained + '</span>' : ''));
         }
-        //pause();
-        //return false;
-        var nextPageElt = xpathFirst('.//div[@id="tournament_nextpage"]', innerPageElt);
+        var nextPageElt = nextButton();
         if (nextPageElt) {
           clickElement(nextPageElt);
           DEBUG('autoTournament(): Clicked to finish the tournament');
           Autoplay.fx = autoTournament;
+          /*Autoplay.fx = function() {
+            clickElement(nextPageElt);
+            DEBUG('autoTournament(): Clicked to finish the tournament');
+          };*/
           Autoplay.start();
           return true;
         }
@@ -15774,6 +15797,7 @@ function logResponse(rootElt, action, context) {
   // Rob message
   if (!messagebox) {
     messagebox = xpathFirst('.//div[@id="'+ context +'" and @class="rob_slot"]', rootElt);
+    if (!messagebox) messagebox = xpathFirst('.//div[@class="rob_board"]', rootElt);
   }
 
   // Build Car/Weapon success popup
@@ -16449,12 +16473,10 @@ function handlePopups() {
           // Get rid of "The Daily Take" popup
           if (popupInnerNoTags.indexOf('Keep the streak alive') != -1) {
             var logtxt='';
-            var m;
-            if ((m=/for playing ([0-9]+) days? in a row you got/i.exec(popupInnerNoTags))) {
-              logtxt = 'Bonus for playing for ' + m[1] + ' day(s): ';
-            }
+            if (popupInnerNoTags.match(/for playing ([0-9]+) days? in a row you got/i))
+              logtxt = 'You played for ' + RegExp.$1 + ' day(s) straight.';
             var bonusElt = xpathFirst('.//div[contains(@style,"font-size: 18px; margin-bottom: 5px;")]', popupElts[i]);
-            if (bonusElt && bonusElt.innerHTML) logtxt += '<span class="loot">' + bonusElt.innerHTML + '</span>';
+            if (bonusElt && bonusElt.innerHTML) logtxt += (logtxt ? '<br/>' : '') + 'Bonus: <span class="loot">' + bonusElt.innerHTML + '</span>';
             addToLog('lootbag Icon',logtxt);
 
             return(closePopup(popupElts[i], "The Daily Take"));
