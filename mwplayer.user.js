@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.745
+// @version     1.1.746
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.745',
+  version: '1.1.746',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2541,7 +2541,7 @@ function autoCollectTake(takeCity) {
 
 function autoPlayerUpdates() {
   // Get the updates.
-  var pUpdates = xpath('.//div[@class="update_item"]', innerPageElt);
+  var pUpdates = xpath('.//div[@id="player_updates_all"]/div[@class="update_item"]', innerPageElt);
   var pUpdatesLen = pUpdates.snapshotLength;
   var logPlayerUpdatesCount = GM_getValue('logPlayerUpdatesCount');
   if (isUndefined(logPlayerUpdatesCount)) {
@@ -3452,13 +3452,9 @@ function goRobbingTab() {
   DEBUG('Clicked to go to robbing tab.');
 }
 
-function needToRefresh()
-{
-  var eltRefreshLink = xpathFirst('//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]');
-  if(eltRefreshLink)
-    return true;
-
-  return false;
+function needToRefresh() {
+  if (xpathFirst('//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]')) return true;
+  else return false;
 }
 
 function refreshRobbingGrid() {
