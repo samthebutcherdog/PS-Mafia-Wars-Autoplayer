@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.747
+// @version     1.1.748
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.747',
+  version: '1.1.748',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -142,7 +142,7 @@ function checkInPublishPopup() {
 }
 
 function fetchPubOptions() {
-  copyMWValues(['isRunning', 'autoGiftSkipOpt', 'autoLottoOpt', 'autoSecretStash',
+  copyMWValues(['isRunning', 'autoGiftSkipOpt', 'autoLottoOpt', 'autoSecretStash','autoShareCoins',
                 'autoIcePublish', 'autoLevelPublish', 'autoAchievementPublish',
                 'autoAskJobHelp', 'autoShareWishlist', 'autoWarRewardPublish',
                 'autoWarResponsePublish', 'autoWarRallyPublish', 'autoWarPublish']);
@@ -2008,10 +2008,6 @@ function doAutoPlay () {
     grabToolbarInfo();
   }
 
-  // Click attack if on warNav
-  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
-    if (autoWarAttack()) return;
-  }
   
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
@@ -2102,6 +2098,11 @@ function doAutoPlay () {
     if (autoLotto()) return;
   }
 
+  // Click attack if on warNav
+  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
+    if (autoWarAttack()) return;
+  }  
+  
   // Auto-war (limit to level 4 and above)
   if (running && !maxed && isGMChecked('autoWar') && hasFight) {
     if (autoWar()) return;
@@ -2501,13 +2502,10 @@ function AskforHelp(hlpCity) {
     addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
     DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
   } else {
-    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
-    DEBUG(askHelpFriends);
-
+    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);    
     if (askHelpFriends) {
       addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
-      clickElement(askHelpFriends);
-      DEBUG(' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
+      clickElement(askHelpFriends);      
       setGMTime(timerName, '12 hours');
       return true;
     } else {
@@ -2533,13 +2531,13 @@ function askSpecialParts(itemArray, itemIndex, buildType){
     Autoplay.start();
     return true;
   }
-
-  DEBUG('Going to ask for '+buildType +' - '+itemArray[itemIndex][0]);
-
+  
   var elt;
   var timerName;
   var canAsk = false;
   var flashCount = buildType-1;
+  
+  DEBUG('Going to ask for '+buildType+' ('+flashCount +') '+itemArray[itemIndex][0]);
       
   switch(buildType){      
     case 11 : timerName = 'askShopPartsTimer'; buildSetting='askShopParts'; break;
@@ -2553,7 +2551,7 @@ function askSpecialParts(itemArray, itemIndex, buildType){
     var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
     if(response[flashCount].level < response[flashCount].maxlevel) {
       canAsk = true;
-      DEBUG(response[i].name + ' - level: ' + response[i].level + ', maxlevel: ' + response[i].maxlevel);
+      DEBUG(response[flashCount].name + ' - level: ' + response[flashCount].level + ', maxlevel: ' + response[flashCount].maxlevel);
     } else {
       DEBUG(response[flashCount].name+' fully upgraded. No need to ask for parts. Disabling settings.'); 
       GM_setValue(buildSetting, 'unchecked');
@@ -4745,8 +4743,8 @@ function saveSettings() {
 
   //Mafia Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoAskJobHelp','acceptMafiaInvitations','autoAskHelponCC', 'autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareWishlist',
-    'autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoWarBetray','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept','autoSafehouse',
+    'autoAskJobHelp','acceptMafiaInvitations','autoAskHelponCC', 'autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareCoins',
+    'autoShareWishlist', 'autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoWarBetray','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept','autoSafehouse',
     'sendEnergyPack','askEnergyPack','rewardEnergyPack',
     'autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
   ]);
@@ -9257,17 +9255,21 @@ function handlePublishing() {
         // Share wishlist
         if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
 
-        // War Reward
-        if (checkPublish('.//div[contains(.,"and friends overwhelmed the Mafia")]','autoWarRewardPublish', pubElt, skipElt)) return;
+        // War Declaration
+        if (checkPublish('.//div[contains(.,"gearing up for a war")]','autoWarPublish', pubElt, skipElt)) return;
 
         // War back up request
         if (checkPublish('.//div[contains(.,"needs help to win")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
         // War rally for help
         if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
-
-        // War Declaration
-        if (checkPublish('.//div[contains(.,"and has Declared War")]','autoWarPublish', pubElt, skipElt)) return;
+        
+        // War Reward
+        if (checkPublish('.//div[contains(.,"and friends overwhelmed the Mafia")]','autoWarRewardPublish', pubElt, skipElt)) return;
+        
+        // War Reward : Share Victory Coins
+        if (checkPublish('.//div[contains(.,"friends rallied to win the war")]','autoWarRewardPublish', pubElt, skipElt)) return;
+        
 
         // Ask for Chop Shop Parts
         if (checkPublish('.//div[contains(.,"a formidable Chop Shop")]','askShopParts', pubElt, skipElt)) return;
@@ -9275,12 +9277,14 @@ function handlePublishing() {
           
         // Ask for Weapons Depot Parts
         if (checkPublish('.//div[contains(.,"a formidable Weapons Depot")]','askDepotParts', pubElt, skipElt)) return;
-        7
+        
         // Ask for Armory Parts
         if (checkPublish('.//div[contains(.,"a formidable Armory")]','askArmorParts', pubElt, skipElt)) return;
 
         // Ask for Special Parts
         if (checkPublish('.//div[contains(.,"Special Parts")]','askSpecialParts', pubElt, skipElt)) return;
+        
+        
   
       }
     } catch (ex) {
@@ -13388,7 +13392,153 @@ function autoWarAttack() {
   return false;
 }
 
+
 function autoWar() {
+  var action = 'war';
+  Autoplay.delay = getAutoPlayDelay();
+
+  // We need to be on the war page to go any further
+  if (!onWarTab()) {
+    Autoplay.fx = goWarTab;
+    Autoplay.start();
+    return true;
+  }
+  
+  // Check for a war that may already be under way : Is there a War Countdown ?
+  var warStatus = xpathFirst('.//span[contains(@id, "war_timer")]', innerPageElt);
+  // War Countdown found
+  if (warStatus) {  
+    var warTimer = warStatus.innerHTML;    
+    DEBUG('War Countdown Timer found : ' + warTimer + '.');
+    //Check the war tab to see if there are enemy targets
+    var warTargetEnnemies = $x('.//a[contains(@href, "xw_action=attack")]', innerPageElt);
+    if(warTargetEnnemies){
+      // Pick a Random Target out of the Targets List
+      DEBUG('Enemy Targets Found ...');
+      var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)];      
+      if(warElt){
+        // Attack the Selected Target 
+        Autoplay.fx = function() {
+        clickAction = action;
+        clickContext = warElt;
+        clickElement(warElt);
+        DEBUG('Attacked Selected Target in ongoing war.');
+        };
+        Autoplay.start();
+        return true;
+      }
+    }            
+    setGMTime('warTimer', '1 hour');
+  } else {  
+    // Get war Targets to Declare War on
+    var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
+    if (warFriendsList) {
+    // Pick a Random Target out of the Targets List
+      var warElt = warFriendsList[Math.floor(Math.random() * warFriendsList.length)];
+    }
+
+    // Check to see if we have a valid target (If attributes are changed by Zynga, disable autoWar)
+    if (!warElt || (warElt && !warElt.getAttribute('onclick').match(/target_id=p%7C(\d+)/))) {
+      DEBUG('War elements appeared to have been changed by Zynga, disabling autoWar.');
+      GM_setValue('autoWar', 0)
+      return false;
+    }
+    // War a Random Target
+    warElt.target_id = RegExp.$1;
+    
+    DEBUG('Auto War Random Target ID : ' + warElt.target_id);
+
+    // War Friends from a List
+    // Therefor we change the target ID in the Random Target Link
+    if (GM_getValue('warMode', 0) == 1)  {
+      var tmpWarTargets = GM_getValue('autoWarTargetList');
+      if (tmpWarTargets) {
+        tmpWarTargets = tmpWarTargets.split('\n');
+        // Get a Random Friend's ID from the friends List
+        var thisAutoWarTarget = tmpWarTargets[Math.floor(Math.random() * tmpWarTargets.length)];
+
+        // Change the Target id
+        warElt.target_id = thisAutoWarTarget;
+        warElt.setAttribute('onclick', warElt.getAttribute('onclick').replace(RegExp.$1, thisAutoWarTarget));
+
+        DEBUG('Auto War Target ID from Friends List = ' + thisAutoWarTarget);
+      } else {
+        // If there are no targets in the list, we keep the Random Target 
+        addToLog('warning Icon','There are no targets in your Friends List. Changing War Settings to War a Random Friend.');
+        GM_setValue('warMode', 0)
+      }
+    }
+
+    // Go to war 
+    Autoplay.fx = function() {
+      clickAction = action;
+      clickContext = warElt;
+      clickElement(warElt);
+      DEBUG('Clicked to start a new war.');
+    };
+    Autoplay.start();
+    return true;
+  }
+  return false;
+}
+
+
+
+// Attack the first war opponent you can
+function old_autoWarAttack() {
+
+  // Betray logic
+  if (isGMChecked('autoWarBetray')) {
+    var betrayElts = $x('.//div//a[@class="sexy_button"]//span[contains(.,"Betray")]', innerPageElt);
+
+    // Betray a random friend
+    if (betrayElts && betrayElts.length > 0) {
+      var betrayFriend = betrayElts[Math.floor(Math.random() * betrayElts.length)];
+      Autoplay.fx = function() {
+        clickAction = 'war';
+        clickElement(betrayFriend);
+        DEBUG('Clicked betray friend button.');
+      };
+      Autoplay.start();
+      return true;
+    }
+  }
+
+  if (helpWar) {
+    // Help attempt was processed. Increment the update count.
+    GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
+    helpWar = false;
+  }
+
+  // Click only the attack button on the right side of the war screen
+  var getWarAttackElt = function (parentElt) {
+    // Get the "right" side elements
+    if (parentElt && parentElt.childNodes[5]) {
+      var atkElt = xpathFirst('.//a[@class="sexy_button"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
+      if (!atkElt) atkElt = xpathFirst('.//a[@class="sexy_button_new short_red sexy_attack_new"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
+      if (atkElt) return atkElt;
+    }
+    return false;
+  };
+
+  // Retrieve attack button
+  var attackElt = getWarAttackElt(xpathFirst('//div[contains(@style,"700px") and contains(.,"vs")]'));
+  if (!attackElt) attackElt = getWarAttackElt(xpathFirst('//div[contains(@style,"700px") and contains(.,"Top Mafia")]'));
+
+  if (attackElt) {
+    Autoplay.fx = function() {
+      clickAction = 'war';
+      clickElement(attackElt);
+      DEBUG('Clicked the war attack button.');
+    };
+    Autoplay.start();
+    return true;
+  }
+
+  return false;
+}
+
+function old_autoWar() {
   var action = 'war';
   Autoplay.delay = getAutoPlayDelay();
 
@@ -16342,6 +16492,7 @@ function handlePopups() {
           }
 
           /* THESE POPUPS get processed only when PS MWAP is running: */
+          /* START */
           if (running) {
 
             if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
@@ -16414,6 +16565,7 @@ function handlePopups() {
                   }
                   // If we selected something, press the stash button
                   if (lootChoice && isGMChecked(useSecretStashItems)) {
+                    addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
                     clickElement(lootChoice);
                     addToLog('lootbag Icon', '<span class="loot">'+' Received '+ lootChoice.innerHTML.untag() + ' from a secret stash.</span>');
                   }
@@ -16586,7 +16738,55 @@ function handlePopups() {
               }
               return true;
             }
+            
+            // War Popups
+ 
+
+            // War Declaration            
+            var warDeclareButton = xpathFirst('.//a[@clas="sexy_button_new short_white sexy_call_new" and contains(@onclick,"attemptFeed")]',popupElts[i]);
+            if(warDeclareButton) {
+              if (isGMChecked('autoWarPublish')) {
+                clickElement(warDeclareButton);
+                DEBUG('Popup Process: WAR - Declare War Publishing');
+                return true;
+              } else {              
+                return(closePopup(popupElts[i], "War Declaration Popup"));
+              }  
+            }  
+                                          
+            // War Rally for Help
+            if (popupInnerNoTags.indexOf('help to take out all 7') != -1) {
+                eltHelp = xpathFirst('.//a[contains(.,"Ask Friends for Help")]', popupElts[i]);
+                if(eltHelp && isGMChecked('autoWarResponsePublish')) {
+                  clickElement(eltHelp);
+                  DEBUG('Popup Process: WAR - Ask Friends for Help Publishing');
+                  return true;
+                } else {
+                  return(closePopup(popupElts[i], "War Help Popup"));
+                }
+            
+            }
+                     
+            // War Reward : Share Victory Coins            
+            var warRewardButtons = $x('.//a[@class="sexy_button_new short_white" and contains(@onclick,"postWarWin")]',popupElts[i]);
+            if(warRewardButtons) {
+              if (isGMChecked('autoWarRewardPublish')){
+                for(i=0;i<warRewardButtons.length>0;++i){
+                  warRewardButton = warRewardButtons[i];
+                  clickElement(warRewardButton);
+                  DEBUG('Popup Process: WAR - Reward Friends for Help Publishing');
+                }
+                return true;                
+              } else {
+                return(closePopup(popupElts[i], "War Reward Popup"));
+              }              
+            }
+           
+          // End of Popups Section           
           }
+        /* END */          
+        /* THESE POPUPS get processed only when PS MWAP is running: */          
+          
         }
       }
     }
