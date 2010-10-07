@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.748
+// @version     1.1.749
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.748',
+  version: '1.1.749',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2104,7 +2104,7 @@ function doAutoPlay () {
   }  
   
   // Auto-war (limit to level 4 and above)
-  if (running && !maxed && isGMChecked('autoWar') && hasFight) {
+  if (running && !maxed && isGMChecked('autoWar') && hasFight && !timeLeftGM('warTimer')) {
     if (autoWar()) return;
   }
 
@@ -2502,10 +2502,10 @@ function AskforHelp(hlpCity) {
     addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
     DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
   } else {
-    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);    
+    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt); 
     if (askHelpFriends) {
       addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
-      clickElement(askHelpFriends);      
+      clickElement(askHelpFriends); 
       setGMTime(timerName, '12 hours');
       return true;
     } else {
@@ -9259,7 +9259,7 @@ function handlePublishing() {
         if (checkPublish('.//div[contains(.,"gearing up for a war")]','autoWarPublish', pubElt, skipElt)) return;
 
         // War back up request
-        if (checkPublish('.//div[contains(.,"needs help to win")]','autoWarResponsePublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"gearing up for a war")]','autoWarResponsePublish', pubElt, skipElt)) return;
 
         // War rally for help
         if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
@@ -12144,7 +12144,7 @@ function getJobRowItems(jobName) {
     }
 
     if(itmSearch!=''){
-      DEBUG('Item(s) Required for this job');
+      DEBUG('Item(s) Required for this job : '+itmSearch);
       // Save the current job for later. The current job should not already exist in the list, so check first.
       var items = getSavedList('itemList');
       var jobs = getSavedList('jobsToDo', '');
@@ -13408,27 +13408,50 @@ function autoWar() {
   var warStatus = xpathFirst('.//span[contains(@id, "war_timer")]', innerPageElt);
   // War Countdown found
   if (warStatus) {  
-    var warTimer = warStatus.innerHTML;    
+    var warTimer = warStatus.innerHTML; 
     DEBUG('War Countdown Timer found : ' + warTimer + '.');
     //Check the war tab to see if there are enemy targets
-    var warTargetEnnemies = $x('.//a[contains(@href, "xw_action=attack")]', innerPageElt);
+    var warTargetEnnemies = $x('.//a[contains(@href, "xw_controller=war&xw_action=attack")]', innerPageElt);
     if(warTargetEnnemies){
       // Pick a Random Target out of the Targets List
       DEBUG('Enemy Targets Found ...');
-      var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)];      
+      var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)]; 
       if(warElt){
+        DEBUG('Going to Attack Selected Target in ongoing war.');
         // Attack the Selected Target 
         Autoplay.fx = function() {
-        clickAction = action;
-        clickContext = warElt;
-        clickElement(warElt);
-        DEBUG('Attacked Selected Target in ongoing war.');
+          clickAction = action;
+          clickContext = warElt;
+          clickElement(warElt); 
         };
         Autoplay.start();
+        DEBUG('Attacked Selected Target in ongoing war.');
         return true;
+      } else {
+        DEBUG('Invalid War Target .. War is ongoing war.');
       }
-    }            
+    } else {
+      DEBUG('No Enemy Targets found ... War is ongoing ...');
+    }
+
+    var callWarHelp = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@href, "postFeedAndSendCallForHelp")]');
+    if (callWarHelp && isGMChecked('autoWarResponsePublish')) {
+      clickElement(callWarHelp);
+      DEBUG('Clicking to ask for help in ongoing war.');
+      // Attack the Selected Target 
+      Autoplay.fx = function() {
+        clickAction = action;
+        clickContext = warElt;
+        clickElement(warElt); 
+      };
+      Autoplay.start();
+      DEBUG('Clicked to ask for help in ongoing war.');
+      return true;
+    }
+    
     setGMTime('warTimer', '1 hour');
+    DEBUG('Setting warTimer come back in 1 hour');
+    return false;
   } else {  
     // Get war Targets to Declare War on
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
@@ -13470,170 +13493,6 @@ function autoWar() {
     }
 
     // Go to war 
-    Autoplay.fx = function() {
-      clickAction = action;
-      clickContext = warElt;
-      clickElement(warElt);
-      DEBUG('Clicked to start a new war.');
-    };
-    Autoplay.start();
-    return true;
-  }
-  return false;
-}
-
-
-
-// Attack the first war opponent you can
-function old_autoWarAttack() {
-
-  // Betray logic
-  if (isGMChecked('autoWarBetray')) {
-    var betrayElts = $x('.//div//a[@class="sexy_button"]//span[contains(.,"Betray")]', innerPageElt);
-
-    // Betray a random friend
-    if (betrayElts && betrayElts.length > 0) {
-      var betrayFriend = betrayElts[Math.floor(Math.random() * betrayElts.length)];
-      Autoplay.fx = function() {
-        clickAction = 'war';
-        clickElement(betrayFriend);
-        DEBUG('Clicked betray friend button.');
-      };
-      Autoplay.start();
-      return true;
-    }
-  }
-
-  if (helpWar) {
-    // Help attempt was processed. Increment the update count.
-    GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
-    helpWar = false;
-  }
-
-  // Click only the attack button on the right side of the war screen
-  var getWarAttackElt = function (parentElt) {
-    // Get the "right" side elements
-    if (parentElt && parentElt.childNodes[5]) {
-      var atkElt = xpathFirst('.//a[@class="sexy_button"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
-      if (!atkElt) atkElt = xpathFirst('.//a[@class="sexy_button_new short_red sexy_attack_new"]//span[contains(.,"Attack")]', parentElt.childNodes[5]);
-      if (atkElt) return atkElt;
-    }
-    return false;
-  };
-
-  // Retrieve attack button
-  var attackElt = getWarAttackElt(xpathFirst('//div[contains(@style,"700px") and contains(.,"vs")]'));
-  if (!attackElt) attackElt = getWarAttackElt(xpathFirst('//div[contains(@style,"700px") and contains(.,"Top Mafia")]'));
-
-  if (attackElt) {
-    Autoplay.fx = function() {
-      clickAction = 'war';
-      clickElement(attackElt);
-      DEBUG('Clicked the war attack button.');
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  return false;
-}
-
-function old_autoWar() {
-  var action = 'war';
-  Autoplay.delay = getAutoPlayDelay();
-
-  var actionElt = getActionBox('War');
-  if (actionElt) {
-    // Check if "War in Progress" is there
-    // FIXME: Causes looping
-    var actionLink = getActionLink (actionElt, 'Check War');
-    if (actionLink && checkOnWar) {
-      Autoplay.fx = function() {
-        setGMTime('warTimer', '00:00');
-        clickElement(actionLink);
-        DEBUG('Clicked to check war in progress.');
-        checkOnWar = false;
-      };
-      Autoplay.start();
-      return true;
-    }
-
-    // Check if "Reward friends" is there
-    actionLink = getActionLink (actionElt, 'Reward Friends');
-    if (actionLink) {
-      Autoplay.fx = function() {
-        setGMTime('warTimer', '00:00');
-        clickElement(actionLink);
-        DEBUG('Clicked to reward friends.');
-      };
-      Autoplay.start();
-      return true;
-    }
-  }
-
-  // Check the timer, do we even need to go further?
-  if (timeLeftGM('warTimer') > 0) return false;
-
-  // We need to be on the war page to go any further
-  if (!onWarTab()) {
-    Autoplay.fx = goWarTab;
-    Autoplay.start();
-    return true;
-  }
-
-  // Click Start a new war
-  var warStartButton = xpathFirst('.//div//a[@class="sexy_button" and contains(.,"Start a new war")]', innerPageElt);
-  if (warStartButton) {
-    Autoplay.fx = function() {
-      clickAction = action;
-      clickElement(warStartButton);
-      checkOnWar = true;
-      DEBUG('Clicked to start a new war.');
-    };
-    Autoplay.start();
-    return true;
-  }
-
-  // Check for a war that may already be under way!
-  var warStatus = xpathFirst('.//span[contains(@id, "war_timer")]', innerPageElt);
-  if (warStatus) {
-    var warTimer = warStatus.innerHTML;
-    setGMTime('warTimer', warTimer);
-    DEBUG('War is not available yet, checking again after ' + warTimer + ' hours.');
-  } else {
-    // Get war Target
-    var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
-    if (warFriendsList) {
-      var warElt = warFriendsList[Math.floor(Math.random() * warFriendsList.length)];
-    }
-
-    // Html attributes has been changed by Zynga, disable autoWar
-    if (!warElt || (warElt && !warElt.getAttribute('onclick').match(/target_id=p%7C(\d+)/))) {
-      DEBUG('War elements changed by Zynga, disabling autoWar.');
-      GM_setValue('autoWar', 0)
-      return false;
-    }
-    warElt.target_id = RegExp.$1;
-
-    // Create clickable element for war list
-    if (GM_getValue('warMode', 0) == 1)  {
-      var tmpWarTargets = GM_getValue('autoWarTargetList');
-      if (tmpWarTargets) {
-        tmpWarTargets = tmpWarTargets.split('\n');
-        var thisAutoWarTarget = tmpWarTargets[0];
-
-        // Fake the target id
-        warElt.target_id = thisAutoWarTarget;
-        warElt.setAttribute('onclick', warElt.getAttribute('onclick').replace(RegExp.$1, thisAutoWarTarget));
-
-        DEBUG('Auto War Target = ' + thisAutoWarTarget);
-      } else {
-        // Target is not set, declare war on a random friend
-        addToLog('warning Icon','Invalid war target (id='+thisAutoWarTarget+'). Declaring war on a random friend.');
-      }
-    }
-
-    // War!!!
     Autoplay.fx = function() {
       clickAction = action;
       clickContext = warElt;
@@ -15206,11 +15065,7 @@ function logFightResponse(rootElt, resultElt, context) {
         if (innerNoTags.match(/(.+?) earned you (.+?) victory coins/i)) shareTo = RegExp.$1;
         clickElement(coinLink);
         addToLog('info Icon', 'Clicked to Share Coins with '+shareTo);
-      } else {
-        DEBUG('Share Coins Link NOT found or autoShareCoins unchecked.');
       } 
-    } else {
-      DEBUG('Share Coins Block NOT found or autoShareCoins unchecked.');
     } 
     
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
@@ -16522,6 +16377,7 @@ function handlePopups() {
                 return(closePopup(popupElts[i], "Secret Stash"));
               }
             }
+
 /*            // Process Secret Stash
             if (popupInnerNoTags.indexOf('Get yours') != -1) {
               DEBUG('Popup Process: Get Secret Stash Processed');
@@ -16536,43 +16392,36 @@ function handlePopups() {
               return true;
             }
 */
-            var autoSecretStashList=getSavedList('secretStashItems');
-            
+
             // Process Secret Stash
+            var autoSecretStashList=getSavedList('secretStashItems');
             if (popupInnerNoTags.indexOf('Get yours') != -1) {
               DEBUG('Popup Process: Get Secret Stash Processed');
-              var eltButton = xpathFirst('.//button',popupElts[i]);
-              if (eltButton) {
-                eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]); 
-                if (eltLoot) {
-                  eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
-                  eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
-                  eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
-                  //DEBUG('STASH: Item1='+eltLoot1.innerHTML.untag()+' Item2='+eltLoot2.innerHTML.untag()+' Item3='+eltLoot3.innerHTML.untag());
-                  for (var i = 0; i < autoSecretStashList.length; ++i) {
-                    if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      var lootChoice = eltLoot1;
-                      break;
-                    }
-                    if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      var lootChoice = eltLoot2;
-                      break;
-                    }
-                    if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      var lootChoice = eltLoot3;
-                      break;
-                    }
+              var eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]); 
+              if (eltLoot && isGMChecked(useSecretStashItems)) {
+                eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
+                eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
+                eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);       
+                for (var i = 0; i < autoSecretStashList.length; ++i) {
+                  if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
+                    eltLoot = eltLoot1;
+                    break;
                   }
-                  // If we selected something, press the stash button
-                  if (lootChoice && isGMChecked(useSecretStashItems)) {
-                    addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
-                    clickElement(lootChoice);
-                    addToLog('lootbag Icon', '<span class="loot">'+' Received '+ lootChoice.innerHTML.untag() + ' from a secret stash.</span>');
+                  if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
+                    eltLoot = eltLoot2;
+                    break;
                   }
-                  // Default select is the first item so this button is always valid
-                  clickElement(eltButton);
-                }
+                  if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
+                    eltLoot = eltLoot3;
+                    break;
+                  }
+                }                
+                clickElement(eltLoot);
+                addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
+                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a secret stash.</span>');
                 return true;
+              } else {
+                return(closePopup(popupElts[i], "Secret Stash"));
               }
             }
 
@@ -16776,10 +16625,9 @@ function handlePopups() {
                   clickElement(warRewardButton);
                   DEBUG('Popup Process: WAR - Reward Friends for Help Publishing');
                 }
-                return true;                
-              } else {
-                return(closePopup(popupElts[i], "War Reward Popup"));
-              }              
+                return true;       
+              } 
+              return(closePopup(popupElts[i], "War Reward Popup"));
             }
            
           // End of Popups Section           
