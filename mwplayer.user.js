@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.750
+// @version     1.1.751
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.750',
+  version: '1.1.751',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10154,7 +10154,7 @@ function customizeMasthead() {
          '&nbsp;&nbsp;Zolli Forums' +
        '</a></li>' +
        '<b style="padding-left:5px;">Bookmarklets</b>' +
-       '<li><a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Farunsmafiascripts.googlecode.com%2Ffiles%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
+       '<li><a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fcodeoutpost.com%2FScripts%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
          '&nbsp;&nbsp;Chuck-a-Crap ' +
        '</a></li> ' +
        '<li><a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
@@ -10217,7 +10217,7 @@ function customizeMasthead() {
                      '  <div class="sexy_destination middle">&nbsp;&nbsp;Zolli Forums</div> ' +
                      '</a>' +
                      '<div class="sexy_destination middle"><b>Bookmarklets</b></div> ' +
-                     '<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Farunsmafiascripts.googlecode.com%2Ffiles%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
+                     '[code]<a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fcodeoutpost.com%2FScripts%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B">[/code] ' +
                      '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
                      '</a> ' +
                      '<a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
@@ -16837,7 +16837,7 @@ function attackXfromProfile() {
 
 // Load Chuck-A-Crap script by Arun
 function eventclick_chuckaCrap() {
-  var src = 'http://arunsmafiascripts.googlecode.com/files/ChuckACrapQueue.js?' + Math.random();
+  var src = 'http://codeoutpost.com/Scripts/ChuckACrapQueue.js?' + Math.random();
   remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
 }
 
