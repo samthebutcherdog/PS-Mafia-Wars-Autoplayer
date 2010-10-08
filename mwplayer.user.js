@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.751
+// @version     1.1.752
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.751',
+  version: '1.1.752',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -713,51 +713,51 @@ var unCheckedIcon = '<img src="data:image/gif;base64,' +
     'txQVFzSEKaEOrhMUFhgZNoQrrRG4FhcZHB44hC3A1dcdHyA6hC8TFcwaGx6PIzyEMd7YICEkJSY9hDPXHh8hIvaTgBCqcQNHDh07ePj4AQRIEEGBAAA7' +
     '" />';
 
-const noDelay = 0; // No delay on commands
-const minDelay = 1000; // Minimum delay on commands
-var running; // Is the autoplayer running?
-var innerPageElt; // The currently visible inner page
-var appLayoutElt; // The currently visible content page
-var mastheadElt; // Masthead content
-var statsrowElt; // statsrow content
-var menubarElt; // menubar content
-var popupfodderElt; // popupfodder Element
-var cashElt; // Cash array of values by city
-var healthElt, health; // Health DOM element and value
-var maxHealthElt, maxHealth; // Maximum health DOM element and value
-var energyElt, energy; // Energy DOM element and value
-var maxEnergyElt, maxEnergy; // Maximum energy DOM element and value
-var staminaElt, stamina; // Stamina DOM element and value
-var maxStaminaElt, maxStamina; // Maximum stamina DOM element and value
-var levelElt, level; // Level DOM element and value
-var curAttack; // Current Attack stat value
-var curDefense; // Current Defense stat value
-var curAttackEquip; // Current Attack equip value
-var curDefenseEquip; // Current Defense equip value
+const noDelay = 0;              // No delay on commands
+const minDelay = 1000;          // Minimum delay on commands
+var running;                    // Is the autoplayer running?
+var innerPageElt;               // The currently visible inner page
+var appLayoutElt;               // The currently visible content page
+var mastheadElt;                // Masthead content
+var statsrowElt;                // statsrow content
+var menubarElt;                 // menubar content
+var popupfodderElt;             // popupfodder Element
+var cashElt;                    // Cash array of values by city
+var healthElt, health;          // Health DOM element and value
+var maxHealthElt, maxHealth;    // Maximum health DOM element and value
+var energyElt, energy;          // Energy DOM element and value
+var maxEnergyElt, maxEnergy;    // Maximum energy DOM element and value
+var staminaElt, stamina;        // Stamina DOM element and value
+var maxStaminaElt, maxStamina;  // Maximum stamina DOM element and value
+var levelElt, level;            // Level DOM element and value
+var curAttack;                  // Current Attack stat value
+var curDefense;                 // Current Defense stat value
+var curAttackEquip;             // Current Attack equip value
+var curDefenseEquip;            // Current Defense equip value
 var prevAttackEquip;
 var prevDefenseEquip;
-var curExpElt, curExp; // Experience DOM element and value
-var lvlExpElt, lvlExp; // Level up experience DOM element and value
-var energyPackElt, energyPack; // Is an energy pack waiting?
-var ptsToNextLevel; // Experience to next level up
-var mafia; // Mafia size
-var invites; // Number of mafia invitations
-var stats; // Skill points
-var city; // Current city (0=New York, 1=Cuba, 2=Moscow)
-var skipStaminaSpend = false; // Skip stamina actions for now?
-var clickAction; // Action being attempted with click simulation
-var clickContext; // Context for clickAction
-var modificationTimer; // Timer used to wait for content changes
-var ajaxAction; // Action being attempted with do_ajax (asynchronous)
-var ajaxContext; // Context for ajaxContext
-var popupTimer; // setInterval timer for handlePopups()
-var helpWar = false; // Helping a friend's war?
-var idle = true; // Is the script currently idle?
-var lastOpponent; // Last opponent fought (object)
-var suspendBank = false; // Suspend banking for a while
-var skipJobs = false; // Skip doing jobs for a while
-var jobOptimizeOn = false; // Is job optimizing flag
-var newStaminaMode; // New stamina mode for random fighting
+var curExpElt, curExp;          // Experience DOM element and value
+var lvlExpElt, lvlExp;          // Level up experience DOM element and value
+var energyPackElt, energyPack;  // Is an energy pack waiting?
+var ptsToNextLevel;             // Experience to next level up
+var mafia;                      // Mafia size
+var invites;                    // Number of mafia invitations
+var stats;                      // Skill points
+var city;                       // Current city (0=New York, 1=Cuba, 2=Moscow)
+var skipStaminaSpend = false;   // Skip stamina actions for now?
+var clickAction;                // Action being attempted with click simulation
+var clickContext;               // Context for clickAction
+var modificationTimer;          // Timer used to wait for content changes
+var ajaxAction;                 // Action being attempted with do_ajax (asynchronous)
+var ajaxContext;                // Context for ajaxContext
+var popupTimer;                 // setInterval timer for handlePopups()
+var helpWar = false;            // Helping a friend's war?
+var idle = true;                // Is the script currently idle?
+var lastOpponent;               // Last opponent fought (object)
+var suspendBank = false;        // Suspend banking for a while
+var skipJobs = false;           // Skip doing jobs for a while
+var jobOptimizeOn = false;      // Is job optimizing flag
+var newStaminaMode;             // New stamina mode for random fighting
 var checkOnWar;
 
 //new_header = false ; // change the commented out line to disable all changes
@@ -1081,7 +1081,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Gunpowder', 658],
     ['Gun Drill', 659]
   );
-  
+
   // Armory build CRAIG
   var cityArmor = new Array (
     ['Random Common Armor', 29, 'Requires 2 armor parts'],
@@ -1096,14 +1096,14 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
   );
 
-  var cityArmorParts = new Array ( 
+  var cityArmorParts = new Array (
     ['Hammer', 2196],
     ['Rivet', 2197],
     ['Furnace', 2183],
     ['Vice', 2184],
     ['Anvil', 2185]
   );
-  
+
   // Tournament Classes
   // Format: long description, short description, min mafia, max xp
   var tournamentClasses = new Array (
@@ -2008,7 +2008,13 @@ function doAutoPlay () {
     grabToolbarInfo();
   }
 
-  
+  // Auto-bank
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
+                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
+  if (running && canBank) {
+    if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
+  }
+
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -2021,33 +2027,26 @@ function doAutoPlay () {
       }
     }
   }
-  
-  // Auto-bank
-  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
-                cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
-  if (running && canBank) {
-    if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
-  }
-  
+
 /*
-  // Ask for Special Parts 
-  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
+  // Ask for Special Parts
+  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
     if (askSpecialParts(null, 0, 0)) return;
-  } 
+  }
 */
 
-  // Ask for Chop Shop Parts 
-  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
+  // Ask for Chop Shop Parts
+  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
     if (askSpecialParts(cityShopParts, GM_getValue('askShopPartsId',1), 11)) return;
   }
 
-  // Ask for Weapons Depot Parts 
-  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
+  // Ask for Weapons Depot Parts
+  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
     if (askSpecialParts(cityDepotParts, GM_getValue('askDepotPartsId',1), 12)) return;
   }
-  
-  // Ask for Armor Parts 
-  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
+
+  // Ask for Armor Parts
+  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
     if (askSpecialParts(cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
   }
 
@@ -2101,8 +2100,8 @@ function doAutoPlay () {
   // Click attack if on warNav
   if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
     if (autoWarAttack()) return;
-  }  
-  
+  }
+
   // Auto-war (limit to level 4 and above)
   if (running && !maxed && isGMChecked('autoWar') && hasFight && !timeLeftGM('warTimer')) {
     if (autoWar()) return;
@@ -2502,10 +2501,10 @@ function AskforHelp(hlpCity) {
     addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
     DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
   } else {
-    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt); 
+    var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
     if (askHelpFriends) {
       addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
-      clickElement(askHelpFriends); 
+      clickElement(askHelpFriends);
       setGMTime(timerName, '12 hours');
       return true;
     } else {
@@ -2524,22 +2523,22 @@ function askSpecialParts(itemArray, itemIndex, buildType){
     Autoplay.start();
     return true;
   }
-  
+
   // Go to the city's property nav
   if (!onPropertyNav()) {
     Autoplay.fx = goPropertyNav;
     Autoplay.start();
     return true;
   }
-  
+
   var elt;
   var timerName;
   var canAsk = false;
   var flashCount = buildType-1;
-  
+
   DEBUG('Going to ask for '+buildType+' ('+flashCount +') '+itemArray[itemIndex][0]);
-      
-  switch(buildType){      
+
+  switch(buildType){
     case 11 : timerName = 'askShopPartsTimer'; buildSetting='askShopParts'; break;
     case 12 : timerName = 'askDepotPartsTimer'; buildSetting='askDepotParts'; break;
     case 13 : timerName = 'askArmorPartsTimer'; buildSetting='askArmorParts'; break;
@@ -2553,9 +2552,9 @@ function askSpecialParts(itemArray, itemIndex, buildType){
       canAsk = true;
       DEBUG(response[flashCount].name + ' - level: ' + response[flashCount].level + ', maxlevel: ' + response[flashCount].maxlevel);
     } else {
-      DEBUG(response[flashCount].name+' fully upgraded. No need to ask for parts. Disabling settings.'); 
+      DEBUG(response[flashCount].name+' fully upgraded. No need to ask for parts. Disabling settings.');
       GM_setValue(buildSetting, 'unchecked');
-    } 
+    }
   }
 
   if(canAsk){
@@ -2565,14 +2564,14 @@ function askSpecialParts(itemArray, itemIndex, buildType){
                         '"remote/html_server.php?xw_controller=propertyV2&' +
                         'xw_action=cs_post_item_feed&xw_city=1&item='+itemArray[itemIndex][1]+'&type=1&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
     } else {
-      // Special Parts    
+      // Special Parts
         elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                           '"remote/html_server.php?xw_controller=propertyV2&' +
                           'xw_action=cs_special_item_feed_update_timestamp&xw_city=1", 1, "nothing"); return false;'});
     }
-  
+
     if (elt) {
-      Autoplay.fx = function() {      
+      Autoplay.fx = function() {
         clickElement(elt);
         addToLog('info Icon', 'Clicked to ask your Mafia to send you '+itemArray[itemIndex][0]+'.');
       };
@@ -2580,11 +2579,11 @@ function askSpecialParts(itemArray, itemIndex, buildType){
       setGMTime(timerName, '12 hours');
       return true;
     }
-  
+
     DEBUG('Failed to ask for '+buildType +' - '+itemArray[itemIndex][0])+'. Timer Reset : 2 Hours.';
     setGMTime(timerName, '2 hours');
-    return false; 
-  } 
+    return false;
+  }
 }
 
 // Pass the item array, item id, and building type
@@ -2965,8 +2964,8 @@ function canMission() {
     if (!enoughEnergy) return false;
 
     var doJob;
-    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][MISSION_RATIO] - missions[a][MISSION_RATIO]; });    
-    
+    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][MISSION_RATIO] - missions[a][MISSION_RATIO]; });
+
     // Don't do expBurners or biggest exp job if energy can be salvaged
     if (singleJobLevelUp.length > 0 && !canSalvage) {
       singleJobLevelUp.sort(function(a, b) { return b[2] - a[2]; });
@@ -3154,9 +3153,10 @@ function currentJobTabPath() {
   tst = parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
 //    DEBUG(' JOB TAB - path - returning  tst =' + tst + '=');
   if (tst==null)     DEBUG(' JOB TAB - path - !tst path not found - ');
-  if   (!elt ||  tst==null ) {
-        DEBUG(' JOB TAB - path - not found RETURNING -1 no elt or tst');
-    return -1; }
+  if (!elt || tst==null) {
+    DEBUG(' JOB TAB - path - not found RETURNING -1 no elt or tst');
+    return -1;
+  }
 //    return parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
   return tst;
 }
@@ -3565,13 +3565,8 @@ function goRobbingTab() {
   DEBUG('Clicked to go to robbing tab.');
 }
 
-
-
 function needToRefresh() {
   if (xpathFirst('//a[@id="rob_refresh_cost"]//span[contains(.,"0 stamina")]')) return true;
-
-
-
   else return false;
 }
 
@@ -4977,7 +4972,7 @@ function saveSettings() {
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
     'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
-    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','askShopParts','askDepotParts','askArmorParts', 'askSpecialParts'  
+    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','askShopParts','askDepotParts','askArmorParts', 'askSpecialParts'
   ]);
   //Cash Settings and Validation
   GM_setValue('minCashNew York', document.getElementById('minCashNew York').value);
@@ -5553,63 +5548,63 @@ function clearStats() {
 
   //ATK
   //New tracking stats for NY
-  GM_setValue('fightExpNY', 0); //Number of exper. points earned from fights in NY
-  GM_setValue('fightWinsNY', 0); //Count of fights won in NY
-  GM_setValue('fightWin$NY', '0'); //$ won from fights in NY
-  GM_setValue('fightLossesNY', 0); //Count of fights lost in NY
-  GM_setValue('fightLoss$NY', '0'); //$ lost from fights in NY
-  GM_setValue('fightLossBGCHNY', 0); //NY Bodyguard Critical Hit losses
-  GM_setValue('fightLossBGCH$NY', '0'); //NY$ lost by Bodyguard Critical Hit
-  GM_setValue('fightLossCHNY', 0); //NY Critical Hit fight losses
-  GM_setValue('fightLossCH$NY', '0'); //$ lost from Critical Hit in NY fights
-  GM_setValue('fightLossStrongNY', 0); //Too Strong loss type count from NY fights
+  GM_setValue('fightExpNY', 0);          //Number of exper. points earned from fights in NY
+  GM_setValue('fightWinsNY', 0);         //Count of fights won in NY
+  GM_setValue('fightWin$NY', '0');       //$ won from fights in NY
+  GM_setValue('fightLossesNY', 0);       //Count of fights lost in NY
+  GM_setValue('fightLoss$NY', '0');      //$ lost from fights in NY
+  GM_setValue('fightLossBGCHNY', 0);     //NY Bodyguard Critical Hit losses
+  GM_setValue('fightLossBGCH$NY', '0');  //NY$ lost by Bodyguard Critical Hit
+  GM_setValue('fightLossCHNY', 0);       //NY Critical Hit fight losses
+  GM_setValue('fightLossCH$NY', '0');    //$ lost from Critical Hit in NY fights
+  GM_setValue('fightLossStrongNY', 0);   //Too Strong loss type count from NY fights
   GM_setValue('fightLossStrong$NY', '0');//$ lost from Too Strong in NY fights
   //New tracking stats for Cuba
-  GM_setValue('fightExpCuba', 0); //Number of exper. points earned from fights in Cuba
-  GM_setValue('fightWinsCuba', 0); //Count of fights won in Cuba
-  GM_setValue('fightWin$Cuba', '0'); //Cuban pesos won from fights
-  GM_setValue('fightLossesCuba', 0); //Count of fights lost in Cuba
-  GM_setValue('fightLoss$Cuba', '0'); //Cuban pesos lost from fights
-  GM_setValue('fightLossBGCHCuba', 0); //Bodyguard Critical Hit loss type count from Cuba fights
+  GM_setValue('fightExpCuba', 0);        //Number of exper. points earned from fights in Cuba
+  GM_setValue('fightWinsCuba', 0);       //Count of fights won in Cuba
+  GM_setValue('fightWin$Cuba', '0');     //Cuban pesos won from fights
+  GM_setValue('fightLossesCuba', 0);     //Count of fights lost in Cuba
+  GM_setValue('fightLoss$Cuba', '0');    //Cuban pesos lost from fights
+  GM_setValue('fightLossBGCHCuba', 0);   //Bodyguard Critical Hit loss type count from Cuba fights
   GM_setValue('fightLossBGCH$Cuba', '0');//$ lost from Bodyguard Critical Hit in Cuba fights
-  GM_setValue('fightLossCHCuba', 0); //Critical Hit loss type count from Cuba fights
-  GM_setValue('fightLossCH$Cuba', '0'); //$ lost from Critical Hit in Cuba fights
+  GM_setValue('fightLossCHCuba', 0);     //Critical Hit loss type count from Cuba fights
+  GM_setValue('fightLossCH$Cuba', '0');  //$ lost from Critical Hit in Cuba fights
   GM_setValue('fightLossStrongCuba', 0); //Too Strong loss type count from Cuba fights
   GM_setValue('fightLossStrong$Cuba', '0');//$ lost from Too Strong in Cuba fights
   //New tracking stats for Moscow
-  GM_setValue('fightExpMoscow', 0); //Number of exper. points earned from fights in Moscow
-  GM_setValue('fightWinsMoscow', 0); //Count of fights won in Moscow
-  GM_setValue('fightWin$Moscow', '0'); //Moscown pesos won from fights
-  GM_setValue('fightLossesMoscow', 0); //Count of fights lost in Moscow
-  GM_setValue('fightLoss$Moscow', '0'); //Moscown pesos lost from fights
-  GM_setValue('fightLossBGCHMoscow', 0); //Bodyguard Critical Hit loss type count from Moscow fights
+  GM_setValue('fightExpMoscow', 0);        //Number of exper. points earned from fights in Moscow
+  GM_setValue('fightWinsMoscow', 0);       //Count of fights won in Moscow
+  GM_setValue('fightWin$Moscow', '0');     //Moscown pesos won from fights
+  GM_setValue('fightLossesMoscow', 0);     //Count of fights lost in Moscow
+  GM_setValue('fightLoss$Moscow', '0');    //Moscown pesos lost from fights
+  GM_setValue('fightLossBGCHMoscow', 0);   //Bodyguard Critical Hit loss type count from Moscow fights
   GM_setValue('fightLossBGCH$Moscow', '0');//$ lost from Bodyguard Critical Hit in Moscow fights
-  GM_setValue('fightLossCHMoscow', 0); //Critical Hit loss type count from Moscow fights
-  GM_setValue('fightLossCH$Moscow', '0'); //$ lost from Critical Hit in Moscow fights
+  GM_setValue('fightLossCHMoscow', 0);     //Critical Hit loss type count from Moscow fights
+  GM_setValue('fightLossCH$Moscow', '0');  //$ lost from Critical Hit in Moscow fights
   GM_setValue('fightLossStrongMoscow', 0); //Too Strong loss type count from Moscow fights
   GM_setValue('fightLossStrong$Moscow', '0');//$ lost from Too Strong in Moscow fights
   //New tracking stats for Bangkok
-  GM_setValue('fightExpBangkok', 0); //Number of exper. points earned from fights in Bangkok
-  GM_setValue('fightWinsBangkok', 0); //Count of fights won in Bangkok
-  GM_setValue('fightWin$Bangkok', '0'); //Bangkok pesos won from fights
-  GM_setValue('fightLossesBangkok', 0); //Count of fights lost in Bangkok
-  GM_setValue('fightLoss$Bangkok', '0'); //Bangkok pesos lost from fights
-  GM_setValue('fightLossBGCHBangkok', 0); //Bodyguard Critical Hit loss type count from Bangkok fights
+  GM_setValue('fightExpBangkok', 0);        //Number of exper. points earned from fights in Bangkok
+  GM_setValue('fightWinsBangkok', 0);       //Count of fights won in Bangkok
+  GM_setValue('fightWin$Bangkok', '0');     //Bangkok pesos won from fights
+  GM_setValue('fightLossesBangkok', 0);     //Count of fights lost in Bangkok
+  GM_setValue('fightLoss$Bangkok', '0');    //Bangkok pesos lost from fights
+  GM_setValue('fightLossBGCHBangkok', 0);   //Bodyguard Critical Hit loss type count from Bangkok fights
   GM_setValue('fightLossBGCH$Bangkok', '0');//$ lost from Bodyguard Critical Hit in Bangkok fights
-  GM_setValue('fightLossCHBangkok', 0); //Critical Hit loss type count from Bangkok fights
-  GM_setValue('fightLossCH$Bangkok', '0'); //$ lost from Critical Hit in Bangkok fights
+  GM_setValue('fightLossCHBangkok', 0);     //Critical Hit loss type count from Bangkok fights
+  GM_setValue('fightLossCH$Bangkok', '0');  //$ lost from Critical Hit in Bangkok fights
   GM_setValue('fightLossStrongBangkok', 0); //Too Strong loss type count from Bangkok fights
   GM_setValue('fightLossStrong$Bangkok', '0');//$ lost from Too Strong in Bangkok fights
   //New tracking stats for Las Vegas
-  GM_setValue('fightExpVegas', 0); //Number of exper. points earned from fights in Bangkok
-  GM_setValue('fightWinsVegas', 0); //Count of fights won in Vegas
-  GM_setValue('fightWin$Vegas', '0'); //Vegas $ won from fights
-  GM_setValue('fightLossesVegas', 0); //Count of fights lost in Vegas
-  GM_setValue('fightLoss$Vegas', '0'); //Vegas $ lost from fights
-  GM_setValue('fightLossBGCHVegas', 0); //Bodyguard Critical Hit loss type count from Vegas fights
+  GM_setValue('fightExpVegas', 0);        //Number of exper. points earned from fights in Bangkok
+  GM_setValue('fightWinsVegas', 0);       //Count of fights won in Vegas
+  GM_setValue('fightWin$Vegas', '0');     //Vegas $ won from fights
+  GM_setValue('fightLossesVegas', 0);     //Count of fights lost in Vegas
+  GM_setValue('fightLoss$Vegas', '0');    //Vegas $ lost from fights
+  GM_setValue('fightLossBGCHVegas', 0);   //Bodyguard Critical Hit loss type count from Vegas fights
   GM_setValue('fightLossBGCH$Vegas', '0');//$ lost from Bodyguard Critical Hit in Vegas fights
-  GM_setValue('fightLossCHVegas', 0); //Critical Hit loss type count from Vegas fights
-  GM_setValue('fightLossCH$Vegas', '0'); //$ lost from Critical Hit in Vegas fights
+  GM_setValue('fightLossCHVegas', 0);     //Critical Hit loss type count from Vegas fights
+  GM_setValue('fightLossCH$Vegas', '0');  //$ lost from Critical Hit in Vegas fights
   GM_setValue('fightLossStrongVegas', 0); //Too Strong loss type count from Vegas fights
   GM_setValue('fightLossStrong$Vegas', '0');//$ lost from Too Strong in Vegas fights
   updateLogStats();
@@ -6098,7 +6093,7 @@ function createGeneralTab() {
       sideOpt.selectedIndex = GM_getValue(id, 0);
     }
   }
-  
+
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -6106,10 +6101,10 @@ function createGeneralTab() {
   id = 'useSecretStashItems';
   title = ' Use Secret Stash Patterns';
   makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title)); 
-  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'secretStashItems', 'title':'Enter each pattern on a separate line.'}).appendChild(document.createTextNode(GM_getValue('secretStashItems', defaultSecretStashes.join('\n')))); 
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'secretStashItems', 'title':'Enter each pattern on a separate line.'}).appendChild(document.createTextNode(GM_getValue('secretStashItems', defaultSecretStashes.join('\n'))));
   makeElement('br', rhs);
-  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each pattern on a separate line.')); 
+  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each pattern on a separate line.'));
 
   return generalTab;
 }
@@ -6497,7 +6492,7 @@ function createMafiaTab() {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Achievement bonus '));
 
-  // Share Coins  
+  // Share Coins
   title = 'Automatically post share coins from fighting.';
   id = 'autoShareCoins';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title,'value':'checked'}, id);
@@ -8028,7 +8023,7 @@ function createCashTab () {
   }
   carType.selectedIndex = GM_getValue(id, 8);
   carType.setAttribute('title', cityCars[carType.selectedIndex][2]);
- 
+
   // Option to build a weapon
   xTop += 25;
   title = 'Check this to build a weapon every 24 hours';
@@ -8079,7 +8074,7 @@ function createCashTab () {
   makeElement('input', shopParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', shopParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Chop Shop Parts'));
-  
+
   // List Chop Shop Parts
   id = 'askShopPartsId';
   var shopPartsType = makeElement('select', shopParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
@@ -8088,7 +8083,7 @@ function createCashTab () {
     choice.appendChild(document.createTextNode(cityShopParts[i][0]));
     shopPartsType.appendChild(choice);
   }
-  shopPartsType.selectedIndex = GM_getValue(id, 0); 
+  shopPartsType.selectedIndex = GM_getValue(id, 0);
 
   // Ask for Weapon Depots Parts
   xTop += 45;
@@ -8098,7 +8093,7 @@ function createCashTab () {
   makeElement('input', depotParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', depotParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Weapon Depots Parts'));
-  
+
   // List Weapon Depots Parts
   id = 'askDepotPartsId';
   var depotPartsType = makeElement('select', depotParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
@@ -8108,7 +8103,7 @@ function createCashTab () {
     depotPartsType.appendChild(choice);
   }
   depotPartsType.selectedIndex = GM_getValue(id, 0);
-  
+
   // Ask for Armor Parts
   xTop += 25;
   title = 'Check this to Ask for Armor Parts every 12 hours';
@@ -8117,7 +8112,7 @@ function createCashTab () {
   makeElement('input', armorParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', armorParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Armor Parts'));
-  
+
   // List Armor Parts
   id = 'askArmorPartsId';
   var armorPartsType = makeElement('select', armorParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
@@ -8135,7 +8130,7 @@ function createCashTab () {
   var specialParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
   makeElement('input', specialParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', specialParts, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Special Parts'));  
+  label.appendChild(document.createTextNode('Ask for Special Parts'));
 
   // Collect Takes
   var xTop = 50;
@@ -9265,29 +9260,24 @@ function handlePublishing() {
 
         // War rally for help
         if (checkPublish('.//div[contains(.,"sided with")]','autoWarRallyPublish', pubElt, skipElt)) return;
-        
+
         // War Reward
         if (checkPublish('.//div[contains(.,"and friends overwhelmed the Mafia")]','autoWarRewardPublish', pubElt, skipElt)) return;
-        
+
         // War Reward : Share Victory Coins
         if (checkPublish('.//div[contains(.,"friends rallied to win the war")]','autoWarRewardPublish', pubElt, skipElt)) return;
-        
 
         // Ask for Chop Shop Parts
         if (checkPublish('.//div[contains(.,"a formidable Chop Shop")]','askShopParts', pubElt, skipElt)) return;
-        
-          
+
         // Ask for Weapons Depot Parts
         if (checkPublish('.//div[contains(.,"a formidable Weapons Depot")]','askDepotParts', pubElt, skipElt)) return;
-        
+
         // Ask for Armory Parts
         if (checkPublish('.//div[contains(.,"a formidable Armory")]','askArmorParts', pubElt, skipElt)) return;
 
         // Ask for Special Parts
         if (checkPublish('.//div[contains(.,"Special Parts")]','askSpecialParts', pubElt, skipElt)) return;
-        
-        
-  
       }
     } catch (ex) {
       // Ignore exceptions
@@ -9977,15 +9967,6 @@ function doQuickClicks() {
     // Click the 'Rally More Help!' button
     if (doClick('.//div//a[@class="sexy_button" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
     if (doClick('.//div//a[@class="sexy_button_new short_white sexy_call_new" and contains(text(),"Rally More Help")]', 'autoWarRallyPublish')) return;
-
-/*
-    //This has to be fixed, since Z changed the way energy packs can be sent to mafia members
-    //This code does not work anymore
-
-    // Auto-send energy pack
-    
-    // Removed old code since this had to be reworked anyway
-*/
 
     // Get daily checklist bonus
     var actionElt = getActionBox('Daily Checklist Complete');
@@ -11759,8 +11740,7 @@ function customizeProps() {
       addToLog('updateBad Icon', flashLog);
     else
       DEBUG(flashLog);
-      
-/*    var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
+    /*var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
     if (flashvars && flashvars.value) {
       var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
       var logtxt='';
@@ -11768,9 +11748,8 @@ function customizeProps() {
         logtxt+=i+': '+response[i].name + ', level: ' + response[i].level + ', maxlevel: ' + response[i].maxlevel + ',payout: '+response[i].payout+', rate: '+response[i].rate+', upgrade cost: '+response[i].upgrade_cost+', build cost: '+response[i].build_cost+'\n';
       }
       alert(logtxt);
-    }
-*/    
-    return true;    
+    }*/
+    return true;
   }
   // Flash is disabled
   isFlashed = FLASH_DISABLED;
@@ -12623,7 +12602,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Energy Fallback: <strong>' + GM_getValue('autoStatEnergyFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Stamina Fallback: <strong>' + GM_getValue('autoStatStaminaFallback') + '</strong><br>' +
         '&nbsp;&nbsp;-Rest AutoStat: <strong>' + GM_getValue('restAutoStat') + '</strong><br>' +
-        '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +                
+        '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +
         'autoResetTimers: <strong>' + showIfUnchecked(GM_getValue('autoResetTimers')) + '</strong><br>' +
         'autoDailyChecklist: <strong>' + showIfUnchecked(GM_getValue('autoDailyChecklist')) + '</strong><br>' +
         'autoEnforcedTitle: <strong>' + GM_getValue('autoEnforcedTitle') + '</strong><br>' +
@@ -12736,12 +12715,12 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Build Armor: <strong>' + showIfUnchecked(GM_getValue('buildArmor')) + '</strong><br>' +
         '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +
-        'Ask for Special Parts: <strong>' + showIfUnchecked(GM_getValue('askSpecialParts')) + '</strong><br>' +        
+        'Ask for Special Parts: <strong>' + showIfUnchecked(GM_getValue('askSpecialParts')) + '</strong><br>' +
         'Ask for Chop Shop Parts: <strong>' + showIfUnchecked(GM_getValue('askShopParts')) + '</strong><br>' +
-        '&nbsp;&nbsp;Part Type: <strong>' + cityShopParts[GM_getValue('askShopPartsId', 9)][0] + '</strong><br>' +        
+        '&nbsp;&nbsp;Part Type: <strong>' + cityShopParts[GM_getValue('askShopPartsId', 9)][0] + '</strong><br>' +
         'Ask for Weapon Depots Parts: <strong>' + showIfUnchecked(GM_getValue('askDepotParts')) + '</strong><br>' +
-        '&nbsp;&nbsp;Part Type: <strong>' + cityDepotParts[GM_getValue('askDepotPartsId', 9)][0] + '</strong><br>' +        
-        'Ask for Armory Parts: <strong>' + showIfUnchecked(GM_getValue('askArmorParts')) + '</strong><br>' +        '&nbsp;&nbsp;Part Type: <strong>' + cityArmorParts[GM_getValue('askArmorPartsId', 9)][0] + '</strong><br>' +        
+        '&nbsp;&nbsp;Part Type: <strong>' + cityDepotParts[GM_getValue('askDepotPartsId', 9)][0] + '</strong><br>' +
+        'Ask for Armory Parts: <strong>' + showIfUnchecked(GM_getValue('askArmorParts')) + '</strong><br>' +        '&nbsp;&nbsp;Part Type: <strong>' + cityArmorParts[GM_getValue('askArmorPartsId', 9)][0] + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -13404,7 +13383,6 @@ function autoWarAttack() {
   return false;
 }
 
-
 function autoWar() {
   var action = 'war';
   Autoplay.delay = getAutoPlayDelay();
@@ -13415,26 +13393,26 @@ function autoWar() {
     Autoplay.start();
     return true;
   }
-  
+
   // Check for a war that may already be under way : Is there a War Countdown ?
   var warStatus = xpathFirst('.//span[contains(@id, "war_timer")]', innerPageElt);
   // War Countdown found
-  if (warStatus) {  
-    var warTimer = warStatus.innerHTML; 
+  if (warStatus) {
+    var warTimer = warStatus.innerHTML;
     DEBUG('War Countdown Timer found : ' + warTimer + '.');
     //Check the war tab to see if there are enemy targets
     var warTargetEnnemies = $x('.//a[contains(@href, "xw_controller=war&xw_action=attack")]', innerPageElt);
     if(warTargetEnnemies){
       // Pick a Random Target out of the Targets List
       DEBUG('Enemy Targets Found ...');
-      var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)]; 
+      var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)];
       if(warElt){
         DEBUG('Going to Attack Selected Target in ongoing war.');
-        // Attack the Selected Target 
+        // Attack the Selected Target
         Autoplay.fx = function() {
           clickAction = action;
           clickContext = warElt;
-          clickElement(warElt); 
+          clickElement(warElt);
         };
         Autoplay.start();
         DEBUG('Attacked Selected Target in ongoing war.');
@@ -13450,21 +13428,21 @@ function autoWar() {
     if (callWarHelp && isGMChecked('autoWarResponsePublish')) {
       clickElement(callWarHelp);
       DEBUG('Clicking to ask for help in ongoing war.');
-      // Attack the Selected Target 
+      // Attack the Selected Target
       Autoplay.fx = function() {
         clickAction = action;
         clickContext = warElt;
-        clickElement(warElt); 
+        clickElement(warElt);
       };
       Autoplay.start();
       DEBUG('Clicked to ask for help in ongoing war.');
       return true;
     }
-    
+
     setGMTime('warTimer', '1 hour');
     DEBUG('Setting warTimer come back in 1 hour');
     return false;
-  } else {  
+  } else {
     // Get war Targets to Declare War on
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
     if (warFriendsList) {
@@ -13480,7 +13458,7 @@ function autoWar() {
     }
     // War a Random Target
     warElt.target_id = RegExp.$1;
-    
+
     DEBUG('Auto War Random Target ID : ' + warElt.target_id);
 
     // War Friends from a List
@@ -13498,13 +13476,13 @@ function autoWar() {
 
         DEBUG('Auto War Target ID from Friends List = ' + thisAutoWarTarget);
       } else {
-        // If there are no targets in the list, we keep the Random Target 
+        // If there are no targets in the list, we keep the Random Target
         addToLog('warning Icon','There are no targets in your Friends List. Changing War Settings to War a Random Friend.');
         GM_setValue('warMode', 0)
       }
     }
 
-    // Go to war 
+    // Go to war
     Autoplay.fx = function() {
       clickAction = action;
       clickContext = warElt;
@@ -15070,16 +15048,16 @@ function logFightResponse(rootElt, resultElt, context) {
     //Click Share Coins
     var coinLink, coinElt;
     coinElt = document.getElementById('share_asn_feed', resultElt);
-    if (coinElt && isGMChecked('autoShareCoins')) {      
+    if (coinElt && isGMChecked('autoShareCoins')) {
       DEBUG('Share Coins block found : '+coinElt.innerHTML);
       coinLink = xpathFirst('.//a[@class="sexy_button_new short_white"]//span[contains(.,"Share Coins")]', coinElt);
       if (coinLink){
         if (innerNoTags.match(/(.+?) earned you (.+?) victory coins/i)) shareTo = RegExp.$1;
         clickElement(coinLink);
         addToLog('info Icon', 'Clicked to Share Coins with '+shareTo);
-      } 
-    } 
-    
+      }
+    }
+
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
       // Look for any new opponents in the displayed list.
       findFightOpponent(rootElt);
@@ -15774,7 +15752,7 @@ function logResponse(rootElt, action, context) {
         }
       }
 
-      if (xpGainElt) {        
+      if (xpGainElt) {
         jobOptimizeOn = false;
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' + jobName + '</span> earning <span class="good">' + xpGainElt.innerHTML.toLowerCase() + '</span>';
@@ -15828,10 +15806,10 @@ function logResponse(rootElt, action, context) {
       } else if (innerNoTags.indexOf('You are not high enough level to do this job') != -1) {
         addToLog('warning Icon', 'You are not high enough level to do ' + missions[GM_getValue('selectMission', 1)][MISSION_NAME] + '.');
         addToLog('warning Icon', 'Job processing will stop');
-        GM_setValue('autoMission', 0); 
+        GM_setValue('autoMission', 0);
       } else if (innerNoTags.indexOf('Success') != -1) {
         jobOptimizeOn = false;
-        addToLog('process Icon', inner); 
+        addToLog('process Icon', inner);
       } else if (innerNoTags.indexOf('Missing') != -1) {
         if (getJobRowItems(jobName)) {
           DEBUG(' - - need items jobid='+jobid+' selectMission='+GM_getValue('selectMission', 1));
@@ -15927,7 +15905,7 @@ function logResponse(rootElt, action, context) {
                  linkToString(context.payer, 'user') + '.');
 
         GM_setValue('hitmanWinCountInt',GM_getValue('hitmanWinCountInt',0)+1);
-        GM_setValue('hitmanWinDollarsInt', String(parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + parseCash(context.bounty))); 
+        GM_setValue('hitmanWinDollarsInt', String(parseInt(GM_getValue('hitmanWinDollarsInt', 0)) + parseCash(context.bounty)));
         GM_setValue('totalWinDollarsInt', String(parseInt(GM_getValue('totalWinDollarsInt', 0)) + parseCash(context.bounty)));
         GM_setValue('fightWin$NY', String(parseInt(GM_getValue('fightWin$NY', 0)) + parseCash(context.bounty)));
       }
@@ -16200,7 +16178,7 @@ function logResponse(rootElt, action, context) {
         setGMTime(timerName, '24 hours');
         if (inner.match(/You built (.+?)\./)) {
           var log = 'You built <span class="loot">'+ RegExp.$1+'</span>.';
-          if (inner.match(/You gained.+&nbsp;(.+?\.)/))
+          if (inner.match(/You gained.+&nbsp;(.+?)<\/div>/))
             log += ' You gained ' + RegExp.$1;
           addToLog('lootbag Icon', log);
         }
@@ -16411,11 +16389,11 @@ function handlePopups() {
               DEBUG('Popup Process: Get Secret Stash Processed');
               var eltButton = xpathFirst('.//button',popupElts[i]);
               if (eltButton) {
-                eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]); 
+                eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
                 if (eltLoot && isGMChecked(useSecretStashItems) && autoSecretStashList) {
                   eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
                   eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
-                  eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);                  
+                  eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
                   for (var i = 0; i < autoSecretStashList.length; ++i) {
                     if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
                       var lootChoice = eltLoot1;
@@ -16444,7 +16422,7 @@ function handlePopups() {
                 return true;
               }
             }
-            
+
             // Process Crime Spree popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
             if (eltPubButton) {
@@ -16607,36 +16585,35 @@ function handlePopups() {
               }
               return true;
             }
-            
-            // War Popups
- 
 
-            // War Declaration            
+            // War Popups
+
+            // War Declaration
             var warDeclareButton = xpathFirst('.//a[@clas="sexy_button_new short_white sexy_call_new" and contains(@onclick,"attemptFeed")]',popupElts[i]);
             if(warDeclareButton) {
               if (isGMChecked('autoWarPublish')) {
                 clickElement(warDeclareButton);
                 DEBUG('Popup Process: WAR - Declare War Publishing');
                 return true;
-              } else {              
+              } else {
                 return(closePopup(popupElts[i], "War Declaration Popup"));
-              }  
-            }  
-                                          
+              }
+            }
+
             // War Rally for Help
             if (popupInnerNoTags.indexOf('help to take out all 7') != -1) {
-                eltHelp = xpathFirst('.//a[contains(.,"Ask Friends for Help")]', popupElts[i]);
-                if(eltHelp && isGMChecked('autoWarResponsePublish')) {
-                  clickElement(eltHelp);
-                  DEBUG('Popup Process: WAR - Ask Friends for Help Publishing');
-                  return true;
-                } else {
-                  return(closePopup(popupElts[i], "War Help Popup"));
-                }
-            
+              eltHelp = xpathFirst('.//a[contains(.,"Ask Friends for Help")]', popupElts[i]);
+              if(eltHelp && isGMChecked('autoWarResponsePublish')) {
+                clickElement(eltHelp);
+                DEBUG('Popup Process: WAR - Ask Friends for Help Publishing');
+                return true;
+              } else {
+                return(closePopup(popupElts[i], "War Help Popup"));
+              }
+
             }
-                     
-            // War Reward : Share Victory Coins            
+
+            // War Reward : Share Victory Coins
             var warRewardButtons = $x('.//a[@class="sexy_button_new short_white" and contains(@onclick,"postWarWin")]',popupElts[i]);
             if(warRewardButtons) {
               if (isGMChecked('autoWarRewardPublish')){
@@ -16645,16 +16622,16 @@ function handlePopups() {
                   clickElement(warRewardButton);
                   DEBUG('Popup Process: WAR - Reward Friends for Help Publishing');
                 }
-                return true;       
-              } 
+                return true;
+              }
               return(closePopup(popupElts[i], "War Reward Popup"));
             }
-           
-          // End of Popups Section           
+
+          // End of Popups Section
           }
-        /* END */          
-        /* THESE POPUPS get processed only when PS MWAP is running: */          
-          
+        /* END */
+        /* THESE POPUPS get processed only when PS MWAP is running: */
+
         }
       }
     }
