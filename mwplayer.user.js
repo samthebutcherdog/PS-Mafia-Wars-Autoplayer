@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.749
+// @version     1.1.750
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.749',
+  version: '1.1.750',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2031,23 +2031,23 @@ function doAutoPlay () {
   
 /*
   // Ask for Special Parts 
-  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
     if (askSpecialParts(null, 0, 0)) return;
   } 
 */
 
   // Ask for Chop Shop Parts 
-  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
     if (askSpecialParts(cityShopParts, GM_getValue('askShopPartsId',1), 11)) return;
   }
 
   // Ask for Weapons Depot Parts 
-  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
     if (askSpecialParts(cityDepotParts, GM_getValue('askDepotPartsId',1), 12)) return;
   }
   
   // Ask for Armor Parts 
-  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer') && (isFlashed!=FLASH_ENABLED)) {    
     if (askSpecialParts(cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
   }
 
@@ -2965,8 +2965,8 @@ function canMission() {
     if (!enoughEnergy) return false;
 
     var doJob;
-    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][MISSION_RATIO] - missions[a][MISSION_RATIO]; });
-
+    multiple_jobs_ratio_sorted.sort(function(a, b) { return missions[b][MISSION_RATIO] - missions[a][MISSION_RATIO]; });    
+    
     // Don't do expBurners or biggest exp job if energy can be salvaged
     if (singleJobLevelUp.length > 0 && !canSalvage) {
       singleJobLevelUp.sort(function(a, b) { return b[2] - a[2]; });
@@ -8028,28 +8028,9 @@ function createCashTab () {
   }
   carType.selectedIndex = GM_getValue(id, 8);
   carType.setAttribute('title', cityCars[carType.selectedIndex][2]);
-
-  // Ask for Chop Shop Parts
-  xTop += 25;
-  title = 'Check this to Ask for Chop Shop Parts every 12 hours';
-  id = 'askShopParts';
-  var shopParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;left:10px;'});
-  makeElement('input', shopParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  label = makeElement('label', shopParts, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Chop Shop Parts'));
-  
-  // List Chop Shop Parts
-  id = 'askShopPartsId';
-  var shopPartsType = makeElement('select', shopParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
-  for (i = 0, iLength=cityShopParts.length; i < iLength; ++i) {
-    var choice = makeElement('option', null, {'value':i,'title':cityShopParts[i][0]});
-    choice.appendChild(document.createTextNode(cityShopParts[i][0]));
-    shopPartsType.appendChild(choice);
-  }
-  shopPartsType.selectedIndex = GM_getValue(id, 0); 
  
   // Option to build a weapon
-  xTop += 40;
+  xTop += 25;
   title = 'Check this to build a weapon every 24 hours';
   id = 'buildWeapon';
   var buildWeapon = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
@@ -8068,27 +8049,8 @@ function createCashTab () {
   weaponType.selectedIndex = GM_getValue(id, 7);
   weaponType.setAttribute('title', cityWeapons[weaponType.selectedIndex][2]);
 
-  // Ask for Weapon Depots Parts
-  xTop += 25;
-  title = 'Check this to Ask for Weapon Depots Parts every 12 hours';
-  id = 'askDepotParts';
-  var depotParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;left:10px;'});
-  makeElement('input', depotParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  label = makeElement('label', depotParts, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Weapon Depots Parts'));
-  
-  // List Weapon Depots Parts
-  id = 'askDepotPartsId';
-  var depotPartsType = makeElement('select', depotParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
-  for (i = 0, iLength=cityDepotParts.length; i < iLength; ++i) {
-    var choice = makeElement('option', null, {'value':i,'title':cityDepotParts[i][0]});
-    choice.appendChild(document.createTextNode(cityDepotParts[i][0]));
-    depotPartsType.appendChild(choice);
-  }
-  depotPartsType.selectedIndex = GM_getValue(id, 0);
-
   // Option to build a armor
-  xTop += 40;
+  xTop += 25;
   title = 'Check this to build a armor every 24 hours';
   id = 'buildArmor';
   var buildArmor = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
@@ -8107,11 +8069,51 @@ function createCashTab () {
   armorType.selectedIndex = GM_getValue(id, 7);
   armorType.setAttribute('title', cityArmor[armorType.selectedIndex][2]);
 
+  // Ask for Chop Shop Parts
+  xTop += 40;
+  title = 'Check this to Ask for Chop Shop Parts every 12 hours';
+  id = 'askShopParts';
+  var shopParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('font', shopParts, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Asking for parts currently only works when Flash is enabled.'));
+  makeElement('br', shopParts);
+  makeElement('input', shopParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', shopParts, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Chop Shop Parts'));
+  
+  // List Chop Shop Parts
+  id = 'askShopPartsId';
+  var shopPartsType = makeElement('select', shopParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
+  for (i = 0, iLength=cityShopParts.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityShopParts[i][0]});
+    choice.appendChild(document.createTextNode(cityShopParts[i][0]));
+    shopPartsType.appendChild(choice);
+  }
+  shopPartsType.selectedIndex = GM_getValue(id, 0); 
+
+  // Ask for Weapon Depots Parts
+  xTop += 45;
+  title = 'Check this to Ask for Weapon Depots Parts every 12 hours';
+  id = 'askDepotParts';
+  var depotParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('input', depotParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', depotParts, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Weapon Depots Parts'));
+  
+  // List Weapon Depots Parts
+  id = 'askDepotPartsId';
+  var depotPartsType = makeElement('select', depotParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
+  for (i = 0, iLength=cityDepotParts.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityDepotParts[i][0]});
+    choice.appendChild(document.createTextNode(cityDepotParts[i][0]));
+    depotPartsType.appendChild(choice);
+  }
+  depotPartsType.selectedIndex = GM_getValue(id, 0);
+  
   // Ask for Armor Parts
   xTop += 25;
   title = 'Check this to Ask for Armor Parts every 12 hours';
   id = 'askArmorParts';
-  var armorParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;left:10px;'});
+  var armorParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
   makeElement('input', armorParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', armorParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Armor Parts'));
@@ -8127,13 +8129,13 @@ function createCashTab () {
   armorPartsType.selectedIndex = GM_getValue(id, 0);
 
   // Ask for Special Parts
-  xTop += 40;
+  xTop += 25;
   title = 'Check this to Ask for Special Parts every 12 hours';
   id = 'askSpecialParts';
   var specialParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
   makeElement('input', specialParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', specialParts, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Special Parts'));
+  label.appendChild(document.createTextNode('Ask for Special Parts'));  
 
   // Collect Takes
   var xTop = 50;
@@ -11757,8 +11759,18 @@ function customizeProps() {
       addToLog('updateBad Icon', flashLog);
     else
       DEBUG(flashLog);
-    return true;
-
+      
+/*    var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
+    if (flashvars && flashvars.value) {
+      var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
+      var logtxt='';
+      for (var i=0, iLength = response.length; i<iLength; ++i) {
+        logtxt+=i+': '+response[i].name + ', level: ' + response[i].level + ', maxlevel: ' + response[i].maxlevel + ',payout: '+response[i].payout+', rate: '+response[i].rate+', upgrade cost: '+response[i].upgrade_cost+', build cost: '+response[i].build_cost+'\n';
+      }
+      alert(logtxt);
+    }
+*/    
+    return true;    
   }
   // Flash is disabled
   isFlashed = FLASH_DISABLED;
@@ -16394,37 +16406,45 @@ function handlePopups() {
 */
 
             // Process Secret Stash
-            var autoSecretStashList=getSavedList('secretStashItems');
+            var autoSecretStashList=getSavedList('secretStashItems',"");
             if (popupInnerNoTags.indexOf('Get yours') != -1) {
               DEBUG('Popup Process: Get Secret Stash Processed');
-              var eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]); 
-              if (eltLoot && isGMChecked(useSecretStashItems)) {
-                eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
-                eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
-                eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);       
-                for (var i = 0; i < autoSecretStashList.length; ++i) {
-                  if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                    eltLoot = eltLoot1;
-                    break;
+              var eltButton = xpathFirst('.//button',popupElts[i]);
+              if (eltButton) {
+                eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]); 
+                if (eltLoot && isGMChecked(useSecretStashItems) && autoSecretStashList) {
+                  eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
+                  eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
+                  eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);                  
+                  for (var i = 0; i < autoSecretStashList.length; ++i) {
+                    if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
+                      var lootChoice = eltLoot1;
+                      break;
+                    }
+                    if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
+                      var lootChoice = eltLoot2;
+                      break;
+                    }
+                    if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
+                      var lootChoice = eltLoot3;
+                      break;
+                    }
                   }
-                  if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                    eltLoot = eltLoot2;
-                    break;
+                  // If we selected something, press the stash button
+                  if (lootChoice) {
+                    clickElement(lootChoice);
+                    addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
+                    addToLog('lootbag Icon', '<span class="loot">'+' Received '+ lootChoice.innerHTML.untag() + ' from a secret stash.</span>');
+                  } else {
+                    addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a secret stash.</span>');
                   }
-                  if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                    eltLoot = eltLoot3;
-                    break;
-                  }
-                }                
-                clickElement(eltLoot);
-                addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
-                addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a secret stash.</span>');
+                  // Default select is the first item so this button is always valid
+                  clickElement(eltButton);
+                }
                 return true;
-              } else {
-                return(closePopup(popupElts[i], "Secret Stash"));
               }
             }
-
+            
             // Process Crime Spree popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
             if (eltPubButton) {
