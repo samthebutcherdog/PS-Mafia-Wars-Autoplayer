@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.753
+// @version     1.1.754
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.753',
+  version: '1.1.754',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2009,7 +2009,7 @@ function doAutoPlay () {
   }
 
   // Auto-bank
-  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && !quickBankFail &&
+  var canBank = isGMChecked(cities[city][CITY_AUTOBANK]) && !suspendBank && quickBankFail &&
                 cities[city][CITY_CASH] >= parseInt(GM_getValue(cities[city][CITY_BANKCONFG]));
   if (running && canBank) {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
@@ -3876,7 +3876,7 @@ function autoBankDeposit(bankCity, amount) {
 
   // Make sure we're at the bank.
   var bankElt = xpathFirst('.//div[@id="bank_popup"]', popupfodderElt);
-  if (!bankElt) {
+  if (!bankElt || bankElt.parentNode.style.display == 'none') {
     Autoplay.fx = goBank;
     Autoplay.start();
     return true;
@@ -3919,15 +3919,13 @@ function autoBankDeposit(bankCity, amount) {
 
   // Make the deposit
   Autoplay.fx = function() {
-    quickBankFail = false;
+    //quickBankFail = false;
     clickContext = bankCity;
     clickAction = 'deposit';
     clickElement (submitElt);
     DEBUG('Clicked to deposit.');
   };
-  Autoplay.delay = noDelay;
   Autoplay.start();
-  closePopup(bankElt.parentNode, "Bank Popup");
   return true;
 }
 
@@ -13698,10 +13696,10 @@ function autoTournament() {
 
         var hasLost = xpathFirst('.//a[contains(text(),"Why did I lose")]', tournamentPage5);
         var hasGained = '';
-        if (expElt) hasGained += ' XP: ' + expElt.innerHTML;
-        if (chipsElt) hasGained += ' Cash: V$' + chipsElt.innerHTML;
-        if (tokensElt) hasGained += ' Tokens: ' + tokensElt.innerHTML;
-        if (fansElt) hasGained += ' Fans: ' + fansElt.innerHTML;
+        if (expElt) hasGained += (hasGained ? ', ' : ' ') + 'XP: ' + expElt.innerHTML;
+        if (chipsElt) hasGained += (hasGained ? ', ' : ' ') + 'Cash: V$' + chipsElt.innerHTML;
+        if (tokensElt) hasGained += (hasGained ? ', ' : ' ') + 'Tokens: ' + tokensElt.innerHTML;
+        if (fansElt) hasGained += (hasGained ? ', ' : ' ') + 'Fans: ' + fansElt.innerHTML;
 
         if (!hasLost) {
           addToLog('yeah Icon', 'Tournament finished, you won!' + (hasGained ? '<br><span class="good">Gained' + hasGained + '</span>' : ''));
@@ -14709,7 +14707,7 @@ function goPropertyNav() {
 }
 
 function goDeleteNews() {
-  var elt = xpathFirst('//a[contains(text(), "Clear Updates")]');
+  var elt = xpathFirst('.//a[contains(@onclick,"xw_action=deletenews") and contains(text(),"Clear")]', innerPageElt);
   if (!elt) {
     DEBUG('Can\'t find Clear Updates link to click. ');
     return;
@@ -16128,8 +16126,8 @@ function logResponse(rootElt, action, context) {
       }
 
       // Close banking
-      var closePopElt = xpathFirst('//div[@class="pop_box"]//a[@class="pop_close"]')
-      clickElement(closePopElt);
+      var bankElt = xpathFirst('//div[@id="bank_popup"]');
+      if (bankElt && bankElt.parentNode) closePopup(bankElt.parentNode, "Bank Popup");
       break;
 
     case 'withdraw':
