@@ -14,10 +14,16 @@
 * All images copyright PlayerScripts.com. All rights reserved. 2010
 */
 
+/*
+missions popups found
+Popup Found: pop_box_socialmission_error_dialog Failed to give reward. Please try again later.Close
+
+Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background: url(http://mwfb.static.zynga.com/mwfb/graphics/socialmissions/popups/txt_youvebeenrewarded.png) 0 0 no-repeat;height: 49px; width: 502px;margin: 0 auto;}.collectPopRow {color: #FFCD00; width: 616px;margin: 10px auto;text-align: center;}.collectPopLoot {margin: 10px auto;}.collectPopLootItem {text-align: center;}.collectPopName {height: 24px;width: 107px;text-align: center;margin: 0 auto;}Congratulations! You and your crew have successfully completed the mission. For your hard work, these great items have been added to your arsenal.Vicious Tiger5234Flame Broiler5633Death Dealer Minigun4864
+*/
 /**
 * @package: Facebook Mafia Wars Autoplayer
 * @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Lister, SamTheButcher, MaxJ, donnaB,
-            billy_bob, Cam, janmillsjr, nonoymsd
+            BBB, Cam, janmillsjr, nonoymsd
 * @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
@@ -27,7 +33,10 @@
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
 */
-
+// newchangefight
+// newchangemission
+// newchange
+// newchangenotadded
 // ==UserScript==
 // @name        PS Facebook Mafia Wars Autoplayer (MWAP)
 // @namespace   mafiawars
@@ -39,7 +48,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.755
+// @version     1.1.756
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +59,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.755',
+  version: '1.1.756',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -867,6 +876,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_AUTOHITLIST  = 4; // Place bounties.
   const STAMINA_HOW_RANDOM       = 5; // Random spending of stamina in random cities.
   const STAMINA_HOW_FIGHTROB     = 6; // Fight then Rob random opponents.
+//  const STAMINA_HOW_LVJOBFIGHT   = 7;  // do lv job Fights.
+// newchangefight
 
   var staminaSpendChoices = [];
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
@@ -876,6 +887,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
   staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
+//  staminaSpendChoices[STAMINA_HOW_LVJOBFIGHT]   = 'Do LV Job Fights';
+// newchangefight
 
   var randomSpendChoices = [];
   randomSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random';
@@ -2015,6 +2028,23 @@ function doAutoPlay () {
     if (autoBankDeposit(city, cities[city][CITY_CASH])) return;
   }
 
+  // Click attack if on warNav
+  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
+    if (autoWarAttack()) return;
+  }
+
+  // Auto-war (limit to level 4 and above)
+  if (running && !maxed && isGMChecked('autoWar') && hasFight && !timeLeftGM('warTimer')) {
+    if (autoWar()) return;
+  }
+
+// newchange
+// auto mission-collect      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+  if (running && isGMChecked('AutoMafiaMission') && !timeLeftGM('colmissionTimer')) {  // && !maxed
+     if (Auto_Mafia_Mission() ) return;
+  } else { DEBUG(' Mafia Missions Turned Off, or timer not 0 ');
+  }
+
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -2095,16 +2125,6 @@ function doAutoPlay () {
   // Auto-lotto (limit to level 7 and above)
   if (running && !maxed && isGMChecked('autoLottoOpt') && hasMarket) {
     if (autoLotto()) return;
-  }
-
-  // Click attack if on warNav
-  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
-    if (autoWarAttack()) return;
-  }
-
-  // Auto-war (limit to level 4 and above)
-  if (running && !maxed && isGMChecked('autoWar') && hasFight && !timeLeftGM('warTimer')) {
-    if (autoWar()) return;
   }
 
   // Auto-accept
@@ -3925,7 +3945,9 @@ function autoBankDeposit(bankCity, amount) {
     clickElement (submitElt);
     DEBUG('Clicked to deposit.');
   };
+  Autoplay.delay = noDelay;
   Autoplay.start();
+  closePopup(bankElt.parentNode, "Bank Popup");
   return true;
 }
 
@@ -4656,7 +4678,6 @@ function saveSettings() {
     'autoClick','autoPause','idleInCity','autoLottoOpt','autoLottoBonus','burnFirst','featJob','autoTournament','useSecretStashItems'
   ]);
   //General Tab Settings
-
   // Validation of refresh and delay values
   var refreshLow = parseInt(document.getElementById('r1').value); var refreshHigh = parseInt(document.getElementById('r2').value);
   var delayLow = parseInt(document.getElementById('d1').value); var delayHigh = parseInt(document.getElementById('d2').value);
@@ -4768,6 +4789,11 @@ function saveSettings() {
 
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   //End Save Mafia Tab Settings
+
+  //Missions Tab Checkboxes  // newchange
+  saveCheckBoxElementArray([
+    'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+  ]);
 
   //Start Save Autostat Tab Settings
   //Autostat Tab Checkboxes
@@ -5792,10 +5818,10 @@ function createSettingsBox() {
 
   // This creates the settings box just like a facebook popup
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
-  elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 540px;'});
+  elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 660px;'}); // newchange
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 600px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
-  //End settings box
+  var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 660px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
+  //End settings box                                                                                          was 600  // newchange
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
 
@@ -5803,6 +5829,7 @@ function createSettingsBox() {
   //       to put the bar on the left side.
   elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; text-align: center'});
   //elt = makeElement('div', settingsBox, {'style':'position: static; width: 100%; text-align: left'});
+//    elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: 5px;  width: 100%; text-align: center'});
 
   var tabNav = makeElement('div', elt, {'id':'tabNav', 'style':'position: static; display: inline-block; background: transparent repeat-x scroll 0 0; border: 1px solid #AAAAAA; fontsize: 13px; line-height: 28px; '});
     var generalTabLink = makeElement('div', tabNav, {'class':'selected', 'id':'General_Tab'});
@@ -5811,6 +5838,11 @@ function createSettingsBox() {
       makeElement('a', displayTabLink, {'href':'#', 'rel':'displayTab'}).appendChild(document.createTextNode('Display'));
     var mafiaTabLink = makeElement('div', tabNav, {'id':'Mafia_Tab'});
       makeElement('a', mafiaTabLink, {'href':'#', 'rel':'mafiaTab'}).appendChild(document.createTextNode('Mafia'));
+
+// newchange
+    var MafiaHelpTabLink = makeElement('div', tabNav, {'id':'Help_Missions_Tab'});
+      makeElement('a', MafiaHelpTabLink, {'href':'#', 'rel':'HelpMissionsTab'}).appendChild(document.createTextNode('Missions/Help'));
+
     var autostatTabLink = makeElement('div', tabNav, {'id':'Autostat_Tab'});
       makeElement('a', autostatTabLink, {'href':'#', 'rel':'autostatTab'}).appendChild(document.createTextNode('Autostat'));
     var energyTabLink = makeElement('div', tabNav, {'id':'Energy_Tab'});
@@ -5835,6 +5867,10 @@ function createSettingsBox() {
   // Create Mafia tab.
   var mafiaTab = createMafiaTab();
   settingsBox.appendChild(mafiaTab);
+
+  // Create help/publish tab.  // newchange
+  var HelpMissionsTab = createHelpMissionsTab();
+  settingsBox.appendChild(HelpMissionsTab);
 
   // Create Autostat tab.
   var autostatTab = createAutostatTab();
@@ -5861,13 +5897,15 @@ function createSettingsBox() {
   settingsBox.appendChild(aboutTab);
 
   // Create save button
-  var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 10px; bottom: 10px;'});
+//  var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 10px; bottom: 10px;'});
+  var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 5px; top:40px;'});  // newchange
   makeElement('button', saveButton).appendChild(document.createTextNode('Save Settings'));
   saveButton.addEventListener('click', saveSettings, false);
 
   // Create Update button
   if (gvar.isGreaseMonkey) {
-    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 10px; bottom: 10px;'});
+//    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 10px; bottom: 10px;'});
+    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 5px; top: 40px;'});  // newchange
     makeElement('button', updateButton).appendChild(document.createTextNode('Update-Check'));
     updateButton.addEventListener('click', updateScript, false);
   }
@@ -5900,8 +5938,9 @@ function createGeneralTab() {
   var elt, title, id, label, item, i, lhs, rhs, choice;
   var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  // Container for a list of settings.
-  var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
+  // Container for a list of settings. // newchange                                                                                 95
+  var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 130%; line-height:120%;'});
+//  var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Refresh option
   item = makeElement('div', list);
@@ -6112,8 +6151,9 @@ function createDisplayTab() {
   var title, id, i, item, choice, lhs, rhs;
   var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  // Container for a list of settings.
-  var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
+  // Container for a list of settings.  // newchange
+//  var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 145%; line-height:120%;'});
+  var list = makeElement('div', displayTab, {'style':' top: 10px; margin-left: auto; margin-right: auto; width: 120%; line-height:120%;'});
 
   // Logging option
   item = makeElement('div', list);
@@ -6335,7 +6375,8 @@ function createMafiaTab() {
   var mafiaTab = makeElement('div', null, {'id':'mafiaTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
+//  var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
+  var list = makeElement('div', mafiaTab, {'style':'position: relative; top: 10px; margin-left: 40px; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Auto-ask for job help
   item = makeElement('div', list);
@@ -6446,7 +6487,7 @@ function createMafiaTab() {
   if (GM_getValue('selectBangkokTier') == '8') choiceBangkokTier.selected = true;
   selectBangkokTier.appendChild(choiceBangkokTier);
 
-  // Auto-accept mafia invitations
+  // Auto help on crew collections
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
@@ -6738,12 +6779,63 @@ function createMafiaTab() {
   return mafiaTab;
 }
 
+/////////////////////////////////////// end mafia tab
+// Create Missions Tab  // newchange      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+function createHelpMissionsTab() {
+  var elt, title, id, label, item, lhs, rhs, i, choice, div;
+  var HelpMissionsTab = makeElement('div', null, {'id':'HelpMissionsTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
+  var statDiv = makeElement('div', HelpMissionsTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
+
+  var TabHeader = makeElement('div', HelpMissionsTab, {'style': 'top: 10px; left: 240px; font-size: 18px; font-weight: bold;'});
+  TabHeader.appendChild(document.createTextNode(' Mafia Missions & Help '));
+
+  // enable mafia missions
+  id = 'AutoMafiaMission';
+  title = 'Participate In Mafia Missions';
+  var AutoMafiaMission = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 25px; left: 10px;'});
+  makeElement('input', AutoMafiaMission, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', AutoMafiaMission, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Mafia Missions '));
+
+  // ask for Mission help
+  id = 'AskMissionHelp';
+  title = 'Ask For Help In Your Missions';
+  var AskMissionHelp = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 45px; left: 10px;'});
+  makeElement('input', AskMissionHelp, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', AskMissionHelp, {'for':id,'title':title}).appendChild(document.createTextNode(' Ask For Mission Help '));
+
+  // enable mafia collections
+  id = 'AutoMafiaCollection';
+  title = 'Collect Mafia Mission Rewards';
+  var AutoMafiaCollection = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 65px; left: 10px;'});
+  makeElement('input', AutoMafiaCollection, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', AutoMafiaCollection, {'for':id,'title':title}).appendChild(document.createTextNode(' Collect Mission Rewards '));
+
+  // help in mafia mission jobs
+  id = 'AutoMafiaJob';
+  title = 'Help In Mafia Mission Jobs';
+  var AutoMafiaJob = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 85px; left: 10px;'});
+  makeElement('input', AutoMafiaJob, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', AutoMafiaJob, {'for':id,'title':title}).appendChild(document.createTextNode(' Do Mission Jobs '));
+
+  // help in mafia mission fighting
+  id = 'AutoMafiaFight';
+  title = 'Help In Mafia Mission Fights';
+  var AutoMafiaFight = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 105px; left: 10px;'});
+  makeElement('input', AutoMafiaFight, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', AutoMafiaFight, {'for':id,'title':title}).appendChild(document.createTextNode(' Do Mission Job Fights '));
+
+
+  return HelpMissionsTab;
+}
+//////////////////////
+
 // Create Autostat Tab
 function createAutostatTab() {
   var title, id, label, i, j, choice, div;
   var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
+   var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 50px; top: 40px;'});
+// var statDiv = makeElement('div', autostatTab, {'style':'position: absolute; width: 100%; left: 10px; top: 10px;'});
 
   id = 'autoStat';
   title = 'Check this this to enable auto-statting';
@@ -7439,6 +7531,13 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label = makeElement('label', lhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Use fight stealth'));
 }
+/*
+
+//STAMINA_HOW_LVJOBFIGHT
+// Create Stamina Sub Tabs
+function createStaminaSubTab_LVJobFight(staminaTabSub) {
+}
+*/
 
 function createStaminaSubTab_FightSpecific(staminaTabSub) {
 
@@ -7814,6 +7913,10 @@ function createStaminaTab() {
       case STAMINA_HOW_FIGHTROB :
         createStaminaSubTab_FightRob(staminaTabSub);
         break;
+// newchange
+//      case STAMINA_HOW_LVJOBFIGHT :
+//        createStaminaSubTab_LVJobFight(staminaTabSub);
+//        break;
       default :
         createStaminaSubTab_Random(staminaTabSub);
         break;
@@ -7833,7 +7936,8 @@ function createHealTab() {
   var healTab = makeElement('div', null, {'id':'healTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
   // Container for a list of settings.
-  var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
+   var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: 0px; margin-right: auto; width: 95%; line-height:120%;'});
+// var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Healing options
   item = makeElement('div', list);
@@ -7985,7 +8089,8 @@ function createCashTab () {
 
   title = 'Check this to auto-upgrade properties';
   id = 'autoBuy';
-  var autoBuy = makeElement('div', cashTab, {'style':'top: 10px;'});
+// var autoBuy = makeElement('div', cashTab, {'style':'top: 10px;'});
+   var autoBuy = makeElement('div', cashTab, {'style':'top: 10px;left: 120px;'});
   makeElement('input', autoBuy, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', autoBuy, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Auto-upgrade properties '));
@@ -8183,7 +8288,8 @@ function createCashTab () {
 function createAboutTab() {
   var elt, title, id, label;
   var aboutTab = makeElement('div', null, {'id': 'aboutTab', 'class': 'tabcontent', 'style': 'background-image:url(' + stripURI(bgTabImage) + ')' });
-  var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 10px; font-size: 18px; font-weight: bold;'});
+//var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 10px; font-size: 18px; font-weight: bold;'});
+  var versionInfo = makeElement('div', aboutTab, {'style': 'top: 10px; left: 250px; font-size: 18px; font-weight: bold;'});
   versionInfo.appendChild(document.createTextNode('Version ' + SCRIPT.version));
 
   var devs = makeElement('div', aboutTab, {'style': 'top: 50px; width: 550px; left: 10px; font-size: 12px; font-weight: bold;'});
@@ -8194,7 +8300,7 @@ function createAboutTab() {
                  'CyB, int1, Janos112, int2str, Doonce, Eric Layne, Tanlis, Cam, ' +
                  'csanbuenaventura, vmzildjian, Scrotal, Bushdaka, rdmcgraw, moe, ' +
                  'KCMCL, caesar2k, crazydude, keli, SamTheButcher, dwightwilbanks, ' +
-                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger, Lister, MaxJ';
+                 'nitr0genics, DTPN, nonoymsd, donnaB, black1ger, Lister, MaxJ, BBB';
 
   devList = makeElement('p', devs, {'style': 'position: relative; left: 15px;'});
   devList.appendChild(document.createTextNode(devNames));
@@ -9238,6 +9344,9 @@ function handlePublishing() {
         // Job Help
         if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
 
+//        // missions  // newchange                         what is this for      \/
+//        if (checkPublish('.//div[contains(.,"mission_collect_dialog")]','autoAskHelponCC', pubElt, skipElt)) return;
+
         // Collections
         if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
 
@@ -9667,7 +9776,6 @@ function refreshMWAPCSS() {
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
-
                  // Move Slot Machine and click box:
                  (isGMChecked('HideSlotMachine') ?
                   ' #slots_icon_container  {display: none;}' +
@@ -9772,7 +9880,8 @@ function refreshMWAPCSS() {
                  '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
                  '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
                  '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
-                 '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
+//               '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
+                 '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:660px}' +  // newchange
                  '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
                  '#settingsBox select,#settingsBox input{border:1px solid;} #settingsBox textarea{border:2px solid;}' +
                  '#settingsBox label {font-weight: normal; color: #BCD2EA}' +
@@ -9875,6 +9984,8 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
       '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
       '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
+      '<br>&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') +
+      '<br>&nbsp;&nbsp;CollectMissionsHelpTimer: ' + getHoursTime('colmissionHelpTimer') +
       '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
       '<br>&nbsp;&nbsp;autoAskHelponCCTimer: ' + getHoursTime('autoAskHelponCCTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
@@ -9922,6 +10033,10 @@ function resetTimers(manually) {
   checkTimer('rewardEnergyTimer', 1800);
   checkTimer('checkVaultTimer', 900);
   checkTimer('tournamentTimer', 300);
+  checkTimer('colmissionTimer', 600); // 10 min
+//  checkTimer('colmissionTimer', 30); // 30 seconds
+  checkTimer('colmissionHelpTimer', 7320); // 2 hours 2 minutes
+// newchange
 
   addToLog('warning Icon', 'All active timers have been reset.');
   if (manually) {
@@ -11864,7 +11979,8 @@ function customizeHitlist() {
 }
 
 function setLevelUpRatio() {
-  var combined = (city == LV);
+  var combined = ((city == NY) ||(city == LV)||(city == MOSCOW)||(city == BANGKOK)||(city == CUBA));
+// newchange    var combined = (city == LV);
   var elt = document.getElementById('level_up_ratio');
   if (elt) {
     var ratioHTML = '';
@@ -14576,6 +14692,25 @@ function goJob(jobno) {
       }
 
       DEBUG('Only doing the job if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
+
+// newchange
+////
+ DEBUG(' check stam 1');
+      //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
+      var skipCurrentJob = false;
+      StamReqElt = xpathFirst('.//dd[@class="stamina"]', jobRow);
+        if(StamReqElt) {
+        StamReq = parseInt(StamReqElt.innerHTML.untag());
+          DEBUG('Required Stamina:' +StamReq+':');
+        if(StamReq > stamina) {
+          skipCurrentJob = true;
+        DEBUG('stamina requied :'+StamReq+': have :'+stamina+': not enough stamina, go home');
+goHome();
+        } else  DEBUG('stamina requied :'+StamReq+': have :'+stamina+': have enough stamina do job');
+      } else   DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
+      DEBUG(' check stam 3');
+      // newchange
+
       var smallestMafia = opponentMafiaMax;
       var lowestLevel = opponentLevelMax;
       var foundOpp = false;
@@ -14606,6 +14741,7 @@ function goJob(jobno) {
           DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         }
       }
+
       if(foundOpp){
         DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
@@ -16150,6 +16286,10 @@ function logResponse(rootElt, action, context) {
       addToLog('info Icon', inner);
       break;
 
+    case 'mission rewards':
+      addToLog('info Icon', inner);
+      break;  // newchangemission
+
     case 'crew collection':
       addToLog('info Icon', inner);
       break;
@@ -16244,7 +16384,9 @@ function handlePopups() {
 
     // Look for all popups that are showing
     var popupElts = $x('.//div[(((contains(@id,"pop") and not(contains(@id,"pop_bg")) and not(contains(@id,"box_bg"))) and contains(@style, "block")) or contains(@id,"mystery")) and not(@id="popup_fodder")]', appLayoutElt);
+
     if (popupElts && popupElts.length > 0) {
+
       // Process each popup that is open
       DEBUG('Popups Found: ' + popupElts.length);
       for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
@@ -17283,3 +17425,188 @@ function encode64(input) {
 
   return output;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// newchange      isGMChecked('AutoMafiaMission')  'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+
+function GoMissionsTab() {
+    DEBUG('Trying to go to missions tab. - - - - ');
+    var elt = xpathFirst('//div[@class="nav_link events_link"]//a',menubarElt);
+  if (elt) {
+    clickElement(elt);
+    DEBUG('Clicked to go to missions tab.');
+  } else { DEBUG('trying auto collect mission, link not found - - ');   }  // menubarElt   //
+}
+
+function OnMissionsTab() {
+  // Return true if we're on the missions tab, false otherwise.
+    if(xpathFirst('//div[@id="socialMissionNav"]//a',innerPageElt)) {
+    DEBUG(' on missions tab page - - - ');
+    return true;
+  }
+  DEBUG(' - - - NOT on missions tab page - - - ');
+  return false;
+}
+////
+function Auto_Mafia_Mission(){
+  // Go to the missions tab
+  if (!OnMissionsTab()) {
+    Autoplay.fx = GoMissionsTab;
+    Autoplay.start();
+    return true;
+  }
+
+  DEBUG(' - - - - in Collect on missions, gonna check help, collection, job, fight');
+
+ if(isGMChecked('AskMissionHelp')) Chk_mission_help () ;
+   if (!Mafia_Missions_Tab()) {
+     Autoplay.fx = Auto_Mafia_Collection_Tab();
+//     Autoplay.fx = Auto_Mafia_Collection();
+     Autoplay.start();
+     return true;
+  }
+
+ if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;
+ if(isGMChecked('AutoMafiaJob'))   Do_Mafia_Mission_Job() ;
+ if(isGMChecked('AutoMafiaFight')) Do_Mafia_Mission_Job_Fight() ;
+
+  if (Chk_Nxt_Page()) {
+    Autoplay.fx = GoMissionsTab;
+    Autoplay.start();
+    return true;
+  }
+  return;
+}
+////////////////////////////////////////////////////////////////////////
+
+//  menubarElt = document.getElementById('menubar');
+//  elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.changePath('+tabnopath+');")]');
+// onclick  myMissions      and contains 'My Missions'
+// onclick  myMafiaMissions and contains 'My Mafia Missions'
+///////////////////////////////////////////////////////////////////////////
+// newchange      isGMChecked('AutoMafiaMission')  'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+
+//a id sm_action_button_4caf1f1579465   class  sexy_button_new do_job medium_white  onclick SocialMissionView.startTask('4caf1f1579465','1','79958337'); return false;
+ // dotaskbutton     a id  taskDoJob_4caf1f1579465_79958337    class sexy_button_new do_job sexy_energy_new medium_orange
+ // onclick    SocialMissionController.doTask('4caf1f1579465','79958337','1'); return false;
+
+
+////
+function Do_Mafia_Mission_Job(){
+ DEBUG(' - - - - were at the do missions jobs section - - - ');
+    var MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job medium_white"  and contains(@onclick, "SocialMissionView.startTask")]', innerPageElt);
+    if(MyMafiaJobs) {
+      DEBUG(' - - - we have a job to try to do');
+      clickElement(MyMafiaJobs);
+    }
+//  if (Chk_Nxt_Page()) {
+//    Autoplay.fx = Do_Mafia_Mission_Job;
+//    Autoplay.start();
+//    return true;
+//  }
+}
+////
+function Do_Mafia_Mission_Job_Fight(){
+ DEBUG(' - - - - were at the do missions Fight section - - - ');
+//  if (Chk_Nxt_Page()) {
+//    Autoplay.fx = Do_Mafia_Mission_Job_Fight;
+//    Autoplay.start();
+//    return true;
+//  }
+}
+///////////////////////////////////////////////////////// start of mission collect
+// newchange      isGMChecked('AutoMafiaMission')  'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+
+
+function Mafia_Missions_Tab() {
+//    var myMafiaMissions = xpathFirst('.//a[@id="myMafiaMissions"  and contains(@onclick, "controller=socialmission")  and not (contains(@style, "marketplace_menu_item_hover"))]', innerPageElt);
+    // if we find this string we are on the mymissions page for me only, not mafia
+
+      var myMafiaMissions = xpathFirst('.//a[(@id="myMafiaMissions"  and contains(@onclick, "controller=socialmission")  and contains(@style, "marketplace_menu_item_hover"))]', innerPageElt);
+        if(myMafiaMissions) {
+        DEBUG(' on myMafiaMissions tab, good to go - - -  ');
+        return true ;
+        } else {
+        DEBUG(' not on myMafiaMissions tab, need to change - - - ');
+//        clickElement(myMafiaMissionstab);
+        }
+        return false;
+}
+
+function Auto_Mafia_Collection_Tab() {
+    var myMafiaMissionstab = xpathFirst('.//a[@id="myMafiaMissions"  and contains(@onclick, "controller=socialmission")  and not (contains(@style, "marketplace_menu_item_hover"))]', innerPageElt);
+        if(myMafiaMissionstab) {
+        DEBUG(' not on myMafiaMissions tab, changing - 2 -  ');
+        clickElement(myMafiaMissionstab);
+        } else {
+        DEBUG(' on myMafiaMissions tab, good to go - 2 - - ');
+        return ;
+        }
+    return ;
+}
+////
+function Auto_Mafia_Collection(){
+
+  var missionButtons;
+  var numButtons;
+  missionButtons = $x('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
+  numButtons = missionButtons.length;
+  DEBUG('There were - '+numButtons+' mission collection buttons found.');
+  if(numButtons>0){
+    var ColMissionReward = xpathFirst('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
+    if (ColMissionReward) {
+      addToLog('info Icon', 'Clicked to collect mission rewards.');
+
+
+      clickAction = 'mission rewards';  // 'crew collection';
+      clickElement(ColMissionReward);
+
+
+
+ // pop_box_socialmission_collect_dialog   collectPopHeader
+ // Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background: url(http://mwfb.static.zynga.com/mwfb/graphics/socialmissions/popups/txt_youvebeenrewarded.png) 0 0 no-repeat;height: 49px; width: 502px;margin: 0 auto;}.collectPopRow {color: #FFCD00; width: 616px;margin: 10px auto;text-align: center;}.collectPopLoot {margin: 10px auto;}.collectPopLootItem {text-align: center;}.collectPopName {height: 24px;width: 107px;text-align: center;margin: 0 auto;}Congratulations! You and your crew have successfully completed the mission. For your hard work, these great items have been added to your arsenal.Vindicator4925Ubijca Assault Rifle4318Sneak Attack4322
+      return true;
+    }
+  } else {
+    DEBUG('No missions found to collect on this page.');
+  }
+  return;
+}
+/////////////////////////////////////////////////////////////////
+function Chk_Nxt_Page() {
+    var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
+    if(page_right){
+    DEBUG('There WAS a right mission page button found, Clicking - - - .');
+      clickElement(page_right);
+    } else  { DEBUG('There was no right mission page button found, Done. set timer to 10 min 0 seconds');
+    setGMTime('colmissionTimer', '00:10:00');
+    return false;
+    }
+return true;
+}
+////
+function Chk_Left_Page() {
+    var page_left = xpathFirst('.//a[@class="left " and contains(@onclick, "viewPage")]', innerPageElt);
+    if(page_left){
+    DEBUG('There WAS a left mission page button found, Clicking - - - .');
+      clickElement(page_left);
+    } else  { DEBUG('There were no left mission page button found.');
+    return false;
+    }
+return true;
+}
+////
+function Chk_mission_help (){
+    var ask_mission_help = xpathFirst('.//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(@onclick, "postAskHelpFeed")]', innerPageElt);
+    if(ask_mission_help  ) {
+      DEBUG('There WAS a mission help button found, Clicking - - - .');
+      setGMTime('colmissionHelpTimer', '02:02:00');  // 2 hrs 2 min
+      clickElement(ask_mission_help);
+    } else  { DEBUG('There was no help mission button found, setting help timer to 15 min. - - ');
+      setGMTime('colmissionHelpTimer', '00:15:00');  //  20 min
+    return false;
+    }
+return true;
+}
+
+///////////////////////////////////////////////////////// end of mission collect
