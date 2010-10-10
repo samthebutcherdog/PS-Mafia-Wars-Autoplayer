@@ -39,7 +39,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.754
+// @version     1.1.755
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -50,7 +50,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.754',
+  version: '1.1.755',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -4476,7 +4476,7 @@ function hideStatsWindow() {
 }
 
 function handleVersionChange() {
-  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">playerscripts.com</a>');
+  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">We need your help - DONATE - playerscripts.com</a>');
 
   // Check for invalid settings and upgrade them.
 
@@ -4516,7 +4516,7 @@ function handleVersionChange() {
 
   // Update saved script version
   GM_setValue('version', SCRIPT.version);
-  //addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">playerscripts.com</a>');
+  //addToLog('updateGood Icon', 'Variable upgrades validated: ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">If you enjoyt his script help by DONATING playerscripts.com</a>');
 }
 
 function saveDefaultSettings() {
@@ -5140,7 +5140,7 @@ function unPause() {
   running = true;
   sendMWValues(['isRunning']);
 
-  addToLog('play Icon', 'Autoplayer resuming - <a href="http://www.playerscripts.com/" target="_blank">playerscripts.com</a>');
+  addToLog('play Icon', 'Autoplayer resuming - <a href="http://www.playerscripts.com/" target="_blank">If you like this scipt help us with costs - DONATE - playerscripts.com</a>');
   mwapOnOffMenu();
   updateMastheadMenu();
 
