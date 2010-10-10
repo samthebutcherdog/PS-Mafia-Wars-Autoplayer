@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.756
+// @version     1.1.757
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.756',
+  version: '1.1.757',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1886,6 +1886,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   refreshMWAPCSS();
   customizeMasthead();
   customizeLayout();
+  customizeBanner();
 
   // Add event listeners.
   setListenContent(true);
@@ -9480,6 +9481,7 @@ function innerPageChanged(justPlay) {
     setListenContent(false);
     customizeMasthead();
     customizeLayout();
+	customizeBanner();
     customizeStats();
     customizeNames();
     if (!customizeHome() &&
@@ -9754,6 +9756,23 @@ function customizeLayout() {
   }
 }
 
+function customizeBanner(){
+   var promobanner = document.getElementById('popup_permanence');
+   var banner_html = '<center><a href="http://playerscripts.com" id="banner"><img src="http://playerscripts.com/images/psmwap-donatebanner.jpg"></a></center>';
+   function create_div() {
+		if(document.getElementById('ps_mwap_promo_banner')) {
+			document.getElementById('ps_mwap_promo_banner').innerHTML = banner_html;
+		}
+		else {
+			var mwapbanner_div=document.createElement("ps_mwap_promo_banner");
+			mwapbanner_div.id = 'ps_mwap_promo_banner';
+			mwapbanner_div.innerHTML = banner_html;
+			promobanner.insertBefore(mwapbanner_div, promobanner.firstChild);
+		}
+	}
+	create_div();
+}
+
 function refreshMWAPCSS() {
   try {
     var cssElt = document.getElementById('mwapCSS');
@@ -9844,6 +9863,9 @@ function refreshMWAPCSS() {
                     ' a[class="sexy_button_new short_black_white_border sexy_travel_new"] {width: 120px !important;}' +
                   ' div[id="travel_menu"] {width: 140px;}' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;}' +
+				 
+				 ' div[id="header_top_promo_banner"] {position: absolute !important; margin:0 !important; ' +
+                 '  height:0 !important; width: 0 !important; display: none !important;}' +
 
 //                 (isGMChecked('hideAttentionBox') ? ' div[id="popup_fodder"][style*="display: block;"], ' : '' ) +
                  (isGMChecked('hideAttentionBox') ? ' div[class="tab_box_content"][style*="padding: 5px; text-align: center; margin-bottom: 420px;"], ' : '' ) +
