@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.758
+// @version     1.1.759
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.758',
+  version: '1.1.759',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -953,7 +953,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var burnModes = ['Energy','Stamina'];
 
   // Array of lottery bonus items
-  var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', '1 Godfather point', '+20 energy points', '1-5 Godfather points'];
+  var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', 'two free lotto tickets', '+20 energy points', '1-5 Godfather points'];
 
   /* Prop Income
   var propsData = new Array (
