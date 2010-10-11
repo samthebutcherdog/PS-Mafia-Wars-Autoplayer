@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.757
+// @version     1.1.758
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.757',
+  version: '1.1.758',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12649,7 +12649,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Moscow: <strong>' + cities[MOSCOW][CITY_SIDES][GM_getValue('sideMoscow', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;Bangkok: <strong>' + cities[BANGKOK][CITY_SIDES][GM_getValue('sideBangkok', 0)] + '</strong><br>' +
         'Use Secret Stash List: <strong>' + showIfUnchecked(GM_getValue('useSecretStashitems')) + '</strong><br>' +
-        '&nbsp;&nbsp;Secret Stash Patterns: <strong>' + GM_getValue('fightClanName') + '</strong><br>' +
+        '&nbsp;&nbsp;Secret Stash Patterns: <strong>' + GM_getValue('secretStashItems') + '</strong><br>' +
         '---------------------Display Tab--------------------<br>' +
         'Enable logging: <strong>' + showIfUnchecked(GM_getValue('autoLog')) + '</strong><br>' +
         '&nbsp;&nbsp;-Logging length: <strong>' + GM_getValue('autoLogLength') + '</strong><br>' +
@@ -16552,7 +16552,7 @@ function handlePopups() {
               var eltButton = xpathFirst('.//button',popupElts[i]);
               if (eltButton) {
                 eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
-                if (eltLoot && isGMChecked(useSecretStashItems) && autoSecretStashList) {
+                if (eltLoot && isGMChecked('useSecretStashItems') && autoSecretStashList) {
                   eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
                   eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
                   eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
