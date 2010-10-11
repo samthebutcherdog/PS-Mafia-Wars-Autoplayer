@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.760
+// @version     1.1.761
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.760',
+  version: '1.1.761',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -953,7 +953,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var burnModes = ['Energy','Stamina'];
 
   // Array of lottery bonus items
-  var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', 'two free lotto tickets', '+20 energy points', '1-5 Godfather points'];
+  var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', 'two free lotto tickets', '+20 energy points', '20 Loyalty points'];
 
   /* Prop Income
   var propsData = new Array (
@@ -2501,17 +2501,19 @@ function AskforHelp(hlpCity) {
     timerName='AskforHelpBangkokTimer';
   }
 
+
+//Set delay to 3000 to prevent Bangkokg not publishing if too fast after Moscow publishing
   // Go to the correct city.
   if (city != helpCity) {
     Autoplay.fx = function() { goLocation(helpCity); };
-    //Autoplay.delay = noDelay;
+    Autoplay.delay = 3000;
     Autoplay.start();
     return true;
   }
 
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
-    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.delay = 3000;
     Autoplay.fx = function() { doAskFunction(goJobTab(tabno)); };
     Autoplay.start();
     return true;
@@ -4082,15 +4084,6 @@ function getHitlist(element, forceRefresh) {
 
   if (!getHitlist.opponents.length) return [];
 
-  //for (var i = 0; i < getHitlist.opponents.length; i++) {
-  //  var opponent = getHitlist.opponents[i];
-  //  GM_log('Saw id=' + opponent.id +
-  //         ', title=' + opponent.title +
-  //         ', name=' + opponent.name +
-  //         ', bounty=' + opponent.bounty +
-  //         ', time=' + opponent.time);
-  // }
-
   return getHitlist.opponents;
 }
 
@@ -5167,7 +5160,7 @@ function unPause() {
   running = true;
   sendMWValues(['isRunning']);
 
-  addToLog('play Icon', 'Autoplayer resuming - <a href="http://www.playerscripts.com/" target="_blank">If you like this scipt help us with costs - DONATE - playerscripts.com</a>');
+  addToLog('play Icon', 'Autoplayer resuming.<br/>If you like this script, help us with costs:<br/><a href="http://www.playerscripts.com/" target="_blank">DONATE - playerscripts.com</a>');
   mwapOnOffMenu();
   updateMastheadMenu();
 
@@ -5522,13 +5515,8 @@ function refreshLog() {
 
 function clearLog() {
   GM_setValue('itemLog', '');
-
-  //for (var i = 0, iLength = cities.length; i < iLength; ++i)
-  //  setGMTime('takeHour' + cities[i][CITY_NAME], '00:00');
-
-  //reset the log box
   var logBox = document.getElementById('logBox');
-    logBox.innerHTML = '';
+  logBox.innerHTML = '';
 }
 
 function clearStats() {
@@ -7938,7 +7926,6 @@ function createHealTab() {
 
   // Container for a list of settings.
    var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: 0px; margin-right: auto; width: 95%; line-height:120%;'});
-// var list = makeElement('div', healTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
   // Healing options
   item = makeElement('div', list);
@@ -8499,8 +8486,7 @@ function validateStaminaTab() {
       s.fightClanName = document.getElementById('fightClanName').value;
       s.fightRemoveStronger = checked('fightRemoveStronger');
 
-      s.fightStealth = checked('fightStealth');
-      //s.fightAvoidBodyguards = checked('fightAvoidBodyguards');
+      s.fightStealth = checked('fightStealth');      
 
       // Validate reattack settings.
       if (isNaN(s.reattackThreshold)) {
@@ -8923,10 +8909,8 @@ function handleModificationTimer(target) {
     }
   }
 
-  //ROJ
   // Added handling for Las Vegas job page changes
   var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_results"]', innerPageElt);
-  //var jobResults = $x('.//div[@id="map_panels"]/div[@id="side_container"]//div[@class="job_info"]', innerPageElt);
   if (jobResults && jobResults.length > 0) {
     for (var i = 0, iLength=jobResults.length; i < iLength; ++i) {
       if (jobResults[i] && !xpathFirst('./div[@id="job_flag"]', jobResults[i])) {
@@ -8945,7 +8929,6 @@ function handleModificationTimer(target) {
 
   // Added handling for just rob page changes
   var robResult = xpathFirst('.//a[@id="rob_refresh_cost"]', innerPageElt);
-  //var robResult = xpathFirst('.//a[@id="rob_refresh_cost" and @class="sexy_button_new sexy_refresh"]/span/span', innerPageElt);
   if (robResult) {
     if (!xpathFirst('.//div[@id="rob_flag"]', robResult)) {
       setListenContent(false);
@@ -9505,18 +9488,17 @@ function innerPageChanged(justPlay) {
       clickAction = undefined;
       clickContext = undefined;
       if (!logResponse(innerPageElt, action, context)) {
-        DEBUG('We did not get a valid logresponse, so kick off auto-play');
+        //DEBUG('We did not get a valid logresponse, so kick off auto-play');
         // No further action was taken. Kick off auto-play.
         doAutoPlay();
       }
     } else {
       // Kick off auto-play.
-      DEBUG('No action was taken, so kick off auto-play');
+      //DEBUG('No action was taken, so kick off auto-play');
       doAutoPlay();
     }
   } catch (ex) {
-    addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
-    //DEBUG('BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
+    addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');    
     autoReload(true);
   }
 }
@@ -9593,9 +9575,6 @@ function refreshGlobalStats() {
   level = parseInt(levelElt.innerHTML);
 
   // Set all the element globals. They change.
-
-//  curExpElt = document.getElementById('user_experience');
-//  curExp = parseInt(curExpElt.innerHTML);
   if(new_header) {
     ptsToNextLevelElt = document.getElementById('user_xp_to_next_level');
     ptsToNextLevel = parseInt(ptsToNextLevelElt.innerHTML);
@@ -10055,9 +10034,8 @@ function resetTimers(manually) {
   checkTimer('rewardEnergyTimer', 1800);
   checkTimer('checkVaultTimer', 900);
   checkTimer('tournamentTimer', 300);
-  checkTimer('colmissionTimer', 120); // 2 min
-//  checkTimer('colmissionTimer', 30); // 30 seconds
-  checkTimer('colmissionHelpTimer', 7320); // 2 hours 2 minutes
+  checkTimer('colmissionTimer', 300); // 5 min
+  checkTimer('colmissionHelpTimer', 3600); // 1 hour
 // newchange
 
   addToLog('warning Icon', 'All active timers have been reset.');
@@ -10240,72 +10218,8 @@ function customizeMasthead() {
 
   // Change help instructions
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
-
-  /*if(new_header){
-    allHelpMenus = document.evaluate("//li[@class='dropdown divider']",document,null,XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,null);
-    helpMenu = allHelpMenus.snapshotItem(2);
-    helpMenu.innerHTML =
-      '<div class="help">' +
-      '<a href="http://apps.facebook.com/inthemafia" onclick="return false;" class="dropdown">PS MWAP</a>' +
-      '</div>' +
-      '<ul id="linklist">' +
-      '<li><b style="padding-left:5px;">Downloads</b></li>' +
-      '<li><a href="http://www.playerscripts.com/index.php?option=com_rokdownloads&view=file&Itemid=64" target="_blank">' +
-      '&nbsp;&nbsp;For Firefox' +
-      '</a></li>' +
-      '<li><a href="https://chrome.google.com/extensions/detail/cgagpckjofhomehafhognmangbjdiaap" target="_blank"> ' +
-      '&nbsp;&nbsp;For Chrome' +
-      '</a></li>' +
-      '<li><a href="http://www.playerscripts.com/index.php?option=com_jumi&fileid=3&Itemid=18" target="_blank"> ' +
-          '&nbsp;&nbsp;Revert to Previous' +
-      '</a></li> ' +
-      '<b style="padding-left:5px;">Websites</b><br/>' +
-      '<li><a href="http://www.playerscripts.com/index.php?option=com_ajaxchat&view=ajaxchat&Itemid=55" target="_blank"> ' +
-        '&nbsp;&nbsp;PlayerScripts Chat' +
-      '</a></li>' +
-      '<li><a href="http://www.playerscripts.com/" target="_blank"> ' +
-        '&nbsp;&nbsp;PlayerScripts ' +
-      '</a></li>' +
-       '<li><a href="http://forums.zynga.com/forumdisplay.php?f=36" target="_blank"> ' +
-         '&nbsp;&nbsp;Zolli Forums' +
-       '</a></li>' +
-       '<b style="padding-left:5px;">Bookmarklets</b>' +
-       '<li><a href="javascript:(function(){var%20a%3Ddocument.createElement(%22script%22)%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http%3A%2F%2Fcodeoutpost.com%2FScripts%2FChuckACrapQueue.js%3F%22%2BMath.random()%3Bdocument.getElementsByTagName(%22head%22)[0].appendChild(a)})()%3B"> ' +
-         '&nbsp;&nbsp;Chuck-a-Crap ' +
-       '</a></li> ' +
-       '<li><a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
-         '&nbsp;&nbsp;Spock&#39;s Robber v1.08' +
-       '</a></li>' +
-       '<li><a></a></li>';
-    linklist = document.getElementById('linklist');
-    linklist.style.width = "200px";
-
-    // Check Las Vegas Vault (PS MWAP menu)
-    var lobjcheckVault = makeElement('li', null, {'id':'checkVault'});
-    lobjcheckVault.innerHTML = '<a id="checkVault">Check Las Vegas Vault</a>';
-    lobjcheckVault.addEventListener('click', checkVaultStatus, false);
-    linklist.insertBefore(lobjcheckVault, linklist.firstChild);
-
-    // Reset Timers (PS MWAP menu)
-    var lobjresetTimers = makeElement('li', null, {'id':'resetTimers'});
-    lobjresetTimers.innerHTML = '<a id="resetTimers">Reset Timers</a>';
-    lobjresetTimers.addEventListener('click', resetTimers, false);
-    linklist.insertBefore(lobjresetTimers, linklist.firstChild);
-    // Show Timers (PS MWAP menu)
-    var lobjshowTimers = makeElement('li', null, {'id':'showTimers'});
-    lobjshowTimers.innerHTML = '<a id="showTimers">Show Timers</a>';
-    lobjshowTimers.addEventListener('click', showTimers, false);
-    linklist.insertBefore(lobjshowTimers, linklist.firstChild);
-
-    // Settings Link (PS MWAP menu)
-    var lobjAutoPlay = makeElement('li', null, {'id':'autoPlay'});
-    lobjAutoPlay.innerHTML = '<a id="autoPlay">Settings</a>';
-    lobjAutoPlay.addEventListener('click', toggleSettings, false);
-    linklist.insertBefore(lobjAutoPlay, linklist.firstChild);
-  } else {*/
   var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
   titleElt.innerHTML = "PS MWAP";
-  //titleElt.style.width= "115px";
   titleElt.parentNode.parentNode.parentNode.style.width= "120px";
   titleElt.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
   titleElt.parentNode.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
@@ -10393,13 +10307,6 @@ function customizeMasthead() {
 function customizeStats() {
   // Don't watch the stats area while we're making changes to it.
   setListenStats(false);
-
-  // Show points until next level.
-//  var elt = xpathFirst('.//div[@id="user_stats"]//h4[@class="experience" and contains(text(), "Experience")]', appLayoutElt);
-//  if (!elt) elt = xpathFirst('.//div[@id="user_stats"]//span[@class="stat_title" and contains(text(),"Experience")]', appLayoutElt);
-//  if (elt) {
-//    elt.innerHTML = 'Experience (' + (ptsToNextLevel > 0? '-' : '+') + Math.abs(ptsToNextLevel) + ')';
-//  }
 
   // Make bank icon clickable for instant banking
   var bankLinkElt = document.getElementById('mwap_bank');
@@ -11234,7 +11141,6 @@ function customizeVegasJobs() {
   availableJobs[city][currentTab] = [];
   masteredJobs[city][currentTab] = [];
 
-  // FIXME: Change this once we encounter locked jobs for the new header
   var isJobLocked = function (thisJob) {
     return (/lock/i.test(thisJob.innerHTML.untag()) || /complete/i.test(thisJob.innerHTML.untag()));
   };
@@ -11591,7 +11497,6 @@ function isJobFight (jobAction) { return (jobAction.innerHTML.indexOf('fight_lis
 
 function isJobLocked (jobAction) {
   return ((/lock/i.test(jobAction.innerHTML.untag()) || /complete/i.test(jobAction.innerHTML.untag())) && !/help/i.test(jobAction.innerHTML.untag()));
-  //return (jobAction.innerHTML.untag().indexOf('lock') >= 0 && jobAction.innerHTML.untag().indexOf('Help') == -1);
 }
 
 // Return item name if missing job item is from a business
@@ -11635,7 +11540,6 @@ function customizeJobs() {
   for (var x = 0, xLength = jobTables.length; x < xLength; ++x) {
     //newlv
     var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_title " or @class="job_name_oneline job_no_border" ]', jobTables[x]);
-    // var jobNames = xpath('.//td[@class="job_name" or @class="job_name job_no_border" or @class="job_name " or @class="job_name_oneline job_no_border"]', jobTables[x]);
 
     for (var i = 0, iLength = jobNames.snapshotLength; i < iLength; ++i) {
       var jobName = jobNames.snapshotItem(i).innerHTML.split('<br>')[0].clean().trim();
@@ -11758,8 +11662,6 @@ function customizeJobs() {
 
   // Show the experience to energy ratio needed to level up.
   elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratio needed to level up on energy alone.', 'style':'position:absolute; text-align: center; right:10px; font-size: 12px; width: 180px; display:none;'});
-  //makeElement('img', elt, {'src':stripURI(infoIcon), 'style':'vertical-align:middle'});
-  //elt.appendChild(document.createTextNode(''));
   jobTables[0].parentNode.insertBefore(elt, jobTables[0]);
 
   setLevelUpRatio();
@@ -12203,7 +12105,6 @@ function getJobRowItems(jobName) {
 
   // Logic to switch to the required job first
   var necessaryItems = $x('.//div[@class="req_item"]//img', currentJobRow);
-  //if(!necessaryItems) necessaryItems = $x('.//div[@class="needed_gate_loot"]//img', currentJobRow);
 
   // Figure out which loot items are needed before this job can be attempted
   // again and, consequently, which jobs will have to be done to get them.
@@ -12782,7 +12683,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Random fight max mafia: <strong>' + GM_getValue('fightMafiaMax') + ' (' + showIfRelative('fightMafiaMaxRelative') + ')</strong><br>' +
         '&nbsp;&nbsp;-Random fight min mafia: <strong>' + GM_getValue('fightMafiaMin') + ' (' + showIfRelative('fightMafiaMinRelative') + ')</strong><br>' +
         '&nbsp;&nbsp;-Random fight stealth: <strong>' + showIfUnchecked(GM_getValue('fightStealth')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Random fight avoid bodyguards: <strong>' + showIfUnchecked(GM_getValue('fightAvoidBodyguards')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight use Patterns: <strong>' + showIfUnchecked(GM_getValue('fightNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight avoid names: <strong>' + showIfUnchecked(GM_getValue('fightAvoidNames')) + '</strong><br>' +
         '&nbsp;&nbsp;-Random fight specific names: <strong>' + showIfUnchecked(GM_getValue('fightOnlyNames')) + '</strong><br>' +
@@ -12912,9 +12812,6 @@ function parsePlayerUpdates(messagebox) {
       // The fight was won.
       cost = RegExp.$2;
       var experience = RegExp.$1;
-      //result += '<span class="good">' + ' WON ' + cost + '</span>' + ' and ' +
-      //          '<span class="good">' + experience +' experience.</span>';
-
       result += ' and <span class="good">WON</span>, gaining <span class="good">' + cost + '</span> and ' +
         '<span class="good">' + experience + ' experience</span>.';
       var cashLoc = parseCashLoc(cost);
@@ -12964,7 +12861,6 @@ function parsePlayerUpdates(messagebox) {
     } else if (messageTextNoTags.match(/you lost.*and losing .*?([A-Z]?\$[\d,]*\d)/i)) {
       // The fight was lost.
       cost   = RegExp.$1;
-      //result += '<span class="bad">' + ' LOST ' + cost + '.</span>';
       result += ' and <span class="bad">LOST</span>, losing <span class="bad">' + cost + '</span>.';
       var cashLoc = parseCashLoc(cost);
       cost = parseCash(cost);
@@ -13147,7 +13043,6 @@ function parsePlayerUpdates(messagebox) {
             )) {
     // Help requested by a fellow mafia member.
     var userText = RegExp.$1;
-    //userElt = xpathFirst('.//a[contains(@onclick, "controller=stats")]', messagebox);
     elt = xpathFirst('.//a[contains(@onclick, "action=cs_help_item") or contains(@onclick, "action=cs_help_initial")]', messagebox);
     if (elt) {
       // Help immediately.
@@ -13358,7 +13253,6 @@ function autoLotto() {
   if (randomTicket) {
     clickElement(randomTicket);
     var submitTicket = xpathFirst('.//input[@class="sexy_lotto" and @type="submit" and contains(@value,"Submit Ticket")]', innerPageElt);
-    //if (!submitTicket) submitTicket = xpathFirst('.//button[@class="sexy_button_new short_white" and @type="submit" and @name="do"]', innerPageElt);
     if (!submitTicket) submitTicket = xpathFirst('.//button[@class="sexy_button_new short_white" and @type="submit" and contains(.,"Submit Ticket")]', innerPageElt);
     if (submitTicket) {
       var ticket = ' ';
@@ -13467,7 +13361,7 @@ function autoWishlist() {
 
 // Attack the first war opponent you can
 function autoWarAttack() {
-
+/*
   // Betray logic
   if (isGMChecked('autoWarBetray')) {
     var betrayElts = $x('.//div//a[@class="sexy_button"]//span[contains(.,"Betray")]', innerPageElt);
@@ -13484,7 +13378,7 @@ function autoWarAttack() {
       return true;
     }
   }
-
+*/
   if (helpWar) {
     // Help attempt was processed. Increment the update count.
     GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
@@ -13554,21 +13448,20 @@ function autoWar() {
         DEBUG('Attacked Selected Target in ongoing war.');
         return true;
       } else {
-        DEBUG('Invalid War Target .. War is ongoing war.');
+        DEBUG('Invalid War Target .. War is ongoing ...');
       }
     } else {
       DEBUG('No Enemy Targets found ... War is ongoing ...');
     }
 
-    var callWarHelp = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@href, "postFeedAndSendCallForHelp")]');
+    var callWarHelp = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "postFeedAndSendCallForHelp")]');
     if (callWarHelp && isGMChecked('autoWarResponsePublish')) {
-      clickElement(callWarHelp);
-      DEBUG('Clicking to ask for help in ongoing war.');
-      // Attack the Selected Target
+      clickElement(callWarHelp);      
+      // Call for Help
       Autoplay.fx = function() {
         clickAction = action;
-        clickContext = warElt;
-        clickElement(warElt);
+        clickContext = callWarHelp;
+        clickElement(callWarHelp);
       };
       Autoplay.start();
       DEBUG('Clicked to ask for help in ongoing war.');
@@ -14140,10 +14033,14 @@ function autoSafehouse() {
 }
 
 function autoDailyChecklist() {
-  // Need to be on the main home page
-  if (!onHome()) return false;
-  // Need to be enabled
-  if (!isGMChecked('autoDailyChecklist')) return false;
+  // Need to be on the main home page   
+  if (!onHome) {
+    DEBUG('Going Home for Daily checklist');
+    Autoplay.fx = function() { goHome; };
+    Autoplay.delay = noDelay;
+    Autoplay.start();
+    return true;
+  }
 
   // Let's do this code once in a while.
   if (timeLeftGM('dailyChecklistTimer')) return false;
@@ -14157,24 +14054,35 @@ function autoDailyChecklist() {
 
   addToLog('info Icon','Daily Checklist: Processed.');
 
+  // Daily Take
+  var eltTake = xpathFirst('.//*[@id="message_box_menu_checkmark_daily_take" and contains(@class, "_checked")]', innerPageElt);
+  var eltTakeClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"showDailyTake")]', innerPageElt);
+  if (eltTakeClick) {
+    DEBUG('Daily Checklist: Challenge Mission');
+    clickElement(eltTakeClick);
+  }
+  
   // Challenge Mission
   var eltTemp = xpathFirst('.//*[@id="message_box_menu_checkmark_challenge_mission" and contains(@class, "_checked")]', innerPageElt);
   var eltTempClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"challenge")]', innerPageElt);
   if (eltTempClick) {
+    DEBUG('Daily Checklist: Challenge Mission');
     clickElement(eltTempClick);
   }
 
   // Grow your family
   var eltGrow = xpathFirst('.//*[@id="message_box_menu_checkmark_mafia" and contains(@class, "_checked")]', innerPageElt);
-  var eltGrowSkip = xpathFirst('.//a[@class="sexy_button_new" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
+  var eltGrowSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
   if (eltGrowSkip) {
+    DEBUG('Daily Checklist: Grow Your Family'); 
     clickElement(eltGrowSkip);
   }
 
   // Gifts
   var eltGifts = xpathFirst('.//*[@id="message_box_menu_checkmark_send_gifts" and contains(@class, "_checked")]', innerPageElt);
-  var eltGiftsSkip = xpathFirst('.//a[@class="sexy_button_new" and contains(@onclick, "skipCategory") and contains(@onclick, "send_gifts")]', innerPageElt);
+  var eltGiftsSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "send_gifts")]', innerPageElt);
   if (eltGiftsSkip) {
+    DEBUG('Daily Checklist: Accept Gifts');
     clickElement(eltGiftsSkip);
   }
 
@@ -14184,6 +14092,7 @@ function autoDailyChecklist() {
   var eltMessagesClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"messages")]', innerPageElt);
   var eltActionTaken = makeElement('a', null, {'onclick':'mboxActionTaken("messages", true);'});
   if (eltMessagesClick) {
+    DEBUG('Daily Checklist: War in Progress');
     clickElement(eltMessagesClick);
   }
   if (eltActionTaken) clickElement(eltActionTaken);
@@ -14200,10 +14109,20 @@ function autoDailyChecklist() {
     var eltPacks = xpathFirst('.//*[@id="message_box_menu_checkmark_energy_packs" and contains(@class, "_checked")]', innerPageElt);
     var eltPacksClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"energy_packs")]', innerPageElt);
     if (eltPacksClick) {
+      DEBUG('Daily Checklist: energy');
       clickElement(eltPacksClick);
     }
   }
 
+  // Properties
+  var eltProperties = xpathFirst('.//*[@id="message_box_menu_checkmark_properties" and contains(@class, "_checked")]', innerPageElt);
+  var eltProperties = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "properties")]', innerPageElt);
+  if(!eltProperties) eltProperties = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(., "Check it out")]', innerPageElt);
+  if (eltProperties) {
+    DEBUG('Daily Checklist: Properties');
+    clickElement(eltProperties);
+  }
+  
   // When we get here everything has a check mark whether we forced it or not
   return false;
 }
@@ -14521,15 +14440,6 @@ function goBank() {
 }
 
 function goJobsNav() {
-//  if(new_header){
-//    var elt = xpathFirst('//a[@class="header_job_button"]');
-//  } else {
-//    var elt = xpathFirst('//a[@class="nav_link jobs_link"]/a'); //typo note
-//  }
-//  if (!elt) {
-//    addToLog('warning Icon', 'Can\'t find jobs nav link to click.');
-//    return false;
-//  }
   var elt = xpathFirst('//div[@class="nav_link jobs_link"]/a');
   if (!elt) {
     var elt = xpathFirst('.//a[@class="header_job_button"]', mastheadElt);
@@ -14727,7 +14637,7 @@ function goJob(jobno) {
         if(StamReq > stamina) {
           skipCurrentJob = true;
         DEBUG('stamina requied :'+StamReq+': have :'+stamina+': not enough stamina, go home');
-goHome();
+        goHome();
         } else  DEBUG('stamina requied :'+StamReq+': have :'+stamina+': have enough stamina do job');
       } else   DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
       DEBUG(' check stam 3');
@@ -14750,8 +14660,7 @@ goHome();
           if(OppSizeElt) OppSize = OppSizeElt.innerHTML.untag();
           OppLevelElt = xpathFirst('.//dd[@class="level"]//span[@class="player_data"]', targetParent);
           if(OppLevelElt) OppLevel = OppLevelElt.innerHTML.untag();
-        }
-        //DEBUG('Name : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
+        }        
         if(OppSize < smallestMafia || (OppSize == smallestMafia && OppLevel < lowestLevel)){
             OppTarget = targetElts[i];
             OppTargetParent = targetParent;
@@ -14778,10 +14687,7 @@ goHome();
       if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
     }
   }
-  //if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
-
-  //DEBUG(elt.innerHTML);
-
+  
   if (elt) {
     DEBUG(' job string used was =' + tmp );
     clickAction = 'job';
@@ -15902,9 +15808,11 @@ function logResponse(rootElt, action, context) {
       var pushNextJob = false;
       // IF we have the mastery gain bar,
       if(masteryGainElt) {
-        if( (GM_getValue('selectTier')!= '0.0'  ) || (!isGMChecked('multipleJobs'))  ) {
-          masteryGainTxt = '. Las Vegas Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
-          if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 ) pushNextJob = true;
+        if( (GM_getValue('selectTier')!= '0.0'  ) || (!isGMChecked('multipleJobs'))  ) {          
+          if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 ) {
+            masteryGainTxt = '. Las Vegas Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+            pushNextJob = true;
+          }  
         }
       }
 
@@ -15976,7 +15884,7 @@ function logResponse(rootElt, action, context) {
       }
 
       if (pushNextJob) {
-          DEBUG('Job Mastery of 100% detected, Reloading');
+          DEBUG('Job Mastery of 100% detected, Reloading Tabno :'+tabno );
           customizeVegasJobs();
       }else {
         return;
@@ -16308,9 +16216,9 @@ function logResponse(rootElt, action, context) {
       addToLog('info Icon', inner);
       break;
 
-    case 'mission rewards':
-      addToLog('info Icon', inner);
-      break;  // newchangemission
+    //case 'mission rewards':
+    //  addToLog('info Icon', inner);
+    //  break;  // newchangemission
 
     case 'crew collection':
       addToLog('info Icon', inner);
@@ -16360,8 +16268,12 @@ function closePopup(eltPopup, coolName) {
   // to find the main element
   //DEBUG('closePopup Processing');
   //var eltPopup = xpathFirst(xpath);
-  if (!eltPopup) return false;
 
+  if (!eltPopup) { 
+    DEBUG('Can not close ' + coolName + ' popup: ' + eltPopup.id+' not found !');
+    return false;
+  }
+  
   // Once we see a post pop-up, set the timer to close it
   DEBUG('Got rid of ' + coolName + ' popup: ' + eltPopup.id);
   var closeElt = xpathFirst('.//a[@class="pop_close"]',eltPopup);
@@ -16434,7 +16346,7 @@ function handlePopups() {
             ) {
             continue;
           }
-          DEBUG('Popup Found: ' + popupElts[i].id + ' ' + popupInnerNoTags);
+          DEBUG('Popup Found: ' + popupElts[i].id + '<br/>' + popupInnerNoTags);
 
           /* THESE POPUPS get always processed/closed: */
           // Get rid of Paypal
@@ -16470,10 +16382,6 @@ function handlePopups() {
           // Get rid of Slot Machine Teaser popup
           if (popupInnerNoTags.indexOf('New Loot!') != -1) return(closePopup(popupElts[i], "Slot Machine Flushed"));
 
-          // Get rid of Daily take popup
-          // FIXME show take or do something fun with this
-          if (popupInnerNoTags.indexOf('keep the streak alive') != -1) return(closePopup(popupElts[i], "The Daily Take"));
-
           // Get rid of Proceed to Vegas Level 6 popup
           if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
 
@@ -16495,7 +16403,6 @@ function handlePopups() {
             addToLog('lootbag Icon',logtxt);
 
             return(closePopup(popupElts[i], "The Daily Take"));
-            //return("The Daily Take");
           }
 
           /* THESE POPUPS get processed only when PS MWAP is running: */
@@ -16504,19 +16411,6 @@ function handlePopups() {
 
             if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
             if (popupElts[i].id == 'popup_fodder_zmc') return(closePopup(popupElts[i], "Your Requests Fodder"));
-            /* Disable Chop Shop/Weapon Depot popup detection for timers
-            // Get rid of Chop Shop/Weapon Depot popup
-            if (popupInnerNoTags.match(/You have built (.+?)\./)) {
-              addToLog('lootbag Icon', '<span class="loot">'+' You have built '+ RegExp.$1 + '.</span>');
-              return(closePopup(popupElts[i], "Chop Shop/Weapon Depot"));
-            }*/
-
-            /* Process The Hospital
-            var eltPubButton = xpathFirst('.//a[contains(@onclick,"xw_action=heal")]',popupElts[i]);
-            if (eltPubButton) {
-              //DEBUG('Popup Process: The Hospital Processed');
-              //clickElement(eltPubButton);
-            }*/
 
             // Process Sharing Secret Stash
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
@@ -16529,21 +16423,6 @@ function handlePopups() {
                 return(closePopup(popupElts[i], "Secret Stash"));
               }
             }
-
-/*            // Process Secret Stash
-            if (popupInnerNoTags.indexOf('Get yours') != -1) {
-              DEBUG('Popup Process: Get Secret Stash Processed');
-              var eltButton = xpathFirst('.//button',popupElts[i]);
-              if (eltButton) {
-                eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
-                if (eltLoot) {
-                  addToLog('lootbag Icon', 'Received <span class="loot">'+ eltLoot.innerHTML.untag() + '</span> from a secret stash.');
-                }
-                clickElement(eltButton);
-              }
-              return true;
-            }
-*/
 
             // Process Secret Stash
             var autoSecretStashList=getSavedList('secretStashItems',"");
@@ -16747,9 +16626,28 @@ function handlePopups() {
               }
               return true;
             }
-
-            // War Popups
-
+            // Missions popups
+            // Claim Mission Rewards Failed
+            if (popupInnerNoTags.indexOf('Failed to give reward') != -1) {
+              DEBUG('Popup Process: MISSIONS - Claim Rewards Failed');
+              return(closePopup(popupElts[i], "Claim Mission Rewards Failed"));
+            }
+            
+            // Log Mission Rewards
+            if (popupInnerNoTags.indexOf('successfully completed the mission') != -1) {   
+              var thisPopup = popupElts[i];
+              DEBUG('Popup Process: MISSIONS - Claim Rewards : '+thisPopup.id);
+              var rewards = $x('.//td[@class="collectPopLootItem"]', thisPopup);
+              var rewardsTxt ="";
+              for(i=0;i<rewards.length;++i){
+                rewardsNoTags = rewards[i].innerHTML.untag();                      
+                if(rewardsTxt) rewardsTxt += ', '+ rewardsNoTags;
+                else rewardsTxt = rewardsNoTags;
+              }
+              addToLog('lootbag Icon', 'Mission Rewards : '+rewardsTxt);              
+              return(closePopup(thisPopup, "Mission Rewards claimed"));
+            }            
+            
             // War Declaration
             var warDeclareButton = xpathFirst('.//a[@clas="sexy_button_new short_white sexy_call_new" and contains(@onclick,"attemptFeed")]',popupElts[i]);
             if(warDeclareButton) {
@@ -16772,7 +16670,6 @@ function handlePopups() {
               } else {
                 return(closePopup(popupElts[i], "War Help Popup"));
               }
-
             }
 
             // War Reward : Share Victory Coins
@@ -16782,14 +16679,15 @@ function handlePopups() {
                 for(i=0;i<warRewardButtons.length>0;++i){
                   warRewardButton = warRewardButtons[i];
                   clickElement(warRewardButton);
-                  DEBUG('Popup Process: WAR - Reward Friends for Help Publishing');
+                  DEBUG('Popup Process: WAR - Reward Friends (Share Coins) for Help Publishing');
                 }
                 return true;
               }
-              return(closePopup(popupElts[i], "War Reward Popup"));
+              return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
             }
 
           // End of Popups Section
+
           }
         /* END */
         /* THESE POPUPS get processed only when PS MWAP is running: */
@@ -17458,7 +17356,9 @@ function Auto_Mafia_Mission(){
     Autoplay.start();
     return true;
   }
+
   DEBUG(' in process missions, gonna check help, removed, collection & job');
+
   if(isGMChecked('AskMissionHelp')&& !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ; // defaults to mymissions page
    if (!Mafia_Missions_Tab()) {
      Autoplay.fx = Do_Mafia_Collection_Tab();
@@ -17518,6 +17418,7 @@ return true;
 function Mafia_Missions_Tab() {
     // choices are myMissions myMafiaMissions  graphics/marketplace_menu_item_hover page on
     // if we find this string we are on the mymafiamissions page not on page for me only
+
       var myMafiaMissions = xpathFirst('.//a[(@id="myMafiaMissions"  and contains(@onclick, "controller=socialmission")  and contains(@style, "marketplace_menu_item_hover"))]', innerPageElt);
         if(myMafiaMissions) {
 //        DEBUG(' on myMafiaMissions tab, good to go - - -  ');
