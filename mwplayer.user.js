@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.762
+// @version     1.1.763
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.762',
+  version: '1.1.763',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11240,9 +11240,9 @@ function customizeVegasJobs() {
     var moneyTxt = '';
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
-      // If this isn't a boss job, add the bagman bonus to the money payout (15% max)
-      if (reward && !isBossJob )
-        money = Math.round(money * parseFloat(GM_getValue('mafiaBagman', '1.15')));
+      // If this isn't a boss job, add the bagman bonus to the money payout (15% max) (removed KC - 12/10/10)
+      //if (reward && !isBossJob )
+       // money = Math.round(money * parseFloat(GM_getValue('mafiaBagman', '1.15')));
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
       moneyTxt = ' (' + mratio + ')';
