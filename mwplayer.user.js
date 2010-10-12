@@ -11,7 +11,7 @@
 
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
-* All images copyright PlayerScripts.com. All rights reserved. 2010
+* Copyright PlayerScripts.com. All rights reserved. 2010
 */
 
 /*
@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.761
+// @version     1.1.762
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.761',
+  version: '1.1.762',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -11226,15 +11226,15 @@ function customizeVegasJobs() {
     if (expElt) var reward = parseInt(expElt.innerHTML);
     else var reward = 0;
 
-//  If this isn't a boss job, add the mastermind bonus to the reward (10% max)
-    if (reward && !isBossJob)
-      reward = Math.floor(reward * parseFloat(GM_getValue('mafiaMastermind', '1.10')));
+//  If this isn't a boss job, add the mastermind bonus to the reward (10% max) (removed KC - 12/10/10)
+//    if (reward && !isBossJob)
+//      reward = Math.floor(reward * parseFloat(GM_getValue('mafiaMastermind', '1.10'))); 
 //  16595 19085
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
     var ratio = Math.round (reward / cost * 100) / 100;
-//  var xpTxt = ' (' + ratio + ')'; //original
-    var xpTxt = ' ' + reward + ' (' + ratio + ')';
+    var xpTxt = ' (' + ratio + ')'; //original
+ //   var xpTxt = ' ' + reward + ' (' + ratio + ')';
 
     // Money payout ratio
     var moneyTxt = '';
