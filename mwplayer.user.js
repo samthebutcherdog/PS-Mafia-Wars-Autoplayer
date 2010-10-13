@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.764
+// @version     1.1.765
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.764',
+  version: '1.1.765',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1034,30 +1034,30 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var allyFaction = '';
   var quickBankFail = false;
 
-  // Cars
+  // Chop Shop Build
   var cityCars = new Array (
-    //['Midnight', , 'Requires 10 car parts, 1 special part | 28 attack, 33 defense, +1 defense'],
+    ['Midnight', 39, 'Requires 10 car parts, 1 special part | 28 attack, 33 defense, +1 defense'],
     ['Sonic Five', 25, 'Requires 12 car parts | 32 attack, 30 defense'],
-    ['Random Common Car', 1, 'Requires 10 car parts'],
-    //['Palermo Luxury', , 'Requires 20 car parts, 2 special parts | 36 attack, 35 defense, +5 health'],
+    ['Random Common Car', 1,  'Requires 10 car parts'],
+    ['Palermo Luxury', 40, 'Requires 20 car parts, 2 special parts | 36 attack, 35 defense, +5 health'],
     ['General Ulysses', 26, 'Requires 28 car parts| 38 attack, 28 defense'],
-    ['Random Rare Car', 2, 'Requires 25 car parts'],
-    //['Sleek', , 'Requires 30 car parts, 3 special parts | 35 attack, 37 defense, +1 attack'],
-    ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
-    ['CM Santiago R10', 4, 'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
+    ['Random Rare Car', 2,  'Requires 25 car parts'],
+    ['Sleek', 41, 'Requires 30 car parts, 3 special parts | 35 attack, 37 defense, +1 attack'],
+    ['Tasmanian', 3,  'Requires 30 car parts | 36 attack, 34 defense'],
+    ['CM Santiago R10', 4,  'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
     ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
-    ['Rebel 2', 5, 'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +6 stamina'],
-    ['Russian Dazatz 45', 6, 'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
+    ['Rebel 2', 5,  'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +6 stamina'],
+    ['Russian Dazatz 45', 6,  'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
     ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
-    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
-    ['Thai XS Max', 8, 'Requires 75 car parts, 2 thai car parts | 45 attack, 35 defense'],
-    ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
+    ['Solar Flare', 7,  'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
+    ['Thai XS Max', 8,  'Requires 75 car parts, 2 thai car parts | 45 attack, 35 defense'],
+    ['Trio Napoli', 9,  'Requires 95 car parts | 47 attack, 23 defense'],
     ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
     ['Mugati Sport', 13, 'Requires 135 car parts, 1 high tech car part | 35 attack, 51 defense, +3 attack'],
     ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 high tech car parts | 52 attack, 29 defense, +3 defense'],
-    ['Day Rider 2K', 27, 'Requires 175 car parts, 1 suspension coil | 45 attack, 50 defense, +1 attack, +1 defense']
-    //['Sportster', , 'Requires 185 car parts, 10 special parts | 52 attack, 46 defense, +3 energy, +3 stamina'],
-    //['Extended Cab 640', , 'Requires 200 car parts, 15 special parts | 53 attack, 55 defense, +3 skill points']
+    ['Day Rider 2K', 27, 'Requires 175 car parts, 1 suspension coil | 45 attack, 50 defense, +1 attack, +1 defense'],
+    ['Sportster',  42, 'Requires 185 car parts, 10 special parts | 52 attack, 46 defense, +3 energy, +3 stamina'],
+    ['Extended Cab 640', 43, 'Requires 200 car parts, 15 special parts | 53 attack, 55 defense, +3 skill points']
   );
 
   var cityShopParts = new Array (
@@ -1079,12 +1079,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Lazer Guided RPG', 21, 'Requires 63 weapon parts and 1 laser rangefinder | 37 attack, 42 defense'],
     ['Robber\'s Utility Belt', 22, 'Requires 72 weapon parts, 1 boomerang and 1 grapple | 33 attack, 41 defense, +6 stamina'],
     ['Railgun', 23, 'Requires 81 weapon parts and 1 railgun barrel | 51 attack, 24 defense, +5 attack'],
-    ['Plasma Rifle', 24, 'Requires 105 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense']/*,
-    ['Dirty Trick', , 'Requires 110 weapon parts and 3 special parts | 45 attack, 49 defense, +5 health, +2 stamina'],
-    ['Electric Prod', , 'Requires 115 weapon parts and 6 special parts | 50 attack, 50 defense, +5 health, +2 energy'],
-    ['Hack Blade', , 'Requires 120 weapon parts and 9 special parts | 45 attack, 51 defense, +6 defense'],
-    ['Stun Knuckles', , 'Requires 125 weapon parts and 12 special parts | 52 attack, 48 defense, +6 attack'],
-    ['Wasper Knife', , 'Requires 130 weapon parts and 15 special parts | 51 attack, 51 defense, +4 skill points'],*/
+    ['Plasma Rifle', 24, 'Requires 105 weapon parts and 1 portable fusion reactor | 40 attack, 47 defense, +5 defense'],
+    ['Dirty Trick', 44, 'Requires 110 weapon parts and 3 special parts | 45 attack, 49 defense, +5 health, +2 stamina'],
+    ['Electric Prod', 45, 'Requires 115 weapon parts and 6 special parts | 50 attack, 50 defense, +5 health, +2 energy'],
+    ['Hack Blade', 46, 'Requires 120 weapon parts and 9 special parts | 45 attack, 51 defense, +6 defense'],
+    ['Stun Knuckles', 47, 'Requires 125 weapon parts and 12 special parts | 52 attack, 48 defense, +6 attack'],
+    ['Wasper Knife', 48, 'Requires 130 weapon parts and 15 special parts | 51 attack, 51 defense, +4 skill points']
   );
 
   var cityDepotParts = new Array (
@@ -1095,7 +1095,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Gun Drill', 659]
   );
 
-  // Armory build CRAIG
+  // Armory build
   var cityArmor = new Array (
     ['Random Common Armor', 29, 'Requires 2 armor parts'],
     ['Random Uncommon Armor', 30, 'Requires 5 armor parts'],
@@ -1108,7 +1108,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['MNU Suit', 37, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
     ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
   );
-
+  
   var cityArmorParts = new Array (
     ['Hammer', 2196],
     ['Rivet', 2197],
