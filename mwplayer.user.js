@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.763
+// @version     1.1.764
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.763',
+  version: '1.1.764',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -16401,10 +16401,18 @@ function handlePopups() {
             var bonusElt = xpathFirst('.//div[contains(@style,"font-size: 18px; margin-bottom: 5px;")]', popupElts[i]);
             if (bonusElt && bonusElt.innerHTML) logtxt += (logtxt ? '<br/>' : '') + 'Bonus: <span class="loot">' + bonusElt.innerHTML + '</span>';
             addToLog('lootbag Icon',logtxt);
-
-            return(closePopup(popupElts[i], "The Daily Take"));
           }
-
+          
+          // Get rid of War is already helped popup
+          if (popupInnerNoTags.indexOf('have already helped') != -1) {
+            return(closePopup(popupElts[i], "Already Helped"));
+          }
+          
+          // Get rid of War is already over popup
+          if (popupInnerNoTags.indexOf('war is already over') != -1) {
+            return(closePopup(popupElts[i], "War already over"));
+          }
+          
           /* THESE POPUPS get processed only when PS MWAP is running: */
           /* START */
           if (running) {
@@ -16673,9 +16681,9 @@ function handlePopups() {
             }
 
             // War Reward : Share Victory Coins
-            var warRewardButtons = $x('.//a[@class="sexy_button_new short_white" and contains(@onclick,"postWarWin")]',popupElts[i]);
-            if(warRewardButtons) {
-              if (isGMChecked('autoWarRewardPublish')){
+            if (popupInnerNoTags.indexOf('Share Victory Coins') != -1) {
+              var warRewardButtons = $x('.//a[@class="sexy_button_new short_white" and contains(@onclick,"postWarWin")]',popupElts[i]);
+              if(warRewardButtons && isGMChecked('autoWarRewardPublish')) {
                 for(i=0;i<warRewardButtons.length>0;++i){
                   warRewardButton = warRewardButtons[i];
                   clickElement(warRewardButton);
@@ -16684,8 +16692,7 @@ function handlePopups() {
                 return true;
               }
               return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
-            }
-
+             } 
           // End of Popups Section
 
           }
