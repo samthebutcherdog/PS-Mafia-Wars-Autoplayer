@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.765
+// @version     1.1.766
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.765',
+  version: '1.1.766',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1108,7 +1108,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['MNU Suit', 37, 'Requires 42 armor parts and 1 bio-monitor | 31 attack, 50 defense, +10 health'],
     ['Power Armor ', 38, 'Requires 48 armor parts and 1 micro-fission cell | 43 attack, 53 defense, +2 energy, +2 stamina']
   );
-  
+
   var cityArmorParts = new Array (
     ['Hammer', 2196],
     ['Rivet', 2197],
@@ -8486,7 +8486,7 @@ function validateStaminaTab() {
       s.fightClanName = document.getElementById('fightClanName').value;
       s.fightRemoveStronger = checked('fightRemoveStronger');
 
-      s.fightStealth = checked('fightStealth');      
+      s.fightStealth = checked('fightStealth');
 
       // Validate reattack settings.
       if (isNaN(s.reattackThreshold)) {
@@ -9498,7 +9498,7 @@ function innerPageChanged(justPlay) {
       doAutoPlay();
     }
   } catch (ex) {
-    addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');    
+    addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
     autoReload(true);
   }
 }
@@ -9774,6 +9774,14 @@ function refreshMWAPCSS() {
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
+
+  // hide new message icons
+                 (isGMChecked('hideMessageIcon') ?
+                   ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0pt 0pt; width: 43px; z-index: 2;"] {display: none;}' +
+                   ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0 0; width: 43px; z-index: 2;"] {display: none;}' :
+                   ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0pt 0pt; width: 43px; z-index: 2;"] { !important; right: 424px !important; z-index: 2 !important;}' +
+                   ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0 0; width: 43px; z-index: 2;"] { !important; right: 424px !important; z-index: 2 !important;}') +
+
                  // Move Slot Machine and click box:
                  (isGMChecked('HideSlotMachine') ?
                   ' #slots_icon_container  {display: none;}' +
@@ -9808,7 +9816,7 @@ function refreshMWAPCSS() {
                 // Move zstream  icon and make it smaller:
                  (isGMChecked('hideLiveUpdatesIcon') ?
                    ' #zstream_icon {display: none;}' :
-                   ' #zstream_icon {position: absolute; top: 10px; left:290px; z-index: 100;} ') +
+                   ' #zstream_icon {position: absolute; top: 12px; left:242px; z-index: 100;} ') +
 
                 // Hide Icon Row (header_mid_row) - This is the part containing all the icons (messege center, promo, live updates):
                 (isGMChecked('hideAttentionBox') ?
@@ -11228,7 +11236,7 @@ function customizeVegasJobs() {
 
 //  If this isn't a boss job, add the mastermind bonus to the reward (10% max) (removed KC - 12/10/10)
 //    if (reward && !isBossJob)
-//      reward = Math.floor(reward * parseFloat(GM_getValue('mafiaMastermind', '1.10'))); 
+//      reward = Math.floor(reward * parseFloat(GM_getValue('mafiaMastermind', '1.10')));
 //  16595 19085
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
@@ -13456,7 +13464,7 @@ function autoWar() {
 
     var callWarHelp = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "postFeedAndSendCallForHelp")]');
     if (callWarHelp && isGMChecked('autoWarResponsePublish')) {
-      clickElement(callWarHelp);      
+      clickElement(callWarHelp);
       // Call for Help
       Autoplay.fx = function() {
         clickAction = action;
@@ -14033,7 +14041,7 @@ function autoSafehouse() {
 }
 
 function autoDailyChecklist() {
-  // Need to be on the main home page   
+  // Need to be on the main home page
   if (!onHome) {
     DEBUG('Going Home for Daily checklist');
     Autoplay.fx = function() { goHome; };
@@ -14061,7 +14069,7 @@ function autoDailyChecklist() {
     DEBUG('Daily Checklist: Challenge Mission');
     clickElement(eltTakeClick);
   }
-  
+
   // Challenge Mission
   var eltTemp = xpathFirst('.//*[@id="message_box_menu_checkmark_challenge_mission" and contains(@class, "_checked")]', innerPageElt);
   var eltTempClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"challenge")]', innerPageElt);
@@ -14074,7 +14082,7 @@ function autoDailyChecklist() {
   var eltGrow = xpathFirst('.//*[@id="message_box_menu_checkmark_mafia" and contains(@class, "_checked")]', innerPageElt);
   var eltGrowSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
   if (eltGrowSkip) {
-    DEBUG('Daily Checklist: Grow Your Family'); 
+    DEBUG('Daily Checklist: Grow Your Family');
     clickElement(eltGrowSkip);
   }
 
@@ -14122,7 +14130,7 @@ function autoDailyChecklist() {
     DEBUG('Daily Checklist: Properties');
     clickElement(eltProperties);
   }
-  
+
   // When we get here everything has a check mark whether we forced it or not
   return false;
 }
@@ -14660,7 +14668,7 @@ function goJob(jobno) {
           if(OppSizeElt) OppSize = OppSizeElt.innerHTML.untag();
           OppLevelElt = xpathFirst('.//dd[@class="level"]//span[@class="player_data"]', targetParent);
           if(OppLevelElt) OppLevel = OppLevelElt.innerHTML.untag();
-        }        
+        }
         if(OppSize < smallestMafia || (OppSize == smallestMafia && OppLevel < lowestLevel)){
             OppTarget = targetElts[i];
             OppTargetParent = targetParent;
@@ -14687,7 +14695,7 @@ function goJob(jobno) {
       if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.selectNode('+jobNo+');")]') ; tmp = 6 ;} // in LV jobs, will fight or job for fallback
     }
   }
-  
+
   if (elt) {
     DEBUG(' job string used was =' + tmp );
     clickAction = 'job';
@@ -15808,11 +15816,11 @@ function logResponse(rootElt, action, context) {
       var pushNextJob = false;
       // IF we have the mastery gain bar,
       if(masteryGainElt) {
-        if( (GM_getValue('selectTier')!= '0.0'  ) || (!isGMChecked('multipleJobs'))  ) {          
+        if( (GM_getValue('selectTier')!= '0.0'  ) || (!isGMChecked('multipleJobs'))  ) {
           if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 ) {
             masteryGainTxt = '. Las Vegas Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
             pushNextJob = true;
-          }  
+          }
         }
       }
 
@@ -16269,11 +16277,11 @@ function closePopup(eltPopup, coolName) {
   //DEBUG('closePopup Processing');
   //var eltPopup = xpathFirst(xpath);
 
-  if (!eltPopup) { 
+  if (!eltPopup) {
     DEBUG('Can not close ' + coolName + ' popup: ' + eltPopup.id+' not found !');
     return false;
   }
-  
+
   // Once we see a post pop-up, set the timer to close it
   DEBUG('Got rid of ' + coolName + ' popup: ' + eltPopup.id);
   var closeElt = xpathFirst('.//a[@class="pop_close"]',eltPopup);
@@ -16402,17 +16410,17 @@ function handlePopups() {
             if (bonusElt && bonusElt.innerHTML) logtxt += (logtxt ? '<br/>' : '') + 'Bonus: <span class="loot">' + bonusElt.innerHTML + '</span>';
             addToLog('lootbag Icon',logtxt);
           }
-          
+
           // Get rid of War is already helped popup
           if (popupInnerNoTags.indexOf('have already helped') != -1) {
             return(closePopup(popupElts[i], "Already Helped"));
           }
-          
+
           // Get rid of War is already over popup
           if (popupInnerNoTags.indexOf('war is already over') != -1) {
             return(closePopup(popupElts[i], "War already over"));
           }
-          
+
           /* THESE POPUPS get processed only when PS MWAP is running: */
           /* START */
           if (running) {
@@ -16640,22 +16648,22 @@ function handlePopups() {
               DEBUG('Popup Process: MISSIONS - Claim Rewards Failed');
               return(closePopup(popupElts[i], "Claim Mission Rewards Failed"));
             }
-            
+
             // Log Mission Rewards
-            if (popupInnerNoTags.indexOf('successfully completed the mission') != -1) {   
+            if (popupInnerNoTags.indexOf('successfully completed the mission') != -1) {
               var thisPopup = popupElts[i];
               DEBUG('Popup Process: MISSIONS - Claim Rewards : '+thisPopup.id);
               var rewards = $x('.//td[@class="collectPopLootItem"]', thisPopup);
               var rewardsTxt ="";
               for(i=0;i<rewards.length;++i){
-                rewardsNoTags = rewards[i].innerHTML.untag();                      
+                rewardsNoTags = rewards[i].innerHTML.untag();
                 if(rewardsTxt) rewardsTxt += ', '+ rewardsNoTags;
                 else rewardsTxt = rewardsNoTags;
               }
-              addToLog('lootbag Icon', 'Mission Rewards : '+rewardsTxt);              
+              addToLog('lootbag Icon', 'Mission Rewards : '+rewardsTxt);
               return(closePopup(thisPopup, "Mission Rewards claimed"));
-            }            
-            
+            }
+
             // War Declaration
             var warDeclareButton = xpathFirst('.//a[@clas="sexy_button_new short_white sexy_call_new" and contains(@onclick,"attemptFeed")]',popupElts[i]);
             if(warDeclareButton) {
@@ -16692,7 +16700,7 @@ function handlePopups() {
                 return true;
               }
               return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
-             } 
+             }
           // End of Popups Section
 
           }
