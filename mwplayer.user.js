@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.766
+// @version     1.1.767
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.766',
+  version: '1.1.767',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1038,25 +1038,25 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   var cityCars = new Array (
     ['Midnight', 39, 'Requires 10 car parts, 1 special part | 28 attack, 33 defense, +1 defense'],
     ['Sonic Five', 25, 'Requires 12 car parts | 32 attack, 30 defense'],
-    ['Random Common Car', 1,  'Requires 10 car parts'],
+    ['Random Common Car', 1, 'Requires 10 car parts'],
     ['Palermo Luxury', 40, 'Requires 20 car parts, 2 special parts | 36 attack, 35 defense, +5 health'],
     ['General Ulysses', 26, 'Requires 28 car parts| 38 attack, 28 defense'],
-    ['Random Rare Car', 2,  'Requires 25 car parts'],
+    ['Random Rare Car', 2, 'Requires 25 car parts'],
     ['Sleek', 41, 'Requires 30 car parts, 3 special parts | 35 attack, 37 defense, +1 attack'],
-    ['Tasmanian', 3,  'Requires 30 car parts | 36 attack, 34 defense'],
-    ['CM Santiago R10', 4,  'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
+    ['Tasmanian', 3, 'Requires 30 car parts | 36 attack, 34 defense'],
+    ['CM Santiago R10', 4, 'Requires 30 car parts, 2 cuban car parts | 42 attack, 30 defense'],
     ['Sirroco 9Z', 11, 'Requires 48 car parts | 46 attack, 15 defense'],
-    ['Rebel 2', 5,  'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +6 stamina'],
-    ['Russian Dazatz 45', 6,  'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
+    ['Rebel 2', 5, 'Requires 45 car parts, 1 bulletproof glass | 40 attack, 45 defense, +6 stamina'],
+    ['Russian Dazatz 45', 6, 'Requires 50 car parts, 2 russian car parts | 18 attack, 46 defense'],
     ['Andresen 420si', 12, 'Requires 68 car parts | 41 attack, 43 defense'],
-    ['Solar Flare', 7,  'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
-    ['Thai XS Max', 8,  'Requires 75 car parts, 2 thai car parts | 45 attack, 35 defense'],
-    ['Trio Napoli', 9,  'Requires 95 car parts | 47 attack, 23 defense'],
+    ['Solar Flare', 7, 'Requires 65 car parts, 1 solar panel | 34 attack, 34 defense, +6 energy'],
+    ['Thai XS Max', 8, 'Requires 75 car parts, 2 thai car parts | 45 attack, 35 defense'],
+    ['Trio Napoli', 9, 'Requires 95 car parts | 47 attack, 23 defense'],
     ['Red Angel', 10, 'Requires 115 car parts | 16 attack, 49 defense'],
     ['Mugati Sport', 13, 'Requires 135 car parts, 1 high tech car part | 35 attack, 51 defense, +3 attack'],
     ['Hunter \'Spy\' XS', 14, 'Requires 155 car parts, 2 high tech car parts | 52 attack, 29 defense, +3 defense'],
     ['Day Rider 2K', 27, 'Requires 175 car parts, 1 suspension coil | 45 attack, 50 defense, +1 attack, +1 defense'],
-    ['Sportster',  42, 'Requires 185 car parts, 10 special parts | 52 attack, 46 defense, +3 energy, +3 stamina'],
+    ['Sportster', 42, 'Requires 185 car parts, 10 special parts | 52 attack, 46 defense, +3 energy, +3 stamina'],
     ['Extended Cab 640', 43, 'Requires 200 car parts, 15 special parts | 53 attack, 55 defense, +3 skill points']
   );
 
@@ -2500,7 +2500,6 @@ function AskforHelp(hlpCity) {
     tabno = parseInt(GM_getValue('selectBangkokTier'));
     timerName='AskforHelpBangkokTimer';
   }
-
 
 //Set delay to 3000 to prevent Bangkokg not publishing if too fast after Moscow publishing
   // Go to the correct city.
@@ -3948,9 +3947,7 @@ function autoBankDeposit(bankCity, amount) {
     clickElement (submitElt);
     DEBUG('Clicked to deposit.');
   };
-  Autoplay.delay = noDelay;
   Autoplay.start();
-  closePopup(bankElt.parentNode, "Bank Popup");
   return true;
 }
 
@@ -4492,7 +4489,7 @@ function hideStatsWindow() {
 }
 
 function handleVersionChange() {
-  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">We need your help - DONATE - playerscripts.com</a>');
+  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + '<br/>We need your help - <a href="http://www.playerscripts.com/" target="_blank">DONATE - playerscripts.com</a>');
 
   // Check for invalid settings and upgrade them.
 
@@ -4675,13 +4672,16 @@ function saveSettings() {
   // Validation of refresh and delay values
   var refreshLow = parseInt(document.getElementById('r1').value); var refreshHigh = parseInt(document.getElementById('r2').value);
   var delayLow = parseInt(document.getElementById('d1').value); var delayHigh = parseInt(document.getElementById('d2').value);
-  if (refreshLow > refreshHigh || refreshLow <= delayHigh || refreshLow < 8) {
-    alert('The refresh values are invalid, defaulting them to 30s->110s.\nPS: Both have to be greater than the high delay value and at least 8s.');
+  if (refreshLow > refreshHigh || refreshLow < 8) {
+    alert('General Tab: The refresh values are invalid, defaulting them to 30s->110s.\nPS: Both have to be greater than the high delay value and at least 8s.');
     document.getElementById('r1').value = 30; document.getElementById('r2').value = 110;
     return;
   } else if (delayLow > delayHigh || delayLow < 1 || delayHigh < 2) {
-    alert('The delay values are invalid, defaulting them to 3s->5s.\nPS: Low delay has to be at least 1s, high delay at least 2s.');
+    alert('General Tab: The delay values are invalid, defaulting them to 3s->5s.\nPS: Low delay has to be at least 1s, high delay at least 2s.');
     document.getElementById('d1').value = 3; document.getElementById('d2').value = 5;
+    return;
+  } else if (refreshLow <= delayHigh) {
+    alert('General Tab: Your low refresh is <= high delay, please adjust.');
     return;
   }
   GM_setValue('r1', String(refreshLow));
@@ -6812,7 +6812,6 @@ function createHelpMissionsTab() {
   var AutoMafiaFight = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 105px; left: 10px;'});
   makeElement('input', AutoMafiaFight, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', AutoMafiaFight, {'for':id,'title':title}).appendChild(document.createTextNode(' Do Mission Job Fights '));
-
 
   return HelpMissionsTab;
 }
@@ -9456,15 +9455,13 @@ function innerPageChanged(justPlay) {
 
   // Parse player attack/defense equip stats
   getPlayerEquip();
-  // Parse TopMafia boni (mastermind,bagman)
-  getTopMafia();
 
   // Customize the display.
   if (!justPlay) {
     setListenContent(false);
     customizeMasthead();
     customizeLayout();
-	customizeBanner();
+    customizeBanner();
     customizeStats();
     customizeNames();
     if (!customizeHome() &&
@@ -9736,20 +9733,19 @@ function customizeLayout() {
 }
 
 function customizeBanner(){
-   var promobanner = document.getElementById('popup_permanence');
-   var banner_html = '<center><a href="http://playerscripts.com" id="banner"><img src="http://playerscripts.com/images/psmwap-donatebanner.jpg"></a></center>';
-   function create_div() {
-		if(document.getElementById('ps_mwap_promo_banner')) {
-			document.getElementById('ps_mwap_promo_banner').innerHTML = banner_html;
-		}
-		else {
-			var mwapbanner_div=document.createElement("ps_mwap_promo_banner");
-			mwapbanner_div.id = 'ps_mwap_promo_banner';
-			mwapbanner_div.innerHTML = banner_html;
-			promobanner.insertBefore(mwapbanner_div, promobanner.firstChild);
-		}
-	}
-	create_div();
+  var promobanner = document.getElementById('popup_permanence');
+  var banner_html = '<center><a href="http://playerscripts.com" id="banner"><img src="http://playerscripts.com/images/psmwap-donatebanner.jpg"></a></center>';
+  var create_div = function() {
+    if(document.getElementById('ps_mwap_promo_banner')) {
+      document.getElementById('ps_mwap_promo_banner').innerHTML = banner_html;
+    } else {
+      var mwapbanner_div=document.createElement("ps_mwap_promo_banner");
+      mwapbanner_div.id = 'ps_mwap_promo_banner';
+      mwapbanner_div.innerHTML = banner_html;
+      promobanner.insertBefore(mwapbanner_div, promobanner.firstChild);
+    }
+  };
+  create_div();
 }
 
 function refreshMWAPCSS() {
@@ -9851,7 +9847,7 @@ function refreshMWAPCSS() {
                   ' div[id="travel_menu"] {width: 140px;}' +
                  ' div[onmouseover="instructionopen()"] {position: absolute !important; left: 460px !important;}' +
 
-				 ' div[id="header_top_promo_banner"] {position: absolute !important; margin:0 !important; ' +
+                 ' div[id="header_top_promo_banner"] {position: absolute !important; margin:0 !important; ' +
                  '  height:0 !important; width: 0 !important; display: none !important;}' +
 
 //                 (isGMChecked('hideAttentionBox') ? ' div[id="popup_fodder"][style*="display: block;"], ' : '' ) +
@@ -10641,7 +10637,7 @@ function getPlayerStats() {
   }
 }
 
-function getTopMafia() {
+/*function getTopMafia() {
   // Make sure we're on the My Mafia tab.
   if (!onMyMafiaTab()) return;
 
@@ -10658,10 +10654,10 @@ function getTopMafia() {
     mastermind = parseInt(RegExp.$1);
     mastermind = mastermind < 10 ? '1.0' + mastermind : '1.' + mastermind;
   }
-  /*if (wheelmanElt && wheelmanElt.innerHTML.match(/<strong>([0-9]+)%<\/strong>/i)) {
-    wheelman = parseInt(RegExp.$1);
-    wheelman = wheelman < 10 ? '1.0' + wheelman : '1.' + wheelman;
-  }*/
+  //if (wheelmanElt && wheelmanElt.innerHTML.match(/<strong>([0-9]+)%<\/strong>/i)) {
+    //wheelman = parseInt(RegExp.$1);
+    //wheelman = wheelman < 10 ? '1.0' + wheelman : '1.' + wheelman;
+  //}
   if (bagmanElt && bagmanElt.innerHTML.match(/<strong>([0-9]+)%<\/strong>/i)) {
     bagman = parseInt(RegExp.$1);
     bagman = bagman < 10 ? '1.0' + bagman : '1.' + bagman;
@@ -10672,7 +10668,7 @@ function getTopMafia() {
   if (!isGMEqual('mafiaMastermind', mastermind)) GM_setValue('mafiaMastermind', mastermind);
   //if (!isGMEqual('mafiaWheelman', wheelman)) GM_setValue('mafiaWheelman', wheelman);
   if (!isGMEqual('mafiaBagman', bagman)) GM_setValue('mafiaBagman', bagman);
-}
+}*/
 
 function getPlayerEquip() {
   // Make sure we're on the fight tab.
@@ -11156,6 +11152,8 @@ function customizeVegasJobs() {
   // Display an experience to energy payoff ratio for each job.
   var bestJobs = [], worstJobs = [];
   var bestRatio = 0, worstRatio = 10;
+  var bestStamJobs = [], worstStamJobs = [];
+  var bestStamRatio = 0, worstStamRatio = 10;
   var reselectJob = false;
   var masteryList = getSavedList('masteryJobsList');
 
@@ -11234,10 +11232,6 @@ function customizeVegasJobs() {
     if (expElt) var reward = parseInt(expElt.innerHTML);
     else var reward = 0;
 
-//  If this isn't a boss job, add the mastermind bonus to the reward (10% max) (removed KC - 12/10/10)
-//    if (reward && !isBossJob)
-//      reward = Math.floor(reward * parseFloat(GM_getValue('mafiaMastermind', '1.10')));
-//  16595 19085
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
     var ratio = Math.round (reward / cost * 100) / 100;
@@ -11248,9 +11242,6 @@ function customizeVegasJobs() {
     var moneyTxt = '';
     if (moneyElt) {
       var money = parseCash(moneyElt.innerHTML.untag());
-      // If this isn't a boss job, add the bagman bonus to the money payout (15% max) (removed KC - 12/10/10)
-      //if (reward && !isBossJob )
-       // money = Math.round(money * parseFloat(GM_getValue('mafiaBagman', '1.15')));
       //var currency = cities[city][CITY_CASH_SYMBOL];
       var mratio = makeCommaValue(Math.round(money / cost));
       moneyTxt = ' (' + mratio + ')';
@@ -11264,61 +11255,81 @@ function customizeVegasJobs() {
     if (cost > energy) timeTxt = 'Time: ' + getDecimalTime((cost - energy) * timePerEnergy);
 
     if (!xpathFirst('.//span[@id="ratio_xp"]', expElt))
-      makeElement('span', expElt, {'title':' Experience is calculated with ' + GM_getValue('mafiaMastermind', '1.10') + 'x Mastermind Bonus.','id':'ratio_xp', 'style':'color:red; font-size: 10px'})
-        .appendChild(document.createTextNode(xpTxt));
+      makeElement('span', expElt, {'id':'ratio_xp', 'style':'color:red; font-size: 10px'}).appendChild(document.createTextNode(xpTxt));
     if (!xpathFirst('.//span[@id="ratio_money"]', moneyElt))
-      makeElement('span', moneyElt, {'title':'Money is calculated with ' + GM_getValue('mafiaBagman', '1.15') + 'x Bagman Bonus.','id':'ratio_money', 'style':'color:red; font-size: 10px'})
-        .appendChild(document.createTextNode(moneyTxt));
+      makeElement('span', moneyElt, {'id':'ratio_money', 'style':'color:red; font-size: 10px'}).appendChild(document.createTextNode(moneyTxt));
     //makeElement('span', costElt, {'style':'color:green; font-size: 10px'})
       //.appendChild(document.createTextNode(timeTxt));
 
     updateJobInfo(jobMatch, cost, reward, ratio);
 
-    // Keep track of the best & worst payoffs.
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestJobs = [costElt];
-    } else if (ratio == bestRatio) {
-      bestJobs.push(costElt);
-    }
-    if (ratio < worstRatio) {
-      worstRatio = ratio;
-      worstJobs = [costElt];
-    } else if (ratio == worstRatio) {
-      worstJobs.push(costElt);
+    if (!isFightJob) {
+      // Keep track of the best & worst payoffs for energy jobs.
+      if (ratio > bestRatio) {
+        bestRatio = ratio;
+        bestJobs = [costElt];
+      } else if (ratio == bestRatio)
+        bestJobs.push(costElt);
+      if (ratio < worstRatio) {
+        worstRatio = ratio;
+        worstJobs = [costElt];
+      } else if (ratio == worstRatio)
+        worstJobs.push(costElt);
+    } else {
+      // Keep track of the best & worst payoffs for stamina jobs.
+      if (ratio > bestStamRatio) {
+        bestStamRatio = ratio;
+        bestStamJobs = [costElt];
+      } else if (ratio == bestStamRatio)
+        bestStamJobs.push(costElt);
+      if (ratio < worstStamRatio) {
+        worstStamRatio = ratio;
+        worstStamJobs = [costElt];
+      } else if (ratio == worstStamRatio)
+        worstStamJobs.push(costElt);
     }
   }
 
   var elt;
-  // Highlight the best and worst jobs.
+  // Highlight the best and worst energy jobs.
   if (worstRatio != bestRatio) {
-    var i=0;
     while (bestJobs.length) {
       elt = bestJobs.pop();
-      var id = 'bestJob'+i;
-      addelt = document.getElementById(id);
-      if(!addelt || elt.innerHTML.indexOf('(BEST)') == -1) {
-        elt = makeElement('span', elt, {'id':id, 'style':'color:#52E259; font-size: 10px'});
+      if (!xpathFirst('.//span[@id="job_best"]', elt)) {
+        elt = makeElement('span', elt, {'id':'job_best', 'style':'color:#52E259; font-size: 10px'});
         elt.appendChild(document.createTextNode(' (BEST)'));
       }
-      i++;
     }
-    i = 0;
     while (worstJobs.length) {
       elt = worstJobs.pop();
-      id = 'worstJob'+i;
-      addelt = document.getElementById(id);
-      if(!addelt || elt.innerHTML.indexOf('(WORST)') == -1) {
-        elt = makeElement('span', elt, {'id':id, 'style':'color:#EC2D2D; font-size: 10px'});
+      if (!xpathFirst('.//span[@id="job_worst"]', elt)) {
+        elt = makeElement('span', elt, {'id':'job_worst', 'style':'color:#EC2D2D; font-size: 10px'});
         elt.appendChild(document.createTextNode(' (WORST)'));
       }
-      i++;
+    }
+  }
+  // Highlight the best and worst stamina jobs.
+  if (worstStamRatio != bestStamRatio) {
+    while (bestStamJobs.length) {
+      elt = bestStamJobs.pop();
+      if (!xpathFirst('.//span[@id="job_best_stam"]', elt)) {
+        elt = makeElement('span', elt, {'id':'job_best_stam', 'style':'color:#52E259; font-size: 10px'});
+        elt.appendChild(document.createTextNode(' (BEST STAM)'));
+      }
+    }
+    while (worstStamJobs.length) {
+      elt = worstStamJobs.pop();
+      if (!xpathFirst('.//span[@id="job_worst_stam"]', elt)) {
+        elt = makeElement('span', elt, {'id':'job_worst_stam', 'style':'color:#EC2D2D; font-size: 10px'});
+        elt.appendChild(document.createTextNode(' (WORST STAM)'));
+      }
     }
   }
 
   // Show the experience to energy/stamina ratios needed to level up.
   if (!document.getElementById('level_up_ratio')) {
-    elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratios needed to level up: combined, on energy only, on stamina only.', 'style':'position:absolute; top:45px; right:60px; width: 80px; text-align: left; font-size: 10px; display:none;'});
+    elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratios needed to level up: combined, on energy only, on stamina only.',
+                                    'style':'position:absolute; top:45px; right:60px; width:80px; text-align:left; font-size:10px; display:none;'});
     var positionElt = xpathFirst('.//div[@id="job_paths"]/div[contains(@style,"clear")]', innerPageElt);
     positionElt.parentNode.insertBefore(elt, positionElt);
   }
@@ -11669,7 +11680,8 @@ function customizeJobs() {
   }
 
   // Show the experience to energy ratio needed to level up.
-  elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratio needed to level up on energy alone.', 'style':'position:absolute; text-align: center; right:10px; font-size: 12px; width: 180px; display:none;'});
+  elt = makeElement('div', null, {'id':'level_up_ratio', 'title':'Ratios needed to level up: combined, on energy only, on stamina only.',
+                                  'style':'position:absolute; right:10px; width:80px; text-align:left; font-size:10px; display:none;'});
   jobTables[0].parentNode.insertBefore(elt, jobTables[0]);
 
   setLevelUpRatio();
@@ -11911,26 +11923,23 @@ function customizeHitlist() {
 }
 
 function setLevelUpRatio() {
-  var combined = ((city == NY) ||(city == LV)||(city == MOSCOW)||(city == BANGKOK)||(city == CUBA));
-// newchange    var combined = (city == LV);
   var elt = document.getElementById('level_up_ratio');
   if (elt) {
     var ratioHTML = '';
-    if (combined && (stamina || energy)) {
+    if (stamina || energy) {
       var ratio = Math.ceil((ptsToNextLevel) / (energy + stamina) * 100) / 100;
       ratioHTML = 'Combined: ' + (ratio > 20 ? '> 20' : ratio) + 'x<br>';
-    }
-    if (energy) {
-      var ratioEnergy = Math.ceil((ptsToNextLevel) / energy * 100) / 100;
-      if (combined) ratioHTML += 'Energy: ' + (ratioEnergy > 20 ? '> 20' : ratioEnergy) + 'x<br>';
-      else ratioHTML = 'Ratio needed: ' + (ratioEnergy > 20 ? '> 20' : ratioEnergy) + 'x.';
-    }
-    if (combined && stamina) {
-      var ratioStamina = Math.ceil((ptsToNextLevel) / stamina * 100) / 100;
-      ratioHTML += 'Stamina: ' + (ratioStamina > 20 ? '> 20' : ratioStamina) + 'x';
+      if (energy) {
+        var ratioEnergy = Math.ceil((ptsToNextLevel) / energy * 100) / 100;
+        ratioHTML += 'Energy: ' + (ratioEnergy > 20 ? '> 20' : ratioEnergy) + 'x<br>';
+      }
+      if (stamina) {
+        var ratioStamina = Math.ceil((ptsToNextLevel) / stamina * 100) / 100;
+        ratioHTML += 'Stamina: ' + (ratioStamina > 20 ? '> 20' : ratioStamina) + 'x';
+      }
     }
     elt.innerHTML = ratioHTML;
-    if (ratio || ratioEnergy || ratioStamina)
+    if (ratio)
       elt.style.display = 'block';
     else
       elt.style.display = 'none';
@@ -14639,15 +14648,15 @@ function goJob(jobno) {
       //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
       var skipCurrentJob = false;
       StamReqElt = xpathFirst('.//dd[@class="stamina"]', jobRow);
-        if(StamReqElt) {
+      if(StamReqElt) {
         StamReq = parseInt(StamReqElt.innerHTML.untag());
-          DEBUG('Required Stamina:' +StamReq+':');
+        DEBUG('Required Stamina:' +StamReq+':');
         if(StamReq > stamina) {
           skipCurrentJob = true;
-        DEBUG('stamina requied :'+StamReq+': have :'+stamina+': not enough stamina, go home');
-        goHome();
-        } else  DEBUG('stamina requied :'+StamReq+': have :'+stamina+': have enough stamina do job');
-      } else   DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
+          DEBUG('stamina required :'+StamReq+': have :'+stamina+': not enough stamina, go home');
+          goHome();
+        } else DEBUG('stamina required :'+StamReq+': have :'+stamina+': have enough stamina do job');
+      } else DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
       DEBUG(' check stam 3');
       // newchange
 
@@ -15892,9 +15901,9 @@ function logResponse(rootElt, action, context) {
       }
 
       if (pushNextJob) {
-          DEBUG('Job Mastery of 100% detected, Reloading Tabno :'+tabno );
-          customizeVegasJobs();
-      }else {
+        DEBUG('Job Mastery of 100% detected, Reloading Tabno :'+tabno );
+        customizeVegasJobs();
+      } else {
         return;
       }
       Autoplay.start();
@@ -16328,7 +16337,6 @@ function handlePopups() {
     var popupElts = $x('.//div[(((contains(@id,"pop") and not(contains(@id,"pop_bg")) and not(contains(@id,"box_bg"))) and contains(@style, "block")) or contains(@id,"mystery")) and not(@id="popup_fodder")]', appLayoutElt);
 
     if (popupElts && popupElts.length > 0) {
-
       // Process each popup that is open
       DEBUG('Popups Found: ' + popupElts.length);
       for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
@@ -16409,6 +16417,7 @@ function handlePopups() {
             var bonusElt = xpathFirst('.//div[contains(@style,"font-size: 18px; margin-bottom: 5px;")]', popupElts[i]);
             if (bonusElt && bonusElt.innerHTML) logtxt += (logtxt ? '<br/>' : '') + 'Bonus: <span class="loot">' + bonusElt.innerHTML + '</span>';
             addToLog('lootbag Icon',logtxt);
+            return(closePopup(popupElts[i], "The Daily Take"));
           }
 
           // Get rid of War is already helped popup
@@ -16700,13 +16709,11 @@ function handlePopups() {
                 return true;
               }
               return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
-             }
+            }
           // End of Popups Section
 
           }
         /* END */
-        /* THESE POPUPS get processed only when PS MWAP is running: */
-
         }
       }
     }
