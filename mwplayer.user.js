@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.767
+// @version     1.1.768
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.767',
+  version: '1.1.768',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -754,6 +754,10 @@ var invites;                    // Number of mafia invitations
 var stats;                      // Skill points
 var city;                       // Current city (0=New York, 1=Cuba, 2=Moscow)
 var skipStaminaSpend = false;   // Skip stamina actions for now?
+var Mission_Name;               // mission Name holder
+var Mission_ID;                 // a holder to move the mission tag around
+var Mission_Slot;               // a holder to move around the mission slot 0-3
+var MyMafiaJobs;                // name to use in misssions
 var clickAction;                // Action being attempted with click simulation
 var clickContext;               // Context for clickAction
 var modificationTimer;          // Timer used to wait for content changes
@@ -2040,10 +2044,10 @@ function doAutoPlay () {
   }
 
 // newchange
-// auto mission-collect      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+// auto mission-collect      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
   if (running && isGMChecked('AutoMafiaMission') && !timeLeftGM('colmissionTimer')) {  // && !maxed
      if (Auto_Mafia_Mission() ) return;
-  } else { DEBUG(' Mafia Missions Turned Off, or timer not 0 ');
+  } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds, Or Missions Turned Off') ;
   }
 
   // Auto-collect take (limit to level 4 and above)
@@ -4786,7 +4790,7 @@ function saveSettings() {
 
   //Missions Tab Checkboxes  // newchange
   saveCheckBoxElementArray([
-    'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+    'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
   ]);
 
   //Start Save Autostat Tab Settings
@@ -6769,7 +6773,7 @@ function createMafiaTab() {
 }
 
 /////////////////////////////////////// end mafia tab
-// Create Missions Tab  // newchange      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+// Create Missions Tab  // newchange      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
 function createHelpMissionsTab() {
   var elt, title, id, label, item, lhs, rhs, i, choice, div;
   var HelpMissionsTab = makeElement('div', null, {'id':'HelpMissionsTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
@@ -6799,7 +6803,7 @@ function createHelpMissionsTab() {
   makeElement('input', AutoMafiaCollection, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', AutoMafiaCollection, {'for':id,'title':title}).appendChild(document.createTextNode(' Collect Mission Rewards '));
 
-  // help in mafia mission jobs
+  // clear removals from mafia missions
   id = 'AutoMafiaJob';
   title = 'Help In Mafia Mission Jobs';
   var AutoMafiaJob = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 85px; left: 10px;'});
@@ -6807,11 +6811,11 @@ function createHelpMissionsTab() {
   makeElement('label', AutoMafiaJob, {'for':id,'title':title}).appendChild(document.createTextNode(' Do Mission Jobs '));
 
   // help in mafia mission fighting
-  id = 'AutoMafiaFight';
-  title = 'Help In Mafia Mission Fights';
-  var AutoMafiaFight = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 105px; left: 10px;'});
-  makeElement('input', AutoMafiaFight, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', AutoMafiaFight, {'for':id,'title':title}).appendChild(document.createTextNode(' Do Mission Job Fights '));
+  id = 'AutoMafiaRemoved';
+  title = 'Clear Removed From Mission If You Have Been Removed From A Mission';
+  var AutoMafiaRemoved = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 105px; left: 10px;'});
+  makeElement('input', AutoMafiaRemoved, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', AutoMafiaRemoved, {'for':id,'title':title}).appendChild(document.createTextNode(' Clear Any Removed From Mission'));
 
   return HelpMissionsTab;
 }
@@ -8926,6 +8930,22 @@ function handleModificationTimer(target) {
     }
   }
 
+  var MissionResults = xpathFirst('.//div[contains(@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'")]//div[@class="task_results"]', innerPageElt);    // results just being on mission page
+  if (MissionResults) {
+//        DEBUG('results');   //doatest
+      if (MissionResults && !xpathFirst('./div[@id="job_flag"]', MissionResults)) {
+        setListenContent(false);
+        makeElement('div', MissionResults, {'id':'job_flag', 'style':'display: none;'});
+        setListenContent(true);
+        DEBUG('Detected Mission results change on Mission ='+Mission_ID);
+        pageChanged = true;
+        if (running) justPlay = true;
+        DEBUG('Flagged');
+      } else {
+       DEBUG('Already Flagged');
+      }
+  }
+
   // Added handling for just rob page changes
   var robResult = xpathFirst('.//a[@id="rob_refresh_cost"]', innerPageElt);
   if (robResult) {
@@ -9472,6 +9492,7 @@ function innerPageChanged(justPlay) {
         !customizeCollections() &&
         !customizeProfile() &&
         !customizeProps() &&
+        !customizeMissions() &&
         !customizeHitlist()) {
       customizeFight();
     }
@@ -11921,6 +11942,11 @@ function customizeHitlist() {
 
   return true;
 }
+
+function customizeMissions() {
+    DEBUG(' were in customize missions pages at the moment');
+}
+
 
 function setLevelUpRatio() {
   var elt = document.getElementById('level_up_ratio');
@@ -14653,8 +14679,9 @@ function goJob(jobno) {
         DEBUG('Required Stamina:' +StamReq+':');
         if(StamReq > stamina) {
           skipCurrentJob = true;
-          DEBUG('stamina required :'+StamReq+': have :'+stamina+': not enough stamina, go home');
-          goHome();
+          DEBUG('stamina required :'+StamReq+': have :'+stamina+': not enough stamina, leave for now');
+//          goHome();
+          reutrn;
         } else DEBUG('stamina required :'+StamReq+': have :'+stamina+': have enough stamina do job');
       } else DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
       DEBUG(' check stam 3');
@@ -15754,6 +15781,12 @@ function logResponse(rootElt, action, context) {
     messagebox = xpathFirst('.//div[@class="chop_build_final"]', appLayoutElt);
   }
 
+  if (!messagebox) {
+  messagebox = xpathFirst('.//div[ contains (@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'_module")]', rootElt);  //shows total mastery result
+      if (messagebox) {  DEBUG(' found messagebox result - '); }  //
+  } //doatest
+  if (!messagebox) { DEBUG(' NO mission messagebox result found - '); }
+
   if (action=='withdraw' && context) {
     autoBankWithdraw(context);
     Autoplay.start();
@@ -15811,6 +15844,57 @@ function logResponse(rootElt, action, context) {
       Autoplay.start();
       return true;
       break;
+
+    case 'Missionjob':
+ //doatest
+      Mission_ResultsElt = xpathFirst('.//div[@class="task_results"]', messagebox);
+    if(Mission_ResultsElt) DEBUG('found Mission_ResultsElt');
+
+// fails for checking errors
+//      Mission_Results = xpathFirst('.//h4[contains@style="border"  and contains(text(),"FAILURE")]', Mission_ResultsElt);
+//if(Mission_Results) DEBUG('found Mission_Results');
+
+      masteryGainElt = xpathFirst('.//div[@class="doTaskMastery"]', messagebox);
+      xpGainElt = xpathFirst('.//dd[@class="experience"]', messagebox);
+      var masteryGainTxt = "";
+      var pushNextJob = false;
+      // IF we have the mastery gain bar,
+       DEBUG(' checking mastery Mission ID :'+Mission_ID  );
+      if(masteryGainElt) {
+          if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 ) {
+            masteryGainTxt = '. Missions Task ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+            pushNextJob = true;
+          } else {
+            masteryGainTxt = '. Missions Task ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+          DEBUG(' NO mastery '+Mission_ID  + masteryGainTxt );
+        }
+      }
+//////////// add stuff here
+//////////// add stuff here
+      var Finish_Mission;
+      if (pushNextJob) {
+        // DEBUG('Job Mastery of 100% detected, Reloading Tabno :'+tabno );
+        DEBUG('Job Mastery of 100% detected, Reloading nothing:' );
+        // customizemissions();
+        //  a id="sm_action_button_4cb855f25be3d" class="sexy_button_new medium_black"
+        //    onclick="SocialMissionView.closeTask('4cb855f25be3d','3','69699939'); return false;"
+        // may be way too detailed
+        var Finish_Mission = xpathFirst('.//a[contains(@id,"sm_action_button_'+Mission_ID+'") and contains(@class,"sexy_button_new medium_black") and contains(@onclick,"SocialMissionView.closeTask(\''+Mission_ID+'")]', innerPageElt);
+        if(Finish_Mission) {
+          DEBUG(' we found the finished, close button' );
+         clickElement(Finish_Mission);
+         if(!Check_Mission_Job()){  // load stuff for next mission and try to start it                this and the next line were added before bed last nite
+        Go_Nxt_Page();  // if there was nothing else on this page, try to go to the next page            so test them
+        }
+        } else {
+          DEBUG(' we did NOT find the finished, close button' );
+        }
+      } else {
+        return;
+      }
+  Autoplay.start();
+  return true;
+  break;
 
     case 'job':
       var masteryGainElt ;
@@ -17369,19 +17453,21 @@ function encode64(input) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-// newchange      isGMChecked('AutoMafiaMission')  'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaFight','AskMissionHelp'
+// newchange      isGMChecked('AutoMafiaMission')  'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
 function Auto_Mafia_Mission(){
   // Go to the missions tab
+    Mission_ID  = null;
+    Mission_Slot= null;
+
   if (!OnMissionsTab()) {
     Autoplay.fx = GoMissionsTab;
-    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.delay = getAutoPlayDelay();     //    to pass stuff around
     Autoplay.start();
     return true;
   }
+   if(isGMChecked('AskMissionHelp')&& !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ; // defaults to mymissions page
+   if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will collect mymission
 
-  DEBUG(' in process missions, gonna check help, removed, collection & job');
-
-  if(isGMChecked('AskMissionHelp')&& !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ; // defaults to mymissions page
    if (!Mafia_Missions_Tab()) {
      Autoplay.fx = Do_Mafia_Collection_Tab();
      Autoplay.delay = getAutoPlayDelay();
@@ -17389,194 +17475,211 @@ function Auto_Mafia_Mission(){
      return true;
   }
 
-  if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will check all collections on this page, currently they have 2 max
-                                         Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page, currently they have 2 max
-  if(isGMChecked('AutoMafiaJob'))        Do_Mafia_Mission_Job() ; // a work in progress
-// if(isGMChecked('AutoMafiaFight')) Do_Mafia_Mission_Fight() ;
+  if(isGMChecked('AutoMafiaJob')) {
+  if(Check_Mission_Job() ) {
+//  go_do_mission();
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.fx = Do_Mission_Job() ;
+    Autoplay.start();
+//  DEBUG(' we passed do_mission_job - autolay - - ');
+    return true;
+//  DEBUG(' we made it end the job routine - - - ');
+    };
+  };
+
+  if(isGMChecked('AutoMafiaRemoved'))    Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page, currently they have 2 max
+  if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will check all collections on this page, currently they have 1 max
 
 // check to see if there is a right button to press to go to the next page
   if (Chk_Nxt_Page()) {
-//    Autoplay.fx = GoMissionsTab;
-    Autoplay.fx = Go_Nxt_Page;
     Autoplay.delay = getAutoPlayDelay();
+    Autoplay.fx = Go_Nxt_Page;
     Autoplay.start();
     return true;
   }
   return;
-};
+}
+////
+function go_do_mission() {
+    Autoplay.delay = getAutoPlayDelay();
+    Autoplay.fx = Do_Mission_Job() ;
+    Autoplay.start();
+//  DEBUG(' we passed do_mission_job - autolay - - ');
+    return true;
+//  DEBUG(' we made it end the job routine - - - ');
+  }
 ////
 function OnMissionsTab() {
-  // Return true if we're on the missions tab, false otherwise.
     if(xpathFirst('//div[@id="socialMissionNav"]//a',innerPageElt)) {
-    DEBUG('on missions tab page');
     return true;
   }
-//  DEBUG(' - - - NOT on missions tab page - - - ');
   return false;
-};
-////
+}
 function GoMissionsTab() {
-    DEBUG('Trying to go to missions tab. - - - - ');
     var elt = xpathFirst('//div[@class="nav_link events_link"]//a',menubarElt);
   if (elt) {
     clickElement(elt);
     DEBUG('Clicked to go to missions tab.');
-  } else { DEBUG('trying auto collect mission, link not found - - ');   }  // menubarElt   //
-};
+//  } else {
+ }
+}
 ////
 function Chk_mission_help (){
     var ask_mission_help = xpathFirst('.//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(@onclick, "postAskHelpFeed")]', innerPageElt);
     if(ask_mission_help  ) {
-      DEBUG('There WAS a mission help button found, Clicking - - - .');
       setGMTime('colmissionHelpTimer', '02:02:00');  // 2 hrs 2 min
       clickElement(ask_mission_help);
-    } else  { DEBUG('There was no help mission button found, setting help timer to 15 min. - - ');
-      setGMTime('colmissionHelpTimer', '00:10:00');  //  10 min
-    return false;
+    } else  {
+      setGMTime('colmissionHelpTimer', '00:05:00');  //  5 min
+      return false;
     }
 return true;
-};
+}
 ////
 function Mafia_Missions_Tab() {
-    // choices are myMissions myMafiaMissions  graphics/marketplace_menu_item_hover page on
     // if we find this string we are on the mymafiamissions page not on page for me only
-
       var myMafiaMissions = xpathFirst('.//a[(@id="myMafiaMissions"  and contains(@onclick, "controller=socialmission")  and contains(@style, "marketplace_menu_item_hover"))]', innerPageElt);
         if(myMafiaMissions) {
-//        DEBUG(' on myMafiaMissions tab, good to go - - -  ');
         return true ;
-//        } else {
-//        DEBUG(' not on myMafiaMissions tab, need to change - - - ');
         }
         return false;
-};
+}
 ////
 function Do_Mafia_Collection_Tab() {
-    // choices are myMissions myMafiaMissions  graphics/marketplace_menu_item_hover page on
     // checking mafia missions, if hover is NOT found we are NOT on it, we are on mymafia page instead , so if string found, we need to click to change
     var myMafiaMissionstab = xpathFirst('.//a[@id="myMafiaMissions"  and contains(@onclick, "controller=socialmission")  and not (contains(@style, "graphics/marketplace_menu_item_hover"))]', innerPageElt);
         if(myMafiaMissionstab) {
-        DEBUG(' not on myMafiaMissions, changing -  ');
         clickElement(myMafiaMissionstab);
         return true;
-//        } else {
-//        DEBUG(' on myMafiaMissions tab, good to go - 2 - - ');
         }
-    return false;
-};
+//    return false;
+}
 ////
 function Auto_Mafia_Collection(){
   var missionButtons;
   var numButtons;
   missionButtons = $x('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
   numButtons = missionButtons.length;
-  DEBUG('There were - '+numButtons+' mission collection buttons found.');
   if(numButtons>0){
+  DEBUG('There were - '+numButtons+' mission collection buttons found.');
+  for (var i = 0, iLength=missionButtons.length; i < iLength; ++i) {
     var ColMissionReward = xpathFirst('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
     if (ColMissionReward) {
       addToLog('info Icon', 'Clicked to collect mission rewards.');
-      clickAction = 'mission rewards';  // 'crew collection';
+//      clickAction = 'Mission_rewards';  // NOT used yet
       clickElement(ColMissionReward);
+      Chk_Left_Page();  // if we removed something we gotta go back a page
       return true;
     }
-//  } else {
-//    DEBUG('No mission collections needed on this page.');
+    }
   }
   return;
-};
+}
 ////
 function Auto_Mafia_Remove(){
   var missionButtons;
   var numButtons;
   missionButtons = $x('.//a[@class="sexy_button_new medium_white" and contains(@onclick, "removeMission")]', innerPageElt);
   numButtons = missionButtons.length;
-  DEBUG('There were - '+numButtons+' mission YOU HAVE BEEN REMOVED buttons found.');
+
   if(numButtons>0){
-    var ClrRemovedButton = xpathFirst('.//a[@class="sexy_button_new medium_white" and contains(@onclick, "removeMission")]', innerPageElt);
-    if (ClrRemovedButton) {
-      addToLog('info Icon', 'Clicked to clear me from a mission I was removed from.');
-      clickElement(ClrRemovedButton);
-      return true;
+//  for (var i = 0, iLength=numButtons.length; i < iLength; ++i) {
+      DEBUG('You were removed from - '+numButtons+' Missions.');
+      var ClrRemovedButton = xpathFirst('.//a[@class="sexy_button_new medium_white" and contains(@onclick, "removeMission")]', innerPageElt);
+      if (ClrRemovedButton) {
+        addToLog('info Icon', 'Clicked to clear me from a mission I was removed from.');
+        clickElement(ClrRemovedButton);
+        Chk_Left_Page();  // if we removed something we gotta go back a page
+        return true;
+      }
     }
-//  } else {
-//    DEBUG('you were not removed from any missions on this page.');
-  }
   return;
-};
-////
-function Do_Mafia_Mission_Job(){
-  if (check_for_job()) {
-    Autoplay.fx = Do_Mission_Job() ;
-    Autoplay.delay = getAutoPlayDelay();
-    Autoplay.start();
-    return true;
+//  }
 }
-    return false;
-};
 ////
-function check_for_job (){
-    var MyMafiaJobs =                    xpathFirst('.//a[@class="sexy_button_new do_job medium_white"  and contains(@onclick, "SocialMissionView.startTask")]', innerPageElt);
-//    if(!MyMafiaJobs) { var MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask")]', innerPageElt); }
-    if(MyMafiaJobs) {
-      DEBUG(' - - - we found a start job button ');
-      clickElement(MyMafiaJobs); // click start job
-    return true;
-    }
-//    DEBUG(' - - - we found NO start job button');
-    return false;
-};
+function Check_Mission_Job(){
+//  if(!MyMafiaJobs) {
+    MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Mission_ID+'")]', innerPageElt);
+    //if(MyMafiaJobs) //  may need to check   Mission_ID for 100% mastery and null MyMafiaJobs if 100% mastery
+//  }
+ if(!MyMafiaJobs) {
+     MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job medium_white"   and contains(@onclick, "SocialMissionView.startTask" )  ]', innerPageElt);
+     if(MyMafiaJobs) {
+       Mission_ID   = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\'')[1].split('\',\'')[0]  ;  // will pull out just the 1 id string
+       Mission_Slot = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Mission_ID+'\',\'')[1].split('\',\'')[0]  ;
+
+//       var Mission_Name_Tmp = xpathFirst('.//div[@id="socialMission_'+Mission_ID+'"]//div[@class="missionBoxLeft"]', innerPageElt);
+       var Mission_Name_Tmp = xpathFirst('.//div[contains(@id,"socialMission_'+Mission_ID+'")]', innerPageElt);
+
+       if(Mission_Name_Tmp) {
+        Mission_Name = xpathFirst('.//div[@class="missionName"]', Mission_Name_Tmp);
+       };
+
+       if(Mission_Name) {
+        Mission_Name = Mission_Name.innerHTML.untag();
+       DEBUG('Mission_Name='+Mission_Name+'=');
+       };
+
+
+       DEBUG('CLICKING New MyMafiaMission ID is=' + Mission_ID +'= and slot number (0-3)=' + Mission_Slot +'= and have a White Start mission button');
+       clickElement(MyMafiaJobs); // click white start job button
+     } else {  DEBUG(' - - - we found NO white start mission button');
+     }
+ }
+  if(MyMafiaJobs) return true ;
+}
 ////
 function Do_Mission_Job(){
 
-//    var DoMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job medium_white"  and contains(@onclick, "SocialMissionView.startTask")]', innerPageElt);
-    if(!DoMafiaJobs) { var DoMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask")]', innerPageElt); }
-//  if(!DoMafiaJobs) { var DoMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask") and contains(text(), "Do Job")]', innerPageElt); }
+    DoMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Mission_ID+'")]', innerPageElt);
     if(DoMafiaJobs) {
-//    clickAction = 'job';
-//    suspendBank = false;
+//      DEBUG('found mission orange button to click(and clicking) in mission=' + Mission_ID );
+      clickAction = 'Missionjob';
+      suspendBank = false;
       clickElement(DoMafiaJobs);
-      DEBUG('Clicked to perform job.');
+      DEBUG('Clicked to perform a mission.');
       return true;
    }  else {
-      DEBUG(' - - - did not find job button to click');
+      DEBUG('no mission button found');
+      return false;
    }
-   return false;
-};
+}
 ////
 function Do_Mafia_Mission_Fight(){
  DEBUG(' - - - - were at the do missions Fight section - - - ');
-};
+}
 ////
 function Chk_Nxt_Page() {
     var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
     if(page_right){
-    DEBUG('There WAS a right mission page button found to Click - .');
-    } else  { DEBUG('No right mission page button found, Done. set timer to 2 min 0 seconds');
-    setGMTime('colmissionTimer', '00:02:00');
+//    DEBUG('There WAS a right mission page button found to Click - .');
+    } else  { DEBUG('Last Page, set timer to 5 min 0 seconds');
+    setGMTime('colmissionTimer', '00:05:00');
     return false;
     }
 return true;
-};
+}
 ////
 function Go_Nxt_Page() {
     var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
     if(page_right){
-//    DEBUG('There WAS a right mission page button found to Click - .');
+    DEBUG('Clicking right page button in Missions.');
       clickElement(page_right);
       Autoplay.delay = getAutoPlayDelay();
       return true;
     }
 return false;
-};
+}
 ////
 function Chk_Left_Page() {
     var page_left = xpathFirst('.//a[@class="left " and contains(@onclick, "viewPage")]', innerPageElt);
     if(page_left){
     DEBUG('There WAS a left mission page button found, Clicking - - - .');
-      clickElement(page_left);
-    } else  { DEBUG('There were no left mission page button found.');
+    clickElement(page_left);
+    return true;
+    } else  {
+//        DEBUG('There were no left mission page button found.');
     return false;
     }
-return true;
-};
+}
 ///////////////////////////////////////////////////////// end of mission collect
