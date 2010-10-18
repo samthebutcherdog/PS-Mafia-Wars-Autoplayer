@@ -23,7 +23,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 /**
 * @package: Facebook Mafia Wars Autoplayer
 * @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Lister, SamTheButcher, MaxJ, donnaB,
-            BBB, Cam, janmillsjr, nonoymsd
+            BBB, Cam, janmillsjr, nonoymsd, Gibson_sg
 * @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.769
+// @version     1.1.770
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -880,6 +880,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_AUTOHITLIST  = 4; // Place bounties.
   const STAMINA_HOW_RANDOM       = 5; // Random spending of stamina in random cities.
   const STAMINA_HOW_FIGHTROB     = 6; // Fight then Rob random opponents.
+  const STAMINA_HOW_FIGHT_RIVALS = 7; // Rival fighting.
 //  const STAMINA_HOW_LVJOBFIGHT   = 7;  // do lv job Fights.
 // newchangefight
 
@@ -891,6 +892,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_AUTOHITLIST]  = 'Place hitlist bounties';
   staminaSpendChoices[STAMINA_HOW_RANDOM]       = 'Spend stamina randomly';
   staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
+  staminaSpendChoices[STAMINA_HOW_FIGHT_RIVALS] = 'Fight rivals';
 //  staminaSpendChoices[STAMINA_HOW_LVJOBFIGHT]   = 'Do LV Job Fights';
 // newchangefight
 
@@ -899,6 +901,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   randomSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific';
   randomSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect bounties';
   randomSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random';
+  randomSpendChoices[STAMINA_HOW_FIGHT_RIVALS] = 'Fight rivals';  
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0; // Select qualified bounties with shortest time.
@@ -3401,6 +3404,14 @@ function autoFight(how) {
     return true;
   }
 
+  // Now visit the Rivals tab if Fight Rivals is selected
+  if(onFightersTab() && !autoFight.profileSearch && (how == STAMINA_HOW_FIGHT_RIVALS)) {
+	    Autoplay.fx = goRivalsTab;
+		Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
+    Autoplay.start();
+	return true;
+  }
+  
   // Get an opponent.
   var opponent;
   if (autoFight.profileSearch && onProfileNav()) {
@@ -3425,11 +3436,11 @@ function autoFight(how) {
     }
     opponent = new Player();
     opponent.id = String(id);
-    DEBUG('Attacking from fight list');
+    DEBUG('Attacking a fight list opponent');
   } else {
     // Check for any new opponents.
     opponent = findFightOpponent(innerPageElt);
-    DEBUG('Attacking from find fight list');
+    DEBUG('Attacking a fight list opponent');
 
     // For stealth mode fights, if we don't have a new opponent then
     // choose one of the inactive opponents we've already fought.
@@ -3861,8 +3872,10 @@ function autoStaminaSpend() {
   var how = getStaminaMode();
   switch (how) {
     case STAMINA_HOW_FIGHT_RANDOM:
-    case STAMINA_HOW_FIGHT_LIST:
+    case STAMINA_HOW_FIGHT_LIST:	
       return autoFight(how);
+
+	  
 
     case STAMINA_HOW_FIGHTROB:
 //    case STAMINA_HOW_FIGHT_RANDOM:
@@ -3882,6 +3895,9 @@ function autoStaminaSpend() {
 
     case STAMINA_HOW_AUTOHITLIST:
       return autoHitlist();
+	  
+	case STAMINA_HOW_FIGHT_RIVALS:
+	  return autoFight(how);
 
     default:
       addToLog('warning Icon', 'BUG DETECTED: Unrecognized stamina setting: ' +
@@ -4159,6 +4175,7 @@ function findFightOpponent(element) {
   // This will force the fight logic to refresh target list everytime.
   fightListNew.set([]);
 
+  
   // Don't bother searching if we still have plenty.
   var newOpponents = fightListNew.get();
   var len = newOpponents.length;
@@ -4346,6 +4363,200 @@ function findFightOpponent(element) {
 
   return newOpponents[Math.floor(Math.random() * newOpponents.length)];
 }
+
+function findRivalOpponent(element) {
+  // This will force the fight logic to refresh target list everytime.
+  fightListNew.set([]);
+
+  
+  // Don't bother searching if we still have plenty.
+  var newOpponents = fightListNew.get();
+  var len = newOpponents.length;
+  if (len >= 50) {
+    return newOpponents[Math.floor(Math.random() * len)];
+  }
+
+  // Check the fight table.
+  var opponents = getDisplayedOpponents(element, true);
+  if (!opponents) {
+    // No opponents displayed on this page.
+    return newOpponents[Math.floor(Math.random() * len)];
+  }
+
+  // Calculate faction points
+  var factionElts = xpath('.//div[@class="faction_container"]', innerPageElt);
+  var factionCnt = factionElts.snapshotLength;
+  if (factionElts.snapshotLength > 0) {
+    allyFaction = '';
+    var maxPts = 0, minPts = 1500;
+    for (var i = 0, iLength = factionElts.snapshotLength; i < iLength; ++i) {
+      var factionElt = factionElts.snapshotItem(i);
+      var factionName = xpathFirst('.//div[@class="faction_name"]',factionElt).innerHTML.trim();
+      var factionPts = parseInt(xpathFirst('.//div[@class="zy_progress_bar_faction_text"]',factionElt).innerHTML.split('/')[0].trim());
+
+      // Keep track of max and min faction pts
+      if (!isNaN(factionPts) && factionPts > maxPts) {
+        maxPts = factionPts;
+      }
+      if (!isNaN(factionPts) && factionPts < minPts) {
+        minPts = factionPts;
+        allyFaction = factionName;
+      }
+    }
+
+    // Do not enable faction filtering
+    if (maxPts - minPts < cities[city][CITY_ALLIANCE])
+      allyFaction = '';
+    DEBUG('Factions found: ' + factionCnt + '<br>' +
+          'Max faction pts: ' + maxPts + '<br>' +
+          'Min faction pts: ' + minPts + '<br>' +
+          'Ally faction: ' + allyFaction);
+  }
+
+  // Get the user's criteria for opponents.
+  var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
+  var opponentMafiaMax = parseInt(GM_getValue('fightMafiaMax', 501));
+  var opponentMafiaMin = parseInt(GM_getValue('fightMafiaMin', 1));
+  var fightNames = isGMChecked('fightNames');
+  var avoidNames = isGMChecked('fightAvoidNames');
+  var onlyNames = isGMChecked('fightOnlyNames');
+
+  // Make any relative adjustments (if enabled).
+  if (GM_getValue('fightLevelMaxRelative', false)) {
+    opponentLevelMax = opponentLevelMax + level;
+  }
+  if (GM_getValue('fightMafiaMaxRelative', false)) {
+    opponentMafiaMax = opponentMafiaMax + mafia;
+  }
+  if (GM_getValue('fightMafiaMinRelative', false)) {
+    opponentMafiaMin = mafia - opponentMafiaMin;
+  }
+  if (opponentMafiaMin > 501) {
+    opponentMafiaMin = 501;
+  }
+
+  // Show which players to blacklist.
+  var avoidLosers = (isGMChecked('fightStealth') ||
+                     newOpponents.length);
+  DEBUG(fightListNew.debug());
+  DEBUG(fightListAvoid.debug());
+  if (avoidLosers) {
+    DEBUG(fightListInactive.debug());
+    DEBUG(fightListActive.debug());
+  }
+
+  // Figure out which opponents are acceptable.
+  DEBUG('Applying criteria to displayed opponents: ' +
+        'level <= ' + opponentLevelMax + ', mafia between ' +
+        opponentMafiaMin + ' and ' + opponentMafiaMax + '.');
+  var levelMaxCount = 0;
+  var mafiaMaxCount = 0;
+  var mafiaMinCount = 0;
+  var namesCount = 0;
+  var factionCount = 0;
+  var blacklistCount = 0;
+  var icedCount = 0;
+  var countOpp = 10;
+  for(var i = 0; i < countOpp; ++i) {
+    var opponent = opponents[i];
+
+    // Balance faction points
+    if (opponent.faction.length > 0 && allyFaction.length > 0 &&
+        opponent.faction == allyFaction) {
+      factionCount++;
+      continue;
+    }
+
+    if (GM_getValue('fightMobMode')) {
+      // Mob fight mode.  Fight players of higher level but smaller mafia.
+      if (opponent.level > (opponentLevelMax * 501 / opponent.mafia)) {
+        levelMaxCount++;
+        continue;
+      }
+    } else {
+      if (opponent.level > opponentLevelMax) {
+        levelMaxCount++;
+        continue;
+      }
+    }
+    if (opponent.mafia > opponentMafiaMax) {
+      mafiaMaxCount++;
+      continue;
+    }
+    if (opponent.mafia < opponentMafiaMin) {
+      mafiaMinCount++;
+      continue;
+    }
+
+    if (fightNames && avoidNames && isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_FIGHT_RANDOM)) {
+      namesCount++;
+      continue;
+    }
+
+    if (fightNames && onlyNames && !isFamily(decodeHTMLEntities(opponent.name),STAMINA_HOW_FIGHT_RANDOM)) {
+      namesCount++;
+      continue;
+    }
+
+    if (!opponent.id) continue;
+
+    // Check iced oponents
+    if (isGMChecked('iceCheck') && opponent.iced) {
+      icedCount++;
+      continue;
+    }
+
+    // Check against previous opponents.
+    var idx = fightListAvoid.indexOf(opponent);
+    if (idx != -1) {
+      // We can't fight them, but update their info.
+      fightListAvoid.get()[idx].update(opponent);
+      blacklistCount++;
+      continue;
+    }
+
+    if (avoidLosers) {
+      idx = fightListInactive.indexOf(opponent);
+      if (idx != -1) {
+        fightListInactive.get()[idx].update(opponent);
+        blacklistCount++;
+        continue;
+      }
+      idx = fightListActive.indexOf(opponent);
+      if (idx != -1) {
+        fightListActive.get()[idx].update(opponent);
+        blacklistCount++;
+        continue;
+      }
+    }
+    if (!fightListNew.add(opponent)) {
+      blacklistCount++;
+      continue;
+    }
+    // This opponent is new and acceptable.
+    DEBUG('Found new fight opponent: name=' + opponent.name +
+          ', id=' + opponent.id + ', level=' + opponent.level +
+          ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
+  }
+
+  var disqualifiedCount = levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + icedCount + blacklistCount;
+  if (countOpp <= disqualifiedCount) {
+    addToLog('info Icon', 'Out of the ' + countOpp + ' opponent(s) listed on the fight page '+disqualifiedCount+' disqualified.<br>' +
+              levelMaxCount + ' on max level, ' +  mafiaMaxCount + ' on max mafia, ' +  mafiaMinCount + ' on min mafia,<br>' +
+              namesCount + ' on name pattern, ' +  factionCount + ' on faction, ' +  icedCount + ' already iced, <br>' +
+              blacklistCount + ' by blacklisting (stronger opponents).<br>');
+  }
+
+  newOpponents = fightListNew.get();
+  if (!newOpponents.length) return -1;
+
+  if (newOpponents.length > len) {
+    fightListNew.set();
+  }
+
+  return newOpponents[Math.floor(Math.random() * newOpponents.length)];
+}
+
 
 function setFightOpponentActive(player) {
   if (!player) return;
@@ -7579,11 +7790,7 @@ function createStaminaSubTab_FightSpecific(staminaTabSub) {
   removeStrongerOpponents(staminaTabSub);
 }
 
-function createStaminaSubTab_FightRob(staminaTabSub) {
-  createStaminaSubTab_Rob(staminaTabSub);
-  makeElement('hr', staminaTabSub);
-  createStaminaSubTab_FightRandom(staminaTabSub);
-}
+
 
 function createStaminaSubTab_Rob(staminaTabSub) {
 
@@ -7793,6 +8000,136 @@ function createStaminaSubTab_Random(staminaTabSub) {
 
 }
 
+function createStaminaSubTab_FightRivals(staminaTabSub) {
+
+  // Location setting
+  tabContainerDivs(staminaTabSub);
+  makeElement('label', lhs).appendChild(document.createTextNode('Fight in: '));
+  id = 'fightRandomLoc';
+  var fightRandomLoc = makeElement('select', lhs, {'id':id});
+  for (i = 0, iLength=fightLocations.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(fightLocations[i]));
+    fightRandomLoc.appendChild(choice);
+  }
+  fightRandomLoc.selectedIndex = GM_getValue('fightLocation', NY);
+
+  //rehit on money gain
+  title = 'Reattack until iced if money gained';
+  id = 'staminaReattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('While gaining $ '));
+  //Money gain treshold
+  title = 'Reattack if this amount is gained';
+  id = 'reattackThreshold';
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':6, 'style':'width: 45px; border: 1px solid #781351;', 'value':GM_getValue(id, '65000'), 'size':'1'});
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+
+  // IceCheck
+  title = 'Attack ONLY live targets';
+  id = 'iceCheck';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'iceCheck');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Skip iced targets'));
+
+  //Replaces old stamina settings insert
+  staminaBursting(staminaTabSub);
+
+  // Maximum level.
+  tabContainerDivs(staminaTabSub);
+  title = 'Avoid opponents higher than this level.';
+  id = 'fightLevelMax';
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Maximum level:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'maxlength':5, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightLevelMax', '100'), 'size':'1'});
+
+  // Maximum level relative?
+  title = 'Make the maximum level be relative to your own. For example, if your level is 10, and maximum level is set to 5, opponents higher than level 15 will be avoided.';
+  id = 'fightLevelMaxRelative';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxRelative');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Add my level'));
+
+ // Override my level check?
+  title = 'Override the check for level to be the same or greater than my level - CAUTION: might cause slow fighting.';
+  id = 'fightLevelMaxOverride';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightLevelMaxOverride');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Override level check'));
+
+  // Maximum mafia size.
+  tabContainerDivs(staminaTabSub);
+  id = 'fightMafiaMax';
+  title = 'Avoid opponents with mafia sizes larger than this.',
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Maximum mafia:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMax', '501'), 'size':'1'});
+
+  // Maximum mafia relative?
+  title = 'Make the maximum mafia size be relative to your own. For example, if you have 300 mafia members, and maximum mafia is set to 50, opponents with more than 350 mafia members will be avoided.';
+  id = 'fightMafiaMaxRelative';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMaxRelative');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Add my mafia size'));
+
+  // Minimum mafia size.
+  tabContainerDivs(staminaTabSub);
+  id = 'fightMafiaMin';
+  title = 'Avoid opponents with mafia sizes smaller than this.',
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Minimum mafia:'));
+  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 30px; border: 1px solid #781351;', 'value':GM_getValue('fightMafiaMin', '1'), 'size':'1'});
+
+  // Minimum mafia relative?
+  title = 'Make the minimum mafia size be relative to your own. For example, if you have 300 mafia members, and minimum mafia is set to 50, opponents with less than 250 mafia members will be avoided.';
+  id = 'fightMafiaMinRelative';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, 'fightMafiaMinRelative');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Subtract from my mafia size'));
+
+  // Mob fight
+  tabContainerDivs(staminaTabSub);
+  title = 'Fight higher levels if the mafia is smaller.  You mob them, overwhelm the smaller numbers';
+  id = 'fightMobMode';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, 'fightMobMode');
+  label = makeElement('label', rhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Mob Fight'));
+
+  // Remove stronger opponents?
+  removeStrongerOpponents(staminaTabSub);
+  tabContainerDivs(staminaTabSub);
+
+  // Pattern Fighting ?
+  title = ' Use Mafia Family Patterns when fighting';
+  id = 'fightNames';
+  var UseFightNames = makeElement('input', lhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(' Use Patterns when fighting:'));
+  UseFightNames.addEventListener('click', clickUseFightNames, false);
+  makeElement('br', lhs);
+  id = 'fightAvoidNames';
+  title = ' Avoid mafia families';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('br', lhs);
+  id = 'fightOnlyNames';
+  title = ' Only Fight Mafia Families ';
+  makeElement('input', lhs, {'type':'radio', 'name':'rm3', 'id':id, 'value':'checked'}, id);
+  makeElement('label', lhs, {'for':id}).appendChild(document.createTextNode(title));
+  makeElement('textarea', rhs, {'style':'position: static; width: 15em; height: 6em;', 'id':'fightClanName', 'title':'Enter each pattern (such as a clan name) on a separate line.'}).appendChild(document.createTextNode(GM_getValue('fightClanName', defaultClans.join('\n'))));
+  makeElement('br', rhs);
+  makeElement('font', rhs, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Enter each name pattern on a separate line.'));
+
+  // Use stealth fighting?
+  tabContainerDivs(staminaTabSub);
+  title = 'Prefer opponents who won\'t be notified of your attacks.';
+  id = 'fightStealth';
+  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'vertical-align:middle', 'value':'checked'}, 'fightStealth');
+  label = makeElement('label', lhs, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode(' Use fight stealth'));
+}
+
 // Create New Stamina Tab
 function createStaminaTab() {
   var i, elt, title, id, label, lhs, item, choice;
@@ -7889,7 +8226,7 @@ function createStaminaTab() {
         break;
       case STAMINA_HOW_FIGHT_LIST :
         createStaminaSubTab_FightSpecific(staminaTabSub);
-        break;
+        break;	
       case STAMINA_HOW_HITMAN :
         createStaminaSubTab_CollectBounties(staminaTabSub);
         break;
@@ -7905,6 +8242,9 @@ function createStaminaTab() {
       case STAMINA_HOW_FIGHTROB :
         createStaminaSubTab_FightRob(staminaTabSub);
         break;
+      case STAMINA_HOW_FIGHT_RIVALS :
+        createStaminaSubTab_FightRivals(staminaTabSub);
+        break;	
 // newchange
 //      case STAMINA_HOW_LVJOBFIGHT :
 //        createStaminaSubTab_LVJobFight(staminaTabSub);
@@ -14330,6 +14670,22 @@ function onFightTab() {
   return false;
 }
 
+function onFightersTab() {
+  // Return true if we're on the fighters tab in the fight menu, false otherwise.
+  if (xpathFirst('.//li[contains(@class, "tab_on tab_middle")]//a[contains(., "Fighters")]', innerPageElt)) {
+    return true;
+  }
+  return false;
+}
+
+function onRivalsTab() {
+  // Return true if we're on the rivals tab, false otherwise.
+  if (xpathFirst('.//li[contains(@class, "tab_off tab_middle")]//a[contains(., "Rivals")]', innerPageElt)) {
+    return true;
+  }
+  return false;
+}
+
 function onTournamentTab() {
   // Return true if we're on the tournament tab, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Tournaments")]', innerPageElt)) {
@@ -14813,6 +15169,16 @@ function goFightTab() {
   DEBUG('Clicked to go to fight tab.');
 }
 
+function goRivalsTab() {
+  var elt = xpathFirst('.//div[@class="minitab_content"]//a[contains(., "Rivals")]', innerPageElt);
+  if (!elt) {
+    goFightNav();
+    return;
+  }
+  clickElement(elt);
+  DEBUG('Clicked to go to rivals tab.');
+}
+
 function goTournamentTab() {
   /*var elt = xpathFirst('.//div[@class="tab_content"]//a[contains(., "Tournaments")]', innerPageElt);
   if (!elt) {
@@ -15205,10 +15571,15 @@ function logFightResponse(rootElt, resultElt, context) {
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
       // Look for any new opponents in the displayed list.
       findFightOpponent(rootElt);
-    } else if (how == STAMINA_HOW_FIGHT_LIST) {
+    } 
+	if (how == STAMINA_HOW_FIGHT_RIVALS){
+	  findRivalOpponent(rootElt);
+	}
+	else if (how == STAMINA_HOW_FIGHT_LIST) {
       cycleSavedList('fightList');
     }
 
+	
     // Determine whether the opponent is alive and may see future attacks.
     if (inner.indexOf('Attack Again') != -1) {
       setFightOpponentActive(context);
