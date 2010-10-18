@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.768
+// @version     1.1.769
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.768',
+  version: '1.1.769',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8997,6 +8997,7 @@ function handleModificationTimer(target) {
 function objLootItem() {
   this.Attack = 0;
   this.Defense = 0;
+  this.Combined = 0;
   this.Quantity = 0;
   this.Element = null;
   this.Giftable = false;
@@ -9030,8 +9031,6 @@ function restoreLootPage() {
 
 function cleanLoot(sortLootType) {
   var eltLoot = xpathFirst('.//table[@class="main_table"]', innerPageElt);
-  var minAttack = 0;
-  var minDefense = 0;
 
   var eltWeapons = document.createElement('tr');
   var eltArmor = document.createElement('tr');
@@ -9099,6 +9098,7 @@ function cleanLoot(sortLootType) {
         objLoot.Name = nameLoot[0].innerHTML;
         objLoot.Attack = parseInt(splitAttack[0]);
         objLoot.Defense = parseInt(splitDefense[0]);
+        objLoot.Combined = parseInt(splitAttack[0]) + parseInt(splitDefense[0]);
         objLoot.Quantity = parseInt(splitQuantity[1]);
         colLoot[lootType].push(objLoot);
         // Because parseInt removes any text, and leaves an int value, if there is any difference means there was other text such as Add
@@ -9150,73 +9150,54 @@ function cleanLoot(sortLootType) {
     var eltLoot = document.getElementById(strType);
     eltLoot.style.display="";
     var colLoot = JSON.parse(eltLoot.getAttribute('class'));
-    var Combined = false;
+    var totalLoot = {'maxItems' : 0,
+                     'Attack'   : 0,
+                     'Defense'  : 0,
+                     'Combined' : 0,
+                     'Quantity' : 0}
 
     switch(sortLootType) {
       case 1: //Attack
       case 4:
       case 7:
       case 10:
-        minAttack = parseInt(sortAttack(colLoot));
-
+        totalLoot = sortLoot(colLoot,'Attack');
         break;
       case 2:
       case 5: //Defense
       case 8:
       case 11:
-        minDefense = parseInt(sortDefense(colLoot));
+        totalLoot = sortLoot(colLoot,'Defense');
         break;
       case 3:
       case 6:
       case 9:
       case 12: //Combined
-        minAttack = parseInt(sortAttack(colLoot));
-        minDefense = parseInt(sortDefense(colLoot));
-        Combined = true;
-        break;
+        totalLoot = sortLoot(colLoot,'Combined');
+         break;
     }
 
     var objLoot = new objLootItem();
     var divElt = document.createElement("div");
     divElt.setAttribute('id', 'MWAP_Temp_Loot_List');
-    var numRows = colLoot.length - 1;
-    for (var i = 0; i < numRows; i++) {
-      var newElt = document.createElement("tr");
-      var tdName = document.createElement("td");
-      var tdAttack = document.createElement("td");
-      var tdDefense = document.createElement("td");
-      var tdQuantity = document.createElement("td");
+    totalLoot['Name']  = "Total";
 
-      var txtElt = document.createTextNode(colLoot[i].Name);
-      tdName.appendChild(txtElt);
+      // Tableheader with Total Item Info
+      divElt.appendChild(createLootRow("th",totalLoot));
 
-      txtElt = document.createTextNode("Attack: " + colLoot[i].Attack);
-      tdAttack.appendChild(txtElt);
-
-      txtElt = document.createTextNode("Defense: " + colLoot[i].Defense);
-      tdDefense.appendChild(txtElt);
-
-      txtElt = document.createTextNode("Total: " + colLoot[i].Quantity);
-      tdQuantity.appendChild(txtElt);
-
-      newElt.appendChild(tdName);
-      newElt.appendChild(tdAttack);
-      newElt.appendChild(tdDefense);
-      newElt.appendChild(tdQuantity);
-
-      if (Combined) {
-        if(colLoot[i].Attack > minAttack -1 || colLoot[i].Defense > minDefense -1) divElt.appendChild(newElt);
-      } else {
-        if(colLoot[i].Attack > minAttack -1 && colLoot[i].Defense > minDefense -1) divElt.appendChild(newElt);
-      }
+    // var numRows = colLoot.length - 1;
+    // for (var i = 0; i < numRows; i++) {
+    for (var i = 0; i < totalLoot['maxItems'] ; i++) {
+      var newElt = createLootRow("td",colLoot[i]);
+      divElt.appendChild(newElt)
     }
     insertAfter(eltLoot,divElt);
 
   } catch (ex) {
     addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
   }
-  DEBUG ('minAttack = ' + minAttack + '   minDefense = ' + minDefense);
-
+  // DEBUG ('minAttack = ' + minAttack + '   minDefense = ' + minDefense);
+  DEBUG ('Finished sorted! Best ' + totalLoot['maxItems'] + ' of ' + colLoot.length + ' ' + strType);
 }
 // This function inserts newNode after referenceNode
 function insertAfter( referenceNode, newNode )
@@ -9224,36 +9205,93 @@ function insertAfter( referenceNode, newNode )
     referenceNode.parentNode.insertBefore( newNode, referenceNode.nextSibling );
 }
 
-function sortAttack(colLoot) {
-  var minimum=0;
-  colLoot.sort(function(a,b) {
-    return b.Attack-a.Attack;
-  });
-  // Find top 501+ Attack
-  var totalItems = 0;
-  for (var x in colLoot)
+// New sort function
+function sortLoot(colLoot, strSortType)
+{
+  var ret = {'maxItems' : 0,
+             'Attack'   : 0,
+             'Defense'  : 0,
+             'Combined' : 0,
+             'Quantity' : 0}
+
+    //Pre sort 
+    if (strSortType == 'Attack') {
+      colLoot.sort(function(a,b) {return b['Defense'] - a['Defense'];});
+    } else {
+      colLoot.sort(function(a,b) {return b['Attack'] - a['Attack'];});
+    }
+
+    // Main sort
+    colLoot.sort(function(a,b) {return b[strSortType] - a[strSortType];});
+
+  // Find top MafiaSize or 501+ Items
+  for (var x = 0; x < colLoot.length; x++)
   {
-    totalItems += parseInt(colLoot[x].Quantity);
-    minimum = parseInt(colLoot[x].Attack);
-    if (totalItems > 500) break;
+    ret['maxItems']   = x + 1;
+    ret['Attack']   += parseInt(colLoot[x]['Attack'])*parseInt(colLoot[x].Quantity);
+    ret['Defense']  += parseInt(colLoot[x]['Defense'])*parseInt(colLoot[x].Quantity);
+    ret['Combined'] += parseInt(colLoot[x]['Combined'])*parseInt(colLoot[x].Quantity);
+    ret['Quantity'] += parseInt(colLoot[x].Quantity);
+    if (ret['Quantity'] > mafia) break;  // for Mafias < 501
+    if (ret['Quantity'] > 500) break;
   }
-  return minimum;
+  return ret;
 }
 
-function sortDefense(colLoot) {
-  var minimum=0;
-  colLoot.sort(function(a,b) {
-    return b.Defense-a.Defense;
-  });
-  // Find top 501+ Defense
+function createLootRow(t_type, rowLoot)
+{
+  var newElt = document.createElement("tr");
+  var t_Name = document.createElement(t_type);
+  var t_Attack = document.createElement(t_type);
+  var t_AttackValue = document.createElement(t_type);
+  var t_Defense = document.createElement(t_type);
+  var t_DefenseValue = document.createElement(t_type);
+  var t_Combined = document.createElement(t_type);
+  var t_CombinedValue = document.createElement(t_type);
+  var t_Quantity = document.createElement(t_type);
+  var t_QuantityValue = document.createElement(t_type);
+  
+  var txtElt = document.createTextNode(rowLoot.Name);
+  t_Name.setAttribute("width", "40%");
+  t_Name.appendChild(txtElt);
+  newElt.appendChild(t_Name);
 
-  var totalItems = 0;
-  for (var x in colLoot) {
-    totalItems += colLoot[x].Quantity;
-    minimum = colLoot[x].Defense;
-    if (totalItems > 500) break;
-  }
-  return minimum;
+  txtElt = document.createTextNode("Attack:");
+  t_Attack.setAttribute("width", "10%");
+  t_Attack.appendChild(txtElt);
+  newElt.appendChild(t_Attack);
+  txtElt = document.createTextNode(rowLoot.Attack);
+  t_AttackValue.setAttribute("width", "5%");
+  t_AttackValue.appendChild(txtElt);
+  newElt.appendChild(t_AttackValue);
+
+  txtElt = document.createTextNode("Defense:");
+  t_Defense.setAttribute("width", "10%");
+  t_Defense.appendChild(txtElt);
+  newElt.appendChild(t_Defense);
+  txtElt = document.createTextNode(rowLoot.Defense);
+  t_DefenseValue.setAttribute("width", "5%");
+  t_DefenseValue.appendChild(txtElt);
+  newElt.appendChild(t_DefenseValue);
+
+  txtElt = document.createTextNode("Combined:");
+  t_Combined.setAttribute("width", "10%");
+  t_Combined.appendChild(txtElt);
+  newElt.appendChild(t_Combined);
+  txtElt = document.createTextNode(rowLoot.Combined);
+  t_CombinedValue.setAttribute("width", "5%");
+  t_CombinedValue.appendChild(txtElt);
+  newElt.appendChild(t_CombinedValue);
+
+  txtElt = document.createTextNode("Quantity:");
+  t_Quantity.setAttribute("width", "10%");
+  t_Quantity.appendChild(txtElt);
+  newElt.appendChild(t_Quantity); 
+  txtElt = document.createTextNode(rowLoot.Quantity);
+  t_QuantityValue.setAttribute("width", "5%");
+  t_QuantityValue.appendChild(txtElt);
+  newElt.appendChild(t_QuantityValue);
+  return newElt;
 }
 
 // Clean up routine.
