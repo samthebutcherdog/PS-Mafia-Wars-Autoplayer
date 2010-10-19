@@ -48,7 +48,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.773
+// @version     1.1.774
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +59,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.773',
+  version: '1.1.774',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1124,6 +1124,18 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Anvil', 2185]
   );
 
+  var cityCasinoParts = new Array (    
+    ['Slot Machine', 1574, 1],
+    ['Cinder Block', 1575, 1],
+    ['Steel Girder', 1576, 1],    
+    ['Concrete', 1577, 1],
+    ['Construction Tool', 1578, 1],
+    ['Casino Dealer', 1579, 2],
+    ['Chef', 1580 ,3],
+    ['Poker Table', 1581, 4],
+    ['Bellhop', 1582, 5]
+  );
+  
   // Tournament Classes
   // Format: long description, short description, min mafia, max xp
   var tournamentClasses = new Array (
@@ -2067,26 +2079,33 @@ function doAutoPlay () {
   }
 
 /*
+  Currently disabled due to MW changes ...
   // Ask for Special Parts
-  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
-    if (askSpecialParts(null, 0, 0)) return;
+  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {    
+    if (askSpecialParts(NY, null, 0, 0)) return;
   }
 */
 
   // Ask for Chop Shop Parts
-  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
-    if (askSpecialParts(cityShopParts, GM_getValue('askShopPartsId',1), 11)) return;
+  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer')) {    
+    if (askSpecialParts(NY, cityShopParts, GM_getValue('askShopPartsId',1), 11)) return;
   }
 
   // Ask for Weapons Depot Parts
-  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
-    if (askSpecialParts(cityDepotParts, GM_getValue('askDepotPartsId',1), 12)) return;
+  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer')) {  
+    if (askSpecialParts(NY, cityDepotParts, GM_getValue('askDepotPartsId',1), 12)) return;
   }
 
   // Ask for Armor Parts
-  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer') && (isFlashed!=FLASH_ENABLED)) {
-    if (askSpecialParts(cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
+  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer')) {  
+    if (askSpecialParts(NY, cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
   }
+  
+  // Ask for Casino Parts
+  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {    
+    if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 4)) return;
+  }
+
 
   // Collect Take first then try to build
   // Build Cars
@@ -2508,18 +2527,18 @@ function AskforHelp(hlpCity) {
     timerName='AskforHelpBangkokTimer';
   }
 
-//Set delay to 3000 to prevent Bangkokg not publishing if too fast after Moscow publishing
+  //Set delay to 3500 to prevent Bangkokg not publishing if too fast after Moscow publishing
   // Go to the correct city.
   if (city != helpCity) {
     Autoplay.fx = function() { goLocation(helpCity); };
-    Autoplay.delay = 3000;
+    Autoplay.delay = 3500;
     Autoplay.start();
     return true;
   }
 
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
-    Autoplay.delay = 3000;
+    Autoplay.delay = 3500;
     Autoplay.fx = function() { doAskFunction(goJobTab(tabno)); };
     Autoplay.start();
     return true;
@@ -2545,13 +2564,14 @@ function AskforHelp(hlpCity) {
   return;
 }
 
-function askSpecialParts(itemArray, itemIndex, buildType){
-  if (city != NY) {
-    Autoplay.fx = function() { goLocation(NY); };
+function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
+  if (city != itemCity) {
+    Autoplay.fx = function() { goLocation(itemCity); };
     //Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
+
 
   // Go to the city's property nav
   if (!onPropertyNav()) {
@@ -2561,58 +2581,118 @@ function askSpecialParts(itemArray, itemIndex, buildType){
   }
 
   var elt;
-  var timerName;
-  var canAsk = false;
-  var flashCount = buildType-1;
-
-  DEBUG('Going to ask for '+buildType+' ('+flashCount +') '+itemArray[itemIndex][0]);
+  var timerName;    
+  var buildSetting;
+  var buildItem;
 
   switch(buildType){
-    case 11 : timerName = 'askShopPartsTimer'; buildSetting='askShopParts'; break;
-    case 12 : timerName = 'askDepotPartsTimer'; buildSetting='askDepotParts'; break;
-    case 13 : timerName = 'askArmorPartsTimer'; buildSetting='askArmorParts'; break;
-    default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; break;
+    case 1 :
+    case 2 : 
+    case 3 : 
+    case 4 : 
+    case 5 : 
+    case 6  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts';  buildItem =itemArray[itemIndex][0]; break;
+    case 11 : timerName = 'askShopPartsTimer';    buildSetting='askShopParts';    buildItem =itemArray[itemIndex][0]; break;
+    case 12 : timerName = 'askDepotPartsTimer';   buildSetting='askDepotParts';   buildItem =itemArray[itemIndex][0]; break;
+    case 13 : timerName = 'askArmorPartsTimer';   buildSetting='askArmorParts';   buildItem =itemArray[itemIndex][0]; break;
+    default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; buildItem ='Special Parts';         break;
   }
 
-  var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
-  if (flashvars && flashvars.value) {
-    var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
-    if(response[flashCount].level < response[flashCount].maxlevel) {
-      canAsk = true;
-      DEBUG(response[flashCount].name + ' - level: ' + response[flashCount].level + ', maxlevel: ' + response[flashCount].maxlevel);
-    } else {
-      DEBUG(response[flashCount].name+' fully upgraded. No need to ask for parts. Disabling settings.');
-      GM_setValue(buildSetting, 'unchecked');
-    }
-  }
-
-  if(canAsk){
+  DEBUG('Going to ask for '+buildItem+' ('+buildType +')');
+  
+  if(itemCity == NY){
     if(buildType){
+      var flashCount = buildType-1;
       // Chop Shop, Weapons Depot and Armory Parts
-      elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
-                        '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=cs_post_item_feed&xw_city=1&item='+itemArray[itemIndex][1]+'&type=1&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
-    } else {
-      // Special Parts
+      DEBUG('Ask for NY Parts - Looking for building Status');  
+      var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
+      if (flashvars && flashvars.value) {
+        var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
+        if(response[flashCount].level < response[flashCount].maxlevel) {
+
+        DEBUG(response[flashCount].name + ' - level: ' + response[flashCount].level + ', maxlevel: ' + response[flashCount].maxlevel);
         elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                           '"remote/html_server.php?xw_controller=propertyV2&' +
-                          'xw_action=cs_special_item_feed_update_timestamp&xw_city=1", 1, "nothing"); return false;'});
+                          'xw_action=cs_post_item_feed&xw_city=1&item='+itemArray[itemIndex][1]+'&type=1&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
+        } else {
+          DEBUG(response[flashCount].name+' fully upgraded. No need to ask for parts. Disabling this setting..');
+          GM_setValue(buildSetting, 'unchecked');
+        }
+      } else {
+      // Flash seems disabled, so asking without checking building level
+        DEBUG('Ask for NY Parts - Flash seems disabled : Building Status not available');
+        elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
+                          '"remote/html_server.php?xw_controller=propertyV2&' +
+                          'xw_action=cs_post_item_feed&xw_city=1&item='+itemArray[itemIndex][1]+'&type=1&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
+      }     
+    } else {
+      // Special Parts
+      elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
+                        '"remote/html_server.php?xw_controller=propertyV2&' +
+                        'xw_action=cs_special_item_feed_update_timestamp&xw_city=1", 1, "nothing"); return false;'});
     }
-
+  
     if (elt) {
       Autoplay.fx = function() {
         clickElement(elt);
-        addToLog('info Icon', 'Clicked to ask your Mafia to send you '+itemArray[itemIndex][0]+'.');
+        addToLog('info Icon', 'Clicked to ask your Mafia to send you '+buildItem+'.');
       };
+      
       Autoplay.start();
       setGMTime(timerName, '12 hours');
       return true;
     }
-
-    DEBUG('Failed to ask for '+buildType +' - '+itemArray[itemIndex][0])+'. Timer Reset : 2 Hours.';
+    DEBUG('Ask for Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 Hours.');
     setGMTime(timerName, '2 hours');
     return false;
   }
+  
+  if(itemCity == LV){
+    //Casino Parts - Check Casino Status        
+    var casinoReport = GM_getValue('casinoReport');    
+    if(!casinoReport) checkCasinoStatus(true);
+    if(casinoReport){
+      casinoReport = casinoReport.replace(/\\/g, "");      
+      var searchItem='"id":'+itemArray[itemIndex][1];    
+     
+      //Casino Parts - Check Quantities             
+      if(casinoReport.indexOf(searchItem) != -1){
+        
+        // Parts Required format : {\"id\":1575,\"type\":1,\"quantity\":7}
+        var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');                
+        var match;        
+        var totalRequired=0, totalNeeded=0, totalOwned=0;
+        while(match = partsRequiredTxt.exec(casinoReport)){          
+          totalRequired += parseInt(match[1]);
+        }        
+      
+        // Parts Owned format : {\"id\":1575,\"type\":1,\"name\":\"Cinder Block\",\"num_owned\":17,\"image_url\":\"http:\\\/\\\/mwfb.static.zynga.com\\\/mwfb\\\/graphics\\\/item_Cinderblock_01.gif\"}
+        var partsOwnedTxt = new RegExp(searchItem+',"type":1,"name":"'+buildItem+'","num_owned":(.+?),"image_url"','gi');        
+        if(match = partsOwnedTxt.exec(casinoReport)) {          
+          totalOwned = parseInt(match[1]);                    
+        }          
+        totalNeeded = totalRequired - totalOwned;        
+        
+        if(totalNeeded<=0){
+          addToLog('warning Icon','Asking for '+buildItem+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
+        } else {
+          addToLog('info Icon','Asking for '+buildItem+', still needing '+ totalNeeded+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
+        }
+        
+        // Asking for Casino Parts
+        
+        var ajaxID = createAjaxPage(false, 'casino parts', LV);
+        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 1, 0, 0); return false;'});
+        clickElement(elt);
+        GM_setValue('askCasinoPartsTimer', '12 hours');
+        return true;        
+      }
+    } 
+        
+    DEBUG('Ask for Casino Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 Hours.');
+    setGMTime(timerName, '2 hours');
+    return false;      
+  }    
 }
 
 // Pass the item array, item id, and building type
@@ -2645,9 +2725,19 @@ function buildItem(itemArray, itemIndex, buildType){
 
 function checkVaultStatus(byUser) {
   if (byUser == false && timeLeftGM('checkVaultTimer')) return;
-  DEBUG('Checking vault status..')
+  DEBUG('Checking vault status.')
   // Handle JSON response
   var ajaxID = createAjaxPage(false, 'check vault', LV);
+  var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
+  clickElement(elt);
+  return;
+}
+
+function checkCasinoStatus(byUser) {
+  if (byUser == false) return;
+  DEBUG('Checking Casino status.')
+  // Handle JSON response
+  var ajaxID = createAjaxPage(false, 'check casino', LV);
   var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
   clickElement(elt);
   return;
@@ -3875,10 +3965,7 @@ function autoStaminaSpend() {
     case STAMINA_HOW_FIGHT_LIST:	
       return autoFight(how);
 
-	  
-
     case STAMINA_HOW_FIGHTROB:
-//    case STAMINA_HOW_FIGHT_RANDOM:
       if ( (health < 21)  && (stamina > 25 ) ) {
         DEBUG(' -- going to autorob -- ');
         return autoRob();
@@ -4066,35 +4153,6 @@ function getHitlist(element, forceRefresh) {
       opponent.bounty = RegExp.lastMatch;
     }
 
-    /* Disabled for now as we don't have a synchronous level check!
-    if (!running && isGMChecked('showLevel')) {
-      var urlLoaded = function () {
-        if (this.readyState == 4 && this.status == 200) {
-          var s = this.responseText;
-          var id = s.split('user=')[1].split('"')[0].split('\'')[0].split('&')[0];
-          var profElt = xpathFirst('.//table[@class="hit_list"]//a[contains(@onclick, "user='+id+'") or contains(@onclick, "user='+escape(encode64(id))+'")]', element);
-          if (profElt) {
-              var testManiac = /level\s([a-z,A-Z,0-9]+)\sManiac/.test(s.untag());
-              var resultManiac = RegExp.$1;
-              if (testManiac == true) {
-                  profElt.parentNode.innerHTML = '<span class="good">'+resultManiac+' </span>' + profElt.parentNode.innerHTML;
-              }
-              var testMogul = /level\s([a-z,A-Z,0-9]+)\sMogul/.test(s.untag());
-              var resultMogul = RegExp.$1;
-              if (testMogul == true) {
-                  profElt.parentNode.innerHTML = '<span class="good">'+resultMogul+' </span>' + profElt.parentNode.innerHTML;
-              }
-              var testFearless = /level\s([a-z,A-Z,0-9]+)\sFearless/.test(s.untag());
-              var resultFearless = RegExp.$1;
-              if (testFearless == true) {
-                  profElt.parentNode.innerHTML = '<span class="good">'+resultFearless+' </span>' + profElt.parentNode.innerHTML;
-              }
-          }
-        }
-      };
-      loadUrl (getProfileUrl(opponent.id), urlLoaded);
-    }*/
-
     getHitlist.opponents.push(opponent);
   }
   DEBUG(getHitlist.opponents.length + ' hitlist target(s) found.');
@@ -4175,7 +4233,6 @@ function findFightOpponent(element) {
   // This will force the fight logic to refresh target list everytime.
   fightListNew.set([]);
 
-  
   // Don't bother searching if we still have plenty.
   var newOpponents = fightListNew.get();
   var len = newOpponents.length;
@@ -4557,7 +4614,6 @@ function findRivalOpponent(element) {
   return newOpponents[Math.floor(Math.random() * newOpponents.length)];
 }
 
-
 function setFightOpponentActive(player) {
   if (!player) return;
 
@@ -4704,10 +4760,9 @@ function hideStatsWindow() {
 }
 
 function handleVersionChange() {
-  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + '<br/>We need your help - <a href="http://www.playerscripts.com/" target="_blank">DONATE - playerscripts.com</a>');
+  addToLog('updateGood Icon', 'Now running version ' + SCRIPT.version + ' <a href="http://www.playerscripts.com/" target="_blank">We need your help - DONATE - playerscripts.com</a>');
 
   // Check for invalid settings and upgrade them.
-
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 388) {
     GM_setValue('minCashNew York', GM_getValue('buyMinAmount'));
   }
@@ -5205,7 +5260,7 @@ function saveSettings() {
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
     'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
-    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','askShopParts','askDepotParts','askArmorParts', 'askSpecialParts'
+    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
   ]);
   //Cash Settings and Validation
   GM_setValue('minCashNew York', document.getElementById('minCashNew York').value);
@@ -5220,6 +5275,7 @@ function saveSettings() {
   GM_setValue('askShopPartsId', document.getElementById('askShopPartsId').selectedIndex);
   GM_setValue('askDepotPartsId', document.getElementById('askDepotPartsId').selectedIndex);
   GM_setValue('askArmorPartsId', document.getElementById('askArmorPartsId').selectedIndex);
+  GM_setValue('askCasinoPartsId', document.getElementById('askCasinoPartsId').selectedIndex);
 
   var autoBankOn      = (document.getElementById('autoBank').checked === true);
   var autoBankCubaOn  = (document.getElementById('autoBankCuba').checked === true);
@@ -8507,7 +8563,7 @@ function createCashTab () {
   title = 'Check this to Ask for Chop Shop Parts every 12 hours';
   id = 'askShopParts';
   var shopParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
-  makeElement('font', shopParts, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Asking for parts currently only works when Flash is enabled.'));
+  makeElement('font', shopParts, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('This may result in some delay, when the request is not ready for processing.'));
   makeElement('br', shopParts);
   makeElement('input', shopParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', shopParts, {'for':id, 'title':title});
@@ -8561,6 +8617,25 @@ function createCashTab () {
   }
   armorPartsType.selectedIndex = GM_getValue(id, 0);
 
+  // Ask for Casino Parts
+  xTop += 25;
+  title = 'Check this to Ask for Casino Parts every 12 hours';
+  id = 'askCasinoParts';
+  var casinoParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('input', casinoParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', casinoParts, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Casino Parts'));
+
+  // List Casino Parts
+  id = 'askCasinoPartsId';
+  var casinoPartsType = makeElement('select', casinoParts, {'id':id, 'style':'position: static; margin-left: 5px;'});
+  for (i = 0, iLength=cityCasinoParts.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityCasinoParts[i][0]});
+    choice.appendChild(document.createTextNode(cityCasinoParts[i][0]));
+    casinoPartsType.appendChild(choice);
+  }
+  casinoPartsType.selectedIndex = GM_getValue(id, 0);
+  
   // Ask for Special Parts
   xTop += 25;
   title = 'Check this to Ask for Special Parts every 12 hours';
@@ -9274,6 +9349,7 @@ function handleModificationTimer(target) {
     }
   }
 
+  // Added handling for Mission Results
   var MissionResults = xpathFirst('.//div[contains(@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'")]//div[@class="task_results"]', innerPageElt);    // results just being on mission page
   if (MissionResults) {
 //        DEBUG('results');   //doatest
@@ -9375,7 +9451,6 @@ function restoreLootPage() {
 
 function cleanLoot(sortLootType) {
   var eltLoot = xpathFirst('.//table[@class="main_table"]', innerPageElt);
-
   var eltWeapons = document.createElement('tr');
   var eltArmor = document.createElement('tr');
   var eltAnimals = document.createElement('tr');
@@ -9540,7 +9615,6 @@ function cleanLoot(sortLootType) {
   } catch (ex) {
     addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
   }
-  // DEBUG ('minAttack = ' + minAttack + '   minDefense = ' + minDefense);
   DEBUG ('Finished sorted! Best ' + totalLoot['maxItems'] + ' of ' + colLoot.length + ' ' + strType);
 }
 // This function inserts newNode after referenceNode
@@ -9760,13 +9834,16 @@ function handlePublishing() {
         if (checkPublish('.//div[contains(.,"friends rallied to win the war")]','autoWarRewardPublish', pubElt, skipElt)) return;
 
         // Ask for Chop Shop Parts
-        if (checkPublish('.//div[contains(.,"a formidable Chop Shop")]','askShopParts', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"an awesome Chop Shop") ]','askShopParts', pubElt, skipElt)) return;
 
         // Ask for Weapons Depot Parts
-        if (checkPublish('.//div[contains(.,"a formidable Weapons Depot")]','askDepotParts', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"an awesome Weapons Depot")]','askDepotParts', pubElt, skipElt)) return;
 
         // Ask for Armory Parts
-        if (checkPublish('.//div[contains(.,"a formidable Armory")]','askArmorParts', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"an awesome Armory")]','askArmorParts', pubElt, skipElt)) return;
+        
+        // Ask for Casino Parts
+        if (checkPublish('.//div[contains(.,"building a casino")]','askCasinoParts', pubElt, skipElt)) return;
 
         // Ask for Special Parts
         if (checkPublish('.//div[contains(.,"Special Parts")]','askSpecialParts', pubElt, skipElt)) return;
@@ -10173,8 +10250,7 @@ function refreshMWAPCSS() {
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 1;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}' +
                     ' div[style$="position: absolute; top: 15px; right: 130px; width: 45px; z-index: 100;"] {top: 15px !important; left: 755px !important; z-index: 100 !important;}') +
                  //' div[id="message_center_div"] {z-index: 10001 !important;}' +
-
-  // hide new message icons
+                 // hide new message icons
                  (isGMChecked('hideMessageIcon') ?
                    ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0pt 0pt; width: 43px; z-index: 2;"] {display: none;}' +
                    ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0 0; width: 43px; z-index: 2;"] {display: none;}' :
@@ -10383,6 +10459,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;askShopPartsTimer: ' + getHoursTime('askShopPartsTimer') +
       '<br>&nbsp;&nbsp;askDepotPartsTimer: ' + getHoursTime('askDepotPartsTimer') +
       '<br>&nbsp;&nbsp;askArmorPartsTimer: ' + getHoursTime('askArmorPartsTimer') +
+      '<br>&nbsp;&nbsp;askCasinoPartsTimer: ' + getHoursTime('askCasinoPartsTimer') +
       '<br>&nbsp;&nbsp;buildCarTimer: ' + getHoursTime('buildCarTimer') +
       '<br>&nbsp;&nbsp;buildWeaponTimer: ' + getHoursTime('buildWeaponTimer') +
       '<br>&nbsp;&nbsp;buildArmorTimer: ' + getHoursTime('buildArmorTimer') +
@@ -10425,6 +10502,7 @@ function resetTimers(manually) {
   checkTimer('askShopPartsTimer', 900);
   checkTimer('askDepotPartsTimer', 900);
   checkTimer('askArmorPartsTimer', 900);
+  checkTimer('askCasinoPartsTimer', 900);
   checkTimer('buildWeaponTimer', 900);
   checkTimer('buildArmorTimer', 900);
   checkTimer('takeHourLas Vegas', 300);
@@ -11634,7 +11712,6 @@ function customizeVegasJobs() {
     var expElt = xpathFirst('.//dd[@class="experience"]', jobReward);
     if (expElt) var reward = parseInt(expElt.innerHTML);
     else var reward = 0;
-
     var moneyElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', jobReward);
 
     var ratio = Math.round (reward / cost * 100) / 100;
@@ -13181,7 +13258,10 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Part Type: <strong>' + cityShopParts[GM_getValue('askShopPartsId', 9)][0] + '</strong><br>' +
         'Ask for Weapon Depots Parts: <strong>' + showIfUnchecked(GM_getValue('askDepotParts')) + '</strong><br>' +
         '&nbsp;&nbsp;Part Type: <strong>' + cityDepotParts[GM_getValue('askDepotPartsId', 9)][0] + '</strong><br>' +
-        'Ask for Armory Parts: <strong>' + showIfUnchecked(GM_getValue('askArmorParts')) + '</strong><br>' +        '&nbsp;&nbsp;Part Type: <strong>' + cityArmorParts[GM_getValue('askArmorPartsId', 9)][0] + '</strong><br>' +
+        'Ask for Armory Parts: <strong>' + showIfUnchecked(GM_getValue('askArmorParts')) + '</strong><br>' +
+        '&nbsp;&nbsp;Part Type: <strong>' + cityArmorParts[GM_getValue('askArmorPartsId', 9)][0] + '</strong><br>' +
+        'Ask for Casino Parts: <strong>' + showIfUnchecked(GM_getValue('askCasinoParts')) + '</strong><br>' +
+        '&nbsp;&nbsp;Part Type: <strong>' + cityCasinoParts[GM_getValue('askCasinoPartsId', 9)][0] + '</strong><br>' +        
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -13893,9 +13973,17 @@ function autoWar() {
       return true;
     }
 
-    setGMTime('warTimer', '1 hour');
-    DEBUG('Setting warTimer come back in 1 hour');
-    return false;
+    var startNewWar = xpathFirst('.//div[contains(text(),"Start a New War")]');
+    if(startNewWar){      
+      setGMTime('warTimer', warTimer);
+      DEBUG('Setting warTimer to come back in ' + warTimer);
+      return false;
+    } else {
+      setGMTime('warTimer', '1 hour');
+      DEBUG('Setting warTimer to come back in 1 hour');
+      return false;
+    }  
+
   } else {
     // Get war Targets to Declare War on
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
@@ -14477,31 +14565,29 @@ function autoDailyChecklist() {
   // checked but the skill point doesn't appear, but if you click them each again it does. Why were they checked if they
   // needed to be clicked again? So, every once in a while, let's click through them just because we can.
 
-  addToLog('info Icon','Daily Checklist: Processed.');
-
   // Daily Take
   var eltTake = xpathFirst('.//*[@id="message_box_menu_checkmark_daily_take" and contains(@class, "_checked")]', innerPageElt);
   var eltTakeClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"showDailyTake")]', innerPageElt);
   if (eltTakeClick) {
-    DEBUG('Daily Checklist: Challenge Mission');
+    DEBUG('Daily Checklist: Daily Take');
     clickElement(eltTakeClick);
-  }
-
+  } else { DEBUG('Daily Checklist: Already Checked'); }
+ 
   // Challenge Mission
   var eltTemp = xpathFirst('.//*[@id="message_box_menu_checkmark_challenge_mission" and contains(@class, "_checked")]', innerPageElt);
   var eltTempClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"challenge")]', innerPageElt);
   if (eltTempClick) {
     DEBUG('Daily Checklist: Challenge Mission');
     clickElement(eltTempClick);
-  }
+  } else {DEBUG('Challenge Mission: Already Checked'); }
 
   // Grow your family
   var eltGrow = xpathFirst('.//*[@id="message_box_menu_checkmark_mafia" and contains(@class, "_checked")]', innerPageElt);
   var eltGrowSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
   if (eltGrowSkip) {
-    DEBUG('Daily Checklist: Grow Your Family');
+    DEBUG('Daily Checklist: Grow Your Family'); 
     clickElement(eltGrowSkip);
-  }
+  } else { DEBUG('Grow your Family: Already Checked');}
 
   // Gifts
   var eltGifts = xpathFirst('.//*[@id="message_box_menu_checkmark_send_gifts" and contains(@class, "_checked")]', innerPageElt);
@@ -14509,7 +14595,7 @@ function autoDailyChecklist() {
   if (eltGiftsSkip) {
     DEBUG('Daily Checklist: Accept Gifts');
     clickElement(eltGiftsSkip);
-  }
+  } else {DEBUG('Accept Gifts: Already Checked'); }
 
   // Messages
   // If there is a war in progress, this might need to be clicked.
@@ -14519,9 +14605,9 @@ function autoDailyChecklist() {
   if (eltMessagesClick) {
     DEBUG('Daily Checklist: War in Progress');
     clickElement(eltMessagesClick);
-  }
+  } else {DEBUG('War in Progress  Already Checked'); }
+  
   if (eltActionTaken) clickElement(eltActionTaken);
-
   // Energy Packs
   // There is already a function to handle using and sending the energy packs, this just makes sure the box is checked
   // If there's an energy pack to send, or if an energy pack is waiting to be used, then we'll not do anything since other code will check this box
@@ -14537,18 +14623,19 @@ function autoDailyChecklist() {
       DEBUG('Daily Checklist: energy');
       clickElement(eltPacksClick);
     }
-  }
+  } else {DEBUG('Energy: Already Checked'); }
 
   // Properties
   var eltProperties = xpathFirst('.//*[@id="message_box_menu_checkmark_properties" and contains(@class, "_checked")]', innerPageElt);
-  var eltProperties = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "properties")]', innerPageElt);
+  var eltPropertiesClick = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "properties")]', innerPageElt);
   if(!eltProperties) eltProperties = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(., "Check it out")]', innerPageElt);
   if (eltProperties) {
     DEBUG('Daily Checklist: Properties');
     clickElement(eltProperties);
-  }
-
+  } else {DEBUG('Properties Checklist: Already Checked'); }
+  
   // When we get here everything has a check mark whether we forced it or not
+  addToLog('info Icon','Daily Checklist: Processed.');
   return false;
 }
 
@@ -14620,15 +14707,14 @@ function onHome() {
 
 function onSafehouseNav() {
   // Return true if we're on the Crime Spree nav, false otherwise.
-  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', innerPageElt)) {
-    //DEBUG('Crime Spree: On Crime Spree page');
+  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', innerPageElt)) {    
     return true;
   }
-  //DEBUG('Crime Spree: NOT on Crime Spree page');
   return false;
 }
 
 function onLottoNav() {
+// Return true if we're on the Lotto nav, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Play")]', innerPageElt)) {
     return true;
   }
@@ -14636,6 +14722,7 @@ function onLottoNav() {
 }
 
 function onWarTab() {
+// Return true if we're on the War nav, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Declare War")]', innerPageElt)) {
     return true;
   }
@@ -14715,6 +14802,7 @@ function onInventoryTab() {
 }
 
 function onLootTab() {
+// Return true if we're on the Loot nav, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Loot")]', innerPageElt)) {
     return true;
   }
@@ -14722,6 +14810,7 @@ function onLootTab() {
 }
 
 function onCollectionsTab() {
+// Return true if we're on the Collections nav, false otherwise.
   if (xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(., "Collections")]', innerPageElt)) {
     return true;
   }
@@ -15068,7 +15157,7 @@ function goJob(jobno) {
 
 // newchange
 ////
- DEBUG(' check stam 1');
+      DEBUG(' check stam 1');
       //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
       var skipCurrentJob = false;
       StamReqElt = xpathFirst('.//dd[@class="stamina"]', jobRow);
@@ -15079,7 +15168,7 @@ function goJob(jobno) {
           skipCurrentJob = true;
           DEBUG('stamina required :'+StamReq+': have :'+stamina+': not enough stamina, leave for now');
 //          goHome();
-          reutrn;
+          return;
         } else DEBUG('stamina required :'+StamReq+': have :'+stamina+': have enough stamina do job');
       } else DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
       DEBUG(' check stam 3');
@@ -15576,14 +15665,14 @@ function logFightResponse(rootElt, resultElt, context) {
       // Look for any new opponents in the displayed list.
       findFightOpponent(rootElt);
     } 
-	if (how == STAMINA_HOW_FIGHT_RIVALS){
-	  findRivalOpponent(rootElt);
-	}
-	else if (how == STAMINA_HOW_FIGHT_LIST) {
+
+	  if (how == STAMINA_HOW_FIGHT_RIVALS){
+	    findRivalOpponent(rootElt);
+	  }
+	  else if (how == STAMINA_HOW_FIGHT_LIST) {
       cycleSavedList('fightList');
     }
 
-	
     // Determine whether the opponent is alive and may see future attacks.
     if (inner.indexOf('Attack Again') != -1) {
       setFightOpponentActive(context);
@@ -15915,9 +16004,8 @@ function ajaxPageChanged(ajaxElt) {
 function logJSONResponse(autoplay, response, action, context) {
   try {
     var responseText = response.untag();
-    DEBUG(responseText);
-    if (action.indexOf('icecheck') == -1) DEBUG(responseText);
-
+    DEBUG('logJSONResponse: '+action +'<br/>'+responseText);
+    
     // Analyze money related responses (collect take, check vault, deposit and withdraw)
     var cashLeft, acctBalance;
     var respJSON, respData;
@@ -16028,9 +16116,26 @@ function logJSONResponse(autoplay, response, action, context) {
       // Parse Las Vegas vault data
       case 'check vault':
         setGMTime('checkVaultTimer', '00:30:00');
+        respJSON = JSON.parse(responseText);
+        respData = JSON.parse(respJSON.data);
+        GM_setValue('casinoReport', JSON.stringify(respData));
+        return false;
+        break;
+        
+      // Parse Las Vegas casino data
+      case 'check casino':                  
+        respJSON = JSON.parse(responseText);
+        respData = JSON.parse(respJSON.data);
+        GM_setValue('casinoReport', JSON.stringify(respData));
         return false;
         break;
 
+      // Casino Parts
+      case 'casino parts':                  
+        GM_setValue('askCasinoPartsTimer', '12 hours');
+        return false;
+        break;
+        
       // Log any message from collecting property take.
       case 'collect take':
         DEBUG('Collected take '+respData.description);
@@ -16118,7 +16223,6 @@ function logJSONResponse(autoplay, response, action, context) {
         }
         return false;
         break;
-
       default:
         addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' + action + '".');
         return false;
@@ -16398,7 +16502,6 @@ function logResponse(rootElt, action, context) {
       }
 
       if (pushNextJob) {
-        DEBUG('Job Mastery of 100% detected, Reloading Tabno :'+tabno );
         customizeVegasJobs();
       } else {
         return;
@@ -16784,7 +16887,7 @@ function closePopup(eltPopup, coolName) {
   //var eltPopup = xpathFirst(xpath);
 
   if (!eltPopup) {
-    DEBUG('Can not close ' + coolName + ' popup: ' + eltPopup.id+' not found !');
+    DEBUG('Can not close ' + coolName + ' : popupElt undefined !');
     return false;
   }
 
@@ -16906,44 +17009,65 @@ function handlePopups() {
           // Get rid of Tournament Expired popup
           if (popupInnerNoTags.indexOf('Your previous tournament has expired') != -1) return(closePopup(popupElts[i], "Tournament Expired"));
 
-          // Get rid of "The Daily Take" popup
-          if (popupInnerNoTags.indexOf('Keep the streak alive') != -1) {
-            var logtxt='';
-            if (popupInnerNoTags.match(/for playing ([0-9]+) days? in a row you got/i))
-              logtxt = 'You played for ' + RegExp.$1 + ' day(s) straight.';
-            var bonusElt = xpathFirst('.//div[contains(@style,"font-size: 18px; margin-bottom: 5px;")]', popupElts[i]);
-            if (bonusElt && bonusElt.innerHTML) logtxt += (logtxt ? '<br/>' : '') + 'Bonus: <span class="loot">' + bonusElt.innerHTML + '</span>';
-            addToLog('lootbag Icon',logtxt);
-            return(closePopup(popupElts[i], "The Daily Take"));
-          }
-
-          // Get rid of War is already helped popup
-          if (popupInnerNoTags.indexOf('have already helped') != -1) {
-            return(closePopup(popupElts[i], "Already Helped"));
-          }
-
-          // Get rid of War is already over popup
-          if (popupInnerNoTags.indexOf('war is already over') != -1) {
-            return(closePopup(popupElts[i], "War already over"));
-          }
-
           /* THESE POPUPS get processed only when PS MWAP is running: */
           /* START */
+          
           if (running) {
-
+          
             if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
             if (popupElts[i].id == 'popup_fodder_zmc') return(closePopup(popupElts[i], "Your Requests Fodder"));
 
+
+          // Get rid of "The Daily Take" popup
+            if (popupInnerNoTags.indexOf('Keep the streak alive') != -1) {
+              var logtxt='';
+              if (popupInnerNoTags.match(/for playing ([0-9]+) days? in a row you got/i))
+                logtxt = 'You played for ' + RegExp.$1 + ' day(s) straight.';
+              var bonusElt = xpathFirst('.//div[contains(@style,"font-size: 18px; margin-bottom: 5px;")]', popupElts[i]);
+              if (bonusElt && bonusElt.innerHTML) logtxt += (logtxt ? '<br/>' : '') + 'Bonus: <span class="loot">' + bonusElt.innerHTML + '</span>';
+              addToLog('lootbag Icon',logtxt);
+              return(closePopup(popupElts[i], "The Daily Take"));
+            }
+
+            // Accept Gifts and Boosts from total Requests popup
+            if (popupInnerNoTags.indexOf('Total Requests') != -1) {
+              var acceptgiftButtons = $x('.//a[@class="sexy_button_new medium_white" and contains(@onclick,"accept_gift")]',popupElts[i]);
+              if(acceptgiftButtons && isGMChecked('autoWarRewardPublish')) {
+                for(i=0;i<acceptgiftButtons.length>0;++i){
+                  acceptgiftButton = acceptgiftButtons[i];
+                  clickElement(acceptgiftButton);                  
+                }                
+                DEBUG('Popup Process: Total Requests - '+acceptgiftButtons.length+' Gifts Accepted');              
+              }  
+              acceptgiftButtons = $x('.//a[@class="sexy_button_new medium_white" and contains(@onclick,"accept_boost")]',popupElts[i]);
+              if(acceptgiftButtons && isGMChecked('autoWarRewardPublish')) {
+                for(i=0;i<acceptgiftButtons.length>0;++i){
+                  acceptgiftButton = acceptgiftButtons[i];
+                  clickElement(acceptgiftButton);                  
+                }                
+                DEBUG('Popup Process: Total Requests - '+acceptgiftButtons.length+' Boosts Accepted');
+              }
+            return(closePopup(popupElts[i], "Total Requests"));
+            } 
+          
+            // Get rid of War is already helped popup
+            if (popupInnerNoTags.indexOf('have already helped') != -1) {
+              return(closePopup(popupElts[i], "Already Helped"));
+            }
+
+            // Get rid of War is already over popup
+            if (popupInnerNoTags.indexOf('war is already over') != -1) {
+              return(closePopup(popupElts[i], "War already over"));
+            }
+          
             // Process Sharing Secret Stash
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
             if (eltPubButton) {
               DEBUG('Popup Process: Share Secret Stash Processed');
               if (isGMChecked('autoSecretStash')) {
                 clickElement(eltPubButton);
-                return true;
-              } else {
-                return(closePopup(popupElts[i], "Secret Stash"));
-              }
+              }  
+                return(closePopup(popupElts[i], "Secret Stash"));              
             }
 
             // Process Secret Stash
@@ -16975,15 +17099,15 @@ function handlePopups() {
                   if (lootChoice) {
                     clickElement(lootChoice);
                     addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
-                    addToLog('lootbag Icon', '<span class="loot">'+' Received '+ lootChoice.innerHTML.untag() + ' from a secret stash.</span>');
+                    addToLog('lootbag Icon', 'Choose  <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
                   } else {
-                    addToLog('lootbag Icon', '<span class="loot">'+' Received '+ eltLoot.innerHTML.untag() + ' from a secret stash.</span>');
+                    addToLog('lootbag Icon', 'Received <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
                   }
                   // Default select is the first item so this button is always valid
                   clickElement(eltButton);
-                }
-                return true;
+                }              
               }
+              return(closePopup(popupElts[i], "Process Secret Stash"));
             }
 
             // Process Crime Spree popup
@@ -16995,10 +17119,8 @@ function handlePopups() {
               }
               if (isGMChecked('autoSafehousePublish')) {
                 clickElement(eltPubButton);
-                return true;
-              } else {
-                return(closePopup(popupElts[i], "Crime Spree Gifts"));
               }
+              return(closePopup(popupElts[i], "Crime Spree Gifts"));
             }
 
             // Process Red Mystery Bag popup
@@ -17036,15 +17158,12 @@ function handlePopups() {
                   if(isGMChecked('autoIcePublish')) logtxt+= ' Iced bonus not published ('+logFrequency+'/'+publishFrequency+')';
                   addToLog('info Icon', logtxt);
                   IcedPublishingCount+=1;
-                  GM_setValue('IcedPublishingCount',IcedPublishingCount);
-                  return(closePopup(popupElts[i], "Iced Popup"));
+                  GM_setValue('IcedPublishingCount',IcedPublishingCount);                  
                 }
                 IcedPublishingCount+=1;
                 GM_setValue('IcedPublishingCount',IcedPublishingCount);
-              } else {
-                // missing info, just go away
-                return(closePopup(popupElts[i], "Iced Popup"));
-              }
+              }               
+              return(closePopup(popupElts[i], "Iced Popup"));              
             }
 
             // Process Reward for Energy Packs
@@ -17099,10 +17218,8 @@ function handlePopups() {
               }
               if (isGMChecked('autoLevelPublish')) {
                 clickElement(eltPubButton);
-                return true;
-              } else {
-                return(closePopup(popupElts[i], "Level Up"));
-              }
+              } 
+              return(closePopup(popupElts[i], "Level Up"));              
             }
 
             // Process Loyalty popup
@@ -17176,10 +17293,8 @@ function handlePopups() {
               if (isGMChecked('autoWarPublish')) {
                 clickElement(warDeclareButton);
                 DEBUG('Popup Process: WAR - Declare War Publishing');
-                return true;
-              } else {
-                return(closePopup(popupElts[i], "War Declaration Popup"));
               }
+              return(closePopup(popupElts[i], "War Declaration Popup"));              
             }
 
             // War Rally for Help
@@ -17188,10 +17303,9 @@ function handlePopups() {
               if(eltHelp && isGMChecked('autoWarResponsePublish')) {
                 clickElement(eltHelp);
                 DEBUG('Popup Process: WAR - Ask Friends for Help Publishing');
-                return true;
-              } else {
-                return(closePopup(popupElts[i], "War Help Popup"));
               }
+              return(closePopup(popupElts[i], "War Help Popup"));
+
             }
 
             // War Reward : Share Victory Coins
@@ -17201,12 +17315,13 @@ function handlePopups() {
                 for(i=0;i<warRewardButtons.length>0;++i){
                   warRewardButton = warRewardButtons[i];
                   clickElement(warRewardButton);
+
                   DEBUG('Popup Process: WAR - Reward Friends (Share Coins) for Help Publishing');
-                }
-                return true;
+                }                
               }
               return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
             }
+
           // End of Popups Section
 
           }
@@ -17967,6 +18082,7 @@ function Do_Mafia_Collection_Tab() {
         }
 //    return false;
 }
+
 ////
 function Auto_Mafia_Collection(){
   var missionButtons;
@@ -18072,6 +18188,7 @@ function Chk_Nxt_Page() {
     }
 return true;
 }
+
 ////
 function Go_Nxt_Page() {
     var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
