@@ -43,12 +43,13 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @description Autoplayer for the facebook application - Mafia Wars
 // @include     http://facebook.mafiawars.com/mwfb/remote/html_server.php*
 // @include     http://mwfb.zynga.com/mwfb/remote/html_server.php*
+// @include     http://facebook.mafiawars.com/mwfb/xd_receiver.htm
 // @include     http://apps.facebook.com/inthemafia/*
 // @include     http://apps.new.facebook.com/inthemafia/*
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.774
+// @version     1.1.775
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -59,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.774',
+  version: '1.1.775',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -139,10 +140,10 @@ function GM_ApiBrowserCheck() {
 }
 GM_ApiBrowserCheck();
 
-// Handle Publishing (check for FB publishing iframe)
+// Handle Publishing (check for FB publishing / FB Gifting iframe)
 function checkInPublishPopup() {
-  if (xpathFirst('//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
-      /connect\/uiserver/.test(window.location.href)) {
+  if ( xpathFirst('//div[contains(@class,"aid_' + SCRIPT.appNo +'")]') &&
+      ( /connect\/uiserver/.test(window.location.href) || /xd_receiver/.test(window.location.href)) ){
     setGMTime('postTimer', '00:10');
     window.setTimeout(handlePublishing, 3000);
     return true;
@@ -1596,6 +1597,65 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Take Down The Security Detail'                     , 20, 78,8,LV    , 35,1,'node78']     // Stamina PATH
 //  ['Boss: Defeat Governor Halloran'                    ,  8, 79,8,LV    ,120,0,'node79']     //           Boss Job
 
+/*
+//Mission array for Italia
+    ['Connect With La Familia'                           ,  4,  1,1,ITALY ,  4,0,'node1' ],    // ENERGY PATH
+    ['Recruit Some Local Muscle'                         ,  7,  2,1,ITALY ,  8,0,'node2' ],    // ENERGY PATH
+    ['Set Up The Italian Operation'                      , 10,  3,1,ITALY , 14,0,'node3' ],    // ENERGY PATH
+    ['Take Over The Italian Operation'                   ,  8,  4,1,ITALY , 14,1,'node4' ],    // STAMINA PATH
+    ['Intercept A Handoff In The Coliseum'               , 14,  5,1,ITALY , 23,0,'node5' ],    // ENERGY PATH
+    ['Assassinate A Corrupt City Official'               , 12,  6,1,ITALY , 18,1,'node6' ],    // STAMINA PATH
+    ['Discover The Conspiracy'                           , 18,  7,1,ITALY , 27,0,'node7' ],    // ENERGY PATH
+    ['Defeat The Di Rossi Hired Muscle'                  , 12,  8,1,ITALY , 18,1,'node8' ],    // STAMINA PATH
+    ['Send A Message To The Di Rossa Family'             , 18,  9,1,ITALY , 27,0,'node9' ],    // ENERGY PATH
+//  ['Boss: Confront Don Antonion Di Rossa'              ,  1, 10,1,ITALY ,  2,0,'node10']     //          Boss Job
+    ['Find An Old Family Friend'                         , 25, 11,2,ITALY , 41,0,'node11'],    // ENERGY PATH
+    ['Build The Winery'                                  , 14, 12,2,ITALY , 23,0,'node12'],    // ENERGY PATH
+    ['Battle For Water Rights'                           , 20, 13,2,ITALY , 31,1,'node13'],    // STAMINA PATH
+    ['Sabotage A Rival'                                  , 18, 14,2,ITALY , 27,0,'node14'],    // ENERGY PATH
+    ['Survive Adriano\'s Betrayal'                       , 32, 15,2,ITALY , 50,2,'node15'],    // SOCIAL PATH
+    ['Repel Adriano\'s Assassins'                        , 24, 16,2,ITALY , 41,1,'node16'],    // STAMINA PATH
+    ['Hide Your Family'                                  , 28, 17,2,ITALY , 46,0,'node17'],    // ENERGY PATH
+    ['Flee To Safety'                                    , 36, 18,2,ITALY , 55,2,'node18'],    // SOCIAL PATH
+    ['Swear An Oath Of Vengeance'                        , 28, 19,2,ITALY , 46,0,'node19'],    // ENERGY PATH
+    ['Track Down Don Adriano'                            , 32, 20,2,ITALY , 50,0,'node20'],    // ENERGY PATH
+//  [Boss: Don Aldo Adriano                              ,  1, 21,2,ITALY ,  2,0,'node21'],    //          Boss Job
+    ['Bug The Don\'s Train Car'                          , 36, 22,3,ITALY , 60,0,'node22'],    // ENERGY PATH
+    ['Collect Info From A Gondolier'                     , 39, 23,3,ITALY , 64,0,'node23'],    // ENERGY PATH
+    ['Smuggle Goods Through A Fishery'                   , 32, 24,3,ITALY , 50,0,'node24'],    // ENERGY PATH
+    ['Rough Up a Local Scalper'                          , 24, 25,3,ITALY , 41,1,'node25'],    // STAMINA PATH
+    ['Counterfeit Tickets For The Masque Ball'           , 32, 26,3,ITALY , 55,0,'node26'],    // ENERGY PATH
+    ['Recruit Gang Of Street Rats'                       , 36, 27,3,ITALY , 60,2,'node27'],    // SOCIAL PATH
+    ['Rob A Costume Shop'                                , 28, 28,3,ITALY , 46,1,'node28'],    // STAMINA PATH
+    ['Buy Out A Costume Shop'                            , 28, 29,3,ITALY , 46,0,'node29'],    // ENERGY PATH
+    ['Lift A Performer\'s Outfit'                        , 36, 30,3,ITALY , 60,2,'node30'],    // SOCIAL PATH
+    ['Deal With The Don\'s Guards'                       , 32, 31,3,ITALY , 55,1,'node31'],    // STAMINA PATH
+    ['Distract The Don\'s Guards'                        , 39, 32,3,ITALY , 64,0,'node32'],    // ENERGY PATH
+    ['Lure The Don To A Secluded Location'               , 46, 33,3,ITALY , 78,0,'node33'],    // ENERGY PATH
+// ['Boss: Don Del Brenta'                              ,  1, 34,3,ITALY ,  2,0,'node34'],    //          Boss Job
+    ['Free A Professional Assassin'                      , 46, 35,4,ITALY , 78,0,'node35'],    // ENERGY PATH
+    ['Bug A Confessional'                                , 43, 36,4,ITALY , 73,0,'node36'],    // ENERGY PATH
+    ['Infiltrate A Seven Star Hotel'                     , 36, 37,4,ITALY , 60,1,'node37'],    // STAMINA PATH
+    ['Blackmail A Track Official'                        , 54, 38,4,ITALY , 92,0,'node38'],    // ENERGY PATH
+    ['Interrogate A Lackey'                              , 28, 39,4,ITALY , 50,1,'node39'],    // STAMINA PATH
+    ['Rob A Collector'                                   , 50, 40,4,ITALY , 83,0,'node40'],    // ENERGY PATH
+    ['Pressure The Bookies'                              , 57, 41,4,ITALY , 96,0,'node41'],    // ENERGY PATH
+    ['Assassinate The Volovino Bodyguard'                , 36, 42,4,ITALY , 64,1,'node42'],    // STAMINA PATH
+    ['Rig The Big Race'                                  , 50, 43,4,ITALY , 83,0,'node43'],    // ENERGY PATH
+//  ['Boss: Volovino Twins'                              ,  1, 44,4,ITALY , 2 ,0,'node44'],    ///        Boss Job
+    ['Snag A Lucrative Disposal Contract'                , 54, 45,5,ITALY , 92,0,'node45'],    // ENERGY PATH
+    ['Take On A Camorra Trash Crew'                      , 44, 46,5,ITALY , 78,1,'node46'],    //STAMINA PATH
+    ['\'Lose\' A Waste Cargo At Sea'                     , 72, 47,5,ITALY ,119,2,'node47'],    //SOCIAL PATH
+    ['Show A Business Owner Who\'s In Charge'            , 61, 48,5,ITALY ,106,0,'node48'],    // ENERGY PATH
+    ['Take Out A Troublesome Carabinieri'                , 48, 49,5,ITALY , 88,1,'node49'],    //STAMINA PATH
+    ['Link The Camorra To The Police'                    , 64, 50,5,ITALY ,111,2,'node50'],    //SOCIAL PATH
+    ['Break Out An Incarcerated Lieutenant'              , 57, 51,5,ITALY , 96,0,'node51'],    //ENERGY PATH
+    ['Support Your Local Hooligan Firm'                  , 40, 52,5,ITALY , 73,1,'node52'],    // STAMINA PATH
+    ['Blow Up A Police Station'                          , 72, 53,5,ITALY ,124,0,'node53'],    //ENERGY PATH
+    ['Trash A Rival Camorra Stadium'                     , 75, 54,5,ITALY ,124,0,'node54']   //PROPERTY
+//  ['Boss: Defeat Don Enzo Casazza'                     ,  1, 55,5,ITALY,   2,0,'node55']
+*/
+
 // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -2106,7 +2166,6 @@ function doAutoPlay () {
     if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 4)) return;
   }
 
-
   // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
@@ -2572,7 +2631,6 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     return true;
   }
 
-
   // Go to the city's property nav
   if (!onPropertyNav()) {
     Autoplay.fx = goPropertyNav;
@@ -2585,19 +2643,13 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
   var buildSetting;
   var buildItem;
 
-  switch(buildType){
-    case 1 :
-    case 2 : 
-    case 3 : 
-    case 4 : 
-    case 5 : 
-    case 6  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts';  buildItem =itemArray[itemIndex][0]; break;
+  switch(buildType){    
+    case 1  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts';  buildItem =itemArray[itemIndex][0]; break;
     case 11 : timerName = 'askShopPartsTimer';    buildSetting='askShopParts';    buildItem =itemArray[itemIndex][0]; break;
     case 12 : timerName = 'askDepotPartsTimer';   buildSetting='askDepotParts';   buildItem =itemArray[itemIndex][0]; break;
     case 13 : timerName = 'askArmorPartsTimer';   buildSetting='askArmorParts';   buildItem =itemArray[itemIndex][0]; break;
     default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; buildItem ='Special Parts';         break;
   }
-
   DEBUG('Going to ask for '+buildItem+' ('+buildType +')');
   
   if(itemCity == NY){
@@ -2651,47 +2703,74 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     //Casino Parts - Check Casino Status        
     var casinoReport = GM_getValue('casinoReport');    
     if(!casinoReport) checkCasinoStatus(true);
-    if(casinoReport){
+    if(casinoReport){    
       casinoReport = casinoReport.replace(/\\/g, "");      
-      var searchItem='"id":'+itemArray[itemIndex][1];    
-     
-      //Casino Parts - Check Quantities             
-      if(casinoReport.indexOf(searchItem) != -1){
+      DEBUG(casinoReport);
+      var match;
+      var nextTimeTxt = new RegExp('"ask_friends_next_time":(.+?),','gi');        
+      if(match = nextTimeTxt.exec(casinoReport)) {
+        var nextTime = parseInt(match[1]);
+        var d = new Date();
+        d.setMilliseconds(0);  
+        var timeDif = Math.max(nextTime-(d.getTime()/1000), 0);
+        //var timeDif = nextTime - date;
+        var hours=Math.floor(timeDif/3600); 
+        var minutes=Math.floor(timeDif/60)-(hours*60); 
+        var seconds=timeDif-(hours*3600)-(minutes*60);
+        if (hours < 10) hours = "0"+hours;
+        if (minutes < 10) minutes = "0"+minutes;
+        if (seconds < 10) seconds = "0"+seconds;
+        var timeDifTxt = hours+':'+minutes+':'+seconds;
+        DEBUG('Time Left: '+timeDifTxt);
+        if (timeDif >0){
+          DEBUG('You can not ask for Casino Parts. Timer Running : '+timeDifTxt);
+          setGMTime('askCasinoPartsTimer', timeDifTxt);
+          return false;
+        } else {        
+          DEBUG('Can ask for parts atm. Timer Running : '+timeDifTxt);
+          var searchItem='"id":'+itemArray[itemIndex][1];    
+          
+          //Casino Parts - Check Quantities             
+          if(casinoReport.indexOf(searchItem) != -1){
         
-        // Parts Required format : {\"id\":1575,\"type\":1,\"quantity\":7}
-        var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');                
-        var match;        
-        var totalRequired=0, totalNeeded=0, totalOwned=0;
-        while(match = partsRequiredTxt.exec(casinoReport)){          
-          totalRequired += parseInt(match[1]);
-        }        
+            // Parts Required format : {\"id\":1575,\"type\":1,\"quantity\":7}
+            var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');                        
+            var totalRequired=0, totalNeeded=0, totalOwned=0;
+            while(match = partsRequiredTxt.exec(casinoReport)){          
+              totalRequired += parseInt(match[1]);
+            }        
       
-        // Parts Owned format : {\"id\":1575,\"type\":1,\"name\":\"Cinder Block\",\"num_owned\":17,\"image_url\":\"http:\\\/\\\/mwfb.static.zynga.com\\\/mwfb\\\/graphics\\\/item_Cinderblock_01.gif\"}
-        var partsOwnedTxt = new RegExp(searchItem+',"type":1,"name":"'+buildItem+'","num_owned":(.+?),"image_url"','gi');        
-        if(match = partsOwnedTxt.exec(casinoReport)) {          
-          totalOwned = parseInt(match[1]);                    
-        }          
-        totalNeeded = totalRequired - totalOwned;        
+            // Parts Owned format : {\"id\":1575,\"type\":1,\"name\":\"Cinder Block\",\"num_owned\":17,\"image_url\":\"http:\\\/\\\/mwfb.static.zynga.com\\\/mwfb\\\/graphics\\\/item_Cinderblock_01.gif\"}
+            var partsOwnedTxt = new RegExp(searchItem+',"type":1,"name":"'+buildItem+'","num_owned":(.+?),"image_url"','gi');
+            if(match = partsOwnedTxt.exec(casinoReport)) {
+              totalOwned = parseInt(match[1]);             
+            }          
+            totalNeeded = totalRequired - totalOwned;
         
-        if(totalNeeded<=0){
-          addToLog('warning Icon','Asking for '+buildItem+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
-        } else {
-          addToLog('info Icon','Asking for '+buildItem+', still needing '+ totalNeeded+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
-        }
+            if(totalNeeded<=0){
+              addToLog('warning Icon','Asking for '+buildItem+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
+            } else {
+              addToLog('info Icon','Asking for '+buildItem+', still needing '+ totalNeeded+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
+            }
+            // changing buildType to part specific building
+            buildType = itemArray[itemIndex][2];        
+            // Asking for Casino Parts
         
-        // Asking for Casino Parts
+            var ajaxID = createAjaxPage(false, 'casino parts', LV);
+            var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 0, 0, 0); return false;'});
+            clickElement(elt);
+            DEBUG('Clicked to ask for '+buildItem+' for '+buildType);
+            GM_setValue('askCasinoPartsTimer', '12 hours');
+            return true;        
+          }
+        } 
         
-        var ajaxID = createAjaxPage(false, 'casino parts', LV);
-        var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 1, 0, 0); return false;'});
-        clickElement(elt);
-        GM_setValue('askCasinoPartsTimer', '12 hours');
-        return true;        
       }
-    } 
-        
-    DEBUG('Ask for Casino Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 Hours.');
-    setGMTime(timerName, '2 hours');
-    return false;      
+    }  
+           
+    DEBUG('Ask for Casino Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 hours.');
+    setGMTime('askCasinoPartsTimer', '2 hours');
+    return false;
   }    
 }
 
@@ -3963,6 +4042,7 @@ function autoStaminaSpend() {
   switch (how) {
     case STAMINA_HOW_FIGHT_RANDOM:
     case STAMINA_HOW_FIGHT_LIST:	
+    case STAMINA_HOW_FIGHT_RIVALS:
       return autoFight(how);
 
     case STAMINA_HOW_FIGHTROB:
@@ -3982,9 +4062,6 @@ function autoStaminaSpend() {
 
     case STAMINA_HOW_AUTOHITLIST:
       return autoHitlist();
-	  
-	case STAMINA_HOW_FIGHT_RIVALS:
-	  return autoFight(how);
 
     default:
       addToLog('warning Icon', 'BUG DETECTED: Unrecognized stamina setting: ' +
@@ -4917,6 +4994,12 @@ function saveDefaultSettings() {
   GM_setValue('stopBursts', 'unchecked');
   GM_setValue('stopBurstsHealth', 0);
 
+  // Cash tab
+  GM_setValue('askChopShopParts', 'unchecked');
+  GM_setValue('askDepotParts', 'unchecked');
+  GM_setValue('askArmoryParts', 'unchecked');
+  GM_setValue('askCasinoParts', 'unchecked');
+  
   // Property tab.
   GM_setValue('minCashNew York', '0');
   GM_setValue('minCashCuba', '0');
@@ -5257,11 +5340,12 @@ function saveSettings() {
   //End Save Health Tab Settings
 
   //Start Save Cash Tab Settings
-  //Cash Tab Checkboxes
+  //Cash Tab Checkboxes  
   saveCheckBoxElementArray([
     'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
     'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
   ]);
+  
   //Cash Settings and Validation
   GM_setValue('minCashNew York', document.getElementById('minCashNew York').value);
   GM_setValue('minCashCuba', document.getElementById('minCashCuba').value);
@@ -8634,7 +8718,7 @@ function createCashTab () {
     choice.appendChild(document.createTextNode(cityCasinoParts[i][0]));
     casinoPartsType.appendChild(choice);
   }
-  casinoPartsType.selectedIndex = GM_getValue(id, 0);
+  casinoPartsType.selectedIndex = GM_getValue(id, 0);  
   
   // Ask for Special Parts
   xTop += 25;
@@ -10256,7 +10340,6 @@ function refreshMWAPCSS() {
                    ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0 0; width: 43px; z-index: 2;"] {display: none;}' :
                    ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0pt 0pt; width: 43px; z-index: 2;"] { !important; right: 424px !important; z-index: 2 !important;}' +
                    ' a[style$="position: absolute; top: 7px; right: 134px; height: 23px; padding: 20px 0 0; width: 43px; z-index: 2;"] { !important; right: 424px !important; z-index: 2 !important;}') +
-
                  // Move Slot Machine and click box:
                  (isGMChecked('HideSlotMachine') ?
                   ' #slots_icon_container  {display: none;}' +
@@ -13983,7 +14066,6 @@ function autoWar() {
       DEBUG('Setting warTimer to come back in 1 hour');
       return false;
     }  
-
   } else {
     // Get war Targets to Declare War on
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
@@ -15665,7 +15747,6 @@ function logFightResponse(rootElt, resultElt, context) {
       // Look for any new opponents in the displayed list.
       findFightOpponent(rootElt);
     } 
-
 	  if (how == STAMINA_HOW_FIGHT_RIVALS){
 	    findRivalOpponent(rootElt);
 	  }
@@ -16131,8 +16212,10 @@ function logJSONResponse(autoplay, response, action, context) {
         break;
 
       // Casino Parts
-      case 'casino parts':                  
+      case 'casino parts': 
+        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Resetting Timer.');
         GM_setValue('askCasinoPartsTimer', '12 hours');
+        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset.');
         return false;
         break;
         
@@ -17008,7 +17091,7 @@ function handlePopups() {
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
           // Get rid of Tournament Expired popup
           if (popupInnerNoTags.indexOf('Your previous tournament has expired') != -1) return(closePopup(popupElts[i], "Tournament Expired"));
-
+       
           /* THESE POPUPS get processed only when PS MWAP is running: */
           /* START */
           
@@ -17016,7 +17099,6 @@ function handlePopups() {
           
             if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
             if (popupElts[i].id == 'popup_fodder_zmc') return(closePopup(popupElts[i], "Your Requests Fodder"));
-
 
           // Get rid of "The Daily Take" popup
             if (popupInnerNoTags.indexOf('Keep the streak alive') != -1) {
@@ -17266,7 +17348,7 @@ function handlePopups() {
               return true;
             }
             // Missions popups
-            // Claim Mission Rewards Failed
+            // Claim Mission Rewards Failed            
             if (popupInnerNoTags.indexOf('Failed to give reward') != -1) {
               DEBUG('Popup Process: MISSIONS - Claim Rewards Failed');
               return(closePopup(popupElts[i], "Claim Mission Rewards Failed"));
@@ -17305,7 +17387,6 @@ function handlePopups() {
                 DEBUG('Popup Process: WAR - Ask Friends for Help Publishing');
               }
               return(closePopup(popupElts[i], "War Help Popup"));
-
             }
 
             // War Reward : Share Victory Coins
@@ -17315,13 +17396,11 @@ function handlePopups() {
                 for(i=0;i<warRewardButtons.length>0;++i){
                   warRewardButton = warRewardButtons[i];
                   clickElement(warRewardButton);
-
                   DEBUG('Popup Process: WAR - Reward Friends (Share Coins) for Help Publishing');
                 }                
               }
               return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
             }
-
           // End of Popups Section
 
           }
@@ -18082,7 +18161,6 @@ function Do_Mafia_Collection_Tab() {
         }
 //    return false;
 }
-
 ////
 function Auto_Mafia_Collection(){
   var missionButtons;
@@ -18188,7 +18266,6 @@ function Chk_Nxt_Page() {
     }
 return true;
 }
-
 ////
 function Go_Nxt_Page() {
     var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
