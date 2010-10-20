@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.776
+// @version     1.1.777
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.775',
+  version: '1.1.777',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -638,6 +638,18 @@ var cashVegasIcon = '<img src="data:image/png;base64,' +
     'o4n9di0H60P4pElO32YFHc55PGcJwlWhRakOp8Shwt0qNtyjRt9EkqTT0L+83mjS0qJw5EbwukvFa5tD6HxWw8yYkmUZoRLzIcj8AvfO6Qd8cWkZZvWIEFoUsjDGfgjnq2PzaF3uJ60dyJ4dEutCXvW/jvynGFyu' +
     '0ypOXv1UdvmPEfHtuV5xxtsmtmysFP+x8999db7DTUMcSAAAAABJRU5ErkJggg==' +
     '" />';
+	
+var cashItalyIcon = '<img src="data:image/png;base64,' +
+    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzg' +
+    'AAADXklEQVQ4T32TD0zUdRjGv3Ac4N3ujuOPHBweh4eAwCGCwCk1PeQQvI4QEGhB624QFoIDtQzbNO20urRZQEyBjWWsXPZH0k7K4Qbl1hS0stI27I8sMMOO0FVin36zrc3F+m7vvtv7vnve9332PELM8U4csRef' +
+    'H3r4vZtX6y7P+urH1ttTTquD1ZuUwXLlXP3/5jISlqbsd6//DPbx5VP5THQ8yC12U+5YxhLTIu7LMI7v3mYsmxOkqqigqPGhmtkKRzGT40188WENRz1rOevJY/tjOdjsaRw95gBcvN0bvesekLX2+JTDnbW3V+VY' +
+    'adhSwvG6XIbd+Xz8loOfOrIZeHUFvc4Ufr1Yyuc9Vg6XaGg/oKi9C5K5RBs98FH1+7CDod4H6Gsu5OsTJXBrnTStWopKuJPHneFk3OsSaduZxeSpHKauZ004y0WkePfN4qf7nTmMdhQw0l7I2KH72deTT2mpiTK7' +
+    'iQ3ORGxWA7s8iVz4YCGHyqLwTVrZszOV2KiAJnH7l3rv1ICDkwdsvLQxG6ZWUFGVStpSM8mJJuIMRhboYojRG+CajiH3fNZkRCALDCMoQDUovhmtHJ6WiDnXbeNMY6y0shnbSgP2PCM1JQsoWp1AS2006elGmEng' +
+    'wjs6qrJDCdeEI4R6QqTELhrOTE7AVZjOqVeSJIAYVlp0LDfrKC+IwGox4CyNwGTSw/VQzruD6HtEwY1pHf3dQRNCpzF45bJYLOmJHGmIg+kQsrLmkxyrZ40ljMykSPIyVQT4R8IVPzwuBXsbtfw8ouDsoP9pYY4P' +
+    '315bGc+V7y280bCQQY+aznYVWx/V4tmk5plaDc83KXmyWcXFLhndTyjwdql52SZoqRPNomVrlP7SpcX9M6OL6XpBYn2Vnu+6g+G3QPhd+v8MAF8A48flbFut5GCrUjpTyY0x/2u5ZqG7q4XWF+NTex5XzbZVa7j5' +
+    'o4n9di0H60P4pElO32YFHc55PGcJwlWhRakOp8Shwt0qNtyjRt9EkqTT0L+83mjS0qJw5EbwukvFa5tD6HxWw8yYkmUZoRLzIcj8AvfO6Qd8cWkZZvWIEFoUsjDGfgjnq2PzaF3uJ60dyJ4dEutCXvW/jvynGFyu' +
+    '0ypOXv1UdvmPEfHtuV5xxtsmtmysFP+x8999db7DTUMcSAAAAABJRU5ErkJggg==' +
+    '" />';
 
 var healthIcon = '<img src="data:image/png;base64,' +
     'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH1wUIFAADTJ17vgAAAJlJREFUOMvFk7ERwjAMRb84L2ENkhmgyh5p' +
@@ -963,23 +975,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Array of lottery bonus items
   var autoLottoBonusList = ['A random collection item', 'A free ticket', '+5 stamina points', 'two free lotto tickets', '+20 energy points', '20 Loyalty points'];
 
-  /* Prop Income
-  var propsData = new Array (
-    // Name, income per level per hour
-    ['Louie\'s Deli', 250],
-    ['Flophouse', 300],
-    ['Pawnshop', 700],
-    ['Tenement', 5000],
-    ['Warehouse', 10000],
-    ['Restaurant', 12000],
-    ['Dockyard', 50000],
-    ['Office Park', 150000],
-    ['Uptown Hotel', 200000],
-    ['Mega Casino', 300000]
-// close above and open below to trick script into buying casino's
-//    ['Mega Casino',   300000000]
-  );*/
-
   // Stat Ordinal constants
   const ATTACK_STAT  = 0;
   const DEFENSE_STAT = 1;
@@ -993,8 +988,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const MOSCOW  = 2;
   const BANGKOK = 3;
   const LV      = 4;
-  const ACTIVE_CITY = 5;
-  const RANDOM_CITY = 6;
+  const ITALY   = 5;
+  const ACTIVE_CITY = 6;
+  const RANDOM_CITY = 7;
 
   // Constants to access city attributes
   const CITY_NAME        = 0;
@@ -1029,12 +1025,13 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'C$', 0],
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'R$', 0],
     ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50],
-    ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 0, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0]
+    ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 0, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0],
+	['Italy', 'italy', [], 'sideItaly', undefined, 0, cashItalyIcon, 'cashItaly Icon', 'autoBankItaly', 'bankConfigItaly', 'L$', 0]
   );
 
-  var locations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Active City'];
-  var fightLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Active City', 'Random City'];
-  var randomLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas'];
+  var locations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Italy','Active City'];
+  var fightLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Italy','Active City', 'Random City'];
+  var randomLocations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Italy'];
 
   // Featured job locations
   var featJobNames = ['Left Job', 'Middle Job', 'Right Job'];
@@ -1594,10 +1591,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Get Your Spotters In Place Above The Dam'          , 22, 75,8,LV    , 38,0,'node75'],    // ENERGY PATH
     ['Take Out A Crooked DEA Unit'                       , 17, 76,8,LV    , 29,1,'node76'],    // Stamina PATH
     ['Verify Halloran\'s Arrival At The Dam'             , 19, 77,8,LV    , 34,0,'node77'],    // ENERGY PATH
-    ['Take Down The Security Detail'                     , 20, 78,8,LV    , 35,1,'node78']     // Stamina PATH
+    ['Take Down The Security Detail'                     , 20, 78,8,LV    , 35,1,'node78'],     // Stamina PATH
 //  ['Boss: Defeat Governor Halloran'                    ,  8, 79,8,LV    ,120,0,'node79']     //           Boss Job
 
-/*
+
 //Mission array for Italia
     ['Connect With La Familia'                           ,  4,  1,1,ITALY ,  4,0,'node1' ],    // ENERGY PATH
     ['Recruit Some Local Muscle'                         ,  7,  2,1,ITALY ,  8,0,'node2' ],    // ENERGY PATH
@@ -1654,7 +1651,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Blow Up A Police Station'                          , 72, 53,5,ITALY ,124,0,'node53'],    //ENERGY PATH
     ['Trash A Rival Camorra Stadium'                     , 75, 54,5,ITALY ,124,0,'node54']   //PROPERTY
 //  ['Boss: Defeat Don Enzo Casazza'                     ,  1, 55,5,ITALY,   2,0,'node55']
-*/
+
 
 // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
 
@@ -1674,7 +1671,9 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     // BANGKOK
     ['Brawler','Criminal','Pirate','Commandant','Oyabun','Dragon Head','Saboteur','Assassin'],
     // LAS VEGAS ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ['North Las Vegas','Paradise City','The Lower Strip','Shogun Casino','Mojave Desert','The Upper Strip','Area 51','Hoover Dam']
+    ['North Las Vegas','Paradise City','The Lower Strip','Shogun Casino','Mojave Desert','The Upper Strip','Area 51','Hoover Dam'],
+    // ITALY /////////////////////////////////////
+    ['Roma','Palermo','Venezia','Milano','Napoli']
   );
 
   var mwTitles = new Array(
@@ -1817,7 +1816,12 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Hot Tip','Help A Bookie Out Of A Jam ',LV],
     ['Alarm Code','Buy Some Black-Market Info',LV],
     ['Hotel Security Key Card','Swipe A Security Keycard',LV],
-    ['Unwanted Evidence','Create A Diversion',LV]
+    ['Unwanted Evidence','Create A Diversion',LV],
+    ['Severed Pinky','Intercept A Handoff In The Coliseum',ITALY],
+    ['Rail Ticket','Track Down Don Adriano',ITALY],
+    ['Smart Phone','Free A Professional Assassin',ITALY],
+    ['Cooked Book','Blackmail A Track Officer',ITALY],
+    ['Hidden Charges','Snag A Lucrative Disposal Contract',ITALY]
   );
 
   // Sort requirement jobs by level requirement, ascending
@@ -3101,8 +3105,8 @@ function canMission() {
   if (isGMChecked('multipleJobs') &&
       getSavedList('jobsToDo').length == 0) {
 
-    var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})') + ')');
-    var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})') + ')');
+    var availableJobs = eval('(' + GM_getValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{},5:{}})') + ')');
+    var masteredJobs = eval('(' + GM_getValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{},5:{}})') + ')');
     var expLeft = ptsToNextLevel;
     var ratio = Math.ceil(expLeft / energy * 100) / 100;
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
@@ -3306,7 +3310,7 @@ function autoMission() {
   }
 
   // Go to the correct job tabnopath in LV
-  if(city == LV){
+  if(city == LV||city==ITALY){
     if (!onJobTabpath(tabnopath)) {
       goJobTabPath(tabnopath);
     }
@@ -3883,6 +3887,8 @@ function logRobResponse(rootElt, resultElt, context) {
         case MOSCOW: GM_setValue('fightWin$Moscow', String(parseInt(GM_getValue('fightWin$Moscow', 0)) + cashInt)); break;
         case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
         case LV: GM_setValue('fightWin$Vegas', String(parseInt(GM_getValue('fightWin$Vegas', 0)) + cashInt)); break;
+	case ITALY: GM_setValue('fightWin$Italy', String(parseInt(GM_getValue('fightWin$Italy', 0)) + cashInt)); break;
+		
       }
       needStatUpdate = true;
     }
@@ -4898,6 +4904,7 @@ function saveDefaultSettings() {
   GM_setValue('bankConfigMoscow', '50000');
   GM_setValue('bankConfigBangkok', '50000');
   GM_setValue('bankConfigVegas', '50000');
+  GM_setValue('bankConfigItaly', '50000');
   GM_setValue('autoPauseBefore', 'checked');
   GM_setValue('autoPauseAfter', 0);
   GM_setValue('autoPauseExp', '50');
@@ -5342,8 +5349,8 @@ function saveSettings() {
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes  
   saveCheckBoxElementArray([
-    'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas',
-    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
+    'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas','collectTakeItaly',
+    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','autoBankItaly','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
   ]);
   
   //Cash Settings and Validation
@@ -5366,16 +5373,19 @@ function saveSettings() {
   var autoBankMoscowOn  = (document.getElementById('autoBankMoscow').checked === true);
   var autoBankBangkokOn  = (document.getElementById('autoBankBangkok').checked === true);
   var autoBankVegasOn  = (document.getElementById('autoBankVegas').checked === true);
+  var autoBankItalyOn  = (document.getElementById('autoBankItaly').checked === true);
   var bankConfig      = document.getElementById('bankConfig').value;
   var bankConfigCuba      = document.getElementById('bankConfigCuba').value;
   var bankConfigMoscow      = document.getElementById('bankConfigMoscow').value;
   var bankConfigBangkok      = document.getElementById('bankConfigBangkok').value;
   var bankConfigVegas      = document.getElementById('bankConfigVegas').value;
+  var bankConfigItaly      = document.getElementById('bankConfigItaly').value;
   var bankConfigInt   = parseInt(bankConfig);
   var bankConfigCubaInt   = parseInt(bankConfigCuba);
   var bankConfigMoscowInt   = parseInt(bankConfigMoscow);
   var bankConfigBangkokInt   = parseInt(bankConfigBangkok);
   var bankConfigVegasInt   = parseInt(bankConfigVegas);
+  var bankConfigItalyInt   = parseInt(bankConfigItaly);
 
   GM_setValue('vaultHandling', document.getElementById('vaultHandling').selectedIndex);
 
@@ -5403,13 +5413,17 @@ function saveSettings() {
     alert('Minimum Las Vegas auto-bank amount must be 1 or higher.');
     return;
   }
-
+  
+  if (autoBankItalyOn && (isNaN(bankConfigItalyInt) || bankConfigItalyInt < 1)) {
+    alert('Minimum Italy auto-bank amount must be 1 or higher.');
+    return;
+  }
   GM_setValue('bankConfig', bankConfig);
   GM_setValue('bankConfigCuba', bankConfigCuba);
   GM_setValue('bankConfigMoscow', bankConfigMoscow);
   GM_setValue('bankConfigBangkok', bankConfigBangkok);
   GM_setValue('bankConfigVegas', bankConfigVegas);
-
+  GM_setValue('bankConfigItaly', bankConfigItaly);
   //End Save Cash Tab Settings
 
   //Start Save About Tab Settings
@@ -5427,8 +5441,8 @@ function saveSettings() {
   setSavedList('itemList', []);
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})');
-  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})');
+  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{},5:{}})');
+  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{},5:{}})');
 
   // Clear the fight/hit state.
   fightListNew.set([]);
@@ -5507,8 +5521,8 @@ function unPause() {
   }
 
   // Clear lists for mastered and available jobs.
-  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{}})');
-  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{}})');
+  GM_setValue('masteredJobs', '({0:{},1:{},2:{},3:{},4:{},5:{}})');
+  GM_setValue('availableJobs', '({0:{},1:{},2:{},3:{},4:{},5:{}})');
 
   // Update the running state.
   GM_setValue('isRunning', true);
@@ -8573,7 +8587,7 @@ function createCashTab () {
   var xTop = 35;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
     // Skip autoupgrade properties for Las Vegas
-    if (i == LV) continue;
+    if (i == LV||i==ITALY) continue;
     title = 'Never spend below this amount of cash ('+cities[i][CITY_NAME]+')';
     id = 'minCash' + cities[i][CITY_NAME];
     var minCash = makeElement('div', cashTab, {'style':'top: '+xTop+'px; left: 10px; width: 250px;'});
@@ -11918,8 +11932,8 @@ function customizeNewJobs() {
 
   DEBUG('Found ' + newJobs.length + ' new jobs.');
 
-  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
-  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
+  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{},5:{}})');
+  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{},5:{}})');
   try {
     availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
     masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
@@ -12099,8 +12113,8 @@ function customizeJobs() {
 
   if (!jobTables || jobTables.length == 0) return false;
 
-  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
-  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{}})');
+  var availableJobs = eval('({0:{},1:{},2:{},3:{},4:{},5:{}})');
+  var masteredJobs = eval('({0:{},1:{},2:{},3:{},4:{},5:{}})');
   try {
     availableJobs = eval('(' + GM_getValue('availableJobs') + ')');
     masteredJobs = eval('(' + GM_getValue('masteredJobs') + ')');
@@ -12593,7 +12607,7 @@ function getJobRow(jobName, contextNode) {
       var jobno = missions[jobMatch][MISSION_NUMBER];
       rowElt = xpathFirst('.//table[@class="job_list"]//a[contains(@onclick, "job=' + jobno + '&")]', contextNode);
       //Fetching logic for Vegas jobs
-      if (!rowElt && (city==LV)) {
+      if (!rowElt && (city==LV || city==ITALY)) {
         var jobContainer = "job"+jobno;
         rowElt = xpathFirst('.//div[@id="'+jobContainer+'"]', contextNode);
         LVjob = 1;
@@ -12831,7 +12845,7 @@ function jobCombo(element) {
   var i;
   if (isGMChecked('multipleJobs')) {
     // Cycle jobs with the same ratio
-    var availableJobs = eval('(' + GM_getValue('availableJobs', "{0:{},1:{},2:{},3:{},4:{}}") + ')');
+    var availableJobs = eval('(' + GM_getValue('availableJobs', "{0:{},1:{},2:{},3:{},4:{},5:{}}") + ')');
     var multiple_jobs_list = getSavedList('selectMissionMultiple');
     var cycle_jobs = new Object();
 
