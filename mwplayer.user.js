@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.775
+// @version     1.1.776
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -2039,7 +2039,7 @@ Animate.prototype.start = function() {
 
 // Set up auto-reload (if enabled).
 if (initialized) {
-  autoReload();
+  autoReload(false, 'initiaized');
 
   if (!refreshGlobalStats()) {
     // Stop the script. (The timer will still go off and reload.)
@@ -2400,7 +2400,7 @@ function doAutoPlay () {
   }
 
   // Use the reload animate obj to kick off autoplay again
-  autoReload(true);
+  autoReload(true, 'reload animate');
 }
 ////////////////////////////////////////////// end of do auto play ///////////////////////////////////
 
@@ -2425,11 +2425,11 @@ function getAutoPlayDelay() {
          parseFloat(GM_getValue('d1', '3')))*Math.random())*1000;
 }
 
-function autoReload(forceReload) {
+function autoReload(forceReload,origin) {
   if (forceReload || isGMChecked('autoClick')) {
     Reload.fx    = function() {
       // Try the "nice" way first, but reload completely if that doesn't work.
-      DEBUG('forced Page Reload');
+      DEBUG('forced Page Reload from:' + origin);
       goHome();
       Reload.fx = loadHome;
       Reload.delay = 10000;
@@ -4769,7 +4769,7 @@ function toggleSettings() {
     // Restart the timers.
     Autoplay.delay = 150;
     Autoplay.start();
-    autoReload();
+    autoReload(false,'toggle settings');
   }
 }
 
@@ -4791,7 +4791,7 @@ function toggleStats() {
     hideStatsWindow();
     Autoplay.delay = 150;
     Autoplay.start();
-    autoReload();
+    autoReload(false, 'toggle stats');
   }
 }
 
@@ -5520,7 +5520,7 @@ function unPause() {
   updateMastheadMenu();
 
   // Set up auto-reload.
-  autoReload();
+  autoReload(false, 'unpause');
 
   // Kick off play.
   Autoplay.fx = goHome;
@@ -10004,7 +10004,7 @@ function doQuickBank() {
 function innerPageChanged(justPlay) {
   // Reset auto-reload (if enabled).
   DEBUG('innerPageChanged');
-  autoReload();
+  autoReload(false, 'innerpagechanged');
 
   // Perform actions here not requiring response logging
   doParseMessages();
@@ -10060,7 +10060,7 @@ function innerPageChanged(justPlay) {
     }
   } catch (ex) {
     addToLog('warning Icon', 'BUG DETECTED (doAutoPlay): ' + ex + '. Reloading.');
-    autoReload(true);
+    autoReload(true, 'error');
   }
 }
 
@@ -10612,7 +10612,7 @@ function resetTimers(manually) {
     // Restart the timers.
     Autoplay.delay = 150;
     Autoplay.start();
-    autoReload();
+    autoReload(false, 'reset timers');
   }
   return;
 }
@@ -14619,7 +14619,12 @@ function autoSafehouse() {
   // Really, this about all that has to be done, the rest is cosmetic
   // This URL doesn't seem to change at this time since the refresh causes all the gifts to shift
   addToLog('info Icon','Crime Spree: Grabbing a gift!');
-  document.location = "http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=safehouse&xw_action=open_gift_free&xw_city=1&box_num=0";
+  var eltSafehouseButton = xpathFirst('.//a[@class="sexy_button_new short_white"]', eltSafehouseGift);
+  //document.location = "http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=safehouse&xw_action=open_gift_free&xw_city=1&box_num=0";
+  if (eltSafehouseButton) {
+    DEBUG (eltSafehouseButton);
+    clickElement(eltSafehouseButton);
+  }
 
   // This might never be needed, but let's just do it anyway
   Autoplay.delay = 30000;
@@ -16076,7 +16081,7 @@ function ajaxPageChanged(ajaxElt) {
       doAutoPlay();
     } catch (ex) {
       addToLog('warning Icon', 'BUG DETECTED (ajaxPageChanged->doAutoPlay): ' + ex + '. Reloading.');
-      autoReload(true);
+      autoReload(true, 'error !logJSONResponse');
     }
   }
 }
@@ -16084,6 +16089,7 @@ function ajaxPageChanged(ajaxElt) {
 // Interpret the response from an ajax request, return false in case Autoplay isn't used:
 function logJSONResponse(autoplay, response, action, context) {
   try {
+    DEBUG ('logJSONResponse');
     var responseText = response.untag();
     DEBUG('logJSONResponse: '+action +'<br/>'+responseText);
     
