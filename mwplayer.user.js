@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.780
+// @version     1.1.781
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.780',
+  version: '1.1.781',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -14643,7 +14643,7 @@ function autoSafehouse() {
   }
 
   // This might never be needed, but let's just do it anyway
-  Autoplay.delay = 30000;
+  Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
 }
@@ -16246,7 +16246,7 @@ function logJSONResponse(autoplay, response, action, context) {
         DEBUG('Collected take '+respData.description);
         setGMTime('takeHour' + cities[context][CITY_NAME], '1 hour'); // collect every 1 hour
         if (respData.description.match(/have collected (.+?) from your properties/i)) {
-          var collectString = RegExp.$1.replace('$', cities[context][CITY_CASH_SYMBOL]);
+          var collectString = RegExp.$1;
           addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
         }
 
@@ -17043,8 +17043,8 @@ function handlePopups() {
 
     if (popupElts && popupElts.length > 0) {
       // Process each popup that is open
-      DEBUG('Popups Found: ' + popupElts.length);
       for (var i = 0, iLength=popupElts.length; i < iLength; ++i) {
+        DEBUG('Popup Found: ' + popupElts[i].id);
         if (popupElts[i] && popupElts[i].scrollWidth && popupElts[i].innerHTML.length > 0) {
           var popupInner = popupElts[i].innerHTML;
           var popupInnerNoTags = popupInner.untag();
@@ -17067,7 +17067,6 @@ function handlePopups() {
             ) {
             continue;
           }
-          DEBUG('Popup Found: ' + popupElts[i].id + '<br/>' + popupInnerNoTags);
 
           /* THESE POPUPS get always processed/closed: */
           // Get rid of Paypal
