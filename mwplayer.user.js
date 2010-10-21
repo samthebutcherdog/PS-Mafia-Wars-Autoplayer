@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.779
+// @version     1.1.780
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.778',
+  version: '1.1.780',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -17121,6 +17121,11 @@ function handlePopups() {
           
             if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
             if (popupElts[i].id == 'popup_fodder_zmc') return(closePopup(popupElts[i], "Your Requests Fodder"));
+
+          // Get rid of not in mission popup
+            if (popupInnerNoTags.indexOf('not involved in this mission') != -1) {
+              return(closePopup(popupElts[i], "Not in Mission"));
+            }
 
           // Get rid of "The Daily Take" popup
             if (popupInnerNoTags.indexOf('Keep the streak alive') != -1) {
