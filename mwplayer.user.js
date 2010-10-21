@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.778
+// @version     1.1.779
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -2166,9 +2166,11 @@ function doAutoPlay () {
   }
   
   // Ask for Casino Parts
+  /* Noted out per request of donnaB
   if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {    
     if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 4)) return;
   }
+  */
 
   // Collect Take first then try to build
   // Build Cars
@@ -17215,7 +17217,7 @@ function handlePopups() {
             // Process Crime Spree popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postFeedAndSendGiftBoxOpen")]',popupElts[i]);
             if (eltPubButton) {
-              if (popupInnerNoTags.match(/and you got (.+?)/)) {
+              if (popupInnerNoTags.match(/and you got (.+?)\. Your/)) {
                 DEBUG('Popup Process: Crime Spree Loot Processed');
                 addToLog('lootbag Icon', 'Received <span class="loot">'+ RegExp.$1 + '</span> from the Crime Spree.');
               }
