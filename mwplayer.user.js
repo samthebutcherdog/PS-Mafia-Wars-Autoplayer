@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.777
+// @version     1.1.778
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.777',
+  version: '1.1.778',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1820,7 +1820,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Severed Pinky','Intercept A Handoff In The Coliseum',ITALY],
     ['Rail Ticket','Track Down Don Adriano',ITALY],
     ['Smart Phone','Free A Professional Assassin',ITALY],
-    ['Cooked Book','Blackmail A Track Officer',ITALY],
+    ['Cooked Book','Blackmail A Track Official',ITALY],
     ['Hidden Charges','Snag A Lucrative Disposal Contract',ITALY]
   );
 
@@ -12907,7 +12907,7 @@ function jobLoot(element) {
     addToLog('lootbag Icon', strLoot);
 
   // Vegas Loot on jobs
-  if (city == LV) {
+  if (city == LV||city==ITALY) {
     var jobResults = xpathFirst('.//div[@class="job_results"]', element);
     strLoot = '';
     messages = $x('.//img', jobResults);
