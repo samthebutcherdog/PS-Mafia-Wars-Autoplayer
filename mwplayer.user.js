@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.783
+// @version     1.1.784
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.783',
+  version: '1.1.784',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -15819,11 +15819,11 @@ function logFightResponse(rootElt, resultElt, context) {
     var lossCount = experience == 0 ? 1 : 0;
 
     // do we have power attack results?
-    var fightHintElt = xpathFirst('.//div[@class="fightres_hint"]')
-    if (fightHintElt && innerNoTags.match('Power attack')) {
-      if (innerNoTags.match(/win:\s*(\d+)/i))
+      var fightHintElt = xpathFirst('.//div[@class="fightres_hint"]')
+    if (fightHintElt && innerNoTags.match('Power Attack')) {
+      if (innerNoTags.match(/Win:\s*(\d+)/i))
         winCount = parseInt(RegExp.$1);
-      if (innerNoTags.match(/loss:\s*(\d+)/i))
+      if (innerNoTags.match(/Loss:\s*(\d+)/i))
         lossCount = parseInt(RegExp.$1);
     }
 
