@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.785
+// @version     1.1.786
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.785',
+  version: '1.1.786',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -181,7 +181,6 @@ function checkLoadIframe() {
 if (gvar.isGreaseMonkey) {
   GM_registerMenuCommand('FB Mafia Wars Autoplayer - Turn Debugging Log On/Off', debugOnOff);
   GM_registerMenuCommand('FB Mafia Wars Autoplayer - Clear Saved Values', function() { clearSettings(); loadHome(); });
-  GM_registerMenuCommand('FB Mafia Wars Autoplayer - Display Stats Window', function() { toggleStats(); });
 }
 
 //
@@ -962,10 +961,6 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 
   var numberSchemes = ['percent','points'];
 
-  // Stamina Burst constants
-  const BURST_WIN    = 0;
-  const BURST_ALWAYS = 1;
-  var burstModes = ['ONLY if won','ALWAYS'];
 
   // Burn constants
   const BURN_ENERGY = 0;
@@ -3325,7 +3320,7 @@ function autoMission() {
 
   // Do the job
   Autoplay.fx = function() { doJobFunction(goJob(jobno)); };
-  Autoplay.delay = (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) == 0) ? noDelay : getAutoPlayDelay();
+  Autoplay.delay = getAutoPlayDelay();
   Autoplay.start();
 } // end of automission
 
@@ -3589,7 +3584,7 @@ function autoFight(how) {
     opponent = autoFight.profileSearch;
     autoFight.profileSearch = undefined;
     lastOpponent = undefined;
-    if (isGMChecked('staminaPowerattack') && GM_getValue('burstMode', 0) == BURST_ALWAYS && ((isGMChecked('stopPA') && health >= GM_getValue('stopPAHealth')) || !isGMChecked('stopPA')))
+    if (isGMChecked('staminaPowerattack') && ((isGMChecked('stopPA') && health >= GM_getValue('stopPAHealth')) || !isGMChecked('stopPA')))
       opponent.profileAttack = xpathFirst('.//a[contains(@onclick,"xw_action=power_attack") and contains(., "Power Attack")]', innerPageElt);
     if (!opponent.profileAttack)
       opponent.profileAttack = xpathFirst('.//a[contains(@onclick,"xw_action=attack") and contains(., "Attack")]', innerPageElt);
@@ -3683,7 +3678,7 @@ function autoFight(how) {
   Autoplay.fx = function() {
     clickAction = 'fight';
     clickContext = opponent;
-    staminaBurst (BURST_ALWAYS, attackElt);
+    clickElement (attackElt);
     DEBUG('Clicked to fight: name=' + opponent.name +
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
@@ -3707,15 +3702,6 @@ function setNextFightCity(){
   GM_setValue('fightNewLocation', newCity);
 }
 
-function staminaBurst (burstMode, clickElt) {
-  var numClicks = 1;
-  if (isGMChecked('burstStamina') && GM_getValue('burstPoints', 0) > 0) {
-    numClicks = isGMEqual('burstMode',burstMode) ? GM_getValue('burstPoints', 1) : 1;
-  }
-  if(isGMChecked('stopBursts') && health < GM_getValue('stopBurstsHealth')) numClicks = 1;
-  DEBUG('Health : '+health+ ' - Min Health for Bursts : '+GM_getValue('stopBurstsHealth') + ' - numClicks : ' +numClicks);
-  clickBurst (clickElt, parseInt(numClicks));
-}
 
 function autoRob() {
   var loc = GM_getValue('robLocation', NY);
@@ -4004,7 +3990,7 @@ function autoHitman() {
   Autoplay.fx = function() {
     clickAction = 'hitman';
     clickContext = opponentsQualified[bountyIndex];
-    staminaBurst (BURST_ALWAYS, clickContext.attack);
+    clickElement (clickContext.attack);
     DEBUG('Clicked to hit ' + clickContext.name + ' (' + clickContext.id + ').');
   };
   Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
@@ -4777,28 +4763,6 @@ function toggleSettings() {
   }
 }
 
-function toggleStats() {
-  if (settingsOpen === true) {
-    toggleSettings();
-  }
-  if (statsOpen === false) {
-    statsOpen = true;
-    if (!document.getElementById('statsWindow')) {
-      createStatWindow();
-    }
-    showStatsWindow();
-    // Stop any running timers so the settings box won't disappear.
-    Autoplay.clearTimeout();
-    Reload.clearTimeout();
-  } else {
-    statsOpen = false;
-    hideStatsWindow();
-    Autoplay.delay = 150;
-    Autoplay.start();
-    autoReload(false, 'toggle stats');
-  }
-}
-
 function showSettingsBox() {
   var settingsBoxContainer = document.getElementById('GenDialogPopDialog');
   if (settingsBoxContainer) {
@@ -4819,14 +4783,6 @@ function showMafiaLogBox() {
   }
   GM_setValue('logOpen', 'open');
 }
-
-function showStatsWindow() {
-  var statsWindowContainer = document.getElementById('sWindowGenDialogPopDialog');
-  if (statsWindowContainer) {
-    statsWindowContainer.style.display = 'block';
-  }
-}
-
 function hideMafiaLogBox() {
   var mafiaLogBoxDiv = document.getElementById('mafiaLogBox');
   mafiaLogBoxDiv.style.display = 'none';
@@ -4995,8 +4951,7 @@ function saveDefaultSettings() {
   // Health tab.
   GM_setValue('stopPA', 'checked');
   GM_setValue('stopPAHealth', 29);
-  GM_setValue('stopBursts', 'unchecked');
-  GM_setValue('stopBurstsHealth', 0);
+
 
   // Cash tab
   GM_setValue('askChopShopParts', 'unchecked');
@@ -5196,20 +5151,11 @@ function saveSettings() {
   //Start Save Energy Tab Settings
   //Energy Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoMission','masterAllJobs','multipleJobs','burstJob','endLevelOptimize','checkMiniPack','autoEnergyPack','autoEnergyPackForce',
+    'autoMission','masterAllJobs','multipleJobs','endLevelOptimize','checkMiniPack','autoEnergyPack','autoEnergyPackForce',
     'hasHelicopter','hasGoldenThrone','isManiac','allowEnergyToLevelUp','skipfight'
   ]);
   //Energy Settings and Validation
-  //Validate burstJobCount
-  var burstJobCount = document.getElementById('burstJobCount').value;
-  if (isNaN(burstJobCount)) {
-    alert('Please enter numeric values for burstJobCount.');
-    return;
-  } else if (parseInt(burstJobCount) > 50) {
-    alert('Please limit job bursts to 50.');
-    return;
-  }
-  GM_setValue('burstJobCount', burstJobCount);
+  
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -5280,7 +5226,7 @@ function saveSettings() {
   //Start Save Health Tab Settings
   //Health Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoHeal','quickHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt7','hideAttacks','BlockHealRobbing','stopPA','stopBursts'
+    'autoHeal','quickHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt7','hideAttacks','BlockHealRobbing','stopPA'
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -5315,15 +5261,7 @@ function saveSettings() {
     }
   }
 
-  var stopBurstsHealth = parseInt(document.getElementById('stopBurstsHealth').value);
-  if (stopBurstsHealth) {
-    if (isNaN(stopBurstsHealth) || stopBurstsHealth < 0) {
-      alert('Please enter a Bursts Attack Health level >= 0');
-      return;
-    } else {
-      GM_setValue ('stopBurstsHealth', stopBurstsHealth);
-    }
-  }
+  
   //Change autoheal shortcut if necessary
   if(!isGMChecked('autoHeal')) {
     document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
@@ -7367,25 +7305,7 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(title + ' '));
   var unChkAll = makeElement('input', label, {'id':'unCheckAll','style':'font-size: 9px;' + ((isGMChecked('multipleJobs')) ? '':' display: none;'),'type':'button', 'value':'Uncheck All'});
 
-  // Job bursts
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Performs bursts of jobs';
-  id = 'burstJob';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable job bursts:'));
-
-  title = 'How many times to do job bursts';
-  id = 'burstJobCount';
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Fire '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '2')});
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' job attempts everytime'));
-
+  
   //
   // Job selector.
   //
@@ -7717,39 +7637,6 @@ function removeStrongerOpponents(staminaTabSub){
   label.appendChild(document.createTextNode(' Remove stronger opponents'));
 }
 
-function staminaBursting(staminaTabSub){
-// Enable Stamina bursts
-  tabContainerDivs(staminaTabSub);
-  id = 'burstStamina';
-  makeElement('input', lhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', lhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Enable bursts:'));
-  // Burst Points
-  title = 'How many points to burst';
-  id = 'burstPoints';
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Burn '));
-  makeElement('input', rhs, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; border: 1px solid #781351;', 'value':GM_getValue(id, '3')});
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' points '));
-  // Burstmode
-  id = 'burstMode';
-  var burstMode = makeElement('select', rhs, {'id':id});
-  for (i = 0, iLength=burstModes.length; i < iLength; ++i) {
-    choice = document.createElement('option');
-    choice.value = i;
-    choice.appendChild(document.createTextNode(burstModes[i]));
-    burstMode.appendChild(choice);
-  }
-  burstMode.selectedIndex = GM_getValue(id, BURST_WIN);
-  // Powerattack
-  title = 'Power Attack';
-  id = 'staminaPowerattack';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
-  label.appendChild(document.createTextNode('Powerattack'));
-}
-
 // Create Stamina Sub Tabs
 function createStaminaSubTab_FightRandom(staminaTabSub) {
 
@@ -7785,8 +7672,12 @@ function createStaminaSubTab_FightRandom(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Skip iced targets'));
 
-  //Replaces old stamina settings insert
-  staminaBursting(staminaTabSub);
+  // Powerattack
+  title = 'Power Attack';
+  id = 'staminaPowerattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('Powerattack'));
 
   // Maximum level.
   tabContainerDivs(staminaTabSub);
@@ -7922,8 +7813,12 @@ function createStaminaSubTab_FightSpecific(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Skip iced targets'));
 
-  //Replaces old stamina settings insert
-  staminaBursting(staminaTabSub);
+  // Powerattack
+  title = 'Power Attack';
+  id = 'staminaPowerattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('Powerattack'));
 
   // Opponent list
   tabContainerDivs(staminaTabSub);
@@ -7980,9 +7875,6 @@ function createStaminaSubTab_CollectBounties(staminaTabSub) {
     hitmanLoc.appendChild(choice);
   }
   hitmanLoc.selectedIndex = GM_getValue('hitmanLocation', NY);
-
-  //Replaces old stamina settings insert
-  staminaBursting(staminaTabSub);
 
   // Minimum bounty
   tabContainerDivs(staminaTabSub);
@@ -8184,8 +8076,12 @@ function createStaminaSubTab_FightRivals(staminaTabSub) {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Skip iced targets'));
 
-  //Replaces old stamina settings insert
-  staminaBursting(staminaTabSub);
+  // Powerattack
+  title = 'Power Attack';
+  id = 'staminaPowerattack';
+  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'style':'margin-left: 0.5em;', 'value':'checked'}, id);
+  label = makeElement('label', rhs, {'for':id, 'title':title,'style':'margin-left: 0.5em;'});
+  label.appendChild(document.createTextNode('Powerattack'));
 
   // Maximum level.
   tabContainerDivs(staminaTabSub);
@@ -8551,14 +8447,6 @@ function createHealTab() {
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
   makeElement('br', item, {'class':'hide'});
-  id = 'stopBursts';
-  title = 'do not use Bursts when health is below treshold';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Do not use Bursts when health falls below  '));
-  id = 'stopBurstsHealth';
-  title = 'Enter min health level';
-  makeElement('input', rhs, {'type':'text', 'value':GM_getValue(id, '0'), 'title':title, 'id':id, 'style':'width: 25px'});
-
   return healTab;
 
 }
@@ -8967,20 +8855,7 @@ function validateStaminaTab() {
       s.reattackThreshold = parseInt(document.getElementById('reattackThreshold').value);
       s.staminaReattack = checked('staminaReattack');
       s.iceCheck = checked('iceCheck');
-
-      s.burstStamina = checked('burstStamina');
-      s.burstMode = document.getElementById('burstMode').selectedIndex;
-      s.burstPoints = document.getElementById('burstPoints').value;
       s.staminaPowerattack = checked('staminaPowerattack');
-
-      // Validate burstPoints settngs
-      if (isNaN(s.burstPoints)) {
-        alert('Please enter numeric values for burstPoints.');
-        return false;
-      } else if (parseInt(s.burstPoints) > maxStamina) {
-        alert('Stamina bursts cannot exceed the max stamina.');
-        return false;
-      }
 
       s.fightLevelMax = parseInt(document.getElementById('fightLevelMax').value);
       s.fightLevelMaxRelative = checked('fightLevelMaxRelative');
@@ -9072,18 +8947,7 @@ function validateStaminaTab() {
       s.staminaReattackList = checked('staminaReattackList');
       s.iceCheck = checked('iceCheck');
 
-      s.burstStamina = checked('burstStamina');
-      s.burstMode = document.getElementById('burstMode').selectedIndex;
-      s.burstPoints = document.getElementById('burstPoints').value;
       s.staminaPowerattack = checked('staminaPowerattack');
-
-      if (isNaN(s.burstPoints)) {
-        alert('Please enter numeric values for burstPoints.');
-        return false;
-      } else if (parseInt(s.burstPoints) > maxStamina) {
-        alert('Stamina bursts cannot exceed the max stamina.');
-        return false;
-      }
 
       s.fightList = document.getElementById('fightList').value;
       s.fightRemoveStronger = document.getElementById('fightRemoveStronger').checked === true? 'checked' : 0;
@@ -9107,19 +8971,9 @@ function validateStaminaTab() {
       // Get the settings.
       s.hitmanLocation = document.getElementById('hitmanLocation').selectedIndex;
 
-      s.burstStamina = checked('burstStamina');
-      s.burstMode = document.getElementById('burstMode').selectedIndex;
-      s.burstPoints = document.getElementById('burstPoints').value;
       s.staminaPowerattack = checked('staminaPowerattack');
 
-      // Validate burstPoints settngs
-      if (isNaN(s.burstPoints)) {
-        alert('Please enter numeric values for burstPoints.');
-        return false;
-      } else if (parseInt(s.burstPoints) > maxStamina) {
-        alert('Stamina bursts cannot exceed the max stamina.');
-        return false;
-      }
+      
 
       s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;
       s.bountySelection = document.getElementById('bountySelection').selectedIndex;
@@ -9234,43 +9088,6 @@ function validateStaminaTab() {
   }
 
   return s;
-}
-
-function createStatWindow() {
-  if (settingsOpen === true) {
-    toggleSettings();
-  }
-
-  // This creates the stats box just like a facebook popup
-  var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'sWindowGenDialogPopDialog'});
-  elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 620px;'});
-  elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
-  var statsWindow = makeElement('div', elt, {'style':'position: fixed; left: 329px; top: 30px; z-index: 101; width: 600px; height: 540px; font-size: 14px; color: #BCD2EA; background: black no-repeat scroll 0 110px', 'id':'statsWindow'});
-  //End settings box
-
-  var statsWindowTopBG = makeElement('div', statsWindow, {'style':'background: black; height: 40px;'});
-    var statsWindowTitle = makeElement('div', statsWindowTopBG, {'style':'font-size: 18px; font-weight: bold;'});
-      statsWindowTitle.appendChild(document.createTextNode('Player Stats '));
-      makeElement('br', statsWindowTitle);
-    //makeElement('img', statsWindowTopBG, {'src':stripURI(mwLogoSmall), 'style':'position: absolute; top: 0px; right: 25px;'});
-    makeElement('img', statsWindowTopBG, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 0px; right: 0px; cursor: pointer;'}).addEventListener('click', toggleStats, false);
-
-  // NOTE: This container is for placing the buttons horizontally.
-  elt = makeElement('div', statsWindow, {'style':'text-align: left'});
-  // Make the button bar.
-  var sWindowTabNav = makeElement('div', elt, {'id':'sWindowTabNav', 'style':'position: static; display: inline-block; background: transparent repeat-x scroll 0 0; border: 1px solid #FFFFFF; fontsize: 13px; line-height: 28px; height: 30px;'});
-    var graphTabLink = makeElement('div', sWindowTabNav, {'class':'selected'} );
-      makeElement('a', graphTabLink, {'href':'#', 'rel':'graphTab'}).appendChild(document.createTextNode('Graphs'));
-    var statTabLink = makeElement('div', sWindowTabNav );
-      makeElement('a', statTabLink, {'href':'#', 'rel':'statTab'}).appendChild(document.createTextNode('Stats'));
-
-  var graphTab = makeElement('div', statsWindow, {'id':'graphTab', 'class':'tabcontent'});
-    var graphBox = makeElement('div', graphTab, {'id':'graphBox', 'style':'position: static; overflow: auto; height: 443px; width: 578px; background-color: #111111; font-size:10px; color: #BCD2EA; text-align: center; margin: 5px; padding: 5px; border: 1px inset;'});
-      graphBox.innerHTML = GM_getValue('graphBox', 'Enable Stats with the Checkbox on the General tab of the AutopPlay settings.<br><br>Stats will populate after the 2nd hour of running.');
-
-  var statTab = makeElement('div', statsWindow, {'id':'statTab', 'class':'tabcontent'});
-
-  createDynamicDrive();
 }
 
 function clickAutoPause() {
@@ -11388,16 +11205,12 @@ function customizeProfile() {
       // See if this player is in our mafia.
       var removeElt = xpathFirst('.//a[contains(., "Remove from Mafia")]', statsDiv);
 
-      // Show if Alive/Dead, insert AttackX button
+      // Show if Alive/Dead
       if (!running && !removeElt) {
         var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
         if (titleElt) {
           titleElt.setAttribute('style', 'background: black;');
-          if (!document.getElementById('profile_attackx')) {
-            var attackXElt = makeElement('input', null, {'id':'profile_attackx','type':'button','value':'AttackX','style':'position:absolute;'});
-            attackXElt.addEventListener('click', attackXfromProfile, false);
-            titleElt.parentNode.insertBefore(attackXElt, titleElt.nextSibling);
-          }
+          
         }
         var ajaxID = createAjaxPage(false, 'icecheck profile', titleElt);
         var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + remoteuserid + '", 1, 1, 0, 0); return false;'});
@@ -13240,7 +13053,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Hour interval for title enforcing: <strong>' + GM_getValue('autoEnforcedTitleTime') + '</strong><br>' +
         '-------------------Energy Tab--------------------<br>' +
         'Enable auto-mission: <strong>' + showIfUnchecked(GM_getValue('autoMission')) + '</strong><br>' +
-        'Enabled job bursts: <strong>' + showIfUnchecked(GM_getValue('burstJob')) + ' == Fire ' + GM_getValue('burstJobCount') + ' job attempts everytime</strong><br>' +
         '&nbsp;&nbsp;-Repeat Job: <strong>' + showIfUnchecked(GM_getValue('repeatJob')) + '</strong><br>' +
         '&nbsp;&nbsp;-Job selected: <strong>' + missions[GM_getValue('selectMission')][MISSION_NAME] + '</strong><br>' +
         '&nbsp;&nbsp;-Multiple Jobs: <strong>' + showIfUnchecked(GM_getValue('multipleJobs')) + '</strong><br>' +
@@ -13268,7 +13080,6 @@ BrowserDetect.init();
         //'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
         'Hide Finished Collection Items: <strong>' + showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
-        'Enabled stamina bursts: <strong>' + showIfUnchecked(GM_getValue('burstStamina')) + ' == Burn ' + GM_getValue('burstPoints') + ' points ' + burstModes[GM_getValue('burstMode')] + '</strong><br>' +
         '&nbsp;&nbsp;-Fight in: <strong>' + fightLocations[GM_getValue('fightLocation', 0)] + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack <strong>' + showIfUnchecked(GM_getValue('staminaReattack')) + '</strong><br>' +
         '&nbsp;&nbsp;-Reattack threshold:<strong>' + GM_getValue('reattackThreshold') + '</strong><br>' +
@@ -13321,8 +13132,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Stop PA: <strong>' + showIfUnchecked(GM_getValue('stopPA')) + '</strong><br>' +
         '&nbsp;&nbsp;when health falls below: <strong>' + GM_getValue('stopPAHealth') + '</strong><br>' +
-        'Stop Bursts: <strong>' + showIfUnchecked(GM_getValue('stopBursts')) + '</strong><br>' +
-        '&nbsp;&nbsp;when health falls below: <strong>' + GM_getValue('stopBurstsHealth') + '</strong><br>' +
         '------------------Cash Tab-------------------<br>' +
         'Enable auto-upgrade <strong>' + showIfUnchecked(GM_getValue('autoBuy')) + '</strong><br>' +
         '&nbsp;&nbsp;-Min cash (NY): <strong>' + GM_getValue('minCashNew York') + '</strong><br>' +
@@ -15101,20 +14910,6 @@ function goJobTabPath(tabnopath) {
 }
 ///////////// end go job tab path
 
-// Get the number of job clicks to attempt
-function getJobClicks() {
-  var numClicks = 1;
-  if (isGMChecked('burstJob') && GM_getValue('burstJobCount', 0) > 0 && !jobOptimizeOn){
-    var nextJobXp = missions[GM_getValue('selectMission', 1)][MISSION_XP];
-    var nextJobCost = missions[GM_getValue('selectMission', 1)][MISSION_ENERGY];
-    numClicks = GM_getValue('burstJobCount', 1);
-    while (nextJobCost * numClicks >= energy - nextJobCost &&
-           nextJobXp   * numClicks >= ptsToNextLevel - nextJobXp &&
-                         numClicks >  1
-           ) numClicks--;
-  }
-  return parseInt(numClicks);
-}
 
 function goJob(jobno) {
   // Retrieve the jobRow
@@ -15225,7 +15020,7 @@ function goJob(jobno) {
     DEBUG(' job string used was =' + tmp );
     clickAction = 'job';
     suspendBank = false;
-    clickBurst (elt, getJobClicks());
+    clickElement(elt);
     DEBUG('Clicked to perform job: ' + jobName + '.');
     return true;
   } else {
@@ -15412,16 +15207,6 @@ function getStatSpecs(workingArray, includeZeroVals){
   return[dataMin, dataMax, dataAvg, runningSum, dataLen];
 }
 
-// This function gets the users gift ID and also sets the ID of
-// the recipient of gifts.
-function saveRecipientInfo() {
-  var giftKey = document.body.innerHTML.match(/gift_key=([0-9a-f]+)/) ? RegExp.$1 : 'Not Found';
-  GM_setValue("giftKey", giftKey);
-
-  var recipientID = document.body.innerHTML.match(/recipients\[0\]=([0-9]+)/) ? RegExp.$1 : 'Not Found';
-  GM_setValue("recipientID", recipientID);
-  alert('Recipient:' + recipientID + '  Gift key:' + giftKey);
-}
 
 function takeFightStatistics(experience, winCount, lossCount, cashStr, resultType) {
   var loc = city;
@@ -15827,7 +15612,7 @@ function logFightResponse(rootElt, resultElt, context) {
         Autoplay.fx = function() {
           clickAction = 'fight';
           clickContext = context;
-          staminaBurst (BURST_WIN, attackAgainElt);
+          clickElement (attackAgainElt);
           DEBUG('Clicked to repeat the attack on ' + context.name +
                 ' (' + context.id + ').');
         };
@@ -16079,7 +15864,7 @@ function logJSONResponse(autoplay, response, action, context) {
           Autoplay.fx = function() {
             clickAction = 'fight';
             clickContext = opponent;
-            staminaBurst (BURST_ALWAYS, attackElt);
+            clickElement(attackElt);
             DEBUG('Clicked to fight: name=' + opponent.name +
                   ', id=' + opponent.id + ', level=' + opponent.level +
                   ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
@@ -16543,7 +16328,7 @@ function logResponse(rootElt, action, context) {
             Autoplay.fx = function() {
               clickAction = action;
               clickContext = context;
-              staminaBurst (BURST_WIN, eltAtk);
+              clickElement(eltAtk);
               DEBUG('Clicked to repeat the hit on ' + clickContext.name +
                     ' (' + clickContext.id + ').');
             };
@@ -17504,11 +17289,7 @@ function loadUrl (url, funcStateChange) {
   }
 }
 
-// Load AttackX script by Spockholm
-function attackXfromProfile() {
-  var src = 'http://www.spockholm.com/mafia/attackX-beta.js?' + Math.random();
-  remakeElement('script', document.getElementsByTagName('head')[0],{'id':'externalScripts','src':src} );
-}
+
 
 // Load Chuck-A-Crap script by Arun
 function eventclick_chuckaCrap() {
@@ -17604,17 +17385,6 @@ function hideElement(elt, hideFlag) {
   return elt;
 }
 
-// Do multiple clicks
-function clickBurst (elt, clickCount) {
-  if (!elt) {
-    addToLog('warning Icon', 'BUG DETECTED: Null element passed to clickBurst().');
-    return;
-  }
-
-  DEBUG('Clicking ' + clickCount + ' time(s).');
-  for (var i = 0; i < clickCount; ++i)
-    clickElement (elt);
-}
 
 function clickElement(elt) {
   if (!elt) {
