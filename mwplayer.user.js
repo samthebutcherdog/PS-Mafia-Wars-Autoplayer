@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.784
+// @version     1.1.785
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.784',
+  version: '1.1.785',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2229,10 +2229,6 @@ function doAutoPlay () {
     if (autoGiftWaiting()) return;
   }
 
-  // Auto-dailychecklist
-  if (running && !maxed && isGMChecked('autoDailyChecklist') && hasHome) {
-    if (autoDailyChecklist()) return;
-  }
 
   // Auto-Enforce title
   if (running && !maxed && GM_getValue('autoEnforcedTitle')!='' && !timeLeftGM('autoEnforcedTitleTimer')) {
@@ -4931,7 +4927,6 @@ function saveDefaultSettings() {
 
   // Misc Tab
   GM_setValue('autoResetTimers', 0);
-  GM_setValue('autoDailyChecklist', 0);
   GM_setValue('autoStat', 0);
   GM_setValue('autoStatDisable', 0);
 
@@ -5155,7 +5150,7 @@ function saveSettings() {
   //Autostat Tab Checkboxes
   saveCheckBoxElementArray([
     'autoStat','autoStatDisable','autoStatAttackFallback','autoStatDefenseFallback','autoStatHealthFallback','autoStatEnergyFallback','autoStatStaminaFallback',
-    'autoResetTimers','autoDailyChecklist',
+    'autoResetTimers'
   ]);
   //Autostat Settings and Validation
   GM_setValue('restAutoStat', 0);
@@ -7308,11 +7303,6 @@ function createAutostatTab() {
   makeElement('input', autoResetTimers, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', autoResetTimers, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-ResetTimers'));
 
-  id = 'autoDailyChecklist';
-  title = 'Check this to have PS MWAP click through the daily checklist items';
-  var autoDailyChecklist = makeElement('div', statDiv, {'style':'position: absolute; text-align: left; top: 225px; left: 20px;'});
-  makeElement('input', autoDailyChecklist, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', autoDailyChecklist, {'for':id, 'title':title}).appendChild(document.createTextNode(' Enable auto-Daily Checklist'));
 
   // Enforce Title
 
@@ -13246,7 +13236,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Rest AutoStat: <strong>' + GM_getValue('restAutoStat') + '</strong><br>' +
         '&nbsp;&nbsp;-Next Stat: <strong>' + GM_getValue('nextStat') + '</strong><br>' +
         'autoResetTimers: <strong>' + showIfUnchecked(GM_getValue('autoResetTimers')) + '</strong><br>' +
-        'autoDailyChecklist: <strong>' + showIfUnchecked(GM_getValue('autoDailyChecklist')) + '</strong><br>' +
         'autoEnforcedTitle: <strong>' + GM_getValue('autoEnforcedTitle') + '</strong><br>' +
         '&nbsp;&nbsp;Hour interval for title enforcing: <strong>' + GM_getValue('autoEnforcedTitleTime') + '</strong><br>' +
         '-------------------Energy Tab--------------------<br>' +
@@ -14651,101 +14640,6 @@ function autoSafehouse() {
   Autoplay.start();
   return true;
 }
-
-function autoDailyChecklist() {
-  // Need to be on the main home page
-  if (!onHome) {
-    DEBUG('Going Home for Daily checklist');
-    Autoplay.fx = function() { goHome; };
-    Autoplay.delay = noDelay;
-    Autoplay.start();
-    return true;
-  }
-
-  // Let's do this code once in a while.
-  if (timeLeftGM('dailyChecklistTimer')) return false;
-  setGMTime('dailyChecklistTimer', "00:30:00");
-
-  // This routines goal is to click the daily checklist to grab the daily skill point
-  // To get the skill point we can 'skip' through the checklist, we just have actually do the skip
-  // The checklist checkmarks are not good indicators of the current skill point status, for example, they may all be
-  // checked but the skill point doesn't appear, but if you click them each again it does. Why were they checked if they
-  // needed to be clicked again? So, every once in a while, let's click through them just because we can.
-
-  // Daily Take
-  var eltTake = xpathFirst('.//*[@id="message_box_menu_checkmark_daily_take" and contains(@class, "_checked")]', innerPageElt);
-  var eltTakeClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"showDailyTake")]', innerPageElt);
-  if (eltTakeClick) {
-    DEBUG('Daily Checklist: Daily Take');
-    clickElement(eltTakeClick);
-  } else { DEBUG('Daily Checklist: Already Checked'); }
-
-  // Challenge Mission
-  var eltTemp = xpathFirst('.//*[@id="message_box_menu_checkmark_challenge_mission" and contains(@class, "_checked")]', innerPageElt);
-  var eltTempClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"challenge")]', innerPageElt);
-  if (eltTempClick) {
-    DEBUG('Daily Checklist: Challenge Mission');
-    clickElement(eltTempClick);
-  } else {DEBUG('Challenge Mission: Already Checked'); }
-
-  // Grow your family
-  var eltGrow = xpathFirst('.//*[@id="message_box_menu_checkmark_mafia" and contains(@class, "_checked")]', innerPageElt);
-  var eltGrowSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
-  if (eltGrowSkip) {
-    DEBUG('Daily Checklist: Grow Your Family');
-    clickElement(eltGrowSkip);
-  } else { DEBUG('Grow your Family: Already Checked');}
-
-  // Gifts
-  var eltGifts = xpathFirst('.//*[@id="message_box_menu_checkmark_send_gifts" and contains(@class, "_checked")]', innerPageElt);
-  var eltGiftsSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "send_gifts")]', innerPageElt);
-  if (eltGiftsSkip) {
-    DEBUG('Daily Checklist: Accept Gifts');
-    clickElement(eltGiftsSkip);
-  } else {DEBUG('Accept Gifts: Already Checked'); }
-
-  // Messages
-  // If there is a war in progress, this might need to be clicked.
-  var eltMessages = xpathFirst('.//*[@id="message_box_menu_checkmark_messages" and contains(@class, "_checked")]', innerPageElt);
-  var eltMessagesClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"messages")]', innerPageElt);
-  var eltActionTaken = makeElement('a', null, {'onclick':'mboxActionTaken("messages", true);'});
-  if (eltMessagesClick) {
-    DEBUG('Daily Checklist: War in Progress');
-    clickElement(eltMessagesClick);
-  } else {DEBUG('War in Progress  Already Checked'); }
-
-  if (eltActionTaken) clickElement(eltActionTaken);
-  // Energy Packs
-  // There is already a function to handle using and sending the energy packs, this just makes sure the box is checked
-  // If there's an energy pack to send, or if an energy pack is waiting to be used, then we'll not do anything since other code will check this box
-  // Another possibility is that the user has selected to either not send energy packs or to not use them, in that case, we'll never be able to check this box
-  if (!isGMChecked('sendEnergyPack') || (!isGMChecked('autoEnergyPack') && !isGMChecked('autoEnergyPackForce'))) {
-    return false;
-  }
-  var actionElt = document.getElementById('message_box_menu_counter_bg_energy_packs');
-  if (!actionElt) {
-    var eltPacks = xpathFirst('.//*[@id="message_box_menu_checkmark_energy_packs" and contains(@class, "_checked")]', innerPageElt);
-    var eltPacksClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"energy_packs")]', innerPageElt);
-    if (eltPacksClick) {
-      DEBUG('Daily Checklist: energy');
-      clickElement(eltPacksClick);
-    }
-  } else {DEBUG('Energy: Already Checked'); }
-
-  // Properties
-  var eltProperties = xpathFirst('.//*[@id="message_box_menu_checkmark_properties" and contains(@class, "_checked")]', innerPageElt);
-  var eltPropertiesClick = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "properties")]', innerPageElt);
-  if(!eltProperties) eltProperties = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(., "Check it out")]', innerPageElt);
-  if (eltProperties) {
-    DEBUG('Daily Checklist: Properties');
-    clickElement(eltProperties);
-  } else {DEBUG('Properties Checklist: Already Checked'); }
-
-  // When we get here everything has a check mark whether we forced it or not
-  addToLog('info Icon','Daily Checklist: Processed.');
-  return false;
-}
-
 function goProperties(propCity) {
   // Make sure we're in the correct city
   if (city != propCity) {
