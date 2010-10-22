@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.781
+// @version     1.1.782
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.781',
+  version: '1.1.782',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -638,7 +638,7 @@ var cashVegasIcon = '<img src="data:image/png;base64,' +
     'o4n9di0H60P4pElO32YFHc55PGcJwlWhRakOp8Shwt0qNtyjRt9EkqTT0L+83mjS0qJw5EbwukvFa5tD6HxWw8yYkmUZoRLzIcj8AvfO6Qd8cWkZZvWIEFoUsjDGfgjnq2PzaF3uJ60dyJ4dEutCXvW/jvynGFyu' +
     '0ypOXv1UdvmPEfHtuV5xxtsmtmysFP+x8999db7DTUMcSAAAAABJRU5ErkJggg==' +
     '" />';
-	
+
 var cashItalyIcon = '<img src="data:image/png;base64,' +
     'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzg' +
     'AAADXklEQVQ4T32TD0zUdRjGv3Ac4N3ujuOPHBweh4eAwCGCwCk1PeQQvI4QEGhB624QFoIDtQzbNO20urRZQEyBjWWsXPZH0k7K4Qbl1hS0stI27I8sMMOO0FVin36zrc3F+m7vvtv7vnve9332PELM8U4csRef' +
@@ -914,7 +914,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   randomSpendChoices[STAMINA_HOW_FIGHT_LIST]   = 'Fight specific';
   randomSpendChoices[STAMINA_HOW_HITMAN]       = 'Collect bounties';
   randomSpendChoices[STAMINA_HOW_ROBBING]      = 'Rob random';
-  randomSpendChoices[STAMINA_HOW_FIGHT_RIVALS] = 'Fight rivals';  
+  randomSpendChoices[STAMINA_HOW_FIGHT_RIVALS] = 'Fight rivals';
 
   // Define Bounty Selection options
   const BOUNTY_SHORTEST_TIME  = 0; // Select qualified bounties with shortest time.
@@ -1122,10 +1122,10 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Anvil', 2185]
   );
 
-  var cityCasinoParts = new Array (    
+  var cityCasinoParts = new Array (
     ['Slot Machine', 1574, 1],
     ['Cinder Block', 1575, 1],
-    ['Steel Girder', 1576, 1],    
+    ['Steel Girder', 1576, 1],
     ['Concrete', 1577, 1],
     ['Construction Tool', 1578, 1],
     ['Casino Dealer', 1579, 2],
@@ -1133,7 +1133,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
     ['Poker Table', 1581, 4],
     ['Bellhop', 1582, 5]
   );
-  
+
   // Tournament Classes
   // Format: long description, short description, min mafia, max xp
   var tournamentClasses = new Array (
@@ -2145,29 +2145,29 @@ function doAutoPlay () {
 /*
   Currently disabled due to MW changes ...
   // Ask for Special Parts
-  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {
     if (askSpecialParts(NY, null, 0, 0)) return;
   }
 */
 
   // Ask for Chop Shop Parts
-  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer')) {
     if (askSpecialParts(NY, cityShopParts, GM_getValue('askShopPartsId',1), 11)) return;
   }
 
   // Ask for Weapons Depot Parts
-  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer')) {  
+  if (running && !maxed && isGMChecked('askDepotParts')  && !timeLeftGM('askDepotPartsTimer')) {
     if (askSpecialParts(NY, cityDepotParts, GM_getValue('askDepotPartsId',1), 12)) return;
   }
 
   // Ask for Armor Parts
-  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer')) {  
+  if (running && !maxed && isGMChecked('askArmorParts')  && !timeLeftGM('askArmorPartsTimer')) {
     if (askSpecialParts(NY, cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
   }
-  
+
   // Ask for Casino Parts
   /* Noted out per request of donnaB
-  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {    
+  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
     if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 4)) return;
   }
   */
@@ -2645,11 +2645,11 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
   }
 
   var elt;
-  var timerName;    
+  var timerName;
   var buildSetting;
   var buildItem;
 
-  switch(buildType){    
+  switch(buildType){
     case 1  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts';  buildItem =itemArray[itemIndex][0]; break;
     case 11 : timerName = 'askShopPartsTimer';    buildSetting='askShopParts';    buildItem =itemArray[itemIndex][0]; break;
     case 12 : timerName = 'askDepotPartsTimer';   buildSetting='askDepotParts';   buildItem =itemArray[itemIndex][0]; break;
@@ -2657,12 +2657,12 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; buildItem ='Special Parts';         break;
   }
   DEBUG('Going to ask for '+buildItem+' ('+buildType +')');
-  
+
   if(itemCity == NY){
     if(buildType){
       var flashCount = buildType-1;
       // Chop Shop, Weapons Depot and Armory Parts
-      DEBUG('Ask for NY Parts - Looking for building Status');  
+      DEBUG('Ask for NY Parts - Looking for building Status');
       var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
       if (flashvars && flashvars.value) {
         var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
@@ -2682,20 +2682,20 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
         elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                           '"remote/html_server.php?xw_controller=propertyV2&' +
                           'xw_action=cs_post_item_feed&xw_city=1&item='+itemArray[itemIndex][1]+'&type=1&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
-      }     
+      }
     } else {
       // Special Parts
       elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
                         'xw_action=cs_special_item_feed_update_timestamp&xw_city=1", 1, "nothing"); return false;'});
     }
-  
+
     if (elt) {
       Autoplay.fx = function() {
         clickElement(elt);
         addToLog('info Icon', 'Clicked to ask your Mafia to send you '+buildItem+'.');
       };
-      
+
       Autoplay.start();
       setGMTime(timerName, '12 hours');
       return true;
@@ -2704,24 +2704,24 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     setGMTime(timerName, '2 hours');
     return false;
   }
-  
+
   if(itemCity == LV){
-    //Casino Parts - Check Casino Status        
-    var casinoReport = GM_getValue('casinoReport');    
+    //Casino Parts - Check Casino Status
+    var casinoReport = GM_getValue('casinoReport');
     if(!casinoReport) checkCasinoStatus(true);
-    if(casinoReport){    
-      casinoReport = casinoReport.replace(/\\/g, "");      
+    if(casinoReport){
+      casinoReport = casinoReport.replace(/\\/g, "");
       DEBUG(casinoReport);
       var match;
-      var nextTimeTxt = new RegExp('"ask_friends_next_time":(.+?),','gi');        
+      var nextTimeTxt = new RegExp('"ask_friends_next_time":(.+?),','gi');
       if(match = nextTimeTxt.exec(casinoReport)) {
         var nextTime = parseInt(match[1]);
         var d = new Date();
-        d.setMilliseconds(0);  
+        d.setMilliseconds(0);
         var timeDif = Math.max(nextTime-(d.getTime()/1000), 0);
         //var timeDif = nextTime - date;
-        var hours=Math.floor(timeDif/3600); 
-        var minutes=Math.floor(timeDif/60)-(hours*60); 
+        var hours=Math.floor(timeDif/3600);
+        var minutes=Math.floor(timeDif/60)-(hours*60);
         var seconds=timeDif-(hours*3600)-(minutes*60);
         if (hours < 10) hours = "0"+hours;
         if (minutes < 10) minutes = "0"+minutes;
@@ -2732,52 +2732,52 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
           DEBUG('You can not ask for Casino Parts. Timer Running : '+timeDifTxt);
           setGMTime('askCasinoPartsTimer', timeDifTxt);
           return false;
-        } else {        
+        } else {
           DEBUG('Can ask for parts atm. Timer Running : '+timeDifTxt);
-          var searchItem='"id":'+itemArray[itemIndex][1];    
-          
-          //Casino Parts - Check Quantities             
+          var searchItem='"id":'+itemArray[itemIndex][1];
+
+          //Casino Parts - Check Quantities
           if(casinoReport.indexOf(searchItem) != -1){
-        
+
             // Parts Required format : {\"id\":1575,\"type\":1,\"quantity\":7}
-            var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');                        
+            var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');
             var totalRequired=0, totalNeeded=0, totalOwned=0;
-            while(match = partsRequiredTxt.exec(casinoReport)){          
+            while(match = partsRequiredTxt.exec(casinoReport)){
               totalRequired += parseInt(match[1]);
-            }        
-      
+            }
+
             // Parts Owned format : {\"id\":1575,\"type\":1,\"name\":\"Cinder Block\",\"num_owned\":17,\"image_url\":\"http:\\\/\\\/mwfb.static.zynga.com\\\/mwfb\\\/graphics\\\/item_Cinderblock_01.gif\"}
             var partsOwnedTxt = new RegExp(searchItem+',"type":1,"name":"'+buildItem+'","num_owned":(.+?),"image_url"','gi');
             if(match = partsOwnedTxt.exec(casinoReport)) {
-              totalOwned = parseInt(match[1]);             
-            }          
+              totalOwned = parseInt(match[1]);
+            }
             totalNeeded = totalRequired - totalOwned;
-        
+
             if(totalNeeded<=0){
               addToLog('warning Icon','Asking for '+buildItem+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
             } else {
               addToLog('info Icon','Asking for '+buildItem+', still needing '+ totalNeeded+' (Total Required: '+totalRequired+' - Already Owned: '+totalOwned+').');
             }
             // changing buildType to part specific building
-            buildType = itemArray[itemIndex][2];        
+            buildType = itemArray[itemIndex][2];
             // Asking for Casino Parts
-        
+
             var ajaxID = createAjaxPage(false, 'casino parts', LV);
             var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 0, 0, 0); return false;'});
             clickElement(elt);
             DEBUG('Clicked to ask for '+buildItem+' for '+buildType);
             GM_setValue('askCasinoPartsTimer', '12 hours');
-            return true;        
+            return true;
           }
-        } 
-        
+        }
+
       }
-    }  
-           
+    }
+
     DEBUG('Ask for Casino Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 hours.');
     setGMTime('askCasinoPartsTimer', '2 hours');
     return false;
-  }    
+  }
 }
 
 // Pass the item array, item id, and building type
@@ -3586,7 +3586,7 @@ function autoFight(how) {
     Autoplay.start();
 	return true;
   }
-  
+
   // Get an opponent.
   var opponent;
   if (autoFight.profileSearch && onProfileNav()) {
@@ -3890,7 +3890,7 @@ function logRobResponse(rootElt, resultElt, context) {
         case BANGKOK: GM_setValue('fightWin$Bangkok', String(parseInt(GM_getValue('fightWin$Bangkok', 0)) + cashInt)); break;
         case LV: GM_setValue('fightWin$Vegas', String(parseInt(GM_getValue('fightWin$Vegas', 0)) + cashInt)); break;
 	case ITALY: GM_setValue('fightWin$Italy', String(parseInt(GM_getValue('fightWin$Italy', 0)) + cashInt)); break;
-		
+
       }
       needStatUpdate = true;
     }
@@ -4049,7 +4049,7 @@ function autoStaminaSpend() {
   var how = getStaminaMode();
   switch (how) {
     case STAMINA_HOW_FIGHT_RANDOM:
-    case STAMINA_HOW_FIGHT_LIST:	
+    case STAMINA_HOW_FIGHT_LIST:
     case STAMINA_HOW_FIGHT_RIVALS:
       return autoFight(how);
 
@@ -4510,7 +4510,7 @@ function findRivalOpponent(element) {
   // This will force the fight logic to refresh target list everytime.
   fightListNew.set([]);
 
-  
+
   // Don't bother searching if we still have plenty.
   var newOpponents = fightListNew.get();
   var len = newOpponents.length;
@@ -5008,7 +5008,7 @@ function saveDefaultSettings() {
   GM_setValue('askDepotParts', 'unchecked');
   GM_setValue('askArmoryParts', 'unchecked');
   GM_setValue('askCasinoParts', 'unchecked');
-  
+
   // Property tab.
   GM_setValue('minCashNew York', '0');
   GM_setValue('minCashCuba', '0');
@@ -5349,12 +5349,12 @@ function saveSettings() {
   //End Save Health Tab Settings
 
   //Start Save Cash Tab Settings
-  //Cash Tab Checkboxes  
+  //Cash Tab Checkboxes
   saveCheckBoxElementArray([
     'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas','collectTakeItaly',
     'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','autoBankItaly','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
   ]);
-  
+
   //Cash Settings and Validation
   GM_setValue('minCashNew York', document.getElementById('minCashNew York').value);
   GM_setValue('minCashCuba', document.getElementById('minCashCuba').value);
@@ -5415,7 +5415,7 @@ function saveSettings() {
     alert('Minimum Las Vegas auto-bank amount must be 1 or higher.');
     return;
   }
-  
+
   if (autoBankItalyOn && (isNaN(bankConfigItalyInt) || bankConfigItalyInt < 1)) {
     alert('Minimum Italy auto-bank amount must be 1 or higher.');
     return;
@@ -8386,7 +8386,7 @@ function createStaminaTab() {
         break;
       case STAMINA_HOW_FIGHT_LIST :
         createStaminaSubTab_FightSpecific(staminaTabSub);
-        break;	
+        break;
       case STAMINA_HOW_HITMAN :
         createStaminaSubTab_CollectBounties(staminaTabSub);
         break;
@@ -8404,7 +8404,7 @@ function createStaminaTab() {
         break;
       case STAMINA_HOW_FIGHT_RIVALS :
         createStaminaSubTab_FightRivals(staminaTabSub);
-        break;	
+        break;
 // newchange
 //      case STAMINA_HOW_LVJOBFIGHT :
 //        createStaminaSubTab_LVJobFight(staminaTabSub);
@@ -8734,8 +8734,8 @@ function createCashTab () {
     choice.appendChild(document.createTextNode(cityCasinoParts[i][0]));
     casinoPartsType.appendChild(choice);
   }
-  casinoPartsType.selectedIndex = GM_getValue(id, 0);  
-  
+  casinoPartsType.selectedIndex = GM_getValue(id, 0);
+
   // Ask for Special Parts
   xTop += 25;
   title = 'Check this to Ask for Special Parts every 12 hours';
@@ -9452,7 +9452,7 @@ function handleModificationTimer(target) {
   // Added handling for Mission Results
   var MissionResults = xpathFirst('.//div[contains(@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'")]//div[@class="task_results"]', innerPageElt);    // results just being on mission page
   if (MissionResults) {
-//        DEBUG('results');   //doatest
+        DEBUG('mission results found');   //doatest
       if (MissionResults && !xpathFirst('./div[@id="job_flag"]', MissionResults)) {
         setListenContent(false);
         makeElement('div', MissionResults, {'id':'job_flag', 'style':'display: none;'});
@@ -9464,7 +9464,9 @@ function handleModificationTimer(target) {
       } else {
        DEBUG('Already Flagged');
       }
-  }
+  } else {       DEBUG('mission results NOT found in handlemodtimer');   //doatest
+
+}
 
   // Added handling for just rob page changes
   var robResult = xpathFirst('.//a[@id="rob_refresh_cost"]', innerPageElt);
@@ -9732,7 +9734,7 @@ function sortLoot(colLoot, strSortType)
              'Combined' : 0,
              'Quantity' : 0}
 
-    //Pre sort 
+    //Pre sort
     if (strSortType == 'Attack') {
       colLoot.sort(function(a,b) {return b['Defense'] - a['Defense'];});
     } else {
@@ -9768,7 +9770,7 @@ function createLootRow(t_type, rowLoot)
   var t_CombinedValue = document.createElement(t_type);
   var t_Quantity = document.createElement(t_type);
   var t_QuantityValue = document.createElement(t_type);
-  
+
   var txtElt = document.createTextNode(rowLoot.Name);
   t_Name.setAttribute("width", "40%");
   t_Name.appendChild(txtElt);
@@ -9804,7 +9806,7 @@ function createLootRow(t_type, rowLoot)
   txtElt = document.createTextNode("Quantity:");
   t_Quantity.setAttribute("width", "10%");
   t_Quantity.appendChild(txtElt);
-  newElt.appendChild(t_Quantity); 
+  newElt.appendChild(t_Quantity);
   txtElt = document.createTextNode(rowLoot.Quantity);
   t_QuantityValue.setAttribute("width", "5%");
   t_QuantityValue.appendChild(txtElt);
@@ -9941,7 +9943,7 @@ function handlePublishing() {
 
         // Ask for Armory Parts
         if (checkPublish('.//div[contains(.,"an awesome Armory")]','askArmorParts', pubElt, skipElt)) return;
-        
+
         // Ask for Casino Parts
         if (checkPublish('.//div[contains(.,"building a casino")]','askCasinoParts', pubElt, skipElt)) return;
 
@@ -13360,7 +13362,7 @@ BrowserDetect.init();
         'Ask for Armory Parts: <strong>' + showIfUnchecked(GM_getValue('askArmorParts')) + '</strong><br>' +
         '&nbsp;&nbsp;Part Type: <strong>' + cityArmorParts[GM_getValue('askArmorPartsId', 9)][0] + '</strong><br>' +
         'Ask for Casino Parts: <strong>' + showIfUnchecked(GM_getValue('askCasinoParts')) + '</strong><br>' +
-        '&nbsp;&nbsp;Part Type: <strong>' + cityCasinoParts[GM_getValue('askCasinoPartsId', 9)][0] + '</strong><br>' +        
+        '&nbsp;&nbsp;Part Type: <strong>' + cityCasinoParts[GM_getValue('askCasinoPartsId', 9)][0] + '</strong><br>' +
         'Enable auto-bank in NY: <strong>' + showIfUnchecked(GM_getValue('autoBank')) + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum deposit: $<strong>' + GM_getValue('bankConfig') + '</strong><br>' +
         'Enable auto-bank in Cuba: <strong>' + showIfUnchecked(GM_getValue('autoBankCuba')) + '</strong><br>' +
@@ -14073,7 +14075,7 @@ function autoWar() {
     }
 
     var startNewWar = xpathFirst('.//div[contains(text(),"Start a New War")]');
-    if(startNewWar){      
+    if(startNewWar){
       setGMTime('warTimer', warTimer);
       DEBUG('Setting warTimer to come back in ' + warTimer);
       return false;
@@ -14081,7 +14083,7 @@ function autoWar() {
       setGMTime('warTimer', '1 hour');
       DEBUG('Setting warTimer to come back in 1 hour');
       return false;
-    }  
+    }
   } else {
     // Get war Targets to Declare War on
     var warFriendsList = $x('.//a[contains(@href, "xw_action=declare_war")]', innerPageElt);
@@ -14675,7 +14677,7 @@ function autoDailyChecklist() {
     DEBUG('Daily Checklist: Daily Take');
     clickElement(eltTakeClick);
   } else { DEBUG('Daily Checklist: Already Checked'); }
- 
+
   // Challenge Mission
   var eltTemp = xpathFirst('.//*[@id="message_box_menu_checkmark_challenge_mission" and contains(@class, "_checked")]', innerPageElt);
   var eltTempClick = xpathFirst('.//div[@class="mbox_click_wrapper_two" and contains(@onclick,"challenge")]', innerPageElt);
@@ -14688,7 +14690,7 @@ function autoDailyChecklist() {
   var eltGrow = xpathFirst('.//*[@id="message_box_menu_checkmark_mafia" and contains(@class, "_checked")]', innerPageElt);
   var eltGrowSkip = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(@onclick, "skipCategory") and contains(@onclick, "mafia")]', innerPageElt);
   if (eltGrowSkip) {
-    DEBUG('Daily Checklist: Grow Your Family'); 
+    DEBUG('Daily Checklist: Grow Your Family');
     clickElement(eltGrowSkip);
   } else { DEBUG('Grow your Family: Already Checked');}
 
@@ -14709,7 +14711,7 @@ function autoDailyChecklist() {
     DEBUG('Daily Checklist: War in Progress');
     clickElement(eltMessagesClick);
   } else {DEBUG('War in Progress  Already Checked'); }
-  
+
   if (eltActionTaken) clickElement(eltActionTaken);
   // Energy Packs
   // There is already a function to handle using and sending the energy packs, this just makes sure the box is checked
@@ -14736,7 +14738,7 @@ function autoDailyChecklist() {
     DEBUG('Daily Checklist: Properties');
     clickElement(eltProperties);
   } else {DEBUG('Properties Checklist: Already Checked'); }
-  
+
   // When we get here everything has a check mark whether we forced it or not
   addToLog('info Icon','Daily Checklist: Processed.');
   return false;
@@ -14810,7 +14812,7 @@ function onHome() {
 
 function onSafehouseNav() {
   // Return true if we're on the Crime Spree nav, false otherwise.
-  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', innerPageElt)) {    
+  if (xpathFirst('.//*[contains(@id,"gift_safehouse_content")]', innerPageElt)) {
     return true;
   }
   return false;
@@ -15231,18 +15233,26 @@ function goJob(jobno) {
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'") and not(contains(@onclick, "xw_controller=marketplace"))]', jobRow);
   // if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
   // if retrieving by job no fails, simply retrieve the job link
+  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);  tmp = 5 ; }
+
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow)                    ; tmp = 2 ;} // first 2 are above line broke down
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]') ; tmp = 3 ;} // lv jobs
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=fight_job")]', jobRow)                ; tmp = 4 ;} // i forget :) may not need
 
 //  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]')    ; tmp = 5 ;} // will do LV job fight (first of the 3 fights in list), no logic
 
-  if (!elt) {
+
+  if (tmp == 5) {
+
+//  if (!elt) {
   // lv fight jobs
-    targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);
+    targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);  tmp = 5 ;
     numTargets = targetElts.length;
     DEBUG('Number of Targets Found : '+ numTargets);
     if(numTargets){
+
+// lv    ExpertMapController.selectNode(5); return MapController.doFightJob(5,'p|35274494',2,'9fadcc0faffcc33a201c733e9af28b19');
+// italy ExpertMapController.selectNode(4); return MapController.doFightJob(4,'p|61862210',0,'d14140ac72d7f0d87976847a632cadc6');
 
       // Get the user's criteria for opponents.
       var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
@@ -15767,7 +15777,7 @@ function logFightResponse(rootElt, resultElt, context) {
     if (how == STAMINA_HOW_FIGHT_RANDOM) {
       // Look for any new opponents in the displayed list.
       findFightOpponent(rootElt);
-    } 
+    }
 	  if (how == STAMINA_HOW_FIGHT_RIVALS){
 	    findRivalOpponent(rootElt);
 	  }
@@ -16108,7 +16118,7 @@ function logJSONResponse(autoplay, response, action, context) {
     DEBUG ('logJSONResponse');
     var responseText = response.untag();
     DEBUG('logJSONResponse: '+action +'<br/>'+responseText);
-    
+
     // Analyze money related responses (collect take, check vault, deposit and withdraw)
     var cashLeft, acctBalance;
     var respJSON, respData;
@@ -16224,9 +16234,9 @@ function logJSONResponse(autoplay, response, action, context) {
         GM_setValue('casinoReport', JSON.stringify(respData));
         return false;
         break;
-        
+
       // Parse Las Vegas casino data
-      case 'check casino':                  
+      case 'check casino':
         respJSON = JSON.parse(responseText);
         respData = JSON.parse(respJSON.data);
         GM_setValue('casinoReport', JSON.stringify(respData));
@@ -16234,13 +16244,13 @@ function logJSONResponse(autoplay, response, action, context) {
         break;
 
       // Casino Parts
-      case 'casino parts': 
+      case 'casino parts':
         DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Resetting Timer.');
         GM_setValue('askCasinoPartsTimer', '12 hours');
         DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset.');
         return false;
         break;
-        
+
       // Log any message from collecting property take.
       case 'collect take':
         DEBUG('Collected take '+respData.description);
@@ -16407,7 +16417,14 @@ function logResponse(rootElt, action, context) {
   messagebox = xpathFirst('.//div[ contains (@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'_module")]', rootElt);  //shows total mastery result
       if (messagebox) {  DEBUG(' found messagebox result - '); }  //
   } //doatest
-  if (!messagebox) { DEBUG(' NO mission messagebox result found - '); }
+  if (!messagebox) { DEBUG(' NO messagebox result found - mission or otherwise '); }
+
+
+  if (!messagebox) {
+  messagebox = xpathFirst('.//div[ contains (@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'_module")]', rootElt);  //shows total mastery result
+      if (messagebox) {  DEBUG(' found messagebox result - '); }  //
+  } //doatest
+  if (!messagebox) { DEBUG(' NO messagebox result found - mission or otherwise '); }
 
   if (action=='withdraw' && context) {
     autoBankWithdraw(context);
@@ -16503,11 +16520,11 @@ function logResponse(rootElt, action, context) {
         // may be way too detailed
         var Finish_Mission = xpathFirst('.//a[contains(@id,"sm_action_button_'+Mission_ID+'") and contains(@class,"sexy_button_new medium_black") and contains(@onclick,"SocialMissionView.closeTask(\''+Mission_ID+'")]', innerPageElt);
         if(Finish_Mission) {
-          DEBUG(' we found the finished, close button' );
+          DEBUG(' we found the finished marker, close button' );
          clickElement(Finish_Mission);
-         if(!Check_Mission_Job()){  // load stuff for next mission and try to start it                this and the next line were added before bed last nite
-        Go_Nxt_Page();  // if there was nothing else on this page, try to go to the next page            so test them
-        }
+//         if(!Check_Mission_Job()){  // load stuff for next mission and try to start it                this and the next line were added before bed last nite
+//        Go_Nxt_Page();  // if there was nothing else on this page, try to go to the next page            so test them
+//        }
         } else {
           DEBUG(' we did NOT find the finished, close button' );
         }
@@ -17112,12 +17129,12 @@ function handlePopups() {
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
           // Get rid of Tournament Expired popup
           if (popupInnerNoTags.indexOf('Your previous tournament has expired') != -1) return(closePopup(popupElts[i], "Tournament Expired"));
-       
+
           /* THESE POPUPS get processed only when PS MWAP is running: */
           /* START */
-          
+
           if (running) {
-          
+
             if (popupElts[i].id == 'popup_box_zmc') return(closePopup(popupElts[i], "Your Requests Box"));
             if (popupElts[i].id == 'popup_fodder_zmc') return(closePopup(popupElts[i], "Your Requests Fodder"));
 
@@ -17143,21 +17160,21 @@ function handlePopups() {
               if(acceptgiftButtons && isGMChecked('autoWarRewardPublish')) {
                 for(i=0;i<acceptgiftButtons.length>0;++i){
                   acceptgiftButton = acceptgiftButtons[i];
-                  clickElement(acceptgiftButton);                  
-                }                
-                DEBUG('Popup Process: Total Requests - '+acceptgiftButtons.length+' Gifts Accepted');              
-              }  
+                  clickElement(acceptgiftButton);
+                }
+                DEBUG('Popup Process: Total Requests - '+acceptgiftButtons.length+' Gifts Accepted');
+              }
               acceptgiftButtons = $x('.//a[@class="sexy_button_new medium_white" and contains(@onclick,"accept_boost")]',popupElts[i]);
               if(acceptgiftButtons && isGMChecked('autoWarRewardPublish')) {
                 for(i=0;i<acceptgiftButtons.length>0;++i){
                   acceptgiftButton = acceptgiftButtons[i];
-                  clickElement(acceptgiftButton);                  
-                }                
+                  clickElement(acceptgiftButton);
+                }
                 DEBUG('Popup Process: Total Requests - '+acceptgiftButtons.length+' Boosts Accepted');
               }
             return(closePopup(popupElts[i], "Total Requests"));
-            } 
-          
+            }
+
             // Get rid of War is already helped popup
             if (popupInnerNoTags.indexOf('have already helped') != -1) {
               return(closePopup(popupElts[i], "Already Helped"));
@@ -17167,15 +17184,15 @@ function handlePopups() {
             if (popupInnerNoTags.indexOf('war is already over') != -1) {
               return(closePopup(popupElts[i], "War already over"));
             }
-          
+
             // Process Sharing Secret Stash
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
             if (eltPubButton) {
               DEBUG('Popup Process: Share Secret Stash Processed');
               if (isGMChecked('autoSecretStash')) {
                 clickElement(eltPubButton);
-              }  
-                return(closePopup(popupElts[i], "Secret Stash"));              
+              }
+                return(closePopup(popupElts[i], "Secret Stash"));
             }
 
             // Process Secret Stash
@@ -17213,7 +17230,7 @@ function handlePopups() {
                   }
                   // Default select is the first item so this button is always valid
                   clickElement(eltButton);
-                }              
+                }
               }
               return(closePopup(popupElts[i], "Process Secret Stash"));
             }
@@ -17266,12 +17283,12 @@ function handlePopups() {
                   if(isGMChecked('autoIcePublish')) logtxt+= ' Iced bonus not published ('+logFrequency+'/'+publishFrequency+')';
                   addToLog('info Icon', logtxt);
                   IcedPublishingCount+=1;
-                  GM_setValue('IcedPublishingCount',IcedPublishingCount);                  
+                  GM_setValue('IcedPublishingCount',IcedPublishingCount);
                 }
                 IcedPublishingCount+=1;
                 GM_setValue('IcedPublishingCount',IcedPublishingCount);
-              }               
-              return(closePopup(popupElts[i], "Iced Popup"));              
+              }
+              return(closePopup(popupElts[i], "Iced Popup"));
             }
 
             // Process Reward for Energy Packs
@@ -17326,8 +17343,8 @@ function handlePopups() {
               }
               if (isGMChecked('autoLevelPublish')) {
                 clickElement(eltPubButton);
-              } 
-              return(closePopup(popupElts[i], "Level Up"));              
+              }
+              return(closePopup(popupElts[i], "Level Up"));
             }
 
             // Process Loyalty popup
@@ -17374,7 +17391,7 @@ function handlePopups() {
               return true;
             }
             // Missions popups
-            // Claim Mission Rewards Failed            
+            // Claim Mission Rewards Failed
             if (popupInnerNoTags.indexOf('Failed to give reward') != -1) {
               DEBUG('Popup Process: MISSIONS - Claim Rewards Failed');
               return(closePopup(popupElts[i], "Claim Mission Rewards Failed"));
@@ -17402,7 +17419,7 @@ function handlePopups() {
                 clickElement(warDeclareButton);
                 DEBUG('Popup Process: WAR - Declare War Publishing');
               }
-              return(closePopup(popupElts[i], "War Declaration Popup"));              
+              return(closePopup(popupElts[i], "War Declaration Popup"));
             }
 
             // War Rally for Help
@@ -17423,7 +17440,7 @@ function handlePopups() {
                   warRewardButton = warRewardButtons[i];
                   clickElement(warRewardButton);
                   DEBUG('Popup Process: WAR - Reward Friends (Share Coins) for Help Publishing');
-                }                
+                }
               }
               return(closePopup(popupElts[i], "War Reward (Share Coins) Popup"));
             }
@@ -18100,6 +18117,7 @@ function Auto_Mafia_Mission(){
   }
    if(isGMChecked('AskMissionHelp')&& !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ; // defaults to mymissions page
    if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will collect mymission
+   if(isGMChecked('AutoMafiaRemoved'))    Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page, currently they have 2 max
 
    if (!Mafia_Missions_Tab()) {
      Autoplay.fx = Do_Mafia_Collection_Tab();
@@ -18120,8 +18138,6 @@ function Auto_Mafia_Mission(){
     };
   };
 
-  if(isGMChecked('AutoMafiaRemoved'))    Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page, currently they have 2 max
-  if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will check all collections on this page, currently they have 1 max
 
 // check to see if there is a right button to press to go to the next page
   if (Chk_Nxt_Page()) {
@@ -18189,6 +18205,41 @@ function Do_Mafia_Collection_Tab() {
 }
 ////
 function Auto_Mafia_Collection(){
+   if (Chk_Mafia_Collection) {
+     Autoplay.fx = Do_Reward_Collection();
+     Autoplay.delay = getAutoPlayDelay();
+     Autoplay.start();
+     return true;
+  }
+}
+////
+function Chk_Mafia_Collection(){
+  var missionButtons;
+  var numButtons;
+  missionButtons = $x('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
+  numButtons = missionButtons.length;
+  if(numButtons>0){
+  DEBUG(' '+numButtons+' mission collection button(s) found.');
+  return true;
+  }
+return false;
+}
+////
+function Do_Reward_Collection(){
+    var ColMissionReward = xpathFirst('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
+    if (ColMissionReward) {
+//      addToLog('info Icon', 'Collecting mission rewards.');
+//      clickAction = 'Mission_rewards';  // NOT used yet
+      clickElement(ColMissionReward);
+//      Chk_Left_Page();  // if we removed something we gotta go back a page
+      return true;
+    }
+//  }
+  return;
+}
+////
+/*
+function Auto_Mafia_Collection(){
   var missionButtons;
   var numButtons;
   missionButtons = $x('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
@@ -18208,6 +18259,7 @@ function Auto_Mafia_Collection(){
   }
   return;
 }
+*/
 ////
 function Auto_Mafia_Remove(){
   var missionButtons;
@@ -18254,9 +18306,9 @@ function Check_Mission_Job(){
        };
 
 
-       DEBUG('CLICKING New MyMafiaMission ID is=' + Mission_ID +'= and slot number (0-3)=' + Mission_Slot +'= and have a White Start mission button');
+//       DEBUG('CLICKING New MyMafiaMission ID is=' + Mission_ID +'= and slot number (0-3)=' + Mission_Slot +'= and have a White Start mission button');
        clickElement(MyMafiaJobs); // click white start job button
-     } else {  DEBUG(' - - - we found NO white start mission button');
+//     } else {  DEBUG(' - - - we found NO white start mission button');
      }
  }
   if(MyMafiaJobs) return true ;
@@ -18270,16 +18322,16 @@ function Do_Mission_Job(){
       clickAction = 'Missionjob';
       suspendBank = false;
       clickElement(DoMafiaJobs);
-      DEBUG('Clicked to perform a mission.');
+//      DEBUG('Clicked to proform a mission.');
       return true;
    }  else {
-      DEBUG('no mission button found');
+//      DEBUG('no mission button found');
       return false;
    }
 }
 ////
 function Do_Mafia_Mission_Fight(){
- DEBUG(' - - - - were at the do missions Fight section - - - ');
+// DEBUG(' - - - - were at the do missions Fight section - - - ');
 }
 ////
 function Chk_Nxt_Page() {
@@ -18296,7 +18348,7 @@ return true;
 function Go_Nxt_Page() {
     var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
     if(page_right){
-    DEBUG('Clicking right page button in Missions.');
+//    DEBUG('Clicking right page button in Missions.');
       clickElement(page_right);
       Autoplay.delay = getAutoPlayDelay();
       return true;
@@ -18307,7 +18359,7 @@ return false;
 function Chk_Left_Page() {
     var page_left = xpathFirst('.//a[@class="left " and contains(@onclick, "viewPage")]', innerPageElt);
     if(page_left){
-    DEBUG('There WAS a left mission page button found, Clicking - - - .');
+//    DEBUG('There WAS a left mission page button found, Clicking - - - .');
     clickElement(page_left);
     return true;
     } else  {
