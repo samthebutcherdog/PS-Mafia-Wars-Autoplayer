@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.782
+// @version     1.1.783
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.782',
+  version: '1.1.783',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9452,7 +9452,7 @@ function handleModificationTimer(target) {
   // Added handling for Mission Results
   var MissionResults = xpathFirst('.//div[contains(@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'")]//div[@class="task_results"]', innerPageElt);    // results just being on mission page
   if (MissionResults) {
-        DEBUG('mission results found');   //doatest
+//        DEBUG('mission results found');   //doatest
       if (MissionResults && !xpathFirst('./div[@id="job_flag"]', MissionResults)) {
         setListenContent(false);
         makeElement('div', MissionResults, {'id':'job_flag', 'style':'display: none;'});
@@ -9464,7 +9464,7 @@ function handleModificationTimer(target) {
       } else {
        DEBUG('Already Flagged');
       }
-  } else {       DEBUG('mission results NOT found in handlemodtimer');   //doatest
+//  } else {       DEBUG('mission results NOT found in handlemodtimer');   //doatest
 
 }
 
@@ -12653,13 +12653,15 @@ function getJobRow(jobName, contextNode) {
   if (!rowElt) return false;
   return rowElt;
 }
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function getJobRowItems(jobName) {
   var currentJob = jobName;
   var currentJobRow = getJobRow(currentJob, innerPageElt);
   if (!currentJobRow) return false;
   var inner = innerPageElt? innerPageElt.innerHTML : '';
   var innerNoTags = inner.untag();
+
+DEBUG(' show inner for loot needed' + innerNoTags);
 
   if (innerNoTags.match(/You do not have enough cash to buy/i)) {
     addToLog('warning Icon', 'You don\'t have enough cash to buy necessary equipment.');
@@ -12826,7 +12828,7 @@ function getJobRowItems(jobName) {
 
   return false;
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function popJob(){
   var jobs = getSavedList('jobsToDo', '');
   // Set the very next job to perform.
@@ -15238,21 +15240,16 @@ function goJob(jobno) {
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow)                    ; tmp = 2 ;} // first 2 are above line broke down
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]') ; tmp = 3 ;} // lv jobs
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=fight_job")]', jobRow)                ; tmp = 4 ;} // i forget :) may not need
-
+//  class="sexy_button_new do_job  medium_black" onclick="return false;" href="#" <span> <span style="color:red"> Need Items </span>
 //  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]')    ; tmp = 5 ;} // will do LV job fight (first of the 3 fights in list), no logic
 
-
   if (tmp == 5) {
-
 //  if (!elt) {
   // lv fight jobs
     targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);  tmp = 5 ;
     numTargets = targetElts.length;
     DEBUG('Number of Targets Found : '+ numTargets);
     if(numTargets){
-
-// lv    ExpertMapController.selectNode(5); return MapController.doFightJob(5,'p|35274494',2,'9fadcc0faffcc33a201c733e9af28b19');
-// italy ExpertMapController.selectNode(4); return MapController.doFightJob(4,'p|61862210',0,'d14140ac72d7f0d87976847a632cadc6');
 
       // Get the user's criteria for opponents.
       var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
@@ -15265,7 +15262,6 @@ function goJob(jobno) {
       if (GM_getValue('fightMafiaMaxRelative', false)) {
         opponentMafiaMax = opponentMafiaMax + mafia;
       }
-
       DEBUG('Only doing the job if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
 
 // newchange
@@ -15316,7 +15312,6 @@ function goJob(jobno) {
           DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         }
       }
-
       if(foundOpp){
         DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
@@ -16415,16 +16410,9 @@ function logResponse(rootElt, action, context) {
 
   if (!messagebox) {
   messagebox = xpathFirst('.//div[ contains (@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'_module")]', rootElt);  //shows total mastery result
-      if (messagebox) {  DEBUG(' found messagebox result - '); }  //
+//      if (messagebox) {  DEBUG(' found messagebox result - '); }  //
   } //doatest
-  if (!messagebox) { DEBUG(' NO messagebox result found - mission or otherwise '); }
-
-
-  if (!messagebox) {
-  messagebox = xpathFirst('.//div[ contains (@id,"missionTask_'+Mission_Slot+'_'+Mission_ID+'_module")]', rootElt);  //shows total mastery result
-      if (messagebox) {  DEBUG(' found messagebox result - '); }  //
-  } //doatest
-  if (!messagebox) { DEBUG(' NO messagebox result found - mission or otherwise '); }
+//  if (!messagebox) { DEBUG(' NO messagebox result found - mission or otherwise '); }
 
   if (action=='withdraw' && context) {
     autoBankWithdraw(context);
@@ -16520,7 +16508,7 @@ function logResponse(rootElt, action, context) {
         // may be way too detailed
         var Finish_Mission = xpathFirst('.//a[contains(@id,"sm_action_button_'+Mission_ID+'") and contains(@class,"sexy_button_new medium_black") and contains(@onclick,"SocialMissionView.closeTask(\''+Mission_ID+'")]', innerPageElt);
         if(Finish_Mission) {
-          DEBUG(' we found the finished marker, close button' );
+//          DEBUG(' we found the finished marker, close button' );
          clickElement(Finish_Mission);
 //         if(!Check_Mission_Job()){  // load stuff for next mission and try to start it                this and the next line were added before bed last nite
 //        Go_Nxt_Page();  // if there was nothing else on this page, try to go to the next page            so test them
@@ -18168,7 +18156,7 @@ function GoMissionsTab() {
     var elt = xpathFirst('//div[@class="nav_link events_link"]//a',menubarElt);
   if (elt) {
     clickElement(elt);
-    DEBUG('Clicked to go to missions tab.');
+//    DEBUG('Clicked to go to missions tab.');
 //  } else {
  }
 }
@@ -18219,7 +18207,7 @@ function Chk_Mafia_Collection(){
   missionButtons = $x('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
   numButtons = missionButtons.length;
   if(numButtons>0){
-  DEBUG(' '+numButtons+' mission collection button(s) found.');
+//  DEBUG(' '+numButtons+' mission collection button(s) found.');
   return true;
   }
 return false;
