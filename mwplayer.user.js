@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.788
+// @version     1.1.789
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.788',
+  version: '1.1.789',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -12701,7 +12701,7 @@ DEBUG(' show inner for loot needed' + innerNoTags);
   var amtElt = xpathFirst('.//strong[@class="cash cash_'+cities[city][CITY_ALIAS]+'"]', currentJobRow);
   if(!amtElt) amtElt = xpathFirst('.//div[@class="job_uses"]//dd[@class="vegas_cash_icon"]', currentJobRow);
   if (amtElt) {
-    var cashDiff = getJobClicks() * parseCash(amtElt.innerHTML.untag().trim()) - cities[city][CITY_CASH];
+    var cashDiff = parseCash(amtElt.innerHTML.untag().trim()) - cities[city][CITY_CASH];
     // Withdraw the amount we need
     if (cashDiff > 0) {
       DEBUG('We need '+cashDiff+' for this job. Going to the bank/vault of '+city);
@@ -12819,7 +12819,7 @@ DEBUG(' show inner for loot needed' + innerNoTags);
   // Withdraw money
   var amtElt = xpathFirst('.//td[contains(@class,"job_energy")]//span[@class="money" or @class="bad"]', currentJobRow);
   if (amtElt) {
-    var cashDiff = getJobClicks() * parseCash(amtElt.innerHTML) - cities[city][CITY_CASH];
+    var cashDiff =  parseCash(amtElt.innerHTML) - cities[city][CITY_CASH];
 
     // Withdraw the amount we need
     if (cashDiff > 0) {
