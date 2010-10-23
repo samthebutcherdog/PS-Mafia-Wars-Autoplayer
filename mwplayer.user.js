@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.786
+// @version     1.1.787
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.786',
+  version: '1.1.787',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -241,7 +241,7 @@ Spend.prototype.toggleSpending = function (maxVal, curVal) {
                ' is set to keep above <strong>' + this.floor + '</strong>.</span>');
     }
   }
-
+ //  burnFlag=3  canBurn
   // Log any change to the ceiling.
   if (this.ceiling != GM_getValue(this.lastCeiling)) {
     GM_setValue(this.lastCeiling, this.ceiling);
@@ -1012,6 +1012,22 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const MISSION_NODE_LV  = 7; // 0 node line for Las Vegas
   const MISSION_RATIO    = 8; // 8
 
+
+
+  // Constants for accessing mafia mission array
+  const MMIssion_NAME         = 0; //
+  const MMIssion_ID           = 1; //
+  const MMIssion_SLOT         = 2; //
+  const MMIssion_ENERGY_Use   = 3; //
+  const MMIssion_STAMINA_Use  = 4; //
+  const MMIssion_XP           = 5; //
+  const MMIssion_PAYS         = 6; //
+  const MMIssion_RATIO        = 7; //
+
+// for mafia missions
+var MMission = new Array ();
+
+
   // Add city variables in this format
   // Name, Alias, Sides (if any), Cash, Level Req, Icon, Icon CSS, Autobank config, Min cash config, Sell Crates config, Cash Symbol, Alliance Point Threshold
   // Array container for city variables
@@ -1172,10 +1188,21 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
                                 'selectStaminaKeepMode', 'selectStaminaKeep',
                                 'selectStaminaUseMode', 'selectStaminaUse', staminaIcon,
                                 'allowStaminaToLevelUp', 'staminaFloorLast', 'staminaCeilingLast');
+
   var SpendEnergy  = new Spend ('Energy', 'autoMission', 'useEnergyStarted',
                                 'selectEnergyKeepMode', 'selectEnergyKeep',
                                 'selectEnergyUseMode', 'selectEnergyUse', energyIcon,
                                 'allowEnergyToLevelUp', 'energyFloorLast', 'energyCeilingLast');
+
+//needchange
+  var SpendMissionEnergy  = new Spend (
+                                'MissionEnergy', 'autoMissionMission', 'useMissionEnergyStarted',
+                                'selectMissionEnergyKeepMode', 'selectMissionEnergyKeep',
+                                'selectMissionEnergyUseMode', 'selectMissionEnergyUse', energyIcon,
+                                'allowMissionEnergyToLevelUp', 'MissionenergyFloorLast', 'MissionenergyCeilingLast'
+                                );
+
+
 
   // Force Heal options
   var healOptions = new Array(
@@ -1590,7 +1617,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
 //  ['Boss: Defeat Governor Halloran'                    ,  8, 79,8,LV    ,120,0,'node79']     //           Boss Job
 
 
-//Mission array for Italia
+//Mission array for Italy
     ['Connect With La Familia'                           ,  4,  1,1,ITALY ,  4,0,'node1' ],    // ENERGY PATH
     ['Recruit Some Local Muscle'                         ,  7,  2,1,ITALY ,  8,0,'node2' ],    // ENERGY PATH
     ['Set Up The Italian Operation'                      , 10,  3,1,ITALY , 14,0,'node3' ],    // ENERGY PATH
@@ -2118,8 +2145,7 @@ function doAutoPlay () {
   }
 
 // newchange
-// auto mission-collect      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
-  if (running && isGMChecked('AutoMafiaMission') && !timeLeftGM('colmissionTimer')) {  // && !maxed
+  if (running && isGMChecked('AutoMafiaMission') && !maxed && !timeLeftGM('colmissionTimer')) {
      if (Auto_Mafia_Mission() ) return;
   } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds, Or Missions Turned Off') ;
   }
@@ -3226,6 +3252,8 @@ function canMission() {
 
   // If spending energy will set energy below Energy floor, skip jobs
   var nextJobEnergy =  missions[GM_getValue('selectMission', 1)][MISSION_ENERGY];
+
+//needchange
   if (energy - nextJobEnergy < SpendEnergy.floor && !SpendEnergy.canBurn) {
     DEBUG('Not spending energy: energy=' + energy +
           ', floor=' + SpendEnergy.floor +
@@ -3234,8 +3262,8 @@ function canMission() {
     return false;
   }
 
-  if (energy < SpendEnergy.ceiling && !SpendEnergy.canBurn &&
-      !GM_getValue('useEnergyStarted')) {
+//needchange
+  if (energy < SpendEnergy.ceiling && !SpendEnergy.canBurn && !GM_getValue('useEnergyStarted')) {
     DEBUG('Rebuilding energy: energy=' + energy +
           ', ceiling=' + SpendEnergy.ceiling + ', burn=' + SpendEnergy.canBurn);
     return false;
@@ -3257,6 +3285,8 @@ function autoMission() {
   if (!tabnopath) var tabnopath = 0 ;
   if (!nodelv)    var nodelv    = ''  ;
   DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno + ' tabnopath ' + tabnopath );
+
+
 
   if (SpendEnergy.floor &&
       isGMChecked('allowEnergyToLevelUp') &&
@@ -4943,6 +4973,12 @@ function saveDefaultSettings() {
   GM_setValue('selectStaminaUse', 0);
   GM_setValue('selectStaminaKeepMode', 0);
   GM_setValue('selectStaminaUseMode', 0);
+//needchange
+  GM_setValue('selectMissionEnergyKeep', 0);
+  GM_setValue('selectMissionEnergyUse', 0);
+  GM_setValue('selectMissionEnergyKeepMode', 0);
+  GM_setValue('selectMissionEnergyUseMode', 0);
+
   GM_setValue('selectEnergyKeep', 0);
   GM_setValue('selectEnergyUse', 0);
   GM_setValue('selectEnergyKeepMode', 0);
@@ -5155,7 +5191,7 @@ function saveSettings() {
     'hasHelicopter','hasGoldenThrone','isManiac','allowEnergyToLevelUp','skipfight'
   ]);
   //Energy Settings and Validation
-  
+
 
   if (document.getElementById('masterAllJobs').checked === true) {
     GM_setValue('repeatJob', 0);
@@ -5195,6 +5231,7 @@ function saveSettings() {
   GM_setValue('estimateJobRatio', document.getElementById('estimateJobRatio').value);
   GM_setValue('autoEnergyPackForcePts', document.getElementById('autoEnergyPackForcePts').value);
 
+
   // Validate and save energy limits settings.
   var selectEnergyUse = document.getElementById('selectEnergyUse').value;
   var selectEnergyKeep = document.getElementById('selectEnergyKeep').value;
@@ -5202,11 +5239,26 @@ function saveSettings() {
     alert('Please enter numeric values for Energy reserve and Energy threshold.');
     return;
   }
+//needchange
+  // Validate and save mission energy limits settings.
+  var selectMissionEnergyUse = document.getElementById('selectMissionEnergyUse').value;
+  var selectMissionEnergyKeep = document.getElementById('selectMissionEnergyKeep').value;
+  if (isNaN(selectMissionEnergyUse) || isNaN(selectMissionEnergyKeep)) {
+    alert('Please enter numeric values for Mission Energy reserve and Mission Energy threshold.');
+    return;
+  }
 
   GM_setValue ('selectEnergyUse', selectEnergyUse);
   GM_setValue ('selectEnergyKeep', selectEnergyKeep);
   GM_setValue ('selectEnergyUseMode', document.getElementById('selectEnergyUseMode').selectedIndex);
   GM_setValue ('selectEnergyKeepMode', document.getElementById('selectEnergyKeepMode').selectedIndex);
+
+//needchange
+  GM_setValue ('selectMissionEnergyUse', selectMissionEnergyUse);
+  GM_setValue ('selectMissionEnergyKeep', selectMissionEnergyKeep);
+  GM_setValue ('selectMissionEnergyUseMode', document.getElementById('selectMissionEnergyUseMode').selectedIndex);
+  GM_setValue ('selectMissionEnergyKeepMode', document.getElementById('selectMissionEnergyKeepMode').selectedIndex);
+
   //End Save Energy Tab Settings
 
   //Start Save Stamina Tab Settings
@@ -5261,7 +5313,7 @@ function saveSettings() {
     }
   }
 
-  
+
   //Change autoheal shortcut if necessary
   if(!isGMChecked('autoHeal')) {
     document.getElementById('mwap_toggleheal').innerHTML=healOffIcon;
@@ -7305,7 +7357,7 @@ function createEnergyTab() {
   label.appendChild(document.createTextNode(title + ' '));
   var unChkAll = makeElement('input', label, {'id':'unCheckAll','style':'font-size: 9px;' + ((isGMChecked('multipleJobs')) ? '':' display: none;'),'type':'button', 'value':'Uncheck All'});
 
-  
+
   //
   // Job selector.
   //
@@ -7572,11 +7624,28 @@ function createEnergyTab() {
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' Golden Throne'));
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// drop a few lines
+  item = makeElement('div', list, {'class':'single', 'style':'padding-top: 30px;'});
+
+
   // Spend energy option
   item = makeElement('div', list, {'class':'single'});
-  title = 'Start spending energy when energy level is reached';
+  title = 'Start spending energy For Jobs when energy level is reached';
   id = 'selectEnergyUse';
-  item.appendChild(document.createTextNode('Start spending energy when '));
+  item.appendChild(document.createTextNode('Start spending energy for jobs when '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
   id = 'selectEnergyUseMode';
   item.appendChild(document.createTextNode(' '));
@@ -7590,9 +7659,9 @@ function createEnergyTab() {
   elt.selectedIndex = GM_getValue(id, 0);
   item.appendChild(document.createTextNode(' of energy has accumulated.'));
 
-  // Stamina to reserve for manual play
+  // Energy to reserve jobs are not allowed to go below
   item = makeElement('div', list, {'class':'single'});
-  title = 'Suspend automatic play below this level of energy.';
+  title = 'Suspend automatic Job play below this level of energy.';
   id = 'selectEnergyKeep';
   item.appendChild(document.createTextNode('Reserve '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
@@ -7606,7 +7675,62 @@ function createEnergyTab() {
     elt.appendChild(choice);
   }
   elt.selectedIndex = GM_getValue(id, 0);
+  item.appendChild(document.createTextNode(' Of Energy To Use For Missions and manual play.'));
+
+// drop a few lines
+  item = makeElement('div', list, {'class':'single', 'style':'padding-top: 30px;'});
+
+//start
+  // Spend mission energy option
+  item = makeElement('div', list, {'class':'single'});
+  title = 'Start spending energy For Missions when energy level is reached      NOTE: these need to be below the above 2';
+  id = 'selectMissionEnergyUse';  //  selectEnergyUse
+  item.appendChild(document.createTextNode('Start spending energy on missions when '));
+  makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
+  id = 'selectMissionEnergyUseMode';  //  selectEnergyUseMode
+  item.appendChild(document.createTextNode(' '));
+  elt = makeElement('select', item, {'id':id, 'title':title});
+  for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(numberSchemes[i]));
+    elt.appendChild(choice);
+  }
+  elt.selectedIndex = GM_getValue(id, 0);
+  item.appendChild(document.createTextNode(' of energy has accumulated.'));
+//  selectMissionEnergyKeepMode
+//  selectMissionEnergyKeep
+//  selectMissionEnergyUseMode
+//  selectMissionEnergyUse
+
+  // Energy to reserve for manual play
+  item = makeElement('div', list, {'class':'single'});
+  title = 'Suspend automatic missions below this level of energy.';
+  id = 'selectMissionEnergyKeep';  //  selectEnergyKeep
+  item.appendChild(document.createTextNode('Reserve '));
+  makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
+  id = 'selectMissionEnergyKeepMode';  //  selectEnergyKeepMode
+  item.appendChild(document.createTextNode(' '));
+  elt = makeElement('select', item, {'id':id, 'title':title});
+  for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
+    choice = document.createElement('option');
+    choice.value = i;
+    choice.appendChild(document.createTextNode(numberSchemes[i]));
+    elt.appendChild(choice);
+  }
+  elt.selectedIndex = GM_getValue(id, 0);
   item.appendChild(document.createTextNode(' of energy for manual play.'));
+//// end copy
+
+
+
+
+
+
+
+
+
+
 
   // Level up
   item = makeElement('div', list, {'class':'single'});
@@ -8973,7 +9097,7 @@ function validateStaminaTab() {
 
       s.staminaPowerattack = checked('staminaPowerattack');
 
-      
+
 
       s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;
       s.bountySelection = document.getElementById('bountySelection').selectedIndex;
@@ -10022,13 +10146,19 @@ function refreshSettings() {
 
   // Refresh spend ceiling, floor and burn condition
   var canLevel = ptsToNextLevel < stamina * getStaminaGainRate() + energy * getEnergyGainRate();
+
   SpendStamina.refreshLimits (maxStamina, canLevel);
   SpendEnergy.refreshLimits (maxEnergy, canLevel);
+//needchange
+  SpendMissionEnergy.refreshLimits (maxEnergy, canLevel);
+
 
   // Log and toggle burning
   if (running) {
     if (isGMChecked(SpendStamina.spendFlag)) SpendStamina.toggleSpending(maxStamina, stamina);
     if (isGMChecked(SpendEnergy.spendFlag)) SpendEnergy.toggleSpending(maxEnergy, energy);
+//needchange
+    if (isGMChecked(SpendMissionEnergy.spendFlag)) SpendMissionEnergy.toggleSpending(maxEnergy, energy);
   }
 
   // Auto-pause reset
@@ -11210,7 +11340,7 @@ function customizeProfile() {
         var titleElt = xpathFirst('./div[@class="title"]', innerPageElt);
         if (titleElt) {
           titleElt.setAttribute('style', 'background: black;');
-          
+
         }
         var ajaxID = createAjaxPage(false, 'icecheck profile', titleElt);
         var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'hitlist' + SCRIPT.action + 'set&target_id=' + remoteuserid + '", 1, 1, 0, 0); return false;'});
@@ -12306,6 +12436,54 @@ function customizeHitlist() {
   return true;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Do missions. Give priority to spending stamina if it needs
+  // to be burned and using one won't level up. Give priority to jobs if
+  // within one stamina of leveling, or if an energy pack is waiting, or
+  // if energy is fuller than stamina (in percentage terms)
+  // Prioritize burning of energy if level-up within reach.
+  //
+  //
+//needchange
+/*  if ((autoMissionMissionif &&
+       SpendMissionEnergy.canBurn) ||
+       (autoMissionMissionif &&
+//       !(autoStaminaSpendif &&
+//        SpendStamina.canBurn &&
+//        ptsToNextLevel > 6) &&
+//       (ptsToNextLevel <= 6
+//       || autoEnergyPackWaiting
+//       || energy/maxEnergy >= stamina/maxStamina)
+       )) {
+    autoMission();
+    return;
+  }
+
+  if (autoStaminaSpendif) {
+    if (autoStaminaSpend()) return; // staminaspend is unchecked comes back false
+
+    // Attempt failed. Randomize stamina setting (if set)
+    if (isGMEqual('staminaSpendHow', STAMINA_HOW_RANDOM)) {
+      randomizeStamina();
+      if (autoStaminaSpend()) return;
+
+    // Attempt failed. Let some other action happen before trying again
+    } else {
+      skipStaminaSpend = true;
+    }
+  }
+  if (autoMissionif) {
+    autoMission();
+    return;
+  }
+*/
+//selectMissionEnergyUse  //selectMissionEnergyUseMode
+//selectMissionEnergyKeep  //selectMissionEnergyKeepMode
+
+
+
+////
 function customizeMissions() {
     DEBUG(' were in customize missions pages at the moment');
 }
@@ -13070,8 +13248,14 @@ BrowserDetect.init();
         'Skip Fighting In Job Tier Mastery: <strong>' + showIfUnchecked(GM_getValue('skipfight')) + '</strong><br>' +
         'Check for mini Energy Packs: <strong>' + showIfUnchecked(GM_getValue('checkMiniPack')) + '</strong><br>' +
         'Energy threshold: <strong>' + GM_getValue('selectEnergyUse') + ' ' + numberSchemes[GM_getValue('selectEnergyUseMode', 0)] + ' (refill to ' + SpendEnergy.ceiling + ')</strong><br>' +
-        '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
         'Energy reserve: <strong>' + + GM_getValue('selectEnergyKeep') + ' ' + numberSchemes[GM_getValue('selectEnergyKeepMode', 0)] + ' (keep above ' + SpendEnergy.floor + ')</strong><br>' +
+        '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
+
+//needchange
+        '&nbsp;&nbsp;-Missions Energy use started: <strong>' + GM_getValue('useMissionEnergyStarted') + '</strong><br>' +
+
+        'Mission Energy threshold: <strong>' + GM_getValue('selectMissionEnergyUse') + ' ' + numberSchemes[GM_getValue('selectMissionEnergyUseMode', 0)] + ' (refill to ' + SpendMissionEnergy.ceiling + ')</strong><br>' +
+        'Mission Energy reserve: <strong>' + + GM_getValue('selectMissionEnergyKeep') + ' ' + numberSchemes[GM_getValue('selectMissionEnergyKeepMode', 0)] + ' (keep above ' + SpendMissionEnergy.floor + ')</strong><br>' +
         'autoEnergyPackForce: <strong>' + showIfUnchecked(GM_getValue('autoEnergyPackForce')) + '</strong><br>' +
         '&nbsp;&nbsp;-autoEnergyPackForcePts: <strong>' + GM_getValue('autoEnergyPackForcePts') + '</strong><br>' +
         '-------------------Stamina Tab-------------------<br>' +
@@ -17780,7 +17964,6 @@ function Auto_Mafia_Mission(){
 
   if(isGMChecked('AutoMafiaJob')) {
   if(Check_Mission_Job() ) {
-//  go_do_mission();
     Autoplay.delay = getAutoPlayDelay();
     Autoplay.fx = Do_Mission_Job() ;
     Autoplay.start();
@@ -17801,14 +17984,6 @@ function Auto_Mafia_Mission(){
   return;
 }
 ////
-function go_do_mission() {
-    Autoplay.delay = getAutoPlayDelay();
-    Autoplay.fx = Do_Mission_Job() ;
-    Autoplay.start();
-//  DEBUG(' we passed do_mission_job - autolay - - ');
-    return true;
-//  DEBUG(' we made it end the job routine - - - ');
-  }
 ////
 function OnMissionsTab() {
     if(xpathFirst('//div[@id="socialMissionNav"]//a',innerPageElt)) {
@@ -17890,29 +18065,6 @@ function Do_Reward_Collection(){
   return;
 }
 ////
-/*
-function Auto_Mafia_Collection(){
-  var missionButtons;
-  var numButtons;
-  missionButtons = $x('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
-  numButtons = missionButtons.length;
-  if(numButtons>0){
-  DEBUG('There were - '+numButtons+' mission collection buttons found.');
-  for (var i = 0, iLength=missionButtons.length; i < iLength; ++i) {
-    var ColMissionReward = xpathFirst('.//a[@class="sexy_button_new medium_green" and contains(@onclick, "collectReward")]', innerPageElt);
-    if (ColMissionReward) {
-      addToLog('info Icon', 'Clicked to collect mission rewards.');
-//      clickAction = 'Mission_rewards';  // NOT used yet
-      clickElement(ColMissionReward);
-      Chk_Left_Page();  // if we removed something we gotta go back a page
-      return true;
-    }
-    }
-  }
-  return;
-}
-*/
-////
 function Auto_Mafia_Remove(){
   var missionButtons;
   var numButtons;
@@ -17934,8 +18086,38 @@ function Auto_Mafia_Remove(){
 //  }
 }
 ////
+function chk_nrg_stam(){
+//needchange
+DEBUG('  -  -  -  checking   work an Energy Mission  -   -  ' );
+var nextMissionEnergy = 15; // temp set for now
+
+//  if (energy < missions[GM_getValue('selectMission', 1)][MISSION_ENERGY]) {
+  if (energy < nextMissionEnergy ) {
+    DEBUG('Skipping Missions: energy=' + energy + ', cost=' + nextMissionEnergy);
+    return false;
+  }
+
+  if (energy - nextMissionEnergy < SpendMissionEnergy.floor && !SpendMissionEnergy.canBurn) {
+    DEBUG('Not spending energy on missions: energy=' + energy +
+          ', floor=' + SpendMissionEnergy.floor +
+          ', nextMissionEnergy=' + nextMissionEnergy +
+          ', burn=' + SpendMissionEnergy.canBurn);
+    return false;
+  }
+//needchange
+//  if (energy < SpendMissionEnergy.ceiling && !SpendMissionEnergy.canBurn && !GM_getValue('useMissionEnergyStarted')) {
+//    DEBUG('Rebuilding Mission energy: energy=' + energy +
+//          ', ceiling=' + SpendMissionEnergy.ceiling + ', burn=' + SpendMissionEnergy.canBurn);
+//    return false;
+//  }
+// DEBUG('  -  -  -  LEAVING energy check and able to work an Energy Mission  -   -  ' );
+return true;
+}
+////
 function Check_Mission_Job(){
-//  if(!MyMafiaJobs) {
+
+if(!chk_nrg_stam()) {return false; }
+
     MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Mission_ID+'")]', innerPageElt);
     //if(MyMafiaJobs) //  may need to check   Mission_ID for 100% mastery and null MyMafiaJobs if 100% mastery
 //  }
@@ -17955,16 +18137,15 @@ function Check_Mission_Job(){
        if(Mission_Name) {
         Mission_Name = Mission_Name.innerHTML.untag();
        DEBUG('Mission_Name='+Mission_Name+'=');
-       };
-
-
-//       DEBUG('CLICKING New MyMafiaMission ID is=' + Mission_ID +'= and slot number (0-3)=' + Mission_Slot +'= and have a White Start mission button');
+       }
+//     DEBUG('CLICKING New MyMafiaMission ID is=' + Mission_ID +'= and slot number (0-3)=' + Mission_Slot +'= and have a White Start mission button');
        clickElement(MyMafiaJobs); // click white start job button
 //     } else {  DEBUG(' - - - we found NO white start mission button');
      }
  }
   if(MyMafiaJobs) return true ;
 }
+
 ////
 function Do_Mission_Job(){
 
