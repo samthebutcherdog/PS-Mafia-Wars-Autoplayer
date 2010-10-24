@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.789
+// @version     1.1.790
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.789',
+  version: '1.1.790',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1037,7 +1037,7 @@ var MMission = new Array ();
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'R$', 0],
     ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50],
     ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 0, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0],
-	['Italy', 'italy', [], 'sideItaly', undefined, 0, cashItalyIcon, 'cashItaly Icon', 'autoBankItaly', 'bankConfigItaly', 'L$', 0]
+	['Italy', 'italy', [], 'sideItaly', undefined, 5, cashItalyIcon, 'cashItaly Icon', 'autoBankItaly', 'bankConfigItaly', 'L$', 0]
   );
 
   var locations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Italy','Active City'];
@@ -9114,9 +9114,6 @@ function validateStaminaTab() {
       // Get the settings.
       s.hitmanLocation = document.getElementById('hitmanLocation').selectedIndex;
 
-      s.staminaPowerattack = checked('staminaPowerattack');
-
-
 
       s.hitmanBountyMin = document.getElementById('hitmanBountyMin').value;
       s.bountySelection = document.getElementById('bountySelection').selectedIndex;
@@ -12796,9 +12793,9 @@ DEBUG(' show inner for loot needed' + innerNoTags);
       // Try fetching the items from the job requirement array
       requirementJob.forEach(
         function(j){
-          if (level >= cities[j[2]][CITY_LEVEL] && j[0] == itmSearch) {
+          if (level >= cities[j[2]][CITY_LEVEL] && j[0].toUpperCase().trim() == itmSearch.toUpperCase().trim()) {
             jobs.push(j[1]);
-            items.push(itmSearch);
+            items.push(itmSearch.trim());
             itemFound = true;
             jobFound = j[1];
           }
@@ -12950,7 +12947,7 @@ function jobLoot(element) {
     DEBUG('Looking for ' + itemName + ' in needed items list.');
     DEBUG('We need ' + items.length + ' item(s).');
     for (var j = 0, jLength=items.length; j < jLength; j++) {
-      if (itemName.indexOf(items[j]) != -1 ) {
+      if (itemName.indexOf(items[j].trim()) != -1 ) {
         // we found some needed loot
         itemFound = true;
         addToLog('found Icon','<span class="loot">'+ itemName + '</span> is the item we were looking for!');
