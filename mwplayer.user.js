@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.791
+// @version     1.1.792
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.791',
+  version: '1.1.792',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1549,7 +1549,7 @@ var MMission = new Array ();
     ['Roll a Bingo Parlor'                               ,  6,  5,1,LV    ,  9,1,'node5' ],    //  FIGHT
     ['Break Into A Gun Shop'                             , 12,  6,1,LV    , 16,0,'node6' ],    // ENERGY
     ['Scout Out Alphabet City'                           , 15,  7,1,LV    , 20,0,'node7' ],    // ENERGY
-    ['Open Fire On Victor&amp;\'s Crew'                  , 23,  8,1,LV    , 27,0,'node8' ],    //SOCIAL
+    ['Open Fire On Victor\'s Crew'                       , 23,  8,1,LV    , 27,0,'node8' ],    //SOCIAL
 //   ['Boss: Defeat Victor Lil\' Loco Alves'             ,  5,  9,1,LV    ,  6,0,'node9' ],    //        BOSS JOB STAMINA
     ['Help A Bookie Out Of A Jam'                        , 15, 10,2,LV    ,  9,0,'node10'],    // ENERGY DISTRICT 2  LAS VEGAS PARADISE CITY
     ['Win An Underground Fight'                          , 11, 11,2,LV    , 18,1,'node11'],    //  FIGHT
