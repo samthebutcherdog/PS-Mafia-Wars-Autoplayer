@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.790
+// @version     1.1.791
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.790',
+  version: '1.1.791',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -784,6 +784,7 @@ var skipJobs = false;           // Skip doing jobs for a while
 var jobOptimizeOn = false;      // Is job optimizing flag
 var newStaminaMode;             // New stamina mode for random fighting
 var checkOnWar;
+var jobid;
 
 //new_header = false ; // change the commented out line to disable all changes
 new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new header
@@ -3278,7 +3279,7 @@ function canMission() {
 }
 
 function autoMission() {
-  var jobid       = GM_getValue('selectMission', 1);
+  jobid       = GM_getValue('selectMission', 1);
   var jobName     = missions[jobid][MISSION_NAME];
   var jobno       = missions[jobid][MISSION_NUMBER];
   var tabno       = missions[jobid][MISSION_TAB];
