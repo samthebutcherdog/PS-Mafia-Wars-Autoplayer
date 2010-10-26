@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.793
+// @version     1.1.794
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.793',
+  version: '1.1.794',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -79,7 +79,7 @@ var SCRIPT = {
 
 /** Google Analytics. See where the script is being used and how often. This does not track any individual user in anyway. KCMCL */
 var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-3078135-15']);  /** use PS for tracking uses of MWAP **/
+_gaq.push(['_setAccount', 'UA-3078135-18']);  /** use PS for tracking uses of MWAP **/
 _gaq.push(['_trackPageview']);
 (function() {
     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
