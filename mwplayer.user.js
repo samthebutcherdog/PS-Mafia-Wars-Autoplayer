@@ -49,18 +49,18 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.794
+// @version     1.1.795
 // ==/UserScript==
 
 // search for new_header   for changes
 //
 // TestChanges    <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
-// if (isGMChecked(TestChanges)){ code };
+// if (isGMChecked('TestChanges')){ code };
 // else { original code }; <- optional
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.794',
+  version: '1.1.795',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -942,7 +942,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   // Define war modes
   const WAR_HOW_RANDOM = 0; // Random war.
   const WAR_HOW_LIST   = 1; // List warring
-  var warModeChoices = ['War a random friend', 'War friends from a list'];
+  var warModeChoices = ['War a random Enemy', 'War Enemies from a list'];
 
   // Define AutoStat allocation mode
   const AUTOSTAT_TARGET        = 0;
@@ -2179,14 +2179,6 @@ function doAutoPlay () {
     }
   }
 
-/*
-  Currently disabled due to MW changes ...
-  // Ask for Special Parts
-  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {
-    if (askSpecialParts(NY, null, 0, 0)) return;
-  }
-*/
-
   // Ask for Chop Shop Parts
   if (running && !maxed && isGMChecked('askShopParts')  && !timeLeftGM('askShopPartsTimer')) {
     if (askSpecialParts(NY, cityShopParts, GM_getValue('askShopPartsId',1), 11)) return;
@@ -2202,13 +2194,18 @@ function doAutoPlay () {
     if (askSpecialParts(NY, cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
   }
 
-  // Ask for Casino Parts
-  /* Noted out per request of donnaB
-  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
-    if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 4)) return;
-  }
-  */
-
+  if (isGMChecked('TestChanges')){
+    // Ask for Special Parts
+    if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {
+      if (askSpecialParts(NY, null, 0, 0)) return;
+    }
+    
+    // Ask for Casino Parts
+    if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
+      if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 1)) return;
+    } 
+  }  
+  
   // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
@@ -2625,18 +2622,18 @@ function AskforHelp(hlpCity) {
     timerName='AskforHelpBangkokTimer';
   }
 
-  //Set delay to 3500 to prevent Bangkokg not publishing if too fast after Moscow publishing
+  //Set delay to 4000 to prevent Bangkokg not publishing if too fast after Moscow publishing
   // Go to the correct city.
   if (city != helpCity) {
     Autoplay.fx = function() { goLocation(helpCity); };
-    Autoplay.delay = 3500;
+    Autoplay.delay = 4000;
     Autoplay.start();
     return true;
   }
 
   // Go to the correct job tab.
   if (!onJobTab(tabno)) {
-    Autoplay.delay = 3500;
+    Autoplay.delay = 4000;
     Autoplay.fx = function() { doAskFunction(goJobTab(tabno)); };
     Autoplay.start();
     return true;
@@ -2799,7 +2796,7 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
             var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 0, 0, 0); return false;'});
             clickElement(elt);
             DEBUG('Clicked to ask for '+buildItem+' for '+buildType);
-            GM_setValue('askCasinoPartsTimer', '12 hours');
+            setGMTime('askCasinoPartsTimer', '12 hours');
             return true;
           }
         }
@@ -8746,6 +8743,8 @@ function createCashTab () {
   title = 'Check this to Ask for Casino Parts every 12 hours';
   id = 'askCasinoParts';
   var casinoParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('font', casinoParts, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Experimental ... Enable by Modification setting on About Tab.'));
+  makeElement('br', casinoParts);
   makeElement('input', casinoParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', casinoParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Casino Parts'));
@@ -8761,7 +8760,7 @@ function createCashTab () {
   casinoPartsType.selectedIndex = GM_getValue(id, 0);
 
   // Ask for Special Parts
-  xTop += 25;
+  xTop += 40;
   title = 'Check this to Ask for Special Parts every 12 hours';
   id = 'askSpecialParts';
   var specialParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
@@ -9859,21 +9858,21 @@ function handlePublishing() {
 
         // Achievement bonus
         if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
-
-        // Job Help
-        if (checkPublish('.//div[contains(.,"requested help")]','autoAskJobHelp', pubElt, skipElt)) return;
-
+        
 //        // missions  // newchange                         what is this for      \/
 //        if (checkPublish('.//div[contains(.,"mission_collect_dialog")]','autoAskHelponCC', pubElt, skipElt)) return;
 
         // Collections
         if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
 
-        // Moscow Job Help
-        if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectMoscowTiercheck', pubElt, skipElt)) return;
+        // Moscow (Social) Job Help
+        if (checkPublish('.//div[contains(.,"get the job done alone in Moscow")]','selectMoscowTiercheck', pubElt, skipElt)) return;
 
-        // Bangkok Job Help
-        if (checkPublish('.//div[contains(.,"Friends get a bonus")]','selectBangkokTiercheck', pubElt, skipElt)) return;
+        // Bangkok (Social) Job Help
+        if (checkPublish('.//div[contains(.,"get the job done alone in Bangkok")]','selectBangkokTiercheck', pubElt, skipElt)) return;
+
+        // Standard NY, Cuba, Moscow, Bangkok and Vegas Social Job Help
+        if (checkPublish('.//div[contains(.,"get the job done alone")]','autoAskJobHelp', pubElt, skipElt)) return;
 
         // Share wishlist
         if (checkPublish('.//div[contains(.,"is looking for")]','autoShareWishlist', pubElt, skipElt)) return;
@@ -12912,8 +12911,9 @@ function jobLoot(element) {
     if (innerNoTags.match(/You\s+gained(?:\s+an?)?\s+(.+)\./) ||
         innerNoTags.match(/found(?:\s+an?)?\s+(.*?)\s+on\s+the/i) ||
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
-      var loot = RegExp.$1;
-      if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
+      var loot = RegExp.$1;            
+      if(loot.match(/(.*?)\.\s+used/i)) loot = RegExp.$1;
+      if(loot.match(/(.*?)\.\s+was/i)) loot = RegExp.$1;
       if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
       else strLoot += 'Found <span class="loot">' + loot+'</span> in the job.';
       lootbag.push(loot);
@@ -14124,17 +14124,17 @@ function autoWar() {
       var tmpWarTargets = GM_getValue('autoWarTargetList');
       if (tmpWarTargets) {
         tmpWarTargets = tmpWarTargets.split('\n');
-        // Get a Random Friend's ID from the friends List
+        // Get a Random Enemy's ID from the friends List
         var thisAutoWarTarget = tmpWarTargets[Math.floor(Math.random() * tmpWarTargets.length)];
 
         // Change the Target id
         warElt.target_id = thisAutoWarTarget;
         warElt.setAttribute('onclick', warElt.getAttribute('onclick').replace(RegExp.$1, thisAutoWarTarget));
 
-        DEBUG('Auto War Target ID from Friends List = ' + thisAutoWarTarget);
+        DEBUG('Auto War Target ID from Enemies List = ' + thisAutoWarTarget);
       } else {
         // If there are no targets in the list, we keep the Random Target
-        addToLog('warning Icon','There are no targets in your Friends List. Changing War Settings to War a Random Friend.');
+        addToLog('warning Icon','There are no targets in your Enemies List. Changing War Settings to War a Random Enemy.');
         GM_setValue('warMode', 0)
       }
     }
@@ -16135,7 +16135,7 @@ function logJSONResponse(autoplay, response, action, context) {
       // Casino Parts
       case 'casino parts':
         DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Resetting Timer.');
-        GM_setValue('askCasinoPartsTimer', '12 hours');
+        setGMTime('askCasinoPartsTimer', '12 hours');
         DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset.');
         return false;
         break;
@@ -16432,7 +16432,7 @@ function logResponse(rootElt, action, context) {
       if(masteryGainElt) {
         if( (GM_getValue('selectTier')!= '0.0'  ) || (!isGMChecked('multipleJobs'))  ) {
           if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 ) {
-            masteryGainTxt = '. Las Vegas Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+            masteryGainTxt = '. Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
             pushNextJob = true;
           }
         }
@@ -17066,6 +17066,11 @@ function handlePopups() {
             if (popupInnerNoTags.indexOf('war is already over') != -1) {
               return(closePopup(popupElts[i], "War already over"));
             }
+            
+            // Get rid of War Not in Mafia popup
+            if (popupInnerNoTags.indexOf('send them a request') != -1) {
+              return(closePopup(popupElts[i], "War Not in Mafia"));
+            }
 
             // Process Sharing Secret Stash
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"post_job_loot_feed")]',popupElts[i]);
@@ -17086,31 +17091,28 @@ function handlePopups() {
                 eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
                 if (eltLoot && isGMChecked('useSecretStashItems') && autoSecretStashList) {
                   eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
+                  var lootChoice = eltLoot1;
                   eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
                   eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
                   for (var i = 0; i < autoSecretStashList.length; ++i) {
                     if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      var lootChoice = eltLoot1;
+                      lootChoice = eltLoot1;
                       break;
                     }
                     if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      var lootChoice = eltLoot2;
+                      lootChoice = eltLoot2;
                       break;
                     }
                     if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      var lootChoice = eltLoot3;
+                      lootChoice = eltLoot3;
                       break;
                     }
-                  }
-                  // If we selected something, press the stash button
+                  }                  
                   if (lootChoice) {
                     clickElement(lootChoice);
                     addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
                     addToLog('lootbag Icon', 'Choose  <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
-                  } else {
-                    addToLog('lootbag Icon', 'Received <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
-                  }
-                  // Default select is the first item so this button is always valid
+                  }                  
                   clickElement(eltButton);
                 }
               }
