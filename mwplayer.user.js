@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.802
+// @version     1.1.803
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.802',
+  version: '1.1.803',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5112,7 +5112,7 @@ function saveSettings() {
   //Mafia Tab Checkboxes
   saveCheckBoxElementArray([
     'autoAskJobHelp','acceptMafiaInvitations','autoAskHelponCC', 'autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareCoins',
-    'autoShareWishlist', 'autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoWarBetray','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept','autoSafehouse',
+    'autoShareWishlist', 'autoHelp','autoWarHelp','autoBurnerHelp','autoPartsHelp','autoGiftSkipOpt','autoGiftWaiting','autoGiftAccept','autoSafehouse',
     'sendEnergyPack','askEnergyPack','rewardEnergyPack',
     'autoWar','autoWarPublish','autoWarRallyPublish','autoWarResponsePublish','autoWarRewardPublish'
   ]);
@@ -6995,17 +6995,6 @@ function createMafiaTab() {
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   label = makeElement('label', rhs, {'for':id, 'title':title});
   label.appendChild(document.createTextNode(' On Parts '));
-
-  // Betray friends in wars
-  item = makeElement('div', list);
-  lhs = makeElement('div', item, {'class':'lhs'});
-  rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
-  title = 'Betray a random friend?';
-  id = 'autoWarBetray';
-  makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
-  label = makeElement('label', rhs, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode(' Betray friends in wars'));
 
   // Skip gift wall posts
   item = makeElement('div', list);
@@ -12926,7 +12915,7 @@ function jobLoot(element) {
         innerNoTags.match(/found(?:\s+an?)?\s+(.*?)\s+on\s+the/i) ||
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
       var loot = RegExp.$1;
-      if(loot.match(/(.*?)\.\s+used/i)) loot = RegExp.$1;
+      //if(loot.match(/(.*?)\.\s+used/i)) loot = RegExp.$1;
       if(loot.match(/(.+?)\s+?was(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$3;
       if(loot.match(/(.+?)\s+?(\.|-)\s+?used(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;      
       if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
@@ -13996,24 +13985,6 @@ function autoWishlist() {
 
 // Attack the first war opponent you can
 function autoWarAttack() {
-/*
-  // Betray logic
-  if (isGMChecked('autoWarBetray')) {
-    var betrayElts = $x('.//div//a[@class="sexy_button"]//span[contains(.,"Betray")]', innerPageElt);
-
-    // Betray a random friend
-    if (betrayElts && betrayElts.length > 0) {
-      var betrayFriend = betrayElts[Math.floor(Math.random() * betrayElts.length)];
-      Autoplay.fx = function() {
-        clickAction = 'war';
-        clickElement(betrayFriend);
-        DEBUG('Clicked betray friend button.');
-      };
-      Autoplay.start();
-      return true;
-    }
-  }
-*/
   if (helpWar) {
     // Help attempt was processed. Increment the update count.
     GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
@@ -16463,11 +16434,20 @@ function logResponse(rootElt, action, context) {
         // Job completed successfully.
         result = 'You performed ' + '<span class="job">' + jobName + '</span> earning <span class="good">' + xpGainTxt + '</span>';
         var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);        
-        cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
-        cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="italy_cash_icon"]', messagebox);
+        //cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
+        //cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="italy_cash_icon"]', messagebox);
+        if (!cashGainElt) {
+          cashGainElt = xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
+          bankCity = LV;
+        }
+        if (!cashGainElt) {
+          cashGainElt = xpathFirst('.//dd[@class="italy_cash_icon"]', messagebox);
+          bankCity = ITALY;
+        }
         if (cashGainElt) {
           var cashGainTxt = cashGainElt.innerHTML;
-          if (cashGainTxt.match(/(\d+?)\s+?\(you have/i)) cashGainTxt = cities[bankCity][CITY_CASH_SYMBOL]+ " "+RegExp.$1;
+          //cashGainTxt = cashGainTxt.replace(",","");
+          if (cashGainTxt.match(/(\d+?)\,(\d+?)\s+?\(you now/i)) cashGainTxt = cities[bankCity][CITY_CASH_SYMBOL]+RegExp.$1+","+RegExp.$2;
           result += ' and <span class="good">' + cashGainTxt + '</span>';
         }  
         if(masteryGainElt) result += masteryGainTxt;
