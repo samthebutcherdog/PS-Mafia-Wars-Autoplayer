@@ -13,13 +13,6 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 * Copyright PlayerScripts.com. All rights reserved. 2010
 */
-
-/*
-missions popups found
-Popup Found: pop_box_socialmission_error_dialog Failed to give reward. Please try again later.Close
-
-Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background: url(http://mwfb.static.zynga.com/mwfb/graphics/socialmissions/popups/txt_youvebeenrewarded.png) 0 0 no-repeat;height: 49px; width: 502px;margin: 0 auto;}.collectPopRow {color: #FFCD00; width: 616px;margin: 10px auto;text-align: center;}.collectPopLoot {margin: 10px auto;}.collectPopLootItem {text-align: center;}.collectPopName {height: 24px;width: 107px;text-align: center;margin: 0 auto;}Congratulations! You and your crew have successfully completed the mission. For your hard work, these great items have been added to your arsenal.Vicious Tiger5234Flame Broiler5633Death Dealer Minigun4864
-*/
 /**
 * @package: Facebook Mafia Wars Autoplayer
 * @authors: KCMCL, Bushdaka, crazydude, cygnum, rasmoe, Lister, SamTheButcher, MaxJ, donnaB,
@@ -49,7 +42,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.798
+// @version     1.1.799
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +53,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.798',
+  version: '1.1.799',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2105,6 +2098,7 @@ function doAutoPlay () {
   var hasFight = level >= 5;
   var hasProps = level >= 4;
   var hasMarket = level >= 7;
+  var hasMissions = level >= 12;
   // Set the default auto-play timer function and delay.
   Autoplay.fx = goHome;
   Autoplay.delay = getAutoPlayDelay();
@@ -2160,10 +2154,10 @@ function doAutoPlay () {
     if (autoWar()) return;
   }
 
-// newchange
-  if (running && isGMChecked('AutoMafiaMission') && !maxed && !timeLeftGM('colmissionTimer')) {
+// newchange hasMissions now locked below 12
+  if (running && isGMChecked('AutoMafiaMission') && hasMissions && !maxed && !timeLeftGM('colmissionTimer')) {
      if (Auto_Mafia_Mission() ) return;
-  } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds, Or Missions Turned Off') ;
+  } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds, Or Missions Turned Off, Or Not Level 12') ;
   }
 
   // Auto-collect take (limit to level 4 and above)
@@ -7138,9 +7132,7 @@ function createMafiaTab() {
 
   return mafiaTab;
 }
-
-/////////////////////////////////////// end mafia tab
-// Create Missions Tab  // newchange      'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
+//// Create Missions Tab
 function createHelpMissionsTab() {
   var elt, title, id, label, item, lhs, rhs, i, choice, div;
   var HelpMissionsTab = makeElement('div', null, {'id':'HelpMissionsTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
@@ -7186,9 +7178,7 @@ function createHelpMissionsTab() {
 
   return HelpMissionsTab;
 }
-//////////////////////
-
-// Create Autostat Tab
+//// Create Autostat Tab
 function createAutostatTab() {
   var title, id, label, i, j, choice, div;
   var autostatTab = makeElement('div', null, {'id':'autostatTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
@@ -7663,6 +7653,7 @@ function createEnergyTab() {
   // Energy to reserve jobs are not allowed to go below
   item = makeElement('div', list, {'class':'single'});
   title = 'Suspend automatic Job play below this level of energy.';
+  title += '  NOTE: Mission & Job LOWER limits are completely INDEPENDENT Of Each Other.';
   id = 'selectEnergyKeep';
   item.appendChild(document.createTextNode('While Energy Is Below '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
@@ -7681,11 +7672,12 @@ function createEnergyTab() {
 // drop a few lines
   item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px;'});
 
-//  title = 'Start spending energy For Missions when energy level is reached      NOTE: these need to be below the above 2';
+//  title = 'Start spending energy For Missions when energy level is reached      NOTE: these limits are COMPLETELY INDEPENDENT OF EACH OTHER
 
   // Energy to reserve for manual play
   item = makeElement('div', list, {'class':'single'});
   title = 'Suspend automatic missions below this level of energy.';
+  title += '  NOTE: Mission & Job LOWER limits areLOWER limits are completely INDEPENDENT Of Each Other.';
   id = 'selectMissionEnergyKeep';  //  selectEnergyKeep
   item.appendChild(document.createTextNode('While Energy Is Below '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
@@ -8330,6 +8322,7 @@ function createStaminaTab() {
   // Stamina to reserve for manual play
   item = makeElement('div', list, {'class':'single'});
   title = 'Suspend spending stamina for above choices while below this level.';
+  title += '  NOTE: Missions & Stamina LOWER limits are completely INDEPENDENT Of Each Other.';
   id = 'selectStaminaKeep';
   item.appendChild(document.createTextNode('While Stamina Is Below '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
@@ -8351,6 +8344,7 @@ function createStaminaTab() {
   // Stamina to reserve for manual play
   item = makeElement('div', list, {'class':'single'});
   title = 'Suspend automatic play and missions processing while below this level of stamina.';
+  title += '  NOTE: Missions & Stamina LOWER limits are completely INDEPENDENT Of Each Other.';
   id = 'selectStaminaMissionKeep';  //  selectStaminaKeep
   item.appendChild(document.createTextNode('While Stamina Is Below '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
