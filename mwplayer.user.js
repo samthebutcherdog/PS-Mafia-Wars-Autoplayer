@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.799
+// @version     1.1.800
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.799',
+  version: '1.1.800',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5020,8 +5020,6 @@ function saveDefaultSettings() {
 }
 
 function saveSettings() {
-  //NOTE : TODO Validation for all numeric fields
-
   var i;
   //Start Save General Tab Settings
   //General Tab Checkboxes
@@ -5032,11 +5030,12 @@ function saveSettings() {
   // Validation of refresh and delay values
   var refreshLow = parseInt(document.getElementById('r1').value); var refreshHigh = parseInt(document.getElementById('r2').value);
   var delayLow = parseInt(document.getElementById('d1').value); var delayHigh = parseInt(document.getElementById('d2').value);
-  if (refreshLow > refreshHigh || refreshLow < 8) {
+
+  if (refreshLow > refreshHigh || refreshLow < 8 || isNaN(refreshLow) || isNaN(refreshHigh) ) {
     alert('General Tab: The refresh values are invalid, defaulting them to 30s->110s.\nPS: Both have to be greater than the high delay value and at least 8s.');
     document.getElementById('r1').value = 30; document.getElementById('r2').value = 110;
     return;
-  } else if (delayLow > delayHigh || delayLow < 1 || delayHigh < 2) {
+  } else if (delayLow > delayHigh || delayLow < 1 || delayHigh < 2|| isNaN(delayLow) || isNaN(delayHigh) ) {
     alert('General Tab: The delay values are invalid, defaulting them to 3s->5s.\nPS: Low delay has to be at least 1s, high delay at least 2s.');
     document.getElementById('d1').value = 3; document.getElementById('d2').value = 5;
     return;
@@ -5056,7 +5055,9 @@ function saveSettings() {
   if (saveCheckBoxElement('autoPauseAfter')) {
     GM_setValue('autoPauselvlExp', ptsToNextLevel);
   }
-  GM_setValue('autoPauseExp', document.getElementById('autoPauseExp').value);
+  var autoPauseExp = parseInt(document.getElementById('autoPauseExp').value)
+  if(isNaN(autoPauseExp)) autoPauseExp = 0;
+  GM_setValue('autoPauseExp', autoPauseExp);
 
   GM_setValue('idleLocation', document.getElementById('idleLocation').selectedIndex);
 
@@ -5065,7 +5066,7 @@ function saveSettings() {
   GM_setValue('burnOption', document.getElementById('burnOption').value);
   GM_setValue('featJobIndex', document.getElementById('featJobIndex').selectedIndex);
 
-  GM_setValue('autoTournamentClass', parseInt(document.getElementById('autoTournamentClass').selectedIndex));
+  GM_setValue('autoTournamentClass', document.getElementById('autoTournamentClass').selectedIndex);
 
   for (i = 0, iLength=cities.length; i < iLength; ++i) {
     if (cities[i][CITY_SIDES].length > 0) {
@@ -5086,7 +5087,6 @@ function saveSettings() {
     'autoLog','logPlayerUpdates','filterLog','leftAlign','mastheadOnTop','fbwindowtitle','showPulse','showLevel',
     'hideGifts','hideGiftIcon','hideActionBox','hideOffer','hideFriendLadder', 'hideMessageIcon','hidePromoIcon','hideLiveUpdatesIcon','hideAttentionBox','HideSlotMachine','HideCollections'
   ]);
-
   //Display Tab Settings and Validation
   var logPlayerUpdates = (document.getElementById('logPlayerUpdates').checked === true);
   var logPlayerUpdatesMax = parseInt(document.getElementById('logPlayerUpdatesMax').value);
@@ -5096,7 +5096,9 @@ function saveSettings() {
     return;
   }
 
-  GM_setValue('autoLogLength', document.getElementById('autoLogLength').value);
+  var autoLogLength = parseInt(document.getElementById('autoLogLength').value)
+  if(isNaN(autoLogLength)) autoLogLength = 3000;
+  GM_setValue('autoLogLength', autoLogLength);
   GM_setValue('logPlayerUpdatesMax', logPlayerUpdatesMax);
 
   var filterOpt = document.getElementById('filterOpt').value;
@@ -5108,7 +5110,6 @@ function saveSettings() {
   //End Save Display Tab Settings
 
   //Start Save Mafia Tab Settings
-
   //Mafia Tab Checkboxes
   saveCheckBoxElementArray([
     'autoAskJobHelp','acceptMafiaInvitations','autoAskHelponCC', 'autoLevelPublish','autoAchievementPublish','autoIcePublish','autoSecretStash','autoShareCoins',
@@ -5118,21 +5119,23 @@ function saveSettings() {
   ]);
   //MafiaTab Settings and Validation
   // Examine share wishlist time
-  var shareWishlistTime = document.getElementById('autoShareWishlistTime').value;
+  var shareWishlistTime = parseInt(document.getElementById('autoShareWishlistTime').value);
   if (isNaN(shareWishlistTime) || parseFloat(shareWishlistTime) < 1) {
     alert('The share wishlist timer has to be at least 1 hour. For decimal numbers please use ".", e.g. 1.5.\nDefaulting it to 1 hour.');
     document.getElementById('autoShareWishlistTime').value = 1;
     return;
   }
-  GM_setValue('autoAskJobHelpMinExp', document.getElementById('autoAskJobHelpMinExp').value);
+  var autoAskJobHelpMinExp = parseInt(document.getElementById('autoAskJobHelpMinExp').value)
+  if(isNaN(autoAskJobHelpMinExp)) autoAskJobHelpMinExp = 0;
+  GM_setValue('autoAskJobHelpMinExp', autoAskJobHelpMinExp);
 
   GM_setValue('selectMoscowTier', (document.getElementById('selectMoscowTier').value)?document.getElementById('selectMoscowTier').value:0);
   GM_setValue('selectMoscowTiercheck', (document.getElementById('selectMoscowTier').value)?'checked':0);
   GM_setValue('selectBangkokTier', (document.getElementById('selectBangkokTier').value)?document.getElementById('selectBangkokTier').value:0);
   GM_setValue('selectBangkokTiercheck', (document.getElementById('selectBangkokTier').value)?'checked':0);
 
-  GM_setValue('autoIcePublishFrequency', document.getElementById('autoIcePublishFrequency').value);
-  GM_setValue('autoSecretStashFrequency', document.getElementById('autoSecretStashFrequency').value);
+  GM_setValue('autoIcePublishFrequency', parseInt(document.getElementById('autoIcePublishFrequency').value));
+  GM_setValue('autoSecretStashFrequency', parseInt(document.getElementById('autoSecretStashFrequency').value));
 
   GM_setValue('autoShareWishlistTime', shareWishlistTime);
 
@@ -5148,7 +5151,6 @@ function saveSettings() {
   saveCheckBoxElementArray([
     'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
   ]);
-
   //Start Save Autostat Tab Settings
   //Autostat Tab Checkboxes
   saveCheckBoxElementArray([
@@ -5167,7 +5169,6 @@ function saveSettings() {
     GM_setValue(autoStatPrios[i], document.getElementById(autoStatPrios[i]).value);
 
   GM_setValue('autoEnforcedTitle', (document.getElementById('autoEnforcedTitle').value)?document.getElementById('autoEnforcedTitle').value:"");
-
   // Validate autoEnforcedTitleTime
   var autoEnforcedTitleTime = document.getElementById('autoEnforcedTitleTime').value;
   if (isNaN(autoEnforcedTitleTime) || parseFloat(autoEnforcedTitleTime) < 1) {
@@ -5229,11 +5230,9 @@ function saveSettings() {
   setSavedList('masteryJobsList', mastery_jobs_list);
   GM_setValue('selectMission', document.getElementById('selectMissionS').selectedIndex);
   GM_setValue('selectTier', document.getElementById('selectTier').value);
-
   // Validate the estimated job ratio setting.
   var autoEnergyPackOn = (document.getElementById('autoEnergyPack').checked === true );
   var estimateJobRatio = parseFloat(document.getElementById('estimateJobRatio').value);
-
   if (autoEnergyPackOn) {
     if (isNaN(estimateJobRatio)) {
       alert('Please enter a number between 0 and 3 for your estimated job xp to energy ratio');
@@ -5241,20 +5240,21 @@ function saveSettings() {
     }
   }
   GM_setValue('estimateJobRatio', document.getElementById('estimateJobRatio').value);
-  GM_setValue('autoEnergyPackForcePts', document.getElementById('autoEnergyPackForcePts').value);
-
+  var autoEnergyPackForcePts = parseInt(document.getElementById('autoEnergyPackForcePts').value);
+  if (isNaN(autoEnergyPackForcePts)) autoEnergyPackForcePts = 0;
+  GM_setValue('autoEnergyPackForcePts', autoEnergyPackForcePts);
 
   // Validate and save energy limits settings.
-  var selectEnergyUse = document.getElementById('selectEnergyUse').value;
-  var selectEnergyKeep = document.getElementById('selectEnergyKeep').value;
+  var selectEnergyUse = parseInt(document.getElementById('selectEnergyUse').value);
+  var selectEnergyKeep = parseInt(document.getElementById('selectEnergyKeep').value);
   if (isNaN(selectEnergyUse) || isNaN(selectEnergyKeep)) {
     alert('Please enter numeric values for Energy reserve and Energy threshold.');
     return;
   }
 //needchange
   // Validate and save mission energy limits settings.
-  var selectMissionEnergyKeep = document.getElementById('selectMissionEnergyKeep').value;
-    if(isNaN(selectMissionEnergyKeep)) {
+  var selectMissionEnergyKeep = parseInt(document.getElementById('selectMissionEnergyKeep').value);
+  if(isNaN(selectMissionEnergyKeep)) {
     alert('Please Enter Numeric Values For The Mission Energy Threshold.');
     return;
   }
@@ -5283,7 +5283,6 @@ function saveSettings() {
   }
 
   //End Save Stamina Tab Settings
-
   //Start Save Health Tab Settings
   //Health Tab Checkboxes
   saveCheckBoxElementArray([
@@ -5299,7 +5298,9 @@ function saveSettings() {
   GM_setValue('healthLevel', healthLevel);
   GM_setValue('healLocation', document.getElementById('healLocation').value);
 
-  GM_setValue('stamina_min_heal', document.getElementById('stamina_min_heal').value);
+  var staminaMinHeal = parseInt(document.getElementById('stamina_min_heal').value);
+  if(isNaN(staminaMinHeal)) staminaMinHeal = 0;
+  GM_setValue('stamina_min_heal', staminaMinHeal);
 
   var hideAttacks = (document.getElementById('hideAttacks').checked === true);
   var rideHitlistXP = parseInt(document.getElementById('rideHitlistXP').value);
@@ -5341,7 +5342,6 @@ function saveSettings() {
   }
 
   //End Save Health Tab Settings
-
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
@@ -5350,10 +5350,30 @@ function saveSettings() {
   ]);
 
   //Cash Settings and Validation
-  GM_setValue('minCashNew York', document.getElementById('minCashNew York').value);
-  GM_setValue('minCashCuba', document.getElementById('minCashCuba').value);
-  GM_setValue('minCashMoscow', document.getElementById('minCashMoscow').value);
-  GM_setValue('minCashBangkok', document.getElementById('minCashBangkok').value);
+  var minNYCash = parseInt(document.getElementById('minCashNew York').value);
+  var minCashCuba = parseInt(document.getElementById('minCashCuba').value);
+  var minCashMoscow = parseInt(document.getElementById('minCashMoscow').value);
+  var minCashBangkok = parseInt(document.getElementById('minCashBangkok').value);
+  if(isNaN(minNYCash)) {
+    alert('Please Enter Numeric Values For NY Min Upgrade Cash.');
+    return;
+  }
+  if(isNaN(minCashCuba)) {
+    alert('Please Enter Numeric Values For Cuba Min Upgrade Cash.');
+    return;
+  }
+  if(isNaN(minCashMoscow)) {
+    alert('Please Enter Numeric Values For Moscow Min Upgrade Cash.');
+    return;
+  }
+  if(isNaN(minCashBangkok)) {
+    alert('Please Enter Numeric Values For Bangkok Min Upgrade Cash.');
+    return;
+  }
+  GM_setValue('minCashNew York', minNYCash);
+  GM_setValue('minCashCuba', minCashCuba);
+  GM_setValue('minCashMoscow', minCashMoscow);
+  GM_setValue('minCashBangkok', minCashBangkok);
 
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
   GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
@@ -5457,6 +5477,7 @@ function saveSettings() {
   updateLogStats();
   refreshMWAPCSS();
   sendSettings();
+  
 }
 
 function updateMastheadMenu() {
@@ -6037,6 +6058,11 @@ function createLogBox() {
   var closeLogButton = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'style':'position: absolute; right: 5px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     closeLogButton.appendChild(document.createTextNode('close'));
     closeLogButton.addEventListener('click', hideMafiaLogBox, false);
+
+  title = 'Click to open settings';
+  var settingsElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_settings_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 210px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
+    settingsElt.appendChild(document.createTextNode('settings'));
+    settingsElt.addEventListener('click', toggleSettings, false);
 
   title = 'Click to toggle log filtering';
   var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 170px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
@@ -8953,12 +8979,18 @@ function validateStaminaTab() {
   s.staminaSpend = checked('staminaSpend');
   s.staminaSpendHow = document.getElementById('staminaSpendHow').selectedIndex;
   s.staminaNoDelay = checked('staminaNoDelay');
-  s.selectStaminaUse = document.getElementById('selectStaminaUse').value;
+  var selectStaminaUse = parseInt(document.getElementById('selectStaminaUse').value);
+  if (isNaN(selectStaminaUse)) selectStaminaUse = 0;
+  s.selectStaminaUse = selectStaminaUse;
   s.selectStaminaUseMode = document.getElementById('selectStaminaUseMode').selectedIndex;
-  s.selectStaminaKeep = document.getElementById('selectStaminaKeep').value;
+  var selectStaminaKeep = parseInt(document.getElementById('selectStaminaKeep').value);
+  if (isNaN(selectStaminaKeep)) selectStaminaKeep = 0;
+  s.selectStaminaKeep = selectStaminaKeep;
   s.selectStaminaKeepMode = document.getElementById('selectStaminaKeepMode').selectedIndex;
 
-  s.selectStaminaMissionKeep = document.getElementById('selectStaminaMissionKeep').value;
+  var selectStaminaMissionKeep = parseInt(document.getElementById('selectStaminaMissionKeep').value);
+  if (isNaN(selectStaminaMissionKeep)) selectStaminaMissionKeep = 0;
+  s.selectStaminaMissionKeep = selectStaminaMissionKeep;
   s.selectStaminaMissionKeepMode = document.getElementById('selectStaminaMissionKeepMode').selectedIndex;
 
   s.allowStaminaToLevelUp = checked('allowStaminaToLevelUp');
