@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.796
+// @version     1.1.797
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.796',
+  version: '1.1.797',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9375,7 +9375,7 @@ function handleModificationTimer(target) {
         setListenContent(false);
         makeElement('div', jobResults[i], {'id':'job_flag', 'style':'display: none;'});
         setListenContent(true);
-        DEBUG('Detected Las Vegas job_results change on job ='+i);
+        DEBUG('Detected '+cities[city][CITY_NAME]+' jobresults change on job ='+i);
         pageChanged = true;
         if (running) justPlay = true;
         DEBUG('Flagged');
@@ -12649,7 +12649,7 @@ function getJobRowItems(jobName) {
   var inner = innerPageElt? innerPageElt.innerHTML : '';
   var innerNoTags = inner.untag();
 
-DEBUG(' show inner for loot needed' + innerNoTags);
+// DEBUG(' show inner for loot needed' + innerNoTags);
 
   if (innerNoTags.match(/You do not have enough cash to buy/i)) {
     addToLog('warning Icon', 'You don\'t have enough cash to buy necessary equipment.');
