@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.800
+// @version     1.1.801
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.800',
+  version: '1.1.801',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5133,9 +5133,13 @@ function saveSettings() {
   GM_setValue('selectMoscowTiercheck', (document.getElementById('selectMoscowTier').value)?'checked':0);
   GM_setValue('selectBangkokTier', (document.getElementById('selectBangkokTier').value)?document.getElementById('selectBangkokTier').value:0);
   GM_setValue('selectBangkokTiercheck', (document.getElementById('selectBangkokTier').value)?'checked':0);
-
-  GM_setValue('autoIcePublishFrequency', parseInt(document.getElementById('autoIcePublishFrequency').value));
-  GM_setValue('autoSecretStashFrequency', parseInt(document.getElementById('autoSecretStashFrequency').value));
+  var autoIcePublishFrequency = parseInt(document.getElementById('autoIcePublishFrequency').value);
+  if(isNaN(autoIcePublishFrequency)) autoIcePublishFrequency = 1;
+  
+  GM_setValue('autoIcePublishFrequency', autoIcePublishFrequency);
+  var autoSecretStashFrequency = parseInt(document.getElementById('autoSecretStashFrequency').value);
+  if(isNaN(autoSecretStashFrequency)) autoSecretStashFrequency = 1;
+  GM_setValue('autoSecretStashFrequency', autoSecretStashFrequency);
 
   GM_setValue('autoShareWishlistTime', shareWishlistTime);
 
