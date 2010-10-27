@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.801
+// @version     1.1.802
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.801',
+  version: '1.1.802',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2231,12 +2231,6 @@ function doAutoPlay () {
     if (AskforHelp('2')) return;
   }
 
-  // Ask for Help on Bangkok Tier
-  if (running && !maxed && parseInt(GM_getValue('selectBangkokTier')) && !timeLeftGM('AskforHelpBangkokTimer')) {
-    DEBUG('going to Bangkok for Ask for Help-job');
-    if (AskforHelp('3')) return;
-  }
-
   // Auto-stat
   if (running && !maxed && stats > 0 && isGMChecked('autoStat') && !parseInt(GM_getValue('restAutoStat')) ) {
     if (autoStat()) return;
@@ -2257,6 +2251,11 @@ function doAutoPlay () {
     if (autoGiftWaiting()) return;
   }
 
+  // Ask for Help on Bangkok Tier
+  if (running && !maxed && parseInt(GM_getValue('selectBangkokTier')) && !timeLeftGM('AskforHelpBangkokTimer')) {
+    DEBUG('going to Bangkok for Ask for Help-job');
+    if (AskforHelp('3')) return;
+  }
 
   // Auto-Enforce title
   if (running && !maxed && GM_getValue('autoEnforcedTitle')!='' && !timeLeftGM('autoEnforcedTitleTimer')) {
@@ -12928,7 +12927,8 @@ function jobLoot(element) {
         innerNoTags.match(/earned(?:\s+an?)?\s+(.*?)\.\s+you\s+/i)) {
       var loot = RegExp.$1;
       if(loot.match(/(.*?)\.\s+used/i)) loot = RegExp.$1;
-      if(loot.match(/(.*?)\.\s+was/i)) loot = RegExp.$1;
+      if(loot.match(/(.+?)\s+?was(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$3;
+      if(loot.match(/(.+?)\s+?(\.|-)\s+?used(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;      
       if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
       else strLoot += 'Found <span class="loot">' + loot+'</span> in the job.';
       lootbag.push(loot);
@@ -15025,10 +15025,13 @@ function goJobsNav() {
 function goInventoryNav() {
   var elt = xpathFirst('//div[@class="nav_link inventory_link"]/a');
   if (!elt) {
-    var elt = xpathFirst('.//a[@class="header_inventory_button"]', mastheadElt);
+    elt = xpathFirst('.//a[@class="header_inventory_button"]', mastheadElt);
     if (!elt) {
-      addToLog('warning Icon', 'Can\'t find Inventory nav link to click.');
-      return false;
+      elt = xpathFirst('.//div[@id="nav_link_inventory_unlock"]//a', mastheadElt);
+      if (!elt) {
+        addToLog('warning Icon', 'Can\'t find Inventory nav link to click.');
+        return false;
+      }
     }
   }
   clickElement(elt);
@@ -15236,7 +15239,8 @@ function goJob(jobno) {
       } else {
         addToLog('warning Icon', 'Opponents did not qualify ... Going home to find new opponents.');
         elt=undefined;
-        goHome();
+        //goHome();
+        goJobsNav();
         return false;
       }
       tmp = 5 ;
@@ -15657,7 +15661,7 @@ function logFightResponse(rootElt, resultElt, context) {
           var stashUser = linkToString(stashFinder, 'stashUser');
           addToLog('lootbag Icon','Clicked to send '+stashUser+' secret stash! ('+logFrequency+'/'+publishFrequency+')');
         } else {
-          addToLog('info Icon','Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
+          DEBUG('Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
         }
         SecretStashFightingCount+=1;
         GM_setValue('SecretStashFightingCount',SecretStashFightingCount);
@@ -16454,11 +16458,18 @@ function logResponse(rootElt, action, context) {
 
       if (xpGainElt) {
         jobOptimizeOn = false;
+        var xpGainTxt = xpGainElt.innerHTML.toLowerCase();                
+        if (xpGainTxt.match(/(\d+?)\s+?\(you need/i)) xpGainTxt = RegExp.$1 + " xp";
         // Job completed successfully.
-        result = 'You performed ' + '<span class="job">' + jobName + '</span> earning <span class="good">' + xpGainElt.innerHTML.toLowerCase() + '</span>';
-        var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);
+        result = 'You performed ' + '<span class="job">' + jobName + '</span> earning <span class="good">' + xpGainTxt + '</span>';
+        var cashGainElt = xpathFirst('.//dd[@class="message_cash"]', messagebox);        
         cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="vegas_cash_icon"]', messagebox);
-        if (cashGainElt) result += ' and <span class="good">' + cashGainElt.innerHTML + '</span>';
+        cashGainElt = cashGainElt ? cashGainElt : xpathFirst('.//dd[@class="italy_cash_icon"]', messagebox);
+        if (cashGainElt) {
+          var cashGainTxt = cashGainElt.innerHTML;
+          if (cashGainTxt.match(/(\d+?)\s+?\(you have/i)) cashGainTxt = cities[bankCity][CITY_CASH_SYMBOL]+ " "+RegExp.$1;
+          result += ' and <span class="good">' + cashGainTxt + '</span>';
+        }  
         if(masteryGainElt) result += masteryGainTxt;
         result += '.';
         if (innerNoTags.indexOf('you spent no energy') != -1) result += ' You spent 0 energy on this job.';
@@ -16520,7 +16531,8 @@ function logResponse(rootElt, action, context) {
       }
 
       if (pushNextJob) {
-        customizeVegasJobs();
+        //customizeVegasJobs();
+        goJobsNav();
       } else {
         return;
       }
@@ -17082,7 +17094,7 @@ function handlePopups() {
             }
 
             // Get rid of War Not in Mafia popup
-            if (popupInnerNoTags.indexOf('send them a request') != -1) {
+            if (popupInnerNoTags.indexOf('Send them a request') != -1) {
               return(closePopup(popupElts[i], "War Not in Mafia"));
             }
 
@@ -17102,9 +17114,8 @@ function handlePopups() {
               DEBUG('Popup Process: Get Secret Stash Processed');
               var eltButton = xpathFirst('.//button',popupElts[i]);
               if (eltButton) {
-                eltLoot = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
-                if (eltLoot && isGMChecked('useSecretStashItems') && autoSecretStashList) {
-                  eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
+                var eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
+                if (eltLoot1 && isGMChecked('useSecretStashItems') && autoSecretStashList) {                  
                   var lootChoice = eltLoot1;
                   eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
                   eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
@@ -17121,15 +17132,15 @@ function handlePopups() {
                       lootChoice = eltLoot3;
                       break;
                     }
-                  }
-                  if (lootChoice) {
-                    clickElement(lootChoice);
-                    addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
-                    addToLog('lootbag Icon', 'Choose  <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
-                  }
-                  clickElement(eltButton);
+                  }                  
                 }
               }
+              if (lootChoice) {
+                clickElement(lootChoice);
+                addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
+                addToLog('lootbag Icon', 'Choose  <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
+              }
+              clickElement(eltButton);
               return(closePopup(popupElts[i], "Process Secret Stash"));
             }
 
