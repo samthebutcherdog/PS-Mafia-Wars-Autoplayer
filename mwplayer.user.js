@@ -49,7 +49,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.797
+// @version     1.1.798
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -60,7 +60,7 @@ Popup Found: pop_box_socialmission_collect_dialog .collectPopHeader {background:
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.797',
+  version: '1.1.798',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2297,11 +2297,14 @@ function doAutoPlay () {
 //    DEBUG('auto-heal passed main block check, checking can auto heal ');
     if(canautoheal()) {
       DEBUG('auto-healing '); // hide/remove after testing
+      if(quickHeal(false)) return;
+      /*
       if (isGMChecked('quickHeal')) {
         if(quickHeal(false)) return;
       } else {
         if(autoHeal()) return;
       }
+      */
     }
   } else {
 // hide/remove after testing
@@ -2446,11 +2449,12 @@ function canautoheal() {
     DEBUG(' STAMINA_HOW_FIGHTROB  blocked autoheal ');
     return false;
   }
+  /* Unnecessary due to prior if statement
   if((GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) && (isGMChecked('BlockHealRobbing')) )  {
     DEBUG(' STAMINA_HOW_ROBBING blocked autoheal ');
     return false;
   }
-
+  */
 //  DEBUG('canautoheal is allowing healing ');
   return true;
 }
@@ -2511,7 +2515,7 @@ function autoAccept() {
   Autoplay.start();
   return true;
 }
-
+/* function not currently used
 function autoHeal() {
   // NOTE: In the interest of time, delays are waived.
   Autoplay.delay = noDelay;
@@ -2551,7 +2555,7 @@ function autoHeal() {
   Autoplay.start();
   return true;
 }
-
+*/
 function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
@@ -5289,7 +5293,7 @@ function saveSettings() {
   //Start Save Health Tab Settings
   //Health Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoHeal','quickHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt7','hideAttacks','BlockHealRobbing','stopPA'
+    'autoHeal','attackCritical','hideInHospital','forceHealOpt3','forceHealOpt4','forceHealOpt5','forceHealOpt7','hideAttacks','stopPA'
   ]);
   //Heal Settings and Validation
   var autoHealOn  = (document.getElementById('autoHeal').checked === true);
@@ -8465,13 +8469,15 @@ function createHealTab() {
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
   rhs = makeElement('div', item, {'class':'rhs'});
-  makeElement('br', item, {'class':'hide'});
   // Use quickHeal() instead of autoHeal()
+  /* Removal of settings on wall
+  makeElement('br', item, {'class':'hide'});
   title = 'Check for PS MWAP to use quickheal';
   id = 'quickHeal';
   makeElement('input', rhs, {'type':'checkbox', 'id':id, 'title':title, 'value':'checked'}, id);
   makeElement('img', rhs, {'style':'padding-left: 5px;','src':stripURI(healthIcon)});
   makeElement('label', rhs, {'for':id,'title':title}).appendChild(document.createTextNode(' Use quickheal'));
+  */
 
   // Attack at critical health
   makeElement('br', rhs, {'class':'hide'});
@@ -8517,7 +8523,7 @@ function createHealTab() {
     return true;
   };
   hideInHosp.addEventListener('click', hideHandler, false);
-
+/* redundant setting  Use FightRob instead
  // block healing while robbing
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -8526,7 +8532,7 @@ function createHealTab() {
   title = 'block auto heal while in ROB RANDOM OPPONENTS mode';
   makeElement('input', item, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   makeElement('label', item, {'for':id,'title':title}).appendChild(document.createTextNode(' block auto heal while robbing'));
-
+*/
   // stamina minimum to allow healing
   item = makeElement('div', list);
   lhs = makeElement('div', item, {'class':'lhs'});
@@ -13313,7 +13319,6 @@ BrowserDetect.init();
         'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
         '&nbsp;&nbsp;-Heal in : <strong>' + locations[GM_getValue('healLocation')] + '</strong><br>' +
         '&nbsp;&nbsp;-Minimum health: <strong>' + GM_getValue('healthLevel') + '</strong><br>' +
-        '&nbsp;&nbsp;-Use quickheal: <strong>' + showIfUnchecked(GM_getValue('quickHeal')) + '</strong><br>' +
         '&nbsp;&nbsp;-Attack at critical health: <strong>' + showIfUnchecked(GM_getValue('attackCritical')) + '</strong><br>' +
         '&nbsp;&nbsp;-Hide in Hospital: <strong>' + showIfUnchecked(GM_getValue('hideInHospital')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal if health is above 19: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt7')) + '</strong><br>' +
@@ -13321,7 +13326,7 @@ BrowserDetect.init();
         '&nbsp;&nbsp;&nbsp;-Heal when stamina is full: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt4')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Heal when stamina can be spent: <strong>' + showIfUnchecked(GM_getValue('forceHealOpt3')) + '</strong><br>' +
         '&nbsp;&nbsp;&nbsp;-Minimum Stamina Allowing auto-Heal: <strong>' + GM_getValue('stamina_min_heal') + '</strong><br>' +
-        '&nbsp;&nbsp;&nbsp;block auto-Heal while robbing: <strong>' + GM_getValue('BlockHealRobbing') + '</strong><br>' +
+        //'&nbsp;&nbsp;&nbsp;block auto-Heal while robbing: <strong>' + GM_getValue('BlockHealRobbing') + '</strong><br>' +
         'Hitlist riding: <strong>' + showIfUnchecked(GM_getValue('hideAttacks')) + '</strong><br>' +
         '&nbsp;&nbsp;Hitlist riding XP limit: <strong>' + GM_getValue('rideHitlistXP') + '</strong><br>' +
         'Stop PA: <strong>' + showIfUnchecked(GM_getValue('stopPA')) + '</strong><br>' +
