@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.804
+// @version     1.1.805
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.804',
+  version: '1.1.805',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -16235,7 +16235,7 @@ function logJSONResponse(autoplay, response, action, context) {
         return false;
         break;
       default:
-        addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' + action + '".');
+        addToLog('warning Icon', 'BUG DETECTED: Unrecognized JSON action "' + action + '".<br>' + responseText);
         return false;
     }
   } catch (ex) {
