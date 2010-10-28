@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.806
+// @version     1.1.807
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.806',
+  version: '1.1.807',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2876,10 +2876,16 @@ function autoCollectTake(takeCity) {
 
   // Visit the property Nav
   if (!onPropertyNav()) {
+    if (GM_getValue('propertyNavAttempt')) {  //Tried to go to city, but failed.  Reset and continue.
+      GM_setValue ('propertyNavAttempt', false);
+      return false;
+    }
     Autoplay.fx = goPropertyNav;
     Autoplay.start();
+    GM_setValue ('propertyNavAttempt', true); 
     return true;
   }
+  GM_setValue ('propertyNavAttempt', false);
 
   var ajaxID = createAjaxPage(true);
   var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'collectall' + SCRIPT.city + (takeCity+1) + '&requesttype=json", 1, 1, 0, 0); return false;'});
