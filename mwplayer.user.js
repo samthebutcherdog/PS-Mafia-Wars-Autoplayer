@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.803
+// @version     1.1.804
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.803',
+  version: '1.1.804',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2163,8 +2163,12 @@ function doAutoPlay () {
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
+      /*
       if (level >= cities[i][CITY_LEVEL] &&
           isGMChecked('collectTake' + cities[i][CITY_NAME]) &&
+          !timeLeftGM('takeHour' + cities[i][CITY_NAME])) {
+      */
+      if (level >= cities[i][CITY_LEVEL] &&
           !timeLeftGM('takeHour' + cities[i][CITY_NAME])) {
 
         // Collect take
@@ -2859,10 +2863,16 @@ function autoCollectTake(takeCity) {
   Autoplay.delay = getAutoPlayDelay();
   // Go to the correct city.
   if (city != takeCity) {
+    if (GM_getValue('collectCityAttempt')) {  //Tried to go to city, but failed.  Reset and continue.
+      GM_setValue ('collectCityAttempt', false);
+      return false;
+    }
     Autoplay.fx = function(){goLocation(takeCity);};
     Autoplay.start();
+    GM_setValue ('collectCityAttempt', true); 
     return true;
   }
+  GM_setValue ('collectCityAttempt', false);
 
   // Visit the property Nav
   if (!onPropertyNav()) {
@@ -5348,7 +5358,7 @@ function saveSettings() {
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York','collectTakeCuba','collectTakeMoscow','collectTakeBangkok','collectTakeLas Vegas','collectTakeItaly',
+    'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York',
     'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','autoBankItaly','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
   ]);
 
@@ -8767,6 +8777,13 @@ function createCashTab () {
 
   // Collect Takes
   var xTop = 50;
+  title = 'Automatically collect from properties';
+  id = 'collectTake' + cities[0][CITY_NAME];
+  var autoTake = makeElement('div', cashTab, {'style':'top: '+xTop+'px; right: 10px;'});
+  label = makeElement('label', autoTake, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Collect from Properties'));
+  makeElement('input', autoTake, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  /*
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
     title = 'Automatically collect ' + cities[i][CITY_NAME] + ' take';
     id = 'collectTake' + cities[i][CITY_NAME];
@@ -8776,6 +8793,7 @@ function createCashTab () {
     makeElement('input', autoTake, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
     xTop += 25;
   }
+  */
   // Autobanking
   var xTop = 220;
   for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -10533,10 +10551,10 @@ function showTimers() {
       '<br>&nbsp;&nbsp;buildWeaponTimer: ' + getHoursTime('buildWeaponTimer') +
       '<br>&nbsp;&nbsp;buildArmorTimer: ' + getHoursTime('buildArmorTimer') +
       '<br>&nbsp;&nbsp;takeHourNew York: ' + getHoursTime('takeHourNew York') +
-      '<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
-      '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
-      '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
-      '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
+      //'<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
+      //'<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
+      //'<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
+      //'<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
       '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsHelpTimer: ' + getHoursTime('colmissionHelpTimer') +
@@ -10574,10 +10592,10 @@ function resetTimers(manually) {
   checkTimer('askCasinoPartsTimer', 900);
   checkTimer('buildWeaponTimer', 900);
   checkTimer('buildArmorTimer', 900);
-  checkTimer('takeHourLas Vegas', 300);
-  checkTimer('takeHourBangkok', 300);
-  checkTimer('takeHourCuba', 300);
-  checkTimer('takeHourMoscow', 300);
+  //checkTimer('takeHourLas Vegas', 300);
+  //checkTimer('takeHourBangkok', 300);
+  //checkTimer('takeHourCuba', 300);
+  //checkTimer('takeHourMoscow', 300);
   checkTimer('takeHourNew York', 300);
   checkTimer('dailyChecklistTimer', 900);
   checkTimer('autoGiftAcceptTimer', 3600);
@@ -13358,14 +13376,14 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Min cash (Bangkok): <strong>' + GM_getValue('minCashBangkok') + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeNew York')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourNew York', 0) + '</strong><br>' +
-        'Collect Cuba Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeCuba')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourCuba', 0) + '</strong><br>' +
-        'Collect Moscow Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeMoscow')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourMoscow', 0) + '</strong><br>' +
-        'Collect Bangkok Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeBangkok')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourBangkok', 0) + '</strong><br>' +
-        'Collect Vegas Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeLas Vegas')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourLas Vegas', 0) + '</strong><br>' +
+        //'Collect Cuba Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeCuba')) + '</strong><br>' +
+        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourCuba', 0) + '</strong><br>' +
+        //'Collect Moscow Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeMoscow')) + '</strong><br>' +
+        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourMoscow', 0) + '</strong><br>' +
+        //'Collect Bangkok Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeBangkok')) + '</strong><br>' +
+        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourBangkok', 0) + '</strong><br>' +
+        //'Collect Vegas Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeLas Vegas')) + '</strong><br>' +
+        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourLas Vegas', 0) + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapons: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
