@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.805
+// @version     1.1.806
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.805',
+  version: '1.1.806',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2161,7 +2161,7 @@ function doAutoPlay () {
   }
 
   // Auto-collect take (limit to level 4 and above)
-  if (running && !maxed && hasProps) {
+  if (running && !maxed && hasProps && isGMChecked('collectTake' + cities[0][CITY_NAME])) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
       /*
       if (level >= cities[i][CITY_LEVEL] &&
