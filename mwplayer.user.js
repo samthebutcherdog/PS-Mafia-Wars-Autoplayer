@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.808
+// @version     1.1.809
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.808',
+  version: '1.1.809',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2557,7 +2557,8 @@ function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
     if (!askResult) {
-      addToLog('warning Icon', 'Unable to Ask for Help on Crew Collections.');
+      addToLog('warning Icon', 'Unable to Ask for Help on Crew Collections.  Resetting Timer for 4 hours.');
+      setGMTime('autoAskHelponCCTimer', '4 hours');
     }
   };
 
@@ -2574,8 +2575,7 @@ function autoAskHelponCC(){
     Autoplay.start();
     return true;
   }
-
-  DEBUG('Since we\'re here we must be on the Collections Page.');
+  
   var helpButtons;
   var numButtons;
 
@@ -2592,7 +2592,7 @@ function autoAskHelponCC(){
     return true;
     }
   } else {
-    DEBUG('No Help on Crew Collection buttons found - Resetting Timer for 4 hours');
+    DEBUG('No Help on Crew Collection buttons found. Resetting Timer for 4 hours.');
     setGMTime('autoAskHelponCCTimer', '4 hours');
   }
   return;
@@ -2602,7 +2602,7 @@ function AskforHelp(hlpCity) {
   // Common function
   var doAskFunction = function (askResult) {
     if (!askResult) {
-      addToLog('warning Icon', 'Unable to Ask for Help on ' + helpCity +'.'+ tabno+'. Please Check your \'Ask for Help\'-settings on PS MWAP\'s Mafia tab.');
+      addToLog('warning Icon', 'Unable to Ask for Help on ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]+'. Please Check your \'Ask for Help\'-settings on PS MWAP\'s Mafia tab.');
       if(helpCity==2) GM_setValue('selectMoscowTier', 0);
       if(helpCity==3) GM_setValue('selectBangkokTier', 0);
     }
@@ -2642,19 +2642,19 @@ function AskforHelp(hlpCity) {
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
     setGMTime(timerName, '2 hours');
-    addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again on ' + helpCity +'.'+ tabno);
-    DEBUG('Link for Asking says Wait for 24 hours ... Resetting Timer for 2h on ' + helpCity +'.'+ tabno);
+    addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
+    DEBUG('Link for Asking says : Wait for 24 hours ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
   } else {
     var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
     if (askHelpFriends) {
-      addToLog('info Icon', ' Clicked to Ask for Help on ' + helpCity +'.'+ tabno);
+      addToLog('info Icon', ' Clicked to Ask for Help in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
       clickElement(askHelpFriends);
       setGMTime(timerName, '12 hours');
       return true;
     } else {
-      setGMTime(timerName, '1 hour');
-      addToLog('info Icon', ' You cannot Ask for Help yet on ' + helpCity +'.'+ tabno);
-      DEBUG('Link for Asking for Help not found ... Resetting Timer for 1h on ' + helpCity +'.'+ tabno);
+      setGMTime(timerName, '2 hours');
+      addToLog('info Icon', ' You cannot Ask for Help yet in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
+      DEBUG('Link for Asking for Help not found ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
     }
   }
   return;
@@ -2792,10 +2792,16 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
             // changing buildType to part specific building
             buildType = itemArray[itemIndex][2];
             // Asking for Casino Parts
+            
+            var ajaxID = createAjaxPage(true);
+            elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 0, 0, 0); return false;'});            
+            Autoplay.fx = function() {
+              clickAction = 'casino parts';
+              clickContext = itemCity;
+              clickElement(elt);
+            };
+            Autoplay.start();            
 
-            var ajaxID = createAjaxPage(false, 'casino parts', LV);
-            var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'askForHelp' + SCRIPT.city + '5&city=5&building_type=' + buildType + '&item_type=1&item_id=' + itemArray[itemIndex][1] +'", 1, 0, 0, 0); return false;'});
-            clickElement(elt);
             DEBUG('Clicked to ask for '+buildItem+' for '+buildType);
             setGMTime('askCasinoPartsTimer', '12 hours');
             return true;
@@ -16147,10 +16153,9 @@ function logJSONResponse(autoplay, response, action, context) {
         break;
 
       // Casino Parts
-      case 'casino parts':
-        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Resetting Timer.');
+      case 'casino parts':        
         setGMTime('askCasinoPartsTimer', '12 hours');
-        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset.');
+        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset for 12 hours.');
         return false;
         break;
 
@@ -16162,7 +16167,6 @@ function logJSONResponse(autoplay, response, action, context) {
           var collectString = RegExp.$1;
           addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
         }
-
         return false;
         break;
 
@@ -16330,7 +16334,7 @@ function logResponse(rootElt, action, context) {
   if (!messagebox) {
 
     if(action == 'autohit') return false;
-    DEBUG('Unexpected response page: no message box found -logResponse: HTML=' + rootElt.innerHTML);
+    DEBUG('Unexpected response page: no message box found - logResponse: HTML=<br/>' + rootElt.innerHTML);
 
     // If fighting from a user-specified list, cycle it.
     // Otherwise, the problem might repeat indefinitely.
@@ -17120,8 +17124,8 @@ function handlePopups() {
               var eltButton = xpathFirst('.//button',popupElts[i]);
               if (eltButton) {
                 var eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
-                if (eltLoot1 && isGMChecked('useSecretStashItems') && autoSecretStashList) {                  
-                  var lootChoice = eltLoot1;
+                var lootChoice = eltLoot1;
+                if (eltLoot1 && isGMChecked('useSecretStashItems') && autoSecretStashList) {                                    
                   eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
                   eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
                   for (var i = 0; i < autoSecretStashList.length; ++i) {
@@ -17139,13 +17143,13 @@ function handlePopups() {
                     }
                   }                  
                 }
-              }
-              if (lootChoice) {
-                clickElement(lootChoice);
-                addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());
+                if (lootChoice) {
+                  clickElement(lootChoice);
+                  addToLog('info Icon', 'Choose between '+eltLoot1.innerHTML.untag()+', '+eltLoot2.innerHTML.untag()+' and '+eltLoot3.innerHTML.untag());                
+                }
                 addToLog('lootbag Icon', 'Choose  <span class="loot">'+ lootChoice.innerHTML.untag() + '</span> from a secret stash.');
+                clickElement(eltButton);
               }
-              clickElement(eltButton);
               return(closePopup(popupElts[i], "Process Secret Stash"));
             }
 
@@ -17251,7 +17255,7 @@ function handlePopups() {
             // Process Level Up popup
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
             if (eltPubButton) {
-              if (popupInnerNoTags.match(/promoted to Level (.+?) C/)) {
+              if (popupInnerNoTags.match(/promoted to level (.+?) c/i)) {
                 DEBUG('Popup Process: Level Up Processed');
                 addToLog('info Icon', '<span class="loot">'+' You were promoted to level '+ RegExp.$1);
               }
@@ -17317,8 +17321,13 @@ function handlePopups() {
               DEBUG('Popup Process: MISSIONS - Claim Rewards : '+thisPopup.id);
               var rewards = $x('.//td[@class="collectPopLootItem"]', thisPopup);
               var rewardsTxt ="";
+              var rewardsNoTags ="";              
               for(i=0;i<rewards.length;++i){
                 rewardsNoTags = rewards[i].innerHTML.untag();
+                if (rewardsNoTags.match(/(.+?)(\d{2})(\d{2})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
+                else if (rewardsNoTags.match(/(.+?)(\d{2})(\d{1})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
+                else if (rewardsNoTags.match(/(.+?)(\d{1})(\d{2})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
+                else if (rewardsNoTags.match(/(.+?)(\d{1})(\d{1})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
                 if(rewardsTxt) rewardsTxt += ', '+ rewardsNoTags;
                 else rewardsTxt = rewardsNoTags;
               }
