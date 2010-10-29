@@ -1,4 +1,5 @@
 ﻿/**
+/**
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
@@ -42,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.811
+// @version     1.1.812
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.811',
+  version: '1.1.812',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1634,9 +1635,9 @@ var MMission = new Array ();
     ['Intercept A Handoff In The Coliseum'               , 14,  5,1,ITALY , 23,0,'node5' ],    // ENERGY PATH
     ['Assassinate A Corrupt City Official'               , 12,  6,1,ITALY , 18,1,'node6' ],    // STAMINA PATH
     ['Discover The Conspiracy'                           , 18,  7,1,ITALY , 27,0,'node7' ],    // ENERGY PATH
-    ['Defeat The Di Rossi Hired Muscle'                  , 12,  8,1,ITALY , 18,1,'node8' ],    // STAMINA PATH
-    ['Send A Message To The Di Rossa Family'             , 18,  9,1,ITALY , 27,0,'node9' ],    // ENERGY PATH
-//  ['Boss: Confront Don Antonion Di Rossa'              ,  1, 10,1,ITALY ,  2,0,'node10']     //          Boss Job
+    ['Defeat The De Rossi Hired Muscle'                  , 12,  8,1,ITALY , 18,1,'node8' ],    // STAMINA PATH
+    ['Send A Message To The De Rossi Family'             , 18,  9,1,ITALY , 27,0,'node9' ],    // ENERGY PATH
+//  ['Boss: Confront Don Antonion De Rossi'              ,  1, 10,1,ITALY ,  2,0,'node10']     //          Boss Job
     ['Find An Old Family Friend'                         , 25, 11,2,ITALY , 41,0,'node11'],    // ENERGY PATH
     ['Build The Winery'                                  , 14, 12,2,ITALY , 23,0,'node12'],    // ENERGY PATH
     ['Battle For Water Rights'                           , 20, 13,2,ITALY , 31,1,'node13'],    // STAMINA PATH
