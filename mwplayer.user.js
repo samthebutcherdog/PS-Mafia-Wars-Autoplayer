@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.809
+// @version     1.1.810
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -2602,7 +2602,7 @@ function AskforHelp(hlpCity) {
   // Common function
   var doAskFunction = function (askResult) {
     if (!askResult) {
-      addToLog('warning Icon', 'Unable to Ask for Help on ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]+'. Please Check your \'Ask for Help\'-settings on PS MWAP\'s Mafia tab.');
+      addToLog('warning Icon', 'Unable to Ask for Help on ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]+'. Please Check your \'Ask for Help\'-settings on PS MWAP\'s Mafia tab.');
       if(helpCity==2) GM_setValue('selectMoscowTier', 0);
       if(helpCity==3) GM_setValue('selectBangkokTier', 0);
     }
@@ -2642,19 +2642,19 @@ function AskforHelp(hlpCity) {
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
     setGMTime(timerName, '2 hours');
-    addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
-    DEBUG('Link for Asking says : Wait for 24 hours ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
+    addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
+    DEBUG('Link for Asking says : Wait for 24 hours ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
   } else {
     var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
     if (askHelpFriends) {
-      addToLog('info Icon', ' Clicked to Ask for Help in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
+      addToLog('info Icon', ' Clicked to Ask for Help in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
       clickElement(askHelpFriends);
       setGMTime(timerName, '12 hours');
       return true;
     } else {
       setGMTime(timerName, '2 hours');
-      addToLog('info Icon', ' You cannot Ask for Help yet in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
-      DEBUG('Link for Asking for Help not found ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[cityno][tabno - 1]);
+      addToLog('info Icon', ' You cannot Ask for Help yet in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
+      DEBUG('Link for Asking for Help not found ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
     }
   }
   return;
