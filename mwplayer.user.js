@@ -42,7 +42,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.810
+// @version     1.1.811
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -53,7 +53,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.809',
+  version: '1.1.811',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2870,6 +2870,7 @@ function autoCollectTake(takeCity) {
   // Go to the correct city.
   if (city != takeCity) {
     if (GM_getValue('collectCityAttempt')) {  //Tried to go to city, but failed.  Reset and continue.
+      setGMTime('takeHour' + cities[takeCity][CITY_NAME], '1 hour'); // reset clock to try again later.
       GM_setValue ('collectCityAttempt', false);
       return false;
     }
