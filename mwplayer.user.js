@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.813
+// @version     1.1.814
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.813',
+  version: '1.1.814',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2156,8 +2156,7 @@ function doAutoPlay () {
   if (running && !maxed && isGMChecked('autoWar') && hasFight && !timeLeftGM('warTimer')) {
     if (autoWar()) return;
   }
-  MMMiss_ver();
-  // newchange hasMissions now locked below 12
+
   // newchange hasMissions now locked below 12
   if (running && isGMChecked('AutoMafiaMission') && hasMissions&& !timeLeftGM('colmissionTimer')) {  //   && !maxed
      if (Auto_Mafia_Mission() ) return;
@@ -9446,7 +9445,7 @@ function handleModificationTimer(target) {
     }
   }
 
-  // Added handling for Mission Results  Miss_ID  Mission_Slot
+  // Added handling for Mission Results  Miss_ID  Miss_Slot
   var MissionResults = xpathFirst('.//div[contains(@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'")]//div[@class="task_results"]', innerPageElt);    // results just being on mission page
   if (MissionResults) {
 //        DEBUG('mission results found');   //doatest
@@ -10803,6 +10802,7 @@ function customizeMasthead() {
   // Make a container for the autoplayer menu. //mychange
   var mwapTitle = 'PS MWAP ' + SCRIPT.version ;
   if (new_header) mwapTitle += ' (nH)' ; // mark header a new header
+  MMMiss_ver();
   if(tst_ver) {  mwapTitle += '('+ tst_ver +')' ;  } // add version tag while working
 
   makeElement('div', mastheadElt, {'style':'position: absolute; top: 20px; right: 10px; text-align: left; font-size: 11px; font-weight: bold; color: white'}).appendChild(document.createTextNode(mwapTitle));
@@ -15267,83 +15267,8 @@ function goJob(jobno) {
           DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         }
       }
-
-
-
-
-
-
-
-// newchangecut down
-/*
-// add routine below here to check all others for an id to use
-// orig
-//    targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);
-//    var elt = xpathFirst('//div[@id="nav_link_fight_unlock"]//a');
-    targetElts2 = $x('//div[@id="job_panel"]//a');  // finds 28
-    numTargets2 = targetElts2.length;
-    DEBUG(' - - - - second large search Number of Targets Found : '+ numTargets2);
-
-// <div id="job_panel"><div id="job72"><div class="fight_list">
-// <div id="fight_opponents"><dl class="clearfix">
-
-
-    targetElts3 = $x('.//a[contains((@onclick, "MapController.doFightJob")]');
-    //div[@id="job72"]//div[@class="fight_list"]//div[@id="fight_opponents"]//div[@class="clearfix"]
-    //div[@class="button"]//div[@id="fight_list0"]//a[contains((@onclick, "MapController.doFightJob")]');
-    numTargets3 = targetElts3.length;
-    DEBUG(' - - - - THIRD large search Number of Targets Found : '+ numTargets3);
-
-    targetElts4 = $x('//div[@id="job_panel"]//a[contains((@onclick, "MapController.doFightJob")]');
-    //div[@id="job72"]//div[@class="fight_list"]//div[@id="fight_opponents"]//div[@class="clearfix"]
-    //div[@class="button"]//div[@id="fight_list0"]//a[contains((@onclick, "MapController.doFightJob")]');
-    numTargets4 = targetElts4.length;
-    DEBUG(' - - - - FOURTH large search Number of Targets Found : '+ numTargets4);
-*/
-/*
-      for(i=0;i<numTargets;i++){
-//  targetParent = targetElts3[i].parentNode.parentNode.parentNode.parentNode.parentNode; //button,fight_opponents,fight_list,job72,job_panel
-        targetParent = targetElts[i].parentNode.parentNode;
-        parentNoTags = targetParent.innerHTML.untag();
-        if (parentNoTags.match(/(.+?)\s+(.+?)\s+(.+?)\s+Fight/i)) {
-          OppName = RegExp.$1;
-          OppSize = RegExp.$2;
-          OppLevel = RegExp.$3;
-        } else {
-          OppNameElt = xpathFirst('.//dt[@class="name"]//span[@class="player_data"]', targetParent);
-          if(OppNameElt) OppName = OppNameElt.innerHTML.untag();
-          OppSizeElt = xpathFirst('.//dd[@class="group_size"]//span[@class="player_data"]', targetParent);
-          if(OppSizeElt) OppSize = OppSizeElt.innerHTML.untag();
-          OppLevelElt = xpathFirst('.//dd[@class="level"]//span[@class="player_data"]', targetParent);
-          if(OppLevelElt) OppLevel = OppLevelElt.innerHTML.untag();
-        }
-        //DEBUG('Name : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
-        if(OppSize < smallestMafia || (OppSize == smallestMafia && OppLevel < lowestLevel)){
-            OppTarget = targetElts[i];
-            OppTargetParent = targetParent;
-            smallestMafia = OppSize;
-            lowestLevel = OppLevel;
-            foundOpp = true;
-            DEBUG('Switching Target : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
-        } else {
-            DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
-        }
-      }
-*/
-// add routine above here to check all others for an id to use
-
-
-// newchangecut up
-
-
-
-
-
-
-
-
-
-
+////
+////
       if(foundOpp){
         DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
@@ -18416,7 +18341,7 @@ function Load_MMiss_Info(){
 ////
 ///////////////////////////////////////////////////////// end of miss collect
 function MMMiss_ver(){
-//  tst_ver = 'C'; // NOTE: will not change till city change
+//  tst_ver = 'D';
   tst_ver = null;
 }
 ////
