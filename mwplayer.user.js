@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.814
+// @version     1.1.815
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.814',
+  version: '1.1.815',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1639,7 +1639,7 @@ var MMiss = new Array ();
     ['Discover The Conspiracy'                           , 18,  7,1,ITALY , 27,0,'node7' ],    // ENERGY PATH
     ['Defeat The De Rossi Hired Muscle'                  , 12,  8,1,ITALY , 18,1,'node8' ],    // STAMINA PATH
     ['Send A Message To The De Rossi Family'             , 18,  9,1,ITALY , 27,0,'node9' ],    // ENERGY PATH
-//  ['Boss: Confront Don Antonion De Rossi'              ,  1, 10,1,ITALY ,  2,0,'node10']     //          Boss Job
+//  ['Boss: Confront Don Antonion De Rossi'              ,  1, 10,1,ITALY ,  2,0,'node10'],    //          Boss Job
     ['Find An Old Family Friend'                         , 25, 11,2,ITALY , 41,0,'node11'],    // ENERGY PATH
     ['Build The Winery'                                  , 14, 12,2,ITALY , 23,0,'node12'],    // ENERGY PATH
     ['Battle For Water Rights'                           , 20, 13,2,ITALY , 31,1,'node13'],    // STAMINA PATH
@@ -16482,7 +16482,8 @@ function logResponse(rootElt, action, context) {
       if(masteryGainElt) {
         if( (GM_getValue('selectTier')!= '0.0'  ) || (!isGMChecked('multipleJobs'))  ) {
           if( (parseInt(masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%'))) )==100 ) {
-            masteryGainTxt = '.' + cities[cityno][CITY_NAME].toUpperCase() + ' Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+//            masteryGainTxt = '.' + cities[cityno][CITY_NAME].toUpperCase() + ' Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
+            masteryGainTxt = '. Job ' + masteryGainElt.innerHTML.substr(0, masteryGainElt.innerHTML.indexOf('%')) + '% Mastered';
             pushNextJob = true;
           }
         }
@@ -18250,7 +18251,7 @@ function Chk_Nxt_Page() {
   if(page_right){
   //  DEBUG('There WAS a right mission page button found to Click - .');
   } else  { DEBUG('Last Page, set timer to 1 min 0 seconds');
-    setGMTime('colmissionTimer', '00:01:00');
+    setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min
     return false;
   }
 return true;
@@ -18305,13 +18306,17 @@ function Load_MMiss_Info(){
     Miss_Slot   = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\'')[1].split('\',\'')[0]  ;
     MIss_chk_ID = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\''+Miss_Slot+'\',\'')[1].split('\'')[0] ;
     DEBUG('Miss_ID='+Miss_ID+'-Miss_Slot='+Miss_Slot+'-MIss_chk_ID=' + MIss_chk_ID + '=');
-    var Miss_Name_Tmp = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]', innerPageElt);
-      if(Miss_Name_Tmp) {   Miss_Name = xpathFirst('.//div[@class="missionName"]', Miss_Name_Tmp);
-        if(Miss_Name) {
-          Miss_Name_is = Miss_Name.innerHTML.untag();
-          DEBUG('Miss_Name: '+Miss_Name_is+'=');
-        }
-      }
+
+
+//    var Miss_Name_Tmp = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]', innerPageElt);
+//      if(Miss_Name_Tmp) {   Miss_Name = xpathFirst('.//div[@class="missionName"]', Miss_Name_Tmp);
+
+    var Miss_Name = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]//div[@class="missionName"]', innerPageElt);
+    if(Miss_Name) {
+      Miss_Name_is = Miss_Name.innerHTML.untag();
+      DEBUG('Miss_Name: '+Miss_Name_is+'=');
+    } else { DEBUG(' new code to find miss name FAILED');
+    }
     Chk_Miss_Pay_Exp = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"experience")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Pay_Exp){
         Miss_Pay_Exp = Chk_Miss_Pay_Exp.innerHTML.untag();
@@ -18341,7 +18346,7 @@ function Load_MMiss_Info(){
 ////
 ///////////////////////////////////////////////////////// end of miss collect
 function MMMiss_ver(){
-//  tst_ver = 'D';
+//  tst_ver = 'E';
   tst_ver = null;
 }
 ////
