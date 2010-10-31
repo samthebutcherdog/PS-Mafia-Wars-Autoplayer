@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.816
+// @version     1.1.817
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.816',
+  version: '1.1.817',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -5371,10 +5371,10 @@ function saveSettings() {
   ]);
 
   //Cash Settings and Validation
-  var minNYCash = parseInt(document.getElementById('minCashNew York').value);
-  var minCashCuba = parseInt(document.getElementById('minCashCuba').value);
-  var minCashMoscow = parseInt(document.getElementById('minCashMoscow').value);
-  var minCashBangkok = parseInt(document.getElementById('minCashBangkok').value);
+  var minNYCash = String(parseInt(document.getElementById('minCashNew York').value));
+  var minCashCuba = String(parseInt(document.getElementById('minCashCuba').value));
+  var minCashMoscow = String(parseInt(document.getElementById('minCashMoscow').value));
+  var minCashBangkok = String(parseInt(document.getElementById('minCashBangkok').value));
   if(isNaN(minNYCash)) {
     alert('Please Enter Numeric Values For NY Min Upgrade Cash.');
     return;
