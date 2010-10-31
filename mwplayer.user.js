@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.818
+// @version     1.1.819
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.818',
+  version: '1.1.819',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1034,7 +1034,7 @@ var MMiss = new Array ();
     ['Cuba', 'cuba', [], 'sideCuba', undefined, 35, cashCubaIcon, 'cashCuba Icon', 'autoBankCuba', 'bankConfigCuba', 'C$', 0],
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'R$', 0],
     ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50],
-    ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 0, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0],
+    ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 17, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0],
 	['Italy', 'italy', [], 'sideItaly', undefined, 5, cashItalyIcon, 'cashItaly Icon', 'autoBankItaly', 'bankConfigItaly', 'L$', 0]
   );
 
@@ -12546,10 +12546,11 @@ function customizeHitlist() {
 ////
 function customizeMissions() {
   DEBUG('Customize missions pages adding INFO.');
-  AddFbIds();
+  //AddFbIds();
 
 }
 ////
+/*
 function AddFbIds() {
   var boxes = document.getElementsByClassName('missionTaskBox');
   for(i = 0, numboxes = boxes.length; i<numboxes; i++) {
@@ -12565,7 +12566,7 @@ function AddFbIds() {
   }
 }
 ////
-
+*/
 
 function setLevelUpRatio() {
   var elt = document.getElementById('level_up_ratio');
