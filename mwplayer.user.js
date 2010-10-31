@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.817
+// @version     1.1.818
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.817',
+  version: '1.1.818',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1008,18 +1008,19 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const MISSION_RATIO    = 8; // 8
 
   // Constants for accessing mafia mission array
-  const Mmiss_Name         =  0; //
-  const MMiss_ID           =  1; //
-  const Mmiss_Slot         =  2; //
-  const Mmiss_Onr          =  3; //
-  const Mmiss_Onr_ID       =  4; //
-  const Mmiss_ONR_FB       =  5; //
-  const Mmiss_Nrg_Use      =  6; //
-  const Mmiss_Stam_Use     =  7; //
-  const Mmiss_XP           =  8; //
-  const Mmiss_Pays         =  9; //
-  const Mmiss_Ratio        = 10; //
+  const MMiss_ID           =  0; //
+  const Mmiss_Slot         =  1; //
+  const Mmiss_Percent_Fin  =  2; //
+  const Mmiss_Nrg_Use      =  3; //
+  const Mmiss_Stam_Use     =  4; //
+  const Mmiss_XP           =  5; //
+  const Mmiss_Pays         =  6; //
+  const Mmiss_Ratio        =  7; //
+  const Mmiss_Onr          =  8; //
+  const Mmiss_Onr_ID       =  9; //
+  const Mmiss_ONR_FB       = 10; //
   const Mmiss_Timer        = 11; //
+  const Mmiss_Name         = 12; //
 
 // for mafia missions
 var MMiss = new Array ();
@@ -1213,11 +1214,10 @@ var MMiss = new Array ();
     ['forceHealOpt4','Heal if stamina is full','allow healing if stamina is full and not blocked from above choices'],
     ['forceHealOpt3','Heal if stamina can be spent','try to heal. overridden by the top 2 choices']
   );
-
   // Define all jobs. The array elements are:
-  // job description0, energy cost1, job number2, tab number3, city4, exp payout5, tabpath6, lvnode7, ratio8
+  // job description0,         energycost1, jobno2, jobtabno3, city4, exppay5, tabpath6, node7, ratio8
+//     0                                                    1   2 3    4     5 6    7     8 //
   var missions = new Array(
-//     7                                                    5   4 2    1      6 3    0     8 //
     ['Chase Away Thugs'                                  ,  1,  1,1,NY     ,  1,0,'     '],
     ['Rob a Drug Runner'                                 ,  3,  2,1,NY     ,  3,0,'     '],
     ['Rough Up Dealers'                                  ,  5,  3,1,NY     ,  5,0,'     '],
@@ -1537,7 +1537,8 @@ var MMiss = new Array ();
     ['Overthrow The Shadow King'                         ,  1,145,8,BANGKOK,  3,0,'     '], // BOSS JOB
 ///////////////////////////////////////////////////////////////////////////////////////////// DONT forget the comma above
 //     60 jobs, 6 boss, 11 fight, 6 social, 37 energy
-//      7                                                   5   4 2   1       6 3   0                PATH
+// job description0,         energycost1, jobno2, jobtabno3, city4, exppay5, tabpath6, node7, ratio8
+//     0                                                    1   2 3    4     5 6    7     8 //
     ['Move Your Crew Into A Safe House'                  ,  9,  1,1,LV    ,  7,0,'node1' ],    // ENERGY DISTRICT 1  LAS VEGAS NORTH LAS VEGAS
     ['Blackmail A Car Dealer'                            ,  8,  2,1,LV    , 11,0,'node2' ],    // ENERGY
     ['Steal A Truckload Of Slots'                        , 24,  3,1,LV    , 18,0,'node3' ],    // ENERGY
@@ -11784,7 +11785,7 @@ function customizeVegasJobs() {
       if(isJobLocked(currentJob) || skipCurrentJob || ( isGMChecked('skipfight') && isJobFight(currentJob) ) ) {
         if(isJobLocked(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : locked.');
         if(skipCurrentJob) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : lack of energy/stamina.');
-        if(isGMChecked('skipfight') && isJobFight(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : skipping LV fight jobs.');
+        if(isGMChecked('skipfight') && isJobFight(currentJob)) DEBUG('Skipping Job ' + jobName + ' (' + jobMatch + ') : skipping LV & Italy fight jobs.');
       }
       else availableJobs[city][currentTab].push(jobMatch);
     }
@@ -12558,6 +12559,7 @@ function AddFbIds() {
         var newItem='http://www.facebook.com/profile.php?id='+fbid[1];
         var addfbid1 = makeElement('a',boxes[i],{'href':newItem});
         addfbid1.appendChild(document.createTextNode('FB: '+fbid[1] ));
+//      addfbid1.appendChild(document.createTextNode('Mission ID: '+ Miss_ID ) );
       }
     }
   }
@@ -16440,7 +16442,7 @@ function logResponse(rootElt, action, context) {
         DEBUG('Job Mastery of 100% detected, Reloading nothing:' );
         // customizemissions();
         // may be way too detailed
-        var Finish_Mission = xpathFirst('.//a[contains(@id,"sm_action_button_'+Miss_ID+'") and contains(@class,"sexy_button_new medium_black") and contains(@onclick,"SocialMissionView.closeTask(\''+Miss_ID+'")]', innerPageElt);
+        Finish_Mission = xpathFirst('.//a[contains(@id,"sm_action_button_'+Miss_ID+'") and contains(@class,"sexy_button_new medium_black") and contains(@onclick,"SocialMissionView.closeTask(\''+Miss_ID+'")]', innerPageElt);
         if(Finish_Mission) {
 //          DEBUG(' we found the finished marker, close button' );
          clickElement(Finish_Mission);
@@ -16450,6 +16452,7 @@ function logResponse(rootElt, action, context) {
         } else {
           DEBUG(' we did NOT find the finished, close button' );
         }
+        Miss_ID = null;
       } else {
         return;
       }
@@ -18336,7 +18339,7 @@ function Load_MMiss_Info(){
 ////
 ///////////////////////////////////////////////////////// end of miss collect
 function MMMiss_ver(){
-//  tst_ver = 'E';
+//  tst_ver = 'A';
   tst_ver = null;
 }
 ////
