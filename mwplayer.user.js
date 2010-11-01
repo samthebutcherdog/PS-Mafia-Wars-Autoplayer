@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.820
+// @version     1.1.821
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.820',
+  version: '1.1.821',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -17153,8 +17153,8 @@ function handlePopups() {
                 var eltLoot1 = xpathFirst('.//div[contains(@id,"job_gift_item_1")]',popupElts[i]);
                 var lootChoice = eltLoot1;
                 if (eltLoot1 && isGMChecked('useSecretStashItems') && autoSecretStashList) {
-                  eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
-                  eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
+                  var eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
+                  var eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
                   if (eltLoot1 && eltLoot2 && eltLoot3) {
                     for (var j = 0; j < autoSecretStashList.length; ++j) {
                       if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[j])!=-1) {
