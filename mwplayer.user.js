@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.819
+// @version     1.1.820
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.819',
+  version: '1.1.820',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -17155,19 +17155,25 @@ function handlePopups() {
                 if (eltLoot1 && isGMChecked('useSecretStashItems') && autoSecretStashList) {
                   eltLoot2 = xpathFirst('.//div[contains(@id,"job_gift_item_2")]',popupElts[i]);
                   eltLoot3 = xpathFirst('.//div[contains(@id,"job_gift_item_3")]',popupElts[i]);
-                  for (var i = 0; i < autoSecretStashList.length; ++i) {
-                    if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      lootChoice = eltLoot1;
-                      break;
+                  if (eltLoot1 && eltLoot2 && eltLoot3) {
+                    for (var j = 0; j < autoSecretStashList.length; ++j) {
+                      if (eltLoot1.innerHTML.untag().indexOf(autoSecretStashList[j])!=-1) {
+                        lootChoice = eltLoot1;
+                        break;
+                      }
+                      if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[j])!=-1) {
+                        lootChoice = eltLoot2;
+                        break;
+                      }
+                      if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[j])!=-1) {
+                        lootChoice = eltLoot3;
+                        break;
+                      }
                     }
-                    if (eltLoot2.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      lootChoice = eltLoot2;
-                      break;
-                    }
-                    if (eltLoot3.innerHTML.untag().indexOf(autoSecretStashList[i])!=-1) {
-                      lootChoice = eltLoot3;
-                      break;
-                    }
+                  } else {
+                    // Error message, then close popup.
+                    addToLog('info Inco', "Error in undefined loots.  Please report the following message:" + popupElts[i]);
+                    return(closePopup(popupElts[i], "Process Secret Stash"));
                   }
                 }
                 if (lootChoice) {
