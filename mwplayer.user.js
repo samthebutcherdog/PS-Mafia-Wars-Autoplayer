@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.822
+// @version     1.1.823
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.822',
+  version: '1.1.823',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -760,10 +760,19 @@ var invites;                    // Number of mafia invitations
 var stats;                      // Skill points
 var city;                       // Current city (0=New York, 1=Cuba, 2=Moscow)
 var skipStaminaSpend = false;   // Skip stamina actions for now?
+//
 var Miss_Name;                  // mission Name holder
+var Miss_Name_is;
 var Miss_ID;                    // a holder to move the mission tag around
 var Miss_Slot;                  // a holder to move around the mission slot 0-3
 var MyMafiaJobs;                // name to use in misssions
+var Miss_Energy;                //
+var Miss_Nrg_Req = 0;
+var Miss_Stamina;               //
+var Miss_Stam_Req = 0;
+var Miss_Pay_Exp;
+var Miss_Pay_Cash;
+//
 var clickAction;                // Action being attempted with click simulation
 var clickContext;               // Context for clickAction
 var modificationTimer;          // Timer used to wait for content changes
@@ -1654,7 +1663,7 @@ var MMiss = new Array ();
     ['Deal With The Don\'s Guards'                       , 32, 31,3,ITALY , 55,1,'node31'],    // STAMINA PATH
     ['Distract The Don\'s Guards'                        , 39, 32,3,ITALY , 64,0,'node32'],    // ENERGY PATH
     ['Lure The Don To A Secluded Location'               , 46, 33,3,ITALY , 78,0,'node33'],    // ENERGY PATH
-// ['Boss: Don Del Brenta'                              ,  1, 34,3,ITALY ,  2,0,'node34'],    //          Boss Job
+//  ['Boss: Don Del Brenta'                              ,  1, 34,3,ITALY ,  2,0,'node34'],    //          Boss Job
     ['Free A Professional Assassin'                      , 46, 35,4,ITALY , 78,0,'node35'],    // ENERGY PATH
     ['Bug A Confessional'                                , 43, 36,4,ITALY , 73,0,'node36'],    // ENERGY PATH
     ['Infiltrate A Seven Star Hotel'                     , 36, 37,4,ITALY , 60,1,'node37'],    // STAMINA PATH
@@ -2151,7 +2160,7 @@ function doAutoPlay () {
   // newchange hasMissions now locked below 12
   if (running && isGMChecked('AutoMafiaMission') && hasMissions&& !timeLeftGM('colmissionTimer')) {  //   && !maxed
      if (Auto_Mafia_Mission() ) return;
-  } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds. Preform Missions  '+isGMChecked('AutoMafiaMission')+', Level '+level) ;
+  } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds. Perform Missions  '+isGMChecked('AutoMafiaMission')+', Level '+level) ;
 //           DEBUG('Has the ability to do missions '+ hasMissions +'. MWAP is running '+ running +'. is maxed '+ maxed + '. If Maxed, will bypass missions.');
   }
 
@@ -10615,7 +10624,7 @@ function resetTimers(manually) {
   checkTimer('rewardEnergyTimer', 1800);
   checkTimer('checkVaultTimer', 900);
   checkTimer('tournamentTimer', 300);
-  checkTimer('colmissionTimer', 600); // 10 min
+  checkTimer('colmissionTimer', 60); // 10 min
   checkTimer('colmissionHelpTimer', 120); // 2 min
 // newchange
 
@@ -12546,11 +12555,11 @@ function customizeHitlist() {
 ////
 function customizeMissions() {
   DEBUG('Customize missions pages adding INFO.');
-  //AddFbIds();
+  AddFbIds();
 
 }
 ////
-/*
+
 function AddFbIds() {
   var boxes = document.getElementsByClassName('missionTaskBox');
   for(i = 0, numboxes = boxes.length; i<numboxes; i++) {
@@ -12566,7 +12575,6 @@ function AddFbIds() {
   }
 }
 ////
-*/
 
 function setLevelUpRatio() {
   var elt = document.getElementById('level_up_ratio');
@@ -16436,6 +16444,26 @@ function logResponse(rootElt, action, context) {
         }
       }
 //////////// add stuff here
+//
+/*
+var Miss_Name;                  // mission Name holder
+var Miss_Name_is;
+var Miss_ID;                    // a holder to move the mission tag around
+var Miss_Slot;                  // a holder to move around the mission slot 0-3
+var MyMafiaJobs;                // name to use in misssions
+var Miss_Energy;                //
+var Miss_Nrg_Req = 0;
+var Miss_Stamina;               //
+var Miss_Stam_Req = 0;
+var Miss_Pay_Exp;
+var Miss_Pay_Cash;
+*/
+//
+if( (stamina < Miss_Stam_Req) || (energy  < Miss_Nrg_Req) ) {
+DEBUG(' Dont have enough to perform:' + Miss_Name_is );
+if(stamina < Miss_Stam_Req) { DEBUG (' stamina needed:' + Miss_Stam_Req + ' stamina available:' + stamina ); }
+if(energy  < Miss_Nrg_Req ) { DEBUG (' energy needed:' + Miss_Nrg_Req + ' energy available:' + energy ); }
+}
 //////////// add stuff here
       var Finish_Mission;
       if (pushNextJob) {
@@ -16455,7 +16483,17 @@ function logResponse(rootElt, action, context) {
         }
         Miss_ID = null;
       } else {
-        return;
+     if((!chk_stam()) || (!chk_nrg()) ) {
+//        if( (stamina < Miss_Stam_Req) || (energy  < Miss_Nrg_Req) ) {
+        DEBUG('Setting Mission Timer to 10 min, Dont have enough to perform:' + Miss_Name_is );
+//        if(energy  < Miss_Nrg_Req ) { DEBUG (' energy needed:' + Miss_Nrg_Req + ' energy available:' + energy + ', floor=' + SpendMissionEnergy.floor  ); }
+//        if(stamina < Miss_Stam_Req) { DEBUG (' stamina needed:' + Miss_Stam_Req + ' stamina available:' + stamina + ', floor=' + SpendStaminaMission.floor ); }
+
+        setGMTime('colmissionTimer', '00:01:00'); // set timer to 10 min since not enough energy /stam
+        Miss_ID = null;
+        return false;
+      }
+
       }
   Autoplay.start();
   return true;
@@ -18047,10 +18085,10 @@ function Auto_Mafia_Mission(){
   // Go to the missions tab
 var Miss_ID = null;
 var MyMafiaJobs = null;
-var Miss_Name = null;
+//var Miss_Name = null;
 var Miss_Slot = null;
-var Miss_Energy = null;
-var Miss_Stamina = null;
+//var Miss_Energy = null;
+//var Miss_Stamina = null;
 
   if (!OnMissionsTab()) {
     Autoplay.fx = GoMissionsTab;
@@ -18058,9 +18096,9 @@ var Miss_Stamina = null;
     Autoplay.start();
     return true;
   }
-    if(isGMChecked('AskMissionHelp') && !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ; // defaults to mymissions page
+    if(isGMChecked('AskMissionHelp') && !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ;
     if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will collect mymission
-    if(isGMChecked('AutoMafiaRemoved'))    Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page, currently they have 2 max
+    if(isGMChecked('AutoMafiaRemoved'))    Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page
 
     if (!Mafia_Missions_Tab()) {
      Autoplay.fx = Do_Mafia_Collection_Tab();
@@ -18187,19 +18225,16 @@ function Auto_Mafia_Remove(){
 }
 ////
 function chk_nrg(){
-  //needchange
   //DEBUG('  -  -  -  checking   work an Energy Mission  -   -  ' );
-  var nextMissionEnergy = 15; // temp set for now
-
   //  if (energy < missions[GM_getValue('selectMission', 1)][Miss_Energy]) {
-  if (energy < nextMissionEnergy ) {
-    DEBUG('Skipping Missions: energy=' + energy + ', cost=' + nextMissionEnergy);
+  if (energy < Miss_Nrg_Req ) {
+    DEBUG('Skipping Missions: energy=' + energy + ', cost=' + Miss_Nrg_Req);
     return false;
   }
-  if (energy - nextMissionEnergy < SpendMissionEnergy.floor && !SpendMissionEnergy.canBurn) {
+  if (energy - Miss_Nrg_Req < SpendMissionEnergy.floor && !SpendMissionEnergy.canBurn) {
     DEBUG('Not spending energy on missions: energy=' + energy +
       ', floor=' + SpendMissionEnergy.floor +
-      ', nextMissionEnergy=' + nextMissionEnergy +
+      ', Miss_Nrg_Req=' + Miss_Nrg_Req +
       ', burn=' + SpendMissionEnergy.canBurn);
     return false;
   }
@@ -18207,20 +18242,16 @@ function chk_nrg(){
 }
 ////
 function chk_stam() {
-
-  //needchange
   //DEBUG('  -  -  -  checking   work a Stamina Mission  -   -  ' );
-  var nextMissionStamina = 15; // temp set for now
-
   //  if (stamina < missions[GM_getValue('selectMission', 1)][Miss_Stamina]) {
-  if (stamina < nextMissionStamina ) {
-    DEBUG('Skipping Missions: stamina=' + stamina + ', cost=' + nextMissionStamina);
+  if (stamina < Miss_Stam_Req ) {
+    DEBUG('Skipping Missions: stamina=' + stamina + ', cost=' + Miss_Stam_Req);
     return false;
   }
-  if (stamina - nextMissionStamina < SpendStaminaMission.floor && !SpendStaminaMission.canBurn) {
+  if ((stamina - Miss_Stam_Req) < SpendStaminaMission.floor && !SpendStaminaMission.canBurn) {
     DEBUG('Not spending stamina on missions: stamina=' + stamina +
       ', floor=' + SpendStaminaMission.floor +
-      ', nextMissionStamina=' + nextMissionStamina +
+      ', Miss_Stam_Req=' + Miss_Stam_Req +
       ', burn=' + SpendStaminaMission.canBurn);
     return false;
   }
@@ -18248,11 +18279,16 @@ function Do_Mission_Job(){
 ////
 function Chk_Nxt_Page() {
   var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
-  if(page_right){
-  //  DEBUG('There WAS a right mission page button found to Click - .');
-  } else  { DEBUG('Last Page, set timer to 1 min 0 seconds');
-    setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min
+  if(!page_right) {
+    if(tst_ver) {
+      setGMTime('colmissionTimer', '00:01:00'); // if testing, set timer to 1 min
+      DEBUG('Last Page, set timer to 1 min 0 seconds');
+    } else {
+      setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min
+      DEBUG('Last Page, set timer to 10 min 0 seconds');
+    }
     return false;
+//  } else { DEBUG('There WAS a right mission page button found to Click - .');
   }
 return true;
 }
@@ -18281,22 +18317,21 @@ function Chk_Left_Page() {
 }
 ////
 function Check_Mission_Job(){
-  if((!chk_stam())&&(!chk_nrg())   ) {return false; }  // if cant do either spend energy or stamina Leave.
   // if we find this link, just go do the job
   MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Miss_ID+'")]', innerPageElt);
   if(!MyMafiaJobs) {
     MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job medium_white" and contains(@onclick, "SocialMissionView.startTask" ) ]', innerPageElt);
-
-    if(MyMafiaJobs) {  // these 3 lines will be moved to customizemissions once array works
-      Load_MMiss_Info();
-    }
-
-    if(MyMafiaJobs) {
-      clickElement(MyMafiaJobs); // click white start job button
-    //  } else {  DEBUG(' - - - we found NO white start mission button');
-    }
   }
-  if(MyMafiaJobs) return true ;
+  if(MyMafiaJobs) {  // these 3 lines will be moved to customizemissions once array works
+    Load_MMiss_Info();
+  }
+  if(MyMafiaJobs) {
+    clickElement(MyMafiaJobs); // click white start job button
+    return true ;
+  } else {
+    setGMTime('colmissionTimer', '00:01:00'); // if testing, set timer to 10 min since not enough energy /stam
+    DEBUG('NO mission button, or unable to perform mission, setting timer to 10 min.');
+  }
 }
 ////
 function Load_MMiss_Info(){
@@ -18306,12 +18341,7 @@ function Load_MMiss_Info(){
     Miss_Slot   = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\'')[1].split('\',\'')[0]  ;
     MIss_chk_ID = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\''+Miss_Slot+'\',\'')[1].split('\'')[0] ;
     DEBUG('Miss_ID='+Miss_ID+'-Miss_Slot='+Miss_Slot+'-MIss_chk_ID=' + MIss_chk_ID + '=');
-
-
-//    var Miss_Name_Tmp = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]', innerPageElt);
-//      if(Miss_Name_Tmp) {   Miss_Name = xpathFirst('.//div[@class="missionName"]', Miss_Name_Tmp);
-
-    var Miss_Name = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]//div[@class="missionName"]', innerPageElt);
+    Miss_Name = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]//div[@class="missionName"]', innerPageElt);
     if(Miss_Name) {
       Miss_Name_is = Miss_Name.innerHTML.untag();
       DEBUG('Miss_Name: '+Miss_Name_is+'=');
@@ -18320,33 +18350,43 @@ function Load_MMiss_Info(){
     Chk_Miss_Pay_Exp = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"experience")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Pay_Exp){
         Miss_Pay_Exp = Chk_Miss_Pay_Exp.innerHTML.untag();
-        DEBUG(' - got -  -  experience Returned: '+Miss_Pay_Exp);
+        //DEBUG(' - got -  -  experience Returned: '+Miss_Pay_Exp);
       }
     Chk_Miss_Pay_Cash = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"cash")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Pay_Cash){
         Miss_Pay_Cash = Chk_Miss_Pay_Cash.innerHTML.untag();
-        DEBUG(' - got -  -  Cash Returned: '+Miss_Pay_Cash);
+        //DEBUG(' - got -  -  Cash Returned: '+Miss_Pay_Cash);
       }
     Chk_Miss_Nrg = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"energy")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Nrg){
         Miss_Nrg_Req = Chk_Miss_Nrg.innerHTML.untag();
         Miss_Ratio =  Math.round(Miss_Pay_Exp / Miss_Nrg_Req * 100 ) / 100 ;
-        DEBUG(' - got -  -  Energy Required: '+Miss_Nrg_Req+' with ratio of: '+ Miss_Ratio);
+        //DEBUG(' - got -  -  Energy Required: '+Miss_Nrg_Req+' with ratio of: '+ Miss_Ratio);
+      } else { Miss_Nrg_Req = 0 ;
       }
     Chk_Miss_Stam = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"stamina")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Stam){
         Miss_Stam_Req = Chk_Miss_Stam.innerHTML.untag();
         Miss_Ratio =  Math.round(Miss_Pay_Exp / Miss_Stam_Req * 100 ) / 100 ;
-        DEBUG(' - got -  -  Stamina Required: '+Miss_Stam_Req+' with ratio of: '+ Miss_Ratio);
+        //DEBUG(' - got -  -  Stamina Required: '+Miss_Stam_Req+' with ratio of: '+ Miss_Ratio);
+      } else { Miss_Stam_Req = 0 ;
       }
-    if((!chk_stam())&&(!chk_nrg())   ) {return false; }  // if cant do either spend energy or stamina Leave.
+
+    if((!chk_stam()) || (!chk_nrg()) ) {
+      MyMafiaJobs = null;
+      return false; }  // if cant do either spend energy or stamina Leave.
     }
   if(MyMafiaJobs) return true ;
 }
 ////
 ///////////////////////////////////////////////////////// end of miss collect
 function MMMiss_ver(){
-//  tst_ver = 'A';
-  tst_ver = null;
+ if (isGMChecked('TestChanges')) {
+  tst_ver = 'E';
+  } else { tst_ver = null;
+  }
 }
 ////
+
+
+
