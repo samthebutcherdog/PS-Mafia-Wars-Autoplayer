@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.823
+// @version     1.1.824
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.823',
+  version: '1.1.824',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10624,7 +10624,7 @@ function resetTimers(manually) {
   checkTimer('rewardEnergyTimer', 1800);
   checkTimer('checkVaultTimer', 900);
   checkTimer('tournamentTimer', 300);
-  checkTimer('colmissionTimer', 60); // 10 min
+  checkTimer('colmissionTimer', 600); // 10 min
   checkTimer('colmissionHelpTimer', 120); // 2 min
 // newchange
 
@@ -12555,7 +12555,7 @@ function customizeHitlist() {
 ////
 function customizeMissions() {
   DEBUG('Customize missions pages adding INFO.');
-  AddFbIds();
+//  AddFbIds();
 
 }
 ////
@@ -16489,7 +16489,7 @@ if(energy  < Miss_Nrg_Req ) { DEBUG (' energy needed:' + Miss_Nrg_Req + ' energy
 //        if(energy  < Miss_Nrg_Req ) { DEBUG (' energy needed:' + Miss_Nrg_Req + ' energy available:' + energy + ', floor=' + SpendMissionEnergy.floor  ); }
 //        if(stamina < Miss_Stam_Req) { DEBUG (' stamina needed:' + Miss_Stam_Req + ' stamina available:' + stamina + ', floor=' + SpendStaminaMission.floor ); }
 
-        setGMTime('colmissionTimer', '00:01:00'); // set timer to 10 min since not enough energy /stam
+        setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min since not enough energy /stam
         Miss_ID = null;
         return false;
       }
@@ -18329,7 +18329,7 @@ function Check_Mission_Job(){
     clickElement(MyMafiaJobs); // click white start job button
     return true ;
   } else {
-    setGMTime('colmissionTimer', '00:01:00'); // if testing, set timer to 10 min since not enough energy /stam
+    setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min since not enough energy /stam
     DEBUG('NO mission button, or unable to perform mission, setting timer to 10 min.');
   }
 }
