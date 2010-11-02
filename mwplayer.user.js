@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.825
+// @version     1.1.826
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.825',
+  version: '1.1.826',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1151,7 +1151,18 @@ var MMiss = new Array ();
     ['Poker Table', 1581, 4],
     ['Bellhop', 1582, 5]
   );
-
+  
+  var cityVillageParts = new Array (
+  ['Volcanic Bricks', 1574, 1],
+  ['Wine Barrel', 1574, 1],
+  ['Motor Oil', 1574, 1],
+  ['Fishing Net', 1574, 1],
+  ['Football Player', 1574, 1],
+  ['Italian Hardwood', 1574, 1],
+  ['Marble Slab', 1574, 1],
+  ['Stone Column', 1574, 1],
+  ['Terracotta Tiles', 1574, 1]
+  );
   // Tournament Classes
   // Format: long description, short description, min mafia, max xp
   var tournamentClasses = new Array (
@@ -2148,7 +2159,7 @@ function doAutoPlay () {
   }
 
   // Click attack if on warNav
-  if (running && onWarTab() && (isGMChecked('autoWar') || helpWar )) {
+  if (running && onWarTab() && hasFight && isGMChecked('autoWarHelp')) {
     if (autoWarAttack()) return;
   }
 
@@ -9867,13 +9878,14 @@ function handlePublishing() {
 
         // Level up bonus
         if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
-        if (checkPublish('.//div[contains(.,"gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"is gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
 
         // Achievement bonus
         if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
 
-//        // missions  // newchange                         what is this for      \/
+//        // missions  // newchange                         what is this for      \/ if the checkbox is 'checked' it will get published, otherwisde the publish popup will be closed
 //        if (checkPublish('.//div[contains(.,"mission_collect_dialog")]','autoAskHelponCC', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"needs help to")]','AskMissionHelp', pubElt, skipElt)) return;
 
         // Collections
         if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
@@ -14025,6 +14037,12 @@ function autoWishlist() {
 // Attack the first war opponent you can
 function autoWarAttack() {
 
+  if (helpWar) {
+    // Help attempt was processed. Increment the update count.
+    GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
+    helpWar = false;
+  }
+
   var warTargetEnnemies = $x('.//a[contains(@href, "xw_controller=war&xw_action=attack")]', innerPageElt);
   if(warTargetEnnemies){
     // Pick a Random Target out of the Targets List
@@ -14040,20 +14058,21 @@ function autoWarAttack() {
       };
       Autoplay.start();
       DEBUG('Attacked Selected Target in ongoing war.');
+      setGMTime('warTimer', '1 hour');
       return true;
     } else {
       DEBUG('Invalid War Target .. War is ongoing ...');
     }
-  } else {
+  } 
+  else {
     DEBUG('No Enemy Targets found ... War is ongoing ...');
   }
-/*    
-  if (helpWar) {
-    // Help attempt was processed. Increment the update count.
-    GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
-    helpWar = false;
-  }
+  
+  setGMTime('warTimer', '1 hour');
+  return false;
 
+  /*    
+  
   // Click only the attack button on the right side of the war screen
   var getWarAttackElt = function (parentElt) {
     // Get the "right" side elements
@@ -14079,7 +14098,7 @@ function autoWarAttack() {
     return true;
   }
 */
-  return false;
+
 }
 
 function autoWar() {
@@ -18386,6 +18405,3 @@ function MMMiss_ver(){
   }
 }
 ////
-
-
-
