@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.827
+// @version     1.1.828
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.827',
+  version: '1.1.828',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -9785,10 +9785,13 @@ function handlePublishing() {
 
         // Level up bonus
         if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
-        if (checkPublish('.//div[contains(.,"gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"is gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
 
         // Achievement bonus
         if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
+
+         // missions
+        if (checkPublish('.//div[contains(.,"needs help to")]','AskMissionHelp', pubElt, skipElt)) return;
 
         // Collections
         if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
