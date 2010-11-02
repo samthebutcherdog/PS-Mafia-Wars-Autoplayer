@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.826
+// @version     1.1.827
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.826',
+  version: '1.1.827',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1044,7 +1044,7 @@ var MMiss = new Array ();
     ['Moscow', 'moscow', ['Vory','Mafiya'], 'sideMoscow', undefined, 70, cashMoscowIcon, 'cashMoscow Icon', 'autoBankMoscow', 'bankConfigMoscow', 'R$', 0],
     ['Bangkok', 'bangkok', ['Yakuza','Triad'], 'sideBangkok', undefined, 18, cashBangkokIcon, 'cashBangkok Icon', 'autoBankBangkok', 'bankConfigBangkok', 'B$', 50],
     ['Las Vegas', 'vegas', [], 'sideVegas', undefined, 17, cashVegasIcon, 'cashVegas Icon', 'autoBankVegas', 'bankConfigVegas', 'V$', 0],
-	['Italy', 'italy', [], 'sideItaly', undefined, 5, cashItalyIcon, 'cashItaly Icon', 'autoBankItaly', 'bankConfigItaly', 'L$', 0]
+    ['Italy', 'italy', [], 'sideItaly', undefined, 5, cashItalyIcon, 'cashItaly Icon', 'autoBankItaly', 'bankConfigItaly', 'L$', 0]
   );
 
   var locations = ['New York','Cuba','Moscow','Bangkok','Las Vegas','Italy','Active City'];
@@ -1151,7 +1151,7 @@ var MMiss = new Array ();
     ['Poker Table', 1581, 4],
     ['Bellhop', 1582, 5]
   );
-  
+
   var cityVillageParts = new Array (
   ['Volcanic Bricks', 1574, 1],
   ['Wine Barrel', 1574, 1],
@@ -1219,11 +1219,11 @@ var MMiss = new Array ();
                                 'allowMissionEnergyToLevelUp', 'MissionenergyFloorLast', 'MissionenergyCeilingLast'
                                 );
 
-  var SpendStaminaMission = new Spend (
-                                'StaminaMission', 'staminaMissionSpend', 'useStaminaMissionStarted',
-                                'selectStaminaMissionKeepMode', 'selectStaminaMissionKeep',
-                                'selectStaminaMissionUseMode', 'selectStaminaMissionUse', staminaIcon,
-                                'allowStaminaMissionToLevelUp', 'staminaMissionFloorLast', 'staminaMissionCeilingLast'
+  var SpendMissionStamina = new Spend (
+                                'MissionStamina', 'MissionStaminaSpend', 'useMissionStaminaStarted',
+                                'selectMissionStaminaKeepMode', 'selectMissionStaminaKeep',
+                                'selectMissionStaminaUseMode', 'selectMissionStaminaUse', staminaIcon,
+                                'allowMissionStaminaToLevelUp', 'MissionStaminaFloorLast', 'MissionStaminaCeilingLast'
                                 );
 
 
@@ -2211,12 +2211,12 @@ function doAutoPlay () {
   if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {
     if (askSpecialParts(NY, null, 0, 0)) return;
   }
-      
+
   // Ask for Casino Parts
   if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
     if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 1)) return;
   }
-  
+
   // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
@@ -2296,7 +2296,6 @@ function doAutoPlay () {
   }
 
   // auto-heal area
-//  DEBUG('  entering auto-heal ') ;
   if (running &&
       health < maxHealth &&
       isGMChecked('autoHeal') &&
@@ -2304,27 +2303,15 @@ function doAutoPlay () {
       (stamina >= GM_getValue('stamina_min_heal')) &&
       canForceHeal()
       ) {
-//    DEBUG('auto-heal passed main block check, checking can auto heal ');
     if(canautoheal()) {
       DEBUG('auto-healing '); // hide/remove after testing
       if(quickHeal(false)) return;
-      /*
-      if (isGMChecked('quickHeal')) {
-        if(quickHeal(false)) return;
-      } else {
-        if(autoHeal()) return;
-      }
-      */
     }
   } else {
-// hide/remove after testing
 //    DEBUG(' autoheal skipped in main loop ');
     //DEBUG('heal skipped, actual stamina:' + stamina +' stamina_Min_heal:'+ GM_getValue('stamina_min_heal') +  ' force heal:' + canForceHeal() );
     //DEBUG('heal skipped, current health:' + health + ' full:' + maxHealth + ' heal when health falls below:' + GM_getValue('healthLevel', 0) );
   }
-
-//  DEBUG('after auto-heal  - - X ');
-
   // Re-activating autoHeal in case you died and PS MWAP cleared the playerupdates before it could parse the snuffed message:
   if (running && health == 0 && !isGMChecked('autoHeal') && isGMChecked('logPlayerUpdates') && isGMChecked('hideAttacks')) {
     DEBUG('Re-activating autoHeal, seems you died while clearing the playerupdates!<br>Current HitXP: ' + GM_getValue('currentHitXp', 0));
@@ -2459,13 +2446,6 @@ function canautoheal() {
     DEBUG(' STAMINA_HOW_FIGHTROB  blocked autoheal ');
     return false;
   }
-  /* Unnecessary due to prior if statement
-  if((GM_getValue('staminaSpendHow') == STAMINA_HOW_ROBBING) && (isGMChecked('BlockHealRobbing')) )  {
-    DEBUG(' STAMINA_HOW_ROBBING blocked autoheal ');
-    return false;
-  }
-  */
-//  DEBUG('canautoheal is allowing healing ');
   return true;
 }
 
@@ -2525,47 +2505,6 @@ function autoAccept() {
   Autoplay.start();
   return true;
 }
-/* function not currently used
-function autoHeal() {
-  // NOTE: In the interest of time, delays are waived.
-  Autoplay.delay = noDelay;
-  // Make sure we're in the preferred city.
-  var healLocation = parseInt(GM_getValue('healLocation', NY));
-  if (healLocation != cities.length && city != healLocation) {
-    Autoplay.fx = function() { goLocation(healLocation); };
-    Autoplay.start();
-    return true;
-  }
-  // Check if hospitalpopup is visible and healbutton is present.
-  var healElt = xpathFirst('.//div[@class="hospital_pop" and not(contains(@style,"none"))]/div[@class="pop_box" and not(contains(@style,"none"))]//a[contains(@onclick,"xw_action=heal")]', popupfodderElt);
-  // If not, go to hospital manually
-  if (!healElt) {
-    // Go to the hospital.
-    var hospitalElt = xpathFirst('.//div[@id="clock_health" and not(contains(@style,"none"))]//a[@class="heal_link" or @class="heal_link vt-p"]', statsrowElt);
-    if (!hospitalElt) hospitalElt = xpathFirst('.//div[@id="clock_health" and not(contains(@style,"none"))]/a', statsrowElt);
-    if (hospitalElt) {
-      Autoplay.fx = function() {
-        clickElement(hospitalElt);
-        DEBUG('Clicked to go to hospital.');
-      };
-      Autoplay.start();
-      return true;
-    } else {
-      addToLog('warning Icon', 'WARNING: Can\'t find hospital link.');
-      return false;
-    }
-  }
-
-  // Found a heal link. Click it.
-  Autoplay.fx = function() {
-    clickAction = 'heal';
-    clickElement(healElt);
-    DEBUG('Clicked to heal.');
-  };
-  Autoplay.start();
-  return true;
-}
-*/
 function autoAskHelponCC(){
   // Common function
   var doAskFunction = function (askResult) {
@@ -2672,7 +2611,6 @@ function AskforHelp(hlpCity) {
   }
   return;
 }
-
 function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
   if (city != itemCity) {
     Autoplay.fx = function() { goLocation(itemCity); };
@@ -2693,7 +2631,7 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
   var timerReset = '12 hours';
   var buildSetting;
   var buildItem;
-    
+
   switch(buildType){
     case 1  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts'; buildItem =itemArray[itemIndex][0]; break;
     case 11 : timerName = 'askShopPartsTimer';    buildSetting='askShopParts';   buildItem =itemArray[itemIndex][0]; break;
@@ -2733,8 +2671,8 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
       elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
                         'xw_action=cs_special_item_feed_update_timestamp&xw_city=1", 1, "nothing"); return false;'});
-    } 
-    
+    }
+
     if (elt) {
       Autoplay.fx = function() {
         clickElement(elt);
@@ -2757,7 +2695,7 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     if(!casinoReport) checkCasinoStatus(true);
     if(casinoReport){
       casinoReport = casinoReport.replace(/\\/g, "");
-      DEBUG(casinoReport);      
+      DEBUG(casinoReport);
       var searchItem='"id":'+itemArray[itemIndex][1];
 
       //Casino Parts - Check Quantities
@@ -2806,7 +2744,6 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     return false;
   }
 }
-
 // Pass the item array, item id, and building type
 function buildItem(itemArray, itemIndex, buildType){
   if (city != NY) {
@@ -3279,7 +3216,7 @@ function canMission() {
 
 //needchange
   if (energy - nextJobEnergy < SpendEnergy.floor && !SpendEnergy.canBurn) {
-    DEBUG('Not spending energy: energy=' + energy +
+    DEBUG('Not spending Job energy: energy=' + energy +
           ', floor=' + SpendEnergy.floor +
           ', nextJobEnergy=' + nextJobEnergy +
           ', burn=' + SpendEnergy.canBurn);
@@ -3392,12 +3329,6 @@ function currentJobTab() {
 function currentJobTabPath() {
   var tst = null ;
   var elt = xpathFirst('.//div[contains(@class, "path_on")]//a', innerPageElt);
-//  if (!elt)     DEBUG(' JOB TAB - path - !elt path not found - ');
-//       tst = (elt.getAttribute('onclick').match(/  0  /) ); // returns 0
-//new_ -- gets matched literally as a string, as is.
-//\d -- means match any and only digits
-//+ -- means to match thoose digits one or more times
-//$ -- this means the end of the string, so with the pattern pieces before it, it must not have anything but "new_" and some numbers, then the end of the string (string being the ID attribute)
 
   tst = parseInt(elt.getAttribute('onclick').split('ExpertMapController.changePath(')[1].split(');')   ) ; // returns 0,
 //    DEBUG(' JOB TAB - path - returning  tst =' + tst + '=');
@@ -4997,8 +4928,8 @@ function saveDefaultSettings() {
   GM_setValue('selectStaminaUse', 0);
   GM_setValue('selectStaminaKeepMode', 0);
   GM_setValue('selectStaminaUseMode', 0);
-  GM_setValue('selectStaminaMissionKeep', 0);
-  GM_setValue('selectStaminaMissionKeepMode', 0);
+  GM_setValue('selectMissionStaminaKeep', 0);
+  GM_setValue('selectMissionStaminaKeepMode', 0);
 
 //needchange
   GM_setValue('selectMissionEnergyKeep', 0);
@@ -6218,16 +6149,10 @@ function createSettingsBox() {
   elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 660px;'}); // newchange
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
   var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 660px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
-  //End settings box                                                                                          was 600  // newchange
+  //End settings box
 
   makeElement('img', settingsBox, {'src':stripURI(closeButtonIcon), 'style':'position: absolute; top: 3px; right: 3px; cursor: pointer;'}).addEventListener('click', toggleSettings, false);
-
-  // NOTE: Use the 1st line below to center the button bar, or the 2nd line
-  //       to put the bar on the left side.
   elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: auto; margin-right: auto; width: 100%; text-align: center'});
-  //elt = makeElement('div', settingsBox, {'style':'position: static; width: 100%; text-align: left'});
-//    elt = makeElement('div', settingsBox, {'style':'position: static; margin-left: 5px;  width: 100%; text-align: center'});
-
   var tabNav = makeElement('div', elt, {'id':'tabNav', 'style':'position: static; display: inline-block; background: transparent repeat-x scroll 0 0; border: 1px solid #AAAAAA; fontsize: 13px; line-height: 28px; '});
     var generalTabLink = makeElement('div', tabNav, {'class':'selected', 'id':'General_Tab'});
       makeElement('a', generalTabLink, {'href':'#', 'rel':'generalTab'}).appendChild(document.createTextNode('General'));
@@ -6235,11 +6160,8 @@ function createSettingsBox() {
       makeElement('a', displayTabLink, {'href':'#', 'rel':'displayTab'}).appendChild(document.createTextNode('Display'));
     var mafiaTabLink = makeElement('div', tabNav, {'id':'Mafia_Tab'});
       makeElement('a', mafiaTabLink, {'href':'#', 'rel':'mafiaTab'}).appendChild(document.createTextNode('Mafia'));
-
-// newchange
     var MafiaHelpTabLink = makeElement('div', tabNav, {'id':'Help_Missions_Tab'});
       makeElement('a', MafiaHelpTabLink, {'href':'#', 'rel':'HelpMissionsTab'}).appendChild(document.createTextNode('Missions/Help'));
-
     var autostatTabLink = makeElement('div', tabNav, {'id':'Autostat_Tab'});
       makeElement('a', autostatTabLink, {'href':'#', 'rel':'autostatTab'}).appendChild(document.createTextNode('Autostat'));
     var energyTabLink = makeElement('div', tabNav, {'id':'Energy_Tab'});
@@ -8369,18 +8291,16 @@ function createStaminaTab() {
   }
   elt.selectedIndex = GM_getValue(id, 0);
   item.appendChild(document.createTextNode(' Suspend Stamina Spending For Jobs & Fighting.'));
+
 // drop a line
-// drop a few lines
-//  item = makeElement('div', list, {'class':'single', 'style':'padding-top: 5px;'});
-//start of copy
   // Stamina to reserve for manual play
   item = makeElement('div', list, {'class':'single'});
   title = 'Suspend automatic play and missions processing while below this level of stamina.';
   title += '  NOTE: Missions & Stamina LOWER limits are completely INDEPENDENT Of Each Other.';
-  id = 'selectStaminaMissionKeep';  //  selectStaminaKeep
+  id = 'selectMissionStaminaKeep';  //  selectStaminaKeep
   item.appendChild(document.createTextNode('While Stamina Is Below '));
   makeElement('input', item, {'type':'text', 'id':id, 'title':title, 'style':'width: 2em; ', 'value':GM_getValue(id, '0')});
-  id = 'selectStaminaMissionKeepMode'; //  selectStaminaKeepMode
+  id = 'selectMissionStaminaKeepMode'; //  selectStaminaKeepMode
   item.appendChild(document.createTextNode(' '));
   elt = makeElement('select', item, {'id':id, 'title':title});
   for (i = 0, iLength = numberSchemes.length; i < iLength; ++i) {
@@ -8391,19 +8311,6 @@ function createStaminaTab() {
   }
   elt.selectedIndex = GM_getValue(id, 0);
   item.appendChild(document.createTextNode(' Suspend Stamina Spending For Missions.'));
-// end of copy
-
-//      selectStaminaKeep  selectStaminaMissionKeep
-//  selectStaminaKeepMode  selectStaminaMissionKeepMode
-
-
-
-
-
-
-
-
-
 
   // Level up
   item = makeElement('div', list, {'class':'single'});
@@ -8757,12 +8664,12 @@ function createCashTab () {
   makeElement('input', specialParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', specialParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Special Parts'));
-  
+
   // Ask for Casino Parts
   xTop += 25;
   title = 'Check this to Ask for Casino Parts every 2 hours, since no MW timer available';
   id = 'askCasinoParts';
-  var casinoParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});  
+  var casinoParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
   makeElement('input', casinoParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', casinoParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Casino Parts'));
@@ -9000,18 +8907,18 @@ function validateStaminaTab() {
   s.selectStaminaKeep = selectStaminaKeep;
   s.selectStaminaKeepMode = document.getElementById('selectStaminaKeepMode').selectedIndex;
 
-  var selectStaminaMissionKeep = parseInt(document.getElementById('selectStaminaMissionKeep').value);
-  if (isNaN(selectStaminaMissionKeep)) selectStaminaMissionKeep = 0;
-  s.selectStaminaMissionKeep = selectStaminaMissionKeep;
-  s.selectStaminaMissionKeepMode = document.getElementById('selectStaminaMissionKeepMode').selectedIndex;
+  var selectMissionStaminaKeep = parseInt(document.getElementById('selectMissionStaminaKeep').value);
+  if (isNaN(selectMissionStaminaKeep)) selectMissionStaminaKeep = 0;
+  s.selectMissionStaminaKeep = selectMissionStaminaKeep;
+  s.selectMissionStaminaKeepMode = document.getElementById('selectMissionStaminaKeepMode').selectedIndex;
 
   s.allowStaminaToLevelUp = checked('allowStaminaToLevelUp');
 
-//      selectStaminaKeep  selectStaminaMissionKeep
-//  selectStaminaKeepMode  selectStaminaMissionKeepMode
+//      selectStaminaKeep  selectMissionStaminaKeep
+//  selectStaminaKeepMode  selectMissionStaminaKeepMode
 
   // Validate common settings
-  if (isNaN(s.selectStaminaUse) || isNaN(s.selectStaminaKeep) || isNaN(s.selectStaminaMissionKeep) ) {
+  if (isNaN(s.selectStaminaUse) || isNaN(s.selectStaminaKeep) || isNaN(s.selectMissionStaminaKeep) ) {
     alert('Please enter numeric values for Stamina reserve and Stamina threshold.');
     return false;
   }
@@ -9878,14 +9785,10 @@ function handlePublishing() {
 
         // Level up bonus
         if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
-        if (checkPublish('.//div[contains(.,"is gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
 
         // Achievement bonus
         if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
-
-//        // missions  // newchange                         what is this for      \/ if the checkbox is 'checked' it will get published, otherwisde the publish popup will be closed
-//        if (checkPublish('.//div[contains(.,"mission_collect_dialog")]','autoAskHelponCC', pubElt, skipElt)) return;
-        if (checkPublish('.//div[contains(.,"needs help to")]','AskMissionHelp', pubElt, skipElt)) return;
 
         // Collections
         if (checkPublish('.//div[contains(.,"Crew Collection")]','autoAskHelponCC', pubElt, skipElt)) return;
@@ -10135,6 +10038,7 @@ function refreshGlobalStats() {
   maxStamina = parseInt(maxStaminaElt.innerHTML);
   level = parseInt(levelElt.innerHTML);
 
+
   // Set all the element globals. They change.
   if(new_header) {
     ptsToNextLevelElt = document.getElementById('user_xp_to_next_level');
@@ -10201,17 +10105,16 @@ function refreshSettings() {
   SpendStamina.refreshLimits (maxStamina, canLevel);
   SpendEnergy.refreshLimits (maxEnergy, canLevel);
 //needchange
-  SpendStaminaMission.refreshLimits (maxStamina, canLevel);
+  SpendMissionStamina.refreshLimits (maxStamina, canLevel);
   SpendMissionEnergy.refreshLimits (maxEnergy, canLevel);
-
 
   // Log and toggle burning
   if (running) {
     if (isGMChecked(SpendStamina.spendFlag)) SpendStamina.toggleSpending(maxStamina, stamina);
     if (isGMChecked(SpendEnergy.spendFlag)) SpendEnergy.toggleSpending(maxEnergy, energy);
 //needchange
-    if (isGMChecked(SpendStaminaMission.spendFlag)) SpendStaminaMission.toggleSpending(maxStamina, stamina);
-    if (isGMChecked(SpendMissionEnergy.spendFlag)) SpendMissionEnergy.toggleSpending(maxEnergy, energy);  // Missionenergy ?
+    if (isGMChecked('AutoMafiaMission')) SpendMissionStamina.toggleSpending(maxStamina, stamina);
+    if (isGMChecked('AutoMafiaMission')) SpendMissionEnergy.toggleSpending(maxEnergy, energy);
   }
 
   // Auto-pause reset
@@ -10555,10 +10458,6 @@ function showTimers() {
       '<br>&nbsp;&nbsp;buildWeaponTimer: ' + getHoursTime('buildWeaponTimer') +
       '<br>&nbsp;&nbsp;buildArmorTimer: ' + getHoursTime('buildArmorTimer') +
       '<br>&nbsp;&nbsp;takeHourNew York: ' + getHoursTime('takeHourNew York') +
-      //'<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
-      //'<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
-      //'<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
-      //'<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
       '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsHelpTimer: ' + getHoursTime('colmissionHelpTimer') +
@@ -10596,10 +10495,6 @@ function resetTimers(manually) {
   checkTimer('askCasinoPartsTimer', 900);
   checkTimer('buildWeaponTimer', 900);
   checkTimer('buildArmorTimer', 900);
-  //checkTimer('takeHourLas Vegas', 300);
-  //checkTimer('takeHourBangkok', 300);
-  //checkTimer('takeHourCuba', 300);
-  //checkTimer('takeHourMoscow', 300);
   checkTimer('takeHourNew York', 300);
   checkTimer('dailyChecklistTimer', 900);
   checkTimer('autoGiftAcceptTimer', 3600);
@@ -10612,7 +10507,6 @@ function resetTimers(manually) {
   checkTimer('tournamentTimer', 300);
   checkTimer('colmissionTimer', 600); // 10 min
   checkTimer('colmissionHelpTimer', 120); // 2 min
-// newchange
 
   addToLog('warning Icon', 'All active timers have been reset.');
   if (manually) {
@@ -12490,54 +12384,6 @@ function customizeHitlist() {
 
   return true;
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Do missions. Give priority to spending stamina if it needs
-  // to be burned and using one won't level up. Give priority to jobs if
-  // within one stamina of leveling, or if an energy pack is waiting, or
-  // if energy is fuller than stamina (in percentage terms)
-  // Prioritize burning of energy if level-up within reach.
-  //
-  //
-//needchange
-/*  if ((autoMissionMissionif &&
-       SpendMissionEnergy.canBurn) ||
-       (autoMissionMissionif &&
-//       !(autoStaminaSpendif &&
-//        SpendStamina.canBurn &&
-//        ptsToNextLevel > 6) &&
-//       (ptsToNextLevel <= 6
-//       || autoEnergyPackWaiting
-//       || energy/maxEnergy >= stamina/maxStamina)
-       )) {
-    autoMission();
-    return;
-  }
-
-  if (autoStaminaSpendif) {
-    if (autoStaminaSpend()) return; // staminaspend is unchecked comes back false
-
-    // Attempt failed. Randomize stamina setting (if set)
-    if (isGMEqual('staminaSpendHow', STAMINA_HOW_RANDOM)) {
-      randomizeStamina();
-      if (autoStaminaSpend()) return;
-
-    // Attempt failed. Let some other action happen before trying again
-    } else {
-      skipStaminaSpend = true;
-    }
-  }
-  if (autoMissionif) {
-    autoMission();
-    return;
-  }
-*/
-//selectMissionEnergyUse  //selectMissionEnergyUseMode
-//selectMissionEnergyKeep  //selectMissionEnergyKeepMode
-
-
-
 ////
 function customizeMissions() {
   DEBUG('Customize missions pages adding INFO.');
@@ -12707,7 +12553,7 @@ function getJobRow(jobName, contextNode) {
   if (!rowElt) return false;
   return rowElt;
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////
 function getJobRowItems(jobName) {
   var currentJob = jobName;
   var currentJobRow = getJobRow(currentJob, innerPageElt);
@@ -12882,7 +12728,6 @@ function getJobRowItems(jobName) {
 
   return false;
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function popJob(){
   var jobs = getSavedList('jobsToDo', '');
   // Set the very next job to perform.
@@ -13334,18 +13179,13 @@ BrowserDetect.init();
         'Energy threshold: <strong>' + GM_getValue('selectEnergyUse') + ' ' + numberSchemes[GM_getValue('selectEnergyUseMode', 0)] + ' (refill to ' + SpendEnergy.ceiling + ')</strong><br>' +
         'Energy reserve: <strong>' + + GM_getValue('selectEnergyKeep') + ' ' + numberSchemes[GM_getValue('selectEnergyKeepMode', 0)] + ' (keep above ' + SpendEnergy.floor + ')</strong><br>' +
         '&nbsp;&nbsp;-Energy use started: <strong>' + GM_getValue('useEnergyStarted') + '</strong><br>' +
-
-//needchange
-        '&nbsp;&nbsp;-Missions Energy use started: <strong>' + GM_getValue('useMissionEnergyStarted') + '</strong><br>' +
-
-        'Mission Energy threshold: <strong>' + GM_getValue('selectMissionEnergyUse') + ' ' + numberSchemes[GM_getValue('selectMissionEnergyUseMode', 0)] + ' (refill to ' + SpendMissionEnergy.ceiling + ')</strong><br>' +
         'Mission Energy reserve: <strong>' + + GM_getValue('selectMissionEnergyKeep') + ' ' + numberSchemes[GM_getValue('selectMissionEnergyKeepMode', 0)] + ' (keep above ' + SpendMissionEnergy.floor + ')</strong><br>' +
         'autoEnergyPackForce: <strong>' + showIfUnchecked(GM_getValue('autoEnergyPackForce')) + '</strong><br>' +
         '&nbsp;&nbsp;-autoEnergyPackForcePts: <strong>' + GM_getValue('autoEnergyPackForcePts') + '</strong><br>' +
         '-------------------Stamina Tab-------------------<br>' +
         'Spend stamina: <strong>' + showIfUnchecked(GM_getValue('staminaSpend')) + '</strong><br>' +
         'How: <strong>' + staminaSpendChoices[GM_getValue('staminaSpendHow', 0)] + '</strong><br>' +
-        //'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
+        'Fight till Iced then Rob?: <strong>' + showIfUnchecked(GM_getValue('fightrob')) + '</strong><br>' +
         'Hide Finished Collection Items: <strong>' + showIfUnchecked(GM_getValue('HideCollections')) + '</strong><br>' +
         '&nbsp;&nbsp;Skip iced targets: <strong>' + showIfUnchecked(GM_getValue('iceCheck')) + '</strong><br>' +
         '&nbsp;&nbsp;-Fight in: <strong>' + fightLocations[GM_getValue('fightLocation', 0)] + '</strong><br>' +
@@ -13375,15 +13215,13 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Random <strong>' + showIfUnchecked(GM_getValue('autoHitListRandom')) + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit opponents: <strong>' + GM_getValue('autoHitOpponentList') + '</strong><br>' +
         '&nbsp;&nbsp;-AutoHit background: <strong>' + showIfUnchecked(GM_getValue('bgAutoHitCheck')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Random Stam Spend - Stamina Spend Modes: <strong>' + GM_getValue('randomSpendModes') + '</strong><br>' +
         '&nbsp;&nbsp;-Random Stam Spend - Fight in: <strong>' + GM_getValue('randomFightLocations') + '</strong><br>' +
         '&nbsp;&nbsp;-Random Stam Spend - Rob in: <strong>' + GM_getValue('randomRobLocations') + '</strong><br>' +
         '&nbsp;&nbsp;-Random Stam Spend - Hit in: <strong>' + GM_getValue('randomHitmanLocations') + '</strong><br>' +
         'Stamina threshold: <strong>' + GM_getValue('selectStaminaUse') + ' ' + numberSchemes[GM_getValue('selectStaminaUseMode', 0)] + ' (refill to ' + SpendStamina.ceiling + ')</strong><br>' +
         '&nbsp;&nbsp;-Stamina use started: <strong>' + GM_getValue('useStaminaStarted') + '</strong><br>' +
         'Stamina Jobs & Fights reserve: <strong>' + + GM_getValue('selectStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaKeepMode', 0)] + ' (keep above ' + SpendStamina.floor + ')</strong><br>' +
-//needchange
-        'Stamina Manual reserve: <strong>' + + GM_getValue('selectStaminaMissionKeep') + ' ' + numberSchemes[GM_getValue('selectStaminaMissionKeepMode', 0)] + ' (Processing Missions will keep above ' + SpendStaminaMission.floor + ')</strong><br>' +
+        'Stamina Manual reserve: <strong>' + + GM_getValue('selectMissionStaminaKeep') + ' ' + numberSchemes[GM_getValue('selectMissionStaminaKeepMode', 0)] + ' (Missions will keep above ' + SpendMissionStamina.floor + ')</strong><br>' +
         'Ignore reserve to level-up: <strong>' + showIfUnchecked(GM_getValue('allowStaminaToLevelUp')) + '</strong><br>' +
         '------------------Health Tab-------------------<br>' +
         'Enable auto-heal: <strong>' + showIfUnchecked(GM_getValue('autoHeal')) + '</strong><br>' +
@@ -13409,14 +13247,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Min cash (Bangkok): <strong>' + GM_getValue('minCashBangkok') + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeNew York')) + '</strong><br>' +
         '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourNew York', 0) + '</strong><br>' +
-        //'Collect Cuba Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeCuba')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourCuba', 0) + '</strong><br>' +
-        //'Collect Moscow Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeMoscow')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourMoscow', 0) + '</strong><br>' +
-        //'Collect Bangkok Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeBangkok')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourBangkok', 0) + '</strong><br>' +
-        //'Collect Vegas Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeLas Vegas')) + '</strong><br>' +
-        //'&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourLas Vegas', 0) + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapons: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
@@ -13857,7 +13687,6 @@ function autoLotto() {
       Autoplay.start();
       return true;
     }
-
     // Check if free ticket is available
     actionLink = getActionLink (actionElt, 'Play Now');
     if (actionLink) {
@@ -13885,7 +13714,6 @@ function autoLotto() {
     Autoplay.start();
     return true;
   }
-
   // Are we supposed to grab a mastery prize?
   if (isGMChecked('autoLottoBonus')) {
     // Grab the progress status
@@ -13921,7 +13749,6 @@ function autoLotto() {
       }
     }
   }
-
   var randomTicket = xpathFirst('.//div[@class="sexy_button" and contains(text(), "Auto-Select Numbers")]', innerPageElt);
   if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and @onclick="autoSelect(1);"]', innerPageElt);
   if (!randomTicket) randomTicket = xpathFirst('.//a[@class="sexy_button_new short_white" and contains(., "Auto-Select Numbers")]', innerPageElt);
@@ -13938,7 +13765,6 @@ function autoLotto() {
         if (i<5)
           ticket = ticket + '-';
       }
-
       Autoplay.fx = goHome;
       clickElement(submitTicket);
       addToLog('info Icon', '<span style="font-weight:bold;color:rgb(255,217,39);">Daily Chance</span>: Played ticket' + ticket + '.');
@@ -13946,7 +13772,6 @@ function autoLotto() {
     Autoplay.start();
     return true;
   }
-
   var lottoResults = xpathFirst('.//li[contains(@class, "tab_on")]//a[contains(text(), "Results")]', innerPageElt);
   if (lottoResults) {
     var totalwinning = 0;
@@ -14000,15 +13825,13 @@ function autoLotto() {
         }
       }
     }
-
     Autoplay.fx = goHome;
     Autoplay.start();
     return true;
   }
-
   return false;
 }
-
+////
 function autoWishlist() {
   var shareWishlist = parseFloat(GM_getValue('autoShareWishlistTime', '1'));
   // Go to the wishlist.
@@ -14063,16 +13886,16 @@ function autoWarAttack() {
     } else {
       DEBUG('Invalid War Target .. War is ongoing ...');
     }
-  } 
+  }
   else {
     DEBUG('No Enemy Targets found ... War is ongoing ...');
   }
-  
+
   setGMTime('warTimer', '1 hour');
   return false;
 
-  /*    
-  
+  /*
+
   // Click only the attack button on the right side of the war screen
   var getWarAttackElt = function (parentElt) {
     // Get the "right" side elements
@@ -15205,31 +15028,23 @@ function goJob(jobno) {
   // Get the action element by job no first
   var elt;
   var tmp = 1 ;
-  // if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'")]', jobRow);
   if (jobRow) elt = xpathFirst('.//a[contains(@onclick, "job='+jobNo+'") and not(contains(@onclick, "xw_controller=marketplace"))]', jobRow);
-  // if (!elt) elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow) ? elt : xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]');
-  // if retrieving by job no fails, simply retrieve the job link
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);  tmp = 5 ; }
 
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=dojob")]', jobRow)                    ; tmp = 2 ;} // first 2 are above line broke down
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.panelButtonDoJob('+jobNo+');")]') ; tmp = 3 ;} // lv jobs
   if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "xw_action=fight_job")]', jobRow)                ; tmp = 4 ;} // i forget :) may not need
-//  class="sexy_button_new do_job  medium_black" onclick="return false;" href="#" <span> <span style="color:red"> Need Items </span>
-//  if (!elt) { elt = xpathFirst('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]')    ; tmp = 5 ;} // will do LV job fight (first of the 3 fights in list), no logic
 
   if (tmp == 5) {
-//  if (!elt) {
   // lv fight jobs
     targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);  tmp = 5 ;
     numTargets = targetElts.length;
     DEBUG('Number of Targets Found : '+ numTargets);
     if(numTargets){
 
-      // Get the user's criteria for opponents.
       var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
       var opponentMafiaMax = parseInt(GM_getValue('fightMafiaMax', 501));
 
-      // Make any relative adjustments (if enabled).
       if (GM_getValue('fightLevelMaxRelative', false)) {
         opponentLevelMax = opponentLevelMax + level;
       }
@@ -15238,9 +15053,6 @@ function goJob(jobno) {
       }
       DEBUG('Only doing the job if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
 
-// newchange
-////
-      DEBUG(' check stam 1');
       //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
       var skipCurrentJob = false;
       StamReqElt = xpathFirst('.//dd[@class="stamina"]', jobRow);
@@ -15255,7 +15067,6 @@ function goJob(jobno) {
         } else DEBUG('stamina required :'+StamReq+': have :'+stamina+': have enough stamina do job');
       } else DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
       DEBUG(' check stam 3');
-      // newchange
 
       var smallestMafia = opponentMafiaMax;
       var lowestLevel = opponentLevelMax;
@@ -16462,56 +16273,28 @@ function logResponse(rootElt, action, context) {
         }
       }
 //////////// add stuff here
-//
-/*
-var Miss_Name;                  // mission Name holder
-var Miss_Name_is;
-var Miss_ID;                    // a holder to move the mission tag around
-var Miss_Slot;                  // a holder to move around the mission slot 0-3
-var MyMafiaJobs;                // name to use in misssions
-var Miss_Energy;                //
-var Miss_Nrg_Req = 0;
-var Miss_Stamina;               //
-var Miss_Stam_Req = 0;
-var Miss_Pay_Exp;
-var Miss_Pay_Cash;
-*/
-//
-if( (stamina < Miss_Stam_Req) || (energy  < Miss_Nrg_Req) ) {
-DEBUG(' Dont have enough to perform:' + Miss_Name_is );
-if(stamina < Miss_Stam_Req) { DEBUG (' stamina needed:' + Miss_Stam_Req + ' stamina available:' + stamina ); }
-if(energy  < Miss_Nrg_Req ) { DEBUG (' energy needed:' + Miss_Nrg_Req + ' energy available:' + energy ); }
-}
 //////////// add stuff here
       var Finish_Mission;
       if (pushNextJob) {
         // DEBUG('Job Mastery of 100% detected, Reloading Tabno :'+tabno );
         DEBUG('Job Mastery of 100% detected, Reloading nothing:' );
-        // customizemissions();
-        // may be way too detailed
         Finish_Mission = xpathFirst('.//a[contains(@id,"sm_action_button_'+Miss_ID+'") and contains(@class,"sexy_button_new medium_black") and contains(@onclick,"SocialMissionView.closeTask(\''+Miss_ID+'")]', innerPageElt);
         if(Finish_Mission) {
-//          DEBUG(' we found the finished marker, close button' );
-         clickElement(Finish_Mission);
-//         if(!Check_Mission_Job()){  // load stuff for next mission and try to start it                this and the next line were added before bed last nite
-//        Go_Nxt_Page();  // if there was nothing else on this page, try to go to the next page            so test them
-//        }
+//        DEBUG(' we found the finished marker, close button' );
+          clickElement(Finish_Mission);
+//        if(!Check_Mission_Job()){  Go_Nxt_Page();  } // load stuff for next mission and try to start it // if there was nothing else on this page, try to go to the next page
         } else {
           DEBUG(' we did NOT find the finished, close button' );
         }
         Miss_ID = null;
       } else {
-     if((!chk_stam()) || (!chk_nrg()) ) {
-//        if( (stamina < Miss_Stam_Req) || (energy  < Miss_Nrg_Req) ) {
-        DEBUG('Setting Mission Timer to 10 min, Dont have enough to perform:' + Miss_Name_is );
-//        if(energy  < Miss_Nrg_Req ) { DEBUG (' energy needed:' + Miss_Nrg_Req + ' energy available:' + energy + ', floor=' + SpendMissionEnergy.floor  ); }
-//        if(stamina < Miss_Stam_Req) { DEBUG (' stamina needed:' + Miss_Stam_Req + ' stamina available:' + stamina + ', floor=' + SpendStaminaMission.floor ); }
-
-        setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min since not enough energy /stam
-        Miss_ID = null;
-        return false;
-      }
-
+        if((!chk_stam()) || (!chk_nrg()) ) {
+          DEBUG('Dont have enough to perform:' + Miss_Name_is );
+          setmissiontimer();
+          Miss_ID = null;
+          return false;
+        }
+        return;
       }
   Autoplay.start();
   return true;
@@ -17119,8 +16902,8 @@ function handlePopups() {
           // Get rid of Slot Machine Teaser popup
           if (popupInnerNoTags.indexOf('New Loot!') != -1) return(closePopup(popupElts[i], "Slot Machine Flushed"));
 
-          // Get rid of Proceed to Vegas Level 6 popup
-          if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
+          // Get rid of Proceed to Vegas Level 6 popup // need to check, closing something else
+//          if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
 
           // Get rid of Your Requests popup
           if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
@@ -18249,7 +18032,8 @@ function chk_nrg(){
     DEBUG('Skipping Missions: energy=' + energy + ', cost=' + Miss_Nrg_Req);
     return false;
   }
-  if (energy - Miss_Nrg_Req < SpendMissionEnergy.floor && !SpendMissionEnergy.canBurn) {
+//  if (energy - Miss_Nrg_Req < SpendMissionEnergy.floor && !SpendMissionEnergy.canBurn) {
+  if (energy - Miss_Nrg_Req < SpendMissionEnergy.floor ) {
     DEBUG('Not spending energy on missions: energy=' + energy +
       ', floor=' + SpendMissionEnergy.floor +
       ', Miss_Nrg_Req=' + Miss_Nrg_Req +
@@ -18266,11 +18050,12 @@ function chk_stam() {
     DEBUG('Skipping Missions: stamina=' + stamina + ', cost=' + Miss_Stam_Req);
     return false;
   }
-  if ((stamina - Miss_Stam_Req) < SpendStaminaMission.floor && !SpendStaminaMission.canBurn) {
+//  if ((stamina - Miss_Stam_Req) < SpendMissionStamina.floor && !SpendMissionStamina.canBurn) {
+  if ((stamina - Miss_Stam_Req) < SpendMissionStamina.floor ) {
     DEBUG('Not spending stamina on missions: stamina=' + stamina +
-      ', floor=' + SpendStaminaMission.floor +
+      ', floor=' + SpendMissionStamina.floor +
       ', Miss_Stam_Req=' + Miss_Stam_Req +
-      ', burn=' + SpendStaminaMission.canBurn);
+      ', burn=' + SpendMissionStamina.canBurn);
     return false;
   }
   return true;
@@ -18298,13 +18083,7 @@ function Do_Mission_Job(){
 function Chk_Nxt_Page() {
   var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
   if(!page_right) {
-    if(tst_ver) {
-      setGMTime('colmissionTimer', '00:01:00'); // if testing, set timer to 1 min
-      DEBUG('Last Page, set timer to 1 min 0 seconds');
-    } else {
-      setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min
-      DEBUG('Last Page, set timer to 10 min 0 seconds');
-    }
+    setmissiontimer();
     return false;
 //  } else { DEBUG('There WAS a right mission page button found to Click - .');
   }
@@ -18335,25 +18114,25 @@ function Chk_Left_Page() {
 }
 ////
 function Check_Mission_Job(){
-  // if we find this link, just go do the job
+  // if we find this link, we are in a non finished job
   MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Miss_ID+'")]', innerPageElt);
-  if(!MyMafiaJobs) {
+  if(MyMafiaJobs) { return true; }
+//  if(!MyMafiaJobs) {
     MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job medium_white" and contains(@onclick, "SocialMissionView.startTask" ) ]', innerPageElt);
-  }
-  if(MyMafiaJobs) {  // these 3 lines will be moved to customizemissions once array works
-    Load_MMiss_Info();
-  }
-  if(MyMafiaJobs) {
-    clickElement(MyMafiaJobs); // click white start job button
-    return true ;
-  } else {
-    setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min since not enough energy /stam
-    DEBUG('NO mission button, or unable to perform mission, setting timer to 10 min.');
-  }
+    if(MyMafiaJobs) {  // if we have a mission to try to do, see if we can
+      Load_MMiss_Info();
+      if(MyMafiaJobs) {
+        clickElement(MyMafiaJobs); // click white start job button
+        return true ;
+      }
+    }
+  // }
+  return false;
 }
 ////
 function Load_MMiss_Info(){
   MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job medium_white" and contains(@onclick, "SocialMissionView.startTask" ) ]', innerPageElt);
+
   if(MyMafiaJobs) {
     Miss_ID     = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\'')[1].split('\',\'')[0]  ;  // will pull out just the 1 id
     Miss_Slot   = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\'')[1].split('\',\'')[0]  ;
@@ -18392,16 +18171,26 @@ function Load_MMiss_Info(){
 
     if((!chk_stam()) || (!chk_nrg()) ) {
       MyMafiaJobs = null;
-      return false; }  // if cant do either spend energy or stamina Leave.
+      return false;
     }
-  if(MyMafiaJobs) return true ;
-}
-////
-///////////////////////////////////////////////////////// end of miss collect
-function MMMiss_ver(){
- if (isGMChecked('TestChanges')) {
-  tst_ver = 'E';
-  } else { tst_ver = null;
+    if(MyMafiaJobs) { return true ;
+    }
   }
 }
 ////
+function setmissiontimer() {
+//  if(tst_ver) {
+  if(isGMChecked('TestChanges')) {
+    setGMTime('colmissionTimer', '00:01:00'); // if testing, set timer to 1 min
+    DEBUG('Last Page, set timer to 1 min 0 seconds');
+  } else {
+    setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min
+    DEBUG('Last Page, set timer to 10 min 0 seconds');
+  }
+}
+///////////////////////////////////////////////////////// end of miss collect
+function MMMiss_ver(){
+  tst_ver = null;
+//  if (isGMChecked('TestChanges')) { tst_ver = 'B';  }
+}
+
