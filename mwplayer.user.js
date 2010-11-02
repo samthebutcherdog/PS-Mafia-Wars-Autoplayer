@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.824
+// @version     1.1.825
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.824',
+  version: '1.1.825',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2196,18 +2196,16 @@ function doAutoPlay () {
     if (askSpecialParts(NY, cityArmorParts, GM_getValue('askArmorPartsId',1), 13)) return;
   }
 
-  if (isGMChecked('TestChanges')){
-    // Ask for Special Parts
-    if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {
-      if (askSpecialParts(NY, null, 0, 0)) return;
-    }
-
-    // Ask for Casino Parts
-    if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
-      if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 1)) return;
-    }
+  // Ask for Special Parts
+  if (running && !maxed && isGMChecked('askSpecialParts')  && !timeLeftGM('askSpecialPartsTimer')) {
+    if (askSpecialParts(NY, null, 0, 0)) return;
   }
-
+      
+  // Ask for Casino Parts
+  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
+    if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 1)) return;
+  }
+  
   // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
@@ -2681,15 +2679,16 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
 
   var elt;
   var timerName;
+  var timerReset = '12 hours';
   var buildSetting;
   var buildItem;
-
+    
   switch(buildType){
-    case 1  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts';  buildItem =itemArray[itemIndex][0]; break;
-    case 11 : timerName = 'askShopPartsTimer';    buildSetting='askShopParts';    buildItem =itemArray[itemIndex][0]; break;
-    case 12 : timerName = 'askDepotPartsTimer';   buildSetting='askDepotParts';   buildItem =itemArray[itemIndex][0]; break;
-    case 13 : timerName = 'askArmorPartsTimer';   buildSetting='askArmorParts';   buildItem =itemArray[itemIndex][0]; break;
-    default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; buildItem ='Special Parts';         break;
+    case 1  : timerName = 'askCasinoPartsTimer';  buildSetting='askCasinoParts'; buildItem =itemArray[itemIndex][0]; break;
+    case 11 : timerName = 'askShopPartsTimer';    buildSetting='askShopParts';   buildItem =itemArray[itemIndex][0]; break;
+    case 12 : timerName = 'askDepotPartsTimer';   buildSetting='askDepotParts';  buildItem =itemArray[itemIndex][0]; break;
+    case 13 : timerName = 'askArmorPartsTimer';   buildSetting='askArmorParts';  buildItem =itemArray[itemIndex][0]; break;
+    default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; buildItem ='Special Parts'; timerReset = '2 hours'; break;
   }
   DEBUG('Going to ask for '+buildItem+' ('+buildType +')');
 
@@ -2723,8 +2722,8 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
       elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                         '"remote/html_server.php?xw_controller=propertyV2&' +
                         'xw_action=cs_special_item_feed_update_timestamp&xw_city=1", 1, "nothing"); return false;'});
-    }
-
+    } 
+    
     if (elt) {
       Autoplay.fx = function() {
         clickElement(elt);
@@ -2732,7 +2731,8 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
       };
 
       Autoplay.start();
-      setGMTime(timerName, '12 hours');
+      setGMTime(timerName, timerReset);
+      DEBUG('Ask for Parts - Ask for '+buildType +' - '+buildItem+' success. Timer Reset : '+timerReset);
       return true;
     }
     DEBUG('Ask for Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 Hours.');
@@ -2746,33 +2746,11 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     if(!casinoReport) checkCasinoStatus(true);
     if(casinoReport){
       casinoReport = casinoReport.replace(/\\/g, "");
-      DEBUG(casinoReport);
-      var match;
-      var nextTimeTxt = new RegExp('"ask_friends_next_time":(.+?),','gi');
-      if(match = nextTimeTxt.exec(casinoReport)) {
-        var nextTime = parseInt(match[1]);
-        var d = new Date();
-        d.setMilliseconds(0);
-        var timeDif = Math.max(nextTime-(d.getTime()/1000), 0);
-        //var timeDif = nextTime - date;
-        var hours=Math.floor(timeDif/3600);
-        var minutes=Math.floor(timeDif/60)-(hours*60);
-        var seconds=timeDif-(hours*3600)-(minutes*60);
-        if (hours < 10) hours = "0"+hours;
-        if (minutes < 10) minutes = "0"+minutes;
-        if (seconds < 10) seconds = "0"+seconds;
-        var timeDifTxt = hours+':'+minutes+':'+seconds;
-        DEBUG('Time Left: '+timeDifTxt);
-        if (timeDif >0){
-          DEBUG('You can not ask for Casino Parts. Timer Running : '+timeDifTxt);
-          setGMTime('askCasinoPartsTimer', timeDifTxt);
-          return false;
-        } else {
-          DEBUG('Can ask for parts atm. Timer Running : '+timeDifTxt);
-          var searchItem='"id":'+itemArray[itemIndex][1];
+      DEBUG(casinoReport);      
+      var searchItem='"id":'+itemArray[itemIndex][1];
 
-          //Casino Parts - Check Quantities
-          if(casinoReport.indexOf(searchItem) != -1){
+      //Casino Parts - Check Quantities
+      if(casinoReport.indexOf(searchItem) != -1){
 
             // Parts Required format : {\"id\":1575,\"type\":1,\"quantity\":7}
             var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');
@@ -2807,12 +2785,9 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
             Autoplay.start();
 
             DEBUG('Clicked to ask for '+buildItem+' for '+buildType);
-            setGMTime('askCasinoPartsTimer', '12 hours');
+            setGMTime('askCasinoPartsTimer', '2 hours');
             return true;
           }
-        }
-
-      }
     }
 
     DEBUG('Ask for Casino Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 hours.');
@@ -8763,13 +8738,20 @@ function createCashTab () {
   }
   armorPartsType.selectedIndex = GM_getValue(id, 0);
 
+  // Ask for Special Parts
+  xTop += 25;
+  title = 'Check this to Ask for Special Parts every 2 hours, since no MW timer available';
+  id = 'askSpecialParts';
+  var specialParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('input', specialParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', specialParts, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Ask for Special Parts'));
+  
   // Ask for Casino Parts
   xTop += 25;
-  title = 'Check this to Ask for Casino Parts every 12 hours';
+  title = 'Check this to Ask for Casino Parts every 2 hours, since no MW timer available';
   id = 'askCasinoParts';
-  var casinoParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
-  makeElement('font', casinoParts, {'style':'font-size: 10px;'}).appendChild(document.createTextNode('Experimental ... Enable by Modification setting on About Tab.'));
-  makeElement('br', casinoParts);
+  var casinoParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});  
   makeElement('input', casinoParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
   label = makeElement('label', casinoParts, {'for':id, 'title':title});
   label.appendChild(document.createTextNode('Ask for Casino Parts'));
@@ -8783,15 +8765,6 @@ function createCashTab () {
     casinoPartsType.appendChild(choice);
   }
   casinoPartsType.selectedIndex = GM_getValue(id, 0);
-
-  // Ask for Special Parts
-  xTop += 40;
-  title = 'Check this to Ask for Special Parts every 12 hours';
-  id = 'askSpecialParts';
-  var specialParts = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
-  makeElement('input', specialParts, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  label = makeElement('label', specialParts, {'for':id, 'title':title});
-  label.appendChild(document.createTextNode('Ask for Special Parts'));
 
   // Collect Takes
   var xTop = 50;
@@ -9894,6 +9867,7 @@ function handlePublishing() {
 
         // Level up bonus
         if (checkPublish('.//div[contains(.,"promoted")]','autoLevelPublish', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"gaining control")]','autoLevelPublish', pubElt, skipElt)) return;
 
         // Achievement bonus
         if (checkPublish('.//div[contains(.,"earned the")]','autoAchievementPublish', pubElt, skipElt)) return;
@@ -9941,7 +9915,7 @@ function handlePublishing() {
         if (checkPublish('.//div[contains(.,"an awesome Armory")]','askArmorParts', pubElt, skipElt)) return;
 
         // Ask for Casino Parts
-        if (checkPublish('.//div[contains(.,"building a casino")]','askCasinoParts', pubElt, skipElt)) return;
+        if (checkPublish('.//div[contains(.,"building a Casino")]','askCasinoParts', pubElt, skipElt)) return;
 
         // Ask for Special Parts
         if (checkPublish('.//div[contains(.,"Special Parts")]','askSpecialParts', pubElt, skipElt)) return;
@@ -12992,7 +12966,8 @@ function jobLoot(element) {
       if(messages[i].title){
         var loot = messages[i].title;
         var parentText = messages[i].parentNode.innerHTML.untag();
-        if(loot.match(/(.*?)\.\s+use/i)) loot = RegExp.$1;
+        if(loot.match(/(.+?)\s+?was(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$3;
+        if(loot.match(/(.+?)\s+?(\.|-)\s+?used(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;
         if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+' ' +parentText+'</span> in the job.';
         else strLoot += 'Found <span class="loot">' + loot+' ' +parentText+'</span> in the job.';
         lootbag.push(loot);
@@ -14049,6 +14024,30 @@ function autoWishlist() {
 
 // Attack the first war opponent you can
 function autoWarAttack() {
+
+  var warTargetEnnemies = $x('.//a[contains(@href, "xw_controller=war&xw_action=attack")]', innerPageElt);
+  if(warTargetEnnemies){
+    // Pick a Random Target out of the Targets List
+    DEBUG('Enemy Targets Found ...');
+    var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)];
+    if(warElt){
+      DEBUG('Going to Attack Selected Target in ongoing war.');
+      // Attack the Selected Target
+      Autoplay.fx = function() {
+        clickAction = action;
+        clickContext = warElt;
+        clickElement(warElt);
+      };
+      Autoplay.start();
+      DEBUG('Attacked Selected Target in ongoing war.');
+      return true;
+    } else {
+      DEBUG('Invalid War Target .. War is ongoing ...');
+    }
+  } else {
+    DEBUG('No Enemy Targets found ... War is ongoing ...');
+  }
+/*    
   if (helpWar) {
     // Help attempt was processed. Increment the update count.
     GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
@@ -14079,7 +14078,7 @@ function autoWarAttack() {
     Autoplay.start();
     return true;
   }
-
+*/
   return false;
 }
 
@@ -16189,8 +16188,8 @@ function logJSONResponse(autoplay, response, action, context) {
 
       // Casino Parts
       case 'casino parts':
-        setGMTime('askCasinoPartsTimer', '12 hours');
-        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset for 12 hours.');
+        setGMTime('askCasinoPartsTimer', '2 hours');
+        DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset for 2 hours.');
         return false;
         break;
 
@@ -17395,10 +17394,10 @@ function handlePopups() {
               var rewardsNoTags ="";
               for(i=0;i<rewards.length;++i){
                 rewardsNoTags = rewards[i].innerHTML.untag();
-                if (rewardsNoTags.match(/(.+?)(\d{2})(\d{2})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
-                else if (rewardsNoTags.match(/(.+?)(\d{2})(\d{1})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
-                else if (rewardsNoTags.match(/(.+?)(\d{1})(\d{2})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
-                else if (rewardsNoTags.match(/(.+?)(\d{1})(\d{1})$/)) rewardsNoTags = RegExp.$1+ "(A: "+RegExp.$2+" / D: "+ RegExp.$3+")";
+                if (rewardsNoTags.match(/(.+?)(\d{2})(\d{2})$/)) rewardsNoTags = '<span class="loot">'+RegExp.$1+ '</span> (A: '+RegExp.$2+' / D: '+ RegExp.$3+')';
+                else if (rewardsNoTags.match(/(.+?)(\d{2})(\d{1})$/)) rewardsNoTags = '<span class="loot">'+RegExp.$1+ '</span> (A: '+RegExp.$2+' / D: '+ RegExp.$3+')';
+                else if (rewardsNoTags.match(/(.+?)(\d{1})(\d{2})$/)) rewardsNoTags = '<span class="loot">'+RegExp.$1+ '</span>(A: '+RegExp.$2+' / D: '+ RegExp.$3+')';
+                else if (rewardsNoTags.match(/(.+?)(\d{1})(\d{1})$/)) rewardsNoTags = '<span class="loot">'+RegExp.$1+ '</span>(A: '+RegExp.$2+' / D: '+ RegExp.$3+')';
                 if(rewardsTxt) rewardsTxt += ', '+ rewardsNoTags;
                 else rewardsTxt = rewardsNoTags;
               }
