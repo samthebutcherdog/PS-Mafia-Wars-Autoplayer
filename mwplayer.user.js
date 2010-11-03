@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.828
+// @version     1.1.829
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.828',
+  version: '1.1.829',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2810,8 +2810,8 @@ function autoCollectTake(takeCity) {
 
   // Visit the property Nav
   if (!onPropertyNav()) {
-    if (GM_getValue('propertyNavAttempt')) {  //Tried to go to city, but failed.  Reset and continue.
-      setGMTime('takeHour' + cities[takeCity][CITY_NAME], '1 hour'); // reset clock to try again later.
+    if (GM_getValue('propertyNavAttempt')) {  //Tried to go to properties, but failed.  (Probably Bangkok)  Reset and continue.
+      setGMTime('takeHour' + cities[takeCity][CITY_NAME], '24 hours'); // reset clock to try again a day later.
       GM_setValue ('propertyNavAttempt', false);
       return false;
     }
