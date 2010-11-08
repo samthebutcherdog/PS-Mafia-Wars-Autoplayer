@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.831
+// @version     1.1.832
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -633,16 +633,15 @@ var cashVegasIcon = '<img src="data:image/png;base64,' +
     '" />';
 
 var cashItalyIcon = '<img src="data:image/png;base64,' +
-    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjVJivzg' +
-    'AAADXklEQVQ4T32TD0zUdRjGv3Ac4N3ujuOPHBweh4eAwCGCwCk1PeQQvI4QEGhB624QFoIDtQzbNO20urRZQEyBjWWsXPZH0k7K4Qbl1hS0stI27I8sMMOO0FVin36zrc3F+m7vvtv7vnve9332PELM8U4csRef' +
-    'H3r4vZtX6y7P+urH1ttTTquD1ZuUwXLlXP3/5jISlqbsd6//DPbx5VP5THQ8yC12U+5YxhLTIu7LMI7v3mYsmxOkqqigqPGhmtkKRzGT40188WENRz1rOevJY/tjOdjsaRw95gBcvN0bvesekLX2+JTDnbW3V+VY' +
-    'adhSwvG6XIbd+Xz8loOfOrIZeHUFvc4Ufr1Yyuc9Vg6XaGg/oKi9C5K5RBs98FH1+7CDod4H6Gsu5OsTJXBrnTStWopKuJPHneFk3OsSaduZxeSpHKauZ004y0WkePfN4qf7nTmMdhQw0l7I2KH72deTT2mpiTK7' +
-    'iQ3ORGxWA7s8iVz4YCGHyqLwTVrZszOV2KiAJnH7l3rv1ICDkwdsvLQxG6ZWUFGVStpSM8mJJuIMRhboYojRG+CajiH3fNZkRCALDCMoQDUovhmtHJ6WiDnXbeNMY6y0shnbSgP2PCM1JQsoWp1AS2006elGmEng' +
-    'wjs6qrJDCdeEI4R6QqTELhrOTE7AVZjOqVeSJIAYVlp0LDfrKC+IwGox4CyNwGTSw/VQzruD6HtEwY1pHf3dQRNCpzF45bJYLOmJHGmIg+kQsrLmkxyrZ40ljMykSPIyVQT4R8IVPzwuBXsbtfw8ouDsoP9pYY4P' +
-    '315bGc+V7y280bCQQY+aznYVWx/V4tmk5plaDc83KXmyWcXFLhndTyjwdql52SZoqRPNomVrlP7SpcX9M6OL6XpBYn2Vnu+6g+G3QPhd+v8MAF8A48flbFut5GCrUjpTyY0x/2u5ZqG7q4XWF+NTex5XzbZVa7j5' +
-    'o4n9di0H60P4pElO32YFHc55PGcJwlWhRakOp8Shwt0qNtyjRt9EkqTT0L+83mjS0qJw5EbwukvFa5tD6HxWw8yYkmUZoRLzIcj8AvfO6Qd8cWkZZvWIEFoUsjDGfgjnq2PzaF3uJ60dyJ4dEutCXvW/jvynGFyu' +
-    '0ypOXv1UdvmPEfHtuV5xxtsmtmysFP+x8999db7DTUMcSAAAAABJRU5ErkJggg==' +
-    '" />';
+	'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAz1JREFUeNpkk19oW2UYxn/n5CRNGtvEZdBuOBK0STeEkpbhpnajYxdWuq6ZBb3w' +
+	'wnrjjddeeC1oB+LwRimiVq1EGbL+8aYDEWtrqzKaSour2eJJ1qVrlzRZcpLT5OTk+CXDUfQ7HPheeL/nfd7nfV6J/5y5uVfHvr369YgkEbFMKJWgUICdHab7TjLz5SSTB/Olfy83fr8SWL7x4bWVRTV87nyYmnGE' +
+	'hQUVs2ZQM/dx2LdQk7C3R+zMWS59MoH6CGDjz68CS0uXV8vljDcUushPC3/z6ceLWNSxLIvmV68zNOyiUtFYWyP/XD+9X3yOamsAnB9Ufsw9SAW6gy+xe7/M5XfmkW0ST/f4GH3Fj2ka3NvWUdUaoy+3opUN5x8x' +
+	'BrJZJuSNjamx9fXvwqGu4WYr2fs6kizh87l5480eQscPERn143AodB5xoTjcPNvvxt1KeHCQMSWVjo00aOh6nrJeJZFII0uyiA0ScaGeoP5YWwvjV05R1vao7udQRH4wBL/9yogtHN78Jth1QYhWJKWWmPhoBZsi' +
+	'i7jG8tJdlhfTpFJFTj3jEzpUMcwKRr0icqqktziulERlSzKxuz20H8px4eKTAvke2UyZp4Jt+P0ttHlMHhQTWKZFxdDQi0XBRpATTJTMrokV0oVodkrFEt/PxpHlxnAsbsfz/HWzTrDbxYkTTgzLQC8U2UrDvvBH' +
+	'A6HRDtWqoGVlkOqSGJtEa6tCuWzg8dhob3fg9SrYRAEtn2F7R+TvI7yBaAfkvpPnppN3f8Yhu/A8rjH+fhd2u3CAEG9wyMdrr7t5cchFvVZGE1V18disIQoIlxaZVg57j838cL0aOdqZFYgFrkaz5HLVZgsrvxS4' +
+	'k7Lo6JBQbFVhODj6xMPqm5vQ3c1M04nvvqesbqzXwv1ng7z9lir0EM8t0aBop+FCEWAKRo2HAwONkcOdLWK3b9HbBJiaej4wf31pVeR4S6XDOFvqdHRaaHqOZALUREMncDrhmB+SSfL9Z+id/Az10TJFoy8E1jbm' +
+	'r926SbinD+G8NuEFnaJWE+LB9jbE4wLIIDYU4dIH4weW6eCJRofHZmfnRpCJGBXQtIf/bobp06f/v87/CDAAaTiPaHm8oi8AAAAASUVORK5CYII='
+	'" />';
 
 var healthIcon = '<img src="data:image/png;base64,' +
     'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsSAAALEgHS3X78AAAAB3RJTUUH1wUIFAADTJ17vgAAAJlJREFUOMvFk7ERwjAMRb84L2ENkhmgyh5p' +
@@ -10429,6 +10428,7 @@ function refreshMWAPCSS() {
                  '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
                  '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
                  '#mafiaLogBox .logEvent.cashVegas.Icon{background-image:url(' + stripURI(cashVegasIcon) + ')}' +
+                 '#mafiaLogBox .logEvent.cashItaly.Icon{background-image:url(' + stripURI(cashItalyIcon) + ')}' +					 
                  '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}' +
                  '#mafiaLogBox .logEvent.healOnIcon.Icon{background-image:url(' + stripURI(healOnIcon) + ')}' +
                  '#mafiaLogBox .logEvent.healOffIcon.Icon{background-image:url(' + stripURI(healOffIcon) + ')}' +

@@ -51,6 +51,7 @@
    * cashMoscowIcon
    * cashBangkokIcon
    * cashVegasIcon
+   * cashItalyIcon
    * healthIcon
    * healOnIcon
    * healOnHoldIcon
