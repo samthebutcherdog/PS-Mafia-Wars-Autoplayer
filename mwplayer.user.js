@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.832
+// @version     1.1.833
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.831',
+  version: '1.1.833',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1139,6 +1139,20 @@ var MMiss = new Array ();
     ['Anvil', 2185]
   );
 
+  // Port build
+  var cityPort = new Array (
+    ['Escalation', 2635, 'Requires L$63,000 | 47 attack, 37 defense'],
+    ['Officer\'s Jacket', 2636, 'Requires L$71,000 | 48 attack, 40 defense'],
+    ['Osprey', 2637, 'Requires L$81,000 | 52 attack, 24 defense'],
+    ['Conchiglia', 2638, 'Requires L$132,000 | 35 attack, 55 defense, +1 energy'],
+    ['Coccodrillo', 2639, 'Requires L$144,000 | 57 attack, 40 defense, +1 stamina'],
+    ['Un Tuono', 2640, 'Requires L$148,000 | 60 attack, 49 defense'],
+    ['Water Truck', 2641, 'Requires L$164,000 | 45 attack, 64 defense, +5 health'],
+    ['Antiproiettil', 2642, 'Requires L$170,000 | 66 attack, 52 defense'],
+    ['Bolla', 2643, 'Requires L$203,000 | 68 attack, 55 defense, +2 attack'],
+    ['Fanteria', 2644, 'Requires L$254,000 | 23 attack, 71 defense, +2 defense']
+  );  
+  
   var cityCasinoParts = new Array (
     ['Slot Machine', 1574, 1],
     ['Cinder Block', 1575, 1],
@@ -2219,17 +2233,22 @@ function doAutoPlay () {
   // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
-    if (buildItem(cityCars, GM_getValue('buildCarId',1), 11)) return;
+    if (buildItem(cityCars, GM_getValue('buildCarId',1), 11, NY)) return;
   }
   // Build Weapons
   if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
-    if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12)) return;
+    if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12, NY)) return;
   }
   // Build Armor
   if (running && !maxed && isGMChecked('buildArmor') && !timeLeftGM('buildArmorTimer')) {
-    if (buildItem(cityArmor, GM_getValue('buildArmorId',1), 13)) return;
+    if (buildItem(cityArmor, GM_getValue('buildArmorId',1), 13, NY)) return;
   }
 
+  // Build Port
+  if (running && !maxed && isGMChecked('buildPort') && !timeLeftGM('buildPortTimer')) {
+    if (buildItem(cityPort, GM_getValue('buildPortId',1), 14, ITALY)) return;
+  }  
+  
   // Player updates
   if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
@@ -2744,29 +2763,43 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
   }
 }
 // Pass the item array, item id, and building type
-function buildItem(itemArray, itemIndex, buildType){
-  if (city != NY) {
-    Autoplay.fx = function() { goLocation(NY); };
+function buildItem(itemArray, itemIndex, buildType, buildCity){
+  if (city != buildCity) {
+    Autoplay.fx = function() { goLocation(buildCity); };
     //Autoplay.delay = noDelay;
     Autoplay.start();
     return true;
   }
   DEBUG('Going to build '+itemArray[itemIndex][1]+' - '+buildType);
   // Build the clickable element
-  var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
-                        '"remote/html_server.php?xw_controller=propertyV2&' +
-                        'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
-
-  if (elt) {
-    Autoplay.fx = function() {
-      clickAction = 'build item';
-      clickContext = {'itemName': itemArray[itemIndex][0], 'buildType': buildType};
-      clickElement(elt);
-      DEBUG('Clicked to build ' + clickContext.itemName + '.');
-    };
-
-    Autoplay.start();
-    return true;
+  if(buildCity==NY) {
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
+                          '"remote/html_server.php?xw_controller=propertyV2&' +
+                          'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
+    if (elt) {
+      Autoplay.fx = function() {
+        clickAction = 'build item';
+        clickContext = {'itemName': itemArray[itemIndex][0], 'buildType': buildType};
+        clickElement(elt);
+        DEBUG('Clicked to build ' + clickContext.itemName + '.');
+      };
+      Autoplay.start();
+      return true;
+    }                          
+  } else {  
+  //format : http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=propertyV2&xw_action=portBuyItem&xw_city=6&tmp=<mytmp>&xw_person=<a number>&id=2643&xw_client_id=8  
+    var ajaxID = createAjaxPage(false, 'purchase portItem', ITALY);
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'portBuyItem' + SCRIPT.city + '6&id='+itemArray[itemIndex][1]+'", 1, 1, 0, 0); return false;'});    
+    if (elt) {
+      Autoplay.fx = function() {
+        clickAction = 'purchase portItem';
+        clickContext = {'itemName': itemArray[itemIndex][0], 'buildType': buildType};
+        clickElement(elt);
+        DEBUG('Clicked to build ' + clickContext.itemName + '.');
+      };
+      Autoplay.start();
+      return true;
+    }                          
   }
   return false;
 }
@@ -4801,7 +4834,15 @@ function handleVersionChange() {
   if (GM_getValue('buildWeaponId') >= cityWeapons.length) {
     GM_setValue('buildWeaponId', cityWeapons.length - 1)
   }
+  
+  if (GM_getValue('buildArmorId') >= cityArmor.length) {
+    GM_setValue('buildArmorId', cityArmor.length - 1)
+  }
 
+  if (GM_getValue('buildPortId') >= cityPort.length) {
+    GM_setValue('buildPortId', cityPort.length - 1)
+  }
+  
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 335) {
     GM_setValue('missions', JSON.stringify('[]'));
   }
@@ -5298,8 +5339,9 @@ function saveSettings() {
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
-    'autoBuy','buildCar','buildWeapon','buildArmor','collectTakeNew York',
-    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','autoBankItaly','askShopParts','askDepotParts','askArmorParts', 'askCasinoParts', 'askSpecialParts'
+    'autoBuy','buildCar','buildWeapon','buildArmor','buildPort','collectTakeNew York',
+    'autoBank','autoBankCuba','autoBankMoscow','autoBankBangkok','autoBankVegas','autoBankItaly',
+    'askShopParts','askDepotParts','askArmorParts','askCasinoParts','askSpecialParts'
   ]);
 
   //Cash Settings and Validation
@@ -5331,7 +5373,8 @@ function saveSettings() {
   GM_setValue('buildCarId', document.getElementById('buildCarId').selectedIndex);
   GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
   GM_setValue('buildArmorId', document.getElementById('buildArmorId').selectedIndex);
-
+  GM_setValue('buildPortId', document.getElementById('buildPortId').selectedIndex);
+  
   GM_setValue('askShopPartsId', document.getElementById('askShopPartsId').selectedIndex);
   GM_setValue('askDepotPartsId', document.getElementById('askDepotPartsId').selectedIndex);
   GM_setValue('askArmorPartsId', document.getElementById('askArmorPartsId').selectedIndex);
@@ -8602,6 +8645,26 @@ function createCashTab () {
   armorType.selectedIndex = GM_getValue(id, 7);
   armorType.setAttribute('title', cityArmor[armorType.selectedIndex][2]);
 
+  // Option to build Port
+  xTop += 25;
+  title = 'Check this to build a port inventory item every 24 hours';
+  id = 'buildPort';
+  var buildPort = makeElement('div', cashTab, {'style':'top: '+xTop+'px;'});
+  makeElement('input', buildPort, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
+  label = makeElement('label', buildPort, {'for':id, 'title':title});
+  label.appendChild(document.createTextNode('Build Port'));
+
+  // Port list
+  id = 'buildPortId';
+  var portType = makeElement('select', buildPort, {'id':id, 'style':'position: static; margin-left: 5px;'});
+  for (i = 0, iLength=cityPort.length; i < iLength; ++i) {
+    var choice = makeElement('option', null, {'value':i,'title':cityPort[i][2]});
+    choice.appendChild(document.createTextNode(cityPort[i][0]));
+    portType.appendChild(choice);
+  }
+  portType.selectedIndex = GM_getValue(id, 7);
+  portType.setAttribute('title', cityPort[portType.selectedIndex][2]);  
+  
   // Ask for Chop Shop Parts
   xTop += 40;
   title = 'Check this to Ask for Chop Shop Parts every 12 hours';
@@ -9807,7 +9870,7 @@ function handlePublishing() {
         // Bangkok (Social) Job Help
         if (checkPublish('.//div[contains(.,"get the job done alone in Bangkok")]','selectBangkokTiercheck', pubElt, skipElt)) return;
 
-        // Standard NY, Cuba, Moscow, Bangkok and Vegas Social Job Help
+        // Standard New York, Cuba, Moscow, Bangkok and Vegas Social Job Help
         if (checkPublish('.//div[contains(.,"get the job done alone")]','autoAskJobHelp', pubElt, skipElt)) return;
 
         // Share wishlist
@@ -10428,7 +10491,7 @@ function refreshMWAPCSS() {
                  '#mafiaLogBox .logEvent.cashMoscow.Icon{background-image:url(' + stripURI(cashMoscowIcon) + ')}' +
                  '#mafiaLogBox .logEvent.cashBangkok.Icon{background-image:url(' + stripURI(cashBangkokIcon) + ')}' +
                  '#mafiaLogBox .logEvent.cashVegas.Icon{background-image:url(' + stripURI(cashVegasIcon) + ')}' +
-                 '#mafiaLogBox .logEvent.cashItaly.Icon{background-image:url(' + stripURI(cashItalyIcon) + ')}' +					 
+                 '#mafiaLogBox .logEvent.cashItaly.Icon{background-image:url(' + stripURI(cashItalyIcon) + ')}' +
                  '#mafiaLogBox .logEvent.energyPack.Icon{background-image:url(' + stripURI(energyPackIcon) + ')}' +
                  '#mafiaLogBox .logEvent.healOnIcon.Icon{background-image:url(' + stripURI(healOnIcon) + ')}' +
                  '#mafiaLogBox .logEvent.healOffIcon.Icon{background-image:url(' + stripURI(healOffIcon) + ')}' +
@@ -10466,6 +10529,7 @@ function showTimers() {
       '<br>&nbsp;&nbsp;buildCarTimer: ' + getHoursTime('buildCarTimer') +
       '<br>&nbsp;&nbsp;buildWeaponTimer: ' + getHoursTime('buildWeaponTimer') +
       '<br>&nbsp;&nbsp;buildArmorTimer: ' + getHoursTime('buildArmorTimer') +
+      '<br>&nbsp;&nbsp;buildPortTimer: ' + getHoursTime('buildPortTimer') +
       '<br>&nbsp;&nbsp;takeHourNew York: ' + getHoursTime('takeHourNew York') +
       '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') +
@@ -10504,6 +10568,7 @@ function resetTimers(manually) {
   checkTimer('askCasinoPartsTimer', 900);
   checkTimer('buildWeaponTimer', 900);
   checkTimer('buildArmorTimer', 900);
+  checkTimer('buildPortTimer', 900);
   checkTimer('takeHourNew York', 300);
   checkTimer('dailyChecklistTimer', 900);
   checkTimer('autoGiftAcceptTimer', 3600);
@@ -13262,6 +13327,8 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Weapon Type: <strong>' + cityWeapons[GM_getValue('buildWeaponId', 9)][0] + '</strong><br>' +
         'Build Armor: <strong>' + showIfUnchecked(GM_getValue('buildArmor')) + '</strong><br>' +
         '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +
+        'Build Port: <strong>' + showIfUnchecked(GM_getValue('buildPort')) + '</strong><br>' +
+        '&nbsp;&nbsp;Port Type: <strong>' + cityPort[GM_getValue('buildPortId', 9)][0] + '</strong><br>' +        
         'Ask for Special Parts: <strong>' + showIfUnchecked(GM_getValue('askSpecialParts')) + '</strong><br>' +
         'Ask for Chop Shop Parts: <strong>' + showIfUnchecked(GM_getValue('askShopParts')) + '</strong><br>' +
         '&nbsp;&nbsp;Part Type: <strong>' + cityShopParts[GM_getValue('askShopPartsId', 9)][0] + '</strong><br>' +
@@ -13884,7 +13951,7 @@ function autoWarAttack() {
       DEBUG('Going to Attack Selected Target in ongoing war.');
       // Attack the Selected Target
       Autoplay.fx = function() {
-        clickAction = action;
+        clickAction = 'war';
         clickContext = warElt;
         clickElement(warElt);
       };
@@ -15112,7 +15179,7 @@ function goJob(jobno) {
         DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
       } else {
-        addToLog('warning Icon', 'Opponents did not qualify ... Going home to find new opponents.');
+        addToLog('warning Icon', 'Opponents did not qualify ... Reloading to find new opponents.');
         elt=undefined;
         //goHome();
         goJobsNav();
@@ -16031,6 +16098,23 @@ function logJSONResponse(autoplay, response, action, context) {
         DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset for 2 hours.');
         return false;
         break;
+        
+        // Purchase Port Item
+      case 'purchase portItem':
+/*         
+        respJSON = JSON.parse(responseText);
+        respData = JSON.parse(respJSON.data);     
+        var respMessage = respData.purchase_message;                
+        respData = JSON.stringify(respData).replace(/\\/g, "");
+        var respProperties = JSON.parse(respData.properties);
+        var refreshRate = JSON.parse(respProperties.purchase_refresh_rate);
+        var timeStamp = JSON.parse(respProperties.last_purchase_time_stamp);
+        DEBUG(respMessage+' '+refreshRate+' '+timeStamp);
+*/        
+        setGMTime('buildPortTimer', '24 hours');
+        DEBUG('Parsed JSONResponse for Purchasing Port Item. Timer Reset for 24 hours.');
+        return false;
+        break;
 
       // Log any message from collecting property take.
       case 'collect take':
@@ -16240,6 +16324,7 @@ function logResponse(rootElt, action, context) {
       }
 
     case 'heal':
+    case 'quick heal':
       if (innerNoTags.indexOf('doctor healed') != -1) {
         GM_setValue('healWaitStarted',false);
         var addHealth = inner.split('doctor healed <strong>')[1].split('health')[0];
@@ -16761,16 +16846,15 @@ function logResponse(rootElt, action, context) {
         case 11: timerName = 'buildCarTimer'; break;
         case 12: timerName = 'buildWeaponTimer'; break;
         case 13: timerName = 'buildArmorTimer'; break;
+        case 14: timerName = 'buildPortTimer'; break;
       }
-      if (/You cannot craft/i.test(inner)) {
-        if(context.buildType==11) inner = "Chop Shop : " + inner;
-        if(context.buildType==12) inner = "Weapons Depot : " + inner;
-        if(context.buildType==13) inner = "Armory : " + inner;
-      }
-      // Visit again after 1 hour if you cannot craft yet
       if (/You cannot craft/i.test(inner) ||
           /You do not have/i.test(inner) ||
           /You need a higher/i.test(inner) ) {
+        if(context.buildType==11) inner = "Chop Shop : " + inner;
+        if(context.buildType==12) inner = "Weapons Depot : " + inner;
+        if(context.buildType==13) inner = "Armory : " + inner;
+        if(context.buildType==14) inner = "Port : " + inner;      
         setGMTime(timerName, '1 hour');
         addToLog('info Icon', inner);
       } else {
@@ -16780,6 +16864,8 @@ function logResponse(rootElt, action, context) {
           if (inner.match(/You gained.+&nbsp;(.+?)<\/div>/))
             log += ' You gained ' + RegExp.$1;
           addToLog('lootbag Icon', log);
+        } else {
+          addToLog('lootbag Icon', inner);
         }
       }
       break;
@@ -16912,13 +16998,13 @@ function handlePopups() {
           if (popupInnerNoTags.indexOf('New Loot!') != -1) return(closePopup(popupElts[i], "Slot Machine Flushed"));
 
           // Get rid of Proceed to Vegas Level 6 popup // need to check, closing something else
-//          if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
+          // if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
 
           // Get rid of Your Requests popup
           if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
 
-		  // Get rid of out of stamina popup
-		  if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));		  
+		      // Get rid of out of stamina popup
+		      if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));		  
 		  
           // Get rid of Welcome to Tournaments popup
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
@@ -16936,6 +17022,11 @@ function handlePopups() {
           // Get rid of not in mission popup
             if (popupInnerNoTags.indexOf('not involved in this mission') != -1) {
               return(closePopup(popupElts[i], "Not in Mission"));
+            }
+            
+            // Get rid of Increase your mafia popup
+            if (popupInnerNoTags.indexOf('Increase your mafia! Increase your strength!') != -1) {
+              return(closePopup(popupElts[i], "Increase your mafia"));
             }
 
           // Get rid of "The Daily Take" popup
@@ -17709,8 +17800,12 @@ function makeCommaValue(nStr) {
 function getGMTime(GMvalue) {
   var tempVal = GM_getValue(GMvalue, 0);
   var d = Date.parse(tempVal);
+  if(!d) {
+    setGMTime(GMvalue,'00:10:00'); // problem with timer, set to 10 min
+  }
   return d/1000;
 }
+
 
 // takes a string input in the form of a countdown 'MM:SS', 'HH:MM:SS', 'MM minutes and SS seconds' and stores the
 // time when the countdown is zero in a GM value.  Also takes an input of 'now' and stores the current time.
