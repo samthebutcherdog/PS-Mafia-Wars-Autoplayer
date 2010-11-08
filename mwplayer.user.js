@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.833
+// @version     1.1.834
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.833',
+  version: '1.1.834',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -16050,6 +16050,7 @@ function logJSONResponse(autoplay, response, action, context) {
         }
         break;
 
+        
       // Log quickHeal() response.
       case 'quick heal':
         // Attempt to correct the displayed health value
@@ -16063,6 +16064,12 @@ function logJSONResponse(autoplay, response, action, context) {
           addToLog('health Icon', '<span style="color:#FF9999;">' + ' Health +'+ addHealth + ' for <span class="expense">' + cost + '</span>.</span>');
         } else if (/you cannot heal so fast/i.test(responseText)) {
           addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
+        }
+        else if (/have enough/i.test(responseText)) {
+          respJSON = JSON.parse(responseText);          
+          var healCity = parseInt(respJSON.user_fields.current_city_id)-1;          
+          addToLog('warning Icon', '<span style="color:#FF9999;">' + 'You don\'t have enough money to heal in '+cities[healCity][CITY_NAME]+'.<br/>Disabling auto-heal.' + '</span>');
+          GM_setValue('autoHeal', 'unchecked');
         }
         if (autoplay) {
           // Returning home after healing ensures that the home page still gets
