@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.830
+// @version     1.1.831
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.830',
+  version: '1.1.831',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10732,7 +10732,7 @@ function customizeMasthead() {
                      '  <div class="sexy_destination middle">&nbsp;&nbsp;Chuck-a-Crap</div> ' +
                      '</a> ' +
                      '<a href="javascript:%28function%28%29%7Bvar%20a%3Ddocument.createElement%28%22script%22%29%3Ba.type%3D%22text%2Fjavascript%22%3Ba.src%3D%22http://www.spockholm.com/mafia/robber.js%3F%22%2BMath.random%28%29%3Bdocument.getElementsByTagName%28%22head%22%29%5B0%5D.appendChild%28a%29%7D%29%28%29%3B"> ' +
-                     '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.08</div> ' +
+                     '  <div class="sexy_destination middle">&nbsp;&nbsp;Spock&#39;s Robber v1.14</div> ' +
                      '</a> ' +
                      '<a><div class="sexy_destination bottom" style="height: 0px; padding: 0px"></div></a>';
 
@@ -16917,6 +16917,9 @@ function handlePopups() {
           // Get rid of Your Requests popup
           if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
 
+		  // Get rid of out of stamina popup
+		  if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));		  
+		  
           // Get rid of Welcome to Tournaments popup
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
           // Get rid of Tournament Expired popup
