@@ -54,7 +54,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.838
+// @version     1.1.839
 // ==/UserScript==
 
 // search for new_header   for changes still lots of them in here
@@ -62,7 +62,7 @@
 // if (isGMChecked('TestChanges')){ code }   <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
 //
 var SCRIPT = {
-  version: '1.1.838',
+  version: '1.1.839',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10756,6 +10756,7 @@ function customizeMasthead() {
   // Change help instructions
   var helpElt = xpathFirst('.//div[@onmouseover="instructionopen()"]', innerPageElt);
   var titleElt = xpathFirst('.//span[contains(text(),"Help")]',helpElt)
+  if(!titleElt) titleElt = xpathFirst('.//span[contains(text(),"Account")]',helpElt)
   titleElt.innerHTML = "PS MWAP";
   titleElt.parentNode.parentNode.parentNode.style.width= "120px";
   titleElt.parentNode.parentNode.parentNode.parentNode.style.width= "120px";
