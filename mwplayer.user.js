@@ -21,16 +21,27 @@
 * @past_authors: CharlesD, Eric Ortego, Jeremy, Liquidor, AK17710N, KCMCL,
             Fragger, <x51>, CyB, int1, Janos112, int2str, Doonce, Eric Layne,
             Tanlis, Cam, vmzildjian, csanbuenaventura, Scrotal, Bushdaka,
-            rdmcgraw, moe, crazydude, SamTheButcher, dwightwilbanks,
+            rdmcgraw, moe, BBB, crazydude, SamTheButcher, dwightwilbanks,
             nonoymsd, MaxJ, donnaB, StevenD
 * @created: March 23, 2009
 * @credits: Blannies Vampire Wars script
             http://userscripts.org/scripts/show/36917
 */
-// newchangefight
-// newchangemission
-// newchange
-// newchangenotadded
+// this aproach should cut way down on background processing since DEBUG is found 436 time in this file.
+////  only attempt display line in log or msg window if, 'enabled looging' 'debug off', and 'log filtering on' &&
+////  must have a 'match word' in accept pattern found. IE: mission to show missions debugging.
+// Diagnose_msg=' missions check 1';
+// Diagnose(Diagnose_msg);
+// Diagnose(' mission whatever.');
+// Diagnose(''); filter words are, mission, timer, job(some of it)
+//newchange
+//newchange_need_to_add_to_main
+//newchange_fight
+//newchange_mission
+//newchange_testing
+//newchange_remove_for_me_only
+//newchange_cut_not_released_yet
+//
 // ==UserScript==
 // @name        PS Facebook Mafia Wars Autoplayer (MWAP)
 // @namespace   mafiawars
@@ -43,18 +54,15 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.836
+// @version     1.1.837
 // ==/UserScript==
 
-// search for new_header   for changes
+// search for new_header   for changes still lots of them in here
 //
-// TestChanges    <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
-// if (isGMChecked('TestChanges')){ code };
-// else { original code }; <- optional
-// once code is proven ok, take it out of testing
+// if (isGMChecked('TestChanges')){ code }   <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
 //
 var SCRIPT = {
-  version: '1.1.836',
+  version: '1.1.837',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -133,6 +141,18 @@ function GM_ApiBrowserCheck() {
   }; } }
 }
 GM_ApiBrowserCheck();
+
+//      GM_getValue=function(name,defValue) {//workinon
+      GM_getGoodValue=function(name,defValue) {
+        if(typeof(gvar.temporarilyStorage[GMSTORAGE_PATH+name])=='undefined') {
+          if(defValue){
+            GM_setValue(name,defValue);  // save the default value for next time, not just use it
+          }
+          return defValue;
+          } else {
+            return gvar.temporarilyStorage[GMSTORAGE_PATH+name];
+          }
+      };
 
 // Handle Publishing (check for FB publishing / FB Gifting iframe)
 function checkInPublishPopup() {
@@ -788,6 +808,10 @@ var newStaminaMode;             // New stamina mode for random fighting
 var checkOnWar;
 var jobid;
 var tst_ver;                    // for making version note changes
+var mmis_time = '00:00:30';
+var deflt_num_fight = 501;
+var deflt_num_fight_st = '501' ;
+
 //new_header = false ; // change the commented out line to disable all changes
 new_header = xpathFirst('//div[@class="header_top_row"]') ? true : false; // checks for new header
 
@@ -896,8 +920,8 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   const STAMINA_HOW_RANDOM       = 5; // Random spending of stamina in random cities.
   const STAMINA_HOW_FIGHTROB     = 6; // Fight then Rob random opponents.
   const STAMINA_HOW_FIGHT_RIVALS = 7; // Rival fighting.
-//  const STAMINA_HOW_LVJOBFIGHT   = 7;  // do lv job Fights.
-// newchangefight
+//  const STAMINA_HOW_LVJOBFIGHT   = 8;  // do lv job Fights.
+//newchange_fight
 
   var staminaSpendChoices = [];
   staminaSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random opponents';
@@ -909,7 +933,7 @@ if (!initialized && !checkInPublishPopup() && !checkLoadIframe() &&
   staminaSpendChoices[STAMINA_HOW_FIGHTROB]     = 'Fight then Rob';
   staminaSpendChoices[STAMINA_HOW_FIGHT_RIVALS] = 'Fight rivals';
 //  staminaSpendChoices[STAMINA_HOW_LVJOBFIGHT]   = 'Do LV Job Fights';
-// newchangefight
+//newchange_fight
 
   var randomSpendChoices = [];
   randomSpendChoices[STAMINA_HOW_FIGHT_RANDOM] = 'Fight random';
@@ -1151,8 +1175,8 @@ var MMiss = new Array ();
     ['Antiproiettil', 2642, 'Requires L$170,000 | 66 attack, 52 defense'],
     ['Bolla', 2643, 'Requires L$203,000 | 68 attack, 55 defense, +2 attack'],
     ['Fanteria', 2644, 'Requires L$254,000 | 23 attack, 71 defense, +2 defense']
-  );  
-  
+  );
+
   var cityCasinoParts = new Array (
     ['Slot Machine', 1574, 1],
     ['Cinder Block', 1575, 1],
@@ -2181,11 +2205,12 @@ function doAutoPlay () {
     if (autoWar()) return;
   }
 
-  // newchange hasMissions now locked below 12
-  if (running && isGMChecked('AutoMafiaMission') && hasMissions&& !timeLeftGM('colmissionTimer')) {  //   && !maxed
+  // hasMissions now locked below 12
+  if (running && isGMChecked('AutoMafiaMission') && hasMissions && (!timeLeftGM('colmissionTimer')) ) {
      if (Auto_Mafia_Mission() ) return;
-  } else { DEBUG(' Mission Timer '+timeLeftGM('colmissionTimer')+' Seconds. Perform Missions  '+isGMChecked('AutoMafiaMission')+', Level '+level) ;
-//           DEBUG('Has the ability to do missions '+ hasMissions +'. MWAP is running '+ running +'. is maxed '+ maxed + '. If Maxed, will bypass missions.');
+  } else {
+    Diagnose(' mission Timer '+parseInt(timeLeftGM('colmissionTimer'))+' Seconds. Perform Missions  '+isGMChecked('AutoMafiaMission')+', Level '+level) ;
+//  Diagnose(' mission, has the ability to: '+ hasMissions +'. MWAP is running '+ running +'.');
   }
 
   // Auto-collect take (limit to level 4 and above)
@@ -2247,8 +2272,8 @@ function doAutoPlay () {
   // Build Port
   if (running && !maxed && isGMChecked('buildPort') && !timeLeftGM('buildPortTimer')) {
     if (buildItem(cityPort, GM_getValue('buildPortId',1), 14, ITALY)) return;
-  }  
-  
+  }
+
   // Player updates
   if (running && !maxed && isGMChecked('logPlayerUpdates') && onHome()) {
     if (autoPlayerUpdates()) return;
@@ -2785,11 +2810,11 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
       };
       Autoplay.start();
       return true;
-    }                          
-  } else {  
-  //format : http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=propertyV2&xw_action=portBuyItem&xw_city=6&tmp=<mytmp>&xw_person=<a number>&id=2643&xw_client_id=8  
+    }
+  } else {
+  //format : http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=propertyV2&xw_action=portBuyItem&xw_city=6&tmp=<mytmp>&xw_person=<a number>&id=2643&xw_client_id=8
     var ajaxID = createAjaxPage(false, 'purchase portItem', ITALY);
-    var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'portBuyItem' + SCRIPT.city + '6&id='+itemArray[itemIndex][1]+'", 1, 1, 0, 0); return false;'});    
+    var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'portBuyItem' + SCRIPT.city + '6&id='+itemArray[itemIndex][1]+'", 1, 1, 0, 0); return false;'});
     if (elt) {
       Autoplay.fx = function() {
         clickAction = 'purchase portItem';
@@ -2799,7 +2824,7 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
       };
       Autoplay.start();
       return true;
-    }                          
+    }
   }
   return false;
 }
@@ -4834,7 +4859,7 @@ function handleVersionChange() {
   if (GM_getValue('buildWeaponId') >= cityWeapons.length) {
     GM_setValue('buildWeaponId', cityWeapons.length - 1)
   }
-  
+
   if (GM_getValue('buildArmorId') >= cityArmor.length) {
     GM_setValue('buildArmorId', cityArmor.length - 1)
   }
@@ -4842,7 +4867,7 @@ function handleVersionChange() {
   if (GM_getValue('buildPortId') >= cityPort.length) {
     GM_setValue('buildPortId', cityPort.length - 1)
   }
-  
+
   if (!isNaN(GM_getValue('build')) && parseInt(GM_getValue('build')) < 335) {
     GM_setValue('missions', JSON.stringify('[]'));
   }
@@ -5141,7 +5166,7 @@ function saveSettings() {
   GM_setValue('autoWarTargetList', document.getElementById('autoWarTargetList').value);
   //End Save Mafia Tab Settings
 
-  //Missions Tab Checkboxes  // newchange
+  //Missions Tab Checkboxes
   saveCheckBoxElementArray([
     'AutoMafiaMission','AutoMafiaCollection','AutoMafiaJob','AutoMafiaRemoved','AskMissionHelp'
   ]);
@@ -5374,7 +5399,7 @@ function saveSettings() {
   GM_setValue('buildWeaponId', document.getElementById('buildWeaponId').selectedIndex);
   GM_setValue('buildArmorId', document.getElementById('buildArmorId').selectedIndex);
   GM_setValue('buildPortId', document.getElementById('buildPortId').selectedIndex);
-  
+
   GM_setValue('askShopPartsId', document.getElementById('askShopPartsId').selectedIndex);
   GM_setValue('askDepotPartsId', document.getElementById('askDepotPartsId').selectedIndex);
   GM_setValue('askArmorPartsId', document.getElementById('askArmorPartsId').selectedIndex);
@@ -5629,7 +5654,13 @@ function isLoggable(line) {
 
   return (filterOpt == 1);
 }
-
+////  only attempt to display line in log if 'log filtering on' &&
+////  must have a 'match word' in accept pattern found. IE: mission to show mission debugging
+function Diagnose(Diagnose_msg){
+  if( (!isGMChecked('filterLog') )  ) return;  //newchange
+  addToLog('info Icon','<span style="color:#04B4AE;";> ' + Diagnose_msg + ' <strong></strong>.</span>');
+}
+////
 function addToLog(icon, line) {
   if (!debug && !isGMChecked('autoLog')) {
     // Logging is turned off.
@@ -5859,7 +5890,7 @@ function debugOnOff() {
     showMafiaLogBox();
     addToLog('info Icon', 'Debug logging enabled.[/code]');
     if (debugElt) debugElt.style.color = 'rgb(255, 0, 0)';
-    if (filterElt) filterElt.style.display = 'none';
+    //if (filterElt) filterElt.style.display = 'none'; // dont hide filter option
 
     debugDumpSettings();
   }
@@ -6056,12 +6087,14 @@ function createLogBox() {
     closeLogButton.addEventListener('click', hideMafiaLogBox, false);
 
   title = 'Click to open settings';
-  var settingsElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_settings_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 210px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
+//  var settingsElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_settings_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 210px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
+    var settingsElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_settings_log', 'style':'position: absolute; right: 210px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(255, 217, 39);'});
     settingsElt.appendChild(document.createTextNode('settings'));
     settingsElt.addEventListener('click', toggleSettings, false);
 
   title = 'Click to toggle log filtering';
-  var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 170px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
+  //var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'display:'+(debug ? 'none' : 'block')+'; position: absolute; right: 170px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
+  var filterElt = makeElement('div', mafiaLogBox, {'class':'mouseunderline', 'title':title,'id':'ap_filter_log', 'style':'position: absolute; right: 170px; top: 0px; font-weight: 600; cursor: pointer; color: rgb(' + (filter ? '255' : '100') + ', 0, 0);'});
     filterElt.appendChild(document.createTextNode('filter'));
     filterElt.addEventListener('click', logFilterOnOff, false);
 
@@ -6194,7 +6227,7 @@ function createSettingsBox() {
 
   // This creates the settings box just like a facebook popup
   var elt = makeElement('div', document.body, {'class':'generic_dialog pop_dialog', 'id':'GenDialogPopDialog'});
-  elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 660px;'}); // newchange
+  elt = makeElement('div', elt, {'class':'generic_dialog_popup', 'style':'top: 30px; width: 660px;'});
   elt = makeElement('div', elt, {'class':'pop_content popcontent_advanced', 'id':'pop_content'});
   var settingsBox = makeElement('div', elt, {'style':'border: 2px; position: fixed; right: 5px; top:  5px; width: 660px; height: 540px; font-size: 13px; z-index: 10001; padding: 5px; border: 1px solid #A0A0A0; color: #BCD2EA; background: black', 'id':'settingsBox'});
   //End settings box
@@ -6235,7 +6268,7 @@ function createSettingsBox() {
   var mafiaTab = createMafiaTab();
   settingsBox.appendChild(mafiaTab);
 
-  // Create help/publish tab.  // newchange
+  // Create help/publish tab.
   var HelpMissionsTab = createHelpMissionsTab();
   settingsBox.appendChild(HelpMissionsTab);
 
@@ -6264,15 +6297,13 @@ function createSettingsBox() {
   settingsBox.appendChild(aboutTab);
 
   // Create save button
-//  var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 10px; bottom: 10px;'});
-  var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 5px; top:40px;'});  // newchange
+  var saveButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'left: 5px; top:40px;'});
   makeElement('button', saveButton).appendChild(document.createTextNode('Save Settings'));
   saveButton.addEventListener('click', saveSettings, false);
 
   // Create Update button
   if (gvar.isGreaseMonkey) {
-//    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 10px; bottom: 10px;'});
-    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 5px; top: 40px;'});  // newchange
+    var updateButton = makeElement('span', settingsBox, {'class':'sexy_button', 'style':'right: 5px; top: 40px;'});
     makeElement('button', updateButton).appendChild(document.createTextNode('Update-Check'));
     updateButton.addEventListener('click', updateScript, false);
   }
@@ -6305,7 +6336,7 @@ function createGeneralTab() {
   var elt, title, id, label, item, i, lhs, rhs, choice;
   var generalTab = makeElement('div', null, {'id':'generalTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  // Container for a list of settings. // newchange                                                                                 95
+  // Container for a list of settings.
   var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 130%; line-height:120%;'});
 //  var list = makeElement('div', generalTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 95%; line-height:120%;'});
 
@@ -6518,7 +6549,7 @@ function createDisplayTab() {
   var title, id, i, item, choice, lhs, rhs;
   var displayTab = makeElement('div', null, {'id':'displayTab', 'class':'tabcontent', 'style':'background-image:url(' + stripURI(bgTabImage) + ')'});
 
-  // Container for a list of settings.  // newchange
+  // Container for a list of settings.
 //  var list = makeElement('div', displayTab, {'style':'position: relative; top: 10px; margin-left: auto; margin-right: auto; width: 145%; line-height:120%;'});
   var list = makeElement('div', displayTab, {'style':' top: 10px; margin-left: auto; margin-right: auto; width: 120%; line-height:120%;'});
 
@@ -7222,9 +7253,9 @@ function createAutostatTab() {
   xTopCur = xTop;
 
   for (i = 0, iLength=autoStatRatios.length; i < iLength; ++i ) {
-    title = 'Please set ratio of' + autoStatDescrips[i + 1] + ' stat';
+    title = 'Please set ratio of ' + autoStatDescrips[i + 1] + ' stat';
     id = autoStatRatios[i];
-    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
+    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;', 'title':title});
     div.appendChild(document.createTextNode(' = '));
     makeElement('input', div, {'type':'text', 'style':'width: 40px;', 'value':GM_getValue(id, 0), 'id':id, 'size':'1'});
     div.appendChild(document.createTextNode(' x '));
@@ -7255,8 +7286,9 @@ function createAutostatTab() {
   xTopCur = xTop;
 
   for (i = 0, iLength=autoStatBases.length; i < iLength; ++i ) {
+    title = 'add these for total ';
     id = autoStatBases[i];
-    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;'});
+    div = makeElement('div', statDiv, {'style':'position: absolute; top:' + xTopCur + 'px; left:' + yLeftCur + 'px;', 'title':title});
     div.appendChild(document.createTextNode(' + '));
     makeElement('input', div, {'type':'text', 'style':'width: 40px;', 'value':GM_getValue(id, 0), 'id':id, 'size':'1'});
     xTopCur += 25;
@@ -8398,7 +8430,7 @@ function createStaminaTab() {
       case STAMINA_HOW_FIGHT_RIVALS :
         createStaminaSubTab_FightRivals(staminaTabSub);
         break;
-// newchange
+//newchange_fight
 //      case STAMINA_HOW_LVJOBFIGHT :
 //        createStaminaSubTab_LVJobFight(staminaTabSub);
 //        break;
@@ -8663,8 +8695,8 @@ function createCashTab () {
     portType.appendChild(choice);
   }
   portType.selectedIndex = GM_getValue(id, 7);
-  portType.setAttribute('title', cityPort[portType.selectedIndex][2]);  
-  
+  portType.setAttribute('title', cityPort[portType.selectedIndex][2]);
+
   // Ask for Chop Shop Parts
   xTop += 40;
   title = 'Check this to Ask for Chop Shop Parts every 12 hours';
@@ -9035,7 +9067,8 @@ function validateStaminaTab() {
       } else if (!s.fightLevelMaxRelative && s.fightLevelMax < level && !s.fightLevelMaxOverride) {
         addToLog('warning Icon', 'Maximum level for fighting is set to ' + s.fightLevelMax + '. Setting to current level of ' + level + '.');
         s.fightLevelMax = level;
-      } else if (!s.fightLevelMaxRelative && level >= 180 &&
+//newchange_need_to_add_to_main
+/*      } else if (!s.fightLevelMaxRelative && level >= 180 &&
                  s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a maximum fight level of 200 at the very least. If necessary, lower the maximum mafia size to compensate.');
         return false;
@@ -9043,7 +9076,7 @@ function validateStaminaTab() {
                 level + s.fightLevelMax < 200) {
         alert('Once you reach level 180, only opponents of level 180 and up are displayed. In order to find random opponents, please enter a relative fight level of at least ' + (200 - s.fightLevelMax) + '. If necessary, lower the maximum mafia size to compensate.');
         return false;
-      }
+*/      }
 
       // Validate the maximum mafia size settings.
       if (isNaN(s.fightMafiaMax)) {
@@ -9315,7 +9348,7 @@ function handleModificationTimer(target) {
 
   if(new_header){
     var mastheadElt =  xpathFirst('//div[@class="header_top_row"]');
-    //var elt = mastheadElt;
+    //if(!mastheadElt)  var mastheadElt = document.getElementById('mw_masthead');
   } else {
     var mastheadElt = document.getElementById('mw_masthead');
   }
@@ -10418,7 +10451,6 @@ function refreshMWAPCSS() {
                  '#settingsBox .sexy_button{position:absolute;background:black;border:1px solid #AAAAAA;color:#D0D0D0;cursor:pointer;display:block;float:left;font-size:13px;font-weight:700;padding:2px;text-decoration:none;width:auto}' +
                  '#settingsBox .sexy_button button{background:transparent;border:1px none #FFF;color:#D0D0D0;cursor:pointer;font-size:13px;font-weight:700;margin:0}' +
                  '#settingsBox .sexy_button button:hover{background:#666666;font-weight:700;text-decoration:none}' +
-//               '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:600px}' +
                  '#settingsBox .tabcontent{display:none;height:420px;top:40px;width:660px}' +  // newchange
                  '#settingsBox div,#settingsBox select,#settingsBox textarea{position:absolute}' +
                  '#settingsBox select,#settingsBox input{border:1px solid;} #settingsBox textarea{border:2px solid;}' +
@@ -10527,7 +10559,6 @@ function showTimers() {
       '<br>&nbsp;&nbsp;takeHourItaly: ' + getHoursTime('takeHourItaly') +
       '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') +
-      '<br>&nbsp;&nbsp;CollectMissionsHelpTimer: ' + getHoursTime('colmissionHelpTimer') +
       '<br>&nbsp;&nbsp;rewardEnergyTimer: ' + getHoursTime('rewardEnergyTimer') +
       '<br>&nbsp;&nbsp;autoAskHelponCCTimer: ' + getHoursTime('autoAskHelponCCTimer') +
       '<br>&nbsp;&nbsp;AskforHelpMoscowTimer: ' + getHoursTime('AskforHelpMoscowTimer') +
@@ -10549,6 +10580,8 @@ function resetTimers(manually) {
   // 900  : if 15 minutes have passed
   // 300  : if 5 minutes have passed
   var checkTimer = function(timername, limit) { if (manually || timeLeftGM(timername) < limit) setGMTime(timername, 0); };
+//  var checkTimer = function(timername, limit) { if (manually) setGMTime(timername, 0); };
+
 
   checkTimer('miniPackTimer', 300);
   checkTimer('wishListTimer', 300);
@@ -10579,7 +10612,6 @@ function resetTimers(manually) {
   checkTimer('checkVaultTimer', 900);
   checkTimer('tournamentTimer', 300);
   checkTimer('colmissionTimer', 600); // 10 min
-  checkTimer('colmissionHelpTimer', 120); // 2 min
 
   addToLog('warning Icon', 'All active timers have been reset.');
   if (manually) {
@@ -10709,7 +10741,7 @@ function doQuickClicks() {
     DEBUG('Error @doQuickClicks: ' + ex);
   }
 }
-
+////
 // Parse certain messages appearing on the message window
 function doParseMessages() {
   var msgs = $x('//td[@class="message_body"]');
@@ -12459,7 +12491,7 @@ function customizeHitlist() {
 }
 ////
 function customizeMissions() {
-  DEBUG('Customize missions pages adding INFO.');
+  Diagnose(' mission Customize pages adding INFO.');
 //  AddFbIds();
 
 }
@@ -13197,7 +13229,6 @@ BrowserDetect.init();
         '&nbsp;&nbsp;Do Mafia Missions: <strong>' + showIfUnchecked(GM_getValue('AutoMafiaJob')) + '</strong><br>' +
         '&nbsp;&nbsp;Delete Missions Removed From: <strong>' + showIfUnchecked(GM_getValue('AutoMafiaRemoved')) + '</strong><br>' +
         '&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') + '</strong><br>' +
-        '&nbsp;&nbsp;CollectMissionsHelpTimer: ' + getHoursTime('colmissionHelpTimer') + '</strong><br>' +
         '-------------------Autostat Tab--------------------<br>' +
         'Enable auto-stat: <strong>' + showIfUnchecked(GM_getValue('autoStat')) + '</strong><br>' +
         'Disable auto-stat: <strong>' + showIfUnchecked(GM_getValue('autoStatDisable')) + '</strong><br>' +
@@ -13332,7 +13363,7 @@ BrowserDetect.init();
         'Build Armor: <strong>' + showIfUnchecked(GM_getValue('buildArmor')) + '</strong><br>' +
         '&nbsp;&nbsp;Armor Type: <strong>' + cityArmor[GM_getValue('buildArmorId', 9)][0] + '</strong><br>' +
         'Build Port: <strong>' + showIfUnchecked(GM_getValue('buildPort')) + '</strong><br>' +
-        '&nbsp;&nbsp;Port Type: <strong>' + cityPort[GM_getValue('buildPortId', 9)][0] + '</strong><br>' +        
+        '&nbsp;&nbsp;Port Type: <strong>' + cityPort[GM_getValue('buildPortId', 9)][0] + '</strong><br>' +
         'Ask for Special Parts: <strong>' + showIfUnchecked(GM_getValue('askSpecialParts')) + '</strong><br>' +
         'Ask for Chop Shop Parts: <strong>' + showIfUnchecked(GM_getValue('askShopParts')) + '</strong><br>' +
         '&nbsp;&nbsp;Part Type: <strong>' + cityShopParts[GM_getValue('askShopPartsId', 9)][0] + '</strong><br>' +
@@ -13671,6 +13702,15 @@ function parsePlayerUpdates(messagebox) {
   } else if (messageTextNoTags.match(/went to war with youxx/i)) {
     // Someone declared war on us!
     DEBUG(minutesAgo + messageText);
+
+  } else if (messageTextNoTags.match(/declared war against you/i)) {  // declared war against you! change 11/5/10
+    // Someone declared war on us!
+    DEBUG('found playerupdate: ' + minutesAgo + messageText);
+
+   // mission has been completed
+  } else if (messageTextNoTags.match(/mission has been completed/i)) {
+    // notice of a mission completed go collect it
+    DEBUG('found playerupdate mission notice: ' + minutesAgo + messageText);
 
   } else {
     // Just copy the update text straight into the log.
@@ -15080,10 +15120,10 @@ function goJobTab(tabno) {
 function goJobTabPath(tabnopath) {
   var elt;
   var currentTabPath = currentJobTabPath();
-  DEBUG('in path go 2 Job sub path: city=' + city + ' ' +  ' currentTabPath=' + currentTabPath +  ' tabnopath=' + tabnopath  );
+  Diagnose(' job in path go 2 Job sub path: city=' + city + ' ' +  ' currentTabPath=' + currentTabPath +  ' tabnopath=' + tabnopath  );
 
   if (currentTabPath == tabnopath) {
-    DEBUG('Already on job  tab sub path' + tabnopath);
+    Diagnose(' job Already on job  tab sub path' + tabnopath);
     return true;
   }
   elt = xpathFirst('.//a[contains(@onclick, "ExpertMapController.changePath('+tabnopath+');")]');
@@ -15092,7 +15132,7 @@ function goJobTabPath(tabnopath) {
     return false;
   }
   clickElement(elt);
-  DEBUG(' Clicked to go to job tab ' + tabnopath + 'in gojobtabpath elt-b=' + elt );
+  Diagnose(' job, Clicked to go to tab ' + tabnopath + 'in gojobtabpath elt-b=' + elt );
   return true;
   //  return ;
 }
@@ -15103,7 +15143,7 @@ function goJob(jobno) {
   // Retrieve the jobRow
   var jobName = missions[GM_getValue('selectMission')][MISSION_NAME];
   var jobNo = missions[GM_getValue('selectMission')][MISSION_NUMBER];
-  DEBUG('Clicking jobNo/jobName : '+jobNo+ ' / '+jobName);
+  Diagnose(' job Clicking jobNo/jobName : '+jobNo+ ' / '+jobName);
   var jobRow = getJobRow(jobName, innerPageElt);
   // Get the action element by job no first
   var elt;
@@ -15119,7 +15159,7 @@ function goJob(jobno) {
   // lv fight jobs
     targetElts = $x('.//a[contains(@onclick, "MapController.doFightJob('+jobNo+',\'p|")]', jobRow);  tmp = 5 ;
     numTargets = targetElts.length;
-    DEBUG('Number of Targets Found : '+ numTargets);
+    Diagnose(' job, Number of Fight Targets Found : '+ numTargets);
     if(numTargets){
 
       var opponentLevelMax = parseInt(GM_getValue('fightLevelMax', 100));
@@ -15131,22 +15171,22 @@ function goJob(jobno) {
       if (GM_getValue('fightMafiaMaxRelative', false)) {
         opponentMafiaMax = opponentMafiaMax + mafia;
       }
-      DEBUG('Only doing the job if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
+      Diagnose(' job Only performing if Level <= '+opponentLevelMax+' and mafia <= '+opponentMafiaMax);
 
       //ignore job if we have do not have enough energy / stamina to perform the job, otherwise we set jobmastery to 100 to skip this job temporarely
       var skipCurrentJob = false;
       StamReqElt = xpathFirst('.//dd[@class="stamina"]', jobRow);
       if(StamReqElt) {
         StamReq = parseInt(StamReqElt.innerHTML.untag());
-        DEBUG('Required Stamina:' +StamReq+':');
+        Diagnose(' job Requires Stamina:' +StamReq+':');
         if(StamReq > stamina) {
           skipCurrentJob = true;
-          DEBUG('stamina required :'+StamReq+': have :'+stamina+': not enough stamina, leave for now');
+          Diagnose(' job stamina required :'+StamReq+': have :'+stamina+': not enough stamina, leave for now');
 //          goHome();
           return false;
-        } else DEBUG('stamina required :'+StamReq+': have :'+stamina+': have enough stamina do job');
-      } else DEBUG(' Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
-      DEBUG(' check stam 3');
+        } else Diagnose(' job stamina required :'+StamReq+': have :'+stamina+': have enough stamina do job');
+      } else Diagnose(' job  Current Stamina: '+stamina+'. Skipping - StamReq NOT FOUND');
+      Diagnose(' job  check stam 3');
 
       var smallestMafia = opponentMafiaMax;
       var lowestLevel = opponentLevelMax;
@@ -15172,15 +15212,15 @@ function goJob(jobno) {
             smallestMafia = OppSize;
             lowestLevel = OppLevel;
             foundOpp = true;
-            DEBUG('Switching Target : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
+            Diagnose(' job Switching Target : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         } else {
-          DEBUG('Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
+          Diagnose(' job Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         }
       }
 ////
 ////
       if(foundOpp){
-        DEBUG('Going to fight : '+OppTargetParent.innerHTML.untag());
+        Diagnose(' job Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
       } else {
         addToLog('warning Icon', 'Opponents did not qualify ... Reloading to find new opponents.');
@@ -15196,11 +15236,11 @@ function goJob(jobno) {
   }
 
   if (elt) {
-    DEBUG(' job string used was =' + tmp );
+    Diagnose(' job  string used was =' + tmp );
     clickAction = 'job';
     suspendBank = false;
     clickElement(elt);
-    DEBUG('Clicked to perform job: ' + jobName + '.');
+    Diagnose(' job Clicked to perform job: ' + jobName + '.');
     return true;
   } else {
     return false;
@@ -16054,7 +16094,7 @@ function logJSONResponse(autoplay, response, action, context) {
         }
         break;
 
-        
+
       // Log quickHeal() response.
       case 'quick heal':
         // Attempt to correct the displayed health value
@@ -16070,8 +16110,8 @@ function logJSONResponse(autoplay, response, action, context) {
           addToLog('warning Icon', '<span style="color:#FF9999;">' + 'Attempted to heal too quickly.' + '</span>');
         }
         else if (/have enough/i.test(responseText)) {
-          respJSON = JSON.parse(responseText);          
-          var healCity = parseInt(respJSON.user_fields.current_city_id)-1;          
+          respJSON = JSON.parse(responseText);
+          var healCity = parseInt(respJSON.user_fields.current_city_id)-1;
           addToLog('warning Icon', '<span style="color:#FF9999;">' + 'You don\'t have enough money to heal in '+cities[healCity][CITY_NAME]+'.<br/>Disabling auto-heal.' + '</span>');
           GM_setValue('autoHeal', 'unchecked');
         }
@@ -16109,19 +16149,19 @@ function logJSONResponse(autoplay, response, action, context) {
         DEBUG('Parsed JSONResponse for clicking AskCasinoParts. Timer Reset for 2 hours.');
         return false;
         break;
-        
+
         // Purchase Port Item
       case 'purchase portItem':
-/*         
+/*
         respJSON = JSON.parse(responseText);
-        respData = JSON.parse(respJSON.data);     
-        var respMessage = respData.purchase_message;                
+        respData = JSON.parse(respJSON.data);
+        var respMessage = respData.purchase_message;
         respData = JSON.stringify(respData).replace(/\\/g, "");
         var respProperties = JSON.parse(respData.properties);
         var refreshRate = JSON.parse(respProperties.purchase_refresh_rate);
         var timeStamp = JSON.parse(respProperties.last_purchase_time_stamp);
         DEBUG(respMessage+' '+refreshRate+' '+timeStamp);
-*/        
+*/
         setGMTime('buildPortTimer', '24 hours');
         DEBUG('Parsed JSONResponse for Purchasing Port Item. Timer Reset for 24 hours.');
         return false;
@@ -16389,12 +16429,12 @@ function logResponse(rootElt, action, context) {
           clickElement(Finish_Mission);
 //        if(!Check_Mission_Job()){  Go_Nxt_Page();  } // load stuff for next mission and try to start it // if there was nothing else on this page, try to go to the next page
         } else {
-          DEBUG(' we did NOT find the finished, close button' );
+          Diagnose(' mission we did not find the finished close button' );
         }
         Miss_ID = null;
       } else {
         if((!chk_stam()) || (!chk_nrg()) ) {
-          DEBUG('Dont have enough to perform:' + Miss_Name_is );
+          Diagnose(' mission setting timer, you dont have enough to perform:' + Miss_Name_is );
           setmissiontimer();
           Miss_ID = null;
           return false;
@@ -16865,7 +16905,7 @@ function logResponse(rootElt, action, context) {
         if(context.buildType==11) inner = "Chop Shop : " + inner;
         if(context.buildType==12) inner = "Weapons Depot : " + inner;
         if(context.buildType==13) inner = "Armory : " + inner;
-        if(context.buildType==14) inner = "Port : " + inner;      
+        if(context.buildType==14) inner = "Port : " + inner;
         setGMTime(timerName, '1 hour');
         addToLog('info Icon', inner);
       } else {
@@ -17008,6 +17048,7 @@ function handlePopups() {
           // Get rid of Slot Machine Teaser popup
           if (popupInnerNoTags.indexOf('New Loot!') != -1) return(closePopup(popupElts[i], "Slot Machine Flushed"));
 
+          //newchange
           // Get rid of Proceed to Vegas Level 6 popup // need to check, closing something else
           // if (popupInnerNoTags.indexOf('Proceed to') != -1) return(closePopup(popupElts[i], "Vegas Level 6"));
 
@@ -17015,8 +17056,8 @@ function handlePopups() {
           if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
 
 		      // Get rid of out of stamina popup
-		      if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));		  
-		  
+		      if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));
+
           // Get rid of Welcome to Tournaments popup
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
           // Get rid of Tournament Expired popup
@@ -17034,7 +17075,7 @@ function handlePopups() {
             if (popupInnerNoTags.indexOf('not involved in this mission') != -1) {
               return(closePopup(popupElts[i], "Not in Mission"));
             }
-            
+
             // Get rid of Increase your mafia popup
             if (popupInnerNoTags.indexOf('Increase your mafia! Increase your strength!') != -1) {
               return(closePopup(popupElts[i], "Increase your mafia"));
@@ -17806,13 +17847,18 @@ function makeCommaValue(nStr) {
 }
 
 /******************************** DATE/TIME ********************************/
-
+//newchange_need_to_add_to_main
 // reads a date string from a stored GM value and converts it to seconds since 1970
 function getGMTime(GMvalue) {
   var tempVal = GM_getValue(GMvalue, 0);
   var d = Date.parse(tempVal);
+//    Diagnose(' mission time' + d);
   if(!d) {
-    setGMTime(GMvalue,'00:10:00'); // problem with timer, set to 10 min
+    //Diagnose(' timer not returning correct time before save: ' + d);
+    setGMTime(GMvalue,"00:00:30"); // problem with timer, set to 30 seconds
+    var tempVal = GM_getValue(GMvalue, 0);
+    var d = Date.parse(tempVal);
+    //Diagnose(' timer fixed after save: ' + d);
   }
   return d/1000;
 }
@@ -18015,7 +18061,7 @@ var Miss_Slot = null;
     Autoplay.start();
     return true;
   }
-    if(isGMChecked('AskMissionHelp') && !timeLeftGM('colmissionHelpTimer')) Chk_mission_help () ;
+    if(isGMChecked('AskMissionHelp') ) Chk_mission_help () ;
     if(isGMChecked('AutoMafiaCollection')) Auto_Mafia_Collection() ;  // will collect mymission
     if(isGMChecked('AutoMafiaRemoved'))    Auto_Mafia_Remove() ;  // will check for being removed from missions onthis page
 
@@ -18063,10 +18109,8 @@ function GoMissionsTab() {
 function Chk_mission_help (){
   var ask_mission_help = xpathFirst('.//a[@class="sexy_button_new medium_white sexy_call_new ask_for_help" and contains(@onclick, "postAskHelpFeed")]', innerPageElt);
   if(ask_mission_help  ) {
-    setGMTime('colmissionHelpTimer', '00:02:00');  // 2 min
     clickElement(ask_mission_help);
   } else  {
-    setGMTime('colmissionHelpTimer', '00:02:00');  // 2 min
     return false;
   }
 return true;
@@ -18131,10 +18175,10 @@ function Auto_Mafia_Remove(){
   numButtons = missionButtons.length;
 
   if(numButtons>0){
-    DEBUG('You were removed from - '+numButtons+' Missions.');
+    Diagnose(' mission. You were removed from - '+numButtons+' Mission(s).');
     var ClrRemovedButton = xpathFirst('.//a[@class="sexy_button_new medium_white" and contains(@onclick, "removeMission")]', innerPageElt);
     if (ClrRemovedButton) {
-      addToLog('info Icon', 'Clicked to clear me from a mission I was removed from.');
+      Diagnose(' mission closed. I was removed from, or expired.');
       clickElement(ClrRemovedButton);
       Chk_Left_Page();  // if we removed something we gotta go back a page
       return true;
@@ -18144,15 +18188,14 @@ function Auto_Mafia_Remove(){
 }
 ////
 function chk_nrg(){
-  //DEBUG('  -  -  -  checking   work an Energy Mission  -   -  ' );
-  //  if (energy < missions[GM_getValue('selectMission', 1)][Miss_Energy]) {
+  //Diagnose(' mission checking energy availability.' );
   if (energy < Miss_Nrg_Req ) {
-    DEBUG('Skipping Missions: energy=' + energy + ', cost=' + Miss_Nrg_Req);
+    Diagnose(' mission Skipped. energy: ' + energy + ', cost=' + Miss_Nrg_Req);
     return false;
   }
 //  if (energy - Miss_Nrg_Req < SpendMissionEnergy.floor && !SpendMissionEnergy.canBurn) {
   if (energy - Miss_Nrg_Req < SpendMissionEnergy.floor ) {
-    DEBUG('Not spending energy on missions: energy=' + energy +
+    Diagnose(' mission Skipped energy =' + energy +
       ', floor=' + SpendMissionEnergy.floor +
       ', Miss_Nrg_Req=' + Miss_Nrg_Req +
       ', burn=' + SpendMissionEnergy.canBurn);
@@ -18162,15 +18205,14 @@ function chk_nrg(){
 }
 ////
 function chk_stam() {
-  //DEBUG('  -  -  -  checking   work a Stamina Mission  -   -  ' );
-  //  if (stamina < missions[GM_getValue('selectMission', 1)][Miss_Stamina]) {
+  //Diagnose(' mission  checking Stamina availability.' );
   if (stamina < Miss_Stam_Req ) {
-    DEBUG('Skipping Missions: stamina=' + stamina + ', cost=' + Miss_Stam_Req);
+    Diagnose(' mission Skipped. Stamina=' + stamina + ', cost=' + Miss_Stam_Req);
     return false;
   }
 //  if ((stamina - Miss_Stam_Req) < SpendMissionStamina.floor && !SpendMissionStamina.canBurn) {
   if ((stamina - Miss_Stam_Req) < SpendMissionStamina.floor ) {
-    DEBUG('Not spending stamina on missions: stamina=' + stamina +
+    Diagnose(' mission Skipped. Stamina=' + stamina +
       ', floor=' + SpendMissionStamina.floor +
       ', Miss_Stam_Req=' + Miss_Stam_Req +
       ', burn=' + SpendMissionStamina.canBurn);
@@ -18180,41 +18222,54 @@ function chk_stam() {
 }
 ////
 function Do_Mission_Job(){
-
-//      DEBUG('mission=' + Miss_ID + 'clicking skipped for testing');
-//        return false;
-
+  Diagnose(' mission starting Do_Mission_Job ');
   DoMafiaMissions = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Miss_ID+'")]', innerPageElt);
   if(DoMafiaMissions) {
-  //  DEBUG('found mission orange button to click(and clicking) in mission=' + Miss_ID );
+  //  Diagnose(' mission orange button found (and clicking) in mission=' + Miss_ID );
     clickAction = 'Missionjob';
     suspendBank = false;
     clickElement(DoMafiaMissions);
-    //  DEBUG('Clicked to proform a mission.');
+    //Diagnose(' mission, Clicked to perform.');
     return true;
   } else {
-//      DEBUG('no mission button found');
+  //Diagnose(' mission no button found');
   return false;
   }
 }
 ////
+function Chk_Nxt_MY_Mission() {
+//Diagnose(' mission Chk_Nxt_MY_Mission ');
+  var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
+  if(page_right) {
+    Diagnose(' mission found a right MY_Mission page button to Click.');
+    return true;
+  } else { Diagnose(' mission did not find a right MY_Mission page button to Click.');
+  }
+return false;
+}
+////
 function Chk_Nxt_Page() {
+//Diagnose(' mission Chk_Nxt_Page ');
   var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
   if(!page_right) {
+    mmis_time = '00:10:00'; // set timer to 10 min
+    Diagnose(' mission timer holder set to: ' + mmis_time + ' no more right pages ');
     setmissiontimer();
     return false;
-//  } else { DEBUG('There WAS a right mission page button found to Click - .');
+  //} else { Diagnose(' mission found a right page button found to Click.');
   }
 return true;
 }
 ////
 function Go_Nxt_Page() {
+  //Diagnose(' mission Go_Nxt_Page ');
   var page_right = xpathFirst('.//a[@class="right " and contains(@onclick, "viewPage")]', innerPageElt);
   if(page_right){
-  //  DEBUG('Clicking right page button in Missions.');
+    //Diagnose(' mission Clicking right page button.');
     clickElement(page_right);
     Autoplay.delay = getAutoPlayDelay();
     return true;
+  } else { Diagnose(' mission found no right page button.');
   }
 return false;
 }
@@ -18222,16 +18277,17 @@ return false;
 function Chk_Left_Page() {
   var page_left = xpathFirst('.//a[@class="left " and contains(@onclick, "viewPage")]', innerPageElt);
   if(page_left){
-  //  DEBUG('Mission page LEFT button found and clicking.');
+  //  Diagnose(' mission page LEFT button found and clicking.');
     clickElement(page_left);
     return true;
   } else  {
-    //  DEBUG('No Mission page LEFT button found.');
+    //  Diagnose(' mission page LEFT button not found.');
     return false;
   }
 }
 ////
 function Check_Mission_Job(){
+ //Diagnose(' mission starting Check_Mission_Job ');
   // if we find this link, we are in a non finished job
   MyMafiaJobs = xpathFirst('.//a[@class="sexy_button_new do_job sexy_energy_new medium_orange"  and contains(@onclick, "SocialMissionController.doTask(\''+Miss_ID+'")]', innerPageElt);
   if(MyMafiaJobs) { return true; }
@@ -18255,36 +18311,38 @@ function Load_MMiss_Info(){
     Miss_ID     = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\'')[1].split('\',\'')[0]  ;  // will pull out just the 1 id
     Miss_Slot   = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\'')[1].split('\',\'')[0]  ;
     MIss_chk_ID = MyMafiaJobs.getAttribute('onclick').split('SocialMissionView.startTask(\''+Miss_ID+'\',\''+Miss_Slot+'\',\'')[1].split('\'')[0] ;
-    DEBUG('Miss_ID='+Miss_ID+'-Miss_Slot='+Miss_Slot+'-MIss_chk_ID=' + MIss_chk_ID + '=');
+    Diagnose(' mission Miss_ID='+Miss_ID+'-Miss_Slot='+Miss_Slot+'-MIss_chk_ID=' + MIss_chk_ID + '=');
     Miss_Name = xpathFirst('.//div[contains(@id,"socialMission_'+Miss_ID+'")]//div[@class="missionName"]', innerPageElt);
     if(Miss_Name) {
       Miss_Name_is = Miss_Name.innerHTML.untag();
-      DEBUG('Miss_Name: '+Miss_Name_is+'=');
-    } else { DEBUG(' new code to find miss name FAILED');
+      Diagnose(' mission Miss_Name: '+Miss_Name_is+'=');
+    } else { Diagnose(' mission new code to find miss name FAILED');
     }
     Chk_Miss_Pay_Exp = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"experience")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Pay_Exp){
         Miss_Pay_Exp = Chk_Miss_Pay_Exp.innerHTML.untag();
-        //DEBUG(' - got -  -  experience Returned: '+Miss_Pay_Exp);
+        //Diagnose(' mission experience Returned: '+Miss_Pay_Exp);
       }
     Chk_Miss_Pay_Cash = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"cash")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Pay_Cash){
         Miss_Pay_Cash = Chk_Miss_Pay_Cash.innerHTML.untag();
-        //DEBUG(' - got -  -  Cash Returned: '+Miss_Pay_Cash);
+        //Diagnose(' mission Cash Returned: '+Miss_Pay_Cash);
       }
+    Miss_Nrg_Req = 0 ;
+    Miss_Stam_Req = 0 ;
     Chk_Miss_Nrg = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"energy")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Nrg){
         Miss_Nrg_Req = Chk_Miss_Nrg.innerHTML.untag();
         Miss_Ratio =  Math.round(Miss_Pay_Exp / Miss_Nrg_Req * 100 ) / 100 ;
-        //DEBUG(' - got -  -  Energy Required: '+Miss_Nrg_Req+' with ratio of: '+ Miss_Ratio);
-      } else { Miss_Nrg_Req = 0 ;
+        Diagnose(' mission Energy Required: '+Miss_Nrg_Req+' with ratio of: '+ Miss_Ratio);
+      //} else { Miss_Nrg_Req = 0 ;
       }
     Chk_Miss_Stam = xpathFirst('.//div[ contains (@id,"missionTask_'+Miss_Slot+'_'+Miss_ID+'_module")]//dd[ contains (@class,"stamina")]', innerPageElt);  //shows total mastery result
       if(Chk_Miss_Stam){
         Miss_Stam_Req = Chk_Miss_Stam.innerHTML.untag();
         Miss_Ratio =  Math.round(Miss_Pay_Exp / Miss_Stam_Req * 100 ) / 100 ;
-        //DEBUG(' - got -  -  Stamina Required: '+Miss_Stam_Req+' with ratio of: '+ Miss_Ratio);
-      } else { Miss_Stam_Req = 0 ;
+        Diagnose(' mission Stamina Required: '+Miss_Stam_Req+' with ratio of: '+ Miss_Ratio);
+      //} else { Miss_Stam_Req = 0 ;
       }
 
     if((!chk_stam()) || (!chk_nrg()) ) {
@@ -18297,18 +18355,17 @@ function Load_MMiss_Info(){
 }
 ////
 function setmissiontimer() {
-//  if(tst_ver) {
   if(isGMChecked('TestChanges')) {
-    setGMTime('colmissionTimer', '00:01:00'); // if testing, set timer to 1 min
-    DEBUG('Last Page, set timer to 1 min 0 seconds');
+    mmis_time = '00:00:45'; // if testing, set timer to 45 seconds
   } else {
-    setGMTime('colmissionTimer', '00:10:00'); // set timer to 10 min
-    DEBUG('Last Page, set timer to 10 min 0 seconds');
+    mmis_time = '00:10:00'; // set timer to 10 min
   }
+  Diagnose(' mission timer set to: ' + mmis_time );
+  setGMTime('colmissionTimer', mmis_time);
 }
 ///////////////////////////////////////////////////////// end of miss collect
 function MMMiss_ver(){
   tst_ver = null;
-//  if (isGMChecked('TestChanges')) { tst_ver = 'B';  }
+//  if (isGMChecked('TestChanges')) { tst_ver = 'A';  }
 }
 
