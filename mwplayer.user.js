@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.835
+// @version     1.1.836
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.835',
+  version: '1.1.836',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -10520,6 +10520,11 @@ function showTimers() {
       '<br>&nbsp;&nbsp;buildArmorTimer: ' + getHoursTime('buildArmorTimer') +
       '<br>&nbsp;&nbsp;buildPortTimer: ' + getHoursTime('buildPortTimer') +
       '<br>&nbsp;&nbsp;takeHourNew York: ' + getHoursTime('takeHourNew York') +
+      '<br>&nbsp;&nbsp;takeHourCuba: ' + getHoursTime('takeHourCuba') +
+      '<br>&nbsp;&nbsp;takeHourMoscow: ' + getHoursTime('takeHourMoscow') +
+      '<br>&nbsp;&nbsp;takeHourBangkok: ' + getHoursTime('takeHourBangkok') +
+      '<br>&nbsp;&nbsp;takeHourLas Vegas: ' + getHoursTime('takeHourLas Vegas') +
+      '<br>&nbsp;&nbsp;takeHourItaly: ' + getHoursTime('takeHourItaly') +
       '<br>&nbsp;&nbsp;tournamentTimer: ' + getHoursTime('tournamentTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsTimer: ' + getHoursTime('colmissionTimer') +
       '<br>&nbsp;&nbsp;CollectMissionsHelpTimer: ' + getHoursTime('colmissionHelpTimer') +
@@ -10559,6 +10564,11 @@ function resetTimers(manually) {
   checkTimer('buildArmorTimer', 900);
   checkTimer('buildPortTimer', 900);
   checkTimer('takeHourNew York', 300);
+  checkTimer('takeHourCuba', 300);
+  checkTimer('takeHourMoscow', 300);
+  checkTimer('takeHourBangkok', 300);
+  checkTimer('takeHourLas Vegas', 300);
+  checkTimer('takeHourItaly', 300);
   checkTimer('dailyChecklistTimer', 900);
   checkTimer('autoGiftAcceptTimer', 3600);
   checkTimer('autoSafehouseTimer', 3600);
@@ -13309,7 +13319,12 @@ BrowserDetect.init();
         '&nbsp;&nbsp;-Min cash (Moscow): <strong>' + GM_getValue('minCashMoscow') + '</strong><br>' +
         '&nbsp;&nbsp;-Min cash (Bangkok): <strong>' + GM_getValue('minCashBangkok') + '</strong><br>' +
         'Collect NY Take: <strong>' + showIfUnchecked(GM_getValue('collectTakeNew York')) + '</strong><br>' +
-        '&nbsp;&nbsp;-Next take at:' + GM_getValue('takeHourNew York', 0) + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at NY:' + timeLeftGM('takeHourNew York') + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at Cuba:' + timeLeftGM('takeHourCuba') + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at Moscow:' + timeLeftGM('takeHourMoscow') + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at Bangkok:' + timeLeftGM('takeHourBangkok') + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at LV:' + timeLeftGM('takeHourLas Vegas') + '</strong><br>' +
+        '&nbsp;&nbsp;-Next take at Italy:' + timeLeftGM('takeHourItaly') + '</strong><br>' +
         'Build Cars: <strong>' + showIfUnchecked(GM_getValue('buildCar')) + '</strong><br>' +
         '&nbsp;&nbsp;Car Type: <strong>' + cityCars[GM_getValue('buildCarId', 9)][0] + '</strong><br>' +
         'Build Weapons: <strong>' + showIfUnchecked(GM_getValue('buildWeapon')) + '</strong><br>' +
