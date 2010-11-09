@@ -43,7 +43,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.834
+// @version     1.1.835
 // ==/UserScript==
 
 // search for new_header   for changes
@@ -54,7 +54,7 @@
 // once code is proven ok, take it out of testing
 //
 var SCRIPT = {
-  version: '1.1.834',
+  version: '1.1.835',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -8847,16 +8847,6 @@ function createAboutTab() {
 
   return aboutTab;
 }
-function dateWithin(beginDate,endDate,checkDate) {
-  var b,e,c;
-  b = Date.parse(beginDate);
-  e = Date.parse(endDate);
-  c = Date.parse(checkDate);
-  if((c <= e && c >= b)) {
-    return true;
-  }
-  return false;
-}
 
 function grabToolbarInfo(manually) {
   // Function for creating the cookies necessary to use miniPacks without installing the Zynga toolbar:
@@ -8901,7 +8891,6 @@ function grabToolbarInfo(manually) {
       var datNow = new Date();
       var modGMT = 8; // Default PDT
       datNow.setMilliseconds(0);
-      if (dateWithin('11/7/2010 02:00:00 AM','3/13/2011 02:00:00 AM',datNow)) modGMT = 7; //PST
       var timer = toolbarInfo.toolbar_energy_timestamp - (datNow.getTime()/1000) + 3600 * modGMT;
 
       setGMTime('miniPackTimer', timer + ' seconds');
