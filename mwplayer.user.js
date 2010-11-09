@@ -54,7 +54,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.837
+// @version     1.1.838
 // ==/UserScript==
 
 // search for new_header   for changes still lots of them in here
@@ -62,7 +62,7 @@
 // if (isGMChecked('TestChanges')){ code }   <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
 //
 var SCRIPT = {
-  version: '1.1.837',
+  version: '1.1.838',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -1676,7 +1676,6 @@ var MMiss = new Array ();
     ['Take Down The Security Detail'                     , 20, 78,8,LV    , 35,1,'node78'],     // Stamina PATH
 //  ['Boss: Defeat Governor Halloran'                    ,  8, 79,8,LV    ,120,0,'node79']     //           Boss Job
 
-
 //Mission array for Italy
     ['Connect With La Familia'                           ,  4,  1,1,ITALY ,  4,0,'node1' ],    // ENERGY PATH
     ['Recruit Some Local Muscle'                         ,  7,  2,1,ITALY ,  8,0,'node2' ],    // ENERGY PATH
@@ -2063,13 +2062,11 @@ var MMiss = new Array ();
   if (!popupTimer) popupTimer = window.setInterval(handlePopups, 2000);
 
   var initialized = true;
-  DEBUG('Completed initialize.');
-
+  
   // For chrome
   sendSettings();
   copyMWValues(['language', 'FBName', 'newRevList', 'oldRevList']);
   DEBUG('There are ' + missions.length + ' known missions.');
-  //for (var i =0; i < missions.length ; i++) DEBUG('M' + i + ': ' + missions[i]);
 }
 
 // Copy settings from background storage
@@ -2213,6 +2210,7 @@ function doAutoPlay () {
 //  Diagnose(' mission, has the ability to: '+ hasMissions +'. MWAP is running '+ running +'.');
   }
 
+  // Collect Take first then Ask for Parts and then Build / Purchase
   // Auto-collect take (limit to level 4 and above)
   if (running && !maxed && hasProps && isGMChecked('collectTake' + cities[0][CITY_NAME])) {
     for (var i = 0, iLength = cities.length; i < iLength; ++i) {
@@ -2250,16 +2248,11 @@ function doAutoPlay () {
     if (askSpecialParts(NY, null, 0, 0)) return;
   }
 
-  // Ask for Casino Parts
-  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
-    if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 1)) return;
-  }
-
-  // Collect Take first then try to build
   // Build Cars
   if (running && !maxed && isGMChecked('buildCar') && !timeLeftGM('buildCarTimer')) {
     if (buildItem(cityCars, GM_getValue('buildCarId',1), 11, NY)) return;
   }
+
   // Build Weapons
   if (running && !maxed && isGMChecked('buildWeapon') && !timeLeftGM('buildWeaponTimer')) {
     if (buildItem(cityWeapons, GM_getValue('buildWeaponId',1), 12, NY)) return;
@@ -2267,6 +2260,11 @@ function doAutoPlay () {
   // Build Armor
   if (running && !maxed && isGMChecked('buildArmor') && !timeLeftGM('buildArmorTimer')) {
     if (buildItem(cityArmor, GM_getValue('buildArmorId',1), 13, NY)) return;
+  }
+
+  // Ask for Casino Parts
+  if (running && !maxed && isGMChecked('askCasinoParts')  && !timeLeftGM('askCasinoPartsTimer')) {
+    if (askSpecialParts(LV, cityCasinoParts, GM_getValue('askCasinoPartsId',1), 1)) return;
   }
 
   // Build Port
@@ -2281,13 +2279,11 @@ function doAutoPlay () {
 
   // Ask for help on Crew Collections
   if (running && !maxed && isGMChecked('autoAskHelponCC') && !timeLeftGM('autoAskHelponCCTimer')) {
-    DEBUG('Going to ask for help on Crew Collections.');
     if (autoAskHelponCC()) return;
   }
 
   // Ask for Help on Moscow Tier
   if (running && !maxed && parseInt(GM_getValue('selectMoscowTier'))  && !timeLeftGM('AskforHelpMoscowTimer')) {
-    DEBUG('going to Moscow for Ask for Help-job');
     if (AskforHelp('2')) return;
   }
 
@@ -2313,7 +2309,6 @@ function doAutoPlay () {
 
   // Ask for Help on Bangkok Tier
   if (running && !maxed && parseInt(GM_getValue('selectBangkokTier')) && !timeLeftGM('AskforHelpBangkokTimer')) {
-    DEBUG('going to Bangkok for Ask for Help-job');
     if (AskforHelp('3')) return;
   }
 
@@ -2576,7 +2571,6 @@ function autoAskHelponCC(){
 
   helpButtons = $x('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);
   numButtons = helpButtons.length;
-  DEBUG('Ask for Help on Crew Collections - '+numButtons+' found.');
 
   if(numButtons>0){
     var askHelpFriends = xpathFirst('.//a[@class="sexy_button_new short_white sexy_call_new" and contains(@onclick, "SocialCollection")]', innerPageElt);
@@ -2608,12 +2602,10 @@ function AskforHelp(hlpCity) {
   var timerName='';
 
   if(helpCity==2) {
-    DEBUG('Clicking to go to Moscow to look for Ask for Help-job');
     tabno = parseInt(GM_getValue('selectMoscowTier'));
     timerName='AskforHelpMoscowTimer';
   }
   if(helpCity==3) {
-    DEBUG('Clicking to go to Bangkok to look for Ask for Help-job');
     tabno = parseInt(GM_getValue('selectBangkokTier'));
     timerName='AskforHelpBangkokTimer';
   }
@@ -2636,9 +2628,8 @@ function AskforHelp(hlpCity) {
   }
 
   if (/You must wait 24 hours/i.test(innerPageElt.innerHTML)) {
-    setGMTime(timerName, '2 hours');
     addToLog('warning Icon', ' You must wait 24 hours before you can ask for help again in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
-    DEBUG('Link for Asking says : Wait for 24 hours ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
+    setGMTime(timerName, '12 hours');    
   } else {
     var askHelpFriends = xpathFirst('.//a[contains(., "Ask for Help")]', innerPageElt);
     if (askHelpFriends) {
@@ -2647,9 +2638,8 @@ function AskforHelp(hlpCity) {
       setGMTime(timerName, '12 hours');
       return true;
     } else {
-      setGMTime(timerName, '2 hours');
       addToLog('info Icon', ' You cannot Ask for Help yet in ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
-      DEBUG('Link for Asking for Help not found ... Resetting Timer for 2h for ' + cities[helpCity][CITY_NAME] +' - '+ missionTabs[hlpCity][tabno - 1]);
+      setGMTime(timerName, '2 hours');
     }
   }
   return;
@@ -2682,13 +2672,11 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     case 13 : timerName = 'askArmorPartsTimer';   buildSetting='askArmorParts';  buildItem =itemArray[itemIndex][0]; break;
     default : timerName = 'askSpecialPartsTimer'; buildSetting='askSpecialParts'; buildItem ='Special Parts'; timerReset = '2 hours'; break;
   }
-  DEBUG('Going to ask for '+buildItem+' ('+buildType +')');
 
   if(itemCity == NY){
     if(buildType){
       var flashCount = buildType-1;
       // Chop Shop, Weapons Depot and Armory Parts
-      DEBUG('Ask for NY Parts - Looking for building Status');
       var flashvars = xpathFirst('//object[@id="flash_content_propertiesV2"]/param[@name="flashvars"]');
       if (flashvars && flashvars.value) {
         var response = JSON.parse(unescape(flashvars.value).match(/&mw_data=(\[.+\])/)[1]);
@@ -2723,8 +2711,8 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
       };
 
       Autoplay.start();
-      setGMTime(timerName, timerReset);
       DEBUG('Ask for Parts - Ask for '+buildType +' - '+buildItem+' success. Timer Reset : '+timerReset);
+      setGMTime(timerName, timerReset);
       return true;
     }
     DEBUG('Ask for Parts - Failed to ask for '+buildType +' - '+buildItem+'. Timer Reset : 2 Hours.');
@@ -2743,7 +2731,6 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
 
       //Casino Parts - Check Quantities
       if(casinoReport.indexOf(searchItem) != -1){
-
             // Parts Required format : {\"id\":1575,\"type\":1,\"quantity\":7}
             var partsRequiredTxt = new RegExp(searchItem+',"type":1,"quantity":(.+?)}','gi');
             var totalRequired=0, totalNeeded=0, totalOwned=0;
@@ -2787,6 +2774,7 @@ function askSpecialParts(itemCity, itemArray, itemIndex, buildType){
     return false;
   }
 }
+
 // Pass the item array, item id, and building type
 function buildItem(itemArray, itemIndex, buildType, buildCity){
   if (city != buildCity) {
@@ -2795,9 +2783,10 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
     Autoplay.start();
     return true;
   }
-  DEBUG('Going to build '+itemArray[itemIndex][1]+' - '+buildType);
+
   // Build the clickable element
   if(buildCity==NY) {
+  // Build Chop Shop, Weapons Depot and Armory Items
     var elt = makeElement('a', null, {'onclick':'return do_ajax("inner_page",'+
                           '"remote/html_server.php?xw_controller=propertyV2&' +
                           'xw_action=craft&xw_city=1&recipe='+itemArray[itemIndex][1]+'&building_type='+buildType+'", 1, 0, 0, 0); return false;'});
@@ -2812,6 +2801,7 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
       return true;
     }
   } else {
+  // Italy Port Purchasing
   //format : http://facebook.mafiawars.com/mwfb/remote/html_server.php?xw_controller=propertyV2&xw_action=portBuyItem&xw_city=6&tmp=<mytmp>&xw_person=<a number>&id=2643&xw_client_id=8
     var ajaxID = createAjaxPage(false, 'purchase portItem', ITALY);
     var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'portBuyItem' + SCRIPT.city + '6&id='+itemArray[itemIndex][1]+'", 1, 1, 0, 0); return false;'});
@@ -2820,7 +2810,7 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
         clickAction = 'purchase portItem';
         clickContext = {'itemName': itemArray[itemIndex][0], 'buildType': buildType};
         clickElement(elt);
-        DEBUG('Clicked to build ' + clickContext.itemName + '.');
+        DEBUG('Clicked to purchase ' + clickContext.itemName + '.');
       };
       Autoplay.start();
       return true;
@@ -2832,7 +2822,6 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
 function checkVaultStatus(byUser) {
   if (byUser == false && timeLeftGM('checkVaultTimer')) return;
   DEBUG('Checking vault status.')
-  // Handle JSON response
   var ajaxID = createAjaxPage(false, 'check vault', LV);
   var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
   clickElement(elt);
@@ -2842,7 +2831,6 @@ function checkVaultStatus(byUser) {
 function checkCasinoStatus(byUser) {
   if (byUser == false) return;
   DEBUG('Checking Casino status.')
-  // Handle JSON response
   var ajaxID = createAjaxPage(false, 'check casino', LV);
   var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","' + SCRIPT.controller + 'propertyV2' + SCRIPT.action + 'createData' + SCRIPT.city + '5&city=5", 1, 1, 0, 0); return false;'});
   clickElement(elt);
@@ -3077,14 +3065,10 @@ function autoEnforce() {
 
   if (onProfileNav()) {
     var selectElt = xpathFirst('.//select[@name="title"]', innerPageElt);
-    if(!selectElt){
-      DEBUG('selectElt NOT found');
-    } else {
+    if(selectElt){      
       oldindex = selectElt.selectedIndex;
-      DEBUG('Current Selection :'+oldindex+' - '+ selectElt[oldindex].text+' trying to change to' + GM_getValue('autoEnforcedTitle'));
       if(selectElt[oldindex].text != GM_getValue('autoEnforcedTitle') ){
         for(newindex = 0; newindex < selectElt.length; ++newindex) {
-          DEBUG(selectElt[newindex].text);
           if(selectElt[newindex].text == GM_getValue('autoEnforcedTitle')) {
             selectElt.selectedIndex = newindex;
             DEBUG('Title set to :'+selectElt[newindex].text);
@@ -3093,25 +3077,21 @@ function autoEnforce() {
         }
       } else {
         logtxt +='MW title already set to '+ GM_getValue('autoEnforcedTitle')+'. ';
-        titleChange=2;
       }
 
       if(titleChange==1){
         var clickElt = xpathFirst('.//input[@type="submit" and contains(@value,"Change Title")]', innerPageElt);
         if(clickElt) {
-          DEBUG('clickElt found');
           clickElement(clickElt);
           DEBUG('Clicked to Change Title to '+ GM_getValue('autoEnforcedTitle'));
           logtxt +='MW title changed to '+ GM_getValue('autoEnforcedTitle')+'. ';
         } else {
-          DEBUG('clickElt not found');
           logtxt +='MW title not changed - Click Button not Found. ';
         }
-      } else if(titleChange==0) {
+      } else {
         logtxt +='Invalid MW Title or No change Needed : Title not changed. ';
       }
     }
-
   } else {
     addToLog('warning Icon','BUG DETECTED: Unable to load Profile page.');
   }
@@ -3124,7 +3104,6 @@ function autoEnforce() {
   logtxt += 'Trying again in '+autoEnforceTime+' hour(s).'
   addToLog('info Icon', logtxt);
   return;
-
 }
 
 // Get reward to cost ratio:
@@ -3309,8 +3288,6 @@ function autoMission() {
   if (!tabnopath) var tabnopath = 0 ;
   if (!nodelv)    var nodelv    = ''  ;
   DEBUG('autoMission = ' + jobid + ' ' + jobName + ' ' + jobno + ' ' + tabno + ' ' + cityno + ' tabnopath ' + tabnopath );
-
-
 
   if (SpendEnergy.floor &&
       isGMChecked('allowEnergyToLevelUp') &&
@@ -3728,8 +3705,8 @@ function autoFight(how) {
     clickContext = opponent;
     clickElement (attackElt);
     DEBUG('Clicked to fight: name=' + opponent.name +
-          ', id=' + opponent.id + ', level=' + opponent.level +
-          ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
+    //      ', id=' + opponent.id + ', level=' + opponent.level +
+          ', level=' + opponent.level + ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   };
   Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
   Autoplay.start();
@@ -3818,12 +3795,6 @@ function refreshRobbingGrid() {
   clickElement(elt);
   DEBUG('Clicked to refresh robbing grid.');
 }
-
-/*function sleepRob(ms){
-  var dt = new Date();
-  dt.setTime(dt.getTime() + ms);
-  while (new Date().getTime() < dt.getTime());
-}*/
 
 function doRob(eltRobButton) {
   if (isGMChecked('fastRob')) {
@@ -4176,7 +4147,6 @@ function autoBankDeposit(bankCity, amount) {
 function autoBankWithdraw(amount) {
   if (city == LV) {
     // Use do_ajax to withdraw in LV
-    DEBUG('Going to the vault to withdraw '+amount);
     var withdrawUrl = "xw_controller=propertyV2&xw_action=doaction&xw_city=5&doaction=ActionBankWithdrawal&building_type=6&city=5&amount=" + amount;
     var ajaxID = createAjaxPage(false, 'quick withdraw', LV);
     var elt = makeElement('a', null, {'onclick':'return do_ajax("' + ajaxID + '","remote/html_server.php?' + withdrawUrl + '", 1, 1, 0, 0); return false;'});
@@ -4185,7 +4155,6 @@ function autoBankWithdraw(amount) {
     return true;
   }
 
-  DEBUG('Going to the bank');
   // Make sure we're at the bank.
   var formElt = xpathFirst('.//div[@id="bank_popup"]', popupfodderElt);
   if (!formElt) {
@@ -4436,6 +4405,8 @@ function findFightOpponent(element) {
   var blacklistCount = 0;
   var icedCount = 0;
   var countOpp = opponents.length;
+
+
   for(var i = 0; i < countOpp; ++i) {
     var opponent = opponents[i];
 
@@ -4514,16 +4485,20 @@ function findFightOpponent(element) {
     }
     // This opponent is new and acceptable.
     DEBUG('Found new fight opponent: name=' + opponent.name +
+
+
           ', id=' + opponent.id + ', level=' + opponent.level +
           ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
   }
 
+
+
   var disqualifiedCount = levelMaxCount + mafiaMaxCount + mafiaMinCount + namesCount + factionCount + icedCount + blacklistCount;
   if (countOpp <= disqualifiedCount) {
-    addToLog('info Icon', 'Out of the ' + countOpp + ' opponent(s) listed on the fight page '+disqualifiedCount+' disqualified.<br>' +
-              levelMaxCount + ' on max level, ' +  mafiaMaxCount + ' on max mafia, ' +  mafiaMinCount + ' on min mafia,<br>' +
-              namesCount + ' on name pattern, ' +  factionCount + ' on faction, ' +  icedCount + ' already iced, <br>' +
-              blacklistCount + ' by blacklisting (stronger opponents).<br>');
+    addToLog('info Icon', 'Out of the ' + countOpp + ' opponent(s) listed on the fight page '+disqualifiedCount+' disqualified.');
+    DEBUG(levelMaxCount + ' on max level, ' +  mafiaMaxCount + ' on max mafia, ' +  mafiaMinCount + ' on min mafia,<br>' +
+          namesCount + ' on name pattern, ' +  factionCount + ' on faction, ' +  icedCount + ' already iced, <br>' +
+          blacklistCount + ' by blacklisting (stronger opponents).<br>');
   }
 
   newOpponents = fightListNew.get();
@@ -5361,6 +5336,7 @@ function saveSettings() {
   }
 
   //End Save Health Tab Settings
+
   //Start Save Cash Tab Settings
   //Cash Tab Checkboxes
   saveCheckBoxElementArray([
@@ -5741,7 +5717,8 @@ function addToLog(icon, line) {
 
     // If the log is too large, trim it down.
     var logMax = parseInt(GM_getValue('autoLogLength', 300));
-    //GM_log('logLen=' + logLen + ', logMax=' + logMax);
+    //hard-coded log length maximum of 1000 lines
+    if(logMax > 1000) logMax = 1000;  
     if (logMax > 0) {
       while (logLen-- > logMax) {
         logBox.removeChild(logBox.lastChild);
@@ -8875,7 +8852,7 @@ function createAboutTab() {
   id = 'TestChanges';
   title = 'Enable Script Modifications In Testing Phase ';
   makeElement('input', devTools, {'type':'checkbox', 'id':id, 'value':'checked'}, id);
-  makeElement('label', devTools, {'for':id,'title':title}).appendChild(document.createTextNode(' Enable Modifications'));
+  makeElement('label', devTools, {'for':id,'title':title}).appendChild(document.createTextNode('BETA TESTING ONLY : USE AT OWN RISK !'));
 
   return aboutTab;
 }
@@ -9383,17 +9360,6 @@ function handleModificationTimer(target) {
     DEBUG('Switched inner page to: ' + innerPageElt.id);
     pageChanged = true;
   }
-
-  /* Determine if popup_fodder has changed.
-  var popupFodderElt = xpathFirst('.//div[@id="popup_fodder"]', appLayoutElt);
-  if (popupFodderElt && !xpathFirst('.//div[@id="popup_flag"]', popupFodderElt)) {
-    setListenContent(false);
-    makeElement('div', popupFodderElt, {'id':'popup_flag', 'style':'display: none;'});
-    setListenContent(true);
-    DEBUG('New popup_fodder content: ' + popupFodderElt.id);
-    pageChanged = true;
-    //if (running) justPlay = true;
-  }*/
 
   // Added handling for the new-style job page changes
   var jobResult = xpathFirst('.//div[@id="new_user_jobs"]//div[@class="job_results"]', innerPageElt);
@@ -10045,13 +10011,9 @@ function innerPageChanged(justPlay) {
       clickAction = undefined;
       clickContext = undefined;
       if (!logResponse(innerPageElt, action, context)) {
-        //DEBUG('We did not get a valid logresponse, so kick off auto-play');
-        // No further action was taken. Kick off auto-play.
         doAutoPlay();
       }
     } else {
-      // Kick off auto-play.
-      //DEBUG('No action was taken, so kick off auto-play');
       doAutoPlay();
     }
   } catch (ex) {
@@ -10675,7 +10637,6 @@ function doQuickClicks() {
       if (actionLink && actionLink.scrollWidth) {
         clickElement(actionLink);
         addToLog('info Icon','Clicked to ask your mafia for Energy Packs.');
-        DEBUG('Clicked to ask for Energy.');
       }
     }
 
@@ -10686,7 +10647,6 @@ function doQuickClicks() {
       if (actionLink) {
         clickElement(actionLink);
         addToLog('info Icon','Clicked to reward your mafia for Energy Packs.');
-        DEBUG('Clicked to reward your mafia for Energy Packs.');
       }
       setGMTime('rewardEnergyTimer', '4 hours');
     }
@@ -11595,7 +11555,6 @@ function jobMastery(element, newJobs) {
   var currentJobRow = getJobRow(currentJob, element);
 
   // Calculate tier mastery.
-  DEBUG('Checking mastery for each job.');
   var tierLevel = 0;
   var jobPercentComplete = -1;
   if (currentJobRow) jobPercentComplete = getJobMastery(currentJobRow, newJobs);
@@ -12666,8 +12625,6 @@ function getJobRowItems(jobName) {
   var inner = innerPageElt? innerPageElt.innerHTML : '';
   var innerNoTags = inner.untag();
 
-// DEBUG(' show inner for loot needed' + innerNoTags);
-
   if (innerNoTags.match(/You do not have enough cash to buy/i)) {
     addToLog('warning Icon', 'You don\'t have enough cash to buy necessary equipment.');
     var jobs = getSavedList('jobsToDo', '');
@@ -12909,7 +12866,7 @@ function jobLoot(element) {
       var loot = RegExp.$1;
       //if(loot.match(/(.*?)\.\s+used/i)) loot = RegExp.$1;
       if(loot.match(/(.+?)\s+?was(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$3;
-      if(loot.match(/(.+?)\s+?(\.|-)\s+?used(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;
+      if(loot.match(/(.+?)\s+?(\.|-)\s+?used?(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;
       if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+'</span> in the job.';
       else strLoot += 'Found <span class="loot">' + loot+'</span> in the job.';
       lootbag.push(loot);
@@ -12929,7 +12886,7 @@ function jobLoot(element) {
         var loot = messages[i].title;
         var parentText = messages[i].parentNode.innerHTML.untag();
         if(loot.match(/(.+?)\s+?was(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$3;
-        if(loot.match(/(.+?)\s+?(\.|-)\s+?used(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;
+        if(loot.match(/(.+?)\s+?(\.|-)\s+?used?(.+?)(\d+)/i)) loot = RegExp.$1+' x '+RegExp.$4;
         if (strLoot) strLoot += '<br/>'+'Found <span class="loot">'+loot+' ' +parentText+'</span> in the job.';
         else strLoot += 'Found <span class="loot">' + loot+' ' +parentText+'</span> in the job.';
         lootbag.push(loot);
@@ -12952,8 +12909,7 @@ function jobLoot(element) {
   var itemName;
   // NOTE: The single equal sign is intentional in this while() condition.
   while ((itemName = lootbag.pop())) {
-    DEBUG('Looking for ' + itemName + ' in needed items list.');
-    DEBUG('We need ' + items.length + ' item(s).');
+    DEBUG('Looking for ' + itemName + ' in needed items list. We need ' + items.length + ' item(s).');
     for (var j = 0, jLength=items.length; j < jLength; j++) {
       if (itemName.indexOf(items[j].trim()) != -1 ) {
         // we found some needed loot
@@ -13618,7 +13574,7 @@ function parsePlayerUpdates(messagebox) {
           };
           clickElement(elt);
           helpWar = true;
-          DEBUG('Clicked to help war.');
+          DEBUG('Clicked to help in war.');
         };
         Autoplay.delay = noDelay;
         Autoplay.start();
@@ -13699,11 +13655,11 @@ function parsePlayerUpdates(messagebox) {
     // Someone else earned an achievement. Who cares!
     DEBUG(minutesAgo + messageText);
 
-  } else if (messageTextNoTags.match(/went to war with youxx/i)) {
+  } else if (messageTextNoTags.match(/went to war with you/i)) {
     // Someone declared war on us!
     DEBUG(minutesAgo + messageText);
 
-  } else if (messageTextNoTags.match(/declared war against you/i)) {  // declared war against you! change 11/5/10
+  } else if (messageTextNoTags.match(/declared war against you/i)) {
     // Someone declared war on us!
     DEBUG('found playerupdate: ' + minutesAgo + messageText);
 
@@ -13812,7 +13768,7 @@ function autoLotto() {
     if (actionLink) {
       Autoplay.fx = function() {
         clickElement(actionLink);
-        DEBUG('Clicked to play the daily chance.');
+        DEBUG('Clicked to play the Daily Chance.');
       };
       Autoplay.start();
       return true;
@@ -13828,7 +13784,7 @@ function autoLotto() {
     Autoplay.fx = function(){
       if(eltDailyChance){
         clickElement(eltDailyChance);
-        DEBUG('Clicked to go to daily chance.');
+        DEBUG('Clicked to go to Daily Chance.');
       }
     };
     Autoplay.start();
@@ -13951,7 +13907,6 @@ function autoLotto() {
   }
   return false;
 }
-////
 function autoWishlist() {
   var shareWishlist = parseFloat(GM_getValue('autoShareWishlistTime', '1'));
   // Go to the wishlist.
@@ -13992,7 +13947,6 @@ function autoWarAttack() {
     DEBUG('Enemy Targets Found ...');
     var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)];
     if(warElt){
-      DEBUG('Going to Attack Selected Target in ongoing war.');
       // Attack the Selected Target
       Autoplay.fx = function() {
         clickAction = 'war';
@@ -14000,22 +13954,18 @@ function autoWarAttack() {
         clickElement(warElt);
       };
       Autoplay.start();
-      DEBUG('Attacked Selected Target in ongoing war.');
-      setGMTime('warTimer', '1 hour');
+      DEBUG('Helped by attacked Selected Target in ongoing war.');      
       return true;
     } else {
-      DEBUG('Invalid War Target .. War is ongoing ...');
+      DEBUG('Unable to Help: Invalid War Target in ongoing war...');
     }
   }
   else {
-    DEBUG('No Enemy Targets found ... War is ongoing ...');
+    DEBUG('Unable to Help: No Enemy Targets found for ongoing war...');
   }
-
-  setGMTime('warTimer', '1 hour');
   return false;
-
+  
   /*
-
   // Click only the attack button on the right side of the war screen
   var getWarAttackElt = function (parentElt) {
     // Get the "right" side elements
@@ -14068,7 +14018,6 @@ function autoWar() {
       DEBUG('Enemy Targets Found ...');
       var warElt = warTargetEnnemies[Math.floor(Math.random() * warTargetEnnemies.length)];
       if(warElt){
-        DEBUG('Going to Attack Selected Target in ongoing war.');
         // Attack the Selected Target
         Autoplay.fx = function() {
           clickAction = action;
@@ -14126,8 +14075,6 @@ function autoWar() {
     // War a Random Target
     warElt.target_id = RegExp.$1;
 
-    DEBUG('Auto War Random Target ID : ' + warElt.target_id);
-
     // War Friends from a List
     // Therefor we change the target ID in the Random Target Link
     if (GM_getValue('warMode', 0) == 1)  {
@@ -14140,8 +14087,6 @@ function autoWar() {
         // Change the Target id
         warElt.target_id = thisAutoWarTarget;
         warElt.setAttribute('onclick', warElt.getAttribute('onclick').replace(RegExp.$1, thisAutoWarTarget));
-
-        DEBUG('Auto War Target ID from Enemies List = ' + thisAutoWarTarget);
       } else {
         // If there are no targets in the list, we keep the Random Target
         addToLog('warning Icon','There are no targets in your Enemies List. Changing War Settings to War a Random Enemy.');
@@ -14170,8 +14115,7 @@ function autoTournament() {
     return true;
   }
   // Check if we're on the tournament tab
-  if (!onTournamentTab()) {
-    DEBUG('autoTournament(): not on tournament tab, going there...');
+  if (!onTournamentTab()) {    
     Autoplay.fx = goTournamentTab;
     Autoplay.start();
     return true;
@@ -14217,7 +14161,6 @@ function autoTournament() {
   // Reset the auto-refresh timer before each step
   autoReload();
 /***** Which tournament step are we at? *****/
-  //DEBUG('footer: ' + footerElt.id);
   var nextButton = function() { return xpathFirst('.//div[@id="tournament_nextpage" and not(contains(@style,"opacity: 0.5")) and not(contains(@style,"none"))]', innerPageElt); };
   switch (footerElt.id) {
 /*** Step 1 Class ***/
@@ -14230,7 +14173,6 @@ function autoTournament() {
       if (!selectedClassElt || !selectedClassElt.innerHTML) {
         // Error
         addToLog('warning Icon', 'autoTournament(): Error finding/parsing a selected class.');
-        //GM_setValue('autoTournament', 0);
         break;
       }
       // Check if correct class needs to be clicked
@@ -14645,7 +14587,6 @@ function autoSafehouse() {
 
   // Grab the first gift location
   var eltSafehouseGift = xpathFirst('.//div[@class="gift_safehouse_gift_display"]', innerPageElt);
-  //DEBUG('eltSafehouseGift = ' + eltSafehouseGift);
   if (!eltSafehouseGift) {
     addToLog('info Icon','Crime Spree: No gifts available');
     setGMTime('autoSafehouseTimer', "00:10:00");
@@ -14664,16 +14605,14 @@ function autoSafehouse() {
   addToLog('info Icon','Crime Spree: Grabbing a gift!');
   var eltSafehouseButton = xpathFirst('.//a[@class="sexy_button_new short_white"]', eltSafehouseGift);
   //document.location = "http://apps.facebook.com/inthemafia/remote/html_server.php?xw_controller=safehouse&xw_action=open_gift_free&xw_city=1&box_num=0";
-  if (eltSafehouseButton) {
-    DEBUG (eltSafehouseButton);
-    clickElement(eltSafehouseButton);
-  }
+  if (eltSafehouseButton) clickElement(eltSafehouseButton);
 
   // This might never be needed, but let's just do it anyway
   Autoplay.delay = noDelay;
   Autoplay.start();
   return true;
 }
+
 function goProperties(propCity) {
   // Make sure we're in the correct city
   if (city != propCity) {
@@ -14931,7 +14870,7 @@ function goProfileNav(player) {
     return;
   }
 
-  DEBUG("Couldnt find profile link");
+  DEBUG("Could not find profile link");
   goFightNav();
   return;
 }
@@ -15217,15 +15156,13 @@ function goJob(jobno) {
           Diagnose(' job Skipping Target  : '+OppName+' - Size : '+OppSize+' - Level : '+OppLevel);
         }
       }
-////
-////
+
       if(foundOpp){
         Diagnose(' job Going to fight : '+OppTargetParent.innerHTML.untag());
         elt=OppTarget;
       } else {
         addToLog('warning Icon', 'Opponents did not qualify ... Reloading to find new opponents.');
         elt=undefined;
-        //goHome();
         goJobsNav();
         return false;
       }
@@ -15645,7 +15582,7 @@ function logFightResponse(rootElt, resultElt, context) {
           clickElement(eltStash);
           var stashFinder = xpathFirst('.//div[contains(.,"found the location")]/a', eltStashParent);
           var stashUser = linkToString(stashFinder, 'stashUser');
-          addToLog('lootbag Icon','Clicked to send '+stashUser+' secret stash! ('+logFrequency+'/'+publishFrequency+')');
+          addToLog('lootbag Icon','Clicked to send a secret stash to '+stashUser+'!');
         } else {
           DEBUG('Skipped secret stash publishing ('+logFrequency+'/'+publishFrequency+')');
         }
@@ -15657,8 +15594,7 @@ function logFightResponse(rootElt, resultElt, context) {
     //Click Share Coins
     var coinLink, coinElt;
     coinElt = document.getElementById('share_asn_feed', resultElt);
-    if (coinElt && isGMChecked('autoShareCoins')) {
-      DEBUG('Share Coins block found : '+coinElt.innerHTML);
+    if (coinElt && isGMChecked('autoShareCoins')) {      
       coinLink = xpathFirst('.//a[@class="sexy_button_new short_white"]//span[contains(.,"Share Coins")]', coinElt);
       if (coinLink){
         if (innerNoTags.match(/(.+?) earned you (.+?) victory coins/i)) shareTo = RegExp.$1;
@@ -15672,7 +15608,8 @@ function logFightResponse(rootElt, resultElt, context) {
       findFightOpponent(rootElt);
     }
 	  if (how == STAMINA_HOW_FIGHT_RIVALS){
-	    findRivalOpponent(rootElt);
+      findFightOpponent(rootElt);
+	    //findRivalOpponent(rootElt);
 	  }
 	  else if (how == STAMINA_HOW_FIGHT_LIST) {
       cycleSavedList('fightList');
@@ -16008,7 +15945,6 @@ function ajaxPageChanged(ajaxElt) {
 // Interpret the response from an ajax request, return false in case Autoplay isn't used:
 function logJSONResponse(autoplay, response, action, context) {
   try {
-    DEBUG ('logJSONResponse');
     var responseText = response.untag();
     DEBUG('logJSONResponse: '+action +'<br/>'+responseText);
 
@@ -16085,15 +16021,14 @@ function logJSONResponse(autoplay, response, action, context) {
             clickContext = opponent;
             clickElement(attackElt);
             DEBUG('Clicked to fight: name=' + opponent.name +
-                  ', id=' + opponent.id + ', level=' + opponent.level +
-                  ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
+            //      ', id=' + opponent.id + ', level=' + opponent.level +
+                  ', level=' + opponent.level + ', mafia=' + opponent.mafia + ', faction=' + opponent.faction);
           };
           Autoplay.delay = isGMChecked('staminaNoDelay') ? noDelay : getAutoPlayDelay();
           Autoplay.start();
           return true;
         }
         break;
-
 
       // Log quickHeal() response.
       case 'quick heal':
@@ -16150,30 +16085,45 @@ function logJSONResponse(autoplay, response, action, context) {
         return false;
         break;
 
-        // Purchase Port Item
+// Purchase Port Item
       case 'purchase portItem':
-/*
         respJSON = JSON.parse(responseText);
         respData = JSON.parse(respJSON.data);
         var respMessage = respData.purchase_message;
-        respData = JSON.stringify(respData).replace(/\\/g, "");
-        var respProperties = JSON.parse(respData.properties);
-        var refreshRate = JSON.parse(respProperties.purchase_refresh_rate);
-        var timeStamp = JSON.parse(respProperties.last_purchase_time_stamp);
-        DEBUG(respMessage+' '+refreshRate+' '+timeStamp);
+        addToLog('info Icon', respMessage);
+/*        
+        if (responseText.match(/purchase_refresh_rate(.+?)(\d+?),/i)) {
+          refreshRate = RegExp.$2;
+        }
+        
+        if (responseText.match(/last_purchase_time_stamp(.+?)(\d+?),/i)) {
+          timeStamp = RegExp.$2;
+        }
+        if(refreshRate && timeStamp) {
+          var dueTime = timeStamp + refreshRate;
+          var currentTime = Math.round(new Date().getTime()/1000.0);
+          timeLeft = dueTime - currentTime;
+          timeLeftTxt = getHoursTime(timeLeft);                
+          setGMTime('buildPortTimer', timeLeftTxt);
+        } else {
+          timeLeftTxt = "2 hours";
+          failedTxt = " failed";
+        }
+
+        DEBUG('Parsed JSONResponse for Purchasing Port Item'+failedTxt+'. Timer Reset for '+timeLeftTxt+'.');
 */
         setGMTime('buildPortTimer', '24 hours');
         DEBUG('Parsed JSONResponse for Purchasing Port Item. Timer Reset for 24 hours.');
         return false;
         break;
-
+        
       // Log any message from collecting property take.
       case 'collect take':
         DEBUG('Collected take '+respData.description);
         setGMTime('takeHour' + cities[context][CITY_NAME], '1 hour'); // collect every 1 hour
         if (respData.description.match(/have collected (.+?) from your properties/i)) {
           var collectString = RegExp.$1;
-          addToLog(cities[context][CITY_CASH_CSS], 'You have collected ' + collectString + ' from your properties.');
+          addToLog(cities[context][CITY_CASH_CSS], 'You have collected <span class="money">' + collectString + '</span> from your properties.');
         }
         return false;
         break;
@@ -16259,7 +16209,6 @@ function logJSONResponse(autoplay, response, action, context) {
     }
   } catch (ex) {
     DEBUG('Exception (logJSONResponse): ' + ex + ', autoplay: ' + autoplay + ', action: ' + action + ', context: ' + context + ', response: <br>' + responseText);
-    //loadHome();
   }
 }
 
@@ -16551,7 +16500,6 @@ function logResponse(rootElt, action, context) {
       }
 
       if (pushNextJob) {
-        //customizeVegasJobs();
         goJobsNav();
       } else {
         return;
@@ -16742,8 +16690,6 @@ function logResponse(rootElt, action, context) {
         return true;
       }
 
-      DEBUG('Parsing job help.');
-
       // Help attempt was processed. Increment the update count.
       GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
 
@@ -16804,8 +16750,6 @@ function logResponse(rootElt, action, context) {
         Autoplay.start();
         return true;
       }
-
-      DEBUG('Parsing burner help.');
 
       // Help burners attempt was processed. Increment the update count.
       GM_setValue('logPlayerUpdatesCount', 1 + GM_getValue('logPlayerUpdatesCount', 0));
@@ -16877,6 +16821,7 @@ function logResponse(rootElt, action, context) {
 
     // FIXME: Add parsing here
     case 'buy item':
+      addToLog('info Icon', inner);
       break;
 
     case 'buy property':
@@ -16934,8 +16879,6 @@ function closePopup(eltPopup, coolName) {
   // Not a button in the popup, but the main element
   // So if we figure out we have a button, then let's try
   // to find the main element
-  //DEBUG('closePopup Processing');
-  //var eltPopup = xpathFirst(xpath);
 
   if (!eltPopup) {
     DEBUG('Can not close ' + coolName + ' : popupElt undefined !');
@@ -16982,8 +16925,6 @@ function handlePopups() {
   fetchPubOptions();
   // Handle more popups that just show up out of nowhere
   try {
-    //DEBUG('Popups: Checking for popups');
-
     // Look for all popups that are showing
     var popupElts = $x('.//div[(((contains(@id,"pop") and not(contains(@id,"pop_bg")) and not(contains(@id,"box_bg"))) and contains(@style, "block")) or contains(@id,"mystery")) and not(@id="popup_fodder")]', appLayoutElt);
 
@@ -17060,6 +17001,7 @@ function handlePopups() {
 
           // Get rid of Welcome to Tournaments popup
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
+
           // Get rid of Tournament Expired popup
           if (popupInnerNoTags.indexOf('Your previous tournament has expired') != -1) return(closePopup(popupElts[i], "Tournament Expired"));
 
@@ -17124,7 +17066,7 @@ function handlePopups() {
             }
 
             // Get rid of War Not in Mafia popup
-            if (popupInnerNoTags.indexOf('Send them a request') != -1) {
+            if (popupInnerNoTags.indexOf('a mafia request') != -1) {
               return(closePopup(popupElts[i], "War Not in Mafia"));
             }
 
@@ -17226,9 +17168,7 @@ function handlePopups() {
                   logtxt = 'You <span style="color:#00FFFF;">ICED</span> ' + linkToString(opponentNameElt, 'user') + '. ' +
                            icedCountTextElt.innerHTML + ' <span style="color:#00FFFF;">' + icedCountElt.innerHTML + '</span>.';
                   if(isGMChecked('autoIcePublish')) logtxt+= ' Iced bonus not published ('+logFrequency+'/'+publishFrequency+')';
-                  addToLog('info Icon', logtxt);
-                  IcedPublishingCount+=1;
-                  GM_setValue('IcedPublishingCount',IcedPublishingCount);
+                  addToLog('info Icon', logtxt);                  
                 }
                 IcedPublishingCount+=1;
                 GM_setValue('IcedPublishingCount',IcedPublishingCount);
@@ -17246,7 +17186,6 @@ function handlePopups() {
                 var eltThanx = xpathFirst('.//a[contains(.,"Thank")]', energyReward);
                 if(eltThanx){
                   clickElement(eltThanx);
-                  DEBUG('Clicked to reward Helper : '+i);
                   addToLog('info Icon','You sent a gift to reward Helper : '+i);
                 } else {
                   DEBUG('Gift already sent to Helper : '+i);
@@ -17283,7 +17222,6 @@ function handlePopups() {
             var eltPubButton = xpathFirst('.//a[contains(@onclick,"postLevelUpFeedAndSend")]',popupElts[i]);
             if (eltPubButton) {
               if (popupInnerNoTags.match(/promoted to level (.+?) c/i)) {
-                DEBUG('Popup Process: Level Up Processed');
                 addToLog('info Icon', '<span class="loot">'+' You were promoted to level '+ RegExp.$1);
               }
               if (isGMChecked('autoLevelPublish')) {
@@ -18344,7 +18282,7 @@ function Load_MMiss_Info(){
         Diagnose(' mission Stamina Required: '+Miss_Stam_Req+' with ratio of: '+ Miss_Ratio);
       //} else { Miss_Stam_Req = 0 ;
       }
-
+      
     if((!chk_stam()) || (!chk_nrg()) ) {
       MyMafiaJobs = null;
       return false;
@@ -18368,4 +18306,3 @@ function MMMiss_ver(){
   tst_ver = null;
 //  if (isGMChecked('TestChanges')) { tst_ver = 'A';  }
 }
-
