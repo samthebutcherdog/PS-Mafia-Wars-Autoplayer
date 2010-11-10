@@ -54,7 +54,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.840
+// @version     1.1.841
 // ==/UserScript==
 
 // search for new_header   for changes still lots of them in here
@@ -62,7 +62,7 @@
 // if (isGMChecked('TestChanges')){ code }   <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
 //
 var SCRIPT = {
-  version: '1.1.840',
+  version: '1.1.841',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2519,7 +2519,7 @@ function autoAccept() {
   }
 
   // Get the "accept all" link.
-  var elt = xpathFirst('.//a[contains(., "accept all")]', innerPageElt);
+  var elt = xpathFirst('.//a[contains(., "Accept All")]', innerPageElt);
   if (!elt) {
     DEBUG('Can\'t find accept link to click.');
     return true;
