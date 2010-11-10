@@ -54,7 +54,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.839
+// @version     1.1.840
 // ==/UserScript==
 
 // search for new_header   for changes still lots of them in here
@@ -62,7 +62,7 @@
 // if (isGMChecked('TestChanges')){ code }   <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
 //
 var SCRIPT = {
-  version: '1.1.839',
+  version: '1.1.840',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -16997,9 +16997,12 @@ function handlePopups() {
           // Get rid of Your Requests popup
           if (popupInnerNoTags.indexOf('Your Mafia Wars requests have moved to the left column on Facebook') != -1) return(closePopup(popupElts[i], "Your Requests"));
 
-		      // Get rid of out of stamina popup
-		      if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));
-
+		  // Get rid of out of stamina popup
+		  if (popupInnerNoTags.indexOf('out of stamina') != -1) return(closePopup(popupElts[i], "out of stamina"));
+  
+		  // Get rid of You helped in . . . popup
+		  if (popupInnerNoTags.indexOf('You helped in') != -1) return(closePopup(popupElts[i], "You helped in"));
+	  
           // Get rid of Welcome to Tournaments popup
           if (popupInnerNoTags.indexOf('Become World Champion') != -1) return(closePopup(popupElts[i], "Welcome to Tournaments"));
 
