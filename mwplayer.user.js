@@ -54,7 +54,7 @@
 // @include     http://www.facebook.com/connect/uiserver*
 // @exclude     http://mwfb.zynga.com/mwfb/*#*
 // @exclude     http://facebook.mafiawars.com/mwfb/*#*
-// @version     1.1.841
+// @version     1.1.842
 // ==/UserScript==
 
 // search for new_header   for changes still lots of them in here
@@ -62,7 +62,7 @@
 // if (isGMChecked('TestChanges')){ code }   <- new questionable changes can have the option to be disabled using this (look for checkbox on about tab)
 //
 var SCRIPT = {
-  version: '1.1.841',
+  version: '1.1.842',
   name: 'inthemafia',
   appID: 'app10979261223',
   appNo: '10979261223',
@@ -2797,6 +2797,7 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
         clickElement(elt);
         DEBUG('Clicked to build ' + clickContext.itemName + '.');
       };
+      Autoplay.delay = noDelay;
       Autoplay.start();
       return true;
     }
@@ -2812,6 +2813,7 @@ function buildItem(itemArray, itemIndex, buildType, buildCity){
         clickElement(elt);
         DEBUG('Clicked to purchase ' + clickContext.itemName + '.');
       };
+      Autoplay.delay = noDelay;
       Autoplay.start();
       return true;
     }
@@ -2838,7 +2840,7 @@ function checkCasinoStatus(byUser) {
 }
 
 function autoCollectTake(takeCity) {
-  Autoplay.delay = getAutoPlayDelay();
+  Autoplay.delay = noDelay;
   if (isGMUndefined('collectCityAttempt')) {
     GM_setValue ('collectCityAttempt', false);
   }
